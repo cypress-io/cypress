@@ -50,6 +50,7 @@ describe('http/request-middleware', () => {
       'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
+      'SetMatchingRoutes',
       'SendToDriver',
       'RedirectToClientRouteIfUnloaded',
       'StripUnsupportedAcceptEncoding',

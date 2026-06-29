@@ -30,17 +30,20 @@ export function emit (socket: SocketBroadcaster, eventName: string, data: object
   socket.toDriver('net:stubbing:event', eventName, data)
 }
 
-export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
+export function applyDefaultStubHeaders (
+  reqHeaders: Record<string, string | string[] | undefined>,
+  resHeaders: Record<string, string | string[] | undefined>,
+): void {
   const setDefaultHeader = (lowercaseHeader: string, defaultValueFn: () => string) => {
-    if (!caseInsensitiveHas(res.headers, lowercaseHeader)) {
-      res.headers[lowercaseHeader] = defaultValueFn()
+    if (!caseInsensitiveHas(resHeaders, lowercaseHeader)) {
+      resHeaders[lowercaseHeader] = defaultValueFn()
     }
   }
 
   // https://github.com/cypress-io/cypress/issues/15050
   // Check if res.headers has a custom header.
   // If so, set access-control-expose-headers to '*'.
-  const hasCustomHeader = Object.keys(res.headers).some((header) => {
+  const hasCustomHeader = Object.keys(resHeaders).some((header) => {
     // The list of header items that can be accessed from cors request
     // without access-control-expose-headers
     // @see https://stackoverflow.com/a/37931084/1038927
@@ -55,12 +58,16 @@ export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMes
   })
 
   // We should not override the user's access-control-expose-headers setting.
-  if (hasCustomHeader && !res.headers['access-control-expose-headers']) {
+  if (hasCustomHeader && !resHeaders['access-control-expose-headers']) {
     setDefaultHeader('access-control-expose-headers', _.constant('*'))
   }
 
-  setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(req.headers, 'origin') || '*')
+  setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(reqHeaders, 'origin') || '*')
   setDefaultHeader('access-control-allow-credentials', _.constant('true'))
+}
+
+export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
+  applyDefaultStubHeaders(req.headers, res.headers)
 }
 
 export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {

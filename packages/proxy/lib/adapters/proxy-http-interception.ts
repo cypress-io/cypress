@@ -141,12 +141,16 @@ export async function ensureRequestBody (
 }
 
 export function toHttpRequest (mw: RequestInterceptionMiddlewareCtx): HttpRequest {
+  const browserAcceptEncoding = mw.req.originalAcceptEncoding
+    ?? mw.req.browserPreRequest?.headers?.['accept-encoding']
+
   return {
     inFlightInterceptId: _.uniqueId('inFlightIntercept'),
     browserRequestId: mw.req.browserPreRequest?.requestId,
     url: mw.req.proxiedUrl,
     method: mw.req.method,
     headers: mw.req.headers as Record<string, string | string[]>,
+    browserAcceptEncoding: typeof browserAcceptEncoding === 'string' ? browserAcceptEncoding : undefined,
     resourceType: mw.req.resourceType,
     isSyncRequest: mw.req.isSyncRequest,
     responseTimeout: mw.req.responseTimeout,

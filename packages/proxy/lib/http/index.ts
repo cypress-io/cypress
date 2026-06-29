@@ -21,7 +21,7 @@ import type {
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
-import type { ForNetworkInterception, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture } from '@packages/network-interception'
+import type { ForNetworkInterception, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture, BackendRoute } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -124,6 +124,12 @@ export type ServerCtx = Readonly<{
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
   onInterceptNetworkError?: (requestId: string, error: Error) => Promise<void>
+  getMatchingRoutes?: (req: {
+    url: string
+    method: string
+    headers: Record<string, string | string[]>
+    resourceType?: string
+  }) => BackendRoute[]
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -133,6 +139,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'networkServices',
   'networkInterception',
   'onInterceptNetworkError',
+  'getMatchingRoutes',
   'next',
   'end',
   'onResponse',
@@ -332,6 +339,7 @@ export class Http {
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   onInterceptNetworkError?: (requestId: string, error: Error) => Promise<void>
+  getMatchingRoutes?: ServerCtx['getMatchingRoutes']
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
@@ -350,6 +358,7 @@ export class Http {
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
     this.onInterceptNetworkError = opts.onInterceptNetworkError
+    this.getMatchingRoutes = opts.getMatchingRoutes
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -376,6 +385,7 @@ export class Http {
       networkServices: this.networkServices,
       networkInterception: this.networkInterception,
       onInterceptNetworkError: this.onInterceptNetworkError,
+      getMatchingRoutes: this.getMatchingRoutes,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

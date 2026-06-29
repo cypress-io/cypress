@@ -115,12 +115,18 @@ export function applyHandlerRequestToRequest (
 }
 
 export function cloneHandlerRequest (request: HttpRequest): HttpRequest {
+  const headers = { ...request.headers }
+
+  if (request.browserAcceptEncoding !== undefined) {
+    headers['accept-encoding'] = request.browserAcceptEncoding
+  }
+
   return {
     inFlightInterceptId: request.inFlightInterceptId,
     browserRequestId: request.browserRequestId,
     url: request.url,
     method: request.method,
-    headers: { ...request.headers },
+    headers,
     body: request.body,
     requestBodyMaterialized: request.requestBodyMaterialized,
     materializeRequestBody: request.materializeRequestBody,
@@ -128,6 +134,7 @@ export function cloneHandlerRequest (request: HttpRequest): HttpRequest {
     isSyncRequest: request.isSyncRequest,
     responseTimeout: request.responseTimeout,
     followRedirect: request.followRedirect,
+    browserAcceptEncoding: request.browserAcceptEncoding,
   }
 }
 

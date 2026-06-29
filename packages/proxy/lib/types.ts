@@ -31,6 +31,8 @@ export type CypressIncomingRequest = Request & {
   isSyncRequest: boolean
   /** Set when cy.intercept applied during ApplyHttpInterception. */
   hadIntercept?: boolean
+  /** Accept-Encoding from the browser before proxy rewrite for driver-visible headers. */
+  originalAcceptEncoding?: string
   /**
    * True once the incoming request body was read via concatStream (or replaced by intercept).
    * When true, {@link sendRequestOutgoing} must send the buffered body and must not pipe.

@@ -497,6 +497,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getRenderedHTMLOrigins: () => ({}),
       onInterceptNetworkError: (requestId, error) =>
         this._cyIntercept!.emitNetworkErrorByRequestId(requestId, error),
+      getMatchingRoutes: (req) => this._cyIntercept!.getMatchingRoutes(req),
     })
   }
 

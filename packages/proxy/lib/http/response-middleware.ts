@@ -495,7 +495,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
-const MaybeSendRedirectToClient: ResponseMiddleware = function () {
+const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan, isVerbose })
 
   const { statusCode, headers } = this.incomingRes
@@ -521,12 +521,13 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
-  this.res.redirect(Number(statusCode), newUrl)
 
   span?.end()
 
-  // TODO; how do we instrument end?
-  return this.end()
+  await finishInterceptResponseWritten(this.req, () => {
+    this.res.redirect(Number(statusCode), newUrl)
+    this.end()
+  })
 }
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {

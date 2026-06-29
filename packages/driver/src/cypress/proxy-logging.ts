@@ -270,6 +270,25 @@ export default class ProxyLogging {
     return proxyRequest
   }
 
+  refreshInterceptionLog (interception: Interception): void {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+
+    if (!proxyRequest) {
+      return
+    }
+
+    proxyRequest.updateConsoleProps()
+
+    const hasInterceptionResponse = !!getInterceptionResponse(interception)
+    const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
+
+    if (hasInterceptionResponse && proxyRequest.responseReceived && !hasResponseSnapshot) {
+      proxyRequest.log?.snapshot('response')
+    }
+
+    proxyRequest.log?.set({})
+  }
+
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
 

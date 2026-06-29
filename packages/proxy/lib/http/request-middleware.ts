@@ -149,6 +149,42 @@ const SendToDriver: RequestMiddleware = function () {
   this.networkServices.commandLog.notifyIncomingRequest(this)
 }
 
+const SetMatchingRoutes: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
+  if (!this.getMatchingRoutes) {
+    span?.end()
+
+    return this.next()
+  }
+
+  const devServerPublicPathRoute = this.config.devServerPublicPathRoute
+
+  if (devServerPublicPathRoute) {
+    try {
+      const pathname = new URL(this.req.proxiedUrl).pathname
+
+      if (pathname.startsWith(devServerPublicPathRoute)) {
+        span?.end()
+
+        return this.next()
+      }
+    } catch {
+      // fall through to route matching
+    }
+  }
+
+  this.req.matchingRoutes = this.getMatchingRoutes({
+    url: this.req.proxiedUrl,
+    method: this.req.method,
+    headers: this.req.headers as Record<string, string | string[]>,
+    resourceType: this.req.resourceType,
+  })
+
+  span?.end()
+  this.next()
+}
+
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:end:with:buffered:response', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -226,6 +262,11 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   const acceptEncoding = this.req.headers['accept-encoding']
+
+  if (acceptEncoding && !this.req.originalAcceptEncoding) {
+    this.req.originalAcceptEncoding = acceptEncoding
+  }
+
   const supported = getSupportedAcceptEncoding(acceptEncoding)
 
   span?.setAttributes({
@@ -335,6 +376,7 @@ export default {
   FormatCookiesIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
+  SetMatchingRoutes,
   SendToDriver,
   RedirectToClientRouteIfUnloaded,
   StripUnsupportedAcceptEncoding,

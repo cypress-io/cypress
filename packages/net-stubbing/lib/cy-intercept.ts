@@ -48,7 +48,7 @@ import type {
   PendingEventHandler,
   ToDriverInterceptEventData,
 } from './driver-http-conversion'
-import { getAllStringMatcherFields, normalizeTextRequestBody, setResponseFromFixture, emit } from './server/util'
+import { applyDefaultStubHeaders, getAllStringMatcherFields, normalizeTextRequestBody, setResponseFromFixture, emit } from './server/util'
 
 const debug = Debug('cypress:net-stubbing:cy-intercept')
 
@@ -230,6 +230,8 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
       const handlerResponse = cloneHandlerResponse(originResponse, request.url)
 
+      applyDefaultStubHeaders(request.headers, handlerResponse.headers)
+
       const mergeResponseChanges = (
         before: HttpResponse,
         after: HttpResponse,
@@ -264,6 +266,8 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         stream: modifiedResponse.stream,
       }
 
+      applyDefaultStubHeaders(request.headers, finalResponse.headers)
+
       this.attachAfterResponseOnWritten(finalResponse, inFlightIntercept)
       deferCleanup = true
 
@@ -277,6 +281,14 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
   matchesUrl (req: RouteMatchableRequest): boolean {
     return matchRoutes(this.routes, req).length > 0
+  }
+
+  getMatchingRoutes (req: RouteMatchableRequest): BackendRoute[] {
+    if (this.isExcludedByDevServerPath(req as HttpRequest)) {
+      return []
+    }
+
+    return matchRoutes(this.routes, req)
   }
 
   async emitNetworkErrorByRequestId (requestId: string, error: Error): Promise<void> {
@@ -478,6 +490,8 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     }
 
     const response = await buildHttpResponseFromStatic(staticResponse, getFixture)
+
+    applyDefaultStubHeaders(inFlightIntercept.request.headers, response.headers)
 
     if (['before:response', 'response:callback', 'response'].includes(inFlightIntercept.lastEvent!)) {
       if (staticResponse.fixture) {

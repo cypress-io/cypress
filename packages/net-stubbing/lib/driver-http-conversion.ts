@@ -63,12 +63,19 @@ const RESPONSE_STAGE_EVENTS = new Set<InterceptHandlerEventName>([
 ])
 
 function toDriverInterceptRequest (request: HttpRequest): DriverInterceptRequest {
+  const headers = { ...request.headers }
+
+  if (request.browserAcceptEncoding !== undefined) {
+    headers['accept-encoding'] = request.browserAcceptEncoding
+  }
+
   return _.extend(_.pick(request, SERIALIZABLE_REQ_PROPS), {
     url: request.url,
     body: request.body ?? '',
     query: {},
     httpVersion: '1.1',
     resourceType: request.resourceType ?? 'other',
+    headers,
   }) as DriverInterceptRequest
 }
 

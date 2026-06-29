@@ -36,6 +36,10 @@ export type HttpRequest = {
    * Adapters copy this onto the transport request (e.g. proxy `hadIntercept`).
    */
   hadIntercept?: boolean
+  /**
+   * Browser-sent Accept-Encoding before proxy rewrite; used for driver-visible request headers.
+   */
+  browserAcceptEncoding?: string
 }
 
 /**

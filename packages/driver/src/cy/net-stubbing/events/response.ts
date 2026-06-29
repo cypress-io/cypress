@@ -32,6 +32,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
     if (!userHandler) {
       request.pendingResponse = res
+      Cypress.ProxyLogging?.refreshInterceptionLog?.(request)
 
       return null
     }
@@ -45,6 +46,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
+      Cypress.ProxyLogging?.refreshInterceptionLog?.(request)
     }
   }
 
@@ -89,8 +91,10 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
         }
 
         sendStaticResponse(requestId, _staticResponse)
+        finishResponseStage(_staticResponse)
+        sendContinueFrame(true)
 
-        return finishResponseStage(_staticResponse)
+        return
       }
 
       return sendContinueFrame(true)
