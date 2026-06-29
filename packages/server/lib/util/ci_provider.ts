@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import fs from 'fs'
 import { isCI } from 'ci-info'
 import debugModule from 'debug'
 
@@ -549,6 +550,30 @@ const _providerCiParams = () => {
   }
 }
 
+// Some GitHub Actions events (e.g. `deployment_status`, `deployment`) don't
+// populate GITHUB_REF / GITHUB_REF_NAME with a branch, so the usual branch env
+// vars are empty and runs land under "Unknown Branch" in Cypress Cloud. The
+// triggering branch is still available in the webhook payload that GitHub
+// writes to the file at GITHUB_EVENT_PATH, under `deployment.ref`.
+// https://github.com/cypress-io/cypress/discussions/25854
+const _githubActionsBranchFromEventPayload = (): string | undefined => {
+  const eventPath = process.env.GITHUB_EVENT_PATH
+
+  if (!eventPath || !fs.existsSync(eventPath)) {
+    return undefined
+  }
+
+  try {
+    const payload = JSON.parse(fs.readFileSync(eventPath, 'utf8'))
+
+    return payload?.deployment?.ref || undefined
+  } catch (err) {
+    debug('failed to read branch from github event payload: %o', err)
+
+    return undefined
+  }
+}
+
 // tries to grab commit information from CI environment variables
 // very useful to fill missing information when Git cannot grab correct values
 const _providerCommitParams = () => {
@@ -687,7 +712,10 @@ const _providerCommitParams = () => {
       //                   otherwise unset
       // GITHUB_REF_NAME - populated with short ref name of the branch or
       //                   tag that triggered the workflow run
-      branch: env.GH_BRANCH || env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME,
+      // GITHUB_EVENT_PATH - fall back to the event payload's deployment.ref
+      //                   for events (e.g. deployment_status) that don't set
+      //                   any of the branch env vars above
+      branch: env.GH_BRANCH || env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME || _githubActionsBranchFromEventPayload(),
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
       runAttempt: env.GITHUB_RUN_ATTEMPT,

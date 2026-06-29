@@ -1,5 +1,6 @@
 import '../../spec_helper'
 import mockedEnv from 'mocked-env'
+import fs from 'fs'
 
 import * as ciProvider from '../../../lib/util/ci_provider'
 
@@ -922,6 +923,52 @@ describe('lib/util/ci_provider', () => {
       GITHUB_HEAD_REF: undefined,
       GITHUB_REF_NAME: 'ciRefName',
       GITHUB_REF: 'ciCommitRef',
+    }, { clear: true })
+
+    return expectsCommitParams({
+      branch: 'ciRefName',
+    })
+  })
+
+  it('github actions - falls back to event payload branch when branch env vars are missing (e.g. deployment_status)', () => {
+    // events like deployment_status don't set GITHUB_REF / GITHUB_REF_NAME,
+    // so the branch must come from the event payload's deployment.ref
+    sinon.stub(fs, 'existsSync').returns(true)
+    sinon.stub(fs, 'readFileSync').returns(JSON.stringify({
+      deployment: { ref: 'deploymentBranch' },
+    }))
+
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: 'true',
+      GITHUB_EVENT_NAME: 'deployment_status',
+      GITHUB_EVENT_PATH: '/github/workflow/event.json',
+      GITHUB_SHA: 'ciCommitSha',
+      GH_BRANCH: undefined,
+      GITHUB_HEAD_REF: undefined,
+      GITHUB_REF_NAME: undefined,
+      GITHUB_REF: undefined,
+    }, { clear: true })
+
+    expectsName('githubActions')
+
+    return expectsCommitParams({
+      sha: 'ciCommitSha',
+      branch: 'deploymentBranch',
+    })
+  })
+
+  it('github actions - prefers branch env vars over the event payload', () => {
+    sinon.stub(fs, 'existsSync').returns(true)
+    sinon.stub(fs, 'readFileSync').returns(JSON.stringify({
+      deployment: { ref: 'deploymentBranch' },
+    }))
+
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: 'true',
+      GITHUB_EVENT_PATH: '/github/workflow/event.json',
+      GH_BRANCH: undefined,
+      GITHUB_HEAD_REF: undefined,
+      GITHUB_REF_NAME: 'ciRefName',
     }, { clear: true })
 
     return expectsCommitParams({
