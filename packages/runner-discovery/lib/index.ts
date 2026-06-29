@@ -4,7 +4,6 @@ export const SCHEMA_VERSION = 1
 
 export const MIN_SCHEMA_VERSION = 1
 
-// Directory under the Cypress cache root that holds the per-instance records.
 export const INSTANCES_DIRNAME = 'instances'
 
 const RECORD_EXTENSION = '.json'
@@ -30,8 +29,6 @@ export interface ReadyRunnerState extends LiveRunnerState {
   cdpBrowserWsUrl: string
 }
 
-// Records are named `<pid>.json`; the pid in the filename is the lookup key the
-// reader uses before reading the file.
 export const recordFileName = (pid: number): string => {
   return `${pid}${RECORD_EXTENSION}`
 }
@@ -44,6 +41,14 @@ export const parseRecordPid = (entry: string): number | null => {
   const pid = Number(path.basename(entry, RECORD_EXTENSION))
 
   return Number.isInteger(pid) ? pid : null
+}
+
+export const runnerDiscoveryDir = (cacheRoot: string): string => {
+  return path.join(cacheRoot, INSTANCES_DIRNAME)
+}
+
+export const recordPath = (cacheRoot: string, pid: number): string => {
+  return path.join(runnerDiscoveryDir(cacheRoot), recordFileName(pid))
 }
 
 export const runnerDiscoveryProbePath = (instanceId: string): string => {

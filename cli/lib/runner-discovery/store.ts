@@ -3,14 +3,14 @@ import path from 'path'
 import Debug from 'debug'
 
 import state from '../tasks/state'
-import { isCompatibleRecord, INSTANCES_DIRNAME, parseRecordPid } from './record'
+import { isCompatibleRecord, parseRecordPid, runnerDiscoveryDir } from './record'
 import type { RunnerDiscoveryRecord } from './record'
 import { isPidAlive, verifyRunnerRecord } from './liveness'
 
 const debug = Debug('cypress:cli:runner-discovery')
 
 export const getRunnerDiscoveryDir = (): string => {
-  return path.join(state.getCacheDir(), INSTANCES_DIRNAME)
+  return runnerDiscoveryDir(state.getCacheDir())
 }
 
 interface RecordFile {
