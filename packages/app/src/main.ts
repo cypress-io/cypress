@@ -29,9 +29,6 @@ const ws = createWebsocket(config)
 
 window.ws = ws
 
-// The typed callable surface external tooling (the Cypress CLI) drives over
-// CDP. Mounted as early as possible so callers can re-find it by name on
-// every invocation.
 window.__CYPRESS_TAP_BINDING__ = new TapManager(config.version)
 
 telemetry.attachWebSocket(ws)

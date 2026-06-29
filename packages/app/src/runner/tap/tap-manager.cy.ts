@@ -42,7 +42,6 @@ describe('tap/tap-manager', () => {
     it('returns INVALID_ARGUMENTS when an arg is not in the param schema', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
 
-      // health declares no params, so any arg is rejected at dispatch.
       const outcome = await manager.exec('health', { extra: 'x' })
 
       expect(outcome).to.deep.include({ ok: false, code: 'INVALID_ARGUMENTS' })
@@ -53,7 +52,6 @@ describe('tap/tap-manager', () => {
     it('returns INVALID_ARGUMENTS when an option is not in the command schema', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
 
-      // health declares no options, so any flag is rejected at dispatch.
       const outcome = await manager.exec('health', {}, { bogus: 'true' })
 
       expect(outcome).to.deep.include({ ok: false, code: 'INVALID_ARGUMENTS' })
@@ -196,8 +194,6 @@ describe('tap/tap-manager', () => {
 
         expect(command.description).to.eq(definition.description)
         expect(command.params).to.deep.eq(definition.params)
-        // A command with no options is advertised with an empty list. The
-        // `satisfies` literal type drops the optional field, so widen to read it.
         expect(command.options).to.deep.eq((definition as TapCommandDefinition).options ?? [])
       }
     })

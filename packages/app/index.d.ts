@@ -24,11 +24,6 @@ declare global {
   interface Window {
     ws?: SocketShape
     getEventManager: () => EventManager
-    /**
-     * The typed callable surface the Cypress CLI drives over CDP. Optional
-     * because it is absent until `main.ts` mounts it — external callers treat
-     * `undefined` as a typed BINDING_NOT_FOUND.
-     */
     __CYPRESS_TAP_BINDING__?: TapManager
     UnifiedRunner: {
       /**
