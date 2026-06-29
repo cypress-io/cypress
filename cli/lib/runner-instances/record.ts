@@ -5,6 +5,7 @@ export {
   isCompatibleRecord,
   recordFileName,
   parseRecordPid,
+  runnerInstancesDir,
   runnerInstancesProbePath,
   RUNNER_INSTANCES_ROUTE_PREFIX,
 } from '@packages/runner-instances'

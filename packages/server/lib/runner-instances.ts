@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { TestingType } from '@packages/types'
-import { INSTANCES_DIRNAME, SCHEMA_VERSION, recordFileName } from '@packages/runner-instances'
+import { SCHEMA_VERSION, runnerInstancesDir, recordPath } from '@packages/runner-instances'
 import type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
@@ -12,11 +12,11 @@ export type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances
 const debug = Debug('cypress:server:runner-instances')
 
 export const getRunnerInstancesDir = (): string => {
-  return path.join(resolveCypressCacheRoot(), INSTANCES_DIRNAME)
+  return runnerInstancesDir(resolveCypressCacheRoot())
 }
 
 const getRecordPath = (pid: number): string => {
-  return path.join(getRunnerInstancesDir(), recordFileName(pid))
+  return recordPath(resolveCypressCacheRoot(), pid)
 }
 
 let currentState: LiveRunnerState | null = null
