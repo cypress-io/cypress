@@ -12,9 +12,6 @@ type TapTransportErrorCode =
   | 'BINDING_THREW'
   | 'STALE_HANDLE'
   | 'INVALID_METHOD'
-  | 'INVALID_SCHEMA'
-  | 'INVALID_EXEC_RESULT'
-  | 'UNSUPPORTED_PROTOCOL'
 
 export class TapTransportError extends Error {
   code: TapTransportErrorCode
@@ -90,10 +87,12 @@ const attachToPage = async (client: CRI.Client, targetId: string): Promise<strin
   }
 }
 
+const evaluateBinding = (client: CRI.Client, sessionId: string) => {
+  return client.Runtime.evaluate({ expression: `window.${TAP_BINDING_GLOBAL}` }, sessionId)
+}
+
 const probeForBinding = async (client: CRI.Client, sessionId: string): Promise<boolean> => {
-  const { result, exceptionDetails } = await client.Runtime.evaluate({
-    expression: `window.${TAP_BINDING_GLOBAL}`,
-  }, sessionId)
+  const { result, exceptionDetails } = await evaluateBinding(client, sessionId)
 
   return !exceptionDetails && result.type !== 'undefined' && !!result.objectId
 }
@@ -126,9 +125,7 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
 }
 
 const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Promise<string> => {
-  const { result, exceptionDetails } = await client.Runtime.evaluate({
-    expression: `window.${TAP_BINDING_GLOBAL}`,
-  }, sessionId)
+  const { result, exceptionDetails } = await evaluateBinding(client, sessionId)
 
   if (exceptionDetails) {
     throw new TapTransportError('CDP_UNREACHABLE', `Evaluating window.${TAP_BINDING_GLOBAL} failed: ${exceptionDetails.text}`)
@@ -154,6 +151,10 @@ const callBindingMethod = (client: CRI.Client, sessionId: string, objectId: stri
   }, sessionId)
 }
 
+const throwCdpError = (method: string, err: any): never => {
+  throw new TapTransportError('CDP_UNREACHABLE', `The CDP call for ${method} failed: ${err.message}`, { cause: err })
+}
+
 const callBindingWithRetry = async (client: CRI.Client, sessionId: string, method: string, args: unknown[]) => {
   const objectId = await resolveBindingObjectId(client, sessionId)
 
@@ -161,7 +162,7 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
     return await callBindingMethod(client, sessionId, objectId, method, args)
   } catch (err: any) {
     if (!isStaleHandleError(err)) {
-      throw new TapTransportError('CDP_UNREACHABLE', `The CDP call for ${method} failed: ${err.message}`, { cause: err })
+      throwCdpError(method, err)
     }
 
     debug('stale binding handle; re-acquiring and retrying once')
@@ -175,7 +176,7 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
         throw new TapTransportError('STALE_HANDLE', 'The Cypress runner navigated while handling the command. Try again.', { cause: retryErr })
       }
 
-      throw new TapTransportError('CDP_UNREACHABLE', `The CDP call for ${method} failed: ${retryErr.message}`, { cause: retryErr })
+      throwCdpError(method, retryErr)
     }
   }
 }
