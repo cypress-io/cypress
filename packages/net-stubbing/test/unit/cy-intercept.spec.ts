@@ -512,6 +512,64 @@ describe('CyIntercept', () => {
     expect(networkErrorEmit![1].data.error.message).toBe('forceNetworkError called')
   })
 
+  it('resolves pending handler when send:static:response arrives at response stage', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName) => {
+      if (eventName === 'before:request') {
+        await cyIntercept.handleDriverEvent('subscribe', {
+          requestId: 'intercept-1',
+          subscription: {
+            routeId: 'route-1',
+            eventName: 'response',
+            await: true,
+          },
+        }, getFixture)
+
+        return {}
+      }
+
+      if (eventName === 'response') {
+        await cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: 'intercept-1',
+          staticResponse: {
+            statusCode: 201,
+            body: 'stubbed at response stage',
+          },
+        }, getFixture)
+      }
+
+      return {}
+    })
+
+    const response = await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn(async () => {
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    }))
+
+    expect(response.statusCode).toBe(201)
+    expect(response.body).toBe('stubbed at response stage')
+  })
+
   it('emitNetworkErrorByRequestId emits network:error for in-flight intercepts', async () => {
     const cyIntercept = new CyIntercept({ socket })
     const emit = vi.spyOn(cyIntercept, 'emit')

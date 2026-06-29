@@ -486,6 +486,13 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
       inFlightIntercept.responseOverride = response
 
+      if (inFlightIntercept.inFlightEventId) {
+        this.resolveEventHandler({
+          eventId: inFlightIntercept.inFlightEventId,
+          stopPropagation: true,
+        })
+      }
+
       return
     }
 
