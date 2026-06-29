@@ -20,12 +20,17 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const { data: res, requestId, subscription } = frame
   const { routeId } = subscription
   const request = getRequest(routeId, frame.requestId)
+  const route = getRoute(routeId)
   const resClone = _.cloneDeep(res)
 
   const bodyParsed = parseJsonBody(res)
 
   let responseSent = false
   let resolved = false
+
+  if (request && route) {
+    Cypress.ProxyLogging?.logInterception?.(request, route)
+  }
 
   if (request) {
     request.state = 'ResponseReceived'

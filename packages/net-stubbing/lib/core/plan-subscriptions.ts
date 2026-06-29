@@ -40,7 +40,7 @@ export function planSubscriptions (options: PlanSubscriptionsOptions): PlannedRo
       immediateStaticResponse: route.staticResponse,
       subscriptions: [{
         eventName: 'before:request',
-        await: true,
+        await: !!route.hasInterceptor,
         routeId: route.id,
       },
       ...DEFAULT_NOTIFICATION_EVENTS.map((eventName) => {

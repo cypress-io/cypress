@@ -260,6 +260,12 @@ export default class ProxyLogging {
       return undefined
     }
 
+    if (proxyRequest.interceptions.some(({ interception: existingInterception }) => existingInterception.id === interception.id)) {
+      proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
+
+      return proxyRequest
+    }
+
     proxyRequest.interceptions.push({ interception, route })
 
     proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
@@ -280,6 +286,8 @@ export default class ProxyLogging {
     proxyRequest.updateConsoleProps()
 
     const hasInterceptionResponse = !!getInterceptionResponse(interception)
+
+    // @ts-ignore
     const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
 
     if (hasInterceptionResponse && proxyRequest.responseReceived && !hasResponseSnapshot) {
