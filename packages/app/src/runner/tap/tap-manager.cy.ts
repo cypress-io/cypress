@@ -21,10 +21,30 @@ describe('tap/tap-manager', () => {
       expect(await manager.exec('health', {})).to.deep.eq({ ok: true, result: 'ok' })
     })
 
-    it('coalesces null args/options so a CDP caller never escapes the envelope', async () => {
+    it('treats null args/options as absent so a CDP caller never escapes the envelope', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
 
       expect(await manager.exec('health', null as any, null as any)).to.deep.eq({ ok: true, result: 'ok' })
+    })
+
+    it('rejects a non-object args payload instead of silently validating it', async () => {
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      for (const malformed of [42, true, 'oops', [] as any]) {
+        const outcome = await manager.exec('health', malformed as any)
+
+        expect(outcome, `args: ${JSON.stringify(malformed)}`).to.deep.include({ ok: false, code: 'INVALID_ARGUMENTS' })
+        expect((outcome as { message: string }).message).to.contain('non-object args payload')
+      }
+    })
+
+    it('rejects a non-object options payload instead of silently validating it', async () => {
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      const outcome = await manager.exec('health', {}, 42 as any)
+
+      expect(outcome).to.deep.include({ ok: false, code: 'INVALID_ARGUMENTS' })
+      expect((outcome as { message: string }).message).to.contain('non-object options payload')
     })
 
     it('returns UNKNOWN_COMMAND listing the available commands', async () => {
@@ -222,6 +242,24 @@ describe('tap/tap-manager', () => {
       const schema = await manager.getSchema()
 
       expect(JSON.parse(JSON.stringify(schema))).to.deep.eq(schema)
+    })
+
+    it('returns a snapshot whose arrays cannot mutate the in-process registry', async () => {
+      const manager = new TapManager(CYPRESS_VERSION)
+      const health = (await manager.getSchema()).commands.find((command) => command.name === 'health')!
+
+      // A caller ignoring the readonly type and mutating the returned arrays
+      // must not reach back into the shared registry.
+      ;(health.params as TapCommandParamSchema[]).push({ name: 'injected', type: 'string', required: true, description: 'x' })
+
+      ;(health.options as TapCommandOptionSchema[]).push({ name: 'injected', type: 'string', required: true, description: 'x' })
+
+      expect(tapCommands.health.params).to.deep.eq([])
+
+      const freshHealth = (await manager.getSchema()).commands.find((command) => command.name === 'health')!
+
+      expect(freshHealth.params).to.deep.eq([])
+      expect(freshHealth.options).to.deep.eq([])
     })
   })
 })
