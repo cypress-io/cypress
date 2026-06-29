@@ -54,9 +54,7 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
         credit_card_enabled: false, // Disable Chrome's "Save card" pop up
       },
       profile: {
-        // Disable Chrome's "Change your password" data-breach warning. Tests
-        // commonly use weak/known-breached passwords, and the popup steals
-        // focus and disrupts interactions (e.g. realHover). https://github.com/cypress-io/cypress/discussions/29384
+        // Disable Chrome's "Change your password" data-breach warning.
         password_manager_leak_detection: false,
       },
     },
