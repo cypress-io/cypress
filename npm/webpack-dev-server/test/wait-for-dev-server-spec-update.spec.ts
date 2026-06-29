@@ -25,7 +25,7 @@ describe('waitForDevServerSpecUpdate', () => {
     expect(resolved).toBe(true)
   })
 
-  it('ignores stale webpack compile success events without jitRecompile or matching spec file', async () => {
+  it('ignores stale JIT compile success before the matching generation is queued', async () => {
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }
 
@@ -34,19 +34,19 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:on-spec-updated')
-    events.emit('dev-server:compile:success')
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await tick()
 
     expect(resolved).toBe(false)
 
-    events.emit('dev-server:compile:success', { jitRecompile: true })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await promise
 
     expect(resolved).toBe(true)
   })
 
-  it('ignores compile success events for other specs when webpack provides a spec file', async () => {
+  it('ignores spec-file compile success while waiting for a JIT recompile generation', async () => {
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }
 
@@ -55,13 +55,13 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:on-spec-updated')
-    events.emit('dev-server:compile:success', { specFile: '/project/src/Other.cy.jsx' })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:compile:success', { specFile: spec.absolute })
     await tick()
 
     expect(resolved).toBe(false)
 
-    events.emit('dev-server:compile:success', { specFile: spec.absolute })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await promise
 
     expect(resolved).toBe(true)

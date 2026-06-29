@@ -55,11 +55,15 @@ export function waitForDevServerSpecUpdate (
     }
 
     const onCompileSuccess = ({ specFile, jitRecompile, jitRecompileGeneration }: DevServerCompileSuccessData = {}) => {
-      if (expectedJitRecompileGeneration !== undefined) {
-        if (jitRecompileGeneration === expectedJitRecompileGeneration) {
+      if (jitRecompile) {
+        if (expectedJitRecompileGeneration !== undefined && jitRecompileGeneration === expectedJitRecompileGeneration) {
           tryResolve()
         }
 
+        return
+      }
+
+      if (expectedJitRecompileGeneration !== undefined) {
         return
       }
 
@@ -69,7 +73,7 @@ export function waitForDevServerSpecUpdate (
 
       // Webpack emits compile success for every build. Ignore in-flight compiles
       // that started before this spec update unless they include a matching spec file.
-      if (!specFile && !jitRecompile) {
+      if (!specFile) {
         return
       }
 
@@ -91,14 +95,6 @@ export function waitForDevServerSpecUpdate (
 
     events.once('dev-server:specs:unchanged', onSpecsUnchanged)
     events.once('dev-server:jit-recompile:queued', onJitRecompileQueued)
-
-    events.once('dev-server:on-spec-updated', () => {
-      if (resolved || expectedJitRecompileGeneration !== undefined) {
-        return
-      }
-
-      events.on('dev-server:compile:success', onCompileSuccess)
-    })
 
     events.emit('dev-server:on-spec-update', spec)
   })

@@ -100,6 +100,12 @@ export class CypressCTWebpackPlugin {
     }
 
     if (!this.compilation) {
+      this.files = specs
+      const generation = ++this.jitRecompileGeneration
+
+      this.pendingJitRecompileGenerations.push(generation)
+      this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation })
+
       return
     }
 

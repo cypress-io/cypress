@@ -27,7 +27,7 @@ export class SocketCt extends SocketBase {
     // Always forward compile success so JIT spec updates can wait for webpack
     // even when watchForFileChanges is disabled.
     devServer.emitter.on('dev-server:compile:success', ({ specFile, jitRecompile, jitRecompileGeneration }) => {
-      const studioCompileRerun = this.#studioCompileRerunPending
+      const studioCompileRerun = this.#studioCompileRerunPending && !jitRecompile
 
       if (studioCompileRerun) {
         this.#studioCompileRerunPending = false

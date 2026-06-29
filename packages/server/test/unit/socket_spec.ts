@@ -1288,6 +1288,30 @@ describe('lib/socket', () => {
           }))
         })
 
+        it('does not consume the studio rerun flag for JIT recompiles', function () {
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onBeforeSave(this.cfg)
+
+          const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+          const handler = compileSuccessCall.args[1]
+
+          sinon.stub(this.socket, 'toRunner')
+          handler({ jitRecompile: true, jitRecompileGeneration: 1 })
+
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+            jitRecompile: true,
+            studioCompileRerun: false,
+          }))
+
+          handler({ specFile: 'foo/bar.js' })
+
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+            specFile: 'foo/bar.js',
+            studioCompileRerun: true,
+          }))
+        })
+
         describe('#onBeforeSave', () => {
           it('marks the next compile success for rerun when config.watchForFileChanges is false', function () {
             this.cfg.watchForFileChanges = false
