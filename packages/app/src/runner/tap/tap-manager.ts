@@ -27,6 +27,12 @@ export class TapManager implements TapBindingContract {
   // Always resolves to a TapExecResult: { ok: true, result } on success, or
   // { ok: false, code, message } for an unknown command or invalid arguments.
   async exec (command: string, args: Record<string, string> = {}, options: Record<string, string> = {}): Promise<TapExecResult> {
+    // Default params only fill in `undefined`; a CDP caller can still hand us
+    // `null`, which would otherwise throw out of `Object.keys` before the
+    // envelope is built. Coalesce so exec always resolves to a TapExecResult.
+    args ??= {}
+    options ??= {}
+
     const definition: TapCommandDefinition | undefined = Object.prototype.hasOwnProperty.call(tapCommands, command)
       ? tapCommands[command as keyof typeof tapCommands]
       : undefined

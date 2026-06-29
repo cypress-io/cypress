@@ -21,6 +21,12 @@ describe('tap/tap-manager', () => {
       expect(await manager.exec('health', {})).to.deep.eq({ ok: true, result: 'ok' })
     })
 
+    it('coalesces null args/options so a CDP caller never escapes the envelope', async () => {
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      expect(await manager.exec('health', null as any, null as any)).to.deep.eq({ ok: true, result: 'ok' })
+    })
+
     it('returns UNKNOWN_COMMAND listing the available commands', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
 
