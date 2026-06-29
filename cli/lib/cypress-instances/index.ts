@@ -52,27 +52,16 @@ export const listLiveInstances = async (options: ListInstanceOptions = {}): Prom
   return probeMatches(matches, options.probeTimeoutMs)
 }
 
-/**
- * How {@link resolveInstance} settled on its target:
- * - `explicit`  — an explicit `--instance` filter pinned the choice.
- * - `only`      — no filter, and exactly one instance was live.
- * - `cwd-match` — several were live; the one rooted at the cwd was chosen.
- * - `arbitrary` — several were live, none rooted at the cwd; lowest pid won.
- */
 export type InstanceSelectionReason = 'explicit' | 'only' | 'cwd-match' | 'arbitrary'
 
 export interface InstanceSelection {
-  /** The chosen instance, guaranteed to have a browser attached. */
   instance: ReadyInstanceState
   reason: InstanceSelectionReason
-  /** Count of verified-live instances that matched before disambiguation (>= 1). */
   candidateCount: number
 }
 
 export interface ResolveInstanceOptions {
-  /** Explicit pid filter; when omitted, every matching instance is a candidate. */
   instance?: number
-  /** Working directory, used only as a tiebreak when several instances are live. */
   cwd: string
   probeTimeoutMs?: number
 }
@@ -88,7 +77,6 @@ const describeFilter = (instance: number | undefined): string => {
 }
 
 const lowestPid = (instances: LiveInstanceState[]): LiveInstanceState => {
-  // Directory read order is not guaranteed, so sort for a deterministic pick.
   return [...instances].sort((a, b) => a.pid - b.pid)[0]
 }
 
@@ -110,16 +98,6 @@ const selectInstance = (live: LiveInstanceState[], options: ResolveInstanceOptio
   return { instance: lowestPid(live), reason: 'arbitrary' }
 }
 
-/**
- * Resolve the single Cypress instance a tap command should target, with its live
- * browser CDP state. With no `--instance`, the cwd is only a tiebreak: a lone
- * running Cypress is used wherever it lives, and several are disambiguated by
- * the cwd then by lowest pid (see {@link InstanceSelectionReason}).
- *
- * @throws {CypressInstanceError} `NO_INSTANCE` when no record matches the filters
- * @throws {CypressInstanceError} `STALE_INSTANCE` when records match but none verify as alive
- * @throws {CypressInstanceError} `NO_BROWSER_ATTACHED` when the chosen instance is live but has no browser
- */
 export const resolveInstance = async (options: ResolveInstanceOptions): Promise<InstanceSelection> => {
   const { instance, probeTimeoutMs } = options
   const records = await readInstanceRecords()
