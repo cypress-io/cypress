@@ -24,7 +24,7 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
   return err instanceof Error && messages.some((message) => err.message.includes(message))
 }
 
-const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
+export const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
   const err: any = new Error(message, cause === undefined ? undefined : { cause })
 
   err.details = details
