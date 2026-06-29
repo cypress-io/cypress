@@ -4,6 +4,23 @@ import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
 import { TAP_PROTOCOL_VERSION } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
+// A wire payload for args/options must be absent or a plain object keyed by
+// name. Default params only fill in `undefined`, so a CDP caller can still hand
+// us `null` (treated as absent) or a primitive/array — the latter would slip
+// past `Object.keys` with no keys and silently validate. Return null to signal
+// a malformed payload so exec can reject it and still resolve to an envelope.
+const asWireRecord = (value: unknown): Record<string, string> | null => {
+  if (value == null) {
+    return {}
+  }
+
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return null
+  }
+
+  return value as Record<string, string>
+}
+
 export class TapManager implements TapBindingContract {
   constructor (private cypressVersion: string) {}
 
@@ -17,7 +34,14 @@ export class TapManager implements TapBindingContract {
       commands: Object.entries(tapCommands).map(([name, definition]) => {
         const { description, params, options } = definition as TapCommandDefinition
 
-        return { name, description, params, options: options ?? [] }
+        // Snapshot the arrays and their elements so a caller mutating the
+        // returned schema can't reach back into the in-process registry.
+        return {
+          name,
+          description,
+          params: params.map((param) => ({ ...param })),
+          options: (options ?? []).map((option) => ({ ...option })),
+        }
       }),
     }
   }
@@ -27,12 +51,6 @@ export class TapManager implements TapBindingContract {
   // Always resolves to a TapExecResult: { ok: true, result } on success, or
   // { ok: false, code, message } for an unknown command or invalid arguments.
   async exec (command: string, args: Record<string, string> = {}, options: Record<string, string> = {}): Promise<TapExecResult> {
-    // Default params only fill in `undefined`; a CDP caller can still hand us
-    // `null`, which would otherwise throw out of `Object.keys` before the
-    // envelope is built. Coalesce so exec always resolves to a TapExecResult.
-    args ??= {}
-    options ??= {}
-
     const definition: TapCommandDefinition | undefined = Object.prototype.hasOwnProperty.call(tapCommands, command)
       ? tapCommands[command as keyof typeof tapCommands]
       : undefined
@@ -45,15 +63,28 @@ export class TapManager implements TapBindingContract {
       }
     }
 
+    const normalizedArgs = asWireRecord(args)
+    const normalizedOptions = asWireRecord(options)
+
+    if (!normalizedArgs || !normalizedOptions) {
+      const field = normalizedArgs ? 'options' : 'args'
+
+      return {
+        ok: false,
+        code: 'INVALID_ARGUMENTS',
+        message: `"${command}" received a non-object ${field} payload; expected an object keyed by name.`,
+      }
+    }
+
     const optionSchema = definition.options ?? []
 
-    const coercedArgs = coerceCommandArgs(command, definition.params, args, optionSchema)
+    const coercedArgs = coerceCommandArgs(command, definition.params, normalizedArgs, optionSchema)
 
     if (!coercedArgs.ok) {
       return { ok: false, code: 'INVALID_ARGUMENTS', message: coercedArgs.message }
     }
 
-    const coercedOptions = coerceCommandOptions(command, definition.params, optionSchema, options)
+    const coercedOptions = coerceCommandOptions(command, definition.params, optionSchema, normalizedOptions)
 
     if (!coercedOptions.ok) {
       return { ok: false, code: 'INVALID_ARGUMENTS', message: coercedOptions.message }
