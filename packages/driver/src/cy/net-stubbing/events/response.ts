@@ -31,8 +31,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
     request.state = 'ResponseReceived'
 
     if (!userHandler) {
-      // this is notification-only, update the request with the response attributes and end
-      request.response = res
+      request.pendingResponse = res
 
       return null
     }

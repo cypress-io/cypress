@@ -9,6 +9,12 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
     return null
   }
 
+  if (!request.response && request.pendingResponse) {
+    request.response = request.pendingResponse
+    delete request.pendingResponse
+    parseJsonBody(request.response)
+  }
+
   if (request.response && frame.data.finalResBody) {
     request.response.body = frame.data.finalResBody
     parseJsonBody(request.response)

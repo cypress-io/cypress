@@ -96,6 +96,13 @@ export interface Interception<TRequest = any, TResponse = any> {
   requestWaited: boolean
   response?: CyHttpMessages.IncomingResponse<TResponse>
   /**
+   * Response data received at response:callback but not yet exposed on `response`.
+   * Promoted to `response` at after:response so `@alias.request` yields before the
+   * response is available.
+   * @internal
+   */
+  pendingResponse?: CyHttpMessages.IncomingResponse<TResponse>
+  /**
    * The error that occurred during this request.
    */
   error?: Error

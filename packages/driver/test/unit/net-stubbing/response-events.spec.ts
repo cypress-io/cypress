@@ -56,7 +56,9 @@ describe('net-stubbing response events (alias spy inspect regression)', () => {
       },
     )
 
-    expect(interception.response?.body).toHaveLength(3)
+    expect(interception.state).toBe('ResponseReceived')
+    expect(interception.response).toBeUndefined()
+    expect(interception.pendingResponse?.body).toHaveLength(3)
 
     await onAfterResponse(
       {} as Cypress.Cypress,
@@ -74,6 +76,7 @@ describe('net-stubbing response events (alias spy inspect regression)', () => {
     )
 
     expect(interception.state).toBe('Complete')
+    expect(interception.pendingResponse).toBeUndefined()
     expect(interception.response?.body).toHaveLength(3)
   })
 })
