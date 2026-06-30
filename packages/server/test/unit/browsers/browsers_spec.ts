@@ -377,7 +377,7 @@ describe('lib/browsers/index', () => {
       }
 
       // this error is snapshotted in an e2e test, no need to do it here
-      expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' } as any)
+      expect(fn).to.throw()
     })
   })
 

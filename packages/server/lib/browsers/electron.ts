@@ -478,8 +478,7 @@ export = {
   _setProxy (webContents, proxyServer) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // this should really only be necessary when
-      // running Chromium versions >= 72
+      // bypass the proxy for loopback addresses
       // https://github.com/cypress-io/cypress/issues/1872
       proxyBypassRules: '<-loopback>',
     })
