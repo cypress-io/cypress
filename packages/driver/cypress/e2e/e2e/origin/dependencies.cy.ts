@@ -101,6 +101,16 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     })
   })
 
+  // a dependency referencing the `process` global must not throw
+  // "process is not defined" @see https://github.com/cypress-io/cypress/discussions/30646
+  it('works with a dependency that references the process global', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
+      const { usesProcessGlobal } = Cypress.require('./dependencies.support-process')
+
+      expect(usesProcessGlobal()).to.be.true
+    })
+  })
+
   it('works with args passed to require result', () => {
     const args = ['some string']
 
