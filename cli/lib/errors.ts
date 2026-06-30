@@ -437,6 +437,11 @@ const tapUnsupportedProtocol = {
   solution: `Update the CLI (${chalk.cyan('npm install --save-dev cypress@latest')}) and try again.`,
 }
 
+const tapOutdatedProtocol = {
+  description: 'The running Cypress is older than this CLI and speaks an earlier tap protocol.',
+  solution: `Update Cypress in the running project to match this CLI (${chalk.cyan('npm install --save-dev cypress@latest')}), then try again.`,
+}
+
 const tapInvalidExecResult = {
   description: 'The running Cypress returned a result this CLI does not recognize.',
   solution: `The running version of Cypress may not support ${chalk.cyan('cypress tap')}.`,
@@ -473,5 +478,6 @@ export const errors = {
   tapStaleHandle,
   tapInvalidSchema,
   tapUnsupportedProtocol,
+  tapOutdatedProtocol,
   tapInvalidExecResult,
 }

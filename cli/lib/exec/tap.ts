@@ -23,8 +23,12 @@ const validateSchema = (value: unknown): TapSchema => {
     return throwTapError(errors.tapInvalidSchema, `${TAP_SCHEMA_METHOD} returned an unrecognizable schema.`)
   }
 
-  if (schema.protocolVersion !== TAP_PROTOCOL_VERSION) {
+  if (schema.protocolVersion > TAP_PROTOCOL_VERSION) {
     return throwTapError(errors.tapUnsupportedProtocol, `schema protocol v${schema.protocolVersion} is newer than the CLI's v${TAP_PROTOCOL_VERSION}.`)
+  }
+
+  if (schema.protocolVersion < TAP_PROTOCOL_VERSION) {
+    return throwTapError(errors.tapOutdatedProtocol, `schema protocol v${schema.protocolVersion} is older than the CLI's v${TAP_PROTOCOL_VERSION}.`)
   }
 
   return schema
@@ -128,7 +132,7 @@ const tapModule = {
       })
     } catch (err: any) {
       if (err instanceof RunnerDiscoveryError) {
-        if (wantsHelp || !command) {
+        if ((wantsHelp || !command) && err.code === 'NO_DISCOVERY_FILE') {
           return renderGenericHelp(wantsHelp)
         }
 

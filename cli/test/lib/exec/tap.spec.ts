@@ -345,6 +345,14 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('newer than this CLI')
       expect(logger.print()).toContain('Update the CLI')
     })
+
+    it('rejects an older protocol version, telling the user to update the running Cypress', async () => {
+      mockSession({ ...schema, protocolVersion: 0 })
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain('older than this CLI')
+      expect(logger.print()).toContain('Update Cypress')
+    })
   })
 
   describe('failure rendering', () => {
@@ -388,6 +396,23 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start([], {})).toBe(1)
       expect(logger.print()).toContain('Usage: cypress tap')
+    })
+
+    it('surfaces a specific discovery error on a bare invocation instead of generic help', async () => {
+      failResolve(new RunnerDiscoveryError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+
+      expect(await tap.start([], {})).toBe(1)
+      expect(logger.print()).toContain('NO_BROWSER_ATTACHED')
+      expect(logger.print()).toContain('no test browser is open')
+      expect(logger.print()).not.toContain('Usage: cypress tap')
+    })
+
+    it('surfaces a specific discovery error for explicit --help instead of generic help', async () => {
+      failResolve(new RunnerDiscoveryError('STALE_DISCOVERY_FILE', 'Cypress was previously running, but is no longer responding.'))
+
+      expect(await tap.start(['--help'], {})).toBe(1)
+      expect(logger.print()).toContain('STALE_DISCOVERY_FILE')
+      expect(logger.print()).not.toContain('Usage: cypress tap')
     })
 
     it('still surfaces the discovery error when an actual command was requested', async () => {
