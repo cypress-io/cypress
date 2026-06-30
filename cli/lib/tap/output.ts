@@ -67,7 +67,7 @@ const instanceBanner = (schema: TapSchema, selection: RunnerSelection): string =
   return target
 }
 
-const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: RunnerSelection, command: string | undefined, wantsHelp: boolean): number => {
+export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: RunnerSelection, command: string | undefined, wantsHelp: boolean): number => {
   if (command) {
     const entry = schema.commands.find(({ name }) => name === command)
 
@@ -87,24 +87,8 @@ const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selecti
   return wantsHelp ? 0 : 1
 }
 
-const renderGenericHelp = (wantsHelp: boolean): number => {
+export const renderGenericHelp = (wantsHelp: boolean): number => {
   logger.always(GENERIC_TAP_USAGE)
 
   return wantsHelp ? 0 : 1
-}
-
-interface RespondToHelpOptions {
-  command: string | undefined
-  wantsHelp: boolean
-  schema?: TapSchema
-  program?: commander.Command
-  selection?: RunnerSelection
-}
-
-export const respondToHelp = ({ command, wantsHelp, schema, program, selection }: RespondToHelpOptions): number => {
-  if (!schema || !program || !selection) {
-    return renderGenericHelp(wantsHelp)
-  }
-
-  return renderSchemaHelp(program, schema, selection, command, wantsHelp)
 }

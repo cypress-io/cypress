@@ -15,7 +15,6 @@ import { start } from './tasks/verify'
 import installModule from './tasks/install'
 import versionModule from './exec/versions'
 import infoModule from './exec/info'
-import tapModule from './exec/tap'
 
 const debug = Debug('cypress:cli:cli')
 
@@ -592,6 +591,7 @@ const cliModule = {
     .option('--instance <pid>', text('instance'), coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {
       try {
+        const { default: tapModule } = await import('./exec/tap')
         const code = await tapModule.start(args || [], _.pick(opts, ['instance']))
 
         process.exit(code)

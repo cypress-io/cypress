@@ -5,7 +5,7 @@ import { RunnerDiscoveryError, listLiveRunners, resolveRunner } from '../runner-
 import { withTapSession, throwTapError } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, respondToHelp } from '../tap/output'
+import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
 import { TAP_EXEC_METHOD, TAP_PROTOCOL_VERSION, TAP_SCHEMA_METHOD } from '../tap/contract'
 import type { TapExecResult, TapSchema } from '../tap/contract'
 import { errors } from '../errors'
@@ -111,7 +111,7 @@ const tapModule = {
         })
 
         if (wantsHelp || !command) {
-          return respondToHelp({ command, wantsHelp, schema, program, selection })
+          return renderSchemaHelp(program, schema, selection, command, wantsHelp)
         }
 
         try {
@@ -129,7 +129,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof RunnerDiscoveryError) {
         if (wantsHelp || !command) {
-          return respondToHelp({ command, wantsHelp })
+          return renderGenericHelp(wantsHelp)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
