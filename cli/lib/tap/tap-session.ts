@@ -37,10 +37,9 @@ export interface TapSession {
   call (method: string, args?: unknown[]): Promise<unknown>
 }
 
-// Shape-check the `exec` envelope before trusting it. Shared with the status
-// command (cli/lib/tap/status.ts) so the validator lives one level below both
-// callers, avoiding an import cycle. Anything that is not the envelope is a
-// transport-level failure, not a domain result.
+// Shape-checks the `exec` envelope; anything else is a transport failure, not a
+// domain result. Lives here (below both callers) so exec/tap and status can
+// share it without an import cycle.
 export const validateExecResult = (value: unknown): TapExecResult => {
   const outcome = value as TapExecResult | null | undefined
 

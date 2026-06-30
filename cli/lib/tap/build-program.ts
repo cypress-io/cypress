@@ -87,8 +87,8 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     rejectExcessArguments('instances', [], instances.args)
   })
 
-  // `status` is the CLI's other own command — also intercepted by `../exec/tap`
-  // before this program is parsed, so this entry only lists it in the overview.
+  // Also intercepted by `../exec/tap` before this program parses; listed here
+  // only so it shows in the overview (hence the no-op action).
   program
   .command('status')
   .description('report where a running Cypress instance is in its lifecycle')

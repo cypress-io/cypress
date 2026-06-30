@@ -47,8 +47,7 @@ export const renderInstancesHelp = (): void => {
   logger.always(INSTANCES_USAGE)
 }
 
-// Static usage for the CLI-native `status` command. Like `instances` it never
-// reaches a binding to discover its grammar, so its help is hardcoded.
+// Hardcoded like `instances`: a CLI-native command, never discovered from a binding.
 const STATUS_USAGE = [
   'Usage: cypress tap status [options]',
   '',

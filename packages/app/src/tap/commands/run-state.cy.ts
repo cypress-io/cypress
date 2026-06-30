@@ -30,8 +30,8 @@ describe('tap/commands/run-state', () => {
     },
   ]
 
-  // One test of every outcome plus an unstarted one, so the rollup is exercised
-  // across all four buckets (the unstarted test counts as pending).
+  // One test of every outcome plus an unstarted one, so the rollup hits all
+  // four buckets (the unstarted test counts as pending).
   const TESTS_STATE = {
     r1: { id: 'r1', title: 'passes', state: 'passed' },
     r2: { id: 'r2', title: 'fails', state: 'failed' },
@@ -40,8 +40,8 @@ describe('tap/commands/run-state', () => {
     r5: { id: 'r5', title: 'has not run yet' },
   }
 
-  // The spec window's own `window.Cypress` is the instance running this test, so
-  // every test stubs the seams rather than replacing the live state.
+  // The spec's own window.Cypress is the instance running this test, so stub
+  // the seams rather than replace live state.
   const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
   const stubRunning = (isRunning: boolean) => cy.stub(tapRunStateSource, 'isRunning').returns(isRunning)
   const stubActiveSpec = (relative: string | undefined) => cy.stub(tapRunStateSource, 'getActiveSpecRelative').returns(relative)
