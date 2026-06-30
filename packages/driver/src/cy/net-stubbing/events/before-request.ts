@@ -374,9 +374,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       delete userReq.alias
     }
 
-    await Promise.all(pendingSubscribes)
-
     if (!handlerCompleted) {
+      await Promise.all(pendingSubscribes)
+
       // handler function completed without resolving request, pass on
       finish(false)
     }
