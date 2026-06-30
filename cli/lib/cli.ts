@@ -587,10 +587,6 @@ const cliModule = {
     .command('tap')
     .usage('[command] [args...]')
     .description('Interacts with a running Cypress instance')
-    // The command set — and `--help`/`-h` — are resolved against the running
-    // instance's schema, not a static usage. helpOption(false) keeps commander
-    // from intercepting `--help` here, and allowUnknownOption lets it (and any
-    // command flags) fall through into the operands we forward.
     .helpOption(false)
     .allowUnknownOption(true)
     .option('--instance <pid>', text('instance'), coerceAnyStringToInt)

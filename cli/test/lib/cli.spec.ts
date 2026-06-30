@@ -209,11 +209,6 @@ describe('cli', () => {
 
       expect(result).toMatchSnapshot()
     })
-
-    // NOTE: `cypress tap` resolves its command set — and `--help`/`-h` — against
-    // the running instance's schema, so the command itself never rejects an
-    // unknown option here; everything after `tap` is forwarded to tapModule
-    // (mocked `cypress tap` block below, plus test/lib/exec/tap.spec.ts).
   })
 
   describe('help command', () => {

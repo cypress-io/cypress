@@ -8,8 +8,6 @@ import type { TapExecResult, TapSchema } from '../../../lib/tap/contract'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
 
-// A known tap transport/handshake error, shaped exactly as throwTapError throws
-// it: the mapped Cypress error in `details`, flagged `known`.
 const tapError = (details: { description: string, solution: string }, message: string): Error => {
   return Object.assign(new Error(message), { details, known: true })
 }
@@ -57,11 +55,6 @@ const schema: TapSchema = {
   ],
 }
 
-/**
- * Stand up a fake session: `getSchema` returns the given schema, `exec`
- * resolves the given envelope. Returns the `call` mock so tests can assert
- * the dispatch sequence and the forwarded args.
- */
 const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { ok: true, result: 'ok' } satisfies TapExecResult) => {
   const call = vi.fn(async (method: string) => {
     return method === 'getSchema' ? sessionSchema : execOutcome
@@ -83,9 +76,6 @@ const readyRunner = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerStat
   ...overrides,
 })
 
-// Stub which runner `resolveRunner` lands on (and how it got there). The
-// dispatch/help tests just need a target; the selection-specific tests override
-// reason/candidateCount to exercise the banner.
 const mockResolved = (overrides: Partial<RunnerSelection> = {}): RunnerSelection => {
   const selection: RunnerSelection = { runner: readyRunner(), reason: 'only', candidateCount: 1, ...overrides }
 
@@ -99,13 +89,9 @@ describe('lib/exec/tap', () => {
     vi.mocked(withTapSession).mockReset()
     vi.mocked(listLiveRunners).mockReset()
     vi.mocked(resolveRunner).mockReset()
-    // A reachable instance by default; tests that exercise discovery failures
-    // or the multi-instance banner override this.
     mockResolved()
     logger.reset()
     vi.spyOn(console, 'log').mockImplementation(() => {})
-    // commander writes its validation errors here before throwing (it predates
-    // configureOutput); silence it and let tests assert on the spy.
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
@@ -120,7 +106,6 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['health'], {})).toBe(0)
       expect(logger.print()).toBe('ok')
 
-      // The handshake always precedes the dispatch, over the same session.
       expect(call.mock.calls).toEqual([
         ['getSchema'],
         ['exec', ['health', {}, {}]],
@@ -138,8 +123,6 @@ describe('lib/exec/tap', () => {
     it('forwards parsed options to exec as raw strings, without interpreting them', async () => {
       const call = mockSession(schema, { ok: true, result: { status: 'started' } })
 
-      // The unknown top-level flags fall through as operands (allowUnknownOption
-      // on `cypress tap`) and are parsed by the schema-built subcommand here.
       expect(await tap.start(['run', 'cypress/e2e/a.cy.js', '--browser', 'chrome', '--headed'], {})).toBe(0)
 
       expect(call).toHaveBeenCalledWith('exec', ['run', { spec: 'cypress/e2e/a.cy.js' }, { browser: 'chrome', headed: 'true' }])
@@ -150,7 +133,6 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['run', 'cypress/e2e/a.cy.js', '--nope'], {})).toBe(1)
       expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`unknown option '--nope'`)
-      // The handshake was the only call — exec never ran.
       expect(call.mock.calls).toEqual([['getSchema']])
     })
 
@@ -167,10 +149,7 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['health'], { instance: 1234 })
 
-      // The cwd is only a tiebreak the resolver falls back to among several live
-      // runners; an explicit --instance pins the choice.
       expect(resolveRunner).toHaveBeenCalledWith({ instance: 1234, cwd: process.cwd() })
-      // The session is opened against whatever runner the resolver chose.
       expect(vi.mocked(withTapSession).mock.calls[0][0]).toBe(runner)
     })
 
@@ -183,8 +162,6 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders an app-side domain failure (ok: false) with its code and exits 1', async () => {
-      // A command that satisfies commander but is rejected app-side — e.g. a
-      // type the CLI never coerces (the running instance is authoritative).
       const call = mockSession(schema, {
         ok: false,
         code: 'INVALID_ARGUMENTS',
@@ -209,9 +186,7 @@ describe('lib/exec/tap', () => {
       const call = mockSession()
 
       expect(await tap.start(['bogus'], {})).toBe(1)
-      // commander prints the message to stderr (console.error) in text mode.
       expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`unknown command 'bogus'`)
-      // The handshake was the only call — exec never ran.
       expect(call.mock.calls).toEqual([['getSchema']])
     })
 
@@ -246,8 +221,6 @@ describe('lib/exec/tap', () => {
       mockResolved({ runner: readyRunner({ pid: 7777, projectRoot: '/projects/app' }) })
 
       expect(await tap.start(['--help'], {})).toBe(0)
-      // Basic info about the instance every command here would target, one fact
-      // per indented line.
       expect(logger.print()).toContain('Target:\n  /projects/app\n  v15.0.0\n  pid:7777')
     })
 
@@ -257,7 +230,6 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['--help'], {})).toBe(0)
       const help = logger.print()
 
-      // instances precedes the schema-derived commands in the Commands list.
       expect(help).toContain('instances')
       expect(help.indexOf('instances')).toBeLessThan(help.indexOf('health'))
     })
@@ -287,7 +259,6 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('Arguments:')
       expect(logger.print()).toContain('spec')
       expect(logger.print()).toContain('project-relative')
-      // The per-command help is fronted by the same instance banner.
       expect(logger.print()).toContain('Target:\n  /projects/app\n  v15.0.0')
       expect(call.mock.calls).toEqual([['getSchema']])
     })
@@ -325,7 +296,6 @@ describe('lib/exec/tap', () => {
         { pid: 222, projectRoot: '/projects/other', serverPort: 49201, browserAttached: false },
       ])
 
-      // instances enumerates discovery — it never connects to an instance.
       expect(withTapSession).not.toHaveBeenCalled()
     })
 
@@ -377,9 +347,6 @@ describe('lib/exec/tap', () => {
   })
 
   describe('failure rendering', () => {
-    // Discovery (which instance to target) is resolveRunner's job; the session
-    // transport (CDP) is withTapSession's. The two error sources are mocked at
-    // their respective seams.
     const failResolve = (err: unknown) => vi.mocked(resolveRunner).mockRejectedValue(err)
     const failSession = (err: unknown) => vi.mocked(withTapSession).mockRejectedValue(err)
 
