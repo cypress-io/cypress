@@ -44,8 +44,6 @@ const subcommand = (program: commander.Command, name: string): commander.Command
 
 describe('lib/tap/build-program', () => {
   beforeEach(() => {
-    // commander writes validation errors to console.error before throwing
-    // (it predates configureOutput); keep the test output quiet.
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
@@ -82,8 +80,6 @@ describe('lib/tap/build-program', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(schema, dispatch)
 
-    // `42` matches a `number`-typed param but must stay a string: coercion is
-    // the running instance's job, not the CLI's.
     program.parse(['open', 'cypress/e2e/a.cy.js', '42'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js', line: '42' }, {})
@@ -145,8 +141,6 @@ describe('lib/tap/build-program', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(schema, dispatch)
 
-    // `8080` matches the `number`-typed port but must stay a string — coercion
-    // is the running instance's job, just as it is for positionals.
     program.parse(['run', 'a.cy.js', '--browser', 'chrome', '--port', '8080', '--headed'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith('run', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' })
