@@ -119,6 +119,14 @@ describe('lib/tap/build-program', () => {
     )
   })
 
+  it('throws a catchable excessArguments error for operands passed to a no-param command', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
+      expect.objectContaining({ code: 'commander.excessArguments' }),
+    )
+  })
+
   it('throws a catchable unknownCommand error for a command not in the schema', () => {
     const program = buildTapProgram(schema, vi.fn())
 
@@ -170,6 +178,29 @@ describe('lib/tap/build-program', () => {
     expect(() => program.parse(['run', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
       expect.objectContaining({ code: 'commander.unknownOption' }),
     )
+  })
+
+  it('rejects an unknown flag catchably even when the root CLI has patched unknownOption to exit', () => {
+    const original = commander.Command.prototype.unknownOption
+    const exit = vi.spyOn(process, 'exit').mockImplementation(((): never => {
+      throw new Error('process.exit called')
+    }))
+
+    // mirror cli/lib/cli.ts, which patches the prototype to exit and so defeats exitOverride()
+    commander.Command.prototype.unknownOption = function () {
+      process.exit(1)
+    }
+
+    try {
+      const program = buildTapProgram(schema, vi.fn())
+
+      expect(() => program.parse(['run', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
+        expect.objectContaining({ code: 'commander.unknownOption' }),
+      )
+    } finally {
+      commander.Command.prototype.unknownOption = original
+      exit.mockRestore()
+    }
   })
 
   it('declares a required value option with requiredOption so commander enforces it', () => {

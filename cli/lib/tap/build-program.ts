@@ -50,6 +50,18 @@ const rejectExcessArguments = (name: string, params: readonly TapCommandParamSch
   throw new commander.CommanderError(1, 'commander.excessArguments', message)
 }
 
+// cli/lib/cli.ts patches Command.prototype.unknownOption to call process.exit, which defeats
+// exitOverride(). Reassert a catchable rejection on every tap command so an unknown flag reaches
+// the orchestrator's error routing like every other parse error, rather than killing the process.
+const rejectUnknownOptions = (command: commander.Command): void => {
+  ;(command as unknown as { unknownOption(flag: string): never }).unknownOption = (flag: string): never => {
+    const message = `error: unknown option '${flag}'`
+
+    console.error(message)
+    throw new commander.CommanderError(1, 'commander.unknownOption', message)
+  }
+}
+
 const forwardedOptions = (options: readonly TapCommandOptionSchema[], opts: Record<string, unknown>): Record<string, string> => {
   const forwarded: Record<string, string> = {}
 
@@ -92,6 +104,9 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
       return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(options, command.opts()))
     })
   }
+
+  rejectUnknownOptions(program)
+  program.commands.forEach(rejectUnknownOptions)
 
   return program
 }
