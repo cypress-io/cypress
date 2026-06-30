@@ -27,7 +27,6 @@ describe('tap binding', () => {
 
       expect((testsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      // The commands command reads the same runner, so it is NO_RUN too.
       const commandsBeforeRun = await binding.exec('commands', {}, { test: 'r1' })
 
       expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
@@ -110,7 +109,6 @@ describe('tap binding', () => {
 
       expect((missingDetail as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
-      // The commands command reads that same test's command log from the runner.
       const testId = tests[0].id as string
 
       const commandsOutcome = await getBinding(win).exec('commands', {}, { test: testId })
@@ -126,7 +124,6 @@ describe('tap binding', () => {
         expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type'].includes(key)))
       }
 
-      // An unknown test id is a domain failure surfaced as { error }.
       const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
 
       expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')

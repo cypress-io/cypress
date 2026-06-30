@@ -2,19 +2,10 @@ import type { SerializedTest } from '@packages/types'
 
 import type { TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from '../types'
 
-/**
- * One command-log entry of a test, trimmed to the fields a tap caller needs to
- * follow what a test did — the reporter's command list. Optional fields are
- * absent (never `null` — JSON drops `undefined` keys at the CDP boundary) when
- * the serialized log did not carry them.
- */
 export interface CommandEntry {
   id: string
-  /** Command name, e.g. `visit`, `get`, `click`. */
   name?: string
-  /** The command's argument summary, e.g. the URL, selector, or assertion text. */
   message?: string
-  /** `passed` | `failed` | `pending` once the command has settled. */
   state?: string
   /** `parent` | `child` | `dual`. */
   type?: string
@@ -75,12 +66,6 @@ export const serializeTestDetail = (test: SerializedTest, runComplete: boolean):
   }
 }
 
-/**
- * Serialize the command log of one test into lean, JSON-clean entries.
- * Returns `undefined` when no test of the run has that id (the command turns
- * this into a `testNotFound` result); a known test that has not run yet has no
- * command log, which serializes to an empty array, not a failure.
- */
 export const serializeTestCommands = (runner: TapTestsRunner, testId: string): CommandEntry[] | undefined => {
   const test = runner.getAllTestsState()[testId]
 
@@ -88,8 +73,6 @@ export const serializeTestCommands = (runner: TapTestsRunner, testId: string): C
     return undefined
   }
 
-  // `commands` is one of the serialized RUNNABLE_LOGS; it is absent until the
-  // test runs and is otherwise an array of serialized command logs.
   const commands = (test.commands ?? []) as Array<Record<string, unknown>>
 
   return commands.map(({ id, name, message, state, type }): CommandEntry => {
