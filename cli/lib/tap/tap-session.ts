@@ -13,6 +13,12 @@ type TapTransportErrorCode =
   | 'STALE_HANDLE'
   | 'INVALID_METHOD'
 
+export const TapSessionRegex = {
+  methodName: /^[a-zA-Z][a-zA-Z0-9]*$/,
+  staleObject: /Could not find object with given id|Cannot find context with specified id|Execution context was destroyed/i,
+  sessionGone: /Inspected target navigated or closed|Session with given id not found/i,
+} as const
+
 export class TapTransportError extends Error {
   code: TapTransportErrorCode
 
@@ -27,15 +33,9 @@ export interface TapSession {
   call (method: string, args?: unknown[]): Promise<unknown>
 }
 
-const METHOD_NAME_RE = /^[a-zA-Z][a-zA-Z0-9]*$/
-
-const STALE_OBJECT_RE = /Could not find object with given id|Cannot find context with specified id|Execution context was destroyed/i
-
 const isStaleHandleError = (err: unknown): boolean => {
-  return err instanceof Error && STALE_OBJECT_RE.test(err.message)
+  return err instanceof Error && TapSessionRegex.staleObject.test(err.message)
 }
-
-const SESSION_GONE_RE = /Inspected target navigated or closed|Session with given id not found/i
 
 const isSessionGoneError = (err: unknown): boolean => {
   if (!(err instanceof Error)) {
@@ -44,7 +44,7 @@ const isSessionGoneError = (err: unknown): boolean => {
 
   const cause = (err as { cause?: unknown }).cause
 
-  return SESSION_GONE_RE.test(err.message) || (cause instanceof Error && SESSION_GONE_RE.test(cause.message))
+  return TapSessionRegex.sessionGone.test(err.message) || (cause instanceof Error && TapSessionRegex.sessionGone.test(cause.message))
 }
 
 interface PageTargetInfo {
@@ -162,7 +162,7 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
     return await callBindingMethod(client, sessionId, objectId, method, args)
   } catch (err: any) {
     if (!isStaleHandleError(err)) {
-      throwCdpError(method, err)
+      return throwCdpError(method, err)
     }
 
     debug('stale binding handle; re-acquiring and retrying once')
@@ -176,7 +176,7 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
         throw new TapTransportError('STALE_HANDLE', 'The Cypress runner navigated while handling the command. Try again.', { cause: retryErr })
       }
 
-      throwCdpError(method, retryErr)
+      return throwCdpError(method, retryErr)
     }
   }
 }
@@ -199,11 +199,11 @@ export const withTapSession = async <T> (
     let sessionId = await attach()
 
     const call = async (method: string, args: unknown[] = []): Promise<unknown> => {
-      if (!METHOD_NAME_RE.test(method)) {
+      if (!TapSessionRegex.methodName.test(method)) {
         throw new TapTransportError('INVALID_METHOD', `"${method}" is not a valid tap binding method name.`)
       }
 
-      let response
+      let response: Awaited<ReturnType<typeof callBindingWithRetry>>
 
       try {
         response = await callBindingWithRetry(client, sessionId, method, args)
@@ -215,11 +215,10 @@ export const withTapSession = async <T> (
         debug('session gone (%s); re-attaching to the runner page', err.message)
 
         sessionId = await attach()
-
         response = await callBindingWithRetry(client, sessionId, method, args)
       }
 
-      if (response.exceptionDetails) {
+      if (response?.exceptionDetails) {
         throw new TapTransportError(
           'BINDING_THREW',
           `window.${TAP_BINDING_GLOBAL}.${method} threw: ${response.exceptionDetails.exception?.description || response.exceptionDetails.text}`,
