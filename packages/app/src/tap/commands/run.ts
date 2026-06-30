@@ -3,16 +3,16 @@ import { defineCommand, TapCommandError } from './definition'
 import { getRunnableSpecs, toSpecListEntry } from './specs-list'
 import type { SpecListEntry } from './specs-list'
 
-// Distinguishes each `run` invocation in the runner URL so rerunning the
-// already-active spec still produces a query change (see the handler).
+// Bumped per invocation so rerunning the active spec still changes route.query,
+// which is what makes unifiedRunner's watchSpecs kick off a fresh run.
 let tapRunNonce = 0
 
 /**
- * Seam over the one side effect `run` performs. Component tests stub this —
- * really navigating there moves the spec frame and stops the test
- * mid-command. The hash setter (rather than `location.href = '#…'`) is what
- * guarantees a synchronous same-document fragment navigation, including when
- * the runner page is itself an AUT (the cypress-in-cypress harness).
+ * Seam over the command's one side effect so component tests can stub it —
+ * really navigating moves the spec frame and stops the test mid-command. Uses
+ * the `hash` setter (not `location.href`) for a synchronous same-document
+ * navigation that never reloads, so the `exec` promise still resolves over CDP
+ * even when the runner page is itself an AUT (cypress-in-cypress).
  */
 export const tapNavigation = {
   setHash (hash: string) {
@@ -25,10 +25,8 @@ export const runCommand = defineCommand({
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
-  // Triggering is fire-and-forget: returning the started spec means navigation
-  // was issued, not that the spec finished or passed. The two failure cases
-  // throw — surfaced on stderr, never stdout, and the runner never navigates:
-  // INVALID_SPEC for an empty path, SPEC_NOT_FOUND when none matches.
+  // Fire-and-forget: a successful return means the run was triggered, not that
+  // the spec finished or passed.
   handler: async ({ spec }): Promise<SpecListEntry> => {
     if (spec.length === 0) {
       throw new TapCommandError('INVALID_SPEC', 'spec must be a non-empty string (a project-relative spec path)')
@@ -41,12 +39,8 @@ export const runCommand = defineCommand({
       throw new TapCommandError('SPEC_NOT_FOUND', `no spec matches the path "${spec}" — use the specs command to list runnable specs`)
     }
 
-    // The tapRun nonce makes route.query differ from the previous query, so
-    // the unifiedRunner watchSpecs effect always kicks off a fresh run —
-    // even when this spec is already active (rerun). Hash navigation never
-    // reloads the page, so this promise still resolves over CDP. The path
-    // travels in posix form because watchSpecs converts route.query.file
-    // back via getPathForPlatform.
+    // Encode the path but keep its slashes literal, since watchSpecs reads
+    // route.query.file back through getPathForPlatform.
     const file = encodeURIComponent(posixify(match.relative)).replace(/%2F/g, '/')
 
     tapNavigation.setHash(`/specs/runner?file=${file}&tapRun=${++tapRunNonce}`)
