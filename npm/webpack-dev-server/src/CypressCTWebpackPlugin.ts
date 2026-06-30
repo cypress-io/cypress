@@ -153,9 +153,13 @@ export class CypressCTWebpackPlugin {
         return
       }
 
-      const generation = this.pendingJitRecompileGenerations.shift()
+      // Webpack may batch rapid spec updates into one recompile. Signal every
+      // queued generation so no waitForDevServerSpecUpdate call hangs.
+      const generations = this.pendingJitRecompileGenerations.splice(0)
 
-      this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: generation })
+      for (const generation of generations) {
+        this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: generation })
+      }
     })
   }
 }
