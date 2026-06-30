@@ -26,6 +26,9 @@ interface TapCommandSchema {
   description: string
   params: readonly TapCommandParamSchema[]
   options: readonly TapCommandOptionSchema[]
+  // Absent ⇒ visible. A hidden command stays exec-able but the CLI omits it from
+  // its command listing (e.g. a binding the CLI wraps in a friendlier command).
+  hidden?: boolean
 }
 
 export interface TapSchema {

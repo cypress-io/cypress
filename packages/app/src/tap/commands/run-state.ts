@@ -31,6 +31,8 @@ export const tapRunStateSource = {
 
 export const runStateCommand = defineCommand({
   description: 'report where the running Cypress instance is in its run lifecycle',
+  // The CLI surfaces this through the friendlier `status` command, not as its own.
+  hidden: true,
   params: [],
   handler: async (): Promise<RunStateResult> => {
     const totalSpecs = tapManagerDataSource.getRunnableSpecs().length
