@@ -98,8 +98,13 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
         pendingStaticSend = sendStaticResponse(requestId, _staticResponse)
         .then(() => {
-          finishResponseStage(_staticResponse)
-          sendContinueFrame(true)
+          const stubRes = _.cloneDeep(_.defaults({}, _staticResponse, res))
+
+          finishResponseStage(stubRes)
+          resolve({
+            changedData: stubRes,
+            stopPropagation: true,
+          })
         })
 
         return pendingStaticSend
