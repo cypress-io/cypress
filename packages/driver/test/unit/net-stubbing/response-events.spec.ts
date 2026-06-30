@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { onResponse } from '../../../src/cy/net-stubbing/events/response'
 import { onAfterResponse } from '../../../src/cy/net-stubbing/events/after-response'
 import type { Interception } from '../../../src/cy/net-stubbing/types'
@@ -78,5 +78,79 @@ describe('net-stubbing response events (alias spy inspect regression)', () => {
     expect(interception.state).toBe('Complete')
     expect(interception.pendingResponse).toBeUndefined()
     expect(interception.response?.body).toHaveLength(3)
+  })
+
+  it('res.send(static) resolves after sendStaticResponse without merging origin body into changedData', async () => {
+    const interception = createInterception()
+    const eventLog: string[] = []
+
+    let releaseStaticSend: () => void
+    const staticSendGate = new Promise<void>((resolve) => {
+      releaseStaticSend = resolve
+    })
+
+    const sendStaticResponse = vi.fn(async () => {
+      eventLog.push('sendStaticResponse:start')
+      await staticSendGate
+      eventLog.push('sendStaticResponse:done')
+    })
+
+    const handlerPromise = onResponse(
+      {
+        config: vi.fn(() => 4000),
+        state: vi.fn(),
+      } as unknown as Cypress.Cypress,
+      {
+        requestId: interception.id,
+        subscription: { routeId: interception.routeId, await: true, eventName: 'response', id: 'sub-1' },
+        eventId: 'event-1',
+        data: {
+          url: interception.request.url,
+          statusCode: 404,
+          statusMessage: 'Not Found',
+          headers: { 'content-type': 'text/html' },
+          body: '<html>Cannot GET /foo</html>',
+        },
+      },
+      (res) => {
+        res.send({
+          statusCode: 200,
+          fixture: 'valid.json',
+        })
+      },
+      {
+        getRoute: () => ({ id: interception.routeId }),
+        getRequest: () => interception,
+        sendStaticResponse,
+      },
+    )
+
+    let handlerResolved = false
+
+    void handlerPromise?.then((result) => {
+      eventLog.push('handler:resolved')
+      handlerResolved = true
+
+      expect(result).toEqual({ stopPropagation: true })
+      expect(result?.changedData).toBeUndefined()
+    })
+
+    await Promise.resolve()
+    expect(handlerResolved).toBe(false)
+    expect(eventLog).toEqual(['sendStaticResponse:start'])
+
+    releaseStaticSend!()
+    await handlerPromise
+
+    expect(eventLog).toEqual([
+      'sendStaticResponse:start',
+      'sendStaticResponse:done',
+      'handler:resolved',
+    ])
+
+    expect(interception.response).toMatchObject({
+      statusCode: 200,
+      fixture: 'valid.json',
+    })
   })
 })

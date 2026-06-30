@@ -100,6 +100,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   let resolved = false
   let handlerCompleted = false
+  let deferFinishWithStopPropagation = false
 
   const createQueryObject = () => {
     try {
@@ -225,10 +226,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-      // tslint:disable:no-floating-promises
       subscribe('response:callback', responseHandler)
+      deferFinishWithStopPropagation = true
 
-      return finish(true)
+      return userReq
     },
     reply (responseHandler?, maybeBody?, maybeHeaders?) {
       if (resolved) {
@@ -374,9 +375,13 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       delete userReq.alias
     }
 
-    if (!handlerCompleted) {
+    if (!handlerCompleted || deferFinishWithStopPropagation) {
       await Promise.all(pendingSubscribes)
+    }
 
+    if (deferFinishWithStopPropagation) {
+      finish(true)
+    } else if (!handlerCompleted) {
       // handler function completed without resolving request, pass on
       finish(false)
     }

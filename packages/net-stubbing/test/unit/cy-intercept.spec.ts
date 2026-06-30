@@ -963,6 +963,274 @@ describe('CyIntercept', () => {
     expect(response.body).toBe('origin')
   })
 
+  describe('e2e net_stubbing regressions', () => {
+    const validJsonFixture = JSON.stringify({ foo: 1, bar: { baz: 'cypress' } })
+
+    const createInterceptRoute = (id: string): BackendRoute => {
+      return {
+        id,
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/foo-*' },
+        getFixture,
+        matches: 0,
+      }
+    }
+
+    it('req.on(response) res.send({ fixture }) stubs origin 404 (can end response)', async () => {
+      getFixture.mockResolvedValue(validJsonFixture)
+      const cyIntercept = new CyIntercept({ socket })
+
+      const { httpIntercept } = createStack({
+        routes: [createInterceptRoute('route-1')],
+        cyIntercept,
+      })
+
+      vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName, frame: any) => {
+        if (eventName === 'before:request') {
+          await cyIntercept.handleDriverEvent('subscribe', {
+            requestId: frame.requestId,
+            subscription: {
+              routeId: 'route-1',
+              eventName: 'response',
+              await: true,
+              id: 'sub-response',
+            },
+          }, getFixture)
+
+          return { stopPropagation: false }
+        }
+
+        if (eventName === 'response') {
+          await cyIntercept.handleDriverEvent('send:static:response', {
+            requestId: frame.requestId,
+            staticResponse: {
+              statusCode: 200,
+              headers: { 'content-type': 'application/json' },
+              fixture: 'valid.json',
+            },
+          }, getFixture)
+
+          return { stopPropagation: true }
+        }
+
+        return {}
+      })
+
+      const response = await httpIntercept.handle({
+        inFlightInterceptId: 'intercept-1',
+        url: 'http://example.com/foo-39',
+        method: 'GET',
+        headers: {},
+      }, vi.fn(async () => {
+        return {
+          statusCode: 404,
+          headers: { 'content-type': 'text/html' },
+          body: '<html>Cannot GET /foo-39</html>',
+        }
+      }))
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe(validJsonFixture)
+    })
+
+    it('req.reply(fn) res.send({ fixture }) stubs JSON (can reply with JSON fixture)', async () => {
+      getFixture.mockResolvedValue(validJsonFixture)
+      const cyIntercept = new CyIntercept({ socket })
+
+      const { httpIntercept } = createStack({
+        routes: [createInterceptRoute('route-1')],
+        cyIntercept,
+      })
+
+      vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName, frame: any) => {
+        if (eventName === 'before:request') {
+          await cyIntercept.handleDriverEvent('subscribe', {
+            requestId: frame.requestId,
+            subscription: {
+              routeId: 'route-1',
+              eventName: 'response:callback',
+              await: true,
+              id: 'sub-callback',
+            },
+          }, getFixture)
+
+          return { stopPropagation: true }
+        }
+
+        if (eventName === 'response:callback') {
+          await cyIntercept.handleDriverEvent('send:static:response', {
+            requestId: frame.requestId,
+            staticResponse: {
+              statusCode: 200,
+              headers: { 'content-type': 'application/json' },
+              fixture: 'valid.json',
+            },
+          }, getFixture)
+
+          return { stopPropagation: true }
+        }
+
+        return {}
+      })
+
+      const response = await httpIntercept.handle({
+        inFlightInterceptId: 'intercept-1',
+        url: 'http://example.com/foo-39',
+        method: 'GET',
+        headers: {},
+      }, vi.fn(async () => {
+        return {
+          statusCode: 200,
+          headers: { 'content-type': 'application/json' },
+          body: '{"ignored":true}',
+        }
+      }))
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe(validJsonFixture)
+    })
+
+    it('response:callback runs only after subscribe is registered on the server', async () => {
+      getFixture.mockResolvedValue(validJsonFixture)
+      const cyIntercept = new CyIntercept({ socket })
+
+      const { httpIntercept } = createStack({
+        routes: [createInterceptRoute('route-1')],
+        cyIntercept,
+      })
+
+      let releaseSubscribe: () => void
+      const subscribeGate = new Promise<void>((resolve) => {
+        releaseSubscribe = resolve
+      })
+
+      const handleDriverEvent = cyIntercept.handleDriverEvent.bind(cyIntercept)
+
+      vi.spyOn(cyIntercept, 'handleDriverEvent').mockImplementation(async (eventName, frame, gf) => {
+        if (eventName === 'subscribe') {
+          await subscribeGate
+        }
+
+        return handleDriverEvent(eventName, frame, gf)
+      })
+
+      let responseCallbackReached = false
+
+      vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName, frame: any) => {
+        if (eventName === 'before:request') {
+          void cyIntercept.handleDriverEvent('subscribe', {
+            requestId: frame.requestId,
+            subscription: {
+              routeId: 'route-1',
+              eventName: 'response:callback',
+              await: true,
+              id: 'sub-callback',
+            },
+          }, getFixture)
+
+          return { stopPropagation: true }
+        }
+
+        if (eventName === 'response:callback') {
+          responseCallbackReached = true
+
+          await cyIntercept.handleDriverEvent('send:static:response', {
+            requestId: frame.requestId,
+            staticResponse: {
+              statusCode: 200,
+              headers: { 'content-type': 'application/json' },
+              fixture: 'valid.json',
+            },
+          }, getFixture)
+
+          return { stopPropagation: true }
+        }
+
+        return {}
+      })
+
+      const responsePromise = httpIntercept.handle({
+        inFlightInterceptId: 'intercept-1',
+        url: 'http://example.com/foo-39',
+        method: 'GET',
+        headers: {},
+      }, vi.fn(async () => {
+        return {
+          statusCode: 200,
+          headers: { 'content-type': 'application/json' },
+          body: '{"ignored":true}',
+        }
+      }))
+
+      await Promise.resolve()
+      expect(responseCallbackReached).toBe(false)
+
+      releaseSubscribe!()
+
+      const response = await responsePromise
+
+      expect(responseCallbackReached).toBe(true)
+      expect(response.body).toBe(validJsonFixture)
+    })
+
+    it('req.reply(fn) can delete a response header via response:callback', async () => {
+      const cyIntercept = new CyIntercept({ socket })
+
+      const { httpIntercept } = createStack({
+        routes: [createInterceptRoute('route-1')],
+        cyIntercept,
+      })
+
+      vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName, frame: any) => {
+        if (eventName === 'before:request') {
+          await cyIntercept.handleDriverEvent('subscribe', {
+            requestId: frame.requestId,
+            subscription: {
+              routeId: 'route-1',
+              eventName: 'response:callback',
+              await: true,
+              id: 'sub-callback',
+            },
+          }, getFixture)
+
+          return { stopPropagation: true }
+        }
+
+        if (eventName === 'response:callback') {
+          const changedData = {
+            ...frame.data,
+            headers: { ...frame.data.headers },
+          }
+
+          delete changedData.headers['content-type']
+
+          return {
+            stopPropagation: false,
+            changedData,
+          }
+        }
+
+        return {}
+      })
+
+      const response = await httpIntercept.handle({
+        inFlightInterceptId: 'intercept-1',
+        url: 'http://example.com/foo-json-content-type',
+        method: 'GET',
+        headers: {},
+      }, vi.fn(async () => {
+        return {
+          statusCode: 200,
+          headers: { 'content-type': 'application/json' },
+          body: '{"ok":true}',
+        }
+      }))
+
+      expect(response.headers['content-type']).toBeUndefined()
+      expect(response.body).toBe('{"ok":true}')
+    })
+  })
+
   describe('._restoreMatcherOptionsTypes', () => {
     it('rehydrates regexes properly', () => {
       const { url } = _restoreMatcherOptionsTypes({
