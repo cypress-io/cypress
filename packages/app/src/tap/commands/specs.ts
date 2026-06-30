@@ -3,7 +3,7 @@ import { readRunModeSpecs, toSpecListEntry } from './run-mode-specs'
 import type { SpecListEntry } from './run-mode-specs'
 
 export const specsCommand = defineCommand({
-  description: 'list the specs the running Cypress instance can run',
+  description: 'List all runnable spec for the selected Cypress instance.',
   params: [],
   handler: async (): Promise<SpecListEntry[]> => {
     return readRunModeSpecs().map(toSpecListEntry)
