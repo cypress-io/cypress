@@ -1,20 +1,22 @@
 // App-side view of the cross-process tap contract. The shared half (types and
 // constants both sides agree on) lives in `@packages/cypress-instances`; this
-// module re-exports it via the path-free deep-dist entry and adds the app-only
-// declarations the CLI never sees.
+// module re-exports it from the package source (Vite compiles the zero-dependency
+// contract module to ESM, the way the app consumes every other sibling package)
+// and adds the app-only declarations the CLI never sees. The CLI itself reads the
+// same contract from the package's compiled CJS build.
 
-import type { TapSchema, TapExecResult } from '@packages/cypress-instances/dist/tap-contract'
+import type { TapSchema, TapExecResult } from '@packages/cypress-instances/lib/tap-contract'
 
 export {
   TAP_SCHEMA_VERSION,
-} from '@packages/cypress-instances/dist/tap-contract'
+} from '@packages/cypress-instances/lib/tap-contract'
 
 export type {
   TapCommandParamSchema,
   TapCommandOptionSchema,
   TapSchema,
   TapExecResult,
-} from '@packages/cypress-instances/dist/tap-contract'
+} from '@packages/cypress-instances/lib/tap-contract'
 
 // Reserved dispatch-level failure codes `exec` itself produces; domain failures
 // carry a command-defined code, so TapExecResult.code stays an open string.
