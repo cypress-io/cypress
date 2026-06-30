@@ -9,10 +9,6 @@ export const commandsCommand = defineCommand({
   options: [
     { name: 'test', type: 'string', required: true, description: 'test id, as listed by the tests command' },
   ],
-  // Returns just the test's command-log entries. A known test that has not run
-  // yet has no log, which is an empty array — not a failure. The two failure
-  // cases throw: NO_RUN when no spec has mounted a runner, TEST_NOT_FOUND when
-  // the run holds no test with that id — both surface on stderr, never stdout.
   handler: async (_params, { test }): Promise<CommandEntry[]> => {
     const runner = tapManagerDataSource.getRunner()
 
