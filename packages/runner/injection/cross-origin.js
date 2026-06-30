@@ -11,7 +11,6 @@
 /* global cypressConfig */
 
 import { createTimers } from './timers'
-import { patchDocumentCookie } from './patches/cross-origin/cookies'
 import { patchElementIntegrity } from './patches/cross-origin/setAttribute'
 import { patchFetch } from './patches/cross-origin/fetch'
 import { patchXmlHttpRequest } from './patches/cross-origin/xmlHttpRequest'
@@ -68,7 +67,8 @@ const handleErrorEvent = (event) => {
 window.addEventListener('error', handleErrorEvent)
 
 // Apply Patches
-const documentCookiePatch = patchDocumentCookie(cypressConfig.simulatedCookies)
+// NOTE: document.cookie is handled entirely server-side via a
+// Page.addScriptToEvaluateOnNewDocument script (see cdp_automation.ts), not here.
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
@@ -99,7 +99,7 @@ window.__attachToCypress = (Cypress) => {
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
 
-  documentCookiePatch.onCypress(Cypress)
+  //documentCookiePatch.onCypress(Cypress)
 
   Cypress.removeAllListeners('app:timers:reset')
   Cypress.removeAllListeners('app:timers:pause')

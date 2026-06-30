@@ -25,70 +25,71 @@ const LogRequest: RequestMiddleware = function () {
 }
 
 const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
+  // should be a no-op
+  // const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
-  this.req.isSyncRequest = !!this.req.headers['x-cypress-is-sync-request']
+  // this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
+  // this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
+  // this.req.isSyncRequest = !!this.req.headers['x-cypress-is-sync-request']
 
-  if (this.req.headers['x-cypress-is-aut-frame']) {
-    delete this.req.headers['x-cypress-is-aut-frame']
-  }
+  // if (this.req.headers['x-cypress-is-aut-frame']) {
+  //   delete this.req.headers['x-cypress-is-aut-frame']
+  // }
 
-  if (this.req.headers['x-cypress-is-sync-request']) {
-    delete this.req.headers['x-cypress-is-sync-request']
-  }
+  // if (this.req.headers['x-cypress-is-sync-request']) {
+  //   delete this.req.headers['x-cypress-is-sync-request']
+  // }
 
-  span?.setAttributes({
-    isAUTFrame: this.req.isAUTFrame,
-    isFromExtraTarget: this.req.isFromExtraTarget,
-  })
+  // span?.setAttributes({
+  //   isAUTFrame: this.req.isAUTFrame,
+  //   isFromExtraTarget: this.req.isFromExtraTarget,
+  // })
 
-  // we only want to intercept requests from the main target and not ones from
-  // extra tabs or windows, so run the bare minimum request/response middleware
-  // to send the request/response directly through
-  if (this.req.isFromExtraTarget) {
-    this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
+  // // we only want to intercept requests from the main target and not ones from
+  // // extra tabs or windows, so run the bare minimum request/response middleware
+  // // to send the request/response directly through
+  // if (this.req.isFromExtraTarget) {
+  //   this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
 
-    delete this.req.headers['x-cypress-is-from-extra-target']
+  //   delete this.req.headers['x-cypress-is-from-extra-target']
 
-    this.onlyRunMiddleware([
-      'MaybeSetBasicAuthHeaders',
-      'SendRequestOutgoing',
-    ])
-  }
+  //   this.onlyRunMiddleware([
+  //     'MaybeSetBasicAuthHeaders',
+  //     'SendRequestOutgoing',
+  //   ])
+  // }
 
-  span?.end()
+  // span?.end()
   this.next()
 }
 
 const MaybeSimulateSecHeaders: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'maybe:simulate:sec:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
+  // const span = telemetry.startSpan({ name: 'maybe:simulate:sec:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  span?.setAttributes({
-    experimentalModifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode,
-  })
+  // span?.setAttributes({
+  //   experimentalModifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode,
+  // })
 
-  if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
-    span?.end()
-    this.next()
+  // if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
+  //   span?.end()
+  //   this.next()
 
-    return
-  }
+  //   return
+  // }
 
-  // Do NOT disclose destination to an iframe and simulate if iframe was top
-  if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
-    const secFetchDestModifiedTo = 'document'
+  // // Do NOT disclose destination to an iframe and simulate if iframe was top
+  // if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
+  //   const secFetchDestModifiedTo = 'document'
 
-    span?.setAttributes({
-      secFetchDestModifiedFrom: this.req.headers['sec-fetch-dest'],
-      secFetchDestModifiedTo,
-    })
+  //   span?.setAttributes({
+  //     secFetchDestModifiedFrom: this.req.headers['sec-fetch-dest'],
+  //     secFetchDestModifiedTo,
+  //   })
 
-    this.req.headers['sec-fetch-dest'] = secFetchDestModifiedTo
-  }
+  //   this.req.headers['sec-fetch-dest'] = secFetchDestModifiedTo
+  // }
 
-  span?.end()
+  // span?.end()
   this.next()
 }
 
@@ -97,25 +98,27 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
-  if (!doesTopNeedToBeSimulated(this) ||
-    (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
-    this.next()
+// note: needs to be moved to CDP
+  // if (!doesTopNeedToBeSimulated(this) ||
+  //   (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
+  //   this.next()
 
-    return
-  }
+  //   return
+  // }
 
-  this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { credentialStatus, resourceType } = resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+  // this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
+  // const { credentialStatus, resourceType } = resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
 
-  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+  // this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 
-  // if for some reason the resourceType is not set by the prerequest, have a fallback in place
-  this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
-  this.req.credentialsLevel = credentialStatus
+  // // if for some reason the resourceType is not set by the prerequest, have a fallback in place
+  // this.req.resourceType = !this.req.resourceType ? resourceType : this.req.resourceType
+  // this.req.credentialsLevel = credentialStatus
   this.next()
 }
 
 const FormatCookiesIfApplicable: RequestMiddleware = function () {
+  // note: will get rid of with bidi http/2 impl
   if (this.req.headers['x-cypress-is-webdriver-bidi'] && this.req.headers.cookie) {
     const cookies = this.req.headers.cookie
     // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
@@ -240,31 +243,31 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   this.next()
 }
 
-function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
-  //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
-  return auth && !req.headers['authorization'] && urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
-}
+// function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
+//   //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
+//   return auth && !req.headers['authorization'] && urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
+// }
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'maybe:set:basic:auth:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
+  // const span = telemetry.startSpan({ name: 'maybe:set:basic:auth:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // get the remote state for the proxied url
-  const remoteState = this.remoteStates.get(this.req.proxiedUrl)
+  // // get the remote state for the proxied url
+  // const remoteState = this.remoteStates.get(this.req.proxiedUrl)
 
-  const doesReqNeedBasicAuthHeaders = remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)
+  // const doesReqNeedBasicAuthHeaders = remoteState?.auth && reqNeedsBasicAuthHeaders(this.req, remoteState)
 
-  span?.setAttributes({
-    doesReqNeedBasicAuthHeaders,
-  })
+  // span?.setAttributes({
+  //   doesReqNeedBasicAuthHeaders,
+  // })
 
-  if (remoteState?.auth && doesReqNeedBasicAuthHeaders) {
-    const { auth } = remoteState
-    const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
+  // if (remoteState?.auth && doesReqNeedBasicAuthHeaders) {
+  //   const { auth } = remoteState
+  //   const base64 = Buffer.from(`${auth.username}:${auth.password}`).toString('base64')
 
-    this.req.headers['authorization'] = `Basic ${base64}`
-  }
+  //   this.req.headers['authorization'] = `Basic ${base64}`
+  // }
 
-  span?.end()
+  // span?.end()
   this.next()
 }
 
