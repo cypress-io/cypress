@@ -433,7 +433,7 @@ const tapInvalidSchema = {
 }
 
 const tapUnsupportedProtocol = {
-  description: 'The running Cypress requires a more recent CLI.',
+  description: 'The running Cypress is newer than this CLI and uses a tap protocol it does not understand.',
   solution: `Update the CLI (${chalk.cyan('npm install --save-dev cypress@latest')}) and try again.`,
 }
 

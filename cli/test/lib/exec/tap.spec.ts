@@ -342,7 +342,8 @@ describe('lib/exec/tap', () => {
       mockSession({ ...schema, protocolVersion: 2 })
 
       expect(await tap.start(['health'], {})).toBe(1)
-      expect(logger.print()).toContain('requires a more recent CLI')
+      expect(logger.print()).toContain('newer than this CLI')
+      expect(logger.print()).toContain('Update the CLI')
     })
   })
 
