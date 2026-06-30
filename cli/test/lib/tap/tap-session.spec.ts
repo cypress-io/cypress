@@ -49,6 +49,7 @@ const makeRecord = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerState
     projectRoot: PROJECT,
     serverPort: 5555,
     instanceId: 'instance-abc',
+    testingType: 'e2e',
     cdpBrowserWsUrl: BROWSER_WS_URL,
     ...overrides,
   }

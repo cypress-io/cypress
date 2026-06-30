@@ -110,7 +110,7 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
 }
 
 const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Promise<string> => {
-  let evaluated: Protocol.Runtime.EvaluateResponse
+  let evaluated: Awaited<ReturnType<typeof evaluateBinding>>
 
   try {
     evaluated = await evaluateBinding(client, sessionId)
