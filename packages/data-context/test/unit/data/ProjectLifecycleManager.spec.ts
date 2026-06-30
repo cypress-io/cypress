@@ -295,6 +295,28 @@ describe('ProjectLifecycleManager', () => {
     })
   })
 
+  describe('#getProjectId', () => {
+    it('returns null without loading the config when the project has no config file', async () => {
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._projectMetaState = { hasValidConfigFile: false }
+
+      const getConfigSpy = jest.spyOn(ctx.project, 'getConfig')
+
+      await expect(ctx.lifecycleManager.getProjectId()).resolves.toBeNull()
+      expect(getConfigSpy).not.toHaveBeenCalled()
+    })
+
+    it('loads the config and returns the projectId when a valid config file exists', async () => {
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._projectMetaState = { hasValidConfigFile: true }
+
+      const getConfigSpy = jest.spyOn(ctx.project, 'getConfig').mockResolvedValue({ projectId: 'abc123' } as FullConfig)
+
+      await expect(ctx.lifecycleManager.getProjectId()).resolves.toEqual('abc123')
+      expect(getConfigSpy).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('#refreshLifecycle', () => {
     type Deferred = { promise: Promise<void>, resolve: () => void, reject: (err: Error) => void }
 

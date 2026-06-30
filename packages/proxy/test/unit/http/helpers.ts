@@ -1,22 +1,10 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
-import { NetworkInterceptionCore } from '@packages/network-interception'
-import { ProxyDocumentPreparationAdapter } from '../../../lib/adapters/proxy-document-preparation'
-import {
-  ProxyCommandLogAdapter,
-  ProxyCookieStateAdapter,
-  ProxyNetworkCaptureAdapter,
-  ProxyRequestInterceptionAdapter,
-  ProxyResponseInterceptionAdapter,
-} from '../../../lib/adapters'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
+import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
 
 export function createTestNetworkInterceptionCore () {
-  return new NetworkInterceptionCore({
-    requestInterception: new ProxyRequestInterceptionAdapter(),
-    responseInterception: new ProxyResponseInterceptionAdapter(),
-    documentPreparation: new ProxyDocumentPreparationAdapter(),
-    networkCapture: new ProxyNetworkCaptureAdapter(),
-    cookieState: new ProxyCookieStateAdapter(),
-    commandLog: new ProxyCommandLogAdapter(),
+  return createProxyNetworkInterception({
+    policyRegistration: new NetworkPolicyRegistry(),
   })
 }
 

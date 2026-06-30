@@ -580,6 +580,16 @@ export class BrowserCriClient {
       return
     }
 
+    // If the browser process crashed, the underlying connection is dead and any
+    // `Target.*` command we send here will never resolve (hanging the run) or
+    // reject (throwing out of post-spec teardown). There are no targets left to
+    // reset, so skip it entirely. @see https://github.com/cypress-io/cypress/issues/24338
+    if (this.browserClient.crashed) {
+      debug('browser cri client is crashed, not resetting browser targets')
+
+      return
+    }
+
     this.resettingBrowserTargets = true
 
     if (!this.currentlyAttachedTarget) {
@@ -707,6 +717,23 @@ export class BrowserCriClient {
    */
   getWebSocketDebuggerUrl () {
     return this.versionInfo.webSocketDebuggerUrl
+  }
+
+  /**
+   * Synchronously mark the root browser client and every attached target client
+   * as crashed. Used when the browser *process* crashes (e.g. it exits with
+   * SIGTRAP): unlike a renderer/tab crash, a process crash never emits
+   * `Target.targetCrashed`, so nothing else flips these clients into the crashed
+   * state. Without this, post-spec teardown (`resetBrowserTargets` via
+   * `reset:browser:tabs:for:next:spec`, `afterSpec`, etc.) can issue CDP commands
+   * on the dead connection that never resolve and hang the run.
+   */
+  markCrashed = () => {
+    this.browserClient?.markCrashed()
+    this.currentlyAttachedTarget?.markCrashed()
+    this.currentlyAttachedProtocolTarget?.markCrashed()
+    this.currentlyAttachedCyPromptTarget?.markCrashed()
+    this.currentlyAttachedStudioTarget?.markCrashed()
   }
 
   /**

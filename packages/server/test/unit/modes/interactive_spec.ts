@@ -198,11 +198,11 @@ describe('gui/interactive', () => {
         return interactiveMode.run(opts).then(() => {
           expect(interactiveMode.ready).to.be.calledWith(opts)
         }).then(async () => {
-          expect(beforeQuitHandler).to.be.defined
+          expect(beforeQuitHandler).to.exist
 
           beforeQuitHandler(mockEvent)
           expect(mockEvent.preventDefault).to.have.been.called
-          expect(quitTeardownImmediateCallback).to.be.defined
+          expect(quitTeardownImmediateCallback).to.exist
 
           await quitTeardownImmediateCallback()
 

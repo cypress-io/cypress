@@ -25,10 +25,7 @@ yarn workspace @packages/net-stubbing check-ts
   - `driver-events.ts` — Handles events from the driver (browser) to the server
   - `state.ts` — Manages the server-side route and handler state
   - `util.ts`, `types.ts` — Server-specific utilities and types
-- `lib/external-types.ts` — Public TypeScript types for users (e.g., `RouteMatcherOptions`, `StaticResponse`)
-- `lib/internal-types.ts` — Internal protocol types shared between server and driver
-- `lib/types.ts` — Re-exports and combined type definitions
-- `lib/util.ts` — Shared utility functions
+- Shared protocol and public API types live in `@packages/network-interception` (public API types are copied to `cypress/types/net-stubbing` at CLI build time)
 
 **Gotchas / Notes**
 

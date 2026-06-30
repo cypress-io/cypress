@@ -77,19 +77,19 @@ jobs:
         run: sudo -H pip install setuptools
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: read
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
           cache: 'yarn'
@@ -111,7 +111,7 @@ jobs:
         shell: bash
       - name: Upload snapshot artifact
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: v8-snapshot-cache-${{ env.PLATFORM }}
           path: ${{ env.SNAPSHOT_FILE }}
@@ -126,14 +126,14 @@ jobs:
     steps:
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           fetch-depth: 1
           token: ${{ steps.app-token.outputs.token }}
@@ -145,7 +145,7 @@ jobs:
         # to continue so the stage step below can exit cleanly with
         # has_changes=false.
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: v8-snapshot-cache-*
           path: artifacts/
@@ -199,7 +199,7 @@ jobs:
         shell: bash
       - name: Commit snapshot update via API
         if: ${{ steps.stage.outputs.has_changes == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
           SNAPSHOT_FILES: ${{ steps.stage.outputs.files }}
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
@@ -226,7 +226,7 @@ jobs:
             })
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
