@@ -39,11 +39,6 @@ const probeMatches = async (matches: CypressInstance[], probeTimeoutMs?: number)
   return probed.filter((instance): instance is LiveInstanceState => instance !== null)
 }
 
-/**
- * Enumerate every verified-live Cypress instance, optionally narrowed to a
- * specific pid. "No instances" is a valid, empty list, never an error — this
- * backs the `instances` command.
- */
 export const listLiveInstances = async (options: ListInstanceOptions = {}): Promise<LiveInstanceState[]> => {
   const records = await readInstanceRecords()
 
@@ -66,8 +61,6 @@ export interface ResolveInstanceOptions {
   probeTimeoutMs?: number
 }
 
-// Phrase the filter that came up empty so the discovery errors name what the
-// user actually asked for (a pid, or nothing in particular).
 const describeFilter = (instance: number | undefined): string => {
   if (instance !== undefined) {
     return ` with pid ${instance}`
@@ -80,8 +73,6 @@ const lowestPid = (instances: LiveInstanceState[]): LiveInstanceState => {
   return [...instances].sort((a, b) => a.pid - b.pid)[0]
 }
 
-// Browser readiness is not a selection criterion — the caller requires it of
-// whatever is chosen.
 const selectInstance = (live: LiveInstanceState[], options: ResolveInstanceOptions): { instance: LiveInstanceState, reason: InstanceSelectionReason } => {
   if (live.length === 1) {
     const filtered = options.instance !== undefined
