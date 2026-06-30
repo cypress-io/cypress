@@ -94,10 +94,8 @@ const tapModule = {
       return listInstances(options, wantsHelp)
     }
 
-    // `status` is the CLI's other reserved command: it reports the discovery
-    // layer (and the in-app run state when a browser is attached) and must work
-    // before any browser exists, so it short-circuits before the session too.
-    // (A running instance that advertised `status` would be shadowed here.)
+    // Reserved CLI command, like `instances`: must work before any browser or
+    // session exists, so it short-circuits here. (A binding `status` is shadowed.)
     if (command === 'status') {
       return reportStatus(options, wantsHelp)
     }

@@ -139,8 +139,8 @@ export const aggregateResults = (runner: TapTestsRunner): { results: RunResults,
   const results: RunResults = { passed: 0, failed: 0, pending: 0, skipped: 0 }
 
   for (const test of tests) {
-    // The serialized type enumerates only passed/failed/pending, but the driver
-    // also marks tests 'skipped' at runtime, so widen before comparing.
+    // The serialized type lists only passed/failed/pending, but the driver also
+    // marks 'skipped' at runtime, so widen before comparing.
     const state = test.state as string | undefined
 
     if (state === 'passed') {
@@ -150,8 +150,7 @@ export const aggregateResults = (runner: TapTestsRunner): { results: RunResults,
     } else if (state === 'skipped') {
       results.skipped++
     } else {
-      // No state yet (not run) or an explicit 'pending' both count as pending,
-      // matching serializeTestsState's default.
+      // No state (not run) and explicit 'pending' both count as pending.
       results.pending++
     }
   }

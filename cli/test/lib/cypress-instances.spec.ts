@@ -404,7 +404,6 @@ describe('lib/cypress-instances', () => {
 
       expect(selection.instance.pid).toBe(111)
       expect(selection.reason).toBe('only')
-      // The browser-optional resolver returns the live instance as-is — no browser.
       expect(selection.instance.cdpBrowserWsUrl).toBeNull()
     })
 

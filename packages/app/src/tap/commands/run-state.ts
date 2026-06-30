@@ -20,8 +20,6 @@ export const tapRunStateSource = {
       return false
     }
   },
-  // The active spec's project-relative path, from the same instance the runner
-  // commands read. Undefined until a spec is mounted.
   getActiveSpecRelative (): string | undefined {
     try {
       return window.getEventManager?.().getCypress()?.spec?.relative
