@@ -69,6 +69,16 @@ describe('config/src/validation', () => {
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot('invalid url')
     })
+
+    it('reports the correct certificate index for an absolute CA filepath', () => {
+      const result = validation.isValidClientCertificatesSet(mockKey, [
+        { url: 'https://a.com', certs: [], ca: ['relative/ca.pem'] },
+        { url: 'https://b.com', certs: [], ca: ['/absolute/ca.pem'] },
+      ])
+
+      expect(result).not.toBe(true)
+      expect((result as any).key).toEqual('clientCertificates[1].ca[0]')
+    })
   })
 
   describe('.isValidBrowser', () => {
