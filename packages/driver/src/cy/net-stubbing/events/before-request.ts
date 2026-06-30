@@ -52,6 +52,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   req.responseTimeout = Cypress.config('responseTimeout')
   const reqClone = _.cloneDeep(req)
+  const pendingSubscribes: Promise<void>[] = []
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -68,8 +69,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     debug('created request subscription %o', { eventName, request, subscription, handler })
 
-    // tslint:disable:no-floating-promises
-    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+    pendingSubscribes.push(emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe))
   }
 
   const getCanonicalInterception = (): Interception => {
@@ -100,6 +100,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   let resolved = false
   let handlerCompleted = false
+  let deferFinishWithStopPropagation = false
 
   const createQueryObject = () => {
     try {
@@ -225,10 +226,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-      // tslint:disable:no-floating-promises
       subscribe('response:callback', responseHandler)
+      deferFinishWithStopPropagation = true
 
-      return finish(true)
+      return userReq
     },
     reply (responseHandler?, maybeBody?, maybeHeaders?) {
       if (resolved) {
@@ -364,7 +365,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   .finally(() => {
     resolved = true
   })
-  .then(() => {
+  .then(async () => {
     if (userReq.alias) {
       Cypress.state('aliasedRequests').push({
         alias: userReq.alias,
@@ -374,7 +375,13 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       delete userReq.alias
     }
 
-    if (!handlerCompleted) {
+    if (!handlerCompleted || deferFinishWithStopPropagation) {
+      await Promise.all(pendingSubscribes)
+    }
+
+    if (deferFinishWithStopPropagation) {
+      finish(true)
+    } else if (!handlerCompleted) {
       // handler function completed without resolving request, pass on
       finish(false)
     }

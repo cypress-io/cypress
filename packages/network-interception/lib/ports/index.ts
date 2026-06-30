@@ -1,3 +1,3 @@
-export * from './driving-ports'
+export * from './http-interception'
 
 export * from './driven-ports'

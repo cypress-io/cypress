@@ -9,5 +9,3 @@ export * from './csp'
 export * from './intercept-middleware'
 
 export * from './core'
-
-export * from './testing/stub-driven-ports'

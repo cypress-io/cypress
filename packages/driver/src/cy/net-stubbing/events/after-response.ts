@@ -1,4 +1,4 @@
-import type { CyHttpMessages } from '@packages/network-interception'
+import type { CyHttpMessages } from '../types'
 import type { HandlerFn } from '.'
 import { parseJsonBody } from './utils'
 
@@ -7,6 +7,12 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
 
   if (!request) {
     return null
+  }
+
+  if (!request.response && request.pendingResponse) {
+    request.response = request.pendingResponse
+    delete request.pendingResponse
+    parseJsonBody(request.response)
   }
 
   if (request.response && frame.data.finalResBody) {

@@ -13,17 +13,29 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { matchRoutes, createHttpInterceptWithDefaultMiddleware, type ForHttpIntercept, type ForStubbing } from '@packages/network-interception'
-import { createDriverAdapter, netStubbingState, resetStubbingState } from '@packages/net-stubbing'
-import { get as fixtureGet } from './fixture'
+import type { CyIntercept } from '@packages/net-stubbing'
+import type { ForHttpIntercept } from '@packages/network-interception'
+import { createHttpInterceptStack } from './create-http-intercept-stack'
 import { agent, clientCertificates, httpUtils, concatStream, blocked } from '@packages/network'
-import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
+import {
+  DocumentDomainInjection,
+  getPath,
+  getSupportedAcceptEncoding,
+  parseUrlIntoHostProtocolDomainTldPort,
+  removeDefaultPort,
+  RemoteStates,
+} from '@packages/network-tools'
+import type { RemoteState } from '@packages/network-tools'
 import {
   NetworkProxy,
   defaultMiddleware,
   createProxyNetworkServices,
-  type BrowserPreRequest,
-  type ProxyNetworkServices,
+} from '@packages/proxy'
+import type {
+  BrowserPreRequest,
+  ProxyNetworkServices,
+  ResourceType,
+  RequestCredentialLevel,
 } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -38,8 +50,6 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import { RemoteStates } from '@packages/network-tools'
-import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
@@ -54,7 +64,6 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
-import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 
@@ -168,9 +177,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _socket?: TSocket
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
-  protected _netStubbingState?: ForStubbing
   protected _networkServices?: ProxyNetworkServices
-  protected _driverAdapter?: ReturnType<typeof createDriverAdapter>
+  protected _cyIntercept?: CyIntercept
+  protected _httpIntercept?: ForHttpIntercept
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -221,20 +230,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._networkProxy, 'open')
   }
 
-  get netStubbingState () {
-    return this.ensureProp(this._netStubbingState, 'open')
+  get cyIntercept () {
+    return this.ensureProp(this._cyIntercept, 'open')
   }
 
   get networkServices () {
     return this.ensureProp(this._networkServices, 'open')
   }
 
-  get driverAdapter () {
-    return this.ensureProp(this._driverAdapter, 'open')
-  }
-
   get networkInterception () {
-    return this.driverAdapter.httpIntercept
+    return this.ensureProp(this._httpIntercept, 'open')
   }
 
   get httpsProxy () {
@@ -360,19 +365,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this._netStubbingState = netStubbingState()
-    const httpIntercept = createHttpInterceptWithDefaultMiddleware(config, {
-      matchesBlockedHost: blocked.matches,
-    })
-
-    this._driverAdapter = createDriverAdapter({
-      stubbing: this._netStubbingState,
-      socket: this._socket,
-      httpIntercept,
-      onSyncInterceptSkipped: (url) => {
+    const { httpIntercept, cyIntercept } = createHttpInterceptStack(
+      config,
+      this._socket,
+      (url) => {
         errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
       },
-    })
+    )
+
+    this._httpIntercept = httpIntercept
+    this._cyIntercept = cyIntercept
 
     if (!isProxyDisabled()) {
       this.createNetworkProxy({
@@ -486,7 +488,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getFileServerToken,
       getCookieJar: () => cookieJar,
       socket: this.socket,
-      netStubbingState: this.netStubbingState,
       networkServices,
       networkInterception: this.networkInterception!,
       request: this.request,
@@ -494,6 +495,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getCurrentBrowser,
       middleware: defaultMiddleware,
       getRenderedHTMLOrigins: () => ({}),
+      onInterceptNetworkError: (requestId, error) =>
+        this._cyIntercept!.emitNetworkErrorByRequestId(requestId, error),
+      getMatchingRoutes: (req) => this._cyIntercept!.getMatchingRoutes(req),
     })
   }
 
@@ -502,16 +506,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.interceptRegistration = this.driverAdapter.createInterceptRegistration({
-      getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
-    })
+    options.cyIntercept = this._cyIntercept
 
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
-      resetStubbingState(this.netStubbingState)
+      this._cyIntercept?.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
     }
@@ -851,12 +853,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const matchesNetStubbingRoute = (requestOptions) => {
       const proxiedReq = {
         url: requestOptions.url,
-        resourceType: 'document',
+        resourceType: 'document' as const,
         ..._.pick(requestOptions, ['headers', 'method']),
         // TODO: add `body` here once bodies can be statically matched
       }
 
-      return matchRoutes(this.netStubbingState?.routes ?? [], proxiedReq).length > 0
+      return this._cyIntercept?.matchesUrl(proxiedReq) ?? false
     }
 
     let p

@@ -14,7 +14,6 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onE
     config: {},
     networkServices: createTestNetworkServices(),
     networkInterception: createMockNetworkInterception(),
-    netStubbingState: { routes: [] },
 
     middleware: {
       0: middleware,

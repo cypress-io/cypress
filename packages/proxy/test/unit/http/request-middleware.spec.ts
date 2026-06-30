@@ -50,6 +50,7 @@ describe('http/request-middleware', () => {
       'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
+      'SetMatchingRoutes',
       'SendToDriver',
       'RedirectToClientRouteIfUnloaded',
       'StripUnsupportedAcceptEncoding',
@@ -1013,6 +1014,7 @@ describe('http/request-middleware', () => {
         },
         req: {
           body: '{}',
+          requestBodyMaterialized: true,
           headers,
           socket: {
             on: () => {},
@@ -1103,6 +1105,55 @@ describe('http/request-middleware', () => {
       await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
 
       expect(ctx.res.redirect).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('ApplyHttpInterception', () => {
+    const { ApplyHttpInterception } = RequestMiddleware
+
+    function makeCtx (networkInterception: any) {
+      return {
+        req: {
+          proxiedUrl: 'http://example.com/',
+          method: 'GET',
+          headers: {},
+        } as Partial<CypressIncomingRequest>,
+        res: { on: vi.fn(), off: vi.fn() } as any,
+        networkInterception,
+      }
+    }
+
+    it('sets req.hadIntercept on error when handle set it before throwing', async () => {
+      const networkInterception = {
+        handle: vi.fn(async (req) => {
+          req.hadIntercept = true
+          throw new Error('intercept error')
+        }),
+      }
+
+      const ctx = makeCtx(networkInterception)
+      const errors: unknown[] = []
+
+      await testMiddleware([ApplyHttpInterception], ctx, (err) => errors.push(err))
+
+      expect((ctx.req as any).hadIntercept).toBe(true)
+      expect(errors).toHaveLength(1)
+    })
+
+    it('does not set req.hadIntercept on error when handle did not match a route', async () => {
+      const networkInterception = {
+        handle: vi.fn(async () => {
+          throw new Error('intercept error')
+        }),
+      }
+
+      const ctx = makeCtx(networkInterception)
+      const errors: unknown[] = []
+
+      await testMiddleware([ApplyHttpInterception], ctx, (err) => errors.push(err))
+
+      expect((ctx.req as any).hadIntercept).toBeFalsy()
+      expect(errors).toHaveLength(1)
     })
   })
 })

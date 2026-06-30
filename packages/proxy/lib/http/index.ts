@@ -21,7 +21,7 @@ import type {
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
-import type { ForNetworkInterception, ForStubbing, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture } from '@packages/network-interception'
+import type { ForNetworkInterception, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture, BackendRoute, ResourceType } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -116,7 +116,6 @@ export type ServerCtx = Readonly<{
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
-  netStubbingState: ForStubbing
   networkServices: ProxyNetworkServices
   networkInterception: ForNetworkInterception
   middleware: HttpMiddlewareStacks
@@ -124,15 +123,23 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  onInterceptNetworkError?: (requestId: string, error: Error) => Promise<void>
+  getMatchingRoutes?: (req: {
+    url: string
+    method: string
+    headers: Record<string, string | string[]>
+    resourceType?: ResourceType
+  }) => BackendRoute[]
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
-  'netStubbingState',
   'networkServices',
   'networkInterception',
+  'onInterceptNetworkError',
+  'getMatchingRoutes',
   'next',
   'end',
   'onResponse',
@@ -320,7 +327,6 @@ export class Http {
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
-  netStubbingState: ForStubbing
   networkServices: ProxyNetworkServices
   networkInterception: ForNetworkInterception
   preRequests: PreRequests = new PreRequests()
@@ -332,6 +338,8 @@ export class Http {
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
+  onInterceptNetworkError?: (requestId: string, error: Error) => Promise<void>
+  getMatchingRoutes?: ServerCtx['getMatchingRoutes']
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
@@ -342,7 +350,6 @@ export class Http {
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
-    this.netStubbingState = opts.netStubbingState
     this.networkServices = opts.networkServices
     this.networkInterception = opts.networkInterception
     this.socket = opts.socket
@@ -350,6 +357,8 @@ export class Http {
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.onInterceptNetworkError = opts.onInterceptNetworkError
+    this.getMatchingRoutes = opts.getMatchingRoutes
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -373,9 +382,10 @@ export class Http {
       remoteStates: this.remoteStates,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
-      netStubbingState: this.netStubbingState,
       networkServices: this.networkServices,
       networkInterception: this.networkInterception,
+      onInterceptNetworkError: this.onInterceptNetworkError,
+      getMatchingRoutes: this.getMatchingRoutes,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

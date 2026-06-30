@@ -31,12 +31,12 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     time: !!span, // request library: include timingPhases on the response
   }
 
-  const requestBodyBuffered = !!mw.req.body
+  const requestBodyMaterialized = !!mw.req.requestBodyMaterialized
 
   const { strategy, origin, fileServer } = mw.remoteStates.current()
 
   span?.setAttributes({
-    requestBodyBuffered,
+    requestBodyMaterialized,
     strategy,
   })
 
@@ -46,7 +46,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
   }
 
-  if (requestBodyBuffered) {
+  if (requestBodyMaterialized) {
     _.assign(requestOptions, _.pick(mw.req, 'method', 'body', 'headers'))
   }
 
@@ -120,7 +120,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
 
   mw.req.socket.on('close', onSocketClose)
 
-  if (!requestBodyBuffered) {
+  if (!requestBodyMaterialized) {
     // Stream the incoming request body and headers to the outgoing request.
     mw.req.pipe(req)
   }

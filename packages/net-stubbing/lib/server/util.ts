@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import mime from 'mime'
 import type { IncomingMessage } from 'http'
 import type { BackendStaticResponse } from '@packages/network-interception'
+import { resolveStaticResponseFixture, sniffFixtureContentType } from '../core/resolve-static-response-fixture'
 
-export { getAllStringMatcherFields } from '@packages/network-interception'
+export { getAllStringMatcherFields } from '../core/matcher-fields'
 
 import { Readable, PassThrough } from 'stream'
 import type { GetFixtureFn } from './types'
@@ -17,34 +17,9 @@ import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
-const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
-
-const isValidJSON = function (text: unknown) {
-  if (_.isObject(text)) {
-    return true
-  }
-
-  try {
-    const o = JSON.parse(text as string)
-
-    return _.isObject(o)
-  } catch (error) {
-    false
-  }
-
-  return false
-}
 
 export function parseContentType (response?: string) {
-  if (isValidJSON(response)) {
-    return mime.getType('json')
-  }
-
-  if (response && htmlLikeRe.test(response)) {
-    return mime.getType('html')
-  }
-
-  return mime.getType('text')
+  return sniffFixtureContentType(response)
 }
 
 export function emit (socket: SocketBroadcaster, eventName: string, data: object) {
@@ -55,17 +30,20 @@ export function emit (socket: SocketBroadcaster, eventName: string, data: object
   socket.toDriver('net:stubbing:event', eventName, data)
 }
 
-export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
+export function applyDefaultStubHeaders (
+  reqHeaders: Record<string, string | string[] | undefined>,
+  resHeaders: Record<string, string | string[] | undefined>,
+): void {
   const setDefaultHeader = (lowercaseHeader: string, defaultValueFn: () => string) => {
-    if (!caseInsensitiveHas(res.headers, lowercaseHeader)) {
-      res.headers[lowercaseHeader] = defaultValueFn()
+    if (!caseInsensitiveHas(resHeaders, lowercaseHeader)) {
+      resHeaders[lowercaseHeader] = defaultValueFn()
     }
   }
 
   // https://github.com/cypress-io/cypress/issues/15050
   // Check if res.headers has a custom header.
   // If so, set access-control-expose-headers to '*'.
-  const hasCustomHeader = Object.keys(res.headers).some((header) => {
+  const hasCustomHeader = Object.keys(resHeaders).some((header) => {
     // The list of header items that can be accessed from cors request
     // without access-control-expose-headers
     // @see https://stackoverflow.com/a/37931084/1038927
@@ -80,47 +58,20 @@ export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMes
   })
 
   // We should not override the user's access-control-expose-headers setting.
-  if (hasCustomHeader && !res.headers['access-control-expose-headers']) {
+  if (hasCustomHeader && !resHeaders['access-control-expose-headers']) {
     setDefaultHeader('access-control-expose-headers', _.constant('*'))
   }
 
-  setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(req.headers, 'origin') || '*')
+  setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(reqHeaders, 'origin') || '*')
   setDefaultHeader('access-control-allow-credentials', _.constant('true'))
 }
 
+export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
+  applyDefaultStubHeaders(req.headers, res.headers)
+}
+
 export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
-  const { fixture } = staticResponse
-
-  if (!fixture) {
-    return
-  }
-
-  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
-
-  const { headers } = staticResponse
-
-  if (!headers || !caseInsensitiveGet(headers, 'content-type')) {
-    // attempt to detect mimeType based on extension, fall back to regular cy.fixture inspection otherwise
-    const mimeType = mime.getType(fixture.filePath) || parseContentType(data)
-
-    _.set(staticResponse, 'headers.content-type', mimeType)
-  }
-
-  function getBody (): string {
-    // NOTE: for backwards compatibility with cy.route
-    if (data === null) {
-      return JSON.stringify('')
-    }
-
-    if (!_.isBuffer(data) && !_.isString(data)) {
-      // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
-      return JSON.stringify(data)
-    }
-
-    return data
-  }
-
-  staticResponse.body = getBody()
+  return resolveStaticResponseFixture(staticResponse, getFixtureFn)
 }
 
 export async function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Promise<Readable> {
@@ -159,6 +110,26 @@ function wait (fn, ms) {
       resolve(fn())
     }, ms)
   })
+}
+
+export function normalizeTextRequestBody (
+  body: unknown,
+  headers: Record<string, string | string[] | undefined>,
+): string | Buffer | undefined {
+  const bodyEncoding = getBodyEncoding({
+    body: body ?? '',
+    headers,
+  } as CyHttpMessages.IncomingRequest)
+
+  if (bodyEncoding !== 'binary' && body && Buffer.isBuffer(body)) {
+    return body.toString('utf8')
+  }
+
+  if (body === undefined) {
+    return undefined
+  }
+
+  return body as string | Buffer
 }
 
 type BodyEncoding = 'utf8' | 'binary' | null

@@ -15,7 +15,7 @@ export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.E
   getRequest: (routeId: string, requestId: string) => Interception | undefined
   getRoute: (routeId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
-  sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
+  sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => Promise<void>
 }) => Promise<HandlerResult<D>> | HandlerResult<D>
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
@@ -56,8 +56,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   }
 
   function sendStaticResponse (requestId: string, staticResponse: StaticResponse) {
-    // tslint:disable:no-floating-promises
-    emitNetEvent('send:static:response', {
+    return emitNetEvent('send:static:response', {
       requestId,
       staticResponse: getBackendStaticResponse(staticResponse),
     })

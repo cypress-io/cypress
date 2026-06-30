@@ -94,6 +94,28 @@ describe('http/response-middleware', function () {
 
       expect(cookie).not.toHaveBeenCalledWith('__cypress.unload', '', expect.anything())
     })
+
+    // https://github.com/cypress-io/cypress/issues/34143
+    it('omits the domain attribute for IPv6 literal hosts so the cookie serializer does not throw', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '[::1]' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      // host-only cookie: no `domain` option, so express/cookie does not reject it
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { expires: new Date(0) })
+    })
+
+    it('keeps the domain attribute for IPv4 literal hosts', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '127.0.0.1' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: '127.0.0.1', expires: new Date(0) })
+    })
   })
 
   describe('multiple this.next invocations', () => {
@@ -367,6 +389,21 @@ describe('http/response-middleware', function () {
       expect(ctx.res.set).toHaveBeenCalledWith(expect.objectContaining({ 'good-header': 'value' }))
     })
 
+    it('drops undefined header values before applying CSP allow list', async function () {
+      prepareContext({
+        'good-header': 'value',
+        'undefined-header': undefined,
+        'content-security-policy': 'default-src \'self\'',
+      }, {
+        experimentalCspAllowList: false,
+      })
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.res.set).toHaveBeenCalledWith(expect.objectContaining({ 'good-header': 'value' }))
+      expect(ctx.res.set).toHaveBeenCalledWith(expect.not.objectContaining({ 'undefined-header': undefined }))
+      expect(ctx.res.removeHeader).toHaveBeenCalledWith('content-security-policy')
+    })
+
     const validCspHeaderNames = [
       'content-security-policy',
       'Content-Security-Policy',
@@ -374,10 +411,14 @@ describe('http/response-middleware', function () {
       'Content-Security-Policy-Report-Only',
     ]
 
+    const prepareCspContext = (additionalHeaders = {}, config = {}) => {
+      prepareContext(additionalHeaders, config)
+    }
+
     unsupportedCSPDirectives.forEach((directive) => {
       validCspHeaderNames.forEach((headerName) => {
         it(`always removes "${directive}" directive from "${headerName}" headers 'when experimentalCspAllowList is true`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
             experimentalCspAllowList: true,
@@ -390,7 +431,7 @@ describe('http/response-middleware', function () {
         })
 
         it(`always removes "${directive}" from "${headerName}" headers when experimentalCspAllowList is an empty array`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
             experimentalCspAllowList: [],
@@ -403,7 +444,7 @@ describe('http/response-middleware', function () {
         })
 
         it(`always removes "${directive}" from "${headerName}" headers when experimentalCspAllowList is an array including "${directive}"`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
             experimentalCspAllowList: [`${directive}`],
@@ -419,7 +460,7 @@ describe('http/response-middleware', function () {
 
     validCspHeaderNames.forEach((headerName) => {
       it(`removes "${headerName}" headers when experimentalCspAllowList is false`, async () => {
-        prepareContext({
+        prepareCspContext({
           [`${headerName}`]: `fake-csp-directive fake-csp-value`,
         }, {
           experimentalCspAllowList: false,
@@ -432,7 +473,7 @@ describe('http/response-middleware', function () {
 
     validCspHeaderNames.forEach((headerName) => {
       it(`will not remove invalid problematicCspDirectives directives provided from "${headerName}" headers when experimentalCspAllowList is an array of directives`, async () => {
-        prepareContext({
+        prepareCspContext({
           [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-1 fake-csp-value-1; fake-csp-directive-2 fake-csp-value-2`,
         }, {
           experimentalCspAllowList: ['fake-csp-directive-1'],
@@ -448,7 +489,7 @@ describe('http/response-middleware', function () {
     validCspHeaderNames.forEach((headerName) => {
       problematicCspDirectives.forEach((directive) => {
         it(`will allow problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including "${directive}"`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `fake-csp-directive fake-csp-value; ${directive} fake-csp-${directive}-value`,
           }, {
             experimentalCspAllowList: [directive],
@@ -464,7 +505,7 @@ describe('http/response-middleware', function () {
           if (directive === otherDirective) return
 
           it(`will still remove other problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including singe directives "${directive}"`, async () => {
-            prepareContext({
+            prepareCspContext({
               [`${headerName}`]: `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
             }, {
               experimentalCspAllowList: [directive],
@@ -477,7 +518,7 @@ describe('http/response-middleware', function () {
           })
 
           it(`will allow both problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including multiple directives ["${directive}","${otherDirective}"]`, async () => {
-            prepareContext({
+            prepareCspContext({
               [`${headerName}`]: `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
             }, {
               experimentalCspAllowList: [directive, otherDirective],
@@ -492,7 +533,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    function prepareContext (additionalHeaders = {}, config = {}) {
+    function prepareContext (additionalHeaders = {}, config = {}, req = {}) {
       const headers = {
         'content-type': 'text/html',
         'content-length': '123',
@@ -504,6 +545,10 @@ describe('http/response-middleware', function () {
       }
 
       ctx = {
+        req: {
+          isFromExtraTarget: false,
+          ...req,
+        },
         config: {
           experimentalCspAllowList: false,
           ...config,
@@ -2071,6 +2116,31 @@ describe('http/response-middleware', function () {
       )
     })
 
+    it('runs onInterceptResponseWritten before ending empty intercepted responses', async function () {
+      const onInterceptResponseWritten = vi.fn(async () => {})
+      const end = vi.fn()
+
+      prepareContext({
+        req: {
+          hadIntercept: true,
+          onInterceptResponseWritten,
+        },
+        incomingRes: {
+          statusCode: 204,
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          end,
+        },
+      })
+
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      expect(onInterceptResponseWritten).toHaveBeenCalledOnce()
+      expect(end).toHaveBeenCalledOnce()
+    })
+
     it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and retried request is correlated and response must have empty body and response is not cached', async function () {
       prepareContext({
         protocolManager: {
@@ -2325,7 +2395,6 @@ describe('http/response-middleware', function () {
         protocolManager: props.protocolManager,
         req: props.req,
         incomingResHadEmptyBody: props.incomingResHadEmptyBody,
-        netStubbingState: props.netStubbingState,
         res: props.res || {
           on: (event, listener) => {},
           off: (event, listener) => {},

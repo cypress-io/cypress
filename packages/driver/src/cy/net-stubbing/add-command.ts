@@ -16,7 +16,7 @@ import {
   NumberMatcher,
   BackendStaticResponseWithArrayBuffer,
   StaticResponseWithOptions,
-} from '@packages/network-interception'
+} from './types'
 import {
   validateStaticResponse,
   getBackendStaticResponse,

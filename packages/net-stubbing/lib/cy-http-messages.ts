@@ -5,7 +5,7 @@ import type {
   DriverInterceptRequest,
   DriverInterceptResponse,
   DriverInterceptResponseComplete,
-} from './driver-intercept'
+} from './driver-http-conversion'
 
 export namespace CyHttpMessages {
   export type BaseMessage<T = any> = DriverInterceptMessage<T>

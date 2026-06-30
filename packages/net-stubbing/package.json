@@ -2,7 +2,7 @@
   "name": "@packages/net-stubbing",
   "version": "0.0.0-development",
   "private": true,
-  "main": "./lib/server",
+  "main": "./lib/index",
   "scripts": {
     "build-prod": "tsc --project .",
     "check-ts": "tsc --noEmit && yarn -s tslint",
@@ -18,10 +18,10 @@
     "@packages/network-interception": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "debug": "^4.4.0",
-    "is-html": "^2.0.0",
     "istextorbinary": "6.0.0",
     "lodash": "^4.17.15",
     "mime": "^3.0.0",
+    "minimatch": "^3.1.2",
     "throttle": "^1.0.3"
   },
   "devDependencies": {
@@ -29,6 +29,7 @@
     "@packages/proxy": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@types/mime": "^3.0.1",
+    "@types/minimatch": "^3.0.3",
     "vitest": "^3.2.4"
   },
   "files": [

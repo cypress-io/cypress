@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { Interception, Route } from '@packages/network-interception'
+import type { Interception, Route } from '../cy/net-stubbing/types'
 import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
 import $errUtils from './error_utils'
 import Debug from 'debug'
@@ -7,6 +7,10 @@ import Debug from 'debug'
 const debug = Debug('cypress:driver:proxy-logging')
 // for logs emitted once per request on expected paths
 const debugVerbose = Debug('cypress-verbose:driver:proxy-logging')
+
+function getInterceptionResponse (interception: Interception) {
+  return interception.response ?? interception.pendingResponse
+}
 
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
@@ -16,8 +20,10 @@ function formatInterception ({ route, interception }: ProxyRequest['interception
     'Request': interception.request,
   }
 
-  if (interception.response) {
-    ret['Response'] = _.omitBy(interception.response, _.isNil)
+  const response = getInterceptionResponse(interception)
+
+  if (response) {
+    ret['Response'] = _.omitBy(response, _.isNil)
   }
 
   const alias = interception.request.alias || route.alias
@@ -197,7 +203,9 @@ class ProxyRequest {
     // details on response
     let resBody
 
-    if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
+    const interception = _.chain(this.interceptions).last().get('interception').value()
+
+    if (interception && (resBody = getInterceptionResponse(interception)?.body)) {
       consoleProps['Response Body'] = resBody
     }
 
@@ -252,6 +260,12 @@ export default class ProxyLogging {
       return undefined
     }
 
+    if (proxyRequest.interceptions.some(({ interception: existingInterception }) => existingInterception.id === interception.id)) {
+      proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
+
+      return proxyRequest
+    }
+
     proxyRequest.interceptions.push({ interception, route })
 
     proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
@@ -260,6 +274,27 @@ export default class ProxyLogging {
     proxyRequest.setFlag(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
 
     return proxyRequest
+  }
+
+  refreshInterceptionLog (interception: Interception): void {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+
+    if (!proxyRequest) {
+      return
+    }
+
+    proxyRequest.updateConsoleProps()
+
+    const hasInterceptionResponse = !!getInterceptionResponse(interception)
+
+    // @ts-ignore
+    const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
+
+    if (hasInterceptionResponse && proxyRequest.responseReceived && !hasResponseSnapshot) {
+      proxyRequest.log?.snapshot('response')
+    }
+
+    proxyRequest.log?.set({})
   }
 
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {

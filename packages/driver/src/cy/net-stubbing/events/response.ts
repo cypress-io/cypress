@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-} from '@packages/network-interception'
+} from '../types'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
@@ -20,19 +20,25 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const { data: res, requestId, subscription } = frame
   const { routeId } = subscription
   const request = getRequest(routeId, frame.requestId)
+  const route = getRoute(routeId)
   const resClone = _.cloneDeep(res)
 
   const bodyParsed = parseJsonBody(res)
 
   let responseSent = false
   let resolved = false
+  let pendingStaticSend: Promise<void> | undefined
+
+  if (request && route) {
+    Cypress.ProxyLogging?.logInterception?.(request, route)
+  }
 
   if (request) {
     request.state = 'ResponseReceived'
 
     if (!userHandler) {
-      // this is notification-only, update the request with the response attributes and end
-      request.response = res
+      request.pendingResponse = res
+      Cypress.ProxyLogging?.refreshInterceptionLog?.(request)
 
       return null
     }
@@ -46,6 +52,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
+      Cypress.ProxyLogging?.refreshInterceptionLog?.(request)
     }
   }
 
@@ -89,9 +96,15 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
           }
         }
 
-        sendStaticResponse(requestId, _staticResponse)
+        pendingStaticSend = sendStaticResponse(requestId, _staticResponse)
+        .then(() => {
+          finishResponseStage(_staticResponse)
+          resolve({
+            stopPropagation: true,
+          })
+        })
 
-        return finishResponseStage(_staticResponse)
+        return pendingStaticSend
       }
 
       return sendContinueFrame(true)
@@ -154,7 +167,11 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       },
     })
   })
-  .then(() => {
+  .then(async () => {
+    if (pendingStaticSend) {
+      await pendingStaticSend
+    }
+
     if (!responseSent) {
       // user did not send, continue response
       sendContinueFrame(false)

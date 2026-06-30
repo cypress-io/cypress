@@ -5,6 +5,7 @@ import ErrorMiddleware, {
   UnpipeResponse,
   DestroyResponse,
 } from '../../../lib/http/error-middleware'
+import { InterceptError } from '@packages/net-stubbing/lib/server/middleware/error'
 import {
   testMiddleware,
 } from './helpers'
@@ -85,6 +86,48 @@ describe('http/error-middleware', function () {
 
       await testMiddleware([DestroyResponse], ctx)
       expect(ctx.res.destroy).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('InterceptError', function () {
+    it('delegates intercepted request errors to onInterceptNetworkError', async function () {
+      const onInterceptNetworkError = vi.fn(async () => {})
+      const error = new Error('proxy failed')
+
+      await testMiddleware([InterceptError], {
+        req: {
+          hadIntercept: true,
+          requestId: 'intercept-1',
+        },
+        error,
+        onInterceptNetworkError,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      })
+
+      expect(onInterceptNetworkError).toHaveBeenCalledOnce()
+      expect(onInterceptNetworkError).toHaveBeenCalledWith('intercept-1', error)
+    })
+
+    it('skips onInterceptNetworkError when the request was not intercepted', async function () {
+      const onInterceptNetworkError = vi.fn(async () => {})
+
+      await testMiddleware([InterceptError], {
+        req: {
+          hadIntercept: false,
+          requestId: 'intercept-1',
+        },
+        error: new Error('proxy failed'),
+        onInterceptNetworkError,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      })
+
+      expect(onInterceptNetworkError).not.toHaveBeenCalled()
     })
   })
 })

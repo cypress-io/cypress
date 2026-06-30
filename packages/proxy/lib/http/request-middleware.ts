@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { concatStream } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -8,12 +7,13 @@ import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
 import { correlateBrowserPreRequest } from '../adapters/correlate-browser-pre-request'
 import {
-  applyOutboundToProxiedRequest,
-  fetchOriginAsHttpResponse,
+  createFetchOrigin,
   toHttpRequest,
 } from '../adapters/proxy-http-interception'
-import { applyHttpResponseToCtx } from '../adapters/apply-http-response'
-import { getBodyEncoding } from '@packages/net-stubbing/lib/server/util'
+import type { RequestInterceptionMiddlewareCtx } from '../adapters/types'
+import type { HttpResponse } from '@packages/network-interception'
+import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
+import { HttpResponseCodec } from '../adapters/http-response-codec'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -149,6 +149,42 @@ const SendToDriver: RequestMiddleware = function () {
   this.networkServices.commandLog.notifyIncomingRequest(this)
 }
 
+const SetMatchingRoutes: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
+  if (!this.getMatchingRoutes) {
+    span?.end()
+
+    return this.next()
+  }
+
+  const devServerPublicPathRoute = this.config.devServerPublicPathRoute
+
+  if (devServerPublicPathRoute) {
+    try {
+      const pathname = new URL(this.req.proxiedUrl).pathname
+
+      if (pathname.startsWith(devServerPublicPathRoute)) {
+        span?.end()
+
+        return this.next()
+      }
+    } catch {
+      // fall through to route matching
+    }
+  }
+
+  this.req.matchingRoutes = this.getMatchingRoutes({
+    url: this.req.proxiedUrl,
+    method: this.req.method,
+    headers: this.req.headers as Record<string, string | string[]>,
+    resourceType: this.req.resourceType,
+  })
+
+  span?.end()
+  this.next()
+}
+
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:end:with:buffered:response', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -226,6 +262,11 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   const acceptEncoding = this.req.headers['accept-encoding']
+
+  if (acceptEncoding && !this.req.originalAcceptEncoding) {
+    this.req.originalAcceptEncoding = acceptEncoding
+  }
+
   const supported = getSupportedAcceptEncoding(acceptEncoding)
 
   span?.setAttributes({
@@ -272,44 +313,31 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   this.next()
 }
 
+async function commitHttpResponseToProxy (
+  mw: RequestInterceptionMiddlewareCtx,
+  httpResponse: HttpResponse,
+): Promise<void> {
+  mw.req.requestId = mw.req.requestId || _.uniqueId('interceptedRequest')
+  mw.req.onInterceptResponseWritten = httpResponse.onResponseWrittenToClient
+
+  const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse(httpResponse)
+
+  if (mw.req.hadIntercept) {
+    setDefaultHeaders(mw.req, incomingRes)
+  }
+
+  return mw.onResponse(incomingRes, bodyStream)
+}
+
 const ApplyHttpInterception: RequestMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
-
-  const devServerUrl = new URL(this.req.proxiedUrl)
-
-  if (devServerUrl.pathname.startsWith(this.config.devServerPublicPathRoute)) {
-    span?.end()
-
-    try {
-      const httpResponse = await fetchOriginAsHttpResponse(this)
-
-      return applyHttpResponseToCtx(this, httpResponse)
-    } catch (err) {
-      return this.onError(err)
-    }
-  }
-
-  await ensureRequestBody(this)
-
-  const bodyEncoding = getBodyEncoding({
-    body: this.req.body,
-    headers: this.req.headers,
-  } as any)
-
-  if (bodyEncoding !== 'binary' && this.req.body && Buffer.isBuffer(this.req.body)) {
-    this.req.body = this.req.body.toString('utf8')
-  }
 
   const httpRequest = toHttpRequest(this)
 
   this.req.requestId = httpRequest.inFlightInterceptId
 
   try {
-    const httpResponse = await this.networkInterception.handle(httpRequest, async (outbound) => {
-      applyOutboundToProxiedRequest(this.req, outbound)
-
-      return fetchOriginAsHttpResponse(this)
-    })
+    const httpResponse = await this.networkInterception.handle(httpRequest, createFetchOrigin(this))
 
     if (httpRequest.hadIntercept) {
       this.req.hadIntercept = true
@@ -317,9 +345,13 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
 
     span?.end()
 
-    return applyHttpResponseToCtx(this, httpResponse)
+    return commitHttpResponseToProxy(this, httpResponse)
   } catch (err) {
     span?.end()
+
+    if (httpRequest.hadIntercept) {
+      this.req.hadIntercept = true
+    }
 
     return this.onError(err)
   }
@@ -327,38 +359,12 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
 
 const SendRequestOutgoing: RequestMiddleware = async function () {
   try {
-    const httpResponse = await fetchOriginAsHttpResponse(this)
+    const httpResponse = await createFetchOrigin(this)(toHttpRequest(this))
 
-    return applyHttpResponseToCtx(this, httpResponse)
+    return commitHttpResponseToProxy(this, httpResponse)
   } catch (err) {
     return this.onError(err)
   }
-}
-
-async function ensureRequestBody (mw: RequestMiddleware extends (this: infer T) => any ? T : never): Promise<void> {
-  if (mw.req.body) {
-    return
-  }
-
-  return new Promise<void>((resolve) => {
-    const onClose = (): void => {
-      mw.req.body = ''
-
-      resolve()
-    }
-
-    if (mw.res.destroyed) {
-      onClose()
-    }
-
-    mw.res.once('close', onClose)
-
-    mw.req.pipe(concatStream((reqBody) => {
-      mw.req.body = reqBody
-      mw.res.off('close', onClose)
-      resolve()
-    }))
-  })
 }
 
 export default {
@@ -370,6 +376,7 @@ export default {
   FormatCookiesIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
+  SetMatchingRoutes,
   SendToDriver,
   RedirectToClientRouteIfUnloaded,
   StripUnsupportedAcceptEncoding,

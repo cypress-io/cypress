@@ -3,7 +3,7 @@ import type {
   HttpRequest,
   HttpResponse,
   InterceptMiddleware,
-  OriginForwarder,
+  ForOriginForwarding,
 } from '../ports/http-interception'
 
 /**
@@ -21,9 +21,9 @@ export class HttpIntercept implements ForHttpIntercept {
 
   handle: InterceptMiddleware = (
     request: HttpRequest,
-    next: OriginForwarder,
+    next: ForOriginForwarding,
   ): Promise<HttpResponse> => {
-    const chain = this.middlewares.reduceRight<OriginForwarder>(
+    const chain = this.middlewares.reduceRight<ForOriginForwarding>(
       (inner, layer) => (req) => layer(req, inner),
       next,
     )

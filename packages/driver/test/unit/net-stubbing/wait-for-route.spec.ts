@@ -64,6 +64,38 @@ describe('waitForRoute', () => {
     expect(interception.responseWaited).toBe(false)
   })
 
+  it('returns a pending interception for request waits when response is not yet exposed', () => {
+    const interception = createInterception({
+      state: 'ResponseReceived',
+      pendingResponse: {
+        url: 'http://example.com/users',
+        statusCode: 200,
+        statusMessage: 'OK',
+        headers: {},
+        body: {},
+      },
+    })
+    const state = createState({
+      routes: {
+        'route-1': {
+          alias: 'getUsers',
+          requests: {
+            [interception.id]: interception,
+          },
+        },
+      },
+    })
+
+    const requestWait = waitForRoute('getUsers', state, 'request')
+    const responseWait = waitForRoute('getUsers', state, 'response')
+
+    expect(requestWait).toBe(interception)
+    expect(requestWait?.response).toBeUndefined()
+    expect(responseWait).toBeNull()
+    expect(interception.requestWaited).toBe(true)
+    expect(interception.responseWaited).toBe(false)
+  })
+
   it('returns errored interceptions for response waits', () => {
     const interception = createInterception({ state: 'Errored' })
     const state = createState({

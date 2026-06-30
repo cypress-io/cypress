@@ -20,7 +20,7 @@ The codebase adopts **hexagonal architecture** (also called **ports and adapters
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception | `ForHttpIntercept`, `ForInterceptRegistration` |
+| **Driving port** (primary) | Outside actors **call into** interception | `ForHttpIntercept` |
 | **Driven port** (secondary) | Interception **calls out** for I/O | `ForInterceptionEvents`, `ForCookieState`, … |
 | **Core** | Domain orchestration without transport imports | **`HttpIntercept`** |
 | **Composition root** | Constructs and injects adapters + core | `server-base.open()` |
@@ -59,10 +59,8 @@ type InterceptMiddleware = (
 ```mermaid
 flowchart TB
   subgraph compositionRoot["server-base open"]
-    REG["registerDefaultInterceptMiddleware<br/>blockHosts + CSP"]
-    DRV["createDriverAdapter<br/>cy.intercept intercepter"]
-    REG --> HI[HttpIntercept]
-    DRV --> HI
+    STACK["createHttpInterceptStack<br/>blockHosts + CyIntercept"]
+    STACK --> HI[HttpIntercept]
   end
   subgraph transportLayer["transport adapters"]
     MITM["ApplyHttpInterception<br/>packages/proxy"]
@@ -78,21 +76,20 @@ flowchart TB
 
 ```
 server-base.open()
-  → createHttpInterceptWithDefaultMiddleware() (blockHosts + CSP middleware)
-  → createDriverAdapter() (registers cy.intercept intercepter via use())
-  → if proxy enabled: createNetworkProxy() with Proxy*Adapter driven ports
+  → createHttpInterceptStack(config, socket) — blockHosts and CyIntercept on one HttpIntercept
+  → if proxy enabled: createNetworkProxy() with proxy driven ports
   → if proxy disabled: open_project passes same HttpIntercept to CDPNetworkInterception
 
 ApplyHttpInterception middleware (proxy path)
-  → networkInterception.handle(toHttpRequest(ctx), forwardToOrigin)
-  → applyHttpResponseToCtx
+  → networkInterception.handle(toHttpRequest(ctx), createFetchOrigin)
+  → HttpResponseCodec.toProxyResponse / commitHttpResponseToProxy
 
 CDPNetworkInterception (CDP path)
   → networkInterception.handle(toHttpRequest(pause), forwardViaFetch)
   → Fetch.fulfillRequest / Fetch.continueRequest
 ```
 
-Config middleware (`blockHosts`, CSP) and the cy.intercept intercepter share one `HttpIntercept` onion chain. Cookies, document prep, and compression stay on proxy middleware via driven ports wired at the composition root.
+Config middleware (`blockHosts`) and the cy.intercept intercepter share one `HttpIntercept` onion chain. CSP allow-list runs in proxy response middleware (`OmitProblematicHeaders` via `applyCspAllowListToHeaders`). Cookies, document prep, and compression stay on proxy middleware via driven ports wired at the composition root.
 
 ---
 
@@ -102,9 +99,9 @@ Use this when a concern can run on materialized `HttpRequest` / `HttpResponse` (
 
 | Concern | Where middleware is defined | Where it is registered | Runs on CDP? |
 | --- | --- | --- | --- |
-| `blockHosts` | `createBlockedHostsInterceptMiddleware` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
-| CSP allow-list | `createCspAllowListInterceptMiddleware` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
-| `cy.intercept` | `CyInterceptIntercepter` (`net-stubbing`) | `server-base.open()` via `createDriverAdapter` | Yes |
+| `blockHosts` | `createBlockConfiguredHosts` (`network-interception`) | `createHttpInterceptStack` (`server`) | Yes (same stack) |
+| CSP allow-list | `applyCspAllowListToHeaders` (`network-interception`) | `OmitProblematicHeaders` (`proxy` response middleware) | No (proxy streaming) |
+| `cy.intercept` | `CyIntercept` (`net-stubbing`) | `createHttpInterceptStack` (`server`) | Yes |
 | Document rewrite | `SetInjectionLevel` → `MaybeInjectHtml` → `MaybeRemoveSecurity` (`proxy` streaming) | `server-base` wires `createProxyNetworkServices()` driven ports | No (intentional) |
 
 **Keep on proxy streaming middleware** when the concern needs the response byte stream (gzip/br), multiple response-stage hooks, or is proxy-only for now:
@@ -137,7 +134,7 @@ Document rewrite (`modifyObstructiveCode`, `experimentalModifyObstructiveThirdPa
 
 System-level `cy.intercept` smoke with proxy disabled: `system-tests/test/cdp_network_intercept_spec.js` (`fetch.cy.js` under `CYPRESS_INTERNAL_DISABLE_PROXY=1`).
 
-**Tests:** `@packages/browser-automation` unit specs use a mocked `handle` (CDP transport only). `cy.intercept` stack integration (real `HttpIntercept` + driver adapter) lives in `@packages/server` (`test/unit/browsers/cdp-cy-intercept-integration_spec.ts`).
+**Tests:** `@packages/browser-automation` unit specs use a mocked `handle` (CDP transport only). `cy.intercept` stack integration (real `HttpIntercept` + `CyIntercept`) lives in `@packages/server` (`test/unit/browsers/cdp-cy-intercept-integration_spec.ts`).
 
 ---
 

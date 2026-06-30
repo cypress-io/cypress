@@ -9,6 +9,7 @@
 
 import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
+import { patchElementIntegrity } from './patches/integrity'
 
 const Cypress = window.Cypress = parent.Cypress
 
@@ -18,6 +19,12 @@ Cypress in the parent window but it is missing. This should never happen and lik
 }
 
 patchXmlHttpRequest(window)
+
+// Strip SRI from <script>/<link> in the primary AUT frame so proxy-rewritten first-party
+// resources aren't blocked. Cross-origin frames are handled in cross-origin.js.
+if (Cypress.config('removeSRIAttributes')) {
+  patchElementIntegrity(window)
+}
 
 // We wrap timers in the injection code because if we do it in the driver (like
 // we used to do), any uncaught errors thrown in the timer callbacks would

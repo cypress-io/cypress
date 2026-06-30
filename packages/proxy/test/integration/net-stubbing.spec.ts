@@ -1,12 +1,7 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import { NetworkProxy } from '../../'
-import {
-  netStubbingState as _netStubbingState,
-  NetStubbingState,
-  onNetStubbingEvent,
-  DriverInterceptionEventsAdapter,
-  createDriverAdapter,
-} from '@packages/net-stubbing'
+import { CyIntercept } from '@packages/net-stubbing'
+import { createHttpInterceptStack } from '@packages/server/lib/create-http-intercept-stack'
 import * as errors from '@packages/errors'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
@@ -23,16 +18,15 @@ const getFixture = async () => {}
 describe('network stubbing', () => {
   let config
   let remoteStates: RemoteStates
-  let netStubbingState: NetStubbingState
+  let cyIntercept: CyIntercept
+  let networkInterception: ForHttpIntercept
+  let proxy: NetworkProxy
   let app
   let destinationApp
   let server
   let destinationPort
   let socket
   let documentDomainInjection: DocumentDomainInjection
-  let networkInterception: ForHttpIntercept
-  let interceptionEvents: DriverInterceptionEventsAdapter
-  let driverAdapter: ReturnType<typeof createDriverAdapter>
 
   const serverPort = 3030
   const fileServerPort = 3030
@@ -43,6 +37,25 @@ describe('network stubbing', () => {
 
   const createRemoteStates = () => {
     return new RemoteStates(remoteStateConfig, documentDomainInjection)
+  }
+
+  const setupInterceptStack = () => {
+    const stack = createHttpInterceptStack(
+      config,
+      socket,
+      (url) => {
+        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
+      },
+    )
+
+    cyIntercept = stack.cyIntercept
+    networkInterception = stack.httpIntercept
+
+    if (proxy) {
+      proxy.http.networkInterception = networkInterception
+    }
+
+    return networkInterception
   }
 
   beforeEach(() => {
@@ -56,23 +69,11 @@ describe('network stubbing', () => {
     socket = new EventEmitter()
     socket.toDriver = vi.fn()
     app = express()
-    netStubbingState = _netStubbingState()
 
-    const createdDriverAdapter = createDriverAdapter({
-      stubbing: netStubbingState,
+    setupInterceptStack()
+
+    proxy = new NetworkProxy({
       socket,
-      onSyncInterceptSkipped: (url) => {
-        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
-      },
-    })
-
-    driverAdapter = createdDriverAdapter
-    networkInterception = driverAdapter.httpIntercept
-    interceptionEvents = driverAdapter.interceptionEvents as DriverInterceptionEventsAdapter
-
-    const proxy = new NetworkProxy({
-      socket,
-      netStubbingState,
       networkServices: createProxyNetworkServices(),
       networkInterception,
       config,
@@ -165,7 +166,7 @@ describe('network stubbing', () => {
   })
 
   it('adds CORS headers to static stubs', async () => {
-    netStubbingState.routes.push({
+    cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
         url: '*',
@@ -190,7 +191,7 @@ describe('network stubbing', () => {
   })
 
   it('does not override CORS headers', async () => {
-    netStubbingState.routes.push({
+    cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
         url: '*',
@@ -214,7 +215,7 @@ describe('network stubbing', () => {
   })
 
   it('uses Origin to set CORS header', async () => {
-    netStubbingState.routes.push({
+    cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
         url: '*',
@@ -235,7 +236,7 @@ describe('network stubbing', () => {
   })
 
   it('adds CORS headers to dynamically intercepted requests', async () => {
-    netStubbingState.routes.push({
+    cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
         url: '*',
@@ -247,21 +248,13 @@ describe('network stubbing', () => {
 
     socket.toDriver.mockImplementation((_, event, data) => {
       if (event === 'before:request') {
-        onNetStubbingEvent({
-          eventName: 'send:static:response',
-          // @ts-ignore
-          frame: {
-            requestId: data.requestId,
-            staticResponse: {
-              ...data.data,
-              body: 'replaced',
-            },
+        cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: data.requestId,
+          staticResponse: {
+            ...data.data,
+            body: 'replaced',
           },
-          state: netStubbingState,
-          getFixture,
-          cyIntercept: driverAdapter.cyIntercept,
-          pendingHandlerResolution: interceptionEvents,
-        })
+        }, getFixture)
       }
     })
 
@@ -302,7 +295,7 @@ describe('network stubbing', () => {
     .post(`/http://localhost:${destinationPort}`)
     .attach('file', png)
 
-    netStubbingState.routes.push({
+    cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
         url: '*',
@@ -315,20 +308,12 @@ describe('network stubbing', () => {
     socket.toDriver.mockImplementation((_, event, data) => {
       if (event === 'before:request') {
         sendContentLength = data.data.headers['content-length']
-        onNetStubbingEvent({
-          eventName: 'send:static:response',
-          // @ts-ignore
-          frame: {
-            requestId: data.requestId,
-            staticResponse: {
-              ...data.data,
-            },
+        cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: data.requestId,
+          staticResponse: {
+            ...data.data,
           },
-          state: netStubbingState,
-          getFixture,
-          cyIntercept: driverAdapter.cyIntercept,
-          pendingHandlerResolution: interceptionEvents,
-        })
+        }, getFixture)
       }
     })
 
@@ -344,9 +329,10 @@ describe('network stubbing', () => {
   it('does not intercept requests to the dev server', async () => {
     destinationApp.get('/__cypress/src/main.js', (req, res) => res.send('it worked'))
 
-    // setup an intercept that matches all requests
-    // and has a static response
-    netStubbingState.routes.push({
+    config.devServerPublicPathRoute = '/__cypress/src'
+    setupInterceptStack()
+
+    cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
         url: '*',
@@ -359,9 +345,6 @@ describe('network stubbing', () => {
       matches: 1,
     })
 
-    config.devServerPublicPathRoute = '/__cypress/src'
-
-    // request to the dev server does NOT get intercepted
     const resp = await supertest(app)
     .get(`/http://localhost:${destinationPort}/__cypress/src/main.js`)
 
@@ -376,6 +359,29 @@ describe('network stubbing', () => {
     expect(resp2.text).toEqual('foo')
   })
 
+  it('still applies blockHosts to dev server URLs', async () => {
+    destinationApp.get('/__cypress/src/main.js', (req, res) => res.send('it worked'))
+
+    config.blockHosts = [`localhost:${destinationPort}`]
+    config.devServerPublicPathRoute = '/__cypress/src'
+    setupInterceptStack()
+
+    cyIntercept.routes.push({
+      id: '1',
+      routeMatcher: { url: '*' },
+      hasInterceptor: false,
+      staticResponse: { body: 'stubbed' },
+      getFixture,
+      matches: 1,
+    })
+
+    const resp = await supertest(app)
+    .get(`/http://localhost:${destinationPort}/__cypress/src/main.js`)
+
+    expect(resp.status).toEqual(503)
+    expect(resp.headers['x-cypress-matched-blocked-host']).toBe(`localhost:${destinationPort}`)
+  })
+
   describe('CSP Headers', () => {
     // Loop through valid CSP header names can verify that we handle them
     [
@@ -386,7 +392,7 @@ describe('network stubbing', () => {
     ].forEach((headerName) => {
       describe(`${headerName}`, () => {
         it('does not add CSP header if injecting JS and original response had no CSP header', async () => {
-          netStubbingState.routes.push({
+          cyIntercept.routes.push({
             id: '1',
             routeMatcher: {
               url: '*',

@@ -8,7 +8,6 @@ import { connect } from '@packages/network'
 import { setupFullConfigWithDefaults } from '@packages/config'
 import { ServerBase } from '../../lib/server-base'
 import { SocketE2E } from '../../lib/socket-e2e'
-import { createDriverAdapter } from '@packages/net-stubbing'
 import * as fileServer from '../../lib/file_server'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { getCtx } from '@packages/data-context'
@@ -172,11 +171,10 @@ describe('lib/server-base', () => {
       .then(() => {
         expect(this.server.createNetworkProxy).not.to.have.been.called
         expect(this.server._networkProxy).to.be.undefined
-        expect(this.server._netStubbingState).to.exist
+        expect(this.server._cyIntercept).to.exist
         expect(this.server.networkInterception).to.exist
-        expect(this.server._driverAdapter).to.exist
-        expect(this.server.networkInterception).to.equal(this.server._driverAdapter.httpIntercept)
-        expect(this.server._driverAdapter.interceptionEvents).to.exist
+        expect(this.server._httpIntercept).to.exist
+        expect(this.server.networkInterception).to.equal(this.server._httpIntercept)
       })
       .finally(() => {
         delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
@@ -428,9 +426,8 @@ describe('lib/server-base', () => {
 
         const wsOptions = this.startListening.lastCall.args[3]
 
-        expect(wsOptions.interceptRegistration).to.have.property('handleEvent').that.is.a('function')
-        expect(this.server._driverAdapter.cyIntercept).to.exist
-        expect(this.server._driverAdapter.interceptionEvents).to.exist
+        expect(wsOptions.cyIntercept).to.exist
+        expect(this.server._cyIntercept).to.exist
       })
       .finally(() => {
         delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY

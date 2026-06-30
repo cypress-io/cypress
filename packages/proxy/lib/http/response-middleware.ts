@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { isIP } from 'net'
 import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
@@ -7,7 +8,7 @@ import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
-import type { CypressOutgoingResponse } from '../types'
+import type { CypressOutgoingResponse, CypressIncomingRequest } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
@@ -15,6 +16,27 @@ import { applyCspAllowListToHeaders, cspHeaderNames } from '@packages/network-in
 import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
+
+async function finishInterceptResponseWritten (
+  req: CypressIncomingRequest,
+  end: () => void,
+): Promise<void> {
+  const onWritten = req.onInterceptResponseWritten
+
+  if (!onWritten) {
+    end()
+
+    return
+  }
+
+  req.onInterceptResponseWritten = undefined
+
+  try {
+    await onWritten()
+  } finally {
+    end()
+  }
+}
 
 interface ResponseMiddlewareProps {
   /**
@@ -106,8 +128,16 @@ function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEnco
   return order
 }
 
+// Whether `domain` is an IPv6 literal, with or without the surrounding brackets.
+function isIPv6Host (domain: string): boolean {
+  return !!domain && isIP(domain.replace(/^\[|\]$/g, '')) === 6
+}
+
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
-  let opts: CookieOptions = { domain }
+  // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
+  // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
+  // Domain and let the cookie default to host-only. See #34143.
+  let opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
 
   if (!v) {
     v = ''
@@ -363,7 +393,7 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
         return false
       }
     }),
-  )
+  ) as Record<string, string | string[]>
 
   this.res.set(filteredHeaders)
 
@@ -465,7 +495,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
-const MaybeSendRedirectToClient: ResponseMiddleware = function () {
+const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan, isVerbose })
 
   const { statusCode, headers } = this.incomingRes
@@ -491,12 +521,13 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
-  this.res.redirect(Number(statusCode), newUrl)
 
   span?.end()
 
-  // TODO; how do we instrument end?
-  return this.end()
+  await finishInterceptResponseWritten(this.req, () => {
+    this.res.redirect(Number(statusCode), newUrl)
+    this.end()
+  })
 }
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {
@@ -516,15 +547,18 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
+const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     this.networkServices.networkCapture.notifyResponseEndedWithEmptyBody(this, {
       isCached: this.incomingRes.statusCode === 304,
     })
 
-    this.res.end()
+    await finishInterceptResponseWritten(this.req, () => {
+      this.res.end()
+      this.end()
+    })
 
-    return this.end()
+    return
   }
 
   // When the origin response declared `Content-Length: 0`, short-circuit with an
@@ -544,10 +578,14 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsSecurityRemoved
   ) {
     this.networkServices.networkCapture.notifyResponseEndedWithEmptyBody(this, { isCached: false })
-    this.res.setHeader('Content-Length', '0')
-    this.res.end()
 
-    return this.end()
+    await finishInterceptResponseWritten(this.req, () => {
+      this.res.setHeader('Content-Length', '0')
+      this.res.end()
+      this.end()
+    })
+
+    return
   }
 
   this.next()
@@ -639,6 +677,17 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.incomingResStream.pipe(this.res).on('error', this.onError)
 
   this.res.once('finish', () => {
+    const onWritten = this.req.onInterceptResponseWritten
+
+    if (onWritten) {
+      void onWritten().finally(() => {
+        this.req.onInterceptResponseWritten = undefined
+        this.end()
+      })
+
+      return
+    }
+
     this.end()
   })
 }
