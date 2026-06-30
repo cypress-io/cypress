@@ -1173,6 +1173,62 @@ describe('CyIntercept', () => {
       expect(response.body).toBe(validJsonFixture)
     })
 
+    it('response:callback res.send({ fixture }) without mocking emitAndAwait', async () => {
+      getFixture.mockResolvedValue(validJsonFixture)
+      const cyIntercept = new CyIntercept({ socket })
+
+      const { httpIntercept } = createStack({
+        routes: [createInterceptRoute('route-1')],
+        cyIntercept,
+      })
+
+      socket.toDriver.mockImplementation((_channel, eventName, frame: any) => {
+        if (eventName === 'before:request') {
+          void cyIntercept.handleDriverEvent('subscribe', {
+            requestId: frame.requestId,
+            subscription: {
+              routeId: 'route-1',
+              eventName: 'response:callback',
+              await: true,
+              id: 'sub-callback',
+            },
+          }, getFixture).then(() => {
+            return cyIntercept.handleDriverEvent('event:handler:resolved', {
+              eventId: frame.eventId,
+              stopPropagation: true,
+            })
+          })
+        }
+
+        if (eventName === 'response:callback') {
+          void cyIntercept.handleDriverEvent('send:static:response', {
+            requestId: frame.requestId,
+            staticResponse: {
+              statusCode: 200,
+              headers: { 'content-type': 'application/json' },
+              fixture: 'valid.json',
+            },
+          }, getFixture)
+        }
+      })
+
+      const response = await httpIntercept.handle({
+        inFlightInterceptId: 'intercept-1',
+        url: 'http://example.com/foo-39',
+        method: 'GET',
+        headers: {},
+      }, vi.fn(async () => {
+        return {
+          statusCode: 404,
+          headers: { 'content-type': 'text/html' },
+          body: '<html>Cannot GET /foo-39</html>',
+        }
+      }))
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe(validJsonFixture)
+    })
+
     it('req.reply(fn) can delete a response header via response:callback', async () => {
       const cyIntercept = new CyIntercept({ socket })
 

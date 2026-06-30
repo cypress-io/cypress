@@ -264,6 +264,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         delay: modifiedResponse.delay,
         throttleKbps: modifiedResponse.throttleKbps,
         stream: modifiedResponse.stream,
+        deletedHeaders: modifiedResponse.deletedHeaders,
       }
 
       applyDefaultStubHeaders(request.headers, finalResponse.headers)

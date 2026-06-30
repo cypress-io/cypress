@@ -75,10 +75,8 @@ describe('buildHttpResponseFromStatic', () => {
     expect(response.body).toBe('<html><body>reply</body></html>')
   })
 
-  it('skips fixture reload when body was pre-resolved at route registration', async () => {
-    const getFixture = vi.fn(async () => {
-      throw new Error('should not reload fixture')
-    })
+  it('reloads fixture when body was pre-resolved at route registration', async () => {
+    const getFixture = vi.fn(async () => '<html><body>from-fixture</body></html>')
 
     const response = await buildHttpResponseFromStatic({
       fixture: { filePath: 'foo.html', encoding: 'utf8' },
@@ -86,7 +84,7 @@ describe('buildHttpResponseFromStatic', () => {
       headers: { 'content-type': 'text/html' },
     }, getFixture)
 
-    expect(getFixture).not.toHaveBeenCalled()
-    expect(response.body).toBe('<html><body>preloaded</body></html>')
+    expect(getFixture).toHaveBeenCalledOnce()
+    expect(response.body).toBe('<html><body>from-fixture</body></html>')
   })
 })

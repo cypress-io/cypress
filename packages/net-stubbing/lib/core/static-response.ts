@@ -11,7 +11,7 @@ export async function buildHttpResponseFromStatic (
 ): Promise<HttpResponse> {
   const response = _.cloneDeep(staticResponse)
 
-  if (response.fixture && _.isUndefined(response.body)) {
+  if (response.fixture) {
     await resolveStaticResponseFixture(response, getFixture)
   }
 

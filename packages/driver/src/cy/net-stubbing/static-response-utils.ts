@@ -108,7 +108,8 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
   }
 
-  if (!_.isUndefined(staticResponse.body)) {
+  // Fixture replaces body; merged origin body from res.send() must not be sent with fixture.
+  if (!staticResponse.fixture && !_.isUndefined(staticResponse.body)) {
     if (_.isString(staticResponse.body) || _.isArrayBuffer(staticResponse.body)) {
       backendStaticResponse.body = staticResponse.body
     } else {

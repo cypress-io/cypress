@@ -40,10 +40,14 @@ export const HttpResponseCodec = {
     const headers = { ...response.headers }
 
     if (!caseInsensitiveGet(headers, 'content-type') && typeof response.body === 'string') {
-      const contentType = parseContentType(response.body)
+      const deletedContentType = response.deletedHeaders?.includes('content-type')
 
-      if (contentType) {
-        headers['content-type'] = contentType
+      if (!deletedContentType) {
+        const contentType = parseContentType(response.body)
+
+        if (contentType) {
+          headers['content-type'] = contentType
+        }
       }
     }
 

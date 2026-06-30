@@ -47,6 +47,17 @@ describe('driver-http-conversion', () => {
     expect(wire.body).toBe('')
   })
 
+  it('omits empty statusMessage from driver wire responses', () => {
+    const wire = toDriverInterceptEventData('response', {
+      url: 'http://localhost/some-url',
+      statusCode: 200,
+      headers: {},
+      body: 'stubbed response',
+    })
+
+    expect(wire).not.toHaveProperty('statusMessage')
+  })
+
   it('serializes JSON after materializeResponseBody', async () => {
     const url = 'https://jsonplaceholder.typicode.com/users?_limit=3'
     const originStream = new PassThrough()

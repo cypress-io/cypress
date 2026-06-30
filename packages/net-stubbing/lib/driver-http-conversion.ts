@@ -29,7 +29,7 @@ export type DriverInterceptRequest<T = any> = DriverInterceptMessage<T> & {
 export type DriverInterceptResponse<T = any> = DriverInterceptMessage<T> & {
   url: string
   statusCode: number
-  statusMessage: string
+  statusMessage?: string
   throttleKbps?: number
   delay?: number
 }
@@ -80,15 +80,17 @@ function toDriverInterceptRequest (request: HttpRequest): DriverInterceptRequest
 }
 
 function toDriverInterceptResponse (response: HttpResponse, requestUrl: string): DriverInterceptResponse {
-  return {
+  return _.omitBy({
     url: requestUrl,
     statusCode: response.statusCode,
-    statusMessage: response.statusMessage ?? '',
+    statusMessage: response.statusMessage,
     headers: response.headers,
     body: response.body ?? '',
     delay: response.delay,
     throttleKbps: response.throttleKbps,
-  }
+  }, (value, key) => {
+    return _.isNil(value) || (key === 'statusMessage' && value === '')
+  }) as DriverInterceptResponse
 }
 
 function driverInterceptRequestToHttpRequest (driverRequest: DriverInterceptRequest): HttpRequest {

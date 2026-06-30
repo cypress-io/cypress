@@ -52,6 +52,11 @@ export type HttpResponse = {
   headers: Record<string, string | string[]>
   /** Set only when the intercept stack replaces the response body. */
   body?: string | Buffer
+  /**
+   * Lowercase header names removed by a response-stage handler. Used to avoid re-inferring
+   * Content-Type when a user intentionally deleted it.
+   */
+  deletedHeaders?: string[]
   delay?: number
   throttleKbps?: number
   /**

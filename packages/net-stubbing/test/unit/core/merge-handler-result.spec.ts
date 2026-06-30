@@ -105,24 +105,24 @@ describe('core/merge-handler-result', () => {
     expect(before.headers['x-test']).toBe('changed')
   })
 
-  it('does not merge response body when handler leaves body unset', () => {
+  it('records deleted response headers for downstream codec handling', () => {
     const before = {
       statusCode: 200,
-      headers: {},
-      body: undefined,
+      headers: { 'content-type': 'application/json' },
+      body: '{"ok":true}',
     } as any
 
     const after = {
       statusCode: 200,
-      headers: { 'x-test': 'changed' },
-      body: undefined,
+      headers: {},
+      body: '{"ok":true}',
     } as any
 
     mergeIncomingResponseChanges(before, after, {
       serializableProps: ['headers', 'body', 'statusCode'],
     })
 
-    expect(before.body).toBeUndefined()
-    expect(before.headers['x-test']).toBe('changed')
+    expect(before.headers['content-type']).toBeUndefined()
+    expect(before.deletedHeaders).toEqual(['content-type'])
   })
 })

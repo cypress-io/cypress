@@ -23,7 +23,9 @@ function formatInterception ({ route, interception }: ProxyRequest['interception
   const response = getInterceptionResponse(interception)
 
   if (response) {
-    ret['Response'] = _.omitBy(response, _.isNil)
+    ret['Response'] = _.omitBy(response, (value, key) => {
+      return _.isNil(value) || (key === 'statusMessage' && value === '')
+    })
   }
 
   const alias = interception.request.alias || route.alias
@@ -31,6 +33,21 @@ function formatInterception ({ route, interception }: ProxyRequest['interception
   if (alias) ret['Alias'] = alias
 
   return ret
+}
+
+function urlsMatchForProxyRequest (proxyUrl: string, interceptionUrl: string) {
+  if (proxyUrl === interceptionUrl) {
+    return true
+  }
+
+  try {
+    const proxyPath = new URL(proxyUrl).pathname
+    const interceptionPath = new URL(interceptionUrl, proxyUrl).pathname
+
+    return proxyPath === interceptionPath
+  } catch {
+    return false
+  }
 }
 
 function getDisplayUrl (url: string) {
@@ -222,6 +239,7 @@ class ProxyRequest {
 
 export default class ProxyLogging {
   proxyRequests: Array<ProxyRequest> = []
+  private pendingInterceptions: Array<{ interception: Interception, route: Route }> = []
 
   constructor (private Cypress: Cypress.Cypress) {
     Cypress.on('request:event', (eventName, data) => {
@@ -244,6 +262,7 @@ export default class ProxyLogging {
         }
       }
       this.proxyRequests = []
+      this.pendingInterceptions = []
     })
   }
 
@@ -251,13 +270,26 @@ export default class ProxyLogging {
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
   logInterception (interception: Interception, route: Route): ProxyRequest | undefined {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+    let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+
+    if (!proxyRequest) {
+      proxyRequest = _.findLast(this.proxyRequests, ({ preRequest, responseReceived }) => {
+        return !responseReceived
+          && urlsMatchForProxyRequest(preRequest.url, interception.request.url)
+          && preRequest.method === interception.request.method
+      })
+    }
 
     if (!proxyRequest) {
       debugVerbose('no proxy request found for interception with browserRequestId %s for url %s; %d proxy request(s) in list', interception.browserRequestId, interception.request.url, this.proxyRequests.length)
 
-      // request was never logged
+      this.pendingInterceptions.push({ interception, route })
+
       return undefined
+    }
+
+    if (!interception.browserRequestId) {
+      interception.browserRequestId = proxyRequest.preRequest.requestId
     }
 
     if (proxyRequest.interceptions.some(({ interception: existingInterception }) => existingInterception.id === interception.id)) {
@@ -277,10 +309,19 @@ export default class ProxyLogging {
   }
 
   refreshInterceptionLog (interception: Interception): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest, interceptions }) => {
+      return preRequest.requestId === interception.browserRequestId
+        || interceptions.some(({ interception: existingInterception }) => existingInterception.id === interception.id)
+    })
 
     if (!proxyRequest) {
       return
+    }
+
+    if (proxyRequest.responseReceived && interception.pendingResponse && !interception.response) {
+      interception.response = _.cloneDeep(interception.pendingResponse)
+      delete interception.pendingResponse
+      interception.state = 'ResponseIntercepted'
     }
 
     proxyRequest.updateConsoleProps()
@@ -306,6 +347,12 @@ export default class ProxyLogging {
 
     proxyRequest.responseReceived = responseReceived
 
+    for (const { interception } of proxyRequest.interceptions) {
+      if (getInterceptionResponse(interception)) {
+        this.refreshInterceptionLog(interception)
+      }
+    }
+
     proxyRequest.updateConsoleProps()
 
     // @ts-ignore
@@ -313,6 +360,7 @@ export default class ProxyLogging {
 
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
 
+    proxyRequest.log?.set({})
     proxyRequest.log?.end()
   }
 
@@ -346,6 +394,19 @@ export default class ProxyLogging {
     }
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
+
+    for (const pending of _.remove(this.pendingInterceptions, ({ interception }) => {
+      return urlsMatchForProxyRequest(preRequest.url, interception.request.url)
+        && preRequest.method === interception.request.method
+    })) {
+      pending.interception.browserRequestId = preRequest.requestId
+      proxyRequest.interceptions.push(pending)
+      proxyRequest.setFlag(!_.isNil(pending.route.handler) && !_.isFunction(pending.route.handler) ? 'stubbed' : 'spied')
+    }
+
+    if (proxyRequest.interceptions.length) {
+      proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
+    }
 
     return proxyRequest
   }

@@ -13,7 +13,7 @@ import { type ForHttpIntercept } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 import { createProxyNetworkServices } from '../../lib/adapters/create-proxy-network-services'
 import { Request as ServerRequest } from '@packages/server/lib/request'
-const getFixture = async () => {}
+const getFixture = vi.fn(async () => '')
 
 describe('network stubbing', () => {
   let config
@@ -264,6 +264,57 @@ describe('network stubbing', () => {
     expect(resp.headers).toEqual(expect.objectContaining({
       'access-control-allow-origin': '*',
     }))
+  })
+
+  it('stubs response stage via response:callback res.send', async () => {
+    const validJsonFixture = JSON.stringify({ foo: 1, bar: { baz: 'cypress' } })
+
+    getFixture.mockResolvedValue(validJsonFixture)
+
+    cyIntercept.routes.push({
+      id: '1',
+      routeMatcher: {
+        url: '*',
+      },
+      hasInterceptor: true,
+      getFixture,
+      matches: 1,
+    })
+
+    socket.toDriver.mockImplementation((_channel, eventName, frame: any) => {
+      if (eventName === 'before:request') {
+        void cyIntercept.handleDriverEvent('subscribe', {
+          requestId: frame.requestId,
+          subscription: {
+            routeId: '1',
+            eventName: 'response:callback',
+            await: true,
+            id: 'sub-callback',
+          },
+        }, getFixture).then(() => {
+          return cyIntercept.handleDriverEvent('event:handler:resolved', {
+            eventId: frame.eventId,
+            stopPropagation: true,
+          })
+        })
+      }
+
+      if (eventName === 'response:callback') {
+        void cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: frame.requestId,
+          staticResponse: {
+            statusCode: 200,
+            headers: { 'content-type': 'application/json' },
+            fixture: 'valid.json',
+          },
+        }, getFixture)
+      }
+    })
+
+    const resp = await supertest(app).get(`/http://localhost:${destinationPort}`)
+
+    expect(resp.status).toBe(200)
+    expect(resp.text).toBe(validJsonFixture)
   })
 
   it('does not modify multipart/form-data files', async () => {

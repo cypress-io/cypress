@@ -7,12 +7,15 @@ type HandlerMessage = {
   headers: Record<string, string | string[]>
 }
 
-function mergeDeletedHeaders (before: HandlerMessage, after: HandlerMessage) {
+function mergeDeletedHeaders (before: HandlerMessage & { deletedHeaders?: string[] }, after: HandlerMessage) {
   for (const k in before.headers) {
     // a header was deleted from `after` but was present in `before`, delete it in `before` too.
     // only treat `undefined` (deleted via `delete` or explicitly set to `undefined`) as removal -
     // an empty string is a valid header value and must be preserved (#25767)
-    after.headers[k] === undefined && delete before.headers[k]
+    if (after.headers[k] === undefined) {
+      delete before.headers[k]
+      before.deletedHeaders = [...(before.deletedHeaders ?? []), k.toLowerCase()]
+    }
   }
 }
 
