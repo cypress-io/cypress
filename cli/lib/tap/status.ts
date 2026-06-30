@@ -1,8 +1,9 @@
 import { CypressInstanceError, resolveLiveInstance } from '../cypress-instances'
 import type { ReadyInstanceState } from '../cypress-instances'
-import { withTapSession, TapTransportError, validateExecResult } from './tap-session'
-import { renderFailure, renderResult, renderStatusHelp } from './output'
+import { withTapSession, throwTapError, validateExecResult } from './tap-session'
+import { renderKnownFailure, renderResult, renderStatusHelp } from './output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import { errors } from '../errors'
 import type { TapCliOptions } from '../exec/tap'
 
 interface TapRunState {
@@ -50,7 +51,7 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
   let selection
 
   try {
-    selection = await resolveLiveInstance({ project: options.project, instance: options.instance, cwd: process.cwd() })
+    selection = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
   } catch (err) {
     // No live instance is itself a status a poller waits on, not a failure.
     if (err instanceof CypressInstanceError) {
@@ -64,15 +65,12 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
 
   const { instance } = selection
   const browserAttached = instance.cdpBrowserWsUrl !== null
-  // testingType joined the discovery record after this branch's base; read it
-  // defensively and omit it until the field propagates up the stack.
-  const testingType = (instance as { testingType?: 'e2e' | 'component' | null }).testingType
 
   const base: TapStatus = {
     status: 'browser not selected',
     pid: instance.pid,
     projectRoot: instance.projectRoot,
-    ...(testingType !== undefined ? { testingType } : {}),
+    testingType: instance.testingType,
     browserAttached,
   }
 
@@ -89,7 +87,7 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
       if ('error' in outcome) {
         // run-state has no domain failures, so an { error } envelope means the
         // running Cypress lacks the command — a binding mismatch, not a stage.
-        throw new TapTransportError('INVALID_EXEC_RESULT', `${outcome.error.code}: ${outcome.error.message}`)
+        return throwTapError(errors.tapInvalidExecResult, `${outcome.error.code}: ${outcome.error.message}`)
       }
 
       return outcome.result as TapRunState
@@ -101,8 +99,8 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
   } catch (err: any) {
     // A browser is attached but the instance is unreachable (still loading, tab
     // closed, CDP gone) — a transport fault, surfaced like other commands.
-    if (err instanceof TapTransportError) {
-      renderFailure(err)
+    if (err.known && err.details) {
+      renderKnownFailure(err)
 
       return 1
     }

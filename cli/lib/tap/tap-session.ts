@@ -3,7 +3,8 @@ import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
 import type { ReadyInstanceState } from '../cypress-instances'
-import { TAP_BINDING_GLOBAL } from '@packages/cypress-instances'
+import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import type { TapExecResult } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -34,6 +35,20 @@ export const throwTapError = (details: { description: string, solution: string }
 
 export interface TapSession {
   call (method: string, args?: unknown[]): Promise<unknown>
+}
+
+// Shape-check the `exec` envelope before trusting it. Shared with the status
+// command (cli/lib/tap/status.ts) so the validator lives one level below both
+// callers, avoiding an import cycle. Anything that is not the envelope is a
+// transport-level failure, not a domain result.
+export const validateExecResult = (value: unknown): TapExecResult => {
+  const outcome = value as TapExecResult | null | undefined
+
+  if (!outcome || typeof outcome !== 'object' || (!('result' in outcome) && !('error' in outcome))) {
+    return throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
+  }
+
+  return outcome
 }
 
 const isStaleHandleError = (err: unknown): boolean => {
