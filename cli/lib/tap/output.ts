@@ -60,8 +60,7 @@ const STATUS_USAGE = [
   'passed, failed.',
   '',
   'Options:',
-  '  -P, --project <project-path>  report the runner for this project',
-  '  --instance <pid>              report the runner with this pid',
+  '  --instance <pid>  report the runner with this pid',
 ].join('\n')
 
 export const renderStatusHelp = (): void => {
