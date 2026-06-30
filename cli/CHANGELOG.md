@@ -1,4 +1,18 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.1
+
+**Performance:**
+
+- Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
+
+**Bugfixes:**
+
+- Fixed an issue where asserting focus with Chai's property syntax, such as `expect($el).to.have.focus` or `expect($el).to.be.focused`, raised a TypeScript error (`Property 'focus' does not exist on type 'Assertion'`) even though the assertion works at runtime. Fixes [#23905](https://github.com/cypress-io/cypress/issues/23905). Fixed in [#34177](https://github.com/cypress-io/cypress/pull/34177).
+- Fixed an issue where [`cy.type()`](https://on.cypress.io/type) fired the simulated `keyup` event in the same turn as `keydown` and `input`, so `keyup` handlers that read state updated asynchronously in an `input` listener could observe stale values. `keyup` is now deferred to the next microtask, matching real browser event ordering. Fixes [#14864](https://github.com/cypress-io/cypress/issues/14864). Fixed in [#34068](https://github.com/cypress-io/cypress/pull/34068).
+- Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808). Fixed in [#34088](https://github.com/cypress-io/cypress/pull/34088).
+- Fixed an issue where the [`userAgent`](https://on.cypress.io/configuration#Browser) configuration option was not applied when running tests in the experimental WebKit browser. Fixes [#33349](https://github.com/cypress-io/cypress/issues/33349).
+- Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
+
 ## 15.18.0
 
 **Performance:**

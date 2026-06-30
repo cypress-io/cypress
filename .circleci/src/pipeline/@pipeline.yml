@@ -5,8 +5,8 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "149.0.7827.155"
-chrome-beta-version: &chrome-beta-version "150.0.7871.24"
+chrome-stable-version: &chrome-stable-version "149.0.7827.200"
+chrome-beta-version: &chrome-beta-version "150.0.7871.46"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.24"
 firefox-stable-version: &firefox-stable-version "151.0.1"
@@ -129,6 +129,14 @@ executors:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+
+  # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check)
+  node-slim:
+    docker:
+      - image: cimg/node:22.19.0
     resource_class: medium
     environment:
       PLATFORM: linux
@@ -1733,6 +1741,7 @@ jobs:
 
   check-ts:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1742,6 +1751,7 @@ jobs:
 
   health-check:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1985,9 +1995,6 @@ jobs:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
-      - install-browsers:
-          install-chrome: true
-          executor: << parameters.executor >>
       - when:
           condition:
             # several snapshots fails for windows due to paths.
@@ -2051,6 +2058,7 @@ jobs:
 
   lint-types:
     <<: *defaults
+    executor: node-slim
     parallelism: 1
     steps:
       - restore_cached_workspace

@@ -165,7 +165,7 @@
     "@types/tar": "^6.1.13",
     "@urql/core": "2.4.4",
     "babel-loader": "10.0.0",
-    "chai": "3.5.0",
+    "chai": "4.5.0",
     "chai-as-promised": "7.1.2",
     "chai-subset": "1.6.0",
     "chai-uuid": "1.0.6",

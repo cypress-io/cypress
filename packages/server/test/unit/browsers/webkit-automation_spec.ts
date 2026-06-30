@@ -9,8 +9,21 @@ function createMockBrowser () {
   let lastPage: any
 
   const makeContextAndPage = () => {
+    // by default, expose a single AUT child frame off of the main frame
+    const autFrame: any = {
+      name: () => `Your project: 'some-project'`,
+      url: () => 'http://localhost:3000/index.html',
+      title: sinon.stub().resolves('My App'),
+      childFrames: () => [],
+    }
+
+    const mainFrame: any = {
+      childFrames: () => [autFrame],
+    }
+
     const page: any = {
       context: () => context,
+      mainFrame: () => mainFrame,
       addInitScript: sinon.stub().resolves(),
       on: sinon.stub(),
       video: sinon.stub(),
@@ -29,6 +42,7 @@ function createMockBrowser () {
       addCookies: sinon.stub().resolves(),
       browser: () => browser,
       close: sinon.stub().resolves(),
+      pages: () => [page],
     }
 
     lastContext = context
@@ -70,15 +84,37 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
       initialUrl: 'http://localhost/__cypress',
       downloadsFolder: '/tmp/downloads',
       videoApi: opts.videoApi,
+      userAgent: opts.userAgent,
+      isHeadless: opts.isHeadless ?? true,
     })
   }
+
+  context('devicePixelRatio', () => {
+    // https://github.com/cypress-io/cypress/issues/23808
+    // Headless WebKit forces a standard devicePixelRatio so screenshots are
+    // consistent regardless of host DPI, mirroring headless Chrome. Headed
+    // WebKit keeps the host's native DPR (also matching Chrome).
+    it('forces deviceScaleFactor to 1 when headless', async () => {
+      await createAutomation({ isHeadless: true })
+
+      expect(mock.browser.newContext).to.be.called
+      expect(mock.browser.newContext.firstCall.args[0]).to.include({ deviceScaleFactor: 1 })
+    })
+
+    it('does not set deviceScaleFactor when headed', async () => {
+      await createAutomation({ isHeadless: false })
+
+      expect(mock.browser.newContext).to.be.called
+      expect(mock.browser.newContext.firstCall.args[0]).not.to.have.property('deviceScaleFactor')
+    })
+  })
 
   context('video recording', () => {
     it('registers a video controller that cannot be restarted', async () => {
@@ -110,6 +146,96 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.getLastPage().close, 'page should be closed to flush the video').to.be.called
       expect(pwVideo.saveAs).to.be.calledWith(videoApi.videoName)
+    })
+  })
+
+  context('userAgent', () => {
+    it('passes the configured userAgent to every context it creates', async () => {
+      const userAgent = 'Mozilla/5.0 (custom) Cypress'
+
+      const wk = await createAutomation({ userAgent })
+
+      expect(mock.browser.newContext).to.be.calledWithMatch({ userAgent })
+
+      // the userAgent should persist when the tab is recycled for the next spec (see #33349)
+      await wk.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
+
+      expect(mock.browser.newContext.lastCall).to.be.calledWithMatch({ userAgent })
+    })
+
+    it('does not set a userAgent when none is configured', async () => {
+      await createAutomation({})
+
+      expect(mock.browser.newContext).to.be.calledOnce
+      expect(mock.browser.newContext.firstCall.args[0]).to.not.have.property('userAgent')
+    })
+  })
+
+  context('focus:browser:window', () => {
+    it('brings the active page to the front', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('focus:browser:window', {})
+
+      expect(mock.getLastPage().bringToFront).to.be.calledOnce
+    })
+
+    it('resolves without error when there are no open pages', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastContext().pages = () => []
+
+      await wk.onRequest('focus:browser:window', {})
+    })
+  })
+
+  context('get:aut:url / get:aut:title', () => {
+    it('returns the AUT frame url for get:aut:url', async () => {
+      const wk = await createAutomation()
+
+      const url = await wk.onRequest('get:aut:url', {})
+
+      expect(url).to.eq('http://localhost:3000/index.html')
+    })
+
+    it('returns the AUT frame title for get:aut:title', async () => {
+      const wk = await createAutomation()
+
+      const title = await wk.onRequest('get:aut:title', {})
+
+      expect(title).to.eq('My App')
+    })
+
+    it('falls back to the first child frame when the AUT frame cannot be identified by name', async () => {
+      const wk = await createAutomation()
+
+      const firstChild: any = {
+        name: () => '',
+        url: () => 'http://localhost:3000/fallback.html',
+        title: sinon.stub().resolves('Fallback'),
+        childFrames: () => [],
+      }
+
+      mock.getLastPage().mainFrame = () => ({ childFrames: () => [firstChild] })
+
+      expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
+      expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+    })
+
+    it('throws when no AUT frame can be found', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastPage().mainFrame = () => ({ childFrames: () => [] })
+
+      let error: Error | undefined
+
+      try {
+        await wk.onRequest('get:aut:url', {})
+      } catch (err) {
+        error = err
+      }
+
+      expect(error?.message).to.include('Could not find AUT frame')
     })
   })
 
