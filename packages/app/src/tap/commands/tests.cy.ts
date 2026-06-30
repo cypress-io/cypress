@@ -4,10 +4,8 @@ import { tapRunnerSource } from './test-state'
 const CYPRESS_VERSION = '15.0.0'
 
 describe('tap/commands/tests', () => {
-  // The serialized tests getTestsState returns carry far more than the
-  // lean entry fields — the fixture includes the extras to prove the
-  // handler strips them (notably `retries`, the configured max, which the
-  // output field of the same name must NOT carry).
+  // The fixture includes extras to prove the handler strips them — notably
+  // input `retries` (configured max), distinct from output `retries` (currentRetry).
   const TESTS_STATE = {
     r2: {
       id: 'r2',
@@ -29,8 +27,8 @@ describe('tap/commands/tests', () => {
     },
   }
 
-  // The spec window's own `window.Cypress` is the instance running this
-  // test, so every test stubs the runner seam instead of replacing it.
+  // The spec's own window.Cypress is the instance running this test, so stub
+  // the runner seam rather than replace it.
   const stubRunner = (runner: unknown) => cy.stub(tapRunnerSource, 'getRunner').returns(runner)
 
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
@@ -94,9 +92,8 @@ describe('tap/commands/tests', () => {
   })
 
   describe('with a test id', () => {
-    // A failed test carries the detail fields the list omits: the full title
-    // path, per-phase timings, and the latest attempt's error (itself trimmed
-    // to its messaging fields from a serialized error with extras).
+    // Includes fields the list omits plus error extras (codeFrame) to prove
+    // the detail trims the error down to its messaging fields.
     const DETAIL_STATE = {
       r2: {
         id: 'r2',
@@ -113,7 +110,6 @@ describe('tap/commands/tests', () => {
           codeFrame: { line: 3 },
         },
       },
-      // A known test that has not run yet — no duration, timings, or error.
       r3: {
         id: 'r3',
         title: 'logs out',
@@ -163,8 +159,7 @@ describe('tap/commands/tests', () => {
 
       const outcome = await manager.exec('tests', { test: 'r2' })
 
-      // '__never__' (not the test id) is the sentinel — getTestsState excludes
-      // the matching id and everything after it, so passing 'r2' would drop it.
+      // Must query with the sentinel, not 'r2': getTestsState excludes the matching id.
       expect(getTestsState).to.have.been.calledOnceWith('__never__')
 
       expect(outcome).to.deep.eq({
