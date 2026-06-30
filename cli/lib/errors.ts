@@ -403,6 +403,38 @@ export const exitWithError = (info: any) => {
   }
 }
 
+const tapCdpUnreachable = {
+  description: 'Lost the debugging connection to the browser Cypress is running.',
+  solution: 'The browser may have just closed. Make sure Cypress is running with a browser open, then try again.',
+}
+
+const tapBindingNotFound = {
+  description: 'Could not connect to the Cypress runner.',
+  solution: stripIndent`
+    The runner may still be loading — try again in a moment.
+
+    Other things to check:
+
+    - The runner tab may have been closed. Open a browser in Cypress and try again.
+    - The running version of Cypress may not support ${chalk.cyan('cypress tap')}.
+  `,
+}
+
+const tapBindingThrew = {
+  description: 'The Cypress runner failed while running the tap command.',
+  solution: genericErrorSolution,
+}
+
+const tapStaleHandle = {
+  description: 'The Cypress runner navigated while running the command.',
+  solution: 'Try running the command again.',
+}
+
+const tapInvalidMethod = {
+  description: 'Invalid tap binding method.',
+  solution: genericErrorSolution,
+}
+
 export const errors = {
   unknownError,
   nonZeroExitCodeXvfb,
@@ -428,4 +460,9 @@ export const errors = {
   incompatibleTestTypeFlags,
   incompatibleTestingTypeAndFlag,
   invalidConfigFile,
+  tapCdpUnreachable,
+  tapBindingNotFound,
+  tapBindingThrew,
+  tapStaleHandle,
+  tapInvalidMethod,
 }

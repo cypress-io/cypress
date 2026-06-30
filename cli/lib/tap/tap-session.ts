@@ -1,17 +1,11 @@
 import Debug from 'debug'
 import CRI from 'chrome-remote-interface'
 
+import { errors } from '../errors'
 import type { ReadyRunnerState } from '../runner-instances'
 import { TAP_BINDING_GLOBAL } from './contract'
 
 const debug = Debug('cypress:cli:tap')
-
-type TapTransportErrorCode =
-  | 'CDP_UNREACHABLE'
-  | 'BINDING_NOT_FOUND'
-  | 'BINDING_THREW'
-  | 'STALE_HANDLE'
-  | 'INVALID_METHOD'
 
 export const TapSessionRegex = {
   methodName: /^[a-zA-Z][a-zA-Z0-9]*$/,
@@ -19,14 +13,12 @@ export const TapSessionRegex = {
   sessionGone: /Inspected target navigated or closed|Session with given id not found/i,
 } as const
 
-export class TapTransportError extends Error {
-  code: TapTransportErrorCode
+const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
+  const err: any = new Error(message, cause === undefined ? undefined : { cause })
 
-  constructor (code: TapTransportErrorCode, message: string, options?: { cause?: unknown }) {
-    super(message, options)
-    this.name = 'TapTransportError'
-    this.code = code
-  }
+  err.details = details
+  err.known = true
+  throw err
 }
 
 export interface TapSession {
@@ -57,11 +49,7 @@ const connectToBrowser = async (wsUrl: string): Promise<CRI.Client> => {
   try {
     return await CRI({ target: wsUrl })
   } catch (err: any) {
-    throw new TapTransportError(
-      'CDP_UNREACHABLE',
-      'Could not open a debugging connection to the browser. It may have just closed; check Cypress and try again.',
-      { cause: err },
-    )
+    return throwTapError(errors.tapCdpUnreachable, `Could not open a debugging connection to the browser: ${err.message}`, err)
   }
 }
 
@@ -69,7 +57,7 @@ const listTargets = async (client: CRI.Client) => {
   try {
     return await client.Target.getTargets()
   } catch (err: any) {
-    throw new TapTransportError('CDP_UNREACHABLE', `Connected to the browser, but listing its targets failed: ${err.message}`, { cause: err })
+    return throwTapError(errors.tapCdpUnreachable, `Listing the browser's targets failed: ${err.message}`, err)
   }
 }
 
@@ -79,11 +67,7 @@ const attachToPage = async (client: CRI.Client, targetId: string): Promise<strin
 
     return sessionId
   } catch (err: any) {
-    throw new TapTransportError(
-      'CDP_UNREACHABLE',
-      'Could not attach to the Cypress runner page. The browser may have just closed; check Cypress and try again.',
-      { cause: err },
-    )
+    return throwTapError(errors.tapCdpUnreachable, `Could not attach to the Cypress runner page: ${err.message}`, err)
   }
 }
 
@@ -103,39 +87,37 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
       continue
     }
 
+    let sessionId: string | undefined
+
     try {
-      const sessionId = await attachToPage(client, target.targetId)
+      sessionId = await attachToPage(client, target.targetId)
 
       if (await probeForBinding(client, sessionId)) {
         debug('matched runner page target %o', { targetId: target.targetId, url: target.url })
 
         return sessionId
       }
-
-      await client.Target.detachFromTarget({ sessionId }).catch(() => {})
     } catch (err: any) {
       debug('probing target %s failed: %s', target.targetId, err.message)
     }
+
+    if (sessionId) {
+      await client.Target.detachFromTarget({ sessionId }).catch(() => {})
+    }
   }
 
-  throw new TapTransportError(
-    'BINDING_NOT_FOUND',
-    'Failed to connect to Cypress. The runner may still be loading (try again), the runner tab may have been closed, or the running Cypress version may not support `cypress tap`.',
-  )
+  return throwTapError(errors.tapBindingNotFound, `Failed to connect to the runner page.`)
 }
 
 const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Promise<string> => {
   const { result, exceptionDetails } = await evaluateBinding(client, sessionId)
 
   if (exceptionDetails) {
-    throw new TapTransportError('CDP_UNREACHABLE', `Evaluating window.${TAP_BINDING_GLOBAL} failed: ${exceptionDetails.text}`)
+    return throwTapError(errors.tapCdpUnreachable, `Failed to connect to the runner page.`)
   }
 
   if (result.type === 'undefined' || !result.objectId) {
-    throw new TapTransportError(
-      'BINDING_NOT_FOUND',
-      'Failed to connect to Cypress. The running Cypress version may not support `cypress tap`, or the runner is still loading — try again.',
-    )
+    return throwTapError(errors.tapBindingNotFound, `Failed to connect to the runner page.`)
   }
 
   return result.objectId
@@ -152,31 +134,41 @@ const callBindingMethod = (client: CRI.Client, sessionId: string, objectId: stri
 }
 
 const throwCdpError = (method: string, err: any): never => {
-  throw new TapTransportError('CDP_UNREACHABLE', `The CDP call for ${method} failed: ${err.message}`, { cause: err })
+  return throwTapError(errors.tapCdpUnreachable, `The CDP call for ${method} failed: ${err.message}`, err)
 }
 
 const callBindingWithRetry = async (client: CRI.Client, sessionId: string, method: string, args: unknown[]) => {
-  const objectId = await resolveBindingObjectId(client, sessionId)
+  const attempt = async () => {
+    const objectId = await resolveBindingObjectId(client, sessionId)
+
+    try {
+      return await callBindingMethod(client, sessionId, objectId, method, args)
+    } catch (err: any) {
+      if (isStaleHandleError(err)) {
+        throw err
+      }
+
+      return throwCdpError(method, err)
+    }
+  }
 
   try {
-    return await callBindingMethod(client, sessionId, objectId, method, args)
+    return await attempt()
   } catch (err: any) {
     if (!isStaleHandleError(err)) {
-      return throwCdpError(method, err)
+      throw err
     }
 
     debug('stale binding handle; re-acquiring and retrying once')
 
-    const freshObjectId = await resolveBindingObjectId(client, sessionId)
-
     try {
-      return await callBindingMethod(client, sessionId, freshObjectId, method, args)
+      return await attempt()
     } catch (retryErr: any) {
       if (isStaleHandleError(retryErr)) {
-        throw new TapTransportError('STALE_HANDLE', 'The Cypress runner navigated while handling the command. Try again.', { cause: retryErr })
+        return throwTapError(errors.tapStaleHandle, retryErr.message, retryErr)
       }
 
-      return throwCdpError(method, retryErr)
+      throw retryErr
     }
   }
 }
@@ -200,7 +192,7 @@ export const withTapSession = async <T> (
 
     const call = async (method: string, args: unknown[] = []): Promise<unknown> => {
       if (!TapSessionRegex.methodName.test(method)) {
-        throw new TapTransportError('INVALID_METHOD', `"${method}" is not a valid tap binding method name.`)
+        return throwTapError(errors.tapInvalidMethod, `"${method}" is not a valid tap method name.`)
       }
 
       let response: Awaited<ReturnType<typeof callBindingWithRetry>>
@@ -219,10 +211,7 @@ export const withTapSession = async <T> (
       }
 
       if (response?.exceptionDetails) {
-        throw new TapTransportError(
-          'BINDING_THREW',
-          `window.${TAP_BINDING_GLOBAL}.${method} threw: ${response.exceptionDetails.exception?.description || response.exceptionDetails.text}`,
-        )
+        return throwTapError(errors.tapBindingThrew, `${method} threw: ${response.exceptionDetails.exception?.description || response.exceptionDetails.text}`)
       }
 
       return response.result.value
