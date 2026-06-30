@@ -148,7 +148,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
     validKeys.push('passesRequired')
 
     if (_.isNull(value.passesRequired) || value.passesRequired === undefined) {
-      return errMsg(`${key}.passesRequired`, value.stopIfAnyPassed, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
+      return errMsg(`${key}.passesRequired`, value.passesRequired, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
     }
 
     const isValidPassesRequired = Number.isInteger(value.passesRequired) && value.passesRequired >= 1 && value.passesRequired <= value.maxRetries
