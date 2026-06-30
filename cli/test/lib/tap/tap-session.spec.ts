@@ -241,6 +241,18 @@ describe('lib/tap/tap-session', () => {
     expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
   })
 
+  it('throws CDP_UNREACHABLE when the binding resolve rejects with a non-stale transport error', async () => {
+    const evaluate = vi.fn()
+    .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
+    .mockRejectedValue(new Error('WebSocket connection closed'))
+
+    const { client } = setup(makeClient({ evaluate }))
+
+    await expectError(callOnce(), errors.tapCdpUnreachable)
+    expect(client.Runtime.evaluate).toHaveBeenCalledTimes(2)
+    expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
+  })
+
   it('re-attaches to the runner page and retries when the session was severed by a cross-process navigation', async () => {
     const attachToTarget = vi.fn()
     .mockResolvedValueOnce({ sessionId: 'SID1' })

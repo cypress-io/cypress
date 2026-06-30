@@ -110,14 +110,26 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
 }
 
 const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Promise<string> => {
-  const { result, exceptionDetails } = await evaluateBinding(client, sessionId)
+  let evaluated: Protocol.Runtime.EvaluateResponse
+
+  try {
+    evaluated = await evaluateBinding(client, sessionId)
+  } catch (err: any) {
+    if (isStaleHandleError(err) || isSessionGoneError(err)) {
+      throw err
+    }
+
+    return throwTapError(errors.tapCdpUnreachable, `Evaluating the tap binding failed: ${err.message}`, err)
+  }
+
+  const { result, exceptionDetails } = evaluated
 
   if (exceptionDetails) {
-    return throwTapError(errors.tapCdpUnreachable, `Failed to connect to the runner page.`)
+    return throwTapError(errors.tapCdpUnreachable, `Failed to connect to the instance.`)
   }
 
   if (result.type === 'undefined' || !result.objectId) {
-    return throwTapError(errors.tapBindingNotFound, `Failed to connect to the runner page.`)
+    return throwTapError(errors.tapBindingNotFound, `Connected to an unsupported instance.`)
   }
 
   return result.objectId
