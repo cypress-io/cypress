@@ -52,6 +52,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   req.responseTimeout = Cypress.config('responseTimeout')
   const reqClone = _.cloneDeep(req)
+  const pendingSubscribes: Promise<void>[] = []
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -68,8 +69,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     debug('created request subscription %o', { eventName, request, subscription, handler })
 
-    // tslint:disable:no-floating-promises
-    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+    pendingSubscribes.push(emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe))
   }
 
   const getCanonicalInterception = (): Interception => {
@@ -364,7 +364,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   .finally(() => {
     resolved = true
   })
-  .then(() => {
+  .then(async () => {
     if (userReq.alias) {
       Cypress.state('aliasedRequests').push({
         alias: userReq.alias,
@@ -373,6 +373,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
       delete userReq.alias
     }
+
+    await Promise.all(pendingSubscribes)
 
     if (!handlerCompleted) {
       // handler function completed without resolving request, pass on

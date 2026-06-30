@@ -27,6 +27,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
   let responseSent = false
   let resolved = false
+  let pendingStaticSend: Promise<void> | undefined
 
   if (request && route) {
     Cypress.ProxyLogging?.logInterception?.(request, route)
@@ -95,11 +96,13 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
           }
         }
 
-        sendStaticResponse(requestId, _staticResponse)
-        finishResponseStage(_staticResponse)
-        sendContinueFrame(true)
+        pendingStaticSend = sendStaticResponse(requestId, _staticResponse)
+        .then(() => {
+          finishResponseStage(_staticResponse)
+          sendContinueFrame(true)
+        })
 
-        return
+        return pendingStaticSend
       }
 
       return sendContinueFrame(true)
@@ -162,7 +165,11 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       },
     })
   })
-  .then(() => {
+  .then(async () => {
+    if (pendingStaticSend) {
+      await pendingStaticSend
+    }
+
     if (!responseSent) {
       // user did not send, continue response
       sendContinueFrame(false)

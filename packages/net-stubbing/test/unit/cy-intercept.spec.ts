@@ -570,6 +570,69 @@ describe('CyIntercept', () => {
     expect(response.body).toBe('stubbed at response stage')
   })
 
+  it('response-stage res.send resolves via send:static:response without driver emitResolved', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+
+    getFixture.mockResolvedValue(JSON.stringify({ foo: 1 }))
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    socket.toDriver.mockImplementation((_channel, eventName, frame: any) => {
+      if (eventName === 'before:request') {
+        void cyIntercept.handleDriverEvent('subscribe', {
+          requestId: frame.requestId,
+          subscription: {
+            routeId: 'route-1',
+            eventName: 'before:response',
+            await: true,
+            id: 'sub-1',
+          },
+        }, getFixture).then(() => {
+          return cyIntercept.handleDriverEvent('event:handler:resolved', {
+            eventId: frame.eventId,
+            stopPropagation: false,
+          })
+        })
+      }
+
+      if (eventName === 'before:response') {
+        void cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: frame.requestId,
+          staticResponse: {
+            statusCode: 200,
+            headers: { 'content-type': 'application/json' },
+            fixture: 'valid.json',
+          },
+        }, getFixture)
+      }
+    })
+
+    const response = await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn(async () => {
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    }))
+
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toBe(JSON.stringify({ foo: 1 }))
+  })
+
   it('emitNetworkErrorByRequestId emits network:error for in-flight intercepts', async () => {
     const cyIntercept = new CyIntercept({ socket })
     const emit = vi.spyOn(cyIntercept, 'emit')
