@@ -43,6 +43,7 @@ export const defineCommand = <
   description: string
   params: P
   options?: O
+  hidden?: boolean
   handler: (params: ParamsToObject<P>, options: OptionsToObject<O>) => Promise<unknown>
 }) => {
   return definition
@@ -54,5 +55,6 @@ export interface TapCommandDefinition {
   description: string
   params: readonly TapCommandParamSchema[]
   options?: readonly TapCommandOptionSchema[]
+  hidden?: boolean
   handler: (...args: any[]) => Promise<unknown>
 }

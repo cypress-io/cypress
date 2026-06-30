@@ -87,14 +87,16 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     rejectExcessArguments('instances', [], instances.args)
   })
 
-  // Also intercepted by `../exec/tap` before this program parses; listed here
-  // only so it shows in the overview (hence the no-op action).
   program
   .command('status')
   .description('report where a running Cypress instance is in its lifecycle')
   .action(() => {})
 
-  for (const { name, description, params = [], options = [] } of schema.commands) {
+  for (const { name, description, params = [], options = [], hidden } of schema.commands) {
+    if (hidden) {
+      continue
+    }
+
     const command = program.command(name)
 
     if (params.length) {
