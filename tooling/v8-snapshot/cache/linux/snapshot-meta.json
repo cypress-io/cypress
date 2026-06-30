@@ -3775,6 +3775,7 @@
     "./packages/server/lib/util/graceful_crash_handling.ts",
     "./packages/server/lib/util/headers.ts",
     "./packages/server/lib/util/human_time.ts",
+    "./packages/server/lib/util/is-proxy-disabled.ts",
     "./packages/server/lib/util/net_profiler.ts",
     "./packages/server/lib/util/network_failures.ts",
     "./packages/server/lib/util/newlines.ts",
@@ -3954,5 +3955,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "01bcde8f738c2dc3bca65ad59aaaa05075ea77d84fb02606ba6079d823d63cc4"
+  "deferredHash": "ef44219ea4d4b568569f8e7460c30734a88c488ef44ba62bc617c8f261f6c6b7"
 }
