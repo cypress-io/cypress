@@ -29,6 +29,11 @@ export const processCallback = ({ file, fn, projectRoot }: CrossOriginCallbackAr
       path: outputDir,
     },
     plugins: [
+      // Preserve the default plugins (notably `webpack.ProvidePlugin`, which
+      // shims the `process` and `Buffer` globals). Without them, dependencies
+      // that reference a bare `process` throw "process is not defined" once the
+      // bundled callback runs in the browser.
+      ...(webpackOptions.plugins || []),
       new VirtualModulesPlugin({
         [inputPath]: source,
       }),
