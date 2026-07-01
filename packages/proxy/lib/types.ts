@@ -17,6 +17,10 @@ export type CypressIncomingRequest = Request & {
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
+  hadIntercept?: boolean
+  originalAcceptEncoding?: string
+  requestBodyMaterialized?: boolean
+  onInterceptResponseWritten?: () => Promise<void>
   isAUTFrame: boolean
   credentialsLevel?: RequestCredentialLevel
   isFromExtraTarget: boolean

@@ -6,6 +6,12 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import {
+  createFetchOrigin,
+} from '../adapters/proxy-http-interception'
+import type { RequestInterceptionMiddlewareCtx } from '../adapters/types'
+import type { ProxyResponsePair } from '../adapters/http-response-codec'
+import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -54,7 +60,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
     this.onlyRunMiddleware([
       'MaybeSetBasicAuthHeaders',
-      'SendRequestOutgoing',
+      'ApplyHttpInterception',
     ])
   }
 
@@ -222,6 +228,11 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   const acceptEncoding = this.req.headers['accept-encoding']
+
+  if (acceptEncoding && !this.req.originalAcceptEncoding) {
+    this.req.originalAcceptEncoding = acceptEncoding
+  }
+
   const supported = getSupportedAcceptEncoding(acceptEncoding)
 
   span?.setAttributes({
@@ -268,6 +279,41 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   this.next()
 }
 
+async function commitHttpResponseToProxy (
+  mw: RequestInterceptionMiddlewareCtx,
+  proxyResponse: ProxyResponsePair,
+): Promise<void> {
+  mw.req.onInterceptResponseWritten = proxyResponse.onResponseWrittenToClient
+
+  if (mw.req.hadIntercept) {
+    setDefaultHeaders(mw.req, proxyResponse.incomingRes)
+  }
+
+  return mw.onResponse(proxyResponse.incomingRes, proxyResponse.bodyStream)
+}
+
+const ApplyHttpInterception: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
+  if (!this.networkInterception) {
+    span?.end()
+
+    return this.onError(new Error('Network interception is not configured for the proxy runtime.'))
+  }
+
+  try {
+    const proxyResponse = await this.networkInterception.handle(this, createFetchOrigin(this))
+
+    span?.end()
+
+    return commitHttpResponseToProxy(this, proxyResponse)
+  } catch (err) {
+    span?.end()
+
+    return this.onError(err as Error)
+  }
+}
+
 const SendRequestOutgoing: RequestMiddleware = function () {
   this.networkInterceptionCore.forwardToOrigin(this)
 }
@@ -288,5 +334,6 @@ export default {
   EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,
+  ApplyHttpInterception,
   SendRequestOutgoing,
 }
