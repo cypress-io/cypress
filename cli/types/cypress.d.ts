@@ -3184,7 +3184,7 @@ declare namespace Cypress {
      * Enable compression by passing true to use the default CRF of 32.
      * Compress at custom CRF by passing a number between 1 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * Disable compression by passing false or 0.
-     * @default 32
+     * @default false
      */
     videoCompression: number | boolean
     /**
