@@ -19,12 +19,12 @@ export const testsCommand = defineCommand({
       return serializeTestsState(runner)
     }
 
-    const found = runner.getAllTestsState()[test]
+    const detail = serializeTestDetail(runner, test)
 
-    if (!found) {
+    if (detail === undefined) {
       throw new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${test}" — use the tests command to list this run’s tests`)
     }
 
-    return serializeTestDetail(found, runner.isRunComplete())
+    return detail
   },
 })
