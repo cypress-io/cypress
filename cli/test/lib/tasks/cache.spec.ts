@@ -408,7 +408,6 @@ describe('lib/tasks/cache', () => {
       })
 
       // the second binary has never been accessed
-      // @ts-ignore
       vi.mocked(fs.stat).mockResolvedValueOnce(undefined)
 
       await cache.list()
@@ -424,7 +423,6 @@ describe('lib/tasks/cache', () => {
       })
 
       // the second binary has never been accessed
-      // @ts-ignore
       vi.mocked(fs.stat).mockResolvedValueOnce(undefined)
 
       await cache.list(true)
