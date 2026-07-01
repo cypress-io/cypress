@@ -8,24 +8,24 @@ export const INSTANCES_DIRNAME = 'instances'
 
 const RECORD_EXTENSION = '.json'
 
-export const RUNNER_INSTANCES_ROUTE_PREFIX = '/__cypress/runner-instances/'
+export const INSTANCES_ROUTE_PREFIX = '/__cypress/instances/'
 
-export type RunnerTestingType = 'e2e' | 'component' | null
+export type InstanceTestingType = 'e2e' | 'component' | null
 
-export interface RunnerInstance {
+export interface CypressInstance {
   schemaVersion: number
   pid: number
   projectRoot: string
   serverPort: number
   instanceId: string
-  testingType: RunnerTestingType
+  testingType: InstanceTestingType
 }
 
-export interface LiveRunnerState extends RunnerInstance {
+export interface LiveInstanceState extends CypressInstance {
   cdpBrowserWsUrl: string | null
 }
 
-export interface ReadyRunnerState extends LiveRunnerState {
+export interface ReadyInstanceState extends LiveInstanceState {
   cdpBrowserWsUrl: string
 }
 
@@ -43,23 +43,23 @@ export const parseRecordPid = (entry: string): number | null => {
   return Number.isInteger(pid) ? pid : null
 }
 
-export const runnerInstancesDir = (cacheRoot: string): string => {
+export const cypressInstancesDir = (cacheRoot: string): string => {
   return path.join(cacheRoot, INSTANCES_DIRNAME)
 }
 
 export const recordPath = (cacheRoot: string, pid: number): string => {
-  return path.join(runnerInstancesDir(cacheRoot), recordFileName(pid))
+  return path.join(cypressInstancesDir(cacheRoot), recordFileName(pid))
 }
 
-export const runnerInstancesProbePath = (instanceId: string): string => {
-  return `${RUNNER_INSTANCES_ROUTE_PREFIX}${instanceId}`
+export const instancesProbePath = (instanceId: string): string => {
+  return `${INSTANCES_ROUTE_PREFIX}${instanceId}`
 }
 
-const isValidTestingType = (value: any): value is RunnerTestingType => {
+const isValidTestingType = (value: any): value is InstanceTestingType => {
   return value === 'e2e' || value === 'component' || value === null
 }
 
-export const isCompatibleRecord = (record: any): record is RunnerInstance => {
+export const isCompatibleRecord = (record: any): record is CypressInstance => {
   return Boolean(record)
     && typeof record.schemaVersion === 'number'
     && record.schemaVersion >= MIN_SCHEMA_VERSION

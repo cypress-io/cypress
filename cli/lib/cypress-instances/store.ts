@@ -3,14 +3,14 @@ import path from 'path'
 import Debug from 'debug'
 
 import state from '../tasks/state'
-import { isCompatibleRecord, parseRecordPid, runnerInstancesDir } from './record'
-import type { RunnerInstance } from './record'
-import { isPidAlive, verifyRunnerRecord } from './liveness'
+import { isCompatibleRecord, parseRecordPid, cypressInstancesDir } from './record'
+import type { CypressInstance } from './record'
+import { isPidAlive, verifyInstanceRecord } from './liveness'
 
-const debug = Debug('cypress:cli:runner-instances')
+const debug = Debug('cypress:cli:cypress-instances')
 
-export const getRunnerInstancesDir = (): string => {
-  return runnerInstancesDir(state.getCacheDir())
+export const getInstancesDir = (): string => {
+  return cypressInstancesDir(state.getCacheDir())
 }
 
 interface RecordFile {
@@ -44,19 +44,19 @@ const listRecordFiles = async (dir: string): Promise<RecordFile[]> => {
   return files
 }
 
-const readCompatibleRecord = async (filePath: string): Promise<RunnerInstance | null> => {
+const readCompatibleRecord = async (filePath: string): Promise<CypressInstance | null> => {
   let record: unknown
 
   try {
     record = await fs.readJson(filePath)
   } catch (err) {
-    debug('could not read runner instances record %s: %o', filePath, err)
+    debug('could not read cypress instances record %s: %o', filePath, err)
 
     return null
   }
 
   if (!isCompatibleRecord(record)) {
-    debug('incompatible runner instances record %s', filePath)
+    debug('incompatible cypress instances record %s', filePath)
 
     return null
   }
@@ -64,15 +64,15 @@ const readCompatibleRecord = async (filePath: string): Promise<RunnerInstance | 
   return record
 }
 
-export const readRunnerRecords = async (): Promise<RunnerInstance[]> => {
-  const files = await listRecordFiles(getRunnerInstancesDir())
+export const readInstanceRecords = async (): Promise<CypressInstance[]> => {
+  const files = await listRecordFiles(getInstancesDir())
   const records = await Promise.all(files.map((file) => readCompatibleRecord(file.path)))
 
-  return records.filter((record): record is RunnerInstance => record !== null)
+  return records.filter((record): record is CypressInstance => record !== null)
 }
 
-export const pruneDeadDiscoveryRecords = async (probeTimeoutMs?: number): Promise<number> => {
-  const files = await listRecordFiles(getRunnerInstancesDir())
+export const pruneDeadInstanceRecords = async (probeTimeoutMs?: number): Promise<number> => {
+  const files = await listRecordFiles(getInstancesDir())
 
   const pruned = await Promise.all(files.map(async (file): Promise<boolean> => {
     if (!isPidAlive(file.pid)) {
@@ -87,7 +87,7 @@ export const pruneDeadDiscoveryRecords = async (probeTimeoutMs?: number): Promis
       return false
     }
 
-    if (!(await verifyRunnerRecord(record, probeTimeoutMs))) {
+    if (!(await verifyInstanceRecord(record, probeTimeoutMs))) {
       await fs.remove(file.path)
 
       return true
@@ -98,7 +98,7 @@ export const pruneDeadDiscoveryRecords = async (probeTimeoutMs?: number): Promis
 
   const removed = pruned.filter(Boolean).length
 
-  debug('pruned %d dead runner instances record(s)', removed)
+  debug('pruned %d dead cypress instances record(s)', removed)
 
   return removed
 }

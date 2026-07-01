@@ -22,8 +22,8 @@ import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
-import { runnerInstances } from './runner-instances'
-import { RUNNER_INSTANCES_ROUTE_PREFIX } from '@packages/runner-instances'
+import { cypressInstances } from './cypress-instances'
+import { INSTANCES_ROUTE_PREFIX } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:server:routes')
 
@@ -237,12 +237,12 @@ export const createCommonRoutes = ({
     res.sendStatus(204)
   })
 
-  // Runner instances only applies to an interactive (`cypress open`) session that an
+  // Cypress instances only applies to an interactive (`cypress open`) session that an
   // external tool can attach to; the record is only written in open mode, so don't
   // expose the probe route for headless `cypress run`.
   if (!config.isTextTerminal) {
-    router.get(`${RUNNER_INSTANCES_ROUTE_PREFIX}:instanceId`, (req, res) => {
-      const state = runnerInstances.getCurrent()
+    router.get(`${INSTANCES_ROUTE_PREFIX}:instanceId`, (req, res) => {
+      const state = cypressInstances.getCurrent()
 
       if (!state || req.params.instanceId !== state.instanceId) {
         return res.sendStatus(404)

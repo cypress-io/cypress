@@ -3,32 +3,32 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { TestingType } from '@packages/types'
-import { SCHEMA_VERSION, runnerInstancesDir, recordPath } from '@packages/runner-instances'
-import type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances'
+import { SCHEMA_VERSION, cypressInstancesDir, recordPath } from '@packages/cypress-instances'
+import type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
-export type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances'
+export type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
 
-const debug = Debug('cypress:server:runner-instances')
+const debug = Debug('cypress:server:cypress-instances')
 
-export const getRunnerInstancesDir = (): string => {
-  return runnerInstancesDir(resolveCypressCacheRoot())
+export const getInstancesDir = (): string => {
+  return cypressInstancesDir(resolveCypressCacheRoot())
 }
 
 const getRecordPath = (pid: number): string => {
   return recordPath(resolveCypressCacheRoot(), pid)
 }
 
-let currentState: LiveRunnerState | null = null
+let currentState: LiveInstanceState | null = null
 
 let persistChain: Promise<void> = Promise.resolve()
-const persist = (record: RunnerInstance): Promise<void> => {
+const persist = (record: CypressInstance): Promise<void> => {
   const run = async () => {
     const finalPath = getRecordPath(record.pid)
     const tmpPath = `${finalPath}.tmp`
 
     // Write to a temp file then rename: rename is atomic, so a concurrent reader
-    // (e.g. the CLI discovering live runners) always sees either the old record or
+    // (e.g. the CLI discovering live instances) always sees either the old record or
     // the fully-written new one, never a partially-written/corrupt JSON file.
     await fs.ensureDir(path.dirname(finalPath))
     await fs.writeJson(tmpPath, record)
@@ -42,9 +42,9 @@ const persist = (record: RunnerInstance): Promise<void> => {
   return next
 }
 
-export const runnerInstances = {
+export const cypressInstances = {
   async addInstance ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
-    const record: RunnerInstance = {
+    const record: CypressInstance = {
       schemaVersion: SCHEMA_VERSION,
       pid: process.pid,
       projectRoot: path.resolve(projectRoot),
@@ -57,9 +57,9 @@ export const runnerInstances = {
 
     try {
       await persist(record)
-      debug('wrote runner instances record %o', record)
+      debug('wrote cypress instances record %o', record)
     } catch (err) {
-      debug('failed to write runner instances record: %o', err)
+      debug('failed to write cypress instances record: %o', err)
     }
   },
 
@@ -69,10 +69,10 @@ export const runnerInstances = {
     }
 
     currentState = { ...currentState, cdpBrowserWsUrl }
-    debug('runner instances cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
+    debug('cypress instances cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
   },
 
-  getCurrent (): LiveRunnerState | null {
+  getCurrent (): LiveInstanceState | null {
     return currentState
   },
 
@@ -89,15 +89,15 @@ export const runnerInstances = {
       await persistChain
 
       if (currentState) {
-        debug('skipping runner instances removal; a newer record is live')
+        debug('skipping cypress instances removal; a newer record is live')
 
         return
       }
 
       await fs.remove(getRecordPath(state.pid))
-      debug('removed runner instances record for pid %d', state.pid)
+      debug('removed cypress instances record for pid %d', state.pid)
     } catch (err) {
-      debug('failed to remove runner instances record: %o', err)
+      debug('failed to remove cypress instances record: %o', err)
     }
   },
 }

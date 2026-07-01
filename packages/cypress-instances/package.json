@@ -1,5 +1,5 @@
 {
-  "name": "@packages/runner-instances",
+  "name": "@packages/cypress-instances",
   "version": "0.0.0-development",
   "private": true,
   "main": "dist/index.js",

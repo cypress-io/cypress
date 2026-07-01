@@ -3,8 +3,8 @@ import {
   isCompatibleRecord,
   recordFileName,
   parseRecordPid,
-  runnerInstancesProbePath,
-  RUNNER_INSTANCES_ROUTE_PREFIX,
+  instancesProbePath,
+  INSTANCES_ROUTE_PREFIX,
   INSTANCES_DIRNAME,
   SCHEMA_VERSION,
 } from '../index'
@@ -18,7 +18,7 @@ const validRecord = {
   testingType: 'e2e',
 }
 
-describe('runner-instances contract', () => {
+describe('cypress-instances contract', () => {
   describe('isCompatibleRecord', () => {
     it('accepts a well-formed record', () => {
       expect(isCompatibleRecord(validRecord)).toBe(true)
@@ -53,8 +53,8 @@ describe('runner-instances contract', () => {
 
   describe('probe route', () => {
     it('builds the probe path from the shared prefix', () => {
-      expect(runnerInstancesProbePath('abc')).toBe(`${RUNNER_INSTANCES_ROUTE_PREFIX}abc`)
-      expect(runnerInstancesProbePath('abc')).toBe('/__cypress/runner-instances/abc')
+      expect(instancesProbePath('abc')).toBe(`${INSTANCES_ROUTE_PREFIX}abc`)
+      expect(instancesProbePath('abc')).toBe('/__cypress/instances/abc')
     })
   })
 

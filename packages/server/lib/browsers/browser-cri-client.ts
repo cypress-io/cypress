@@ -7,7 +7,7 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
-import { runnerInstances } from '../runner-instances'
+import { cypressInstances } from '../cypress-instances'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
@@ -233,18 +233,18 @@ export class BrowserCriClient {
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
 
-      const clearRunnerInstanceCdpUrl = () => runnerInstances.setCdpBrowserWsUrl(null)
+      const clearInstanceCdpUrl = () => cypressInstances.setCdpBrowserWsUrl(null)
 
       const browserClient = await CriClient.create({
         target: versionInfo.webSocketDebuggerUrl,
         onAsynchronousError: (err) => {
-          clearRunnerInstanceCdpUrl()
+          clearInstanceCdpUrl()
           onAsynchronousError(err)
         },
         onReconnect,
         protocolManager,
         fullyManageTabs,
-        onCriConnectionClosed: clearRunnerInstanceCdpUrl,
+        onCriConnectionClosed: clearInstanceCdpUrl,
       })
 
       const browserCriClient = new BrowserCriClient({
@@ -259,7 +259,7 @@ export class BrowserCriClient {
         onServiceWorkerClientEvent,
       })
 
-      runnerInstances.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl)
+      cypressInstances.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl)
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
@@ -726,7 +726,7 @@ export class BrowserCriClient {
 
     this.onClose && this.onClose(gracefulShutdown)
 
-    runnerInstances.setCdpBrowserWsUrl(null)
+    cypressInstances.setCdpBrowserWsUrl(null)
 
     if (this.connected === false) {
       debug('browser cri client is already closed')

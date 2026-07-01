@@ -1,10 +1,10 @@
 import http from 'http'
 import Debug from 'debug'
 
-import { runnerInstancesProbePath } from './record'
-import type { LiveRunnerState, RunnerInstance } from './record'
+import { instancesProbePath } from './record'
+import type { LiveInstanceState, CypressInstance } from './record'
 
-const debug = Debug('cypress:cli:runner-instances')
+const debug = Debug('cypress:cli:cypress-instances')
 
 const PROBE_HOST = '127.0.0.1'
 const DEFAULT_PROBE_TIMEOUT_MS = 2000
@@ -19,12 +19,12 @@ export const isPidAlive = (pid: number): boolean => {
   }
 }
 
-export const verifyRunnerRecord = (record: RunnerInstance, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveRunnerState | null> => {
+export const verifyInstanceRecord = (record: CypressInstance, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveInstanceState | null> => {
   return new Promise((resolve) => {
     const request = http.get({
       host: PROBE_HOST,
       port: record.serverPort,
-      path: runnerInstancesProbePath(record.instanceId),
+      path: instancesProbePath(record.instanceId),
       timeout: timeoutMs,
     }, (response) => {
       let body = ''

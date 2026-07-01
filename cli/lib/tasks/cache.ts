@@ -10,13 +10,13 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import chalk from 'chalk'
 import _ from 'lodash'
 import getFolderSize from './get-folder-size'
-import { INSTANCES_DIRNAME, pruneDeadDiscoveryRecords } from '../runner-instances'
+import { INSTANCES_DIRNAME, pruneDeadInstanceRecords } from '../cypress-instances'
 
 dayjs.extend(relativeTime)
 
 // Subdirs under the cache root that are not binary version dirs. INSTANCES_DIRNAME
-// is sourced from runner-instances so a rename there can't silently make prune
-// treat the discovery dir as a stale binary cache and delete live records.
+// is sourced from cypress-instances so a rename there can't silently make prune
+// treat the instances dir as a stale binary cache and delete live records.
 const EXTERNAL_CACHE_ENTRIES = new Set(['bundles', INSTANCES_DIRNAME])
 
 // output colors for the table
@@ -64,7 +64,7 @@ const prune = async (): Promise<void> => {
       logger.always(`No binary caches found to prune.`)
     }
 
-    await pruneDeadDiscoveryRecords()
+    await pruneDeadInstanceRecords()
   } catch (e: any) {
     if (e.code === 'ENOENT') {
       logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)

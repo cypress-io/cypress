@@ -3,15 +3,15 @@ import path from 'path'
 import os from 'os'
 import fs from 'fs-extra'
 import mockedEnv from 'mocked-env'
-import { runnerInstances, getRunnerInstancesDir, _resetForTesting } from '../../lib/runner-instances'
+import { cypressInstances, getInstancesDir, _resetForTesting } from '../../lib/cypress-instances'
 
-describe('lib/runner-instances', () => {
+describe('lib/cypress-instances', () => {
   let restoreEnv: () => void
   let cacheDir: string
   let recordPath: string
 
   beforeEach(() => {
-    cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-runner-instances-'))
+    cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-cypress-instances-'))
     recordPath = path.join(cacheDir, 'instances', `${process.pid}.json`)
 
     // resolveCypressCacheRoot also reads the npm_config_/npm_package_config_ variants,
@@ -32,19 +32,19 @@ describe('lib/runner-instances', () => {
     restoreEnv()
   })
 
-  describe('.getRunnerInstancesDir', () => {
+  describe('.getInstancesDir', () => {
     it('resolves to an instances/ dir under the cache root', () => {
-      expect(getRunnerInstancesDir()).to.eq(path.join(cacheDir, 'instances'))
+      expect(getInstancesDir()).to.eq(path.join(cacheDir, 'instances'))
     })
 
-    // ProjectBase.open() calls process.chdir(projectRoot) before the runner record is
+    // ProjectBase.open() calls process.chdir(projectRoot) before the instance record is
     // written. A relative CYPRESS_CACHE_FOLDER must stay anchored to the launch cwd
     // (which the CLI reader resolves against), not drift to the project root — otherwise
     // the server writes the record to a tree the CLI never reads from.
     it('keeps a relative CYPRESS_CACHE_FOLDER anchored to the launch cwd across a chdir', () => {
       process.env.CYPRESS_CACHE_FOLDER = './.cypress-cache-relative'
 
-      const beforeChdir = getRunnerInstancesDir()
+      const beforeChdir = getInstancesDir()
 
       // Simulate ProjectBase.open() doing process.chdir(projectRoot) by stubbing the
       // reported cwd rather than mutating the real process state. The resolution must
@@ -54,14 +54,14 @@ describe('lib/runner-instances', () => {
 
       sinon.stub(process, 'cwd').returns(projectRoot)
 
-      expect(getRunnerInstancesDir()).to.eq(beforeChdir)
-      expect(getRunnerInstancesDir()).to.not.contain(projectRoot)
+      expect(getInstancesDir()).to.eq(beforeChdir)
+      expect(getInstancesDir()).to.not.contain(projectRoot)
     })
   })
 
   describe('.addInstance', () => {
     it('writes a record named by pid with only immutable identity fields', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
+      await cypressInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
 
       const record = await fs.readJson(recordPath)
 
@@ -79,21 +79,21 @@ describe('lib/runner-instances', () => {
     })
 
     it('records the selected testing type', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455, testingType: 'component' })
+      await cypressInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455, testingType: 'component' })
 
       expect(await fs.readJson(recordPath)).to.have.property('testingType', 'component')
     })
 
     it('defaults the testing type to null when none is selected', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455 })
 
       expect(await fs.readJson(recordPath)).to.have.property('testingType', null)
     })
 
     it('leaves no temp files behind (atomic write)', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
-      const entries = await fs.readdir(getRunnerInstancesDir())
+      const entries = await fs.readdir(getInstancesDir())
 
       expect(entries).to.eql([`${process.pid}.json`])
     })
@@ -104,7 +104,7 @@ describe('lib/runner-instances', () => {
       await fs.writeFile(filePath, 'x')
       process.env.CYPRESS_CACHE_FOLDER = filePath
 
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
       expect(await fs.pathExists(path.join(filePath, 'instances'))).to.be.false
     })
@@ -112,13 +112,13 @@ describe('lib/runner-instances', () => {
 
   describe('.setCdpBrowserWsUrl', () => {
     it('updates the live state without touching the disk record', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
       const onDiskBefore = await fs.readJson(recordPath)
 
-      runnerInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
 
-      expect(runnerInstances.getCurrent()).to.deep.include({
+      expect(cypressInstances.getCurrent()).to.deep.include({
         serverPort: 4455,
         cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       })
@@ -127,35 +127,35 @@ describe('lib/runner-instances', () => {
     })
 
     it('clears the endpoint when the browser goes away', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
-      runnerInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
-      runnerInstances.setCdpBrowserWsUrl(null)
+      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressInstances.setCdpBrowserWsUrl(null)
 
-      expect(runnerInstances.getCurrent()!.cdpBrowserWsUrl).to.be.null
+      expect(cypressInstances.getCurrent()!.cdpBrowserWsUrl).to.be.null
     })
 
     it('is a no-op when no record has been written yet', () => {
-      runnerInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
 
-      expect(runnerInstances.getCurrent()).to.be.null
+      expect(cypressInstances.getCurrent()).to.be.null
     })
   })
 
   describe('.getCurrent', () => {
     it('is null before write and after remove', async () => {
-      expect(runnerInstances.getCurrent()).to.be.null
+      expect(cypressInstances.getCurrent()).to.be.null
 
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
-      await runnerInstances.remove()
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.remove()
 
-      expect(runnerInstances.getCurrent()).to.be.null
+      expect(cypressInstances.getCurrent()).to.be.null
     })
 
     it('is the disk record plus the memory-only browser CDP state', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
-      expect(runnerInstances.getCurrent()).to.deep.eq({
+      expect(cypressInstances.getCurrent()).to.deep.eq({
         ...await fs.readJson(recordPath),
         cdpBrowserWsUrl: null,
       })
@@ -164,24 +164,24 @@ describe('lib/runner-instances', () => {
 
   describe('.remove', () => {
     it('deletes the record file', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
-      await runnerInstances.remove()
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.remove()
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
 
     it('is idempotent and never throws', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
-      await runnerInstances.remove()
-      await runnerInstances.remove()
+      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressInstances.remove()
+      await cypressInstances.remove()
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
 
     it('waits out an in-flight persist so the file cannot be resurrected', async () => {
-      const writing = runnerInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      const writing = cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
-      await runnerInstances.remove()
+      await cypressInstances.remove()
       await writing
 
       expect(await fs.pathExists(recordPath)).to.be.false
@@ -191,12 +191,12 @@ describe('lib/runner-instances', () => {
     // write() takes over the live state while the previous close()'s remove() is still
     // in flight. The stale remove() must not delete the freshly written record.
     it('does not delete a record a newer write took over on switch', async () => {
-      await runnerInstances.addInstance({ projectRoot: '/a', serverPort: 4455 })
+      await cypressInstances.addInstance({ projectRoot: '/a', serverPort: 4455 })
 
       // begin removing the first record, then write the second before it completes
-      const removing = runnerInstances.remove()
+      const removing = cypressInstances.remove()
 
-      await runnerInstances.addInstance({ projectRoot: '/b', serverPort: 5566 })
+      await cypressInstances.addInstance({ projectRoot: '/b', serverPort: 5566 })
       await removing
 
       expect(await fs.pathExists(recordPath)).to.be.true
@@ -206,7 +206,7 @@ describe('lib/runner-instances', () => {
         serverPort: 5566,
       })
 
-      expect(runnerInstances.getCurrent()).to.include({ serverPort: 5566 })
+      expect(cypressInstances.getCurrent()).to.include({ serverPort: 5566 })
     })
   })
 })

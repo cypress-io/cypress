@@ -1,4 +1,4 @@
-This package is the **cross-process contract** for runner instances: the shared
+This package is the **cross-process contract** for Cypress instances: the shared
 schema, on-disk layout, and liveness-probe route that let an external process
 (the `cypress` CLI) find a running `cypress open` instance and attach to its
 browser over CDP.
@@ -10,28 +10,28 @@ CLI stay in agreement by construction instead of hand-mirrored copies.
 
 **Producer / Consumer**
 
-- **Producer** — `@packages/server` (`lib/runner-instances.ts`) writes `<pid>.json`
+- **Producer** — `@packages/server` (`lib/cypress-instances.ts`) writes `<pid>.json`
   records into the `instances/` dir and serves the probe route in open mode.
-- **Consumer** — the CLI (`cli/lib/runner-instances/*`) reads those records,
-  checks pid liveness, and probes the route to confirm the runner and read the
+- **Consumer** — the CLI (`cli/lib/cypress-instances/*`) reads those records,
+  checks pid liveness, and probes the route to confirm the instance and read the
   live CDP endpoint.
 
 **Key Commands**
 
 ```bash
 # Build TypeScript to dist/
-yarn workspace @packages/runner-instances build
+yarn workspace @packages/cypress-instances build
 
 # Run tests
-yarn workspace @packages/runner-instances test
+yarn workspace @packages/cypress-instances test
 ```
 
 **Architecture**
 
-- `lib/index.ts` — the entire contract: `RunnerInstance` / `LiveRunnerState`
-  / `ReadyRunnerState` interfaces, `isCompatibleRecord` validator, schema version
+- `lib/index.ts` — the entire contract: `CypressInstance` / `LiveInstanceState`
+  / `ReadyInstanceState` interfaces, `isCompatibleRecord` validator, schema version
   constants, `INSTANCES_DIRNAME`, `<pid>.json` filename helpers, and the
-  `RUNNER_INSTANCES_ROUTE_PREFIX` / `runnerInstancesProbePath` route helpers.
+  `INSTANCES_ROUTE_PREFIX` / `instancesProbePath` route helpers.
 
 **Gotchas / Notes**
 
