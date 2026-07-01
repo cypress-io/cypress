@@ -837,8 +837,8 @@
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
     ],
-    "packages/app/src/tap/commands.ts": [
-      "exports"
+    "packages/app/src/tap/contract.ts": [
+      "types"
     ],
     "packages/app/src/studio/studio-app-types.ts": [
       "types"
