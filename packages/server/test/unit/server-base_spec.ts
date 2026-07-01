@@ -356,6 +356,22 @@ describe('lib/server-base', () => {
     })
   })
 
+  describe('#updateBlockHosts', () => {
+    it('delegates the new blockHosts value to the network proxy', function () {
+      this.server._networkProxy = { updateBlockHosts: sinon.stub() }
+
+      this.server.updateBlockHosts(['*.pendo.io'])
+
+      expect(this.server._networkProxy.updateBlockHosts).to.be.calledOnceWith(['*.pendo.io'])
+    })
+
+    it('is a no-op when the network proxy has not been created', function () {
+      this.server._networkProxy = undefined
+
+      expect(() => this.server.updateBlockHosts(null)).not.to.throw()
+    })
+  })
+
   describe('#createServer', () => {
     beforeEach(function () {
       this.port = 54321

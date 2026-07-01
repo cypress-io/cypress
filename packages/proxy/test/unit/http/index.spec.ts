@@ -434,6 +434,54 @@ describe('http', function () {
 
       expect(http.preRequests.reset).not.toHaveBeenCalled()
     })
+
+    // https://github.com/cypress-io/cypress/issues/21151
+    it('restores the original blockHosts when resetBetweenSpecs is true', function () {
+      const http = new Http({ ...httpOpts, config: { blockHosts: '*.pendo.io' } })
+
+      http.updateBlockHosts(null)
+      expect(http.config.blockHosts).to.be.null
+
+      http.reset({ resetBetweenSpecs: true })
+
+      expect(http.config.blockHosts).to.eq('*.pendo.io')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/21151
+    it('keeps a runtime blockHosts override when resetBetweenSpecs is false', function () {
+      const http = new Http({ ...httpOpts, config: { blockHosts: '*.pendo.io' } })
+
+      http.updateBlockHosts(null)
+
+      http.reset({ resetBetweenSpecs: false })
+
+      expect(http.config.blockHosts).to.be.null
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/21151
+  describe('Http.updateBlockHosts', function () {
+    let httpOpts
+
+    beforeEach(function () {
+      httpOpts = { config: { blockHosts: '*.pendo.io' }, middleware: {}, request: { rp: vi.fn() } }
+    })
+
+    it('mutates the live config the proxy reads at enforcement time', function () {
+      const http = new Http(httpOpts)
+
+      http.updateBlockHosts(['*.google-analytics.com'])
+
+      expect(http.config.blockHosts).to.deep.eq(['*.google-analytics.com'])
+    })
+
+    it('clears blocking when passed a falsy value', function () {
+      const http = new Http(httpOpts)
+
+      http.updateBlockHosts(null)
+
+      expect(http.config.blockHosts).to.be.null
+    })
   })
 
   describe('Service Worker', function () {

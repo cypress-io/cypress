@@ -75,6 +75,7 @@
 **Dependency Updates:**
 
 - Upgraded `esbuild` from `0.28.0` to `0.28.1` to address a [Resources Downloaded over Insecure Protocol](https://security.snyk.io/vuln/SNYK-JS-ESBUILD-17750822) vulnerability reported in security scans. Addressed in [#34211](https://github.com/cypress-io/cypress/pull/34211).
+- Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)` or `Cypress.config('blockHosts', ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
 
 ## 15.18.0
 

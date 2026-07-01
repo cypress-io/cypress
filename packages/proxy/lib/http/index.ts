@@ -313,6 +313,7 @@ function getUniqueRequestId (requestId: string) {
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
+  originalBlockHosts: CyServer.Config['blockHosts']
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
@@ -336,6 +337,9 @@ export class Http {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
+    // `blockHosts` can be overridden per-test at runtime, so remember the
+    // project-level value to restore between specs.
+    this.originalBlockHosts = opts.config.blockHosts
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
@@ -593,6 +597,8 @@ export class Http {
     if (options.resetBetweenSpecs) {
       this.preRequests.reset()
       this.serviceWorkerManager = new ServiceWorkerManager()
+      // Discard any per-test `blockHosts` override so it can't leak into the next spec.
+      this.config.blockHosts = this.originalBlockHosts
     }
   }
 
@@ -643,6 +649,10 @@ export class Http {
 
   setPreRequestTimeout (timeout: number) {
     this.preRequests.setPreRequestTimeout(timeout)
+  }
+
+  updateBlockHosts (blockHosts: CyServer.Config['blockHosts']) {
+    this.config.blockHosts = blockHosts
   }
 
   private async shouldIgnorePendingRequest (browserPreRequest: BrowserPreRequest) {
