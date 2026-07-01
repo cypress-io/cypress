@@ -90,6 +90,10 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/favicon.ico`,
   ]
 
+  const isAllowedProxyBypass = (trimmedUrl: string) => {
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith('/__cypress/runner-instances/')
+  }
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -106,7 +110,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
       return next()
     }
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
