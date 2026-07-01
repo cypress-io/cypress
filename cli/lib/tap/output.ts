@@ -60,7 +60,7 @@ export const renderStatusHelp = (): void => {
 }
 
 const unknownCommandMessage = (schema: TapSchema, command: string): string => {
-  return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${schema.commands.map(({ name }) => name).join(', ')}.`
+  return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${schema.commands.filter(({ hidden }) => !hidden).map(({ name }) => name).join(', ')}.`
 }
 
 const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string => {
@@ -82,7 +82,8 @@ export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, 
   if (command) {
     const entry = schema.commands.find(({ name }) => name === command)
 
-    if (!entry) {
+    // Hidden commands are absent from the program, so treat them as unknown.
+    if (!entry || entry.hidden) {
       renderFailure({ code: 'UNKNOWN_COMMAND', message: unknownCommandMessage(schema, command) })
 
       return 1

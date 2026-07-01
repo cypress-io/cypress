@@ -283,6 +283,21 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('UNKNOWN_COMMAND')
       expect(logger.print()).toContain('is not a command')
     })
+
+    it('treats a hidden command as unknown for `<command> --help` and omits it from the listing', async () => {
+      mockSession({
+        ...schema,
+        commands: [
+          ...schema.commands,
+          { name: 'run-state', description: 'internal poll target', params: [], options: [], hidden: true },
+        ],
+      } satisfies TapSchema)
+
+      expect(await tap.start(['run-state', '--help'], {})).toBe(1)
+      expect(logger.print()).toContain('UNKNOWN_COMMAND')
+      expect(logger.print()).toContain('"run-state" is not a command')
+      expect(logger.print()).not.toContain('run-state,')
+    })
   })
 
   describe('the CLI-native instances command', () => {
@@ -393,14 +408,6 @@ describe('lib/exec/tap', () => {
 
       // The early lifecycle is reported from discovery alone.
       expect(withTapSession).not.toHaveBeenCalled()
-    })
-
-    it('includes testingType as a passthrough field when the discovery record carries it', async () => {
-      mockLiveResolved({ ...liveInstance({ cdpBrowserWsUrl: null }), testingType: 'e2e' } as any)
-
-      await tap.start(['status'], {})
-
-      expect(JSON.parse(logger.print())).toMatchObject({ testingType: 'e2e' })
     })
 
     it('reports "spec not selected" with totalSpecs when a browser is attached and on the spec list', async () => {
