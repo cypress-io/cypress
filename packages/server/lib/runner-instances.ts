@@ -5,12 +5,12 @@ import Debug from 'debug'
 import type { TestingType } from '@packages/types'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
-const debug = Debug('cypress:server:runner-discovery')
+const debug = Debug('cypress:server:runner-instances')
 
 const INSTANCES_DIRNAME = 'instances'
 const SCHEMA_VERSION = 1
 
-export interface RunnerDiscoveryRecord {
+export interface RunnerInstance {
   schemaVersion: number
   pid: number
   projectRoot: string
@@ -22,22 +22,22 @@ export interface RunnerDiscoveryRecord {
   testingType: TestingType | null
 }
 
-export interface LiveRunnerState extends RunnerDiscoveryRecord {
+export interface LiveRunnerState extends RunnerInstance {
   cdpBrowserWsUrl: string | null
 }
 
-export const getRunnerDiscoveryDir = (): string => {
+export const getRunnerInstancesDir = (): string => {
   return path.join(resolveCypressCacheRoot(), INSTANCES_DIRNAME)
 }
 
 const getRecordPath = (pid: number): string => {
-  return path.join(getRunnerDiscoveryDir(), `${pid}.json`)
+  return path.join(getRunnerInstancesDir(), `${pid}.json`)
 }
 
 let currentState: LiveRunnerState | null = null
 
 let persistChain: Promise<void> = Promise.resolve()
-const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
+const persist = (record: RunnerInstance): Promise<void> => {
   const run = async () => {
     const finalPath = getRecordPath(record.pid)
     const tmpPath = `${finalPath}.tmp`
@@ -57,9 +57,9 @@ const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
   return next
 }
 
-export const runnerDiscovery = {
-  async captureRecord ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
-    const record: RunnerDiscoveryRecord = {
+export const runnerInstances = {
+  async addInstance ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
+    const record: RunnerInstance = {
       schemaVersion: SCHEMA_VERSION,
       pid: process.pid,
       projectRoot: path.resolve(projectRoot),
@@ -72,9 +72,9 @@ export const runnerDiscovery = {
 
     try {
       await persist(record)
-      debug('wrote runner discovery record %o', record)
+      debug('wrote runner instance record %o', record)
     } catch (err) {
-      debug('failed to write runner discovery record: %o', err)
+      debug('failed to write runner instance record: %o', err)
     }
   },
 
@@ -84,7 +84,7 @@ export const runnerDiscovery = {
     }
 
     currentState = { ...currentState, cdpBrowserWsUrl }
-    debug('runner discovery cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
+    debug('runner instance cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
   },
 
   getCurrent (): LiveRunnerState | null {
@@ -104,15 +104,15 @@ export const runnerDiscovery = {
       await persistChain
 
       if (currentState) {
-        debug('skipping runner discovery removal; a newer record is live')
+        debug('skipping runner instance removal; a newer record is live')
 
         return
       }
 
       await fs.remove(getRecordPath(state.pid))
-      debug('removed runner discovery record for pid %d', state.pid)
+      debug('removed runner instance record for pid %d', state.pid)
     } catch (err) {
-      debug('failed to remove runner discovery record: %o', err)
+      debug('failed to remove runner instance record: %o', err)
     }
   },
 }

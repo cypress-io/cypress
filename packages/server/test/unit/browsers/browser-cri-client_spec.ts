@@ -7,7 +7,7 @@ import net from 'net'
 import { ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { runnerDiscovery } from '../../../lib/runner-discovery'
+import { runnerInstances } from '../../../lib/runner-instances'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -135,16 +135,16 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(criImport.Version).to.be.calledTwice
     })
 
-    it('advertises the browser websocket url to runner discovery once connected', async function () {
-      const setCdpBrowserWsUrl = sinon.stub(runnerDiscovery, 'setCdpBrowserWsUrl')
+    it('advertises the browser websocket url to runner instances once connected', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(runnerInstances, 'setCdpBrowserWsUrl')
 
       await getClient()
 
       expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url')
     })
 
-    it('clears the runner discovery cdp url when the browser connection is lost', async function () {
-      const setCdpBrowserWsUrl = sinon.stub(runnerDiscovery, 'setCdpBrowserWsUrl')
+    it('clears the runner instances cdp url when the browser connection is lost', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(runnerInstances, 'setCdpBrowserWsUrl')
 
       await getClient()
 

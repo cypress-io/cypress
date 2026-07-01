@@ -290,9 +290,8 @@ describe('lib/open_project', () => {
 
   describe('#closeActiveProject', () => {
     // The project teardown is intentionally fire-and-forget: blocking on the full
-    // projectBase.close() (server + proxy shutdown) regresses Firefox's process exit.
-    // The runner-discovery switch race is guarded at the source in
-    // runnerDiscovery.remove(), so closeActiveProject only awaits the browser close.
+    // projectBase.close() (server + proxy shutdown) regresses Firefox's process exit,
+    // so closeActiveProject only awaits the browser close.
     it('initiates the project teardown without blocking on it', async () => {
       let closeResolved = false
 

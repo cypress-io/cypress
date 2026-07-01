@@ -91,7 +91,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   ]
 
   const isAllowedProxyBypass = (trimmedUrl: string) => {
-    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith('/__cypress/runner-discovery/')
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith('/__cypress/runner-instances/')
   }
 
   // normalize clientRoute to help with comparison

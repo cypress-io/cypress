@@ -17,7 +17,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
-import { runnerDiscovery } from './runner-discovery'
+import { runnerInstances } from './runner-instances'
 import type {
   BannersState,
   FoundBrowser,
@@ -254,10 +254,10 @@ export class ProjectBase extends EE {
       projectRoot: this.projectRoot,
     })
 
-    // Runner discovery only applies to an interactive (`cypress open`) session that an
+    // Runner instances only apply to an interactive (`cypress open`) session that an
     // external tool can attach to; skip it for headless `cypress run`.
     if (!cfg.isTextTerminal) {
-      await runnerDiscovery.captureRecord({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
+      await runnerInstances.addInstance({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
     }
 
     await this.saveState(stateToSave)
@@ -329,7 +329,7 @@ export class ProjectBase extends EE {
 
     await Promise.all([
       this.server?.close(),
-      runnerDiscovery.remove(),
+      runnerInstances.remove(),
     ])
 
     this._isServerOpen = false
