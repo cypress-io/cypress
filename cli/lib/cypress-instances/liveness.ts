@@ -1,4 +1,3 @@
-import http from 'http'
 import Debug from 'debug'
 
 import { instancesProbePath } from './record'
@@ -19,45 +18,29 @@ export const isPidAlive = (pid: number): boolean => {
   }
 }
 
-export const verifyInstanceRecord = (record: CypressInstance, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveInstanceState | null> => {
-  return new Promise((resolve) => {
-    const request = http.get({
-      host: PROBE_HOST,
-      port: record.serverPort,
-      path: instancesProbePath(record.instanceId),
-      timeout: timeoutMs,
-    }, (response) => {
-      let body = ''
+export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveInstanceState | null> => {
+  const url = `http://${PROBE_HOST}:${record.serverPort}${instancesProbePath(record.instanceId)}`
 
-      response.setEncoding('utf8')
-      response.on('data', (chunk) => body += chunk)
-      response.on('error', () => resolve(null))
-      response.on('end', () => {
-        if (response.statusCode !== 200) {
-          return resolve(null)
-        }
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
 
-        try {
-          const live = JSON.parse(body)
+    if (response.status !== 200) {
+      return null
+    }
 
-          if (live.instanceId !== record.instanceId) {
-            return resolve(null)
-          }
+    const live = await response.json() as { instanceId?: unknown, cdpBrowserWsUrl?: unknown }
 
-          resolve({
-            ...record,
-            cdpBrowserWsUrl: typeof live.cdpBrowserWsUrl === 'string' ? live.cdpBrowserWsUrl : null,
-          })
-        } catch {
-          resolve(null)
-        }
-      })
-    })
+    if (live.instanceId !== record.instanceId) {
+      return null
+    }
 
-    request.on('timeout', () => request.destroy())
-    request.on('error', (err) => {
-      debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)
-      resolve(null)
-    })
-  })
+    return {
+      ...record,
+      cdpBrowserWsUrl: typeof live.cdpBrowserWsUrl === 'string' ? live.cdpBrowserWsUrl : null,
+    }
+  } catch (err) {
+    debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)
+
+    return null
+  }
 }
