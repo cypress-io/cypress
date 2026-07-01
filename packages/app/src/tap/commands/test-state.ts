@@ -50,7 +50,14 @@ const serializeTestError = (err: Record<string, unknown>): TestError => {
   }
 }
 
-export const serializeTestDetail = (test: SerializedTest, runComplete: boolean): TestDetailEntry => {
+export const serializeTestDetail = (runner: TapTestsRunner, testId: string): TestDetailEntry | undefined => {
+  const test = runner.getAllTestsState()[testId]
+
+  if (!test) {
+    return undefined
+  }
+
+  const runComplete = runner.isRunComplete()
   const { id, title, duration, state, currentRetry, timings, err } = test
   const titlePath = test._titlePath
 
