@@ -135,7 +135,7 @@ export interface RunResults {
 }
 
 export const aggregateResults = (runner: TapTestsRunner): { results: RunResults, totalTests: number } => {
-  const tests = Object.values(runner.getTestsState('__never__'))
+  const tests = Object.values(getAllTests(runner))
   const results: RunResults = { passed: 0, failed: 0, pending: 0, skipped: 0 }
 
   for (const test of tests) {
