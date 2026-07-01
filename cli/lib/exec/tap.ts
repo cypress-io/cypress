@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { RunnerDiscoveryError, listLiveRunners, resolveRunner } from '../runner-instances'
+import { CypressInstanceError, listLiveInstances, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
@@ -81,13 +81,13 @@ const listInstances = async (options: TapCliOptions, wantsHelp: boolean): Promis
     return 0
   }
 
-  const runners = await listLiveRunners({ instance: options.instance })
+  const instances = await listLiveInstances({ instance: options.instance })
 
-  renderResult(runners.map((runner) => ({
-    pid: runner.pid,
-    projectRoot: runner.projectRoot,
-    serverPort: runner.serverPort,
-    browserAttached: runner.cdpBrowserWsUrl !== null,
+  renderResult(instances.map((instance) => ({
+    pid: instance.pid,
+    projectRoot: instance.projectRoot,
+    serverPort: instance.serverPort,
+    browserAttached: instance.cdpBrowserWsUrl !== null,
   })))
 
   return 0
@@ -104,9 +104,9 @@ const tapModule = {
     }
 
     try {
-      const selection = await resolveRunner({ instance: options.instance, cwd: process.cwd() })
+      const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
 
-      return await withTapSession(selection.runner, async (session) => {
+      return await withTapSession(selection.instance, async (session) => {
         const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
 
         let dispatchCode = 0
@@ -131,8 +131,8 @@ const tapModule = {
         return dispatchCode
       })
     } catch (err: any) {
-      if (err instanceof RunnerDiscoveryError) {
-        if ((wantsHelp || !command) && err.code === 'NO_DISCOVERY_FILE') {
+      if (err instanceof CypressInstanceError) {
+        if ((wantsHelp || !command) && err.code === 'NO_INSTANCE') {
           return renderGenericHelp(wantsHelp)
         }
 

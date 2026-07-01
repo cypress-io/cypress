@@ -1,7 +1,7 @@
 import commander from 'commander'
 
 import logger from '../logger'
-import type { RunnerSelection } from '../runner-instances'
+import type { InstanceSelection } from '../cypress-instances'
 import type { TapSchema } from './contract'
 
 export const renderFailure = (err: { code: string, message: string }): void => {
@@ -35,11 +35,11 @@ const INSTANCES_USAGE = [
   'Usage: cypress tap instances [options]',
   '',
   'Lists the running Cypress instances this CLI can reach (those whose tap',
-  'binding answers a liveness probe), as a JSON array. Pass a runner\'s pid to',
+  'binding answers a liveness probe), as a JSON array. Pass a instance\'s pid to',
   '`--instance` to target it with another tap command.',
   '',
   'Options:',
-  '  --instance <pid>  only list the runner with this pid',
+  '  --instance <pid>  only list the instance with this pid',
 ].join('\n')
 
 export const renderInstancesHelp = (): void => {
@@ -50,24 +50,24 @@ const unknownCommandMessage = (schema: TapSchema, command: string): string => {
   return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${schema.commands.map(({ name }) => name).join(', ')}.`
 }
 
-const instanceBanner = (schema: TapSchema, selection: RunnerSelection): string => {
-  const { runner, candidateCount } = selection
+const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string => {
+  const { instance, candidateCount } = selection
 
   const target = [
     'Target:',
-    `  ${runner.projectRoot}`,
+    `  ${instance.projectRoot}`,
     `  v${schema.cypressVersion}`,
-    `  pid:${runner.pid}`,
+    `  pid:${instance.pid}`,
   ].join('\n')
 
   if (candidateCount > 1) {
-    return `${target}\n${candidateCount} running instances matched; targeting pid ${runner.pid}. Pass --instance <pid> to target another.`
+    return `${target}\n${candidateCount} running instances matched; targeting pid ${instance.pid}. Pass --instance <pid> to target another.`
   }
 
   return target
 }
 
-export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: RunnerSelection, command: string | undefined, wantsHelp: boolean): number => {
+export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined, wantsHelp: boolean): number => {
   if (command) {
     const entry = schema.commands.find(({ name }) => name === command)
 

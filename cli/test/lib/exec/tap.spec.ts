@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { RunnerDiscoveryError, listLiveRunners, resolveRunner } from '../../../lib/runner-instances'
-import type { LiveRunnerState, ReadyRunnerState, RunnerSelection } from '../../../lib/runner-instances'
+import { CypressInstanceError, listLiveInstances, resolveInstance } from '../../../lib/cypress-instances'
+import type { LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
 import type { TapExecResult, TapSchema } from '../../../lib/tap/contract'
 import { errors } from '../../../lib/errors'
@@ -21,13 +21,13 @@ vi.mock('../../../lib/tap/tap-session', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/runner-instances', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/runner-instances')>()
+vi.mock('../../../lib/cypress-instances', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
 
   return {
     ...actual,
-    listLiveRunners: vi.fn(),
-    resolveRunner: vi.fn(),
+    listLiveInstances: vi.fn(),
+    resolveInstance: vi.fn(),
   }
 })
 
@@ -65,7 +65,7 @@ const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { o
   return call
 }
 
-const readyRunner = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerState => ({
+const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => ({
   schemaVersion: 1,
   pid: 4242,
   projectRoot: '/projects/app',
@@ -76,10 +76,10 @@ const readyRunner = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerStat
   ...overrides,
 })
 
-const mockResolved = (overrides: Partial<RunnerSelection> = {}): RunnerSelection => {
-  const selection: RunnerSelection = { runner: readyRunner(), reason: 'only', candidateCount: 1, ...overrides }
+const mockResolved = (overrides: Partial<InstanceSelection> = {}): InstanceSelection => {
+  const selection: InstanceSelection = { instance: readyInstance(), reason: 'only', candidateCount: 1, ...overrides }
 
-  vi.mocked(resolveRunner).mockResolvedValue(selection)
+  vi.mocked(resolveInstance).mockResolvedValue(selection)
 
   return selection
 }
@@ -87,8 +87,8 @@ const mockResolved = (overrides: Partial<RunnerSelection> = {}): RunnerSelection
 describe('lib/exec/tap', () => {
   beforeEach(() => {
     vi.mocked(withTapSession).mockReset()
-    vi.mocked(listLiveRunners).mockReset()
-    vi.mocked(resolveRunner).mockReset()
+    vi.mocked(listLiveInstances).mockReset()
+    vi.mocked(resolveInstance).mockReset()
     mockResolved()
     logger.reset()
     vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -145,12 +145,12 @@ describe('lib/exec/tap', () => {
 
     it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
       mockSession()
-      const { runner } = mockResolved()
+      const { instance } = mockResolved()
 
       await tap.start(['health'], { instance: 1234 })
 
-      expect(resolveRunner).toHaveBeenCalledWith({ instance: 1234, cwd: process.cwd() })
-      expect(vi.mocked(withTapSession).mock.calls[0][0]).toBe(runner)
+      expect(resolveInstance).toHaveBeenCalledWith({ instance: 1234, cwd: process.cwd() })
+      expect(vi.mocked(withTapSession).mock.calls[0][0]).toBe(instance)
     })
 
     it('resolves with just the cwd tiebreak when --instance is absent', async () => {
@@ -158,7 +158,7 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['health'], {})
 
-      expect(resolveRunner).toHaveBeenCalledWith({ instance: undefined, cwd: process.cwd() })
+      expect(resolveInstance).toHaveBeenCalledWith({ instance: undefined, cwd: process.cwd() })
     })
 
     it('renders an app-side domain failure (ok: false) with its code and exits 1', async () => {
@@ -218,7 +218,7 @@ describe('lib/exec/tap', () => {
 
     it('leads the help with a banner naming the resolved instance', async () => {
       mockSession()
-      mockResolved({ runner: readyRunner({ pid: 7777, projectRoot: '/projects/app' }) })
+      mockResolved({ instance: readyInstance({ pid: 7777, projectRoot: '/projects/app' }) })
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Target:\n  /projects/app\n  v15.0.0\n  pid:7777')
@@ -236,7 +236,7 @@ describe('lib/exec/tap', () => {
 
     it('notes which instance was auto-selected when several were live', async () => {
       mockSession()
-      mockResolved({ runner: readyRunner({ pid: 7777 }), reason: 'arbitrary', candidateCount: 3 })
+      mockResolved({ instance: readyInstance({ pid: 7777 }), reason: 'arbitrary', candidateCount: 3 })
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('3 running instances matched; targeting pid 7777.')
@@ -273,7 +273,7 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native instances command', () => {
-    const liveRunner = (overrides: Partial<LiveRunnerState> = {}): LiveRunnerState => ({
+    const liveInstance = (overrides: Partial<LiveInstanceState> = {}): LiveInstanceState => ({
       schemaVersion: 1,
       pid: 54321,
       projectRoot: '/projects/app',
@@ -284,10 +284,10 @@ describe('lib/exec/tap', () => {
       ...overrides,
     })
 
-    it('renders the live runners as a JSON summary and exits 0, without opening a session', async () => {
-      vi.mocked(listLiveRunners).mockResolvedValue([
-        liveRunner({ pid: 111, projectRoot: '/projects/app', serverPort: 49200, cdpBrowserWsUrl: 'ws://x' }),
-        liveRunner({ pid: 222, projectRoot: '/projects/other', serverPort: 49201, cdpBrowserWsUrl: null }),
+    it('renders the live instances as a JSON summary and exits 0, without opening a session', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([
+        liveInstance({ pid: 111, projectRoot: '/projects/app', serverPort: 49200, cdpBrowserWsUrl: 'ws://x' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', serverPort: 49201, cdpBrowserWsUrl: null }),
       ])
 
       expect(await tap.start(['instances'], {})).toBe(0)
@@ -299,33 +299,33 @@ describe('lib/exec/tap', () => {
       expect(withTapSession).not.toHaveBeenCalled()
     })
 
-    it('renders an empty array when no runner is live', async () => {
-      vi.mocked(listLiveRunners).mockResolvedValue([])
+    it('renders an empty array when no instance is live', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([])
 
       expect(await tap.start(['instances'], {})).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([])
     })
 
     it('forwards --instance as the discovery filter', async () => {
-      vi.mocked(listLiveRunners).mockResolvedValue([])
+      vi.mocked(listLiveInstances).mockResolvedValue([])
 
       await tap.start(['instances'], { instance: 1234 })
 
-      expect(listLiveRunners).toHaveBeenCalledWith({ instance: 1234 })
+      expect(listLiveInstances).toHaveBeenCalledWith({ instance: 1234 })
     })
 
-    it('lists every live runner when --instance is absent', async () => {
-      vi.mocked(listLiveRunners).mockResolvedValue([])
+    it('lists every live instance when --instance is absent', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([])
 
       await tap.start(['instances'], {})
 
-      expect(listLiveRunners).toHaveBeenCalledWith({ instance: undefined })
+      expect(listLiveInstances).toHaveBeenCalledWith({ instance: undefined })
     })
 
     it('prints instances usage for `instances --help` and exits 0, without enumerating', async () => {
       expect(await tap.start(['instances', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap instances')
-      expect(listLiveRunners).not.toHaveBeenCalled()
+      expect(listLiveInstances).not.toHaveBeenCalled()
       expect(withTapSession).not.toHaveBeenCalled()
     })
   })
@@ -356,14 +356,14 @@ describe('lib/exec/tap', () => {
   })
 
   describe('failure rendering', () => {
-    const failResolve = (err: unknown) => vi.mocked(resolveRunner).mockRejectedValue(err)
+    const failResolve = (err: unknown) => vi.mocked(resolveInstance).mockRejectedValue(err)
     const failSession = (err: unknown) => vi.mocked(withTapSession).mockRejectedValue(err)
 
     it('renders discovery errors with their code and exits 1', async () => {
-      failResolve(new RunnerDiscoveryError('NO_DISCOVERY_FILE', 'No running Cypress was found.'))
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['health'], {})).toBe(1)
-      expect(logger.print()).toBe('NO_DISCOVERY_FILE: No running Cypress was found.')
+      expect(logger.print()).toBe('NO_INSTANCE: No running Cypress was found.')
     })
 
     it('renders a known transport failure as its mapped description and solution, and exits 1', async () => {
@@ -384,7 +384,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to generic help when no instance is found and help was wanted', async () => {
-      failResolve(new RunnerDiscoveryError('NO_DISCOVERY_FILE', 'No running Cypress was found.'))
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -392,14 +392,14 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {
-      failResolve(new RunnerDiscoveryError('NO_DISCOVERY_FILE', 'No running Cypress was found.'))
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start([], {})).toBe(1)
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
     it('surfaces a specific discovery error on a bare invocation instead of generic help', async () => {
-      failResolve(new RunnerDiscoveryError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+      failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start([], {})).toBe(1)
       expect(logger.print()).toContain('NO_BROWSER_ATTACHED')
@@ -408,18 +408,18 @@ describe('lib/exec/tap', () => {
     })
 
     it('surfaces a specific discovery error for explicit --help instead of generic help', async () => {
-      failResolve(new RunnerDiscoveryError('STALE_DISCOVERY_FILE', 'Cypress was previously running, but is no longer responding.'))
+      failResolve(new CypressInstanceError('STALE_INSTANCE', 'Cypress was previously running, but is no longer responding.'))
 
       expect(await tap.start(['--help'], {})).toBe(1)
-      expect(logger.print()).toContain('STALE_DISCOVERY_FILE')
+      expect(logger.print()).toContain('STALE_INSTANCE')
       expect(logger.print()).not.toContain('Usage: cypress tap')
     })
 
     it('still surfaces the discovery error when an actual command was requested', async () => {
-      failResolve(new RunnerDiscoveryError('NO_DISCOVERY_FILE', 'No running Cypress was found.'))
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['health'], {})).toBe(1)
-      expect(logger.print()).toContain('NO_DISCOVERY_FILE')
+      expect(logger.print()).toContain('NO_INSTANCE')
     })
 
     it('rethrows unexpected errors for the generic CLI error path', async () => {
