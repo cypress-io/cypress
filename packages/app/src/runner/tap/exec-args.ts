@@ -51,7 +51,7 @@ type CoercedField =
 // paths format identical errors from one place.
 const coerceField = (label: string, type: ExpectedType, raw: string): CoercedField => {
   if (typeof raw !== 'string') {
-    return { ok: false, message: `${label} must be a string over the wire, but ${typeof raw} was given.` }
+    return { ok: false, message: `${label} must be a string, but ${typeof raw} was given.` }
   }
 
   const result = coerceScalar(type, raw)
@@ -76,7 +76,7 @@ export const coerceCommandArgs = (name: string, params: readonly TapCommandParam
   const unknown = Object.keys(args).find((key) => !known.has(key))
 
   if (unknown) {
-    return invalid(`"${name}" has no <${unknown}> argument.`)
+    return invalid(`<${unknown}> was passed to "${name}", but it's not a supported argument of "${name}".`)
   }
 
   const missing = params.filter(({ required, name: param }) => required && args[param] === undefined)

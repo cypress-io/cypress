@@ -1,4 +1,4 @@
-import type { HealthResult, TapCommandOptionSchema, TapCommandParamSchema } from './contract'
+import type { TapCommandOptionSchema, TapCommandParamSchema } from './contract'
 
 // Limits the input types
 type ScalarOf<T> = T extends 'string' ? string : T extends 'number' ? number : boolean
@@ -14,7 +14,7 @@ type OptionsToObject<O extends readonly TapCommandOptionSchema[]> =
   { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? never : E['name']]?: ScalarOf<E['type']> }
 
 // Function that provides type-safe command definitions
-const defineCommand = <
+export const defineCommand = <
   const P extends readonly TapCommandParamSchema[],
   const O extends readonly TapCommandOptionSchema[] = [],
 >(definition: {
@@ -33,11 +33,6 @@ export interface TapCommandDefinition {
   handler: (...args: any[]) => Promise<unknown>
 }
 
-export const tapCommands = {
-  // Example command to be removed
-  health: defineCommand({
-    description: 'check that a running Cypress instance is reachable and its tap binding responds',
-    params: [],
-    handler: async (): Promise<HealthResult> => 'ok',
-  }),
-}
+// The registry starts empty; each subcommand lands here as one entry authored
+// with `defineCommand`. The explicit annotation keeps an empty registry typed.
+export const tapCommands: Record<string, TapCommandDefinition> = {}

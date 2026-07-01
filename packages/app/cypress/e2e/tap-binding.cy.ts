@@ -13,16 +13,14 @@ describe('tap binding', () => {
         throw new Error('"window.__CYPRESS_TAP_BINDING__" is expected to be available')
       }
 
-      expect(await binding.exec('health')).to.deep.eq({ ok: true, result: 'ok' })
-
       const schema = await binding.getSchema()
 
-      expect(schema.protocolVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include('health')
+      expect(schema.schemaVersion).to.eq(1)
+      expect(schema.commands).to.be.an('array')
 
       const unknown = await binding.exec('not-a-command')
 
-      expect(unknown).to.deep.include({ ok: false, code: 'UNKNOWN_COMMAND' })
+      expect((unknown as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
     })
   })
 })

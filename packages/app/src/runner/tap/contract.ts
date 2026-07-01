@@ -1,4 +1,7 @@
-export const TAP_PROTOCOL_VERSION = 1
+// Internal negotiation signal handed to the CLI via getSchema so it can refuse
+// a Cypress whose tap contract it doesn't understand. It is deliberately kept
+// out of the public `cli/types` surface — nothing user-facing should expose it.
+export const TAP_SCHEMA_VERSION = 1
 
 export interface TapCommandParamSchema {
   name: string
@@ -23,18 +26,20 @@ interface TapCommandSchema {
 }
 
 export interface TapSchema {
-  protocolVersion: typeof TAP_PROTOCOL_VERSION
+  schemaVersion: typeof TAP_SCHEMA_VERSION
   cypressVersion: string
   commands: TapCommandSchema[]
 }
 
-type TapExecFailureCode = 'UNKNOWN_COMMAND' | 'INVALID_ARGUMENTS'
+// UNKNOWN_COMMAND   – the command isn't in the registry
+// INVALID_PAYLOAD   – the args/options payload wasn't an object (or absent)
+// INVALID_ARGUMENTS – a positional argument failed schema validation
+// INVALID_OPTIONS   – a flag failed schema validation
+type TapExecFailureCode = 'UNKNOWN_COMMAND' | 'INVALID_PAYLOAD' | 'INVALID_ARGUMENTS' | 'INVALID_OPTIONS'
 
 export type TapExecResult =
-  | { ok: true, result: unknown }
-  | { ok: false, code: TapExecFailureCode, message: string }
-
-export type HealthResult = 'ok'
+  | { result: unknown }
+  | { error: { code: TapExecFailureCode, message: string } }
 
 export interface TapBindingContract {
   getSchema (): Promise<TapSchema>
