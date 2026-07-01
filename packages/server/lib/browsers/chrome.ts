@@ -419,6 +419,10 @@ export = {
     browserCriClient = undefined
   },
 
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
+  },
+
   async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
     const browserCriClient = this._getBrowserCriClient()
 

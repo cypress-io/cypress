@@ -503,6 +503,10 @@ export = {
     }
   },
 
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
+  },
+
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     throw new Error('Attempting to connect to a new spec is not supported for electron, use open instead')
   },
