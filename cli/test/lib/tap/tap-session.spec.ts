@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CRI from 'chrome-remote-interface'
 
-import type { ReadyRunnerState } from '../../../lib/runner-instances'
+import type { ReadyInstanceState } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
 import { errors } from '../../../lib/errors'
 
@@ -42,7 +42,7 @@ const makeClient = (overrides: FakeClientOverrides = {}) => {
   return client
 }
 
-const makeRecord = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerState => {
+const makeRecord = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => {
   return {
     schemaVersion: 1,
     pid: 1234,
@@ -55,17 +55,17 @@ const makeRecord = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerState
   }
 }
 
-let runner: ReadyRunnerState
+let instance: ReadyInstanceState
 
-const setup = (client = makeClient(), overrides: Partial<ReadyRunnerState> = {}) => {
-  runner = makeRecord(overrides)
+const setup = (client = makeClient(), overrides: Partial<ReadyInstanceState> = {}) => {
+  instance = makeRecord(overrides)
   mockConnect.mockResolvedValue(client)
 
-  return { runner, client }
+  return { instance, client }
 }
 
 const callOnce = (method = 'health', args: unknown[] = []) => {
-  return withTapSession(runner, (session) => session.call(method, args))
+  return withTapSession(instance, (session) => session.call(method, args))
 }
 
 const staleError = () => new Error('Could not find object with given id')
@@ -87,7 +87,7 @@ describe('lib/tap/tap-session', () => {
   it('connects to the browser ws, attaches a session, invokes the binding, and returns the decoded result', async () => {
     const { client } = setup()
 
-    const result = await withTapSession(runner, async (session) => {
+    const result = await withTapSession(instance, async (session) => {
       return session.call('health')
     })
 
@@ -122,7 +122,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ callFunctionOn }))
 
-    const results = await withTapSession(runner, async (session) => {
+    const results = await withTapSession(instance, async (session) => {
       return [await session.call('getSchema'), await session.call('health')]
     })
 
@@ -151,7 +151,7 @@ describe('lib/tap/tap-session', () => {
     const { client } = setup()
     const boom = new Error('boom')
 
-    const err = await withTapSession(runner, async () => {
+    const err = await withTapSession(instance, async () => {
       throw boom
     }).catch((e) => e)
 
@@ -415,7 +415,7 @@ describe('lib/tap/tap-session', () => {
   })
 
   it('throws CDP_UNREACHABLE when the browser connection cannot be opened', async () => {
-    runner = makeRecord()
+    instance = makeRecord()
     mockConnect.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
     await expectError(callOnce(), errors.tapCdpUnreachable)

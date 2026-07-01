@@ -2,7 +2,7 @@ import Debug from 'debug'
 import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
-import type { ReadyRunnerState } from '../runner-instances'
+import type { ReadyInstanceState } from '../cypress-instances'
 import { TAP_BINDING_GLOBAL } from './contract'
 
 const debug = Debug('cypress:cli:tap')
@@ -186,12 +186,12 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
 }
 
 export const withTapSession = async <T> (
-  runner: ReadyRunnerState,
+  instance: ReadyInstanceState,
   fn: (session: TapSession) => Promise<T>,
 ): Promise<T> => {
-  debug('opening tap session for runner %o', { pid: runner.pid, cdpBrowserWsUrl: runner.cdpBrowserWsUrl })
+  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl })
 
-  const client = await connectToBrowser(runner.cdpBrowserWsUrl)
+  const client = await connectToBrowser(instance.cdpBrowserWsUrl)
 
   try {
     const attach = async (): Promise<string> => {
