@@ -286,6 +286,22 @@ describe('lib/tap/tap-session', () => {
     expect(client.Target.getTargets).toHaveBeenCalledTimes(2)
   })
 
+  it('throws STALE_HANDLE when the binding resolve hits a severed session again after the re-attach', async () => {
+    const evaluate = vi.fn()
+    .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
+    .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ1' } })
+    .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE2' } })
+    .mockRejectedValue(new Error('Session with given id not found.'))
+
+    const callFunctionOn = vi.fn().mockRejectedValue(new Error('Inspected target navigated or closed'))
+
+    const { client } = setup(makeClient({ evaluate, callFunctionOn }))
+
+    await expectError(callOnce(), errors.tapStaleHandle)
+    expect(client.Target.getTargets).toHaveBeenCalledTimes(2)
+    expect(client.Runtime.callFunctionOn).toHaveBeenCalledOnce()
+  })
+
   it('throws BINDING_NOT_FOUND when no page has the binding mounted, detaching from probed pages', async () => {
     const evaluate = vi.fn().mockResolvedValue({ result: { type: 'undefined' } })
     const { client } = setup(makeClient({ evaluate }))

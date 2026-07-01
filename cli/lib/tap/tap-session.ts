@@ -219,7 +219,16 @@ export const withTapSession = async <T> (
         debug('session gone (%s); re-attaching to the runner page', err.message)
 
         sessionId = await attach()
-        response = await callBindingWithRetry(client, sessionId, method, args)
+
+        try {
+          response = await callBindingWithRetry(client, sessionId, method, args)
+        } catch (retryErr: any) {
+          if (isSessionGoneError(retryErr)) {
+            return throwTapError(errors.tapStaleHandle, retryErr.message, retryErr)
+          }
+
+          throw retryErr
+        }
       }
 
       if (response?.exceptionDetails) {
