@@ -837,6 +837,9 @@
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
     ],
+    "packages/app/src/tap/commands/test-state.ts": [
+      "types"
+    ],
     "packages/app/src/tap/contract.ts": [
       "types"
     ],
