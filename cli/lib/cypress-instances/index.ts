@@ -55,6 +55,13 @@ export interface InstanceSelection {
   candidateCount: number
 }
 
+// Like InstanceSelection, but the chosen instance may have no browser attached yet.
+export interface LiveInstanceSelection {
+  instance: LiveInstanceState
+  reason: InstanceSelectionReason
+  candidateCount: number
+}
+
 export interface ResolveInstanceOptions {
   instance?: number
   cwd: string
@@ -69,27 +76,29 @@ const describeFilter = (instance: number | undefined): string => {
   return ''
 }
 
-const lowestPid = (instances: LiveInstanceState[]): LiveInstanceState => {
+const lowestPid = <T extends LiveInstanceState>(instances: T[]): T => {
   return [...instances].sort((a, b) => a.pid - b.pid)[0]
 }
 
-const selectInstance = (live: LiveInstanceState[], options: ResolveInstanceOptions): { instance: LiveInstanceState, reason: InstanceSelectionReason } => {
-  if (live.length === 1) {
+const selectInstance = <T extends LiveInstanceState>(candidates: T[], options: ResolveInstanceOptions): { instance: T, reason: InstanceSelectionReason } => {
+  if (candidates.length === 1) {
     const filtered = options.instance !== undefined
 
-    return { instance: live[0], reason: filtered ? 'explicit' : 'only' }
+    return { instance: candidates[0], reason: filtered ? 'explicit' : 'only' }
   }
 
-  const cwdMatches = live.filter((record) => matchesProject(record, options.cwd))
+  const cwdMatches = candidates.filter((record) => matchesProject(record, options.cwd))
 
   if (cwdMatches.length > 0) {
     return { instance: lowestPid(cwdMatches), reason: 'cwd-match' }
   }
 
-  return { instance: lowestPid(live), reason: 'arbitrary' }
+  return { instance: lowestPid(candidates), reason: 'arbitrary' }
 }
 
-export const resolveInstance = async (options: ResolveInstanceOptions): Promise<InstanceSelection> => {
+// Reads, filters by pid, and probes for liveness. Throws NO_INSTANCE when
+// nothing matches and STALE_INSTANCE when matches exist but none responds.
+const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanceState[]> => {
   const { instance, probeTimeoutMs } = options
   const records = await readInstanceRecords()
 
@@ -111,14 +120,40 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
     )
   }
 
-  const { instance: selected, reason } = selectInstance(live, options)
+  return live
+}
 
-  if (!selected.cdpBrowserWsUrl) {
+// Resolves a live instance without requiring a browser; `status` reports
+// instances that have no browser attached yet.
+export const resolveLiveInstance = async (options: ResolveInstanceOptions): Promise<LiveInstanceSelection> => {
+  const live = await liveMatches(options)
+
+  const { instance, reason } = selectInstance(live, options)
+
+  return { instance, reason, candidateCount: live.length }
+}
+
+// Adds the browser-readiness requirement to resolveLiveInstance: the instance
+// it returns is guaranteed to have a browser attached. Gate on the browser
+// before selecting so a browserless instance never shadows a ready one that
+// could serve the command.
+export const resolveInstance = async (options: ResolveInstanceOptions): Promise<InstanceSelection> => {
+  const live = await liveMatches(options)
+
+  const ready = live.filter((record): record is ReadyInstanceState => record.cdpBrowserWsUrl !== null)
+
+  if (ready.length === 0) {
+    const detail = live.length === 1
+      ? ` (pid ${live[0].pid}, ${live[0].projectRoot})`
+      : describeFilter(options.instance)
+
     throw new CypressInstanceError(
       'NO_BROWSER_ATTACHED',
-      `Cypress is running (pid ${selected.pid}, ${selected.projectRoot}), but no test browser is open. Open a browser in Cypress and try again.`,
+      `Cypress is running${detail}, but no test browser is open. Open a browser in Cypress and try again.`,
     )
   }
 
-  return { instance: selected as ReadyInstanceState, reason, candidateCount: live.length }
+  const { instance: selected, reason } = selectInstance(ready, options)
+
+  return { instance: selected, reason, candidateCount: ready.length }
 }

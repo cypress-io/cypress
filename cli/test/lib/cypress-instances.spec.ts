@@ -10,6 +10,7 @@ import {
   verifyInstanceRecord,
   readInstanceRecords,
   resolveInstance,
+  resolveLiveInstance,
   listLiveInstances,
   getInstancesDir,
   pruneDeadInstanceRecords,
@@ -286,6 +287,30 @@ describe('lib/cypress-instances', () => {
       await expect(resolveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
     })
 
+    it('resolves a browser-attached instance over a live one at the cwd that has none', async () => {
+      const readyPort = await startReadyInstance('ready-instance')
+      const browserlessPort = await startFakeInstance({ instanceId: 'browserless-instance', respondWith: { instanceId: 'browserless-instance', cdpBrowserWsUrl: null } })
+
+      mockfs({
+        [INSTANCES_DIR]: {
+          // The cwd-rooted instance has no browser, so it cannot be the target
+          // even though it would otherwise win by cwd-match.
+          '111.json': makeRecord({ pid: 111, projectRoot: PROJECT, serverPort: browserlessPort, instanceId: 'browserless-instance' }),
+          '222.json': makeRecord({ pid: 222, projectRoot: '/projects/other', serverPort: readyPort, instanceId: 'ready-instance' }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      const selection = await resolveInstance({ cwd: PROJECT })
+
+      expect(selection.instance.pid).toBe(222)
+      expect(selection.instance.cdpBrowserWsUrl).toBe(CDP_WS_URL)
+      // Only the browser-attached instance is a candidate.
+      expect(selection.reason).toBe('only')
+      expect(selection.candidateCount).toBe(1)
+    })
+
     it('skips a stale record and resolves the live one', async () => {
       const closedPort = await getClosedPort()
       const livePort = await startReadyInstance('live-instance')
@@ -365,6 +390,47 @@ describe('lib/cypress-instances', () => {
       expect(selection.instance.pid).toBe(999)
       expect(selection.reason).toBe('arbitrary')
       expect(selection.candidateCount).toBe(2)
+    })
+  })
+
+  describe('.resolveLiveInstance', () => {
+    it('resolves a live instance that has no browser attached, instead of throwing', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: null } })
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      const selection = await resolveLiveInstance({ cwd: PROJECT })
+
+      expect(selection.instance.pid).toBe(111)
+      expect(selection.reason).toBe('only')
+      // The browser-optional resolver returns the live instance as-is — no browser.
+      expect(selection.instance.cdpBrowserWsUrl).toBeNull()
+    })
+
+    it('carries the live CDP endpoint when a browser is attached', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL } })
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      const selection = await resolveLiveInstance({ cwd: PROJECT })
+
+      expect(selection.instance.cdpBrowserWsUrl).toBe(CDP_WS_URL)
+    })
+
+    it('throws NO_INSTANCE when no record matches the filters', async () => {
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
+      stubKill({ alive: [111] })
+
+      await expect(resolveLiveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+    })
+
+    it('throws STALE_INSTANCE when a match exists but its process is dead', async () => {
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
+      stubKill({ alive: [] })
+
+      await expect(resolveLiveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'STALE_INSTANCE' })
     })
   })
 
