@@ -192,7 +192,6 @@ Here is a list of the core packages in this repository with a short description,
  | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
  | [resolve-dist](./packages/resolve-dist)       | `@packages/resolve-dist`    | Centralizes the resolution of paths to compiled/static assets from server-side code..    |
- | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
  | [runner](./packages/runner)           | `@packages/runner`      | (deprecated) The runner is the minimal "chrome" around the user's application under test. |
  | [scaffold-config](./packages/scaffold-config)           | `@packages/scaffold-config`      | The logic related to scaffolding new projects using launchpad.   |

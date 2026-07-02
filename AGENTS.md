@@ -7,7 +7,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, rewriter, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (33 packages total)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
 - **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
@@ -128,7 +128,6 @@ yarn clean-deps && yarn
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
-- **`@packages/rewriter`** — JavaScript source rewriter that transforms test and app code for Cypress compatibility (instrument, polyfill, inject).
 
 ### Configuration & Data
 

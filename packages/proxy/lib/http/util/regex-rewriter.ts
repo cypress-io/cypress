@@ -1,8 +1,8 @@
-import { STRIPPED_INTEGRITY_TAG } from '@packages/rewriter'
+import { STRIPPED_INTEGRITY_TAG } from './rewrite-constants.json'
+import { replaceStream } from './replace_stream'
 import type { SecurityOpts } from './rewriter'
 
 const pumpify = require('pumpify')
-const { replaceStream } = require('./replace_stream')
 const utf8Stream = require('utf8-stream')
 
 const topOrParentEqualityBeforeRe = /((?:\bwindow\b|\bself\b)(?:\.|\[['"](?:top|self)['"]\])?\s*[!=]==?\s*(?:(?:window|self)(?:\.|\[['"]))?)(top|parent)(?![\w])/g

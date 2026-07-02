@@ -29,7 +29,6 @@
     "@packages/network-interception": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
-    "@packages/rewriter": "0.0.0-development",
     "@packages/runner": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@packages/socket": "0.0.0-development",

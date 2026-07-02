@@ -432,15 +432,6 @@
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/rewriter": {
-      "entry": [
-        "lib/index.ts"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}",
-        "*.{ts,tsx,js,jsx}"
-      ]
-    },
     "packages/*": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",

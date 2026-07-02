@@ -28,7 +28,6 @@
 - [ ] packages/proxy
 - [ ] packages/net-stubbing
 - [ ] packages/driver
-- [ ] packages/rewriter
 - [ ] packages/reporter
 - [x] packages/server
 

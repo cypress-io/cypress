@@ -41,7 +41,6 @@
     "@packages/network-interception": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
-    "@packages/rewriter": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@packages/types": "0.0.0-development",
