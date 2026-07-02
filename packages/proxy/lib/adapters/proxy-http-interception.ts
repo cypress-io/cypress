@@ -47,7 +47,7 @@ export function applyOutboundToProxiedRequest (
   }
 }
 
-export async function ensureRequestBody (
+async function ensureRequestBody (
   mw: RequestInterceptionMiddlewareCtx,
 ): Promise<void> {
   if (mw.req.requestBodyMaterialized) {
