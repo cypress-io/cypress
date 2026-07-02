@@ -361,24 +361,20 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // `blockHosts` is enforced by the proxy, whose config is process-global, so
     // only the primary origin syncs it. Test-level overrides are applied to
-    // Cypress.config() before this event fires, so push the resolved value to the
-    // server when it changes so the proxy blocks/unblocks for the upcoming test.
-    let lastSyncedBlockHosts = config('blockHosts') ?? null
-
+    // Cypress.config() before this event fires, so push the resolved value for the
+    // upcoming test to keep the proxy in sync.
+    //
+    // We send this every test rather than diffing against the last-synced value: the
+    // proxy resets to the project default between specs independently of the driver,
+    // so a cached value could drift out of sync (e.g. in single-tab run mode or
+    // component testing, where the driver persists across specs). The cost is one
+    // small socket round-trip per test, matching the adjacent `close:extra:targets`.
     Cypress.on('test:before:run:async', () => {
       if (Cypress.isCrossOriginSpecBridge) {
         return
       }
 
-      const blockHosts = Cypress.config('blockHosts') ?? null
-
-      if (_.isEqual(blockHosts, lastSyncedBlockHosts)) {
-        return
-      }
-
-      lastSyncedBlockHosts = blockHosts
-
-      return Cypress.backend('update:block:hosts', blockHosts)
+      return Cypress.backend('update:block:hosts', Cypress.config('blockHosts') ?? null)
     })
 
     if (!Cypress.isCrossOriginSpecBridge) {
