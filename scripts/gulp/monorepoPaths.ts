@@ -7,6 +7,7 @@ export const monorepoPaths = {
   toolingDir: path.join(__dirname, '../../system-tests'),
   pkgApp: path.join(__dirname, '../../packages/app'),
   pkgConfig: path.join(__dirname, '../../packages/config'),
+  pkgCypressInstances: path.join(__dirname, '../../packages/cypress-instances'),
   pkgDataContext: path.join(__dirname, '../../packages/data-context'),
   pkgDriver: path.join(__dirname, '../../packages/driver'),
   pkgElectron: path.join(__dirname, '../../packages/electron'),

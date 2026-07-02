@@ -769,7 +769,13 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
-    "packages/server/lib/runner-instances.ts": [
+    "cli/lib/cypress-instances/index.ts": [
+      "types"
+    ],
+    "cli/lib/cypress-instances/record.ts": [
+      "types"
+    ],
+    "packages/server/lib/cypress-instances.ts": [
       "types"
     ],
     "cli/types/cy-blob-util.d.ts": [
