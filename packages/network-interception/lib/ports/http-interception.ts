@@ -1,56 +1,30 @@
-import type { Readable } from 'stream'
-import type { ResourceType } from '../types/external-types'
-
 export type HttpHeaders = Record<string, string | string[]>
 
 export type HttpRequest = {
-  inFlightInterceptId: string
-  browserRequestId?: string
+  id: string
   url: string
-  method: string
-  headers: HttpHeaders
-  body?: string | Buffer
-  requestBodyMaterialized?: boolean
-  materializeRequestBody?: () => Promise<string | Buffer | undefined>
-  materializeOriginResponse?: boolean
-  resourceType?: ResourceType
-  isSyncRequest?: boolean
-  responseTimeout?: number
-  followRedirect?: boolean
-  hadIntercept?: boolean
-  browserAcceptEncoding?: string
 }
 
 export type HttpResponse = {
-  statusCode: number
-  statusMessage?: string
-  headers: HttpHeaders
-  body?: string | Buffer
-  delay?: number
-  throttleKbps?: number
-  stream?: () => Promise<Readable>
-  onResponseWrittenToClient?: () => Promise<void>
+  id: string
+  url: string
 }
 
-export interface ForOriginForwarding {
-  (request: HttpRequest): Promise<HttpResponse>
+export interface TransportCodecPort<TRequest, TResponse> {
+  encodeRequest (request: HttpRequest): TRequest
+  decodeRequest (request: TRequest): HttpRequest
+  encodeResponse (response: HttpResponse): TResponse
+  decodeResponse (response: TResponse): HttpResponse
 }
 
 export type InterceptMiddleware = (
   request: HttpRequest,
-  next: ForOriginForwarding,
+  next: (request: HttpRequest) => Promise<HttpResponse>,
 ) => Promise<HttpResponse>
 
 export type TransportNext<TRequest, TResponse> = (
   request: TRequest,
 ) => Promise<TResponse>
-
-export interface HttpTransportCodec<TRequest, TResponse> {
-  decodeRequest (request: TRequest): HttpRequest
-  applyRequest (transportRequest: TRequest, request: HttpRequest): void | Promise<void>
-  decodeResponse (response: TResponse): HttpResponse
-  encodeResponse (response: HttpResponse): TResponse | Promise<TResponse>
-}
 
 export interface ForHttpIntercept<TRequest, TResponse> {
   handle (

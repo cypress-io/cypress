@@ -5,8 +5,7 @@ import type { ForNetworkInterception } from '@packages/network-interception'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
-import { proxyHttpCodec } from './adapters/proxy-http-interception'
-import type { ProxyResponsePair } from './adapters/http-response-codec'
+import { proxyHttpCodec } from './adapters/http-codec'
 import type { RequestInterceptionMiddlewareCtx } from './adapters/types'
 
 export class NetworkProxy {
@@ -21,7 +20,7 @@ export class NetworkProxy {
   }
 
   withIntercept (
-    networkInterception: ForNetworkInterception<RequestInterceptionMiddlewareCtx, ProxyResponsePair>,
+    networkInterception: ForNetworkInterception<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
   ) {
     this.http.networkInterception = networkInterception
 

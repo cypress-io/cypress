@@ -1,15 +1,16 @@
 import type {
   ForHttpIntercept,
-  ForOriginForwarding,
-  HttpTransportCodec,
+  HttpRequest,
+  HttpResponse,
   InterceptMiddleware,
+  TransportCodecPort,
   TransportNext,
 } from '../ports/http-interception'
 
 export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TRequest, TResponse> {
   private readonly middlewares: InterceptMiddleware[] = []
 
-  constructor (private readonly codec: HttpTransportCodec<TRequest, TResponse>) {}
+  constructor (private readonly codec: TransportCodecPort<TRequest, TResponse>) {}
 
   use (middleware: InterceptMiddleware): void {
     this.middlewares.push(middleware)
@@ -21,13 +22,15 @@ export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TReq
   ): Promise<TResponse> {
     const request = this.codec.decodeRequest(transportRequest)
 
-    const terminal: ForOriginForwarding = async (nextRequest) => {
-      await this.codec.applyRequest(transportRequest, nextRequest)
+    type Forward = (nextRequest: HttpRequest) => Promise<HttpResponse>
 
-      return this.codec.decodeResponse(await next(transportRequest))
+    const terminal: Forward = async (nextRequest) => {
+      const encodedRequest = this.codec.encodeRequest(nextRequest)
+
+      return this.codec.decodeResponse(await next(encodedRequest))
     }
 
-    const forward = this.middlewares.reduceRight<ForOriginForwarding>(
+    const forward = this.middlewares.reduceRight<Forward>(
       (inner, middleware) => {
         return (nextRequest) => middleware(nextRequest, inner)
       },

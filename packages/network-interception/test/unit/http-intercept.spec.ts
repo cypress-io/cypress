@@ -1,54 +1,56 @@
 import { describe, expect, it, vi } from 'vitest'
 import { HttpIntercept } from '../../lib/core/http-intercept'
-import type { HttpRequest, HttpResponse, HttpTransportCodec } from '../../lib/ports/http-interception'
+import type { TransportCodecPort } from '../../lib/ports/http-interception'
 
 type TransportRequest = {
   id: string
   href: string
-  method: string
-  headers: Record<string, string | string[]>
-  body?: string | Buffer
 }
 
 type TransportResponse = {
-  code: number
-  headers: Record<string, string | string[]>
-  body?: string | Buffer
+  id: string
+  href: string
 }
 
-function createCodec (): HttpTransportCodec<TransportRequest, TransportResponse> {
+function createCodec (): TransportCodecPort<TransportRequest, TransportResponse> {
+  const inFlightRequests = new Map<string, TransportRequest>()
+  const inFlightResponses = new Map<string, TransportResponse>()
+
   return {
-    decodeRequest (request): HttpRequest {
+    decodeRequest (transportRequest) {
+      inFlightRequests.set(transportRequest.id, transportRequest)
+
       return {
-        inFlightInterceptId: request.id,
-        url: request.href,
-        method: request.method,
-        headers: request.headers,
-        body: request.body,
+        id: transportRequest.id,
+        url: transportRequest.href,
       }
     },
 
-    applyRequest (transportRequest, request): void {
+    encodeRequest (request) {
+      const transportRequest = inFlightRequests.get(request.id)!
+
       transportRequest.href = request.url
-      transportRequest.method = request.method
-      transportRequest.headers = request.headers
-      transportRequest.body = request.body
+
+      return transportRequest
     },
 
-    decodeResponse (response): HttpResponse {
+    decodeResponse (response) {
+      inFlightResponses.set(response.id, response)
+
       return {
-        statusCode: response.code,
-        headers: response.headers,
-        body: response.body,
+        id: response.id,
+        url: response.href,
       }
     },
 
-    encodeResponse (response): TransportResponse {
-      return {
-        code: response.statusCode,
-        headers: response.headers,
-        body: response.body,
-      }
+    encodeResponse (response) {
+      const transportResponse = inFlightResponses.get(response.id)!
+
+      transportResponse.href = response.url
+      inFlightRequests.delete(response.id)
+      inFlightResponses.delete(response.id)
+
+      return transportResponse
     },
   }
 }
@@ -59,14 +61,12 @@ describe('HttpIntercept', () => {
     const request: TransportRequest = {
       id: 'req-1',
       href: 'https://example.test/',
-      method: 'GET',
-      headers: {},
     }
 
     const next = vi.fn(async (nextRequest: TransportRequest): Promise<TransportResponse> => {
       return {
-        code: 204,
-        headers: { 'x-url': nextRequest.href },
+        id: nextRequest.id,
+        href: nextRequest.href,
       }
     })
 
@@ -75,9 +75,8 @@ describe('HttpIntercept', () => {
     expect(next).toHaveBeenCalledOnce()
     expect(next).toHaveBeenCalledWith(request)
     expect(response).to.deep.equal({
-      code: 204,
-      headers: { 'x-url': 'https://example.test/' },
-      body: undefined,
+      id: 'req-1',
+      href: 'https://example.test/',
     })
   })
 
@@ -87,24 +86,24 @@ describe('HttpIntercept', () => {
 
     http.use(async (request, next) => {
       calls.push('first:request')
-      request.headers['x-first'] = '1'
+      request.url = 'https://example.test/first'
 
       const response = await next(request)
 
       calls.push('first:response')
-      response.headers['x-first-response'] = '1'
+      response.url = `${response.url}/first-response`
 
       return response
     })
 
     http.use(async (request, next) => {
       calls.push('second:request')
-      request.headers['x-second'] = '1'
+      request.url = 'https://example.test/second'
 
       const response = await next(request)
 
       calls.push('second:response')
-      response.headers['x-second-response'] = '1'
+      response.url = `${response.url}/second-response`
 
       return response
     })
@@ -112,19 +111,14 @@ describe('HttpIntercept', () => {
     const request: TransportRequest = {
       id: 'req-1',
       href: 'https://example.test/',
-      method: 'GET',
-      headers: {},
     }
 
     const response = await http.handle(request, async (nextRequest) => {
       calls.push('origin')
 
       return {
-        code: 200,
-        headers: {
-          ...nextRequest.headers,
-          'x-origin': '1',
-        },
+        id: nextRequest.id,
+        href: nextRequest.href,
       }
     })
 
@@ -136,18 +130,8 @@ describe('HttpIntercept', () => {
       'first:response',
     ])
 
-    expect(request.headers).to.deep.equal({
-      'x-first': '1',
-      'x-second': '1',
-    })
-
-    expect(response.headers).to.deep.equal({
-      'x-first': '1',
-      'x-second': '1',
-      'x-origin': '1',
-      'x-second-response': '1',
-      'x-first-response': '1',
-    })
+    expect(request.href).to.equal('https://example.test/second')
+    expect(response.href).to.equal('https://example.test/second/second-response/first-response')
   })
 
   it('round-trips request and response mutations through the codec', async () => {
@@ -155,13 +139,10 @@ describe('HttpIntercept', () => {
 
     http.use(async (request, next) => {
       request.url = 'https://example.test/mutated'
-      request.method = 'POST'
-      request.body = 'mutated request'
 
       const response = await next(request)
 
-      response.statusCode = 201
-      response.body = 'mutated response'
+      response.url = 'https://example.test/mutated-response'
 
       return response
     })
@@ -169,30 +150,61 @@ describe('HttpIntercept', () => {
     const request: TransportRequest = {
       id: 'req-1',
       href: 'https://example.test/',
-      method: 'GET',
-      headers: {},
     }
 
     const response = await http.handle(request, async (nextRequest) => {
       return {
-        code: nextRequest.method === 'POST' ? 200 : 500,
-        headers: { location: nextRequest.href },
-        body: nextRequest.body,
+        id: nextRequest.id,
+        href: nextRequest.href,
       }
     })
 
     expect(request).to.deep.equal({
       id: 'req-1',
       href: 'https://example.test/mutated',
-      method: 'POST',
-      headers: {},
-      body: 'mutated request',
     })
 
     expect(response).to.deep.equal({
-      code: 201,
-      headers: { location: 'https://example.test/mutated' },
-      body: 'mutated response',
+      id: 'req-1',
+      href: 'https://example.test/mutated-response',
     })
+  })
+
+  it('passes the transport returned from encodeRequest to next()', async () => {
+    const encodedTransport: TransportRequest = {
+      id: 'encoded-req',
+      href: 'https://example.test/encoded',
+    }
+
+    const http = new HttpIntercept({
+      ...createCodec(),
+      encodeRequest (): TransportRequest {
+        return encodedTransport
+      },
+    })
+
+    http.use(async (request, next) => {
+      request.url = 'https://example.test/encoded'
+
+      return next(request)
+    })
+
+    const request: TransportRequest = {
+      id: 'req-1',
+      href: 'https://example.test/',
+    }
+
+    const next = vi.fn(async (nextRequest: TransportRequest): Promise<TransportResponse> => {
+      return {
+        id: nextRequest.id,
+        href: nextRequest.href,
+      }
+    })
+
+    await http.handle(request, next)
+
+    expect(next).toHaveBeenCalledOnce()
+    expect(next).toHaveBeenCalledWith(encodedTransport)
+    expect(next).not.toHaveBeenCalledWith(request)
   })
 })

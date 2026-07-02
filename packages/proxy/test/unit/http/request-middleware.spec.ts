@@ -992,7 +992,10 @@ describe('http/request-middleware', () => {
     it('routes the proxy context through networkInterception.handle and commits the proxy response', async () => {
       const incomingRes = new IncomingMessage(new Socket)
       const bodyStream = Readable.from(['ok'])
-      const handle = vi.fn().mockResolvedValue({ incomingRes, bodyStream })
+      const handle = vi.fn().mockResolvedValue({
+        httpInterceptIncomingRes: incomingRes,
+        originBodyStream: bodyStream,
+      })
       const ctx = {
         networkInterception: {
           handle,
