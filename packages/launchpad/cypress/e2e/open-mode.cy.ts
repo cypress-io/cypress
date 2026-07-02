@@ -165,8 +165,10 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.withCtx(async (ctx, o) => {
-        // Trigger actual wizard initialization to occur
-        (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
+        // Trigger actual wizard initialization and await it so framework detection
+        // (filesystem I/O, slow on Windows) completes before we assert on the UI,
+        // rather than racing the default command timeout.
+        await (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
       })
 
       // Verify that auto-detection has fired via the real initialize call and updated data
