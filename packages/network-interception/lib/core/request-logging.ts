@@ -1,7 +1,10 @@
-import Debug from 'debug'
 import type { InterceptMiddleware } from '../ports/http-interception'
 
-const debug = Debug('cypress:network-interception:http')
+function getDebug () {
+  const Debug = require('debug')
+
+  return Debug('cypress:network-interception:http')
+}
 
 export type ShouldLogRequestFacts = {
   matchingRoutes?: Array<{ staticResponse?: { log?: boolean } }>
@@ -31,6 +34,8 @@ export function shouldLogRequest (facts: ShouldLogRequestFacts): boolean {
 }
 
 export const debugRequest: InterceptMiddleware = async (request, next) => {
+  const debug = getDebug()
+
   debug('request: %s', request.url)
 
   const response = await next(request)
