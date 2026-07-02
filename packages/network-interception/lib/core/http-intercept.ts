@@ -37,6 +37,10 @@ export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TReq
       terminal,
     )
 
-    return this.codec.encodeResponse(await forward(request))
+    try {
+      return this.codec.encodeResponse(await forward(request))
+    } finally {
+      this.codec.releaseRequest?.(request.id)
+    }
   }
 }

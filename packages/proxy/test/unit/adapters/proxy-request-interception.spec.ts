@@ -16,7 +16,7 @@ vi.mock('../../../lib/adapters/end-requests-to-blocked-hosts', () => {
   }
 })
 
-vi.mock('../../../lib/adapters/send-request-outgoing', () => {
+vi.mock('../../../lib/http/send-request-outgoing', () => {
   return {
     sendRequestOutgoing: vi.fn(),
   }

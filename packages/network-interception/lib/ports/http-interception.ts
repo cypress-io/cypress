@@ -15,6 +15,7 @@ export interface TransportCodecPort<TRequest, TResponse> {
   decodeRequest (request: TRequest): HttpRequest
   encodeResponse (response: HttpResponse): TResponse
   decodeResponse (response: TResponse): HttpResponse
+  releaseRequest? (id: string): void
 }
 
 export type InterceptMiddleware = (

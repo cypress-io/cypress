@@ -52,6 +52,11 @@ function createCodec (): TransportCodecPort<TransportRequest, TransportResponse>
 
       return transportResponse
     },
+
+    releaseRequest (id) {
+      inFlightRequests.delete(id)
+      inFlightResponses.delete(id)
+    },
   }
 }
 
@@ -206,5 +211,25 @@ describe('HttpIntercept', () => {
     expect(next).toHaveBeenCalledOnce()
     expect(next).toHaveBeenCalledWith(encodedTransport)
     expect(next).not.toHaveBeenCalledWith(request)
+  })
+
+  it('releases the in-flight request when handle rejects', async () => {
+    const releaseRequest = vi.fn()
+    const http = new HttpIntercept({
+      ...createCodec(),
+      releaseRequest,
+    })
+
+    const request: TransportRequest = {
+      id: 'req-1',
+      href: 'https://example.test/',
+    }
+
+    await expect(http.handle(request, async () => {
+      throw new Error('origin failed')
+    })).rejects.toThrow('origin failed')
+
+    expect(releaseRequest).toHaveBeenCalledOnce()
+    expect(releaseRequest).toHaveBeenCalledWith('req-1')
   })
 })

@@ -6,7 +6,7 @@ import type { Readable } from 'stream'
 import { sendRequestOutgoing } from '../http/send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
 
-export type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
+type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
   id?: string
   httpInterceptIncomingRes?: IncomingMessage
   originBodyStream?: Readable
@@ -54,6 +54,10 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       inFlightRequests.delete(response.id)
 
       return ctx
+    },
+
+    releaseRequest (id: string): void {
+      inFlightRequests.delete(id)
     },
   }
 }
