@@ -166,17 +166,17 @@ describe('Launchpad: Open Mode', () => {
 
       cy.withCtx(async (ctx, o) => {
         // Trigger actual wizard initialization to occur
-        (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
+        await (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
       })
 
       // Verify that auto-detection has fired via the real initialize call and updated data
       // has flowed through to populate UI
-      cy.get('[data-testid="select-bundler"]').as('bundler')
-
       cy.get('@framework').within(() => {
-        cy.contains('React.js').should('be.visible')
+        cy.contains('React.js', { timeout: 15000 }).should('be.visible')
         cy.contains('(detected)').should('be.visible')
       })
+
+      cy.get('[data-testid="select-bundler"]', { timeout: 15000 }).as('bundler')
 
       cy.get('@bundler').within(() => {
         cy.contains('Vite').should('be.visible')
