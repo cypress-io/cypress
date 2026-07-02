@@ -1322,6 +1322,14 @@ export const AllCypressErrors = {
         
         You can safely remove this option from your config.`
   },
+  EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSourceRewriting`)} option was removed in ${fmt.cypressVersion(`16.0.0`)}.
+
+        The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting.
+
+        You can safely remove this option from your config.`
+  },
   JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
     The ${fmt.highlight(`justInTimeCompile`)} configuration is only supported for Component Testing.`

@@ -1316,7 +1316,6 @@ describe('config/src/project/utils', () => {
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           expose: {},
           fileServerFolder: { value: '', from: 'default' },
@@ -1440,7 +1439,6 @@ describe('config/src/project/utils', () => {
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           expose: {
             baz: {

@@ -29,7 +29,6 @@ exports['module api and after:run results'] = `
     "experimentalModifyObstructiveThirdPartyCode": false,
     "injectDocumentDomain": false,
     "experimentalOriginDependencies": false,
-    "experimentalSourceRewriting": false,
     "experimentalSingleTabRunMode": false,
     "experimentalWebKitSupport": false,
     "visibilityStrategy": "modern",

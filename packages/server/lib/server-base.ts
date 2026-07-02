@@ -27,7 +27,6 @@ import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
-import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
@@ -361,10 +360,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         shouldCorrelatePreRequests,
         getCurrentBrowser,
       })
-    }
-
-    if (config.experimentalSourceRewriting && !isProxyDisabled()) {
-      createInitialWorkers()
     }
 
     this.createHosts(config.hosts)

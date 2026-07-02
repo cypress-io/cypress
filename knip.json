@@ -434,7 +434,7 @@
     },
     "packages/rewriter": {
       "entry": [
-        "lib/threads/worker.ts"
+        "lib/index.ts"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
@@ -842,9 +842,6 @@
       "types"
     ],
     "packages/telemetry/src/node.ts": [
-      "exports"
-    ],
-    "packages/proxy/lib/http/util/ast-rewriter.ts": [
       "exports"
     ],
     "packages/errors/src/errTemplate.ts": [

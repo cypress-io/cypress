@@ -93,11 +93,6 @@
   {
     "value": false,
     "from": "default",
-    "field": "experimentalSourceRewriting"
-  },
-  {
-    "value": false,
-    "from": "default",
     "field": "experimentalWebKitSupport"
   },
   {
