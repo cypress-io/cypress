@@ -1,7 +1,7 @@
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
+import { debugRequest, HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
@@ -63,6 +63,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   })
   const networkInterception = new HttpIntercept(networkProxy.codec)
 
+  networkInterception.use(debugRequest)
   networkProxy.withIntercept(networkInterception)
 
   return {

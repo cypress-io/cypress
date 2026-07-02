@@ -1,3 +1,8 @@
+import Debug from 'debug'
+import type { InterceptMiddleware } from '../ports/http-interception'
+
+const debug = Debug('cypress:network-interception:http')
+
 export type ShouldLogRequestFacts = {
   matchingRoutes?: Array<{ staticResponse?: { log?: boolean } }>
   resourceType?: string
@@ -23,4 +28,14 @@ export function shouldLogRequest (facts: ShouldLogRequestFacts): boolean {
 
   // 2. Otherwise, only log if it is an XHR or fetch.
   return facts.resourceType === 'fetch' || facts.resourceType === 'xhr'
+}
+
+export const debugRequest: InterceptMiddleware = async (request, next) => {
+  debug('request: %s', request.url)
+
+  const response = await next(request)
+
+  debug('response: %s %d', request.url, response.statusCode)
+
+  return response
 }
