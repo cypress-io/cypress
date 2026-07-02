@@ -2,7 +2,7 @@
 
 import type { SocketShape } from '@packages/socket/browser/client'
 import type MobX from 'mobx'
-import type { TapManager } from './src/runner/tap/tap-manager'
+import type { TapManager } from './src/tap/tap-manager'
 import type { EventManager } from './src/runner/event-manager'
 
 export {}

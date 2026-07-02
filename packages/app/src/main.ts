@@ -7,7 +7,7 @@ import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
-import { TapManager } from './runner/tap/tap-manager'
+import { TapManager } from './tap/tap-manager'
 import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
