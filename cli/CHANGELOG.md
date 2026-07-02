@@ -3,7 +3,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `esbuild` from `0.28.0` to `0.28.1` to address a [Resources Downloaded over Insecure Protocol](https://security.snyk.io/vuln/SNYK-JS-ESBUILD-17750822) vulnerability reported in security scans.
+- Upgraded `esbuild` from `0.28.0` to `0.28.1` to address a [Resources Downloaded over Insecure Protocol](https://security.snyk.io/vuln/SNYK-JS-ESBUILD-17750822) vulnerability reported in security scans. Addressed in [#34211](https://github.com/cypress-io/cypress/pull/34211).
 
 **Performance:**
 
