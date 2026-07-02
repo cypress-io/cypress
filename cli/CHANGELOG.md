@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.18.1
 
+**Dependency Updates:**
+
+- Upgraded `esbuild` from `0.28.0` to `0.28.1` to address a [Resources Downloaded over Insecure Protocol](https://security.snyk.io/vuln/SNYK-JS-ESBUILD-17750822) vulnerability reported in security scans.
+
 **Performance:**
 
 - Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).

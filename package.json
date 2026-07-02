@@ -273,6 +273,7 @@
     "**/@types/cheerio": "0.22.35",
     "**/@types/node": "22.18.7",
     "**/editorconfig/minimatch": "9.0.7",
+    "**/esbuild": "0.28.1",
     "**/form-data": "^4.0.5",
     "**/graphql-config/minimatch": "3.1.3",
     "**/jquery": "3.7.1",
