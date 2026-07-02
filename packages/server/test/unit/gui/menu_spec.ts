@@ -252,12 +252,12 @@ describe('gui/menu', function () {
   describe('Developer Tools', () => {
     it('exists by default', () => {
       menu.set()
-      expect(getMenuItem('Developer Tools')).to.be.defined
+      expect(getMenuItem('Developer Tools')).to.exist
     })
 
     it('exists when withInternalDevTools is false', () => {
       menu.set({ withInternalDevTools: false })
-      expect(getMenuItem('Developer Tools')).to.be.defined
+      expect(getMenuItem('Developer Tools')).to.exist
     })
 
     it('contains only Reload and Toggle Developer Tools items in expected order', () => {

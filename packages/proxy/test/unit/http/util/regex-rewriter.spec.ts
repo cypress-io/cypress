@@ -433,6 +433,41 @@ describe('http/util/regex-rewriter', () => {
       })).toEqual(expectedWithModifyObstructiveThirdPartyCode)
     })
 
+    describe('removeSRIAttributes', () => {
+      it('strips integrity from static <script> and <link> when removeSRIAttributes is set', () => {
+        const html = `<script integrity="sha384-abc123" src="app.js"></script>\n<link rel="stylesheet" integrity="sha256-def456" href="app.css">`
+
+        expect(regexRewriter.strip(html, { removeSRIAttributes: true })).toEqual(
+          `<script cypress-stripped-integrity="sha384-abc123" src="app.js"></script>\n<link rel="stylesheet" cypress-stripped-integrity="sha256-def456" href="app.css">`,
+        )
+      })
+
+      it('strips integrity assigned via a JS string literal when removeSRIAttributes is set', () => {
+        const js = `el.integrity = 'sha384-abc123'`
+
+        expect(regexRewriter.strip(js, { removeSRIAttributes: true })).toEqual(`el['cypress-stripped-integrity'] = 'sha384-abc123'`)
+      })
+
+      it('strips integrity assigned via bracket access when removeSRIAttributes is set', () => {
+        const js = `el['integrity'] = 'sha384-abc123'`
+
+        expect(regexRewriter.strip(js, { removeSRIAttributes: true })).toEqual(`el['cypress-stripped-integrity'] = 'sha384-abc123'`)
+      })
+
+      it('leaves integrity untouched when neither flag is set', () => {
+        const html = `<script integrity="sha384-abc123" src="app.js"></script>`
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('does not enable third-party obstructive-code rewriting (integrity stripping is decoupled)', () => {
+        // `e.self === e.top` is only rewritten under modifyObstructiveThirdPartyCode, not removeSRIAttributes
+        const js = `if (e.self === e.top) run()`
+
+        expect(regexRewriter.strip(js, { removeSRIAttributes: true })).toEqual(regexRewriter.strip(js))
+      })
+    })
+
     it('replaces jira window getter', () => {
       const jira = `\
 for (; !function (n) {

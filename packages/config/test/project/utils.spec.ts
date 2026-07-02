@@ -888,6 +888,25 @@ describe('config/src/project/utils', () => {
       await defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/33198
+    // A `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string, which used to
+    // slip past validation and crash later when the browser list was mapped over.
+    it('throws a clear validation error when browsers is coerced to a non-array via env', async function () {
+      vi.stubEnv('CYPRESS_BROWSERS', 'chrome')
+
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+
+      try {
+        await mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)
+        throw new Error('Expected error to be thrown')
+      } catch (err: any) {
+        expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_BROWSERS_INVALID', 'chrome')
+      }
+    })
+
     it('port=null', async function () {
       await defaults('port', null)
     })
@@ -1101,9 +1120,17 @@ describe('config/src/project/utils', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', async function () {
-      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
 
       expect(cfg.numTestsKeptInMemory).toEqual(0)
+    })
+
+    it('honors numTestsKeptInMemory in runMode when CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY=true', async function () {
+      vi.stubEnv('CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY', 'true')
+
+      const cfg = await defaults('numTestsKeptInMemory', 50, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
+
+      expect(cfg.numTestsKeptInMemory).toEqual(50)
     })
 
     it('resets watchForFileChanges to false when runMode', async function () {
@@ -1307,6 +1334,7 @@ describe('config/src/project/utils', () => {
           port: { value: 1234, from: 'cli' },
           projectId: { value: null, from: 'default' },
           redirectionLimit: { value: 20, from: 'default' },
+          removeSRIAttributes: { value: false, from: 'default' },
           reporter: { value: 'json', from: 'cli' },
           resolvedNodePath: { value: null, from: 'default' },
           resolvedNodeVersion: { value: null, from: 'default' },
@@ -1439,6 +1467,7 @@ describe('config/src/project/utils', () => {
           port: { value: 2020, from: 'config' },
           projectId: { value: 'projectId123', from: 'env' },
           redirectionLimit: { value: 20, from: 'default' },
+          removeSRIAttributes: { value: false, from: 'default' },
           reporter: { value: 'spec', from: 'default' },
           resolvedNodePath: { value: null, from: 'default' },
           resolvedNodeVersion: { value: null, from: 'default' },

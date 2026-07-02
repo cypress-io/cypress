@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>#14864: keyup testcase</title>
+  </head>
+  <body>
+    <input type="text">
+    <div id="feedback"></div>
+    <script>
+      const input = document.querySelector('input')
+      const feedback = document.getElementById('feedback')
+
+      let value = ''
+      input.addEventListener('keyup', () => {
+        feedback.textContent = value.endsWith('/')
+          ? 'You typed Slash'
+          : ''
+      })
+      input.addEventListener('input', (event) => {
+        Promise.resolve().then(() => {
+          value = event.target.value
+        })
+      })
+    </script>
+  </body>
+</html>

@@ -248,22 +248,30 @@ export class SocketBase implements SocketBroadcaster {
           automationClient.on('disconnect', () => {
             const { activeBrowser } = getCtx().coreData
 
+            debug('automation client disconnected %o', { ended: this.ended, connectedBrowser: connectedBrowser?.path, activeBrowser: activeBrowser?.path })
+
             // if we've stopped or if we've switched to another browser then don't do anything
             if (this.ended || (connectedBrowser?.path !== activeBrowser?.path)) {
               return
             }
+
+            const disconnectedAt = Date.now()
 
             // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
             return Bluebird.delay(2000)
             .then(() => {
               // bail if we've swapped to a new automationClient
               if (automationClient !== socket) {
+                debug('a different automation client connected %dms after the disconnect', Date.now() - disconnectedAt)
+
                 return
               }
 
               // give ourselves about 2000ms to reconnect
               // and if we're connected its all good
               if (automationClient.connected) {
+                debug('automation client socket is connected %dms after the disconnect', Date.now() - disconnectedAt)
+
                 return
               }
 
@@ -699,6 +707,13 @@ export class SocketBase implements SocketBroadcaster {
 
         if (this.supportsRunEvents) {
           socket.on('plugins:before:spec', (spec, cb) => {
+            // When `runState` is set, the runner is reloading `top` because cy.visit()
+            // navigated to a different origin. before:spec has already fired for this spec
+            // run and must not fire again.
+            if (runState) {
+              return cb()
+            }
+
             const beforeSpecSpan = telemetry.startSpan({ name: 'lifecycle:before:spec' })
 
             beforeSpecSpan?.setAttributes({ spec })

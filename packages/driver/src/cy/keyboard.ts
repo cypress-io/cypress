@@ -774,9 +774,7 @@ export class Keyboard {
           const activeEl = this.getActiveEl(options)
 
           if (key.type === 'shortcut') {
-            this.simulateShortcut(activeEl, key, options)
-
-            return null
+            return this.simulateShortcut(activeEl, key, options)
           }
 
           debug('typing key:', key.key)
@@ -842,9 +840,7 @@ export class Keyboard {
             return null
           }
 
-          this.typeSimulatedKey(activeEl, key, options)
-
-          return null
+          return this.typeSimulatedKey(activeEl, key, options)
         }
       },
     )
@@ -1245,7 +1241,14 @@ export class Keyboard {
     this.simulatedKeydown(el, key, options)
     const elToKeyup = this.getActiveEl(options)
 
-    this.simulatedKeyup(elToKeyup, key, options)
+    // keyup is deferred to the next microtask so listeners that update state in a
+    // native microtask on input (as real browsers allow) run before keyup handlers.
+    // Use the native Promise scheduler; bluebird's Promise.resolve() does not share
+    // the same microtask queue as DOM Promise.resolve() callbacks.
+    // @see https://github.com/cypress-io/cypress/issues/14864
+    return globalThis.Promise.resolve().then(() => {
+      this.simulatedKeyup(elToKeyup, key, options)
+    })
   }
 
   simulateShortcut (el: HTMLElement, key: ShortcutDetails, options) {
@@ -1254,16 +1257,19 @@ export class Keyboard {
     })
 
     this.simulatedKeydown(el, key.key, options)
-    this.simulatedKeyup(el, key.key, options)
 
-    options.id = _.uniqueId('char')
+    return globalThis.Promise.resolve().then(() => {
+      this.simulatedKeyup(el, key.key, options)
 
-    const elToKeyup = this.getActiveEl(options)
+      const elToKeyup = this.getActiveEl(options)
 
-    key.modifiers.reverse().forEach((key) => {
-      delete key.events.keyup
       options.id = _.uniqueId('char')
-      this.simulatedKeyup(elToKeyup, key, options)
+
+      key.modifiers.reverse().forEach((key) => {
+        delete key.events.keyup
+        options.id = _.uniqueId('char')
+        this.simulatedKeyup(elToKeyup, key, options)
+      })
     })
   }
 

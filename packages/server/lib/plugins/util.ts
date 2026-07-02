@@ -4,10 +4,13 @@ import Bluebird from 'bluebird'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import Debug from 'debug'
 import type { CompilerErrorLocation, ProcessIpcWrapper, TransformError } from '@packages/types'
 import { stackUtils } from '@packages/errors'
 import type { SerializedError } from '@packages/errors'
 import type { PluginInvokeIds } from './child/types'
+
+const debug = Debug('cypress:server:plugins:util')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -165,6 +168,8 @@ export const wrapIpc = (aProcess: WrappedIpcProcess): ProcessIpcWrapper => {
   return {
     send (event, ...args) {
       if (aProcess.killed || !aProcess.connected) {
+        debug('not sending ipc event %s; process killed: %o, connected: %o', event, aProcess.killed, aProcess.connected)
+
         return
       }
 
@@ -185,10 +190,14 @@ export const wrapChildPromise = (
   ids: PluginInvokeIds,
   args: any[] = [],
 ): Bluebird<void> => {
+  const invokedAt = Date.now()
+
   return Bluebird.try(() => {
     return invoke(ids.eventId, args)
   })
   .then((value) => {
+    debug('invocation %s (event id %d) fulfilled after %dms', ids.invocationId, ids.eventId, Date.now() - invokedAt)
+
     // undefined is coerced into null when sent over ipc, but we need
     // to differentiate between them for 'task' event
     if (value === undefined) {
@@ -197,6 +206,8 @@ export const wrapChildPromise = (
 
     return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
   }).catch((err) => {
+    debug('invocation %s (event id %d) rejected after %dms: %o', ids.invocationId, ids.eventId, Date.now() - invokedAt, err)
+
     return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
   })
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-redeclare */
 /// <reference types="cypress" />
 import type {
   ComponentPublicInstance,
@@ -49,7 +48,7 @@ type GlobalMountOptions = Required<VTUMountingOptions<any>>['global']
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
 declare global {
-  // eslint-disable-next-line no-redeclare
+
   namespace Cypress {
     interface Cypress {
       vueWrapper: VueWrapper<ComponentPublicInstance>
@@ -113,7 +112,7 @@ type ComponentMountingOptions<T> = T extends DefineComponent<
   : MountingOptions<any>
 
 // Class component (without vue-class-component) - no props
-export function mount<V extends {}>(
+export function mount<V extends {}> (
   originalComponent: {
     new (...args: any[]): V
     __vccOpts: any
@@ -125,7 +124,7 @@ export function mount<V extends {}>(
 }>
 
 // Class component (without vue-class-component) - props
-export function mount<V extends {}, P>(
+export function mount<V extends {}, P> (
   originalComponent: {
     new (...args: any[]): V
     __vccOpts: any
@@ -138,7 +137,7 @@ export function mount<V extends {}, P>(
 }>
 
 // Class component - no props
-export function mount<V extends {}>(
+export function mount<V extends {}> (
   originalComponent: {
     new (...args: any[]): V
     registerHooks(keys: string[]): void
@@ -150,7 +149,7 @@ export function mount<V extends {}>(
 }>
 
 // Class component - props
-export function mount<V extends {}, P>(
+export function mount<V extends {}, P> (
   originalComponent: {
     new (...args: any[]): V
     props(Props: P): any
@@ -163,7 +162,7 @@ export function mount<V extends {}, P>(
 }>
 
 // Functional component with emits
-export function mount<Props extends {}, E extends EmitsOptions = {}>(
+export function mount<Props extends {}, E extends EmitsOptions = {}> (
   originalComponent: FunctionalComponent<Props, E>,
   options?: MountingOptions<Props & PublicProps> & Record<string, any>
 ): Cypress.Chainable<{
@@ -184,8 +183,8 @@ export function mount<
   EE extends string = string,
   PP = PublicProps,
   Props = Readonly<ExtractPropTypes<PropsOrPropOptions>>,
-  Defaults extends {} = ExtractDefaultPropTypes<PropsOrPropOptions>
->(
+  Defaults extends {} = ExtractDefaultPropTypes<PropsOrPropOptions>,
+> (
   component: DefineComponent<
     PropsOrPropOptions,
     RawBindings,
@@ -246,7 +245,7 @@ export function mount<
 }>
 
 // component declared by vue-tsc ScriptSetup
-export function mount<T extends DefineComponent<any, any, any, any, any>>(
+export function mount<T extends DefineComponent<any, any, any, any, any>> (
   component: T,
   options?: ComponentMountingOptions<T>
 ): Cypress.Chainable<{
@@ -264,8 +263,8 @@ export function mount<
   E extends EmitsOptions = Record<string, any>,
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
-  EE extends string = string
->(
+  EE extends string = string,
+> (
   componentOptions: ComponentOptionsWithoutProps<
     Props,
     RawBindings,
@@ -304,8 +303,8 @@ export function mount<
   EE extends string = string,
   Props extends Readonly<{ [key in PropNames]?: any }> = Readonly<{
     [key in PropNames]?: any
-  }>
->(
+  }>,
+> (
   componentOptions: ComponentOptionsWithArrayProps<
     PropNames,
     RawBindings,
@@ -336,8 +335,8 @@ export function mount<
   E extends EmitsOptions = Record<string, any>,
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
-  EE extends string = string
->(
+  EE extends string = string,
+> (
   componentOptions: ComponentOptionsWithObjectProps<
     PropsOptions,
     RawBindings,

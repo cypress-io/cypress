@@ -9,6 +9,7 @@ import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
 import utils from './utils'
 import type { CyCookie } from '../automation/util'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -67,6 +68,8 @@ type WebKitAutomationOpts = {
   initialUrl: string
   downloadsFolder: string
   videoApi?: RunModeVideoApi
+  userAgent?: string | null
+  isHeadless: boolean
 }
 
 export class WebKitAutomation {
@@ -74,10 +77,14 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
+  private userAgent: string | null
+  private isHeadless: boolean
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
+    this.userAgent = opts.userAgent ?? null
+    this.isHeadless = opts.isHeadless
   }
 
   // static initializer to avoid "not definitively declared"
@@ -94,6 +101,13 @@ export class WebKitAutomation {
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
+      ...(this.userAgent ? { userAgent: this.userAgent } : {}),
+      // In headless mode, set a standard devicePixelRatio so that screenshots
+      // are consistent regardless of the host machine's DPI (e.g. 2x locally
+      // vs 1x in CI) and to avoid fuzzy text on high-DPI displays. This mirrors
+      // Chrome, which only forces `--force-device-scale-factor=1` when headless.
+      // https://github.com/cypress-io/cypress/issues/23808
+      ...(this.isHeadless ? { deviceScaleFactor: 1 } : {}),
       recordVideo: options.videoApi && {
         dir: os.tmpdir(),
         size: { width: 1280, height: 720 },
@@ -139,7 +153,7 @@ export class WebKitAutomation {
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
-        debug('ending video capture, closing page...')
+        debug('ending video capture: closing page and saving video to %s', videoApi.videoName)
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
@@ -151,7 +165,11 @@ export class WebKitAutomation {
         throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
       },
       async restart () {
-        throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
+        // WebKit records to a page-scoped Playwright video that is finalized on page close, so a
+        // single controller cannot be restarted to record a second spec. Instead of re-using the
+        // controller, WebKit recycles the tab per spec and creates a fresh recording each time (see
+        // run.ts), so this should never be reached. It remains as a defensive guard.
+        throw new Error('Cannot restart WebKit video controller - its recording is tied to the page. WebKit records each spec to its own video by recreating the tab instead.')
       },
       postProcessFfmpegOptions: {
         // WebKit seems to record at the highest possible frame rate, so filter out duplicate frames before compressing
@@ -253,6 +271,22 @@ export class WebKitAutomation {
 
       this.automation.onRequestEvent?.('response:received', responseReceived)
     })
+
+    // When a request fails (e.g. `req.destroy()` / `forceNetworkError` resets the
+    // connection), the pre-request emitted on 'request' is never matched to a
+    // response and would otherwise leak in the proxy's pre-request queue, causing
+    // infinite request loops. Mirror the CDP (`Network.loadingFailed`) and BiDi
+    // (`network.fetchError`) behavior by removing the orphaned pre-request.
+    // @see https://github.com/cypress-io/cypress/issues/23810
+    this.page.on('requestfailed', (request) => {
+      const requestId = requestIdMap.get(request)
+
+      if (!requestId) return
+
+      debug('received requestfailed, removing pre-request %o', { requestId })
+
+      this.automation.onRemoveBrowserPreRequest?.(requestId)
+    })
   }
 
   private async getCookies (filter: CyCookieFilter): Promise<CyCookie[]> {
@@ -277,7 +311,7 @@ export class WebKitAutomation {
 
     if (!cookie) {
       cookie = cookies.find((cookie) => {
-          // if unable to match closest via strict domain, then return a cookie that matches the apex domain
+        // if unable to match closest via strict domain, then return a cookie that matches the apex domain
         return cookieMatches(cookie, filter)
       })
 
@@ -340,6 +374,38 @@ export class WebKitAutomation {
     return cookiesToClear
   }
 
+  /**
+   * Locates the AUT (application under test) frame within the runner page.
+   * Playwright's `frame.name()` returns the frame's `name` attribute, falling
+   * back to its `id` attribute, both of which the runner sets to
+   * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
+   */
+  private getAutFrame (): playwright.Frame {
+    const childFrames = this.page.mainFrame().childFrames()
+
+    let autFrame = childFrames.find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER))
+
+    // When running Cypress-in-Cypress E2E tests, the AUT frame is nested one
+    // level deeper inside the outer AUT frame.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && autFrame) {
+      autFrame = autFrame.childFrames().find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER)) ?? autFrame
+    }
+
+    // If for whatever reason we cannot identify the AUT frame by name, fall back
+    // to the first child frame, which should always be the AUT frame.
+    if (!autFrame) {
+      debug('could not identify AUT frame by name, falling back to first child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
+      autFrame = childFrames[0]
+    }
+
+    if (!autFrame) {
+      debug('could not find AUT frame: the runner page has no child frames')
+      throw new Error('Could not find AUT frame')
+    }
+
+    return autFrame
+  }
+
   private async takeScreenshot (data) {
     const buffer = await this.page.screenshot({
       fullPage: data.capture === 'fullPage',
@@ -371,8 +437,12 @@ export class WebKitAutomation {
         return await this.clearCookie(data)
       case 'take:screenshot':
         return await this.takeScreenshot(data)
+      case 'get:aut:url':
+        return this.getAutFrame().url()
+      case 'get:aut:title':
+        return await this.getAutFrame().title()
       case 'focus:browser:window':
-        return await this.context.pages[0]?.bringToFront()
+        return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':
         debug('stubbed reset:browser:state')
 

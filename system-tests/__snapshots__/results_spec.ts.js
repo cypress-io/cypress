@@ -46,6 +46,7 @@ exports['module api and after:run results'] = `
     "port": 100,
     "projectId": null,
     "redirectionLimit": 20,
+    "removeSRIAttributes": false,
     "reporter": "spec",
     "reporterOptions": null,
     "requestTimeout": 5000,

@@ -720,6 +720,16 @@ export const AllCypressErrors = {
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
+  FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
+    return errTemplate`\
+        Cypress could not start its internal file server.
+
+        After ${fmt.highlight(attempts)} attempts to listen on an available port on ${fmt.highlightSecondary('127.0.0.1')}, the last attempt failed with:
+
+        ${fmt.highlightSecondary(err.message)}
+
+        Please try again later.`
+  },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
         Error reading from: ${fmt.path(filePath)}
@@ -962,6 +972,24 @@ export const AllCypressErrors = {
       Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
       Instead the value was: ${fmt.stringify(value)}`
+  },
+  CONFIG_BROWSERS_INVALID: (browsers: any) => {
+    return errTemplate`\
+        The ${fmt.highlight(`browsers`)} configuration value must be an array of browser objects, but it was set to:
+
+        ${fmt.stringify(browsers)}
+
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+
+        To run your tests in a specific browser, remove that value and pass the browser by name instead:
+
+        ${fmt.terminal(`cypress run --browser chrome`)}
+
+        ...or, with the Module API:
+
+        ${fmt.code(`cypress.run({ browser: 'chrome' })`)}
+
+        https://on.cypress.io/launching-browsers`
   },
   RENAMED_CONFIG_OPTION: (arg1: { name: string, newName: string }) => {
     return errTemplate`\

@@ -1,4 +1,4 @@
-import { vi, describe, it, expect } from 'vitest'
+import { vi, describe, it, expect, afterEach } from 'vitest'
 import errors from '@packages/errors'
 import { updateWithPluginValues } from '../../src/project'
 
@@ -199,6 +199,68 @@ describe('config/src/project/index', () => {
             from: 'plugin',
           },
         },
+      })
+    })
+
+    describe('numTestsKeptInMemory', () => {
+      afterEach(() => {
+        vi.unstubAllEnvs()
+      })
+
+      it('forces numTestsKeptInMemory to 0 in run mode when setupNodeEvents returns a non-zero value', () => {
+        const cfg = {
+          isTextTerminal: true,
+          numTestsKeptInMemory: 0,
+          resolved: {
+            numTestsKeptInMemory: { value: 0, from: 'default' },
+          },
+        }
+
+        const overrides = {
+          numTestsKeptInMemory: 50,
+        }
+
+        const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
+
+        expect(updated.numTestsKeptInMemory).toEqual(0)
+      })
+
+      it('honors numTestsKeptInMemory in run mode when CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY=true', () => {
+        vi.stubEnv('CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY', 'true')
+
+        const cfg = {
+          isTextTerminal: true,
+          numTestsKeptInMemory: 0,
+          resolved: {
+            numTestsKeptInMemory: { value: 0, from: 'default' },
+          },
+        }
+
+        const overrides = {
+          numTestsKeptInMemory: 50,
+        }
+
+        const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
+
+        expect(updated.numTestsKeptInMemory).toEqual(50)
+      })
+
+      it('does not force numTestsKeptInMemory to 0 in open mode', () => {
+        const cfg = {
+          isTextTerminal: false,
+          numTestsKeptInMemory: 0,
+          resolved: {
+            numTestsKeptInMemory: { value: 0, from: 'default' },
+          },
+        }
+
+        const overrides = {
+          numTestsKeptInMemory: 50,
+        }
+
+        const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
+
+        expect(updated.numTestsKeptInMemory).toEqual(50)
       })
     })
   })

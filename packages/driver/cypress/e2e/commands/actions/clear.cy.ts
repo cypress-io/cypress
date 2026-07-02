@@ -107,7 +107,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     cy.get('input:first').clear({ scrollBehavior: 'bottom' })
 
     cy.get('input:first').then((el) => {
-      expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+      expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
     })
   })
 
@@ -143,7 +143,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     cy.get('input:first').clear()
 
     cy.get('input:first').then((el) => {
-      expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+      expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
     })
   })
 

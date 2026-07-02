@@ -41,7 +41,7 @@
     "base64url": "^3.0.1",
     "bluebird": "3.7.2",
     "body-parser": "1.20.3",
-    "chai": "3.5.0",
+    "chai": "4.5.0",
     "chai-as-promised": "7.1.2",
     "chai-subset": "1.6.0",
     "chai-uuid": "1.0.6",
