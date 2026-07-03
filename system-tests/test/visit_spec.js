@@ -202,6 +202,26 @@ describe('e2e visit', () => {
     })
   })
 
+  context('source rewriting', () => {
+    systemTests.setup({
+      servers: {
+        port: 3434,
+        static: true,
+        onServer,
+      },
+      settings: {
+        e2e: {
+        },
+      },
+    })
+
+    systemTests.it('passes with the default source rewriter', {
+      browser: '!webkit', // TODO(webkit): fix+unskip
+      spec: 'source_rewriting.cy.js',
+      snapshot: true,
+    })
+  })
+
   context('normal response timeouts', () => {
     systemTests.setup({
       settings: {
