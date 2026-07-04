@@ -24,7 +24,6 @@ describe('lib/tap public error catalog', () => {
         "tapBindingNotFound",
         "tapBindingThrew",
         "tapCdpUnreachable",
-        "tapInvalidMethod",
         "tapStaleHandle",
       ]
     `)
@@ -66,16 +65,6 @@ describe('lib/tap public error catalog', () => {
       "The Cypress runner navigated while running the command.
 
       Try running the command again."
-    `)
-  })
-
-  it('tapInvalidMethod — the requested method name was rejected', () => {
-    expect(render(errors.tapInvalidMethod)).toMatchInlineSnapshot(`
-      "Invalid tap binding method.
-
-      Search for an existing issue or open a GitHub issue at
-
-        https://github.com/cypress-io/cypress/issues"
     `)
   })
 })

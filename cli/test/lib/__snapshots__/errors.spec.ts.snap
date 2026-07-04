@@ -95,7 +95,6 @@ exports[`errors > individual > has the following errors 1`] = `
   "tapBindingNotFound",
   "tapBindingThrew",
   "tapCdpUnreachable",
-  "tapInvalidMethod",
   "tapStaleHandle",
   "unexpected",
   "unknownError",

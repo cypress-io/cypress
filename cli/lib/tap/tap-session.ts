@@ -7,8 +7,6 @@ import { TAP_BINDING_GLOBAL } from './contract'
 
 const debug = Debug('cypress:cli:tap')
 
-const methodNameRe = /^[a-zA-Z][a-zA-Z0-9]*$/
-
 // Chrome reports these CDP failures under the generic -32000 "server error"
 // protocol code, so the exact message text is the only way to recognize them.
 export const CdpErrorMessage = {
@@ -149,8 +147,8 @@ const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Pr
 const callBindingMethod = (client: CRI.Client, sessionId: string, objectId: string, method: string, args: unknown[]) => {
   return client.Runtime.callFunctionOn({
     objectId,
-    functionDeclaration: `function (...a) { return this.${method}(...a) }`,
-    arguments: args.map((value) => ({ value })),
+    functionDeclaration: `function (method, ...args) { return this[method](...args) }`,
+    arguments: [method, ...args].map((value) => ({ value })),
     returnByValue: true,
     awaitPromise: true,
   }, sessionId)
@@ -214,10 +212,6 @@ export const withTapSession = async <T> (
     let sessionId = await attach()
 
     const call = async (method: string, args: unknown[] = []): Promise<unknown> => {
-      if (!methodNameRe.test(method)) {
-        return throwTapError(errors.tapInvalidMethod, `"${method}" is not a valid tap method name.`)
-      }
-
       let response: Awaited<ReturnType<typeof callBindingWithRetry>>
 
       try {

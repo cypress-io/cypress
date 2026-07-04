@@ -430,11 +430,6 @@ const tapStaleHandle = {
   solution: 'Try running the command again.',
 }
 
-const tapInvalidMethod = {
-  description: 'Invalid tap binding method.',
-  solution: genericErrorSolution,
-}
-
 export const errors = {
   unknownError,
   nonZeroExitCodeXvfb,
@@ -464,5 +459,4 @@ export const errors = {
   tapBindingNotFound,
   tapBindingThrew,
   tapStaleHandle,
-  tapInvalidMethod,
 }

@@ -104,8 +104,8 @@ describe('lib/tap/tap-session', () => {
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledOnce()
     expect(client.Runtime.callFunctionOn.mock.calls[0][0]).toEqual({
       objectId: 'OBJ1',
-      functionDeclaration: 'function (...a) { return this.health(...a) }',
-      arguments: [],
+      functionDeclaration: 'function (method, ...args) { return this[method](...args) }',
+      arguments: [{ value: 'health' }],
       returnByValue: true,
       awaitPromise: true,
     })
@@ -131,20 +131,10 @@ describe('lib/tap/tap-session', () => {
     expect(mockConnect).toHaveBeenCalledOnce()
     expect(client.Target.attachToTarget).toHaveBeenCalledOnce()
 
-    expect(client.Runtime.callFunctionOn.mock.calls[0][0].functionDeclaration).toContain('this.getSchema')
-    expect(client.Runtime.callFunctionOn.mock.calls[1][0].functionDeclaration).toContain('this.health')
+    expect(client.Runtime.callFunctionOn.mock.calls[0][0].arguments[0]).toEqual({ value: 'getSchema' })
+    expect(client.Runtime.callFunctionOn.mock.calls[1][0].arguments[0]).toEqual({ value: 'health' })
 
     expect(client.close).toHaveBeenCalledOnce()
-  })
-
-  it('rejects method names that are not plain identifiers before any CDP call', async () => {
-    const { client } = setup()
-
-    await expectError(callOnce('health(); window.x'), errors.tapInvalidMethod)
-    await expectError(callOnce('a.b'), errors.tapInvalidMethod)
-    await expectError(callOnce(''), errors.tapInvalidMethod)
-
-    expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
   })
 
   it('closes the connection even when fn itself throws', async () => {
