@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CRI from 'chrome-remote-interface'
 
 import type { ReadyInstanceState } from '../../../lib/cypress-instances'
-import { withTapSession } from '../../../lib/tap/tap-session'
+import { CdpErrorMessage, withTapSession } from '../../../lib/tap/tap-session'
 import { errors } from '../../../lib/errors'
 
 vi.mock('chrome-remote-interface', () => ({ default: vi.fn() }))
@@ -68,7 +68,7 @@ const callOnce = (method = 'health', args: unknown[] = []) => {
   return withTapSession(instance, (session) => session.call(method, args))
 }
 
-const staleError = () => new Error('Could not find object with given id')
+const staleError = () => new Error(CdpErrorMessage.objectNotFound)
 
 const expectError = async (promise: Promise<any>, details: unknown) => {
   const err = await promise.catch((e) => e)
@@ -184,7 +184,7 @@ describe('lib/tap/tap-session', () => {
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ2' } })
 
     const callFunctionOn = vi.fn()
-    .mockRejectedValueOnce(new Error('Execution context was destroyed.'))
+    .mockRejectedValueOnce(new Error(CdpErrorMessage.contextDestroyed))
     .mockResolvedValueOnce({ result: { type: 'string', value: 'ok' } })
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
@@ -196,7 +196,7 @@ describe('lib/tap/tap-session', () => {
 
   it('throws STALE_HANDLE when the context is destroyed again on the retry', async () => {
     const evaluate = vi.fn().mockResolvedValue({ result: { type: 'object', objectId: 'OBJ1' } })
-    const callFunctionOn = vi.fn().mockRejectedValue(new Error('Execution context was destroyed.'))
+    const callFunctionOn = vi.fn().mockRejectedValue(new Error(CdpErrorMessage.contextDestroyed))
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
@@ -219,7 +219,7 @@ describe('lib/tap/tap-session', () => {
   it('re-acquires and retries once when the binding resolve is destroyed mid-flight', async () => {
     const evaluate = vi.fn()
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
-    .mockRejectedValueOnce(new Error('Execution context was destroyed.'))
+    .mockRejectedValueOnce(new Error(CdpErrorMessage.contextDestroyed))
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ1' } })
 
     const { client } = setup(makeClient({ evaluate }))
@@ -233,7 +233,7 @@ describe('lib/tap/tap-session', () => {
   it('throws STALE_HANDLE when the binding resolve is destroyed again on the retry', async () => {
     const evaluate = vi.fn()
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
-    .mockRejectedValue(new Error('Execution context was destroyed.'))
+    .mockRejectedValue(new Error(CdpErrorMessage.contextDestroyed))
 
     const { client } = setup(makeClient({ evaluate }))
 
@@ -260,7 +260,7 @@ describe('lib/tap/tap-session', () => {
     .mockResolvedValueOnce({ sessionId: 'SID2' })
 
     const callFunctionOn = vi.fn()
-    .mockRejectedValueOnce(new Error('Inspected target navigated or closed'))
+    .mockRejectedValueOnce(new Error(CdpErrorMessage.targetGone))
     .mockResolvedValueOnce({ result: { type: 'string', value: 'ok' } })
 
     const { client } = setup(makeClient({ attachToTarget, callFunctionOn }))
@@ -278,7 +278,7 @@ describe('lib/tap/tap-session', () => {
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ1' } })
     .mockResolvedValue({ result: { type: 'undefined' } })
 
-    const callFunctionOn = vi.fn().mockRejectedValue(new Error('Inspected target navigated or closed'))
+    const callFunctionOn = vi.fn().mockRejectedValue(new Error(CdpErrorMessage.targetGone))
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
@@ -291,9 +291,9 @@ describe('lib/tap/tap-session', () => {
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ1' } })
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE2' } })
-    .mockRejectedValue(new Error('Session with given id not found.'))
+    .mockRejectedValue(new Error(CdpErrorMessage.sessionNotFound))
 
-    const callFunctionOn = vi.fn().mockRejectedValue(new Error('Inspected target navigated or closed'))
+    const callFunctionOn = vi.fn().mockRejectedValue(new Error(CdpErrorMessage.targetGone))
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 

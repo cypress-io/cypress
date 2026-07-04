@@ -7,11 +7,24 @@ import { TAP_BINDING_GLOBAL } from './contract'
 
 const debug = Debug('cypress:cli:tap')
 
-export const TapSessionRegex = {
-  methodName: /^[a-zA-Z][a-zA-Z0-9]*$/,
-  staleObject: /Could not find object with given id|Cannot find context with specified id|Execution context was destroyed/i,
-  sessionGone: /Inspected target navigated or closed|Session with given id not found/i,
+const methodNameRe = /^[a-zA-Z][a-zA-Z0-9]*$/
+
+// Chrome reports these CDP failures under the generic -32000 "server error"
+// protocol code, so the exact message text is the only way to recognize them.
+export const CdpErrorMessage = {
+  objectNotFound: 'Could not find object with given id',
+  contextNotFound: 'Cannot find context with specified id',
+  contextDestroyed: 'Execution context was destroyed',
+  targetGone: 'Inspected target navigated or closed',
+  sessionNotFound: 'Session with given id not found',
 } as const
+
+const staleObjectMessages = [CdpErrorMessage.objectNotFound, CdpErrorMessage.contextNotFound, CdpErrorMessage.contextDestroyed]
+const sessionGoneMessages = [CdpErrorMessage.targetGone, CdpErrorMessage.sessionNotFound]
+
+const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
+  return err instanceof Error && messages.some((message) => err.message.includes(message))
+}
 
 const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
   const err: any = new Error(message, cause === undefined ? undefined : { cause })
@@ -26,7 +39,7 @@ export interface TapSession {
 }
 
 const isStaleHandleError = (err: unknown): boolean => {
-  return err instanceof Error && TapSessionRegex.staleObject.test(err.message)
+  return matchesAnyMessage(err, staleObjectMessages)
 }
 
 const isSessionGoneError = (err: unknown): boolean => {
@@ -34,9 +47,7 @@ const isSessionGoneError = (err: unknown): boolean => {
     return false
   }
 
-  const cause = (err as { cause?: unknown }).cause
-
-  return TapSessionRegex.sessionGone.test(err.message) || (cause instanceof Error && TapSessionRegex.sessionGone.test(cause.message))
+  return matchesAnyMessage(err, sessionGoneMessages) || matchesAnyMessage((err as { cause?: unknown }).cause, sessionGoneMessages)
 }
 
 interface PageTargetInfo {
@@ -203,7 +214,7 @@ export const withTapSession = async <T> (
     let sessionId = await attach()
 
     const call = async (method: string, args: unknown[] = []): Promise<unknown> => {
-      if (!TapSessionRegex.methodName.test(method)) {
+      if (!methodNameRe.test(method)) {
         return throwTapError(errors.tapInvalidMethod, `"${method}" is not a valid tap method name.`)
       }
 
