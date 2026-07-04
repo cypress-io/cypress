@@ -37,22 +37,19 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapBindingNotFound — the runner page could not be reached', () => {
+  it('tapBindingNotFound — the instance page could not be reached', () => {
     expect(render(errors.tapBindingNotFound)).toMatchInlineSnapshot(`
-      "Could not connect to the Cypress runner.
+      "Could not connect to the Cypress instance.
 
-      The runner may still be loading — try again in a moment.
+      The instance may still be loading — try again in a moment.
 
-      Other things to check:
-
-      - The runner tab may have been closed. Open a browser in Cypress and try again.
-      - The running version of Cypress may not support cypress tap."
+      If the problem persists, the browser tab running Cypress may have been closed. Open a browser in Cypress and try again."
     `)
   })
 
-  it('tapBindingThrew — the binding method threw inside the runner', () => {
+  it('tapBindingThrew — the binding method threw inside the instance', () => {
     expect(render(errors.tapBindingThrew)).toMatchInlineSnapshot(`
-      "The Cypress runner failed while running the tap command.
+      "The Cypress instance failed while running the tap command.
 
       Search for an existing issue or open a GitHub issue at
 
@@ -60,9 +57,9 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapStaleHandle — the runner navigated mid-command', () => {
+  it('tapStaleHandle — the instance navigated mid-command', () => {
     expect(render(errors.tapStaleHandle)).toMatchInlineSnapshot(`
-      "The Cypress runner navigated while running the command.
+      "The Cypress instance navigated while running the command.
 
       Try running the command again."
     `)

@@ -409,24 +409,21 @@ const tapCdpUnreachable = {
 }
 
 const tapBindingNotFound = {
-  description: 'Could not connect to the Cypress runner.',
+  description: 'Could not connect to the Cypress instance.',
   solution: stripIndent`
-    The runner may still be loading — try again in a moment.
+    The instance may still be loading — try again in a moment.
 
-    Other things to check:
-
-    - The runner tab may have been closed. Open a browser in Cypress and try again.
-    - The running version of Cypress may not support ${chalk.cyan('cypress tap')}.
+    If the problem persists, the browser tab running Cypress may have been closed. Open a browser in Cypress and try again.
   `,
 }
 
 const tapBindingThrew = {
-  description: 'The Cypress runner failed while running the tap command.',
+  description: 'The Cypress instance failed while running the tap command.',
   solution: genericErrorSolution,
 }
 
 const tapStaleHandle = {
-  description: 'The Cypress runner navigated while running the command.',
+  description: 'The Cypress instance navigated while running the command.',
   solution: 'Try running the command again.',
 }
 
