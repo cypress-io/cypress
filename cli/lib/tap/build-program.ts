@@ -77,7 +77,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     rejectExcessArguments('instances', [], instances.args)
   })
 
-  for (const { name, description, params, options = [] } of schema.commands) {
+  for (const { name, description, params = [], options = [] } of schema.commands) {
     const command = program.command(name)
 
     if (params.length) {

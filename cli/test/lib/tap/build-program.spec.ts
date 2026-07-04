@@ -188,6 +188,26 @@ describe('lib/tap/build-program', () => {
     )
   })
 
+  it('treats a schema command that omits params as having no positionals', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram({
+      protocolVersion: 1,
+      cypressVersion: '15.0.0',
+      commands: [{
+        name: 'health',
+        description: 'check that a running Cypress instance is reachable',
+      }],
+    } as TapSchema, dispatch)
+
+    program.parse(['health'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('health', {}, {})
+
+    expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
+      expect.objectContaining({ code: 'commander.excessArguments' }),
+    )
+  })
+
   it('declares a required value option with requiredOption so commander enforces it', () => {
     const program = buildTapProgram({
       protocolVersion: 1,
