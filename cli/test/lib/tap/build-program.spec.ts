@@ -208,6 +208,65 @@ describe('lib/tap/build-program', () => {
     )
   })
 
+  const dashedSchema: TapSchema = {
+    protocolVersion: 1,
+    cypressVersion: '15.0.0',
+    commands: [{
+      name: 'export',
+      description: 'export results',
+      params: [],
+      options: [
+        { name: 'dry-run', type: 'boolean', required: false, description: 'preview without writing' },
+        { name: 'output-file', type: 'string', required: false, description: 'where to write results' },
+      ],
+    }],
+  }
+
+  it('forwards a dashed boolean option keyed by its raw schema name despite commander camelCasing it', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dashedSchema, dispatch)
+
+    program.parse(['export', '--dry-run'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'dry-run': 'true' })
+  })
+
+  it('forwards a dashed value option keyed by its raw schema name despite commander camelCasing it', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dashedSchema, dispatch)
+
+    program.parse(['export', '--output-file', 'out.json'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'output-file': 'out.json' })
+  })
+
+  it('omits dashed options the user did not supply', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dashedSchema, dispatch)
+
+    program.parse(['export'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('export', {}, {})
+  })
+
+  it('forwards a dashed param name keyed by its raw schema name (positionals bypass camelCasing)', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram({
+      protocolVersion: 1,
+      cypressVersion: '15.0.0',
+      commands: [{
+        name: 'show',
+        description: 'show a spec',
+        params: [{ name: 'spec-path', type: 'string', required: true, description: 'project-relative spec path' }],
+        options: [],
+      }],
+    }, dispatch)
+
+    program.parse(['show', 'a.cy.js'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('show', { 'spec-path': 'a.cy.js' }, {})
+  })
+
   it('declares a required value option with requiredOption so commander enforces it', () => {
     const program = buildTapProgram({
       protocolVersion: 1,
