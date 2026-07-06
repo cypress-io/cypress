@@ -328,5 +328,23 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.disable')
       expect(client.off).to.have.been.calledWith('Fetch.requestPaused')
     })
+
+    it('does not register duplicate handlers on repeated start', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+
+      await transport.start()
+      await transport.start()
+
+      expect(client.send).to.have.been.calledOnceWith('Fetch.enable', {
+        patterns: [{
+          requestStage: 'Request',
+        }, {
+          requestStage: 'Response',
+        }],
+      })
+
+      expect(client.on).to.have.been.calledTwice
+    })
   })
 })

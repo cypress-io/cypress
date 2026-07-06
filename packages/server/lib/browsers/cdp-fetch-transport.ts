@@ -28,12 +28,18 @@ export interface CdpFetchTransportResponse extends CdpFetchRequest {
 export class CdpFetchTransport {
   private readonly inFlightRequests = new Map<string, pDefer.DeferredPromise<CdpFetchTransportResponse>>()
 
+  private isStarted = false
+
   constructor (
     private readonly client: CdpFetchClient,
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
   ) {}
 
   async start (): Promise<void> {
+    if (this.isStarted) {
+      return
+    }
+
     await this.client.send('Fetch.enable', {
       patterns: [{
         requestStage: 'Request',
@@ -44,15 +50,21 @@ export class CdpFetchTransport {
 
     this.client.on('Fetch.requestPaused', this.interceptRequest)
     this.client.on('Fetch.requestPaused', this.resolveResponse)
+    this.isStarted = true
   }
 
   async stop (): Promise<void> {
+    if (!this.isStarted) {
+      return
+    }
+
     try {
       await this.client.send('Fetch.disable')
     } finally {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
+      this.isStarted = false
     }
   }
 
