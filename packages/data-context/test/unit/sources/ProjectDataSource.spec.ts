@@ -951,5 +951,34 @@ describe('ProjectDataSource', () => {
 
       expect(unmatched).toEqual(['cypress/e2e/nonexistent.cy.ts'])
     })
+
+    // https://github.com/cypress-io/cypress/issues/34160
+    it('matches regex-style alternation groups consistently with spec discovery', () => {
+      const specs = [
+        makeSpec('tests/a/a_page.js'),
+        makeSpec('tests/b/b_page.js'),
+      ]
+
+      const unmatched = ctx.project.getUnmatchedPatterns(
+        ['tests/(a|b)/*.js'],
+        specs,
+      )
+
+      expect(unmatched).toEqual([])
+    })
+
+    it('matches brace expansion patterns', () => {
+      const specs = [
+        makeSpec('tests/a/a_page.js'),
+        makeSpec('tests/b/b_page.js'),
+      ]
+
+      const unmatched = ctx.project.getUnmatchedPatterns(
+        ['tests/{a,b}/*.js'],
+        specs,
+      )
+
+      expect(unmatched).toEqual([])
+    })
   })
 })
