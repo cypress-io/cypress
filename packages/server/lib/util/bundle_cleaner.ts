@@ -27,10 +27,26 @@ const DEFAULT_MAX_REMOVALS = 25
 // file handles when clearing a large backlog
 const REMOVAL_CONCURRENCY = 5
 
+// stat is cheap, but still bound it so a backlog of thousands of bundle dirs
+// cannot spawn thousands of concurrent stat calls on the startup critical path
+const SCAN_CONCURRENCY = 32
+
 const envNumber = (name: string, fallback: number): number => {
   const value = Number(process.env[name])
 
   return Number.isFinite(value) && value >= 0 ? value : fallback
+}
+
+// run `fn` over `items` in bounded batches so neither phase floods the event
+// loop with unbounded concurrent fs operations
+const mapWithConcurrency = async <T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> => {
+  const results: R[] = []
+
+  for (let i = 0; i < items.length; i += limit) {
+    results.push(...await Promise.all(items.slice(i, i + limit).map(fn)))
+  }
+
+  return results
 }
 
 const removeBundle = async (folder: string): Promise<void> => {
@@ -88,7 +104,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
 
   const now = Date.now()
 
-  const staleness = await Promise.all(bundleDirs.map(async (bundleDir): Promise<string | null> => {
+  const staleness = await mapWithConcurrency(bundleDirs, SCAN_CONCURRENCY, async (bundleDir): Promise<string | null> => {
     // never remove the bundles for the project we're about to run
     if (path.resolve(bundleDir) === normalizedCurrent) {
       return null
@@ -107,7 +123,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
 
       return null
     }
-  }))
+  })
 
   const stale = staleness.filter((dir): dir is string => dir !== null)
   const maxRemovals = envNumber('CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS', DEFAULT_MAX_REMOVALS)
@@ -117,9 +133,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
 
   // remove in bounded batches so a large backlog cannot spike disk I/O or block
   // the run for too long; any remaining stale bundles are removed on later runs
-  for (let i = 0; i < toRemove.length; i += REMOVAL_CONCURRENCY) {
-    await Promise.all(toRemove.slice(i, i + REMOVAL_CONCURRENCY).map(removeBundle))
-  }
+  await mapWithConcurrency(toRemove, REMOVAL_CONCURRENCY, removeBundle)
 
   // keep the current project fresh so it survives the next prune
   await touchBundleDir(normalizedCurrent)
