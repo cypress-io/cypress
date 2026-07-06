@@ -35,23 +35,21 @@ function createClient () {
   }
 }
 
-async function tick () {
-  for (let i = 0; i < 5; i++) {
-    await Promise.resolve()
-  }
-}
-
 async function startTransport (transport: CdpFetchTransport, client: ReturnType<typeof createClient>) {
   await transport.start()
   client.send.resetHistory()
 
   return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
-    for (const call of client.on.withArgs('Fetch.requestPaused').getCalls()) {
+    return Promise.all(client.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
       const handler = call.args[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void
 
-      handler(event, sessionId)
-    }
+      return handler(event, sessionId)
+    }))
   }
+}
+
+async function tick () {
+  await Promise.resolve()
 }
 
 describe('CdpFetchTransport', () => {
@@ -135,7 +133,7 @@ describe('CdpFetchTransport', () => {
       const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
-      onRequestPaused(request)
+      const handled = onRequestPaused(request)
 
       await tick()
 
@@ -143,8 +141,8 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
       })
 
-      onRequestPaused(response)
-      await tick()
+      await onRequestPaused(response)
+      await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-response',
@@ -157,19 +155,20 @@ describe('CdpFetchTransport', () => {
       const transport = new CdpFetchTransport(client as any)
       const onRequestPaused = await startTransport(transport, client)
 
-      onRequestPaused(createPausedRequest({
+      const handled = onRequestPaused(createPausedRequest({
         requestId: 'request-pause-id',
         networkId: 'shared-network-id',
       }))
 
       await tick()
-      onRequestPaused(createPausedRequest({
+
+      await onRequestPaused(createPausedRequest({
         requestId: 'response-pause-id',
         networkId: 'shared-network-id',
         responseStatusCode: 200,
       }))
 
-      await tick()
+      await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'response-pause-id',
@@ -182,12 +181,10 @@ describe('CdpFetchTransport', () => {
       const transport = new CdpFetchTransport(client as any)
       const onRequestPaused = await startTransport(transport, client)
 
-      onRequestPaused(createPausedRequest({
+      await onRequestPaused(createPausedRequest({
         requestId: 'response-pause-id',
         responseStatusCode: 204,
       }))
-
-      await tick()
 
       expect(client.send).to.have.been.calledOnceWith('Fetch.continueRequest', {
         requestId: 'response-pause-id',
@@ -209,7 +206,7 @@ describe('CdpFetchTransport', () => {
         })
       })
 
-      onRequestPaused(request)
+      const handled = onRequestPaused(request)
 
       await tick()
 
@@ -218,8 +215,9 @@ describe('CdpFetchTransport', () => {
         url: 'https://example.test/mutated',
       })
 
-      onRequestPaused(response)
-      await tick()
+      await onRequestPaused(response)
+
+      await handled
     })
 
     it('rejects the pending flow from a matching response failure pause', async () => {
@@ -227,19 +225,25 @@ describe('CdpFetchTransport', () => {
       const transport = new CdpFetchTransport(client as any)
       const onRequestPaused = await startTransport(transport, client)
 
-      onRequestPaused(createPausedRequest({
+      const handled = onRequestPaused(createPausedRequest({
         requestId: 'fetch-request',
         networkId: 'network-1',
       }))
 
       await tick()
-      onRequestPaused(createPausedRequest({
+
+      await onRequestPaused(createPausedRequest({
         requestId: 'fetch-response',
         networkId: 'network-1',
         responseErrorReason: 'Aborted',
       }))
 
-      await tick()
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+        requestId: 'fetch-response',
+        errorReason: 'Aborted',
+      })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
     })

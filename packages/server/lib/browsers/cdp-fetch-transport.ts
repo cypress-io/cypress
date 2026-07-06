@@ -85,14 +85,22 @@ export class CdpFetchTransport {
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
         }, outbound.sessionId)
 
-        return Promise.race([
-          deferred.promise,
-          new Promise<never>((_resolve, reject) => {
-            setTimeout(() => {
-              reject(new Error(`Timed out waiting for CDP Fetch response pause for ${event.request.url}`))
-            }, 30000)
-          }),
-        ])
+        let timeout: NodeJS.Timeout | undefined
+
+        try {
+          return await Promise.race([
+            deferred.promise,
+            new Promise<never>((_resolve, reject) => {
+              timeout = setTimeout(() => {
+                reject(new Error(`Timed out waiting for CDP Fetch response pause for ${event.request.url}`))
+              }, 30000)
+            }),
+          ])
+        } finally {
+          if (timeout) {
+            clearTimeout(timeout)
+          }
+        }
       })
 
       await this.client.send('Fetch.fulfillRequest', {
@@ -129,12 +137,21 @@ export class CdpFetchTransport {
     }
 
     if (event.responseErrorReason) {
+      await this.client.send('Fetch.failRequest', {
+        requestId: event.requestId,
+        errorReason: event.responseErrorReason,
+      }, sessionId)
+
       deferred.reject(new Error(`CDP Fetch response failed for ${event.request.url}: ${event.responseErrorReason}`))
 
       return
     }
 
     if (typeof event.responseStatusCode !== 'number') {
+      await this.client.send('Fetch.continueRequest', {
+        requestId: event.requestId,
+      }, sessionId)
+
       deferred.reject(new Error(`CDP Fetch response did not include a status code for ${event.request.url}`))
 
       return
