@@ -535,7 +535,8 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
           const removeScrollBehaviorFix = addScrollBehaviorFix($el)
 
           debug('scrollIntoView:', $el[0])
-          $el.get(0).scrollIntoView({ block: scrollBehavior })
+          // Mirror the scroll behavior onto both axes.
+          $el.get(0).scrollIntoView({ block: scrollBehavior, inline: scrollBehavior })
 
           removeScrollBehaviorFix()
 
