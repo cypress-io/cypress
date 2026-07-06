@@ -29,6 +29,7 @@ export class GracefulExit {
   private readonly signalHandlers: Array<{ signal: NodeJS.Signals, listener: (sig: NodeJS.Signals) => void }> = []
   private processTeardown: Promise<number | void> | null = null
   private teardownStartedAt: number | null = null
+  private forceExitTimeout: NodeJS.Timeout | undefined
   private steps: Map<string, ExitStep> = new Map()
   private debug: Debug.Debugger
 
@@ -103,6 +104,11 @@ export class GracefulExit {
       process.removeListener(signal, listener)
     }
 
+    if (inst.forceExitTimeout) {
+      clearTimeout(inst.forceExitTimeout)
+      inst.forceExitTimeout = undefined
+    }
+
     inst.steps.clear()
     inst.processTeardown = null
     inst.teardownStartedAt = null
@@ -154,6 +160,13 @@ export class GracefulExit {
     return code
   }
 
+  private clearForceExitTimeout (): void {
+    if (this.forceExitTimeout) {
+      clearTimeout(this.forceExitTimeout)
+      this.forceExitTimeout = undefined
+    }
+  }
+
   private async flushAndExit (code: number): Promise<number | void> {
     let finalExitCode = code ?? 0
 
@@ -178,15 +191,13 @@ export class GracefulExit {
       return exit.processTeardown
     }
 
-    let forceExitTimeout: NodeJS.Timeout | undefined = undefined
-
     exit.teardownStartedAt = Date.now()
     exit.processTeardown = Promise.race([
       GracefulExit.singleton.flushAndExit(code).then(() => {
-        clearTimeout(forceExitTimeout)
+        exit.clearForceExitTimeout()
       }),
       new Promise<void>((resolve) => {
-        forceExitTimeout = setTimeout(() => {
+        exit.forceExitTimeout = setTimeout(() => {
           try {
             const ms = getTeardownTimeoutMs()
 
@@ -194,7 +205,7 @@ export class GracefulExit {
           } catch (e) {
             console.error('Error forcing exit: ', e)
           } finally {
-            clearTimeout(forceExitTimeout)
+            exit.clearForceExitTimeout()
             resolve()
             process.exit(1)
           }
