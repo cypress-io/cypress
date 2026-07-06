@@ -150,6 +150,12 @@ expect('foo').to.not.include.value('foo')
 expect('foo').to.not.include.text('foo')
 expect('foo').to.not.include.html('foo')
 
+// Ensure we've extended chai.Assertion with chai-jquery's focus assertions
+expect(Cypress.$('#result')).to.have.focus
+expect(Cypress.$('#result')).to.be.focused
+expect(Cypress.$('#result')).to.not.have.focus
+expect(Cypress.$('#result')).to.not.be.focused
+
 cy.wrap([1, 2, 3]).should('include.members', [1, 2])
 ;
 () => {
