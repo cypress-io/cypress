@@ -22,10 +22,14 @@ const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true
 
 const safeRemove = (path) => {
   try {
-    // Use native fs.rmSync with retries to absorb transient filesystem races
-    // (ENOTEMPTY/EBUSY/EPERM) caused by child processes still writing to a
-    // subdirectory at cleanup time.
-    fs.rmSync(path, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    // fs-extra's lstat-based removeSync unlinks junctions/symlinks instead of
+    // recursing into them. Native fs.rmSync must not be used here: under
+    // Electron's libc++-built Node 24+, std::filesystem::remove_all classifies
+    // Windows junctions (created when scaffolding project node_modules) as
+    // plain directories and deletes their target contents — including the
+    // monorepo dirs they point to. removeSync also retries transient Windows
+    // races (ENOTEMPTY/EBUSY/EPERM) internally.
+    fs.removeSync(path)
   } catch (_err) {
     const err = _err as NodeJS.ErrnoException
 
