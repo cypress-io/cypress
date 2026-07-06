@@ -1,5 +1,4 @@
 import fs from 'fs-extra'
-import os from 'os'
 import path from 'path'
 import { parseMemoryStat, availableFromWorkingSet, type MemoryLog } from './cgroup-util'
 
@@ -26,20 +25,25 @@ const getCgroupBase = async () => {
   return CGROUP_MOUNT
 }
 
-// Whether the cgroup v2 memory interface files are readable. On a
-// non-containerized host the resolved cgroup may not expose them, in which case
-// the caller should fall back to the default handler.
+// Whether this cgroup imposes a readable memory limit. An unconstrained cgroup
+// (memory.max === 'max') has no cgroup-scoped limit to measure against, and a
+// non-containerized host may not expose the file at all; in both cases the
+// caller should fall back to the default handler, which reports host memory
+// (os.totalmem / si.mem) accurately rather than mixing host and cgroup scales.
 const isAvailable = async () => {
-  return fs.pathExists(path.join(await getCgroupBase(), 'memory.max'))
+  try {
+    const limit = (await fs.readFile(path.join(await getCgroupBase(), 'memory.max'), 'utf8')).trim()
+
+    return limit !== 'max'
+  } catch {
+    return false
+  }
 }
 
 // Returns the total memory limit in bytes from the cgroup v2 unified hierarchy.
-// `memory.max` holds the limit in bytes, or the literal string `max` when the
-// cgroup is unconstrained, in which case we fall back to the total system memory.
+// Only reached once isAvailable() has confirmed a numeric memory.max limit.
 const getTotalMemoryLimit = async () => {
-  const limit = (await fs.readFile(path.join(await getCgroupBase(), 'memory.max'), 'utf8')).trim()
-
-  return limit === 'max' ? os.totalmem() : Number(limit)
+  return Number((await fs.readFile(path.join(await getCgroupBase(), 'memory.max'), 'utf8')).trim())
 }
 
 // Returns the available memory in bytes from the cgroup v2 unified hierarchy.
