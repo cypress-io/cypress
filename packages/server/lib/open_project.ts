@@ -382,9 +382,11 @@ export class OpenProject extends EventEmitter {
     }
 
     // in an interactive session the process is long-lived and keeps using this
-    // project's bundle cache, so keep it fresh against concurrent prunes
-    if (!options.isTextTerminal) {
-      this.startBundleTouchHeartbeat(path)
+    // project's bundle cache, so keep it fresh against concurrent prunes. use the
+    // already-resolved projectRoot: `open()` chdir's into the project, so resolving
+    // a relative `path` later would point at the wrong directory
+    if (!options.isTextTerminal && this.projectBase) {
+      this.startBundleTouchHeartbeat(this.projectBase.projectRoot)
     }
 
     this.emit('ready')
