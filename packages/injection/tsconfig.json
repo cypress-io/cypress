@@ -1,0 +1,19 @@
+{
+  "include": [
+    "lib/*.ts",
+    "lib/**/*.ts"
+  ],
+  "exclude": [
+    "test"
+  ],
+  "module": "ESNext",
+  "compilerOptions": {
+    "declaration": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ]
+  }
+}

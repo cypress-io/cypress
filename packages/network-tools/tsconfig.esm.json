@@ -5,7 +5,6 @@
     "outDir": "./esm",
     "target": "ES2022",
     "module": "ES2022",
-    "moduleResolution": "node",
-    "noEmit": true
+    "moduleResolution": "node"
   }
 }
