@@ -13,6 +13,7 @@ linux-x64:
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       # temporary branches that can be removed after merging
       - equal: [ 'mschile/electron_41', << pipeline.git.branch >> ]
+      - equal: [ 'fix/windows-junction-safe-fixture-cleanup', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
