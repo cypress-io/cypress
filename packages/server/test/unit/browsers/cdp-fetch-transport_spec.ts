@@ -206,8 +206,34 @@ describe('CdpFetchTransport', () => {
         responseStatusCode: 204,
       }))
 
-      expect(client.send).to.have.been.calledOnceWith('Fetch.continueRequest', {
+      expect(client.send).to.have.been.calledOnceWith('Fetch.continueResponse', {
         requestId: 'response-pause-id',
+      })
+    })
+
+    it('treats status code 0 as a response pause', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'request-pause-id',
+        networkId: 'shared-network-id',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'response-pause-id',
+        networkId: 'shared-network-id',
+        responseStatusCode: 0,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'response-pause-id',
+        responseCode: 0,
       })
     })
 

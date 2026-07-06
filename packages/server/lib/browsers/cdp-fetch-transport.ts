@@ -57,7 +57,7 @@ export class CdpFetchTransport {
   }
 
   private interceptRequest = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
-    if (event.responseErrorReason || event.responseStatusCode) {
+    if (event.responseErrorReason || typeof event.responseStatusCode === 'number') {
       return
     }
 
@@ -137,7 +137,7 @@ export class CdpFetchTransport {
   }
 
   private resolveResponse = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
-    if (!event.responseErrorReason && !event.responseStatusCode) {
+    if (!event.responseErrorReason && typeof event.responseStatusCode !== 'number') {
       return
     }
 
@@ -145,7 +145,7 @@ export class CdpFetchTransport {
 
     if (!deferred) {
       debug('continuing unmatched response pause: %s', event.request.url)
-      await this.client.send('Fetch.continueRequest', {
+      await this.client.send('Fetch.continueResponse', {
         requestId: event.requestId,
       }, sessionId)
 
@@ -164,7 +164,7 @@ export class CdpFetchTransport {
     }
 
     if (typeof event.responseStatusCode !== 'number') {
-      await this.client.send('Fetch.continueRequest', {
+      await this.client.send('Fetch.continueResponse', {
         requestId: event.requestId,
       }, sessionId)
 
