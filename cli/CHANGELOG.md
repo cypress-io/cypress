@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.18.1
 
+**Dependency Updates:**
+
+- Upgraded `esbuild` from `0.28.0` to `0.28.1` to address a [Resources Downloaded over Insecure Protocol](https://security.snyk.io/vuln/SNYK-JS-ESBUILD-17750822) vulnerability reported in security scans. Addressed in [#34211](https://github.com/cypress-io/cypress/pull/34211).
+
 **Performance:**
 
 - Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
@@ -13,7 +17,7 @@
 - Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808). Fixed in [#34088](https://github.com/cypress-io/cypress/pull/34088).
 - Fixed an issue where the [`userAgent`](https://on.cypress.io/configuration#Browser) configuration option was not applied when running tests in the experimental WebKit browser. Fixes [#33349](https://github.com/cypress-io/cypress/issues/33349).
 - Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
-- Fixed an issue where opening an unconfigured project from a git repository sub-directory (such as a monorepo package) skipped project setup. Fixes [#27410](https://github.com/cypress-io/cypress/issues/27410) and [#29544](https://github.com/cypress-io/cypress/issues/29544).
+- Fixed an issue where opening an unconfigured project from a git repository sub-directory (such as a monorepo package) skipped project setup. Additionally, the component testing setup wizard now reliably displays the auto-detected framework and bundler. Fixes [#27410](https://github.com/cypress-io/cypress/issues/27410) and [#29544](https://github.com/cypress-io/cypress/issues/29544). Fixed in [#34129](https://github.com/cypress-io/cypress/pull/34129) and [#34212](https://github.com/cypress-io/cypress/pull/34212).
 - Fixed an issue where interacting with an element inside a horizontally-scrollable container could scroll the element to the container's right edge, placing it underneath a right-floating `position: sticky` or `position: fixed` element and causing the action to fail or land on the wrong element. Elements are now scrolled to their top, leftmost point as documented. Fixes [#33884](https://github.com/cypress-io/cypress/issues/33884). Fixed in [#34108](https://github.com/cypress-io/cypress/pull/34108).
 
 ## 15.18.0

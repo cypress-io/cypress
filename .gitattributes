@@ -1,5 +1,10 @@
 * text=auto
 
+# Reduce merge conflicts in the changelog by unioning both sides' added lines.
+# Not perfect (e.g. two PRs each adding the same section), but the changelog
+# semantic check in CI will surface any bad merges immediately.
+cli/CHANGELOG.md merge=union
+
 *.json text eol=lf
 
 **/.eslintrc text eol=lf
