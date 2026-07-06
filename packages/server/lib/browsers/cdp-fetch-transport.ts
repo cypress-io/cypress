@@ -62,6 +62,7 @@ export class CdpFetchTransport {
     }
 
     let networkId: string | undefined
+    let requestContinued = false
 
     try {
       if (!event.networkId) {
@@ -88,6 +89,8 @@ export class CdpFetchTransport {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
         }, outbound.sessionId)
+
+        requestContinued = true
 
         let timeout: NodeJS.Timeout | undefined
 
@@ -116,8 +119,17 @@ export class CdpFetchTransport {
       this.cleanup(networkId)
     } catch (err) {
       if (networkId) {
-        this.inFlightRequests.get(networkId)?.reject(err as Error)
+        if (requestContinued) {
+          this.inFlightRequests.get(networkId)?.reject(err as Error)
+        }
+
         this.cleanup(networkId)
+      }
+
+      if (!requestContinued) {
+        await this.client.send('Fetch.continueRequest', {
+          requestId: event.requestId,
+        }, sessionId)
       }
 
       debug('CDP Fetch transport error: %s', (err as Error).stack || (err as Error).message)

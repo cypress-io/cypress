@@ -240,6 +240,28 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('continues the request pause when middleware fails before the terminal path', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async () => {
+        throw new Error('middleware failed')
+      })
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
     it('rejects the pending flow from a matching response failure pause', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
