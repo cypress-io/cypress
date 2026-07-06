@@ -1,4 +1,4 @@
-// A bag of numeric memory stats that a handler may record diagnostics onto.
+// Named numeric memory stats that a handler may record diagnostics onto.
 export type MemoryLog = Record<string, number>
 
 // Parse a cgroup `memory.stat` file (lines of `key value`) into a numeric lookup.
