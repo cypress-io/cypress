@@ -10,6 +10,8 @@ website
 images
 assets
 !mochawesome-report-generator/dist/assets
+# Needed so the vitest v8 `html` coverage reporter can render (CSS/JS/icons)
+!istanbul-reports/lib/html/assets
 
 # Do NOT clean out app assets from cypress-example-kitchensink to avoid broken deployments
 # Needed for https://example.cypress.io/

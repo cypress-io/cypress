@@ -6888,6 +6888,19 @@
   resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.13.tgz#093a01af0cde13552f058544fcadf12e9b522c3b"
   integrity sha512-3ngTAv6F/Py35BsYbeeLeecvhMKdsKm4AoOETVhAA+Qc8nrA2I0kF7oa93mE9qnIurngOSpMnQ0x2nQY2FPviA==
 
+"@rollup/plugin-commonjs@29.0.0", "@rollup/plugin-commonjs@^29.0.0":
+  version "29.0.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-commonjs/-/plugin-commonjs-29.0.0.tgz#42a6cc0eeb8ae7aabfc6f9bdc28fe22d65abd15a"
+  integrity sha512-U2YHaxR2cU/yAiwKJtJRhnyLk7cifnQw0zUpISsocBDoHDJn+HTV74ABqnwr5bEgWUwFZC9oFL6wLe21lHu5eQ==
+  dependencies:
+    "@rollup/pluginutils" "^5.0.1"
+    commondir "^1.0.1"
+    estree-walker "^2.0.2"
+    fdir "^6.2.0"
+    is-reference "1.2.1"
+    magic-string "^0.30.3"
+    picomatch "^4.0.2"
+
 "@rollup/plugin-commonjs@^17.1.0":
   version "17.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-commonjs/-/plugin-commonjs-17.1.0.tgz#757ec88737dffa8aa913eb392fade2e45aef2a2d"
@@ -6901,25 +6914,23 @@
     magic-string "^0.25.7"
     resolve "^1.17.0"
 
-"@rollup/plugin-commonjs@^29.0.0":
-  version "29.0.0"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-commonjs/-/plugin-commonjs-29.0.0.tgz#42a6cc0eeb8ae7aabfc6f9bdc28fe22d65abd15a"
-  integrity sha512-U2YHaxR2cU/yAiwKJtJRhnyLk7cifnQw0zUpISsocBDoHDJn+HTV74ABqnwr5bEgWUwFZC9oFL6wLe21lHu5eQ==
-  dependencies:
-    "@rollup/pluginutils" "^5.0.1"
-    commondir "^1.0.1"
-    estree-walker "^2.0.2"
-    fdir "^6.2.0"
-    is-reference "1.2.1"
-    magic-string "^0.30.3"
-    picomatch "^4.0.2"
-
-"@rollup/plugin-json@^6.1.0":
+"@rollup/plugin-json@6.1.0", "@rollup/plugin-json@^6.1.0":
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-json/-/plugin-json-6.1.0.tgz#fbe784e29682e9bb6dee28ea75a1a83702e7b805"
   integrity sha512-EGI2te5ENk1coGeADSIwZ7G2Q8CJS2sF120T7jLw4xFw9n7wIOXHo+kIYRAoVpJAN+kmqZSoO3Fp4JtoNF4ReA==
   dependencies:
     "@rollup/pluginutils" "^5.1.0"
+
+"@rollup/plugin-node-resolve@16.0.3", "@rollup/plugin-node-resolve@^16.0.3":
+  version "16.0.3"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-16.0.3.tgz#0988e6f2cbb13316b0f5e7213f757bc9ed44928f"
+  integrity sha512-lUYM3UBGuM93CnMPG1YocWu7X802BrNF3jW2zny5gQyLQgRFJhV1Sq0Zi74+dh/6NBx1DxFC4b4GXg9wUCG5Qg==
+  dependencies:
+    "@rollup/pluginutils" "^5.0.1"
+    "@types/resolve" "1.20.2"
+    deepmerge "^4.2.2"
+    is-module "^1.0.0"
+    resolve "^1.22.1"
 
 "@rollup/plugin-node-resolve@^11.2.1":
   version "11.2.1"
@@ -6932,17 +6943,6 @@
     deepmerge "^4.2.2"
     is-module "^1.0.0"
     resolve "^1.19.0"
-
-"@rollup/plugin-node-resolve@^16.0.3":
-  version "16.0.3"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-16.0.3.tgz#0988e6f2cbb13316b0f5e7213f757bc9ed44928f"
-  integrity sha512-lUYM3UBGuM93CnMPG1YocWu7X802BrNF3jW2zny5gQyLQgRFJhV1Sq0Zi74+dh/6NBx1DxFC4b4GXg9wUCG5Qg==
-  dependencies:
-    "@rollup/pluginutils" "^5.0.1"
-    "@types/resolve" "1.20.2"
-    deepmerge "^4.2.2"
-    is-module "^1.0.0"
-    resolve "^1.22.1"
 
 "@rollup/plugin-typescript@12.0.0":
   version "12.0.0"
