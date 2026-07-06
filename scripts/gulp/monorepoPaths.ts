@@ -17,6 +17,7 @@ export const monorepoPaths = {
   pkgFrontendShared: path.join(__dirname, '../../packages/frontend-shared'),
   pkgHttpsProxy: path.join(__dirname, '../../packages/https-proxy'),
   pkgIcons: path.join(__dirname, '../../packages/icons'),
+  pkgInjection: path.join(__dirname, '../../packages/injection'),
   pkgLauncher: path.join(__dirname, '../../packages/launcher'),
   pkgLaunchpad: path.join(__dirname, '../../packages/launchpad'),
   pkgNetStubbing: path.join(__dirname, '../../packages/net-stubbing'),

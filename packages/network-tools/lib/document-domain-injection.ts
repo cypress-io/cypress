@@ -15,10 +15,12 @@ import { isString, isEqual } from 'lodash'
 import { getSuperDomainOrigin, getSuperDomain, parseUrlIntoHostProtocolDomainTldPort } from './cors'
 import type { ParsedHostWithProtocolAndHost } from './types'
 
+export type DocumentDomainInjectionConfig = { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component' }
+
 const debug = Debug('cypress:network:document-domain-injection')
 
 export abstract class DocumentDomainInjection {
-  public static InjectionBehavior (config: { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component'}): DocumentDomainInjection {
+  public static InjectionBehavior (config: DocumentDomainInjectionConfig): DocumentDomainInjection {
     debug('Determining injection behavior for config values: %o', {
       injectDocumentDomain: config.injectDocumentDomain,
       testingType: config.testingType,

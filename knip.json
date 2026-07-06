@@ -441,6 +441,15 @@
         "*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/injection": {
+      "entry": [
+        "lib/index.ts",
+        "rollup.config.mts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/*": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
