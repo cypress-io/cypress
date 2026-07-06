@@ -378,7 +378,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { scrollBehavior: 'bottom' })
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
       })
     })
 
@@ -402,7 +402,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo')
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
       })
     })
 
@@ -414,7 +414,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo')
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center', inline: 'center' })
       })
     })
 
@@ -426,7 +426,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo')
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest', inline: 'nearest' })
       })
     })
 
@@ -450,7 +450,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo')
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
       })
     })
 
