@@ -46,7 +46,7 @@ export type CdpFetchNetworkRuntime = {
   networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
   fetchTransport: CdpFetchTransport
   start (): Promise<void>
-  reset (): void
+  reset (): Promise<void>
 }
 
 /**
@@ -131,7 +131,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       return fetchTransport.start()
     },
     reset () {
-      fetchTransport.stop()
+      return fetchTransport.stop()
     },
   }
 }

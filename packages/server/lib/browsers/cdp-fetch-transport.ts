@@ -46,10 +46,14 @@ export class CdpFetchTransport {
     this.client.on('Fetch.requestPaused', this.resolveResponse)
   }
 
-  stop (): void {
-    this.client.off('Fetch.requestPaused', this.interceptRequest)
-    this.client.off('Fetch.requestPaused', this.resolveResponse)
-    this.rejectAll(new Error('CDP Fetch transport stopped'))
+  async stop (): Promise<void> {
+    try {
+      await this.client.send('Fetch.disable')
+    } finally {
+      this.client.off('Fetch.requestPaused', this.interceptRequest)
+      this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.rejectAll(new Error('CDP Fetch transport stopped'))
+    }
   }
 
   private interceptRequest = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
@@ -103,7 +107,7 @@ export class CdpFetchTransport {
         }
       })
 
-      await this.client.send('Fetch.fulfillRequest', {
+      await this.client.send('Fetch.continueResponse', {
         requestId: response.requestId,
         responseCode: response.responseCode,
         ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),

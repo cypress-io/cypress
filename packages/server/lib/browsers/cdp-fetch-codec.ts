@@ -46,5 +46,9 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
 
       return transportResponse
     },
+
+    releaseRequest (id: string): void {
+      inFlightRequests.delete(id)
+    },
   }
 }

@@ -123,6 +123,26 @@ describe('CdpFetchTransport', () => {
 
       expect(encoded.url).to.equal('https://example.test/response')
     })
+
+    it('releases CDP request state when the intercept pipeline fails', async () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      codec.decodeRequest(transportRequest)
+      codec.releaseRequest?.('network-1')
+
+      expect(() => {
+        codec.encodeRequest({
+          id: 'network-1',
+          url: 'https://example.test/mutated',
+        })
+      }).to.throw()
+    })
   })
 
   describe('request pause handling', () => {
@@ -144,7 +164,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-response',
         responseCode: 200,
       })
@@ -170,7 +190,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'response-pause-id',
         responseCode: 200,
       })
@@ -245,7 +265,20 @@ describe('CdpFetchTransport', () => {
         errorReason: 'Aborted',
       })
 
-      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    it('disables Fetch before removing handlers on stop', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+
+      await transport.start()
+      client.send.resetHistory()
+
+      await transport.stop()
+
+      expect(client.send).to.have.been.calledWith('Fetch.disable')
+      expect(client.off).to.have.been.calledWith('Fetch.requestPaused')
     })
   })
 })
