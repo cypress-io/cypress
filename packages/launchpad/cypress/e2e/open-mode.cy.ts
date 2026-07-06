@@ -165,8 +165,9 @@ describe('Launchpad: Open Mode', () => {
       })
 
       cy.withCtx(async (ctx, o) => {
-        // Trigger actual wizard initialization to occur
-        (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
+        // Await initialization so detection completes and the launchpad refresh
+        // it triggers has been emitted before we assert on the resulting UI.
+        await (ctx.actions.wizard.initialize as SinonStub).wrappedMethod.apply(ctx.actions.wizard)
       })
 
       // Verify that auto-detection has fired via the real initialize call and updated data
