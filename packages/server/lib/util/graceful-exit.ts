@@ -104,10 +104,7 @@ export class GracefulExit {
       process.removeListener(signal, listener)
     }
 
-    if (inst.forceExitTimeout) {
-      clearTimeout(inst.forceExitTimeout)
-      inst.forceExitTimeout = undefined
-    }
+    inst.clearForceExitTimeout()
 
     inst.steps.clear()
     inst.processTeardown = null
@@ -174,9 +171,10 @@ export class GracefulExit {
       finalExitCode = await this.flushSteps(code)
       this.debug('steps flushed successfully', code, finalExitCode)
     } catch (error) {
-     this.debug('Error flushing steps: ', error)
+      this.debug('Error flushing steps: ', error)
       finalExitCode = 1
     } finally {
+      this.clearForceExitTimeout()
       this.processTeardown = null
       this.teardownStartedAt = null
       this.steps.clear()
@@ -193,9 +191,7 @@ export class GracefulExit {
 
     exit.teardownStartedAt = Date.now()
     exit.processTeardown = Promise.race([
-      GracefulExit.singleton.flushAndExit(code).then(() => {
-        exit.clearForceExitTimeout()
-      }),
+      GracefulExit.singleton.flushAndExit(code),
       new Promise<void>((resolve) => {
         exit.forceExitTimeout = setTimeout(() => {
           try {
