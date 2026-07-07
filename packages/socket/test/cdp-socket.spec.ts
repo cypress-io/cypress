@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { CDPSocket } from '../lib/node/cdp-socket'
 
 describe('CDPSocket', () => {
-  it('emits via Runtime.evaluate with returnByValue so the renderer does not pin a RemoteObject per message', async () => {
+  it('emits via Runtime.evaluate with returnByValue', async () => {
     const cdpClient = {
       send: vi.fn().mockResolvedValue({}),
       on: vi.fn(),
