@@ -20,7 +20,6 @@ export namespace CyServer {
     blockHosts: string | string[]
     clientRoute: string
     experimentalCspAllowList: boolean | Cypress.experimentalCspAllowedDirectives[]
-    experimentalSourceRewriting: boolean
     injectDocumentDomain: boolean
     modifyObstructiveCode: boolean
     experimentalModifyObstructiveThirdPartyCode: boolean

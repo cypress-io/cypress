@@ -6,7 +6,6 @@ import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
 import * as rewriter from '../http/util/rewriter'
 import { getNodeCharsetFromResponse } from '../http/util/response-stream'
-import { resContentTypeIsJavaScript } from '../http/util/document-preparation'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
 /**
@@ -42,14 +41,11 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
       domainName: getDomainNameFromUrl(mw.req.proxiedUrl),
       wantsInjection: mw.res.wantsInjection,
       wantsSecurityRemoved: mw.res.wantsSecurityRemoved,
-      isNotJavascript: !resContentTypeIsJavaScript(mw.incomingRes),
-      useAstSourceRewriting: mw.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: mw.config.experimentalModifyObstructiveThirdPartyCode && !mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
       shouldInjectDocumentDomain: DocumentDomainInjection.InjectionBehavior(mw.config).shouldInjectDocumentDomain(mw.req.proxiedUrl),
       modifyObstructiveCode: mw.config.modifyObstructiveCode,
       removeSRIAttributes: mw.config.removeSRIAttributes && mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
       url: mw.req.proxiedUrl,
-      deferSourceMapRewrite: mw.deferSourceMapRewrite,
       simulatedCookies: mw.simulatedCookies,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)

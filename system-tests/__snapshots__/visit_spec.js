@@ -522,18 +522,17 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
 
 `
 
-exports['e2e visit / source rewriting / passes with experimentalSourceRewriting'] = `
+exports['e2e visit / source rewriting / passes with the default source rewriter'] = `
 
 ====================================================================================================
 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (source_rewriting.cy.js)                                                 │
-  │ Searched:     cypress/e2e/source_rewriting.cy.js                                               │
-  │ Experiments:  experimentalSourceRewriting=true                                                 │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (source_rewriting.cy.js)                                                   │
+  │ Searched:   cypress/e2e/source_rewriting.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

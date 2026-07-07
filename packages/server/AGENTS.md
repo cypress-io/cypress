@@ -53,7 +53,7 @@ yarn workspace @packages/server build-prod
 **Integration Points**
 
 - Consumes virtually every other `@packages/*` package in the monorepo.
-- `@packages/proxy` and `@packages/rewriter` handle all HTTP interception.
+- `@packages/proxy` handles all HTTP interception.
 - `@packages/net-stubbing` provides `cy.intercept()` server-side state.
 - `@packages/data-context` provides the GraphQL layer consumed by `@packages/launchpad` and `@packages/app`.
 - `@packages/socket` provides the WebSocket bridge between the server and the browser driver.

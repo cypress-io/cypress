@@ -3190,8 +3190,6 @@ declare namespace Cypress {
      * NOTE: Setting this flag to true removes Subresource Integrity (SRI) from third-party resources.
      * To strip SRI from first-party resources as well, use `removeSRIAttributes`.
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
-     * This option has no impact on experimentalSourceRewriting and is only used with the
-     * non-experimental source rewriter.
      * @see https://on.cypress.io/experiments#Configuration
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
@@ -3211,11 +3209,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalRunAllSpecs?: boolean
-    /**
-     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
-     * @default false
-     */
-    experimentalSourceRewriting: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false

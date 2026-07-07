@@ -197,16 +197,6 @@ export const createCommonRoutes = ({
     return
   })
 
-  router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
-    if (!networkProxy) {
-      return res.sendStatus(404)
-    }
-
-    await networkProxy.handleSourceMapRequest(req, res)
-
-    return
-  })
-
   // special fallback - serve dist'd (bundled/static) files from the project path folder
   router.get(`/${config.namespace}/bundled/*`, (req, res) => {
     const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))

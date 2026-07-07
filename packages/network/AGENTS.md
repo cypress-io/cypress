@@ -41,5 +41,5 @@ lib/
 
 ## Integration Points
 
-- Consumed by **@packages/server**, **@packages/proxy**, **@packages/https-proxy**, and **@packages/rewriter** for all Node.js HTTP networking.
+- Consumed by **@packages/server**, **@packages/proxy**, and **@packages/https-proxy** for all Node.js HTTP networking.
 - **@packages/network-tools** depends on this package (dev dep) in its test suite.

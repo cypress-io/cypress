@@ -41,7 +41,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/dist/index.js',
     'packages/server/node_modules/ts-loader/index.js',
-    'packages/rewriter/lib/threads/worker.js',
     'npm/webpack-batteries-included-preprocessor/dist/index.js',
     // needed in the server entry point
     'node_modules/tsx/dist/cjs/index.cjs',

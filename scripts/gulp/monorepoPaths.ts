@@ -27,7 +27,6 @@ export const monorepoPaths = {
   pkgProxy: path.join(__dirname, '../../packages/proxy'),
   pkgReporter: path.join(__dirname, '../../packages/reporter'),
   pkgResolveDist: path.join(__dirname, '../../packages/resolve-dist'),
-  pkgRewriter: path.join(__dirname, '../../packages/rewriter'),
   pkgRoot: path.join(__dirname, '../../packages/root'),
   pkgRunner: path.join(__dirname, '../../packages/runner'),
   pkgScaffoldConfig: path.join(__dirname, '../../packages/scaffold-config'),

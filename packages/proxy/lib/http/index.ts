@@ -3,7 +3,6 @@ import chalk from 'chalk'
 import Debug from 'debug'
 import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
-import { DeferredSourceMapCache } from '@packages/rewriter'
 import { telemetry, Span } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
@@ -24,7 +23,7 @@ import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
 import type { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Readable } from 'stream'
-import type { Request, Response } from 'express'
+import type { Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { Request as ServerRequest } from '@packages/server/lib/request'
@@ -87,7 +86,6 @@ type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   pendingRequest: PendingRequest | undefined
   getCookieJar: () => CookieJar
-  deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
   addPendingUrlWithoutPreRequest: (url: string) => void
   removePendingRequest: (pendingRequest: PendingRequest) => void
@@ -308,7 +306,6 @@ export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
-  deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
@@ -327,7 +324,6 @@ export class Http {
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
-    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
@@ -373,12 +369,6 @@ export class Http {
         if (!debugVerbose.enabled) return
 
         debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
-      },
-      deferSourceMapRewrite: (opts) => {
-        this.deferredSourceMapCache.defer({
-          resHeaders: ctx.incomingRes.headers,
-          ...opts,
-        })
       },
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getAUTUrl: this.getAUTUrl,
@@ -482,20 +472,6 @@ export class Http {
 
   setAUTUrl = (url) => {
     this.autUrl = url
-  }
-
-  async handleSourceMapRequest (req: Request, res: Response) {
-    try {
-      const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
-
-      if (!sm) {
-        throw new Error('no sourcemap found')
-      }
-
-      res.json(sm)
-    } catch (err) {
-      res.status(500).json({ err })
-    }
   }
 
   reset (options: { resetBetweenSpecs: boolean }) {
