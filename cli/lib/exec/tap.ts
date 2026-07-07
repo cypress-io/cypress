@@ -34,14 +34,23 @@ const validateSchema = (value: unknown): TapSchema => {
   return schema
 }
 
+const isFailureError = (error: unknown): error is { code: string, message: string } => {
+  return !!error && typeof error === 'object' && typeof (error as any).code === 'string' && typeof (error as any).message === 'string'
+}
+
 const validateExecResult = (value: unknown): TapExecResult => {
   const outcome = value as TapExecResult | null | undefined
+  const fail = () => throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
 
-  if (!outcome || typeof outcome !== 'object' || (!('result' in outcome) && !('error' in outcome))) {
-    return throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
-  }
+  if (!outcome || typeof outcome !== 'object') return fail()
 
-  return outcome
+  // execCommand dispatches on `'error' in outcome`, so a failure envelope must carry a
+  // well-formed error object — otherwise renderFailure would read code/message off garbage.
+  if ('error' in outcome) return isFailureError(outcome.error) ? outcome : fail()
+
+  if ('result' in outcome) return outcome
+
+  return fail()
 }
 
 const isHelpFlag = (arg: string): boolean => arg === '--help' || arg === '-h'

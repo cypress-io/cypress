@@ -180,6 +180,16 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapInvalidExecResult.description)
     })
+
+    it('treats a malformed error envelope as a transport failure, without crashing on renderFailure', async () => {
+      for (const malformed of [{ error: null }, { error: 'boom' }, { error: {} }, { error: { code: 'X' } }]) {
+        logger.reset()
+        mockSession(schema, malformed)
+
+        expect(await tap.start(['health'], {})).toBe(1)
+        expect(logger.print()).toContain(errors.tapInvalidExecResult.description)
+      }
+    })
   })
 
   describe('commander validates the command against the live schema', () => {
