@@ -75,6 +75,7 @@ export class CdpFetchTransport {
 
     let networkId: string | undefined
     let requestContinued = false
+    let response: CdpFetchTransportResponse | undefined
 
     try {
       if (!event.networkId) {
@@ -96,7 +97,7 @@ export class CdpFetchTransport {
 
       this.inFlightRequests.set(networkId, deferred)
 
-      const response = await this.httpIntercept.handle(request, async (outbound) => {
+      response = await this.httpIntercept.handle(request, async (outbound) => {
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
@@ -142,6 +143,8 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
         }, sessionId)
+      } else if (response?.requestId) {
+        await this.unblockResponsePause(response.requestId, response.sessionId ?? sessionId)
       }
 
       debug('CDP Fetch transport error: %s', (err as Error).stack || (err as Error).message)
@@ -156,10 +159,18 @@ export class CdpFetchTransport {
     const deferred = event.networkId ? this.inFlightRequests.get(event.networkId) : undefined
 
     if (!deferred) {
-      debug('continuing unmatched response pause: %s', event.request.url)
-      await this.client.send('Fetch.continueResponse', {
-        requestId: event.requestId,
-      }, sessionId)
+      if (event.responseErrorReason) {
+        debug('failing unmatched response error pause: %s', event.request.url)
+        await this.client.send('Fetch.failRequest', {
+          requestId: event.requestId,
+          errorReason: event.responseErrorReason,
+        }, sessionId)
+      } else {
+        debug('continuing unmatched response pause: %s', event.request.url)
+        await this.client.send('Fetch.continueResponse', {
+          requestId: event.requestId,
+        }, sessionId)
+      }
 
       return
     }
@@ -193,6 +204,19 @@ export class CdpFetchTransport {
       responseHeaders: event.responseHeaders,
       sessionId,
     })
+  }
+
+  private async unblockResponsePause (
+    requestId: string,
+    sessionId?: string,
+  ): Promise<void> {
+    try {
+      await this.client.send('Fetch.continueResponse', {
+        requestId,
+      }, sessionId)
+    } catch (unblockErr) {
+      debug('failed to unblock CDP Fetch response pause: %s', (unblockErr as Error).message)
+    }
   }
 
   private cleanup (networkId: string): void {

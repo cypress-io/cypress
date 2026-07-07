@@ -211,6 +211,24 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    it('fails unmatched response error pauses so the browser is not left paused', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'response-pause-id',
+        responseErrorReason: 'Aborted',
+      }))
+
+      expect(client.send).to.have.been.calledOnceWith('Fetch.failRequest', {
+        requestId: 'response-pause-id',
+        errorReason: 'Aborted',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
     it('treats status code 0 as a response pause', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
@@ -264,6 +282,31 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
 
       await handled
+    })
+
+    it('continues the response pause when continueResponse fails after handle', async () => {
+      const client = createClient()
+
+      client.send.onCall(1).rejects(new Error('continueResponse failed'))
+      const transport = new CdpFetchTransport(client as any)
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-response',
+        responseCode: 200,
+      })
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-response',
+      })
     })
 
     it('continues the request pause when middleware fails before the terminal path', async () => {
