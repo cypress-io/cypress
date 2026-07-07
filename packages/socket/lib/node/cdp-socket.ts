@@ -125,8 +125,6 @@ export class CDPSocket extends EventEmitter {
 
       debugVerbose('sending message to browser %o', { expression })
 
-      // returnByValue prevents the browser from retaining each `send` result
-      // (a Promise) until the execution context is destroyed
       this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId, returnByValue: true }).then((result) => {
         debugVerbose('successfully sent message to browser %o', result)
       }).catch((error) => {
