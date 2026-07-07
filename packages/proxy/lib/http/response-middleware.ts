@@ -9,7 +9,7 @@ import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
-import type { CypressOutgoingResponse } from '../types'
+import type { CypressIncomingRequest, CypressOutgoingResponse } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
@@ -17,6 +17,27 @@ import { cspHeaderNames, generateCspDirectives, parseCspHeaders, problematicCspD
 import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
+
+async function finishInterceptResponseWritten (
+  req: CypressIncomingRequest,
+  end: () => void,
+): Promise<void> {
+  const onWritten = req.onInterceptResponseWritten
+
+  if (!onWritten) {
+    end()
+
+    return
+  }
+
+  req.onInterceptResponseWritten = undefined
+
+  try {
+    await onWritten()
+  } finally {
+    end()
+  }
+}
 
 interface ResponseMiddlewareProps {
   /**
@@ -489,7 +510,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
-const MaybeSendRedirectToClient: ResponseMiddleware = function () {
+const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan, isVerbose })
 
   const { statusCode, headers } = this.incomingRes
@@ -515,12 +536,12 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
-  this.res.redirect(Number(statusCode), newUrl)
-
   span?.end()
 
-  // TODO; how do we instrument end?
-  return this.end()
+  await finishInterceptResponseWritten(this.req, () => {
+    this.res.redirect(Number(statusCode), newUrl)
+    this.end()
+  })
 }
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {
@@ -540,15 +561,18 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
+const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, {
       isCached: this.incomingRes.statusCode === 304,
     })
 
-    this.res.end()
+    await finishInterceptResponseWritten(this.req, () => {
+      this.res.end()
+      this.end()
+    })
 
-    return this.end()
+    return
   }
 
   // When the origin response declared `Content-Length: 0`, short-circuit with an
@@ -568,10 +592,14 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsSecurityRemoved
   ) {
     this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
-    this.res.setHeader('Content-Length', '0')
-    this.res.end()
 
-    return this.end()
+    await finishInterceptResponseWritten(this.req, () => {
+      this.res.setHeader('Content-Length', '0')
+      this.res.end()
+      this.end()
+    })
+
+    return
   }
 
   this.next()
@@ -663,7 +691,9 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.incomingResStream.pipe(this.res).on('error', this.onError)
 
   this.res.once('finish', () => {
-    this.end()
+    void finishInterceptResponseWritten(this.req, () => {
+      this.end()
+    })
   })
 }
 

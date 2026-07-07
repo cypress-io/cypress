@@ -14,10 +14,9 @@ import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddle
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
-import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 import { cdpKeyPress } from '../automation/commands/key_press'
 
-import { toSupportedKey } from '@packages/types'
+import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 import { cdpGetUrl } from '../automation/commands/get_url'
 import { cdpReloadFrame } from '../automation/commands/reload_frame'
