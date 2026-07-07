@@ -11,10 +11,18 @@ function setInitializedReporter (val: boolean) {
   hasInitializeReporter = val
 }
 
+let reporterFrame: HTMLIFrameElement | null = null
+
 export function unmountReporter () {
   if (reactDomRoot) {
     reactDomRoot.unmount()
     reactDomRoot = null
+  }
+
+  if (reporterFrame) {
+    reporterFrame.remove()
+    reporterFrame = null
+    window.UnifiedRunner.setReporterDocument(document)
   }
 }
 
@@ -56,6 +64,61 @@ function renderReporter (
     testFilter: specsStore.testFilter,
     codeEditorLineWrap: runnerUiStore.codeEditorLineWrap,
   })
+
+  // Render the command log inside a same-origin iframe so its layout lives in a
+  // separate document from the AUT iframe's parent document. When a heavy AUT
+  // reflow (e.g. a ResizeObserver loop) and the live command-log tree share one
+  // document, Chromium can crash the renderer process. Weaker isolation (Shadow
+  // DOM, CSS containment) does not prevent the crash — only a separate document
+  // does. The reporterBus EventEmitter and MobX store are passed by reference
+  // and work across same-origin frames. Falls back to inline rendering if the
+  // iframe cannot be set up.
+  try {
+    const doc = root.ownerDocument
+    const frame = doc.createElement('iframe')
+
+    frame.id = 'reporter-frame'
+    frame.title = 'Cypress Reporter'
+    frame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:transparent'
+    root.appendChild(frame)
+
+    const idoc = frame.contentDocument
+
+    if (!idoc) throw new Error('reporter iframe contentDocument unavailable')
+
+    // clone the parent document's stylesheets (the reporter's own styles from
+    // `cypress_runner.css` plus app-level resets like the Tailwind preflight)
+    // and root classes so the reporter is styled exactly as it is when
+    // rendered inline
+    doc.querySelectorAll('head link[rel="stylesheet"], head style').forEach((node) => {
+      idoc.head.appendChild(node.cloneNode(true))
+    })
+
+    idoc.documentElement.className = doc.documentElement.className
+    idoc.documentElement.classList.add('force-dark')
+    idoc.documentElement.style.colorScheme = 'dark'
+    idoc.body.style.margin = '0'
+    idoc.body.style.width = '100%'
+
+    // reporter code that binds document-level listeners or portals DOM nodes
+    // (keyboard shortcuts, tooltips, popovers) must target the iframe document
+    window.UnifiedRunner.setReporterDocument(idoc)
+
+    reporterFrame = frame
+    reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
+    reactDomRoot.render(reporter)
+
+    return
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[reporter] iframe render failed, falling back to inline', err)
+    if (reporterFrame) {
+      reporterFrame.remove()
+      reporterFrame = null
+    }
+
+    window.UnifiedRunner.setReporterDocument(document)
+  }
 
   reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)
 

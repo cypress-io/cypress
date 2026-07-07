@@ -4,12 +4,13 @@ import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import cs from 'classnames'
 
-import Tooltip from '@cypress/react-tooltip'
 import Button from '@cypress-design/react-button'
 import { IconActionAddMedium, IconWindowCodeEditor, IconMenuDotsVertical } from '@cypress-design/react-icon'
 import defaultEvents, { Events } from '../lib/events'
 import Switch from '../lib/switch'
 import appState from '../lib/app-state'
+import Tooltip from '../lib/tooltip'
+import { getReporterBody, getReporterDocument } from '../lib/reporter-document'
 
 interface Props {
   events?: Events
@@ -113,14 +114,17 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
       }
     }
 
+    const doc = getReporterDocument()
+    const win = doc.defaultView ?? window
+
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      window.addEventListener('scroll', handleScroll, true)
+      doc.addEventListener('mousedown', handleClickOutside)
+      win.addEventListener('scroll', handleScroll, true)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
+      doc.removeEventListener('mousedown', handleClickOutside)
+      win.removeEventListener('scroll', handleScroll, true)
     }
   }, [isOpen])
 
@@ -240,7 +244,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           )
         }
       </div>
-      {isOpen && createPortal(popoverContent, document.body)}
+      {isOpen && createPortal(popoverContent, getReporterBody())}
     </>
   )
 })

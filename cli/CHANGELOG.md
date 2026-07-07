@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.2
+
+**Bugfixes:**
+
+- Fixed an issue where the browser's renderer process could crash (`We detected that the Chrome Renderer process just crashed`) when the application under test performed heavy layout work driven by a `ResizeObserver` loop (for example, a dialog dynamically showing many form fields with an open dropdown) while the command log was visible. The command log now renders in an isolated document so it no longer shares a layout pass with the application under test. Fixes [#33962](https://github.com/cypress-io/cypress/issues/33962) and [#34218](https://github.com/cypress-io/cypress/issues/34218).
+
 ## 15.18.1
 
 **Performance:**
