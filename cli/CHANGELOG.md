@@ -8,6 +8,7 @@
 **Performance:**
 
 - Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
+- Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers (including Electron) retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
 
 **Bugfixes:**
 
