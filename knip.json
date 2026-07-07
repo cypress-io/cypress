@@ -441,6 +441,14 @@
         "*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/browser-automation": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/injection": {
       "entry": [
         "lib/index.ts",
