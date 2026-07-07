@@ -1,8 +1,3 @@
-// Cross-process tap contract shared by the app (producer of the binding) and the
-// CLI (consumer). Every value crosses CDP via JSON, so this is pure data: types
-// and constants only, no imports. Argument coercion happens app-side so any CLI
-// version can drive any Cypress version.
-
 export const TAP_SCHEMA_VERSION = 1
 
 export const TAP_BINDING_GLOBAL = '__CYPRESS_TAP_BINDING__'
