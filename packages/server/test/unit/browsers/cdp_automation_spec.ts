@@ -29,7 +29,7 @@ context('lib/browsers/cdp_automation', () => {
 
         const localNetworkCommandStub = localCommand.withArgs('Network.enable', enabledObject).resolves()
 
-        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
+        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, {} as any, localManager)
 
         expect(localNetworkCommandStub).to.have.been.calledWith('Network.enable', enabledObject)
       })
@@ -55,8 +55,8 @@ context('lib/browsers/cdp_automation', () => {
 
         const localCommandStub = localCommand.withArgs('Network.enable', disabledObject).resolves()
 
-        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, localManager)
-        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any)
+        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, {} as any, localManager)
+        await CdpAutomation.create(localCommand, localOnFn, localOffFn, localSendCloseTargetCommand, localAutomation as any, {} as any)
 
         expect(localCommandStub).to.have.been.calledTwice
         expect(localCommandStub).to.have.been.calledWithExactly('Network.enable', disabledObject)
@@ -77,7 +77,7 @@ context('lib/browsers/cdp_automation', () => {
         onServiceWorkerVersionUpdated: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation)
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, {} as any)
       this.onRequest = cdpAutomation.onRequest
     })
 
@@ -517,7 +517,7 @@ context('lib/browsers/cdp_automation', () => {
           })
 
           it('does not try to comm with extension, simply brings page to front', async function () {
-            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, undefined, requireTabFocus, isHeadless)
+            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, {} as any, undefined, requireTabFocus, isHeadless)
             this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
 
             expect(cdpAutomation.onRequest('take:screenshot', undefined)).to.eventually.equal('data:image/png;base64,foo')
@@ -529,7 +529,7 @@ context('lib/browsers/cdp_automation', () => {
         describe('when not headless', () => {
           beforeEach(async function () {
             isHeadless = false
-            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, undefined, requireTabFocus, isHeadless)
+            cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.offFn, this.sendCloseTargetCommand, this.automation, {} as any, undefined, requireTabFocus, isHeadless)
             this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
           })
 
