@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "vitest": "^3.2.4"
   },
   "files": [
