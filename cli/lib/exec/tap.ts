@@ -6,8 +6,8 @@ import { withTapSession, throwTapError } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
-import { TAP_EXEC_METHOD, TAP_PROTOCOL_VERSION, TAP_SCHEMA_METHOD } from '../tap/contract'
-import type { TapExecResult, TapSchema } from '../tap/contract'
+import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
+import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
@@ -19,16 +19,16 @@ interface TapCliOptions {
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
 
-  if (!schema || typeof schema !== 'object' || typeof schema.protocolVersion !== 'number' || !Array.isArray(schema.commands)) {
+  if (!schema || typeof schema !== 'object' || typeof schema.schemaVersion !== 'number' || !Array.isArray(schema.commands)) {
     return throwTapError(errors.tapInvalidSchema, `${TAP_SCHEMA_METHOD} returned an unrecognizable schema.`)
   }
 
-  if (schema.protocolVersion > TAP_PROTOCOL_VERSION) {
-    return throwTapError(errors.tapUnsupportedProtocol, `schema protocol v${schema.protocolVersion} is newer than the CLI's v${TAP_PROTOCOL_VERSION}.`)
+  if (schema.schemaVersion > TAP_SCHEMA_VERSION) {
+    return throwTapError(errors.tapUnsupportedProtocol, `schema version v${schema.schemaVersion} is newer than the CLI's v${TAP_SCHEMA_VERSION}.`)
   }
 
-  if (schema.protocolVersion < TAP_PROTOCOL_VERSION) {
-    return throwTapError(errors.tapOutdatedProtocol, `schema protocol v${schema.protocolVersion} is older than the CLI's v${TAP_PROTOCOL_VERSION}.`)
+  if (schema.schemaVersion < TAP_SCHEMA_VERSION) {
+    return throwTapError(errors.tapOutdatedProtocol, `schema version v${schema.schemaVersion} is older than the CLI's v${TAP_SCHEMA_VERSION}.`)
   }
 
   return schema
@@ -37,7 +37,7 @@ const validateSchema = (value: unknown): TapSchema => {
 const validateExecResult = (value: unknown): TapExecResult => {
   const outcome = value as TapExecResult | null | undefined
 
-  if (!outcome || typeof outcome !== 'object' || typeof outcome.ok !== 'boolean') {
+  if (!outcome || typeof outcome !== 'object' || (!('result' in outcome) && !('error' in outcome))) {
     return throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
   }
 
@@ -63,8 +63,8 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
 const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
-  if (!outcome.ok) {
-    renderFailure(outcome)
+  if ('error' in outcome) {
+    renderFailure(outcome.error)
 
     return 1
   }

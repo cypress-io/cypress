@@ -2,7 +2,7 @@ import commander from 'commander'
 
 import logger from '../logger'
 import type { InstanceSelection } from '../cypress-instances'
-import type { TapSchema } from './contract'
+import type { TapSchema } from '@packages/cypress-instances'
 
 export const renderFailure = (err: { code: string, message: string }): void => {
   logger.error(`${err.code}: ${err.message}`)

@@ -4,7 +4,7 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
-import type { TapExecResult, TapSchema } from '../../../lib/tap/contract'
+import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
 
@@ -32,7 +32,7 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
 })
 
 const schema: TapSchema = {
-  protocolVersion: 1,
+  schemaVersion: 1,
   cypressVersion: '15.0.0',
   commands: [
     {
@@ -55,7 +55,7 @@ const schema: TapSchema = {
   ],
 }
 
-const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { ok: true, result: 'ok' } satisfies TapExecResult) => {
+const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
   const call = vi.fn(async (method: string) => {
     return method === 'getSchema' ? sessionSchema : execOutcome
   })
@@ -113,7 +113,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('forwards positional args to exec as raw strings keyed by param name, without interpreting them', async () => {
-      const call = mockSession(schema, { ok: true, result: { status: 'started' } })
+      const call = mockSession(schema, { result: { status: 'started' } })
 
       expect(await tap.start(['run', 'cypress/e2e/a.cy.js'], {})).toBe(0)
 
@@ -121,7 +121,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('forwards parsed options to exec as raw strings, without interpreting them', async () => {
-      const call = mockSession(schema, { ok: true, result: { status: 'started' } })
+      const call = mockSession(schema, { result: { status: 'started' } })
 
       expect(await tap.start(['run', 'cypress/e2e/a.cy.js', '--browser', 'chrome', '--headed'], {})).toBe(0)
 
@@ -137,7 +137,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints non-string results as readable JSON', async () => {
-      mockSession(schema, { ok: true, result: { status: 'ok', browsers: 2 } })
+      mockSession(schema, { result: { status: 'ok', browsers: 2 } })
 
       expect(await tap.start(['health'], {})).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'ok', browsers: 2 })
@@ -161,11 +161,12 @@ describe('lib/exec/tap', () => {
       expect(resolveInstance).toHaveBeenCalledWith({ instance: undefined, cwd: process.cwd() })
     })
 
-    it('renders an app-side domain failure (ok: false) with its code and exits 1', async () => {
+    it('renders an app-side domain failure ({ error }) with its code and exits 1', async () => {
       const call = mockSession(schema, {
-        ok: false,
-        code: 'INVALID_ARGUMENTS',
-        message: '<spec> must be a string over the wire, but number was given.',
+        error: {
+          code: 'INVALID_ARGUMENTS',
+          message: '<spec> must be a string, but number was given.',
+        },
       })
 
       expect(await tap.start(['run', 'cypress/e2e/a.cy.js'], {})).toBe(1)
@@ -339,7 +340,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('rejects a future protocol version, telling the user to update the CLI', async () => {
-      mockSession({ ...schema, protocolVersion: 2 })
+      mockSession({ ...schema, schemaVersion: 2 })
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain('newer than this CLI')
@@ -347,7 +348,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('rejects an older protocol version, telling the user to update the running Cypress', async () => {
-      mockSession({ ...schema, protocolVersion: 0 })
+      mockSession({ ...schema, schemaVersion: 0 })
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain('older than this CLI')

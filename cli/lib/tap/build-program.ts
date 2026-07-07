@@ -1,6 +1,6 @@
 import commander from 'commander'
 
-import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from './contract'
+import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
 
