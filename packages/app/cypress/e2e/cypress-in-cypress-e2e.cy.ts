@@ -16,7 +16,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
 
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
     cy.findByTestId('aut-url').should('be.visible')
     cy.findByTestId('select-browser').click()
 
@@ -34,7 +34,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('Canary').should('be.hidden')
     cy.get('body').click()
 
-    cy.get('.hook-open-in-ide').should('exist')
+    cy.reporter().find('.hook-open-in-ide').should('exist')
 
     cy.get('#unified-runner').then((el) => {
       expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.85\); position: absolute; margin-left: -25px;/)
@@ -51,7 +51,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
 
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
     cy.findByTestId('aut-url').should('be.visible')
 
     cy.get('#unified-runner').then((el) => {
@@ -66,7 +66,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     // go to Settings page and back to spec runner
     cy.contains('a', 'Settings').click()
@@ -74,7 +74,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('a', 'Specs').click()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
     // go to Runs page and back to spec runner
     cy.contains('a', 'Runs').click()
@@ -82,7 +82,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('a', 'Specs').click()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
   })
 
   it('redirects to the specs list with error if a spec is not found when navigating', () => {
@@ -112,7 +112,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.visit(`http://localhost:4455/__/#/specs/runner?file=${goodFilePath}`)
 
-    cy.contains('Dom Content').should('be.visible')
+    cy.reporter().contains('Dom Content').should('be.visible')
 
     cy.withCtx((ctx, o) => {
       ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
@@ -133,7 +133,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('blank-contents.spec')
     .click()
 
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the blank page')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the blank page')
   })
 
   it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
@@ -149,7 +149,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('bad-spec.spec')
     .click()
 
-    cy.contains('No tests found').should('be.visible')
+    cy.reporter().contains('No tests found').should('be.visible')
 
     cy.contains('SyntaxError')
     .should('be.visible')
@@ -171,7 +171,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('blank-contents.spec')
     .click()
 
-    cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
+    cy.reporter().find('[data-model-state="failed"]').should('contain', 'renders the blank page')
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
@@ -183,7 +183,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('dom-content.spec').click()
 
-    cy.get('.toggle-specs-wrapper').click()
+    cy.reporter().find('.toggle-specs-wrapper').click()
 
     cy.get('#unified-runner').then((el) => {
       // CSS properties are calculated over inline styles, which means we get a close representation
@@ -198,14 +198,14 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('withFailure.spec').click()
 
-    cy.get('[data-cy="runnable-header"]').should('be.visible')
+    cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.contains('Search specs')
     cy.contains('withWait.spec').click()
     cy.waitForSpecToFinish()
 
-    cy.get('.passed > .num').should('contain', 4)
-    cy.get('.failed > .num').should('not.contain', 1)
+    cy.reporter().find('.passed > .num').should('contain', 4)
+    cy.reporter().find('.failed > .num').should('not.contain', 1)
   })
 
   it('executes a test, navigates back to the spec list, creates a new spec, and runs the new spec', () => {
@@ -213,7 +213,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
     cy.contains('a', 'Specs').click()
     cy.withCtx(async (ctx, o) => {
       await ctx.actions.file.writeFileInProject(o.path, `describe('Simple Test', () => { it('true is true', () => { expect(true).to.be.true }) })`)
@@ -221,7 +221,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.contains('new-file.spec').click()
     cy.waitForSpecToFinish()
-    cy.get('[data-model-state="passed"]').should('contain', 'expected true to be true')
+    cy.reporter().find('[data-model-state="passed"]').should('contain', 'expected true to be true')
   })
 
   describe('accessibility', () => {
@@ -229,14 +229,14 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.contains('withFailure.spec').click()
-      cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
+      cy.reporter().find('button[aria-controls="reporter-inline-specs-list"]').click()
     })
 
     it('has no axe violations in reporter panel', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.contains('withFailure.spec').click()
-      cy.get('button[aria-controls="reporter-inline-specs-list"]').click()
+      cy.reporter().find('button[aria-controls="reporter-inline-specs-list"]').click()
     })
   })
 })

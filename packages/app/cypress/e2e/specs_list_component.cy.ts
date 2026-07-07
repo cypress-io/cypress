@@ -27,7 +27,7 @@ describe('App: Spec List (Component)', () => {
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
 
-    cy.get('[data-cy="runnable-header"]').should('be.visible')
+    cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')

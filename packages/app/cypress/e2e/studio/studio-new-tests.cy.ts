@@ -5,11 +5,11 @@ describe('Cypress Studio - New Test Creation', () => {
     launchStudio({ specName: 'spec-w-multiple-tests.cy.js', createNewTestFromSuite: true })
 
     // verify we are not in single test mode
-    cy.get('.runnable-title').should('have.length', 4)
-    cy.get('.runnable-title').its(0).should('have.text', 'studio functionality')
-    cy.get('.runnable-title').its(1).should('contain.text', 'visits a basic html page')
-    cy.get('.runnable-title').its(2).should('contain.text', 'visits a basic html page 2')
-    cy.get('.runnable-title').its(3).should('contain.text', 'visits a basic html page 3')
+    cy.reporter().find('.runnable-title').should('have.length', 4)
+    cy.reporter().find('.runnable-title').its(0).should('have.text', 'studio functionality')
+    cy.reporter().find('.runnable-title').its(1).should('contain.text', 'visits a basic html page')
+    cy.reporter().find('.runnable-title').its(2).should('contain.text', 'visits a basic html page 2')
+    cy.reporter().find('.runnable-title').its(3).should('contain.text', 'visits a basic html page 3')
   })
 
   describe('from spec header', () => {
@@ -38,7 +38,7 @@ it('new-test', function() {
     const saveNewTest = () => {
       inputNewTestName()
 
-      cy.contains('new-test').click()
+      cy.reporter().contains('new-test').click()
 
       cy.percySnapshot()
 
@@ -213,7 +213,7 @@ describe('studio functionality', () => {
   it('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
-    cy.contains('Create test with Cypress Studio').click()
+    cy.reporter().contains('Create test with Cypress Studio').click()
 
     inputNewTestName()
 
@@ -245,7 +245,7 @@ it('new-test', function() {
 
     cy.get('[data-cy="studio-panel"]').should('be.visible')
 
-    cy.contains('Create test with Cypress Studio').click()
+    cy.reporter().contains('Create test with Cypress Studio').click()
 
     inputNewTestName()
 
@@ -274,25 +274,25 @@ it('new-test', function() {
     loadProjectAndRunSpec({ specName: 'spec-with-only.cy.js' })
 
     // verify the test is the only one that runs
-    cy.get('.test').should('have.length', 1)
-    cy.get('.test').contains('should be the only test to run normally').should('be.visible')
+    cy.reporter().find('.test').should('have.length', 1)
+    cy.reporter().find('.test').contains('should be the only test to run normally').should('be.visible')
 
     // open edit in studio
-    cy.contains('should be the only test to run normally')
+    cy.reporter().contains('should be the only test to run normally')
     .closest('.runnable-wrapper')
     .findByTestId('launch-studio')
     .click()
 
     cy.findByTestId('studio-panel').should('be.visible')
 
-    cy.findByTestId('studio-single-test-title').should('have.text', 'should be the only test to run normally')
+    cy.reporter().findByTestId('studio-single-test-title').should('have.text', 'should be the only test to run normally')
   })
 
   it('creates and runs new tests in studio mode when there is a .only test in the spec file', () => {
     loadProjectAndRunSpec({ specName: 'spec-with-only.cy.js' })
 
-    cy.get('.test').should('have.length', 1)
-    cy.get('.test').contains('should be the only test to run normally').should('be.visible')
+    cy.reporter().find('.test').should('have.length', 1)
+    cy.reporter().find('.test').contains('should be the only test to run normally').should('be.visible')
     // create a new test from the spec header
     openNewTestFromSpecHeader()
 
@@ -300,9 +300,9 @@ it('new-test', function() {
       cy.get('[data-cy="test-name-input"]').type('new test{enter}')
     })
 
-    cy.get('.spec-name').should('have.text', 'spec-with-only')
+    cy.reporter().find('.spec-name').should('have.text', 'spec-with-only')
     // our new test runs in studio mode even though it doesn't have a .only
-    cy.get('[data-cy="studio-single-test-title"]').should('have.text', 'new test')
+    cy.reporter().find('[data-cy="studio-single-test-title"]').should('have.text', 'new test')
   })
 
   it('continues to display the welcome screen after reloading', () => {

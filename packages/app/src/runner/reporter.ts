@@ -90,8 +90,19 @@ function renderReporter (
     // `cypress_runner.css` plus app-level resets like the Tailwind preflight)
     // and root classes so the reporter is styled exactly as it is when
     // rendered inline
+    const pendingStylesheets: Promise<void>[] = []
+
     doc.querySelectorAll('head link[rel="stylesheet"], head style').forEach((node) => {
-      idoc.head.appendChild(node.cloneNode(true))
+      const clone = node.cloneNode(true) as HTMLElement
+
+      if (clone.tagName === 'LINK') {
+        pendingStylesheets.push(new Promise((resolve) => {
+          clone.addEventListener('load', () => resolve())
+          clone.addEventListener('error', () => resolve())
+        }))
+      }
+
+      idoc.head.appendChild(clone)
     })
 
     idoc.documentElement.className = doc.documentElement.className
@@ -105,8 +116,19 @@ function renderReporter (
     window.UnifiedRunner.setReporterDocument(idoc)
 
     reporterFrame = frame
-    reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
-    reactDomRoot.render(reporter)
+
+    const reactRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
+
+    reactDomRoot = reactRoot
+
+    // mount only once the stylesheets have loaded so the reporter never lays
+    // out (or receives interactions) unstyled
+    Promise.all(pendingStylesheets).then(() => {
+      // a spec navigation may have unmounted this reporter while styles loaded
+      if (reactDomRoot === reactRoot) {
+        reactRoot.render(reporter)
+      }
+    })
 
     return
   } catch (err) {
