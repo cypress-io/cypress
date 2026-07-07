@@ -5,16 +5,19 @@ import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { parseDomain, isLocalhost as isLocalhostNetworkTools } from '@packages/network-tools'
+import type { DocumentDomainInjectionConfig } from '@packages/network-tools'
 import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, BrowserLaunchOpts } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../automation/commands/key_press'
+import { CdpBridgeInjectionAdapter } from '@packages/browser-automation'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
@@ -177,8 +180,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private gettingFrameTree: Promise<void> | undefined | null
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
+  private autBridge: CdpBridgeInjectionAdapter | undefined
 
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false, private browserLaunchOpts: BrowserLaunchOpts) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     onFn('Network.requestServedFromCache', this.onRequestServedFromCache)
@@ -192,6 +196,30 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.on = onFn
     this.off = offFn
     this.send = sendDebuggerCommandFn
+
+    // When the MITM proxy is disabled (HTTP/2 / proxy-bypass path) it can't rewrite AUT HTML to inject
+    // the Cypress bridge, so install it over CDP instead. Gated on the same flag that disables the proxy
+    // so the CDP and proxy injection paths are mutually exclusive and never double-inject.
+    if (isProxyDisabled()) {
+      // pick only the config keys the page-context injection needs. BrowserLaunchOpts doesn't type these,
+      // but open_project merges the resolved Cypress config into the launch options at runtime.
+      const { injectDocumentDomain, testingType, modifyObstructiveCode, experimentalModifyObstructiveThirdPartyCode } =
+        browserLaunchOpts as BrowserLaunchOpts & DocumentDomainInjectionConfig & { modifyObstructiveCode?: boolean, experimentalModifyObstructiveThirdPartyCode?: boolean }
+
+      const documentDomainConfig: DocumentDomainInjectionConfig = { injectDocumentDomain, testingType }
+
+      // cross-origin spec-bridge `cypressConfig` (mirrors the proxy's fullCrossOrigin options).
+      // simulatedCookies is hardcoded empty for now — it needs to be wired from the cookie jar separately
+      // (https://github.com/cypress-io/cypress/issues/33860).
+      const crossOriginConfig = {
+        shouldInjectDocumentDomain: !!injectDocumentDomain && testingType !== 'component',
+        modifyObstructiveThirdPartyCode: !!experimentalModifyObstructiveThirdPartyCode,
+        modifyObstructiveCode: !!modifyObstructiveCode,
+        simulatedCookies: [],
+      }
+
+      this.autBridge = new CdpBridgeInjectionAdapter(this.sendDebuggerCommandFn, documentDomainConfig, crossOriginConfig)
+    }
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
@@ -210,8 +238,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, browserLaunchOpts: BrowserLaunchOpts, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless, browserLaunchOpts)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
@@ -408,6 +436,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     this.gettingFrameTree = new Promise<void>(async (resolve) => {
       try {
         this.frameTree = (await client.send('Page.getFrameTree')).frameTree
+        // inject the bridge into the AUT frame if the proxy is disabled
+        this.autBridge?.inject(this.frameTree.frame.url)
         debugVerbose('frame tree updated')
       } catch (err) {
         debugVerbose('failed to update frame tree:', err.stack)
@@ -543,6 +573,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     client.on('Page.frameAttached', this._updateFrameTree(client, 'Page.frameAttached'))
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
+    client.on('Page.frameNavigated', this._updateFrameTree(client, 'Page.frameNavigated'))
   }
 
   onRequest = async <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
