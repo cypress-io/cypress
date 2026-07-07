@@ -104,7 +104,7 @@ export class NetworkProxy {
     this.http.setPreRequestTimeout(timeout)
   }
 
-  updateBlockHosts (blockHosts) {
+  updateBlockHosts (blockHosts: string | string[] | null) {
     this.http.updateBlockHosts(blockHosts)
   }
 
