@@ -122,6 +122,10 @@ export class WizardActions {
       })
 
       this.ctx.emitter.frameworkDetectionChange()
+      // The detection-change subscription alone does not reliably refresh the
+      // wizard UI, so trigger a launchpad re-query to surface the detected
+      // framework/bundler.
+      this.ctx.emitter.toLaunchpad()
     }
   }
 
