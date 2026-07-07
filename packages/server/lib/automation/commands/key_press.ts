@@ -60,9 +60,6 @@ export async function cdpKeyPress (
     throw new Error('Could not find AUT frame')
   }
 
-  // Complete with a primitive rather than `document.activeElement` itself: an evaluation
-  // completing with a DOM element pins a RemoteObject in the renderer for the lifetime of
-  // the execution context, which can retain detached DOM trees across navigations.
   const topActiveElement = await evaluateInFrameContext(
     `document.activeElement instanceof HTMLIFrameElement ? document.activeElement.name || document.activeElement.id : ''`,
     send, contexts, frameTree.frame,
