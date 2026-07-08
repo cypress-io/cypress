@@ -146,6 +146,17 @@ function renderReporter (
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[reporter] iframe render failed, falling back to inline', err)
+    if (reactDomRoot) {
+      // don't leave a detached React tree behind before creating the inline
+      // root; never let cleanup prevent the fallback from rendering
+      try {
+        reactDomRoot.unmount()
+      } catch {
+        // ignore
+      }
+      reactDomRoot = null
+    }
+
     if (reporterFrame) {
       reporterFrame.remove()
       reporterFrame = null
