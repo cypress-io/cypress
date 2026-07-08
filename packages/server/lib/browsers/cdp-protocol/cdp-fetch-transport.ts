@@ -35,6 +35,18 @@ export class CdpFetchTransport {
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
   ) {}
 
+  /**
+   * Enables the CDP Fetch domain and starts intercepting requests.
+   *
+   * This transport must be the sole owner of the Fetch domain on its CDP
+   * session. `Fetch.enable` is not additive: the last call on a session
+   * replaces the pattern list, while `Fetch.requestPaused` handlers stack.
+   * Enabling this alongside `cdp_automation._handlePausedRequests` on the
+   * same session clobbers patterns and races `continueRequest` calls, which
+   * can drop the `X-Cypress-Is-AUT-Frame` header or hang document requests
+   * until the response-pause timeout. Coordinating the two owners is out of
+   * scope; do not enable both on one session.
+   */
   async start (): Promise<void> {
     if (this.isStarted) {
       return
