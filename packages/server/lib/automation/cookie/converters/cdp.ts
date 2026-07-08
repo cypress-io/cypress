@@ -25,7 +25,7 @@ function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): c
   return str.toLowerCase() as chrome.cookies.SameSiteStatus
 }
 
-const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
+const convertCdpCookieToCyCookie = (cookie: Protocol.Network.Cookie): CyCookie => {
   if (cookie.expires === -1) {
     // @ts-ignore
     delete cookie.expires
@@ -48,11 +48,11 @@ const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
   return cookie
 }
 
-export const normalizeGetCookies = (cookies: Protocol.Network.Cookie[]) => {
-  return _.map(cookies, normalizeGetCookieProps)
+export const convertCdpCookiesToCyCookies = (cookies: Protocol.Network.Cookie[]) => {
+  return _.map(cookies, convertCdpCookieToCyCookie)
 }
 
-export const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
+export const convertCyCookieToCdpCookie = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
   // this logic forms a SetCookie request that will be received by Chrome
   // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
   // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174

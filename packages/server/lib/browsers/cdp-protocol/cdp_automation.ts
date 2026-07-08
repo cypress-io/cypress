@@ -12,7 +12,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
-import { normalizeGetCookies, normalizeSetCookieProps } from '../../automation/cookie/converters/cdp'
+import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../../automation/commands/key_press'
 
@@ -252,7 +252,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private getAllCookies = async (filter: CyCookieFilter) => {
     const result: Protocol.Network.GetAllCookiesResponse = await this.sendDebuggerCommandFn('Network.getAllCookies')
 
-    return normalizeGetCookies(result.cookies)
+    return convertCdpCookiesToCyCookies(result.cookies)
     .filter((cookie: CyCookie) => {
       const matches = cookieMatches(cookie, filter)
 
@@ -269,7 +269,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     const isLocalhost = isLocalhostNetworkTools(new URL(url))
 
-    return normalizeGetCookies(result.cookies)
+    return convertCdpCookiesToCyCookies(result.cookies)
     .filter((cookie) => {
       // Chrome returns all cookies for a URL, even if they wouldn't normally
       // be sent with a request. This standardizes it by filtering out ones
@@ -442,7 +442,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'get:cookie':
         return this.getCookie(data)
       case 'set:cookie': {
-        setCookie = normalizeSetCookieProps(data)
+        setCookie = convertCyCookieToCdpCookie(data)
 
         const result: Protocol.Network.SetCookieResponse = await this.sendDebuggerCommandFn('Network.setCookie', setCookie)
 
@@ -456,12 +456,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       case 'add:cookies':
-        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+        setCookie = data.map((cookie) => convertCyCookieToCdpCookie(cookie)) as Protocol.Network.SetCookieRequest[]
 
         return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
 
       case 'set:cookies':
-        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+        setCookie = data.map((cookie) => convertCyCookieToCdpCookie(cookie))
 
         await this.sendDebuggerCommandFn('Network.clearBrowserCookies')
 

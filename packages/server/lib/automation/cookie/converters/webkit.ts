@@ -7,11 +7,11 @@ const extensionMap = {
   'strict': 'Strict',
 } as const
 
-function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
+function convertSameSiteExtensionToPlaywright (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
   return str ? extensionMap[str] : undefined
 }
 
-export const normalizeGetCookieProps = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
+export const convertPlaywrightCookieToCyCookie = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
   const cyCookie: CyCookie = {
     name,
     value,
@@ -33,7 +33,7 @@ export const normalizeGetCookieProps = ({ name, value, domain, path, secure, htt
   return cyCookie
 }
 
-export const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
+export const convertCyCookieToPlaywrightCookie = (cookie: CyCookie): playwright.Cookie => {
   return {
     name: cookie.name,
     value: cookie.value,
@@ -42,6 +42,6 @@ export const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => 
     secure: cookie.secure,
     httpOnly: cookie.httpOnly,
     expires: cookie.expirationDate!,
-    sameSite: convertSameSiteExtensionToCypress(cookie.sameSite)!,
+    sameSite: convertSameSiteExtensionToPlaywright(cookie.sameSite)!,
   }
 }
