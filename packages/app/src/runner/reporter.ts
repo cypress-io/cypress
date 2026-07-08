@@ -105,6 +105,15 @@ function renderReporter (
       idoc.head.appendChild(clone)
     })
 
+    // Tailwind's responsive `.container` component (cloned along with the
+    // app's stylesheets) collides with the reporter's `.container` element;
+    // its media queries resolve against the narrow iframe viewport and clamp
+    // the command log's width at Tailwind's breakpoints
+    const styleOverrides = idoc.createElement('style')
+
+    styleOverrides.textContent = '.reporter .container { max-width: none; }'
+    idoc.head.appendChild(styleOverrides)
+
     idoc.documentElement.className = doc.documentElement.className
     idoc.documentElement.classList.add('force-dark')
     idoc.documentElement.style.colorScheme = 'dark'
