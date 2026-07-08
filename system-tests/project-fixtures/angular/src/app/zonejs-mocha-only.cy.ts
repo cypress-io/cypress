@@ -46,8 +46,17 @@ describe('only', () => {
   })
 
   context.only('02 - validations', () => {
+    // the command log renders inside a same-origin iframe (#reporter-frame); fall
+    // back to the top document if the reporter rendered inline
+    const reporterBody = () => {
+      const topDoc = window.top!.document
+      const frame = topDoc.querySelector('#reporter-frame') as HTMLIFrameElement | null
+
+      return Cypress.$((frame?.contentDocument || topDoc).body)
+    }
+
     const verifyNotPresent = (title: string) => {
-      cy.wrap(Cypress.$(window.top!.document.body)).within(() => {
+      cy.wrap(reporterBody()).within(() => {
         return cy
         .contains(title)
         .should('not.exist')
