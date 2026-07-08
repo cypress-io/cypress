@@ -9,7 +9,7 @@ function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Net
   return str ? sameSiteExtensionToProtocolMap[str] : undefined
 }
 
-function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
+function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite | undefined): CyCookie['sameSite'] {
   if (_.isUndefined(str)) {
     return str
   }
@@ -18,30 +18,27 @@ function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): c
     return 'no_restriction'
   }
 
-  return str.toLowerCase() as chrome.cookies.SameSiteStatus
+  return str.toLowerCase() as CyCookie['sameSite']
 }
 
 const convertCdpCookieToCyCookie = (cookie: Protocol.Network.Cookie): CyCookie => {
-  if (cookie.expires === -1) {
-    // @ts-ignore
-    delete cookie.expires
+  const cyCookie: CyCookie = {
+    name: cookie.name,
+    value: cookie.value,
+    domain: cookie.domain,
+    path: cookie.path,
+    secure: cookie.secure,
+    httpOnly: cookie.httpOnly,
+    sameSite: convertSameSiteCdpToExtension(cookie.sameSite),
+    // CDP signals a session cookie with a -1 expiry
+    expirationDate: cookie.expires === -1 ? undefined : cookie.expires,
   }
 
   if (isHostOnlyCookie(cookie)) {
-    // @ts-ignore
-    cookie.hostOnly = true
+    cyCookie.hostOnly = true
   }
 
-  // @ts-ignore
-  cookie.sameSite = convertSameSiteCdpToExtension(cookie.sameSite)
-
-  // @ts-ignore
-  cookie.expirationDate = cookie.expires
-  // @ts-ignore
-  delete cookie.expires
-
-  // @ts-ignore
-  return cookie
+  return cyCookie
 }
 
 export const convertCdpCookiesToCyCookies = (cookies: Protocol.Network.Cookie[]) => {
@@ -74,11 +71,6 @@ export const convertCyCookieToCdpCookie = (cookie: CyCookie): Protocol.Network.S
   // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
     setCookieRequest.domain = `.${cookie.domain}`
-  }
-
-  if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
-    // @ts-ignore
-    delete cookie.hostOnly
   }
 
   if (setCookieRequest.name.startsWith('__Host-')) {

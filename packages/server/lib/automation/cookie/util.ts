@@ -15,9 +15,11 @@ export const sameSiteExtensionToProtocolMap = {
 } as const
 
 // @ts-ignore
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
+export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
   // use `undefined` instead of `unspecified`
   sameSite?: Exclude<ExtensionSameSiteStatus, 'unspecified'>
+  // unlike chrome.cookies.Cookie, hostOnly is optional — producers only set it when it applies
+  hostOnly?: boolean
 }
 
 // Cypress uses the webextension-style filtering
