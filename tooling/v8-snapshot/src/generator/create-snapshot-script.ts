@@ -360,8 +360,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
         }
 
         // The bundler's stderr names the exact offending file, so surface it on
-        // the rejected error rather than routing it through a DEBUG-gated logger
-        // that CI (DEBUG=cypress:snapgen:info) doesn't enable.
+        // the rejected error rather than routing it through a DEBUG-gated logger.
         const stderr = err.stderr?.toString().trim()
         const detail = stderr ? `\n${stderr}` : `\n${err}`
 
