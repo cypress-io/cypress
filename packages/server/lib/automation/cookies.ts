@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { isHostOnlyCookie } from '../browsers/cdp_automation'
+import { isHostOnlyCookie } from '../browsers/cdp-protocol/cdp_automation'
 import type { SerializableAutomationCookie } from '../util/cookies'
 
 type AutomationFn<V, T> = (data: V) => Promise<T>

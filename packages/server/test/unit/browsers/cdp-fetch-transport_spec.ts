@@ -2,8 +2,8 @@ const { expect, sinon } = require('../../spec_helper')
 
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
-import { createCdpFetchCodec } from '../../../lib/browsers/cdp-fetch-codec'
-import { CdpFetchTransport } from '../../../lib/browsers/cdp-fetch-transport'
+import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
+import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 
 function createPausedRequest (options: {
   requestId: string

@@ -12,10 +12,10 @@ import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
-import type { ICriClient } from './browsers/cri-client'
-import { createCdpFetchCodec } from './browsers/cdp-fetch-codec'
-import { CdpFetchTransport } from './browsers/cdp-fetch-transport'
-import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-fetch-transport'
+import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
+import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
+import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config

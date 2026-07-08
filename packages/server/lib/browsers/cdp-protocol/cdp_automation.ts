@@ -11,17 +11,17 @@ import { performance } from 'perf_hooks'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
-import type { Automation } from '../automation'
-import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
+import type { Automation } from '../../automation'
+import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
-import { cdpKeyPress } from '../automation/commands/key_press'
+import { cdpKeyPress } from '../../automation/commands/key_press'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
-import { cdpGetUrl } from '../automation/commands/get_url'
-import { cdpReloadFrame } from '../automation/commands/reload_frame'
-import { cdpNavigateHistory } from '../automation/commands/navigate_history'
-import { cdpGetFrameTitle } from '../automation/commands/get_frame_title'
+import { cdpGetUrl } from '../../automation/commands/get_url'
+import { cdpReloadFrame } from '../../automation/commands/reload_frame'
+import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
+import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 

@@ -1,7 +1,7 @@
 import debugModule from 'debug'
 import toInteger from 'lodash/toInteger'
 import isNumber from 'lodash/isNumber'
-import { isHostOnlyCookie } from './cdp_automation'
+import { isHostOnlyCookie } from './cdp-protocol/cdp_automation'
 import { isLocalhost } from '@packages/network-tools'
 import { cookieMatches } from '../automation/util'
 import { bidiKeyPress } from '../automation/commands/key_press'
