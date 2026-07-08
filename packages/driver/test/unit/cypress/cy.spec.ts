@@ -37,3 +37,45 @@ describe('$Cy reset', () => {
     expect(resetStability).toHaveBeenCalledOnce()
   })
 })
+
+describe('$Cy#syncBlockHostsToBackend', () => {
+  const buildMockCy = ({
+    isCrossOriginSpecBridge = false,
+    blockHosts,
+  }: {
+    isCrossOriginSpecBridge?: boolean
+    blockHosts?: string | string[]
+  }) => {
+    return {
+      Cypress: {
+        isCrossOriginSpecBridge,
+        backend: vi.fn(),
+        config: vi.fn((key: string) => (key === 'blockHosts' ? blockHosts : undefined)),
+      },
+    }
+  }
+
+  it('sends the resolved blockHosts value to the backend on the primary origin', () => {
+    const mockCy = buildMockCy({ blockHosts: ['*.foo.com'] })
+
+    $Cy.prototype.syncBlockHostsToBackend.call(mockCy)
+
+    expect(mockCy.Cypress.backend).toHaveBeenCalledWith('update:block:hosts', ['*.foo.com'])
+  })
+
+  it('sends null when blockHosts is unset so an override can be cleared', () => {
+    const mockCy = buildMockCy({ blockHosts: undefined })
+
+    $Cy.prototype.syncBlockHostsToBackend.call(mockCy)
+
+    expect(mockCy.Cypress.backend).toHaveBeenCalledWith('update:block:hosts', null)
+  })
+
+  it('does not sync from a cross-origin spec bridge', () => {
+    const mockCy = buildMockCy({ isCrossOriginSpecBridge: true, blockHosts: ['*.foo.com'] })
+
+    $Cy.prototype.syncBlockHostsToBackend.call(mockCy)
+
+    expect(mockCy.Cypress.backend).not.toHaveBeenCalled()
+  })
+})

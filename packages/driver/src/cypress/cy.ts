@@ -359,29 +359,32 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       return Cypress.backend('close:extra:targets')
     })
 
-    // `blockHosts` is enforced by the proxy, whose config is process-global, so
-    // only the primary origin syncs it. Test-level overrides are applied to
-    // Cypress.config() before this event fires, so push the resolved value for the
-    // upcoming test to keep the proxy in sync.
-    //
-    // We send this every test rather than diffing against the last-synced value: the
-    // proxy resets to the project default between specs independently of the driver,
-    // so a cached value could drift out of sync (e.g. in single-tab run mode or
-    // component testing, where the driver persists across specs). The cost is one
-    // small socket round-trip per test, matching the adjacent `close:extra:targets`.
-    Cypress.on('test:before:run:async', () => {
-      if (Cypress.isCrossOriginSpecBridge) {
-        return
-      }
-
-      return Cypress.backend('update:block:hosts', Cypress.config('blockHosts') ?? null)
-    })
+    // keep the proxy's `blockHosts` in sync with test-level overrides for the upcoming test
+    Cypress.on('test:before:run:async', () => this.syncBlockHostsToBackend())
 
     if (!Cypress.isCrossOriginSpecBridge) {
       trackTopUrl()
     }
 
     handleCrossOriginCookies(Cypress)
+  }
+
+  // `blockHosts` is enforced by the proxy, whose config is process-global, so
+  // only the primary origin syncs it. Test-level overrides are applied to
+  // Cypress.config() before `test:before:run:async` fires, so push the resolved
+  // value for the upcoming test to keep the proxy in sync.
+  //
+  // We send this every test rather than diffing against the last-synced value: the
+  // proxy resets to the project default between specs independently of the driver,
+  // so a cached value could drift out of sync (e.g. in single-tab run mode or
+  // component testing, where the driver persists across specs). The cost is one
+  // small socket round-trip per test, matching the adjacent `close:extra:targets`.
+  syncBlockHostsToBackend () {
+    if (this.Cypress.isCrossOriginSpecBridge) {
+      return
+    }
+
+    return this.Cypress.backend('update:block:hosts', this.Cypress.config('blockHosts') ?? null)
   }
 
   isCy (val) {

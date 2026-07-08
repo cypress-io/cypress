@@ -17,7 +17,7 @@
 export namespace CyServer {
   // TODO: pull this from main types
   export interface Config {
-    blockHosts: string | string[]
+    blockHosts: string | string[] | null
     clientRoute: string
     experimentalCspAllowList: boolean | Cypress.experimentalCspAllowedDirectives[]
     experimentalSourceRewriting: boolean
