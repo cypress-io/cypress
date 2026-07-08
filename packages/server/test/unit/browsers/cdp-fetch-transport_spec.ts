@@ -196,6 +196,87 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    it('keeps concurrent requests isolated by network id', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const firstHandled = onRequestPaused(createPausedRequest({
+        requestId: 'first-request-pause-id',
+        networkId: 'first-network-id',
+      }))
+      const secondHandled = onRequestPaused(createPausedRequest({
+        requestId: 'second-request-pause-id',
+        networkId: 'second-network-id',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'second-response-pause-id',
+        networkId: 'second-network-id',
+        responseStatusCode: 201,
+      }))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'first-response-pause-id',
+        networkId: 'first-network-id',
+        responseStatusCode: 200,
+      }))
+
+      await Promise.all([firstHandled, secondHandled])
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'first-response-pause-id',
+        responseCode: 200,
+      })
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'second-response-pause-id',
+        responseCode: 201,
+      })
+    })
+
+    it('does not let a timed out redirect hop reject a newer flow with the same network id', async () => {
+      const clock = sinon.useFakeTimers()
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const firstHandled = onRequestPaused(createPausedRequest({
+        requestId: 'first-request-pause-id',
+        networkId: 'shared-network-id',
+        url: 'https://example.test/redirect',
+      }))
+
+      await tick()
+      await clock.tickAsync(1)
+
+      const secondHandled = onRequestPaused(createPausedRequest({
+        requestId: 'second-request-pause-id',
+        networkId: 'shared-network-id',
+        url: 'https://example.test/final',
+      }))
+
+      await tick()
+      await clock.tickAsync(29999)
+      await firstHandled
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'second-response-pause-id',
+        networkId: 'shared-network-id',
+        url: 'https://example.test/final',
+        responseStatusCode: 200,
+      }))
+
+      await secondHandled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'second-response-pause-id',
+        responseCode: 200,
+      })
+    })
+
     it('continues unmatched response pauses so the browser is not left paused', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
@@ -359,6 +440,51 @@ describe('CdpFetchTransport', () => {
       expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
     })
 
+    it('rejects the pending flow when failing the response pause throws', async () => {
+      const client = createClient()
+
+      client.send.withArgs('Fetch.failRequest').rejects(new Error('failRequest failed'))
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseErrorReason: 'Aborted',
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+        requestId: 'fetch-response',
+        errorReason: 'Aborted',
+      })
+    })
+
+    it('resolves the handler after stop rejects in-flight flows', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+      await transport.stop()
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.disable')
+    })
+
     it('disables Fetch before removing handlers on stop', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
@@ -388,6 +514,36 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.on).to.have.been.calledTwice
+    })
+
+    it('rolls back handlers when Fetch.enable fails so start can be retried', async () => {
+      const client = createClient()
+
+      client.send.onCall(0).rejects(new Error('enable failed'))
+      const transport = new CdpFetchTransport(client as any)
+
+      await expect(transport.start()).to.be.rejectedWith('enable failed')
+
+      expect(client.off).to.have.been.calledWith('Fetch.requestPaused')
+
+      client.send.resetBehavior()
+      client.send.resolves({})
+      client.send.resetHistory()
+      client.on.resetHistory()
+      client.off.resetHistory()
+
+      await transport.start()
+
+      expect(client.send).to.have.been.calledOnceWith('Fetch.enable', {
+        patterns: [{
+          requestStage: 'Request',
+        }, {
+          requestStage: 'Response',
+        }],
+      })
+
+      expect(client.on).to.have.been.calledTwice
+      expect(client.off).not.to.have.been.called
     })
   })
 })
