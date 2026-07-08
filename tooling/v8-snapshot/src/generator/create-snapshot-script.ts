@@ -359,8 +359,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
           logDebug(err.stdout.toString())
         }
 
-        // The bundler's stderr names the exact offending file, so surface it on
-        // the rejected error rather than routing it through a DEBUG-gated logger.
+        // The bundler's stderr names the exact offending file, so surface it on the rejected error.
         const stderr = err.stderr?.toString().trim()
         const detail = stderr ? `\n${stderr}` : `\n${err}`
 
