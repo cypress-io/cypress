@@ -136,9 +136,9 @@ describe('studio functionality', () => {
       // Cypress re-runs after the new test is saved.
       cy.waitForSpecToFinish({ passCount: 2 })
 
-      cy.contains('new-test').click()
-      cy.get('.command').should('have.length', 1)
-      cy.get('.command-name-visit').within(() => {
+      cy.reporter().contains('new-test').click()
+      cy.reporter().find('.command').should('have.length', 1)
+      cy.reporter().find('.command-name-visit').within(() => {
         cy.contains('visit')
         cy.contains('cypress/e2e/index.html')
       })
