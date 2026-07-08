@@ -79,8 +79,13 @@ function renderReporter (
 
     frame.id = 'reporter-frame'
     frame.title = 'Cypress Reporter'
-    frame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:transparent'
+    // hidden until the cloned stylesheets load so the reporter is never shown
+    // (or interacted with) unstyled
+    frame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:transparent;visibility:hidden'
     root.appendChild(frame)
+    // track the frame as soon as it is in the DOM so the catch path can
+    // remove it if any of the remaining setup throws
+    reporterFrame = frame
 
     const idoc = frame.contentDocument
 
@@ -124,19 +129,14 @@ function renderReporter (
     // (keyboard shortcuts, tooltips, popovers) must target the iframe document
     window.UnifiedRunner.setReporterDocument(idoc)
 
-    reporterFrame = frame
+    // mount synchronously so the reporter's event listeners are registered
+    // before any driver events or resetReporter round-trips can fire; the
+    // frame is only revealed once its stylesheets have loaded
+    reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
+    reactDomRoot.render(reporter)
 
-    const reactRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
-
-    reactDomRoot = reactRoot
-
-    // mount only once the stylesheets have loaded so the reporter never lays
-    // out (or receives interactions) unstyled
     Promise.all(pendingStylesheets).then(() => {
-      // a spec navigation may have unmounted this reporter while styles loaded
-      if (reactDomRoot === reactRoot) {
-        reactRoot.render(reporter)
-      }
+      frame.style.visibility = ''
     })
 
     return
