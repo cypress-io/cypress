@@ -1,15 +1,24 @@
 const { $, _, Promise } = Cypress
 
+// the command log renders inside a same-origin iframe in the runner UI, so
+// reporter queries must target that document (falling back to the top
+// document if the reporter rendered inline)
+const getReporterDocument = () => {
+  const frame = top?.document.querySelector<HTMLIFrameElement>('#reporter-frame')
+
+  return frame?.contentDocument ?? top?.document
+}
+
 export const getCommandLogWithText = (command, type?) => {
   if (!type) {
     type = 'method'
   }
 
   // Open current test if not already open, so we can find the command log
-  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
+  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', getReporterDocument()).click()
 
   return cy
-  .$$(`.test.runnable-active .command-${type}:contains(${command})`, top?.document)
+  .$$(`.test.runnable-active .command-${type}:contains(${command})`, getReporterDocument())
   .closest('.command')
 }
 
@@ -52,7 +61,7 @@ export const clickCommandLog = (sel, type?) => {
     // wait slightly for a repaint of the reporter
     cy.wait(10).then(() => {
       // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.runnable-active .command-pin', top?.document).length, 'command should be pinned').ok
+      expect(cy.$$('.runnable-active .command-pin', getReporterDocument()).length, 'command should be pinned').ok
     })
   })
 }
