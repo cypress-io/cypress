@@ -1,6 +1,7 @@
 import { exec } from 'child_process'
 import util from 'util'
-import { parseMemoryStat, availableFromWorkingSet, type MemoryLog } from './cgroup-util'
+import { parseMemoryStat, availableFromWorkingSet } from './cgroup-util'
+import type { MemoryLog } from './cgroup-util'
 
 const execAsync = util.promisify(exec)
 

@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
-import { parseMemoryStat, availableFromWorkingSet, type MemoryLog } from './cgroup-util'
+import { parseMemoryStat, availableFromWorkingSet } from './cgroup-util'
+import type { MemoryLog } from './cgroup-util'
 
 const CGROUP_MOUNT = '/sys/fs/cgroup'
 
