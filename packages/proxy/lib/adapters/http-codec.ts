@@ -8,6 +8,8 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
 
 type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
   id?: string
+  incomingRes?: IncomingMessage
+  incomingResStream?: Readable
   httpInterceptIncomingRes?: IncomingMessage
   originBodyStream?: Readable
   httpInterceptStubBody?: string | Buffer
@@ -38,6 +40,10 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       ctx.req.proxiedUrl = request.url
 
       return ctx
+    },
+
+    getRequest (id: string): HttpInterceptCtx {
+      return inFlightRequests.get(id)!
     },
 
     decodeResponse (ctx: HttpInterceptCtx): HttpResponse {

@@ -42,6 +42,13 @@ describe('proxyHttpCodec', () => {
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/mutated')
   })
 
+  it('recovers the in-flight proxy ctx by request id', () => {
+    const ctx = createCtx()
+    const request = proxyHttpCodec.decodeRequest(ctx)
+
+    expect(proxyHttpCodec.getRequest(request.id)).to.equal(ctx)
+  })
+
   it('round-trips request mutations through decode and encode', () => {
     const ctx = createCtx()
     const request = proxyHttpCodec.decodeRequest(ctx)

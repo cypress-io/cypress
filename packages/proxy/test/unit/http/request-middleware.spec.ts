@@ -1,8 +1,5 @@
 import { describe, expect, beforeEach, it, vi } from 'vitest'
 import _ from 'lodash'
-import { IncomingMessage } from 'http'
-import { Socket } from 'net'
-import { Readable } from 'stream'
 import RequestMiddleware from '../../../lib/http/request-middleware'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
@@ -60,8 +57,6 @@ describe('http/request-middleware', () => {
       'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',
-      'ApplyHttpInterception',
-      'SendRequestOutgoing',
     ])
   })
 
@@ -117,7 +112,7 @@ describe('http/request-middleware', () => {
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
-        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['MaybeSetBasicAuthHeaders', 'ApplyHttpInterception'])
+        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['MaybeSetBasicAuthHeaders'])
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
@@ -983,117 +978,6 @@ describe('http/request-middleware', () => {
       expect(ctx.req.browserPreRequest).toBeUndefined()
       expect(ctx.res.once).toHaveBeenCalledWith('close', expect.any(Function))
       expect(ctx.onError).toHaveBeenCalledOnce()
-    })
-  })
-
-  describe('ApplyHttpInterception', () => {
-    const { ApplyHttpInterception } = RequestMiddleware
-
-    it('routes the proxy context through networkInterception.handle and commits the proxy response', async () => {
-      const incomingRes = new IncomingMessage(new Socket)
-      const bodyStream = Readable.from(['ok'])
-      const handle = vi.fn().mockResolvedValue({
-        httpInterceptIncomingRes: incomingRes,
-        originBodyStream: bodyStream,
-      })
-      const ctx = {
-        networkInterception: {
-          handle,
-        },
-        req: {},
-        res: {
-          off: vi.fn(),
-        },
-      }
-
-      await testMiddleware([ApplyHttpInterception], ctx)
-
-      expect(handle).toHaveBeenCalledOnce()
-      expect(handle.mock.calls[0][0]).toEqual(expect.objectContaining({
-        req: ctx.req,
-        res: ctx.res,
-        networkInterception: ctx.networkInterception,
-      }))
-
-      expect(handle.mock.calls[0][1]).toEqual(expect.any(Function))
-      expect(ctx['incomingRes']).toBe(incomingRes)
-      expect(ctx['incomingResStream']).toBe(bodyStream)
-    })
-
-    it('errors when networkInterception is not configured', async () => {
-      const ctx = {
-        req: {},
-        res: {
-          off: vi.fn(),
-        },
-      }
-      const onError = vi.fn()
-
-      await testMiddleware([ApplyHttpInterception], ctx, onError)
-
-      expect(onError).toHaveBeenCalledOnce()
-      expect(onError.mock.calls[0][0].message).toContain('Network interception is not configured')
-    })
-  })
-
-  describe('SendRequestOutgoing', () => {
-    const { SendRequestOutgoing } = RequestMiddleware
-
-    let ctx
-
-    beforeEach(() => {
-      const headers = {}
-
-      ctx = {
-        onError: vi.fn(),
-        request: {
-          create: (opts) => {
-            return {
-              inputArgs: opts,
-              on: (event, callback) => {
-                if (event === 'response') {
-                  callback({ request: { timings: {} } })
-                }
-              },
-            }
-          },
-        },
-        req: {
-          body: '{}',
-          headers,
-          socket: {
-            on: () => {},
-          },
-        },
-        res: {
-          on: (event, listener) => {},
-          off: (event, listener) => {},
-        } as Partial<CypressOutgoingResponse>,
-        remoteStates,
-      }
-    })
-
-    describe('same-origin file request', () => {
-      beforeEach(() => {
-        ctx.getFileServerToken = () => 'abcd1234'
-        ctx.req.proxiedUrl = 'https://www.cypress.io/file'
-        ctx.remoteStates.set({
-          origin: 'https://www.cypress.io',
-          strategy: 'file',
-        } as any)
-      })
-
-      it('adds `x-cypress-authorization` header', async () => {
-        await testMiddleware([SendRequestOutgoing], ctx)
-        expect(ctx.req.headers['x-cypress-authorization']).toEqual('abcd1234')
-      })
-
-      it('handles nil fileServer token', async () => {
-        ctx.getFileServerToken = () => undefined
-
-        await testMiddleware([SendRequestOutgoing], ctx)
-        expect(ctx.req.headers['x-cypress-authorization']).toBeUndefined()
-      })
     })
   })
 
