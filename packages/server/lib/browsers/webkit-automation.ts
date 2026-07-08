@@ -9,7 +9,7 @@ import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
 import utils from './utils'
 import type { CyCookie } from '../automation/util'
-import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
