@@ -3,6 +3,15 @@ const { _ } = Cypress
 let count = 1
 let openInIdePath = Cypress.spec
 
+// the command log renders inside a same-origin iframe (#reporter-frame); fall
+// back to the top document if the reporter rendered inline
+const reporterDocument = () => {
+  const topDoc = window.top.document
+  const frame = topDoc.querySelector('#reporter-frame')
+
+  return (frame && frame.contentDocument) || topDoc
+}
+
 // ensure title is unique since it's necessary for querying the UI
 // in the verification step
 const getTitle = (title, ctx) => {
@@ -33,7 +42,7 @@ export const verify = (title, ctx, options) => {
   it(`✓ VERIFY - ${title}`, function () {
     if (before) before()
 
-    cy.wrap(Cypress.$(window.top.document.body))
+    cy.wrap(Cypress.$(reporterDocument().body))
     .find('.reporter')
     .contains(`FAIL - ${getTitle(title, ctx)}`)
     .closest('.collapsible')

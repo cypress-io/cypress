@@ -7,12 +7,20 @@
  * and global session data is persisted between specs in run mode.
  */
 
+// the command log renders inside a same-origin iframe (#reporter-frame); fall
+// back to the top document if the reporter rendered inline
+const reporterDocument = () => {
+  const frame = top.document.querySelector('#reporter-frame')
+
+  return (frame && frame.contentDocument) || top.document
+}
+
 describe('creates global session', () => {
   it('creates global sessions', () => {
     cy.login('global_1', true)
     cy.env(['SYSTEM_TESTS']).then(({ SYSTEM_TESTS }) => {
       if (SYSTEM_TESTS) {
-        cy.get(top.document).within(() => {
+        cy.get(reporterDocument()).within(() => {
           cy.contains('.test', 'creates global session').as('creates_global_session').click()
           cy.get('@creates_global_session').within(() => {
             cy.get('.command-name-session').should('contain', 'global_1')
@@ -31,7 +39,7 @@ describe('creates global session', () => {
     cy.login('global_1', true)
     cy.env(['SYSTEM_TESTS']).then(({ SYSTEM_TESTS }) => {
       if (SYSTEM_TESTS) {
-        cy.get(top.document).within(() => {
+        cy.get(reporterDocument()).within(() => {
           cy.contains('.test', 'restores global session').as('restores_global_session').click()
           cy.get('@restores_global_session').within(() => {
             cy.get('.command-name-session').should('contain', 'global_1')
@@ -50,7 +58,7 @@ describe('creates global session', () => {
     cy.login('spec_session', false)
     cy.env(['SYSTEM_TESTS']).then(({ SYSTEM_TESTS }) => {
       if (SYSTEM_TESTS) {
-        cy.get(top.document).within(() => {
+        cy.get(reporterDocument()).within(() => {
           cy.contains('.test', 'creates spec session').as('creates_spec_session').click()
           cy.get('@creates_spec_session').within(() => {
             cy.get('.command-name-session').should('contain', 'spec_session')
@@ -69,7 +77,7 @@ describe('creates global session', () => {
     cy.login('spec_session', false)
     cy.env(['SYSTEM_TESTS']).then(({ SYSTEM_TESTS }) => {
       if (SYSTEM_TESTS) {
-        cy.get(top.document).within(() => {
+        cy.get(reporterDocument()).within(() => {
           cy.contains('.test', 'restores spec session').as('restores_spec_session').click()
           cy.get('@restores_spec_session').within(() => {
             cy.get('.command-name-session').should('contain', 'spec_session')
