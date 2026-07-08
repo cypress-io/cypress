@@ -1275,7 +1275,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('e=window.Cypress=parent.Cypress')
+          expect(res.body).to.include('window.Cypress=parent.Cypress')
           expect(res.body).to.include('gzip</html>')
         })
       })
@@ -1429,7 +1429,7 @@ describe('Routes', () => {
 
           expect(res.statusCode).to.eq(200)
           expect(res.headers['content-encoding']).to.eq('br')
-          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('window.Cypress=parent.Cypress')
           expect(decompressed).to.include('brotli</html>')
         })
       })
@@ -1549,7 +1549,7 @@ describe('Routes', () => {
 
           expect(res.statusCode).to.eq(200)
           expect(res.headers['content-encoding']).to.eq('gzip, br')
-          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('window.Cypress=parent.Cypress')
           expect(decompressed).to.include('layered-gzip-br</html>')
         })
       })
@@ -1581,7 +1581,7 @@ describe('Routes', () => {
 
           expect(res.statusCode).to.eq(200)
           expect(res.headers['content-encoding']).to.eq('br, gzip')
-          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('window.Cypress=parent.Cypress')
           expect(decompressed).to.include('layered-br-gzip</html>')
         })
       })

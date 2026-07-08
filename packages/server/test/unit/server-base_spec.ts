@@ -158,6 +158,25 @@ describe('lib/server-base', () => {
         expect(this.server.createServer).to.have.been.calledWith(app, this.config, sinon.match.func)
       })
     })
+
+    it('does not create networkProxy when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+      _.extend(this.config, { port: 54321 })
+      const app = { use: sinon.stub() }
+
+      sinon.stub(this.server, 'createExpressApp').returns(app)
+      sinon.spy(this.server, 'createNetworkProxy')
+
+      return this.server.open(this.config, getOpenOptions())
+      .then(() => {
+        expect(this.server.createNetworkProxy).not.to.have.been.called
+        expect(this.server._networkProxy).to.be.undefined
+        expect(this.server._netStubbingState).to.exist
+      })
+      .finally(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+    })
   })
 
   describe('#createServer', () => {
@@ -225,6 +244,30 @@ describe('lib/server-base', () => {
           expect(httpsProxyAtSetCall, 'httpsProxy must not yet be assigned when set runs').to.be.undefined
           // sanity: by the time createServer resolves, httpsProxy is up
           expect(this.server._httpsProxy).to.exist
+        })
+      })
+
+      it('does not create httpsProxy when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        return this.server.createServer(this.app, { port: this.port })
+        .then(() => {
+          expect(this.server._httpsProxy).to.be.undefined
+        })
+        .finally(() => {
+          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+        })
+      })
+
+      it('registers connect listener when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        return this.server.createServer(this.app, { port: this.port })
+        .then(() => {
+          expect(this.server.server.listenerCount('connect')).to.be.greaterThan(0)
+        })
+        .finally(() => {
+          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
         })
       })
     })
@@ -496,6 +539,26 @@ describe('lib/server-base', () => {
       this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(this.socket.end).to.be.called
+    })
+  })
+
+  describe('#onConnect', () => {
+    afterEach(function () {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    it('responds 403 when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const socket = {
+        write: sinon.stub(),
+        end: sinon.stub(),
+      }
+
+      this.server.onConnect({ url: 'example.com:443' }, socket, null)
+
+      expect(socket.write).to.have.been.calledWith('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
+      expect(socket.end).to.have.been.called
     })
   })
 })

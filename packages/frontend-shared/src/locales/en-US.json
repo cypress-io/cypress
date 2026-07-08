@@ -317,6 +317,7 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "deprecated": "Deprecated",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
@@ -606,10 +607,6 @@
       "experimentalSingleTabRunMode": {
         "name": "Single tab run mode",
         "description": "Runs all component specs in a single tab, trading spec isolation for faster run mode execution."
-      },
-      "experimentalSourceRewriting": {
-        "name": "Source rewriting",
-        "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
       },
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
@@ -953,7 +950,11 @@
     "running": "Running {browser}",
     "focus": "Focus",
     "close": "Close",
-    "switchTestingType": "Switch testing type"
+    "switchTestingType": "Switch testing type",
+    "deprecatedRibbon": "Deprecated",
+    "deprecatedTitle": "Deprecated browser",
+    "deprecatedBody": "Electron is deprecated as a test browser and will be removed in a future version of Cypress. Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.",
+    "deprecatedLink": "See supported browsers"
   },
   "runner": {
     "header": {

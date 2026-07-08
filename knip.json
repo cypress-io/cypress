@@ -115,6 +115,7 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
+        "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
         "test/**/*.{ts,js}"
@@ -290,6 +291,7 @@
     },
     "packages/proxy": {
       "entry": [
+        "lib/index.ts",
         "lib/http/util/rewriter.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -430,15 +432,6 @@
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/rewriter": {
-      "entry": [
-        "lib/threads/worker.ts"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}",
-        "*.{ts,tsx,js,jsx}"
-      ]
-    },
     "packages/*": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
@@ -545,6 +538,9 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "jiti"
       ]
     },
     "npm/react": {
@@ -789,10 +785,6 @@
       "exports",
       "types"
     ],
-    "packages/net-stubbing/lib/external-types.ts": [
-      "exports",
-      "types"
-    ],
     "packages/network-interception/lib/types/external-types.ts": [
       "exports",
       "types"
@@ -841,9 +833,6 @@
       "types"
     ],
     "packages/telemetry/src/node.ts": [
-      "exports"
-    ],
-    "packages/proxy/lib/http/util/ast-rewriter.ts": [
       "exports"
     ],
     "packages/errors/src/errTemplate.ts": [

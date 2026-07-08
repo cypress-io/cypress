@@ -534,6 +534,44 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   let parentNode
   let $select
 
+  if (Cypress.config('visibilityStrategy') === 'modern') {
+    // for a multi-element subject, describe the first element that modernIsHidden actually caught —
+    // checking only $el[0] would misattribute the cause when a later element is the hidden one.
+    const hiddenEl = $el.toArray().find((e) => modernIsHidden(e, options)) ?? $el[0]
+    const $hiddenEl = $jquery.wrap(hiddenEl)
+    const hiddenNode = stringifyElement($hiddenEl, 'short')
+
+    // detached elements fail `Element.checkVisibility()` because they are not rendered, but the
+    // generic checkVisibility message would be unhelpful — surface the structural cause instead.
+    if (isDetached($hiddenEl)) {
+      return `This element \`${hiddenNode}\` is not visible because it is detached from the DOM`
+    }
+
+    // mirror modernIsHidden: checkVisibility() runs first, then a zero-dimension guard.
+    // attribute the failure to whichever check actually rejected the element and report
+    // only the values relevant to that check.
+    const passesCheckVisibility = hiddenEl.checkVisibility({
+      contentVisibilityAuto: true,
+      opacityProperty: options.checkOpacity,
+      visibilityProperty: true,
+    } as CheckVisibilityOptions)
+
+    if (!passesCheckVisibility) {
+      const style = getComputedStyle(hiddenEl)
+      const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
+
+      return `This element \`${hiddenNode}\` is not visible per \`Element.checkVisibility()\`. Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${contentVisibility}\`.`
+    }
+
+    const rect = hiddenEl.getBoundingClientRect()
+
+    if (rect.width <= 0 || rect.height <= 0) {
+      return `This element \`${hiddenNode}\` is not visible because it has an effective width and height of: \`${rect.width} x ${rect.height}\` pixels.`
+    }
+
+    return `This element \`${hiddenNode}\` is not visible.`
+  }
+
   // if the element is an option or optgroup then we need to get the
   // select so it can be used when determining the hidden reason
   if (isOption($el[0]) || isOptgroup($el[0])) {

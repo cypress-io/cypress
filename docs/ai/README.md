@@ -74,7 +74,6 @@ packages/packherd-require/CLAUDE.md
 packages/proxy/CLAUDE.md
 packages/reporter/CLAUDE.md
 packages/resolve-dist/CLAUDE.md
-packages/rewriter/CLAUDE.md
 packages/root/CLAUDE.md
 packages/runner/CLAUDE.md
 packages/scaffold-config/CLAUDE.md

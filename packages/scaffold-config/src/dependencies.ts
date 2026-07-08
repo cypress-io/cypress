@@ -70,7 +70,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
   package: '@angular/cli',
   installer: '@angular/cli',
   description: 'CLI tool that you use to initialize, develop, scaffold, and maintain Angular applications.',
-  minVersion: '^21.0.0',
+  minVersion: '^21.0.0 || ^22.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
@@ -79,7 +79,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR = {
   package: '@angular-devkit/build-angular',
   installer: '@angular-devkit/build-angular',
   description: 'Angular Webpack build facade',
-  minVersion: '^21.0.0',
+  minVersion: '^21.0.0 || ^22.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
@@ -88,7 +88,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_CORE = {
   package: '@angular/core',
   installer: '@angular/core',
   description: 'The core of the Angular framework',
-  minVersion: '^21.0.0',
+  minVersion: '^21.0.0 || ^22.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
@@ -97,7 +97,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
   package: '@angular/common',
   installer: '@angular/common',
   description: 'Commonly needed Angular directives and services',
-  minVersion: '^21.0.0',
+  minVersion: '^21.0.0 || ^22.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER = {
@@ -106,7 +106,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER = {
   package: '@angular/platform-browser',
   installer: '@angular/platform-browser',
   description: 'Library for using Angular in a web browser',
-  minVersion: '^21.0.0',
+  minVersion: '^21.0.0 || ^22.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {

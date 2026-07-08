@@ -18,6 +18,7 @@ import * as createRoutes from '../../lib/routes'
 import { getCtx } from '../../lib/makeDataContext'
 import { sinon } from '../spec_helper'
 import { SocketCt } from '../../lib/socket-ct'
+import runEvents from '../../lib/plugins/run_events'
 
 let ctx
 
@@ -816,6 +817,131 @@ describe('lib/socket', () => {
             resolve()
           })
         })
+      })
+    })
+  })
+
+  describe('run events (experimentalInteractiveRunEvents)', () => {
+    let runEventsStub
+
+    beforeEach(async function () {
+      runEventsStub = sinon.stub(runEvents, 'execute').resolves()
+
+      this.cfg.experimentalInteractiveRunEvents = true
+
+      await this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        testingType: 'e2e',
+        getCurrentBrowser: () => null,
+      })
+
+      const options = {
+        getSavedState: sinon.stub(),
+        onSavedStateChanged: sinon.spy(),
+        onStudioInit: sinon.stub(),
+        onStudioDestroy: sinon.stub(),
+        onCyPromptReady: sinon.stub(),
+      }
+
+      const automation = new Automation({
+        cyNamespace: this.cfg.namespace,
+        cookieNamespace: this.cfg.socketIoCookie,
+        screenshotsFolder: this.cfg.screenshotsFolder,
+      })
+
+      const mockCyPrompt = {
+        addSocketListeners: sinon.stub(),
+        status: 'INITIALIZED',
+        reset: sinon.stub(),
+      }
+
+      ctx.coreData.studioLifecycleManager = {
+        registerStudioReadyListener: sinon.stub().callsFake((callback) => {
+          callback({ addSocketListeners: sinon.stub() })
+
+          return () => {}
+        }),
+      }
+
+      ctx.coreData.cyPromptLifecycleManager = {
+        getCyPrompt: sinon.stub().resolves({ cyPromptManager: mockCyPrompt }),
+        resetCyPrompt: sinon.stub(),
+        registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
+          callback(mockCyPrompt)
+
+          return () => {}
+        }),
+      }
+
+      this.server.startWebsockets(automation, this.cfg, options)
+      this.socket = this.server._socket
+
+      const { proxyUrl, socketIoRoute } = this.cfg
+      const agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
+
+      await new Promise((resolve) => {
+        this.socket.socketIo.on('connection', () => resolve(null))
+        this.client = socketIo.client(proxyUrl, {
+          agent,
+          path: socketIoRoute,
+          transports: ['websocket'],
+        })
+      })
+    })
+
+    afterEach(function () {
+      runEventsStub?.restore()
+
+      return this.client?.disconnect()
+    })
+
+    describe('on(plugins:before:spec)', () => {
+      it('executes before:spec on initial spec load', async function () {
+        const spec = { relative: 'cypress/e2e/spec.cy.js', absolute: '/project/cypress/e2e/spec.cy.js' }
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', spec, resolve)
+        })
+
+        expect(runEventsStub).to.have.been.calledWith('before:spec', spec)
+      })
+
+      it('skips before:spec when Cypress reloads mid-test due to cross-origin navigation (runState set)', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test-1' }, resolve)
+        })
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', { relative: 'cypress/e2e/spec.cy.js' }, resolve)
+        })
+
+        expect(runEventsStub).not.to.have.been.called
+      })
+
+      it('executes before:spec again after runState is consumed', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test-1' }, resolve)
+        })
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', { relative: 'cypress/e2e/spec.cy.js' }, resolve)
+        })
+
+        expect(runEventsStub).not.to.have.been.called
+
+        // Consuming runState simulates what happens when get:cached:test:state is called after reload
+        await new Promise((resolve) => {
+          this.client.emit('get:cached:test:state', resolve)
+        })
+
+        const spec = { relative: 'cypress/e2e/spec.cy.js', absolute: '/project/cypress/e2e/spec.cy.js' }
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', spec, resolve)
+        })
+
+        expect(runEventsStub).to.have.been.calledOnceWith('before:spec', spec)
       })
     })
   })

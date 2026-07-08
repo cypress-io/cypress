@@ -109,6 +109,21 @@ describe('lib/cors', () => {
         protocol: 'http:',
       })
     })
+
+    it('does not throw on relative or invalid urls', () => {
+      // the legacy url parser tolerated these; the WHATWG parser throws, so we
+      // fall back to a degraded result rather than propagating the error
+      expect(() => parseUrlIntoHostProtocolDomainTldPort('/foo/bar')).not.toThrow()
+      expect(() => parseUrlIntoHostProtocolDomainTldPort('http://example.com:99999')).not.toThrow()
+    })
+  })
+
+  describe('.urlOriginsMatch with invalid urls', () => {
+    it('does not treat distinct invalid urls as same-origin', () => {
+      // both urls fail WHATWG parsing (out-of-range port); they must not collapse
+      // to the same degraded parse and be reported as same-origin
+      expect(urlOriginsMatch('http://a.example.com:99999', 'http://b.example.com:99999')).toBe(false)
+    })
   })
 
   describe('.urlOriginsMatch', () => {

@@ -17,14 +17,14 @@ jobs:
     steps:
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
@@ -36,14 +36,14 @@ jobs:
           git fetch origin
           git checkout ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version-file: .node-version
       - name: install dependencies
         run: CI=true yarn
       - name: Check for new Chrome versions
         id: get-versions
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
@@ -68,7 +68,7 @@ jobs:
       - name: Check need for update on existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
         id: check-need-for-branch-update
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const { checkNeedForBranchUpdate } = require('./scripts/github-actions/update-browser-versions.js')
@@ -82,7 +82,7 @@ jobs:
       ## Both
       - name: Update Browser Versions File
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const { updateBrowserVersionsFile } = require('./scripts/github-actions/update-browser-versions.js')
@@ -94,7 +94,7 @@ jobs:
             })
       - name: Commit and push via API
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -114,7 +114,7 @@ jobs:
       ## Update available and a branch/PR already exists
       - name: Update PR Title
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -131,7 +131,7 @@ jobs:
       - name: Create Pull Request
         id: create-pr
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |

@@ -609,6 +609,11 @@ describe('visual error templates', () => {
         default: [2020],
       }
     },
+    FILE_SERVER_COULD_NOT_LISTEN: () => {
+      return {
+        default: [3, makeErr()],
+      }
+    },
     ERROR_READING_FILE: () => {
       return {
         default: ['/path/to/read/file.ts', makeErr()],
@@ -744,6 +749,11 @@ describe('visual error templates', () => {
       return {
         default: ['configFile', 'cypress.config.js', '`something` was not right'],
         noFileType: [null, null, '`something` was not right'],
+      }
+    },
+    CONFIG_BROWSERS_INVALID: () => {
+      return {
+        default: ['chrome'],
       }
     },
     RENAMED_CONFIG_OPTION: () => {
@@ -1086,6 +1096,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
@@ -1127,6 +1143,11 @@ describe('visual error templates', () => {
     },
 
     INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+    BROWSER_ELECTRON_DEPRECATED: () => {
       return {
         default: [],
       }

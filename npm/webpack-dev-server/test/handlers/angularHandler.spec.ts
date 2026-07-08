@@ -55,6 +55,44 @@ describe('angularHandler', { timeout: 60000 }, function () {
     expectLoadsAngularBuildOptions(projectConfig.buildOptions)
   })
 
+  it('sources the config from angular-22', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-22')
+
+    process.chdir(projectRoot)
+    const devServerConfig = {
+      cypressConfig: {
+        projectRoot,
+        specPattern: 'src/**/*.cy.ts',
+      } as Cypress.PluginConfigOptions,
+      framework: 'angular',
+    } as AngularWebpackDevServerConfig
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
+
+    expect(webpackConfig).toBeDefined()
+    expect((webpackConfig?.entry as any).main).toBeUndefined()
+    expect(sourceWebpackModulesResult.framework?.importPath).toContain(path.join('@angular-devkit', 'build-angular'))
+    const projectConfig = await getProjectConfig(projectRoot)
+
+    expect(projectConfig).toEqual({
+      root: '',
+      sourceRoot: 'src',
+      buildOptions: {
+        browser: 'src/main.ts',
+        tsConfig: 'tsconfig.app.json',
+        assets: ['src/favicon.ico', 'src/assets'],
+        styles: ['src/styles.css'],
+        optimization: false,
+        extractLicenses: false,
+        sourceMap: true,
+      },
+    })
+
+    await expectLoadsAngularJson(projectRoot)
+    await expectLoadsAngularCLiModules(projectRoot)
+    await expectGeneratesTsConfig(devServerConfig, projectConfig.buildOptions, false)
+    expectLoadsAngularBuildOptions(projectConfig.buildOptions)
+  })
+
   it('allows custom project config', async () => {
     const customProjectConfig = {
       root: '',

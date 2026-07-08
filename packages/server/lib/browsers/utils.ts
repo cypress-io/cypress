@@ -71,8 +71,36 @@ const getDefaultLaunchOptions = (options) => {
   return _.defaultsDeep(options, defaultLaunchOptions)
 }
 
-const copyExtension = (src, dest) => {
-  return fs.copyAsync(src, dest)
+// When Cypress is installed in a read-only location (e.g. the Nix store), the
+// source extension files and directories are read-only. fs.copy preserves those
+// permissions on the copied extension, which later prevents Cypress from removing
+// the browser profile directory on exit (EACCES/EPERM when unlinking files inside
+// a read-only directory). Recursively granting owner write access ensures the
+// profile can be cleaned up. See https://github.com/cypress-io/cypress/issues/31300
+const ensureWritable = async (entryPath: string) => {
+  const stats = await fs.stat(entryPath)
+
+  // chmod(path, mode) sets the file's permission bits to `mode`.
+  // `stats.mode` is the current mode (e.g. 0o555 for a read-only dir, 0o444 for a
+  // read-only file). 0o200 is the octal bit for "owner write" (the `w` in `-w-`
+  // under `rwx` triplets owner/group/other). OR-ing them (`stats.mode | 0o200`)
+  // turns on the owner write bit while leaving every other bit untouched — so
+  // 0o555 -> 0o755 and 0o444 -> 0o644. We only grant owner write (not group/other)
+  // because the Cypress process owns these copies and that's all it needs to
+  // remove them later.
+  await fs.chmod(entryPath, stats.mode | 0o200)
+
+  if (stats.isDirectory()) {
+    const entries = await fs.readdir(entryPath)
+
+    await Promise.all(entries.map((entry) => ensureWritable(path.join(entryPath, entry))))
+  }
+}
+
+const copyExtension = async (src, dest) => {
+  await fs.copyAsync(src, dest)
+
+  await ensureWritable(dest)
 }
 
 const getPartition = function (isTextTerminal) {
@@ -209,9 +237,20 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const getWebKitBrowserVersion = async () => {
+const getWebKitBrowserVersion = async (pwWebkitModulePath?: string) => {
   try {
-    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
+    // Resolve `playwright-core` relative to the resolved `playwright-webkit`
+    // module first, then fall back to the project's working directory.
+    //
+    // In system tests the project runs from a temp dir outside the monorepo
+    // where only `playwright-webkit` is symlinked into `node_modules` (see
+    // `scaffoldCommonNodeModules`). Its transitive `playwright-core` dependency
+    // is not resolvable from `process.cwd()`, so detection used to fall back to
+    // '0' and display "WebKit 0". Since `playwright-webkit` always depends on
+    // `playwright-core`, resolving from the webkit module's location finds the
+    // correct `browsers.json`.
+    const paths = pwWebkitModulePath ? [path.dirname(pwWebkitModulePath), process.cwd()] : [process.cwd()]
+    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths }))
     const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
     const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')
     const browsersJson = JSON.parse(browsersJsonContents)
@@ -235,7 +274,7 @@ async function getWebKitBrowser () {
   try {
     const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
     const mod = await import(modulePath) as typeof import('playwright-webkit')
-    const version = await getWebKitBrowserVersion()
+    const version = await getWebKitBrowserVersion(modulePath)
 
     const browser: FoundBrowser = {
       name: 'webkit',
@@ -250,7 +289,7 @@ async function getWebKitBrowser () {
 
     return browser
   } catch (err) {
-    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+    debug('There was an error constructing the WebKit browser: %o', { err })
 
     return
   }
@@ -482,6 +521,8 @@ const listenForDownload = (binding) => {
 }
 
 const browserUtils = {
+
+  getWebKitBrowserVersion,
 
   extendLaunchOptionsFromPlugins,
 

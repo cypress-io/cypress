@@ -1,5 +1,6 @@
 import type { NetEvent } from '../types'
 import type { NetworkPolicy } from '../policies/types'
+import type { RunPoliciesOptions, RunPoliciesResult } from '../registry/network-policy-registry'
 
 export type InterceptRegistrationEventName =
   | 'route:added'
@@ -30,5 +31,8 @@ export interface ForInterceptRegistration {
  */
 export interface ForNetworkPolicyRegistration {
   add (policy: NetworkPolicy): void
+
   getPolicies (): ReadonlyArray<NetworkPolicy>
+
+  runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult>
 }

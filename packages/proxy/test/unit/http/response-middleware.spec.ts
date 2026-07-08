@@ -95,6 +95,28 @@ describe('http/response-middleware', function () {
 
       expect(cookie).not.toHaveBeenCalledWith('__cypress.unload', '', expect.anything())
     })
+
+    // https://github.com/cypress-io/cypress/issues/34143
+    it('omits the domain attribute for IPv6 literal hosts so the cookie serializer does not throw', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '[::1]' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      // host-only cookie: no `domain` option, so express/cookie does not reject it
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { expires: new Date(0) })
+    })
+
+    it('keeps the domain attribute for IPv4 literal hosts', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '127.0.0.1' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: '127.0.0.1', expires: new Date(0) })
+    })
   })
 
   describe('multiple this.next invocations', () => {
@@ -2374,14 +2396,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
-            'deferSourceMapRewrite': undefined,
             'domainName': 'foobar.com',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': true,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://www.foobar.com:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2398,14 +2417,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
-            'deferSourceMapRewrite': undefined,
             'domainName': '127.0.0.1',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': false,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://127.0.0.1:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2428,14 +2444,11 @@ describe('http/response-middleware', function () {
           expect(htmlStub).toHaveBeenCalledOnce()
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': 'fake-nonce',
-            'deferSourceMapRewrite': undefined,
             'domainName': 'foobar.com',
-            'isNotJavascript': true,
             'modifyObstructiveCode': true,
             'modifyObstructiveThirdPartyCode': true,
             'shouldInjectDocumentDomain': injectDocumentDomain,
             'url': 'http://www.foobar.com:3501/primary-origin.html',
-            'useAstSourceRewriting': undefined,
             'wantsInjection': 'full',
             'wantsSecurityRemoved': true,
             'simulatedCookies': [],
@@ -2508,12 +2521,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': true,
         'modifyObstructiveThirdPartyCode': true,
         'url': 'http://www.foobar.com:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2523,12 +2533,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': true,
         'modifyObstructiveThirdPartyCode': false,
         'url': 'http://127.0.0.1:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 
@@ -2546,12 +2553,9 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
-        'deferSourceMapRewrite': undefined,
-        'isNotJavascript': true,
         'modifyObstructiveCode': false,
         'modifyObstructiveThirdPartyCode': false,
         'url': 'http://www.foobar.com:3501/primary-origin.html',
-        'useAstSourceRewriting': undefined,
       }))
     })
 

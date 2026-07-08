@@ -7,7 +7,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, rewriter, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (33 packages total)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
 - **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
@@ -128,7 +128,6 @@ yarn clean-deps && yarn
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
-- **`@packages/rewriter`** — JavaScript source rewriter that transforms test and app code for Cypress compatibility (instrument, polyfill, inject).
 
 ### Configuration & Data
 
@@ -204,6 +203,40 @@ yarn clean-deps && yarn
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
+
+### Code Comments
+
+- **Prefer none** — Always prefer no code comment if the code is self-explanatory.
+- **Explain the why** — When a comment is necessary, use it to explain the *why* and anything relevant that is not directly expressed by the code itself.
+- **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
+- **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
+
+Bad examples:
+
+```js
+// never wipe the entire jar - the old hack called clearCookies() with no filter
+// we no longer need to clear the state here, CDP added automatically clearing
+// Firefox previously relied on os-level focus, now we use WebDrive BiDi to focus
+```
+
+Good examples:
+
+```js
+// Close any extra pages so they don't leak into other tests
+// Firefox doesn't support this in native BiDi, so we pull remote.location from current frame
+// `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
+// the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
+// Domain and let the cookie default to host-only.
+```
+
+## Pull Requests
+
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) is the source of truth for PR conventions, including the semantic-release title prefix that determines the next version. The other essentials:
+
+### Changelog & Template
+
+- For user-facing changes shipping with the next Cypress version, add a changelog entry to [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) — see the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md).
+- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
 

@@ -180,5 +180,7 @@ describe('lib/util/graceful-exit', () => {
     await new Promise((r) => setTimeout(r, 200))
 
     expect(exitStub).to.have.been.calledWith(1)
+
+    exitStub.restore()
   })
 })

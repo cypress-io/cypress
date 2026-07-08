@@ -69,6 +69,42 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     })
   })
 
+  // el.integrity = … (the webpack-subresource-integrity pattern) is set via the reflected
+  // property; a regex can't rewrite a non-literal value, so the setter is overridden at runtime.
+  context('integrity property', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+    })
+
+    it('redirects the reflected integrity property to cypress-stripped-integrity for HTMLScriptElement', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.window().then((win: Window) => {
+          const script = win.document.createElement('script')
+
+          script.integrity = 'sha-123'
+          expect(script.getAttribute('integrity')).to.be.null
+          expect(script.getAttribute('cypress-stripped-integrity')).to.equal('sha-123')
+          // the getter still reflects the value back so app code reading it is unaffected
+          expect(script.integrity).to.equal('sha-123')
+        })
+      })
+    })
+
+    it('redirects the reflected integrity property to cypress-stripped-integrity for HTMLLinkElement', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.window().then((win: Window) => {
+          const link = win.document.createElement('link')
+
+          link.integrity = 'sha-123'
+          expect(link.getAttribute('integrity')).to.be.null
+          expect(link.getAttribute('cypress-stripped-integrity')).to.equal('sha-123')
+          expect(link.integrity).to.equal('sha-123')
+        })
+      })
+    })
+  })
+
   context('fetch', () => {
     describe('from the AUT', () => {
       beforeEach(() => {

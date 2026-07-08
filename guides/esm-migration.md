@@ -62,7 +62,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
 - [x] packages/resolve-dist ✅ **COMPLETED**
-- [ ] packages/rewriter **PARTIAL** - entry point is JS
 - [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
@@ -109,7 +108,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/network-tools ✅ **COMPLETED**
 - [x] packages/packherd-require ✅ **COMPLETED**
 - [x] packages/proxy ✅ **COMPLETED**
-- [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
 - [x] packages/socket ✅ **COMPLETED**

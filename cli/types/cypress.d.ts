@@ -3020,6 +3020,15 @@ declare namespace Cypress {
      */
     modifyObstructiveCode: boolean
     /**
+     * Whether Cypress will strip the `integrity` attribute from `<script>` and `<link>` elements
+     * on first-party resources so they are not blocked by Subresource Integrity (SRI) enforcement
+     * after the proxy rewrites them (under `modifyObstructiveCode`). Covers `integrity` set via
+     * static HTML, a JavaScript string literal, or runtime DOM assignment. Third-party resources
+     * are only rewritten — and have their SRI stripped — under `experimentalModifyObstructiveThirdPartyCode`.
+     * @default false
+     */
+    removeSRIAttributes: boolean
+    /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
@@ -3178,10 +3187,9 @@ declare namespace Cypress {
     experimentalInteractiveRunEvents: boolean
     /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
-     * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
+     * NOTE: Setting this flag to true removes Subresource Integrity (SRI) from third-party resources.
+     * To strip SRI from first-party resources as well, use `removeSRIAttributes`.
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
-     * This option has no impact on experimentalSourceRewriting and is only used with the
-     * non-experimental source rewriter.
      * @see https://on.cypress.io/experiments#Configuration
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
@@ -3201,11 +3209,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalRunAllSpecs?: boolean
-    /**
-     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
-     * @default false
-     */
-    experimentalSourceRewriting: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
@@ -3993,7 +3996,7 @@ declare namespace Cypress {
     method: 'GET' | 'POST'
 
     /**
-     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
+     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-form-urlencoded` header.
      *
      * @example
      *    cy.visit({

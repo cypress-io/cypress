@@ -202,13 +202,6 @@ describe('App: Settings', () => {
             href: 'https://on.cypress.io/after-spec',
           })
         })
-
-        cy.get('[data-cy="experiment-experimentalSourceRewriting"]').within(() => {
-          cy.validateExternalLink({
-            name: '#5273',
-            href: 'https://github.com/cypress-io/cypress/issues/5273',
-          })
-        })
       })
 
       // makes sure all experiments have an i18n header and description available.

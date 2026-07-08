@@ -29,6 +29,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'RENAMED_CONFIG_OPTION',
   'EXPERIMENTAL_STUDIO_REMOVED',
   'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
+  'EXPERIMENTAL_SOURCE_REWRITING_REMOVED',
   'ALLOW_CYPRESS_ENV_REMOVED',
   'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
   'VISIBILITY_STRATEGY_DEPRECATION',
@@ -271,12 +272,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
-    name: 'experimentalSourceRewriting',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
     name: 'experimentalSingleTabRunMode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -357,6 +352,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 20,
     validation: validate.isNumber,
     overrideLevel: 'any',
+  }, {
+    name: 'removeSRIAttributes',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
   }, {
     name: 'reporter',
     defaultValue: 'spec',
@@ -673,6 +673,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   {
     name: 'experimentalPromptCommand',
     errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'experimentalSourceRewriting',
+    errorKey: 'EXPERIMENTAL_SOURCE_REWRITING_REMOVED',
     isWarning: true,
   },
   {

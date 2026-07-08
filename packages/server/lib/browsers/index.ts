@@ -6,7 +6,7 @@ import * as errors from '../errors'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, isDeprecatedBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
@@ -195,6 +195,21 @@ const browsers = {
 
     if (!options.url) throw new Error('Missing url in browsers.open')
 
+    // Surface the Electron deprecation in open mode only when Electron was
+    // explicitly requested via `--browser` or the `defaultBrowser` config —
+    // an interactive pick in the launchpad already shows the deprecation in
+    // the UI (ribbon + tag), so a terminal warning there would be redundant.
+    // Run mode emits this alongside the "Run Starting" header
+    // (see displayRunStarting), so `!isTextTerminal` also avoids double-printing.
+    // `--browser` / `defaultBrowser` can be a bare name (`electron`) or a
+    // `name:channel` form (`electron:stable`), so compare against the name part.
+    const requestedBrowser = ctx.modeOptions.browser || ctx.lifecycleManager.loadedFullConfig?.defaultBrowser
+    const requestedBrowserName = requestedBrowser?.split(':')[0]
+
+    if (!options.isTextTerminal && isDeprecatedBrowser(browser) && requestedBrowserName === browser.name) {
+      errors.warning('BROWSER_ELECTRON_DEPRECATED')
+    }
+
     debug('opening browser %o', browser)
 
     const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
@@ -252,10 +267,6 @@ const browsers = {
 
       const browserDisplayName = instance?.browser?.displayName || 'unknown'
 
-      options.onBrowserClose()
-      browserLauncher.clearInstanceState()
-      instance = null
-
       // We are being very narrow on when to restart the browser here. The only case we can reliably test the 'SIGTRAP' signal.
       // We want to avoid adding signals in here that may intentionally be caused by a user.
       // For example exiting firefox through either force quitting or quitting via cypress will fire a 'SIGTERM' event which
@@ -263,7 +274,19 @@ const browsers = {
       // On windows the crash produces 2147483651 as an exit code. We should add to the list of crashes we handle as we see them.
       // In the future we may consider delegating to the browsers to determine if an exit is a crash since it might be different
       // depending on what browser has crashed.
-      if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
+      const browserDidCrash = code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null
+
+      // Must happen before we tear down instance state below, so that the
+      // post-spec teardown that follows a crash fails fast instead of hanging.
+      if (browserDidCrash) {
+        browserLauncher.markBrowserCrashed?.()
+      }
+
+      options.onBrowserClose()
+      browserLauncher.clearInstanceState()
+      instance = null
+
+      if (browserDidCrash) {
         const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
 
         if (!options.onError) {

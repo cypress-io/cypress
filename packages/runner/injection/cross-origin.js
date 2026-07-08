@@ -12,7 +12,7 @@
 
 import { createTimers } from './timers'
 import { patchDocumentCookie } from './patches/cross-origin/cookies'
-import { patchElementIntegrity } from './patches/cross-origin/setAttribute'
+import { patchElementIntegrity } from './patches/integrity'
 import { patchFetch } from './patches/cross-origin/fetch'
 import { patchXmlHttpRequest } from './patches/cross-origin/xmlHttpRequest'
 

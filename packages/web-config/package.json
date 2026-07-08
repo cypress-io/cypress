@@ -20,7 +20,7 @@
     "autoprefixer": "10.4.23",
     "babel-loader": "10.0.0",
     "buffer": "6.0.3",
-    "chai": "4.2.0",
+    "chai": "4.5.0",
     "chalk": "2.4.2",
     "clean-webpack-plugin": "4.0.0",
     "copy-webpack-plugin": "11.0.0",

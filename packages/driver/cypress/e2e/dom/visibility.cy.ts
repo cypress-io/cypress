@@ -420,7 +420,7 @@ describe('src/cypress/dom/visibility', {
     })
   }
 
-  context('#getReasonIsHidden', () => {
+  context('#getReasonIsHidden (legacy)', { visibilityStrategy: 'legacy' }, () => {
     const reasonIs = ($el: JQuery, str: string) => {
       expect(dom.getReasonIsHidden($el)).to.eq(str)
     }
@@ -571,6 +571,104 @@ describe('src/cypress/dom/visibility', {
 
       cy.$$('body').append(visible)
       reasonIs(visible, 'This element `<div>` is not visible.')
+    })
+  })
+
+  context('#getReasonIsHidden (modern)', { visibilityStrategy: 'modern' }, () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/visibility/basic-css-properties.html')
+    })
+
+    it('returns the generic checkVisibility message with computed values', () => {
+      prepareFixtureSection('display-property')
+      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
+    it('passes opacityProperty: true to checkVisibility by default', () => {
+      cy.get('h1').then(($el) => {
+        const spy = cy.spy($el[0], 'checkVisibility')
+
+        dom.getReasonIsHidden($el)
+
+        expect(spy).to.be.calledWith(Cypress.sinon.match({ opacityProperty: true }))
+      })
+    })
+
+    it('passes opacityProperty: false to checkVisibility when checkOpacity is false', () => {
+      cy.get('h1').then(($el) => {
+        const spy = cy.spy($el[0], 'checkVisibility')
+
+        dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(spy).to.be.calledWith(Cypress.sinon.match({ opacityProperty: false }))
+      })
+    })
+
+    it('reports the computed opacity value even when checkOpacity: false', () => {
+      // checkOpacity: false excludes opacity from the hidden decision, but when the element is
+      // hidden for another reason the message still reports the actual computed opacity.
+      cy.$$('body').append('<div id="display-and-opacity" style="display: none; opacity: 0;">hidden</div>')
+      cy.get('#display-and-opacity').then(($el) => {
+        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(reason).to.eq('This element `<div#display-and-opacity>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
+      })
+    })
+
+    it('does not branch on specific css properties (always generic)', () => {
+      prepareFixtureSection('opacity-property')
+      cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: block`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
+      })
+    })
+
+    it('attributes zero-dimension elements to the dimension guard, not checkVisibility', () => {
+      cy.$$('body').append('<div id="zero-dim" style="width: 0; height: 0;">zero</div>')
+      cy.get('#zero-dim').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div#zero-dim>` is not visible because it has an effective width and height of: `0 x 0` pixels.')
+      })
+    })
+
+    it('describes the first hidden element in a multi-element jQuery subject', () => {
+      // modernIsHidden returns true if *any* element in the jQuery subject is hidden, so the
+      // message must describe the element that actually tripped.
+      cy.$$('body').append('<div id="multi-visible" style="width: 100px; height: 20px;">visible</div>')
+      cy.$$('body').append('<div id="multi-hidden" style="display: none;">hidden</div>')
+      cy.then(() => {
+        const $els = Cypress.$('#multi-visible, #multi-hidden')
+        const reason = dom.getReasonIsHidden($els)
+
+        expect(reason).to.eq('This element `<div#multi-hidden>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
+    it('surfaces the detached cause instead of the generic checkVisibility message', () => {
+      // detached elements fail `Element.checkVisibility()`, which would otherwise produce
+      // an unhelpful generic message. The reason should call out the structural cause.
+      const $detached = Cypress.$('<div id="detached-el">detached</div>')
+      const reason = dom.getReasonIsHidden($detached)
+
+      expect(reason).to.eq('This element `<div#detached-el>` is not visible because it is detached from the DOM')
+    })
+
+    it('falls back to the generic message when modernIsHidden checks all pass', () => {
+      // If neither checkVisibility nor the zero-dimension guard rejects the element, the
+      // function falls back to the legacy generic "not visible." string rather than emitting
+      // a misleading dimension message.
+      cy.$$('body').append('<div id="actually-visible" style="width: 100px; height: 20px;">visible</div>')
+      cy.get('#actually-visible').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div#actually-visible>` is not visible.')
+      })
     })
   })
 })

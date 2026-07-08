@@ -3,6 +3,7 @@ import _ from 'lodash'
 import os from 'os'
 
 import type { FoundBrowser } from '@packages/types'
+import { isDeprecatedBrowser } from '@packages/types'
 import type { DataContext } from '..'
 
 let isPowerShellAvailable: undefined | boolean
@@ -130,5 +131,9 @@ export class BrowserDataSource {
 
   isVersionSupported (obj: FoundBrowser) {
     return Boolean(!obj.unsupportedVersion)
+  }
+
+  isDeprecated (obj: FoundBrowser) {
+    return isDeprecatedBrowser(obj)
   }
 }
