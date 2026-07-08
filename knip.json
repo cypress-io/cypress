@@ -837,7 +837,19 @@
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
     ],
+    "packages/app/src/tap/commands/dom.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/dom-serialize.ts": [
+      "types"
+    ],
     "packages/app/src/tap/commands/run-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/snapshot.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/snapshot-state.ts": [
       "types"
     ],
     "packages/app/src/tap/commands/test-state.ts": [
