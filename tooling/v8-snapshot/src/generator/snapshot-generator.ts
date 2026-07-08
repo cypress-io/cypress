@@ -515,9 +515,7 @@ export class SnapshotGenerator {
       // `mksnapshot` command directly to trouble shoot
       runInstructions()
 
-      // mksnapshot's stderr explains why it failed, so surface it on the thrown
-      // error rather than routing it through a DEBUG-gated logger that CI
-      // (DEBUG=cypress:snapgen:info) doesn't enable.
+      // mksnapshot's stderr explains why it failed, so surface it on the thrown error.
       const stderr = err.stderr?.toString().trim()
       const detail = stderr || err.toString()
 
