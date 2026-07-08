@@ -194,7 +194,7 @@ executors:
   linux-x64: &linux-x64-executor
     machine:
       image: ubuntu-2004:2024.11.1
-    resource_class: medium.gen2
+    resource_class: medium
     environment:
       PLATFORM: linux
 
@@ -1985,7 +1985,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium.gen2
+        default: medium
       executor:
         type: executor
         default: linux-x64
@@ -2175,7 +2175,7 @@ jobs:
       # using `machine` gives us a Linux VM that can run Docker
       image: ubuntu-2004:2024.05.1
       docker_layer_caching: true
-    resource_class: medium.gen2
+    resource_class: medium
     steps:
       - maybe_skip_binary_jobs
       - run-binary-system-tests
