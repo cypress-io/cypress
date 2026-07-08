@@ -26,7 +26,16 @@ export function waitForDevServerSpecUpdate (
   events: DevServerSpecUpdateEvents,
   options: { bundler?: string } = {},
 ): Promise<void> {
-  const shouldWaitForWebpackCompile = options.bundler === 'webpack'
+  const bundler = options.bundler
+
+  if (bundler === 'vite') {
+    return new Promise<void>((resolve) => {
+      events.once('dev-server:on-spec-updated', () => resolve())
+      events.emit('dev-server:on-spec-update', spec)
+    })
+  }
+
+  const shouldWaitForWebpackCompile = bundler === 'webpack' || bundler === undefined
 
   return new Promise<void>((resolve) => {
     if (!shouldWaitForWebpackCompile) {
@@ -37,6 +46,7 @@ export function waitForDevServerSpecUpdate (
     }
 
     let resolved = false
+    let webpackWaitActive = bundler === 'webpack'
     let expectedJitRecompileGeneration: number | undefined
 
     const cleanup = () => {
@@ -81,6 +91,7 @@ export function waitForDevServerSpecUpdate (
     }
 
     const onSpecsUnchanged = () => {
+      webpackWaitActive = true
       tryResolve()
     }
 
@@ -89,12 +100,20 @@ export function waitForDevServerSpecUpdate (
         return
       }
 
+      webpackWaitActive = true
       expectedJitRecompileGeneration = generation
       events.on('dev-server:compile:success', onCompileSuccess)
     }
 
+    const onSpecUpdated = () => {
+      if (!webpackWaitActive) {
+        tryResolve()
+      }
+    }
+
     events.once('dev-server:specs:unchanged', onSpecsUnchanged)
     events.once('dev-server:jit-recompile:queued', onJitRecompileQueued)
+    events.once('dev-server:on-spec-updated', onSpecUpdated)
 
     events.emit('dev-server:on-spec-update', spec)
   })

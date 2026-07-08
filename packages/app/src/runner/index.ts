@@ -373,13 +373,34 @@ async function initialize () {
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }
 
+function getDevServerBundler (config: Cypress.Config & {
+  devServer?: { bundler?: string }
+  devServerConfig?: { bundler?: string, webpackConfig?: unknown, viteConfig?: unknown }
+}) {
+  const directBundler = config.devServer?.bundler ?? config.devServerConfig?.bundler
+
+  if (directBundler) {
+    return directBundler
+  }
+
+  if (config.devServerConfig && 'webpackConfig' in config.devServerConfig) {
+    return 'webpack'
+  }
+
+  if (config.devServerConfig && 'viteConfig' in config.devServerConfig) {
+    return 'vite'
+  }
+
+  return undefined
+}
+
 async function updateDevServerWithSpec (spec: SpecFile) {
   const config = getRunnerConfigFromWindow() as Cypress.Config & {
     devServer?: { bundler?: string }
-    devServerConfig?: { bundler?: string }
+    devServerConfig?: { bundler?: string, webpackConfig?: unknown, viteConfig?: unknown }
   }
 
-  const bundler = config.devServer?.bundler ?? config.devServerConfig?.bundler
+  const bundler = getDevServerBundler(config)
 
   return waitForDevServerSpecUpdate(spec, Cypress, { bundler })
 }
