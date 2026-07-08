@@ -63,8 +63,7 @@ describe('runner/cypress sessions.ui.spec', {
 
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-    cy.reporter().find('.command-name-session').eq(0)
-    cy.reporter().find('.command-expander').first().click()
+    cy.reporter().find('.command-name-session').eq(0).find('.command-expander').first().click()
     cy.reporter().find('.command').should('have.length', 2)
   })
 
@@ -101,8 +100,7 @@ describe('runner/cypress sessions.ui.spec', {
 
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-    cy.reporter().find('.command-name-session').eq(0)
-    cy.reporter().find('.command-expander').first().click()
+    cy.reporter().find('.command-name-session').eq(0).find('.command-expander').first().click()
 
     cy.reporter().find('.command').should('have.length', 2)
   })

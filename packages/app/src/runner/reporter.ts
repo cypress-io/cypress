@@ -131,11 +131,14 @@ function renderReporter (
 
     // mount synchronously so the reporter's event listeners are registered
     // before any driver events or resetReporter round-trips can fire; the
-    // frame is only revealed once its stylesheets have loaded
+    // frame is only revealed once its stylesheets have loaded, with a timeout
+    // so a stylesheet that never resolves cannot leave the command log hidden
     reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
     reactDomRoot.render(reporter)
 
-    Promise.all(pendingStylesheets).then(() => {
+    const revealTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
+
+    Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
       frame.style.visibility = ''
     })
 
