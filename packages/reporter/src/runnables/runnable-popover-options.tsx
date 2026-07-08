@@ -117,17 +117,21 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
       }
     }
 
+    // listen on both the top document and the reporter's document (they
+    // differ when the reporter renders inside an iframe) so interactions
+    // anywhere in the app dismiss the popover
     const doc = getReporterDocument()
-    const win = doc.defaultView ?? window
+    const docs = new Set([document, doc])
+    const wins = new Set([window, doc.defaultView ?? window])
 
     if (isOpen) {
-      doc.addEventListener('mousedown', handleClickOutside)
-      win.addEventListener('scroll', handleScroll, true)
+      docs.forEach((d) => d.addEventListener('mousedown', handleClickOutside))
+      wins.forEach((w) => w.addEventListener('scroll', handleScroll, true))
     }
 
     return () => {
-      doc.removeEventListener('mousedown', handleClickOutside)
-      win.removeEventListener('scroll', handleScroll, true)
+      docs.forEach((d) => d.removeEventListener('mousedown', handleClickOutside))
+      wins.forEach((w) => w.removeEventListener('scroll', handleScroll, true))
     }
   }, [isOpen])
 
