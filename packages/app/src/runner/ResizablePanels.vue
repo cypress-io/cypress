@@ -34,7 +34,13 @@
       class="h-full shrink-0 z-10 relative"
       :style="{ width: `${panel2Width}px` }"
     >
-      <slot name="panel2" />
+      <!-- the reporter renders in an iframe, which swallows the mousemove events that
+           drive resizing — consumers must disable pointer events on the panel content
+           while any panel is dragging so hits pass through to this component's root -->
+      <slot
+        name="panel2"
+        :isDragging="panel1IsDragging || panel2IsDragging || panel4IsDragging"
+      />
 
       <div
         data-cy="panel2ResizeHandle"
