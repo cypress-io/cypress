@@ -4,6 +4,7 @@
 **Performance:**
 
 - Fixed an issue where the browser's renderer process could crash (`We detected that the Chrome Renderer process just crashed`) when the application under test performed heavy layout work driven by a `ResizeObserver` loop (for example, a dialog dynamically showing many form fields with an open dropdown) while the command log was visible. The command log now renders in an isolated document so it no longer shares a layout pass with the application under test. Fixes [#33962](https://github.com/cypress-io/cypress/issues/33962) and [#34218](https://github.com/cypress-io/cypress/issues/34218).
+- Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
 
 ## 15.18.1
 
