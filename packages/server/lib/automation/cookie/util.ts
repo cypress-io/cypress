@@ -2,10 +2,22 @@ import type playwright from 'playwright-webkit'
 import { domainMatch, pathMatch } from 'tough-cookie'
 import { parseDomain } from '@packages/network-tools'
 
+// mirrors chrome.cookies.SameSiteStatus — the WebExtension-style sameSite vocabulary
+// the automation layer speaks
+export type ExtensionSameSiteStatus = 'unspecified' | 'no_restriction' | 'lax' | 'strict'
+
+// maps the extension vocabulary to the PascalCase the protocols speak (CDP's
+// Network.CookieSameSite and playwright's sameSite are the same three values)
+export const sameSiteExtensionToProtocolMap = {
+  'no_restriction': 'None',
+  'lax': 'Lax',
+  'strict': 'Strict',
+} as const
+
 // @ts-ignore
 export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
   // use `undefined` instead of `unspecified`
-  sameSite?: 'no_restriction' | 'lax' | 'strict'
+  sameSite?: Exclude<ExtensionSameSiteStatus, 'unspecified'>
 }
 
 // Cypress uses the webextension-style filtering

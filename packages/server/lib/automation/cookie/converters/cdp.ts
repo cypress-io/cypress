@@ -2,15 +2,11 @@
 
 import _ from 'lodash'
 import type { Protocol } from 'devtools-protocol'
-import { isHostOnlyCookie } from '../util'
+import { isHostOnlyCookie, sameSiteExtensionToProtocolMap } from '../util'
 import type { CyCookie } from '../util'
 
 function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
-  return str ? ({
-    'no_restriction': 'None',
-    'lax': 'Lax',
-    'strict': 'Strict',
-  })[str] as Protocol.Network.CookieSameSite : str as undefined
+  return str ? sameSiteExtensionToProtocolMap[str] : undefined
 }
 
 function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {

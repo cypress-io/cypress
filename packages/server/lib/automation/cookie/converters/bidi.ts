@@ -3,12 +3,14 @@ import toInteger from 'lodash/toInteger'
 import isNumber from 'lodash/isNumber'
 import type { NetworkCookie, NetworkSameSite } from 'webdriver/build/bidi/localTypes'
 import { isHostOnlyCookie } from '../util'
-import type { CyCookie } from '../util'
+import type { CyCookie, ExtensionSameSiteStatus } from '../util'
 
 const debugCookies = debugModule('cypress:server:browsers:bidi_automation:cookies')
 
+// BiDi reports 'unspecified' where the extension shape uses `undefined`, so this widens
+// CyCookie's sameSite back to the full extension vocabulary
 export type BidiCyCookie = Omit<CyCookie, 'sameSite'> & {
-  sameSite: 'no_restriction' | 'lax' | 'strict' | 'unspecified'
+  sameSite: ExtensionSameSiteStatus
 }
 
 // if the filter is not an exact match OR, if looselyMatchCookiePath is enabled, doesn't include the path.

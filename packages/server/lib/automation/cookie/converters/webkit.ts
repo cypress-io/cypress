@@ -1,14 +1,9 @@
 import type playwright from 'playwright-webkit'
+import { sameSiteExtensionToProtocolMap } from '../util'
 import type { CyCookie } from '../util'
 
-const extensionMap = {
-  'no_restriction': 'None',
-  'lax': 'Lax',
-  'strict': 'Strict',
-} as const
-
 function convertSameSiteExtensionToPlaywright (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
-  return str ? extensionMap[str] : undefined
+  return str ? sameSiteExtensionToProtocolMap[str] : undefined
 }
 
 export const convertPlaywrightCookieToCyCookie = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
