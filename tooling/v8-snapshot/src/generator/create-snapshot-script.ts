@@ -355,17 +355,17 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
 
         return Promise.resolve(result)
       } catch (err: any) {
-        if (err.stderr != null) {
-          logError(err.stderr.toString())
-        }
-
         if (err.stdout != null) {
           logDebug(err.stdout.toString())
         }
 
-        logError(err)
+        // The bundler's stderr names the exact offending file, so surface it on
+        // the rejected error rather than routing it through a DEBUG-gated logger
+        // that CI (DEBUG=cypress:snapgen:info) doesn't enable.
+        const stderr = err.stderr?.toString().trim()
+        const detail = stderr ? `\n${stderr}` : `\n${err}`
 
-        return Promise.reject(new Error(`Failed command: "${cmd}"`))
+        return Promise.reject(new Error(`Failed command: "${cmd}"${detail}`))
       } finally {
         if (!keepConfig) {
           const err = tryRemoveFileSync(configPath)
