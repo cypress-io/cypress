@@ -33,6 +33,12 @@ export const resetPinState = (): void => {
   pinned = undefined
 }
 
+// The current pin, for the run-state command to surface (so `status` can report
+// a pin and a stranded one is always visible and recoverable).
+export const getPinnedRef = (): { command: string, at: SnapshotRef } | undefined => {
+  return pinned ? { command: pinned.command, at: pinned.at } : undefined
+}
+
 const liveSnapshots = (props: PinSnapshotProps | undefined): PinSnapshotEntry[] => {
   return (props?.snapshots ?? []).filter((entry): entry is PinSnapshotEntry => Boolean(entry))
 }

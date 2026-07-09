@@ -6,6 +6,7 @@ import { withTapSession } from '../tap-session'
 import { resolveAutFrame, FrameCommandError } from '../aut-frame'
 import { extractDom, DEFAULT_MAX_CHARS } from './dom'
 import { extractAx, DEFAULT_MAX_NODES } from './ax'
+import { extractInspect } from './inspect'
 import { renderResult, renderFailure, renderKnownFailure, renderFrameHelp } from '../output'
 
 const debug = Debug('cypress:cli:tap')
@@ -18,7 +19,7 @@ interface FrameOptions {
 }
 
 interface ParsedFrame {
-  sub: 'dom' | 'ax'
+  sub: 'dom' | 'ax' | 'inspect'
   selector?: string
   maxChars?: string
   maxNodes?: string
@@ -61,6 +62,13 @@ const buildFrameProgram = (capture: (parsed: ParsedFrame) => void): commander.Co
     capture({ sub: 'ax', selector, maxNodes: opts.maxNodes })
   })
 
+  program
+  .command('inspect <selector>')
+  .description('inspect one element: its tag, attributes, computed styles, box model, and accessibility node')
+  .action((selector) => {
+    capture({ sub: 'inspect', selector })
+  })
+
   return program
 }
 
@@ -101,9 +109,15 @@ export const runFrame = async (operands: string[], options: FrameOptions, wantsH
       const frame = await resolveAutFrame(session.client, session.sessionId)
 
       try {
-        const result = parsed!.sub === 'ax'
-          ? await extractAx(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxNodes, DEFAULT_MAX_NODES, 'max-nodes'))
-          : await extractDom(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxChars, DEFAULT_MAX_CHARS, 'max-chars'))
+        let result: unknown
+
+        if (parsed!.sub === 'ax') {
+          result = await extractAx(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxNodes, DEFAULT_MAX_NODES, 'max-nodes'))
+        } else if (parsed!.sub === 'inspect') {
+          result = await extractInspect(session, frame, parsed!.selector!)
+        } else {
+          result = await extractDom(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxChars, DEFAULT_MAX_CHARS, 'max-chars'))
+        }
 
         renderResult(result)
 

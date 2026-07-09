@@ -6,12 +6,18 @@ import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import { errors } from '../errors'
 import type { TapCliOptions } from '../exec/tap'
 
+interface PinnedRef {
+  command: string
+  at: { index: number, name?: string }
+}
+
 interface TapRunState {
   spec: string | null
   totalSpecs: number
   state?: 'running' | 'passed' | 'failed'
   totalTests?: number
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  pinned?: PinnedRef
 }
 
 interface TapStatus {
@@ -24,11 +30,14 @@ interface TapStatus {
   spec?: string
   totalTests?: number
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  pinned?: PinnedRef
 }
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
+  const pinned = runState.pinned ? { pinned: runState.pinned } : {}
+
   if (runState.state === undefined) {
-    return { ...base, status: 'spec not selected', totalSpecs: runState.totalSpecs }
+    return { ...base, status: 'spec not selected', totalSpecs: runState.totalSpecs, ...pinned }
   }
 
   return {
@@ -38,6 +47,7 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
     ...(runState.spec !== null ? { spec: runState.spec } : {}),
     totalTests: runState.totalTests,
     results: runState.results,
+    ...pinned,
   }
 }
 
