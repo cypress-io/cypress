@@ -8,6 +8,9 @@ export type HttpRequest = {
 export type HttpResponse = {
   id: string
   url: string
+  body?: string | Buffer
+  headers?: HttpHeaders
+  statusCode?: number
 }
 
 export interface TransportCodecPort<TRequest, TResponse> {

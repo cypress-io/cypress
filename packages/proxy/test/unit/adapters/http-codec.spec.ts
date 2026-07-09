@@ -89,6 +89,15 @@ describe('proxyHttpCodec', () => {
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/encoded')
   })
 
+  it('throws a descriptive error when middleware returns without forwarding', () => {
+    expect(() => {
+      proxyHttpCodec.encodeResponse({
+        id: 'missing-request-id',
+        url: 'https://example.test/',
+      })
+    }).to.throw('HttpIntercept middleware must call next() before returning a response')
+  })
+
   it('materializes a stub body stream when committing to the proxy', async () => {
     const ctx = createCtx()
 

@@ -20,6 +20,15 @@ type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
 
 function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
   const inFlightRequests = new Map<string, HttpInterceptCtx>()
+  const requireCtx = (id: string): HttpInterceptCtx => {
+    const ctx = inFlightRequests.get(id)
+
+    if (!ctx) {
+      throw new Error(`No in-flight proxy request found for ${id}. HttpIntercept middleware must call next() before returning a response.`)
+    }
+
+    return ctx
+  }
 
   return {
     decodeRequest (ctx: HttpInterceptCtx): HttpRequest {
@@ -35,7 +44,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
     },
 
     encodeRequest (request: HttpRequest): HttpInterceptCtx {
-      const ctx = inFlightRequests.get(request.id)!
+      const ctx = requireCtx(request.id)
 
       ctx.req.proxiedUrl = request.url
 
@@ -54,7 +63,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
     },
 
     encodeResponse (response: HttpResponse): HttpInterceptCtx {
-      const ctx = inFlightRequests.get(response.id)!
+      const ctx = requireCtx(response.id)
 
       ctx.req.proxiedUrl = response.url
       inFlightRequests.delete(response.id)

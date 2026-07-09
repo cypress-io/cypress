@@ -302,6 +302,14 @@ export class CriClient implements ICriClient {
       this.enableCommands.push(obj)
     }
 
+    if (command.endsWith('.disable')) {
+      const enableCommand = `${command.slice(0, -'.disable'.length)}.enable`
+
+      this.enableCommands = this.enableCommands.filter((entry) => {
+        return !(entry.command === enableCommand && entry.sessionId === sessionId)
+      })
+    }
+
     if (this._connected && this.cdpConnection) {
       // a send to a renderer that crashed without this connection observing
       // Target.targetCrashed will never resolve. When debug logging is

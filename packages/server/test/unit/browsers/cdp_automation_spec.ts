@@ -1,7 +1,7 @@
 const { expect, sinon } = require('../../spec_helper')
 
 import { ProtocolManagerShape } from '@packages/types'
-import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
   context('.CdpAutomation', () => {
