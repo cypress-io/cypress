@@ -76,16 +76,30 @@ class ElementOverrideManager {
       this.mutationStack.push(...mutations)
     })
 
-    observer.observe(cy.$$('html')[0], {
+    const observeOptions: MutationObserverInit = {
       childList: true,
       subtree: true,
       attributes: true,
       attributeOldValue: true,
-    })
+    }
+
+    observer.observe(cy.$$('html')[0], observeOptions)
+
+    // The reporter command log renders inside a same-origin iframe
+    // (#reporter-frame), so selectors targeting reporter content resolve against
+    // that document rather than the top one. Include the iframe document when
+    // applying overrides, and observe it too so the mutations are reverted after
+    // the snapshot. Falls back to top-document-only when the reporter renders
+    // inline (component tests, older layouts).
+    const reporterDocument = (cy.$$('#reporter-frame')[0] as HTMLIFrameElement | undefined)?.contentDocument
+
+    if (reporterDocument?.documentElement) {
+      observer.observe(reporterDocument.documentElement, observeOptions)
+    }
 
     Object.entries(overrides).forEach(([k, v]) => {
       // eslint-disable-next-line cypress/no-assigning-return-values
-      const $el = cy.$$(k)
+      const $el = reporterDocument ? cy.$$(k).add(cy.$$(k, reporterDocument)) : cy.$$(k)
 
       if (typeof v === 'function') {
         v($el)
