@@ -61,7 +61,7 @@ export function createServeInternalRoutesMiddleware ({
     }
 
     if (isCypressServerOrigin(request.url, config)) {
-      return terminal(request)
+      return next(request)
     }
 
     const response = await serverRequest.create({

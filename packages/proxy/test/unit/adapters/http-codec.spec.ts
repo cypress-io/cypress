@@ -97,6 +97,28 @@ describe('proxyHttpCodec', () => {
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/encoded')
   })
 
+  it('does not write to the browser response after decoding a streamed origin response', () => {
+    const ctx = createCtx()
+    const writes: any[] = []
+
+    proxyHttpCodec.decodeRequest(ctx)
+
+    const incomingRes = new IncomingMessage(new Socket)
+
+    incomingRes.statusCode = 200
+    ctx.httpInterceptIncomingRes = incomingRes
+    ctx.originBodyStream = Readable.from(['origin'])
+    ctx.res.writeHead = (...args) => writes.push(['writeHead', ...args])
+    ctx.res.end = (...args) => writes.push(['end', ...args])
+
+    const response = proxyHttpCodec.decodeResponse(ctx)
+
+    proxyHttpCodec.encodeResponse(response)
+
+    expect(response.statusCode).to.be.undefined
+    expect(writes).to.deep.equal([])
+  })
+
   it('writes fulfilled neutral responses directly to the browser response', () => {
     const ctx = createCtx()
     const request = proxyHttpCodec.decodeRequest(ctx)

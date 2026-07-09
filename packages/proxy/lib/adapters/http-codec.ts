@@ -75,8 +75,6 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       return {
         id: ctx.id!,
         url: ctx.req.proxiedUrl,
-        statusCode: ctx.httpInterceptIncomingRes?.statusCode,
-        headers: ctx.httpInterceptIncomingRes?.headers,
       }
     },
 
@@ -85,7 +83,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
 
       ctx.req.proxiedUrl = response.url
 
-      if (response.statusCode) {
+      if (typeof response.statusCode === 'number') {
         ctx.res.writeHead(response.statusCode, cleanHeaders(response.headers))
         ctx.res.end(response.body)
       }

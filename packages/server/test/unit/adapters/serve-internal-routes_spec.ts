@@ -66,10 +66,10 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(serverRequest.create).not.to.have.been.called
   })
 
-  it('forwards same-origin internal requests through the terminal forwarder', async () => {
+  it('forwards same-origin internal requests through the next middleware', async () => {
     const { middleware, serverRequest } = createMiddleware()
-    const next = sinon.stub()
-    const terminal = sinon.stub().resolves({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
+    const next = sinon.stub().resolves({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
+    const terminal = sinon.stub()
 
     const response = await middleware({
       id: 'req-1',
@@ -77,8 +77,8 @@ describe('lib/adapters/serve-internal-routes', () => {
     }, next, terminal)
 
     expect(response).to.deep.equal({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
-    expect(next).not.to.have.been.called
-    expect(terminal).to.have.been.calledOnce
+    expect(next).to.have.been.calledOnce
+    expect(terminal).not.to.have.been.called
     expect(serverRequest.create).not.to.have.been.called
   })
 
