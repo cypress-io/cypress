@@ -9,7 +9,7 @@ import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
-import type { CypressIncomingRequest, CypressOutgoingResponse } from '../types'
+import type { CypressIncomingRequest, CypressOutgoingResponseLike } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
@@ -134,7 +134,7 @@ function isIPv6Host (domain: string): boolean {
   return !!domain && isIP(domain.replace(/^\[|\]$/g, '')) === 6
 }
 
-function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
+function setCookie (res: CypressOutgoingResponseLike, k: string, v: string, domain: string) {
   // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
   // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
   // Domain and let the cookie default to host-only. See #34143.
@@ -149,7 +149,7 @@ function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: 
   return res.cookie(k, v, opts)
 }
 
-function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value) {
+function setInitialCookie (res: CypressOutgoingResponseLike, remoteState: any, value) {
   // dont modify any cookies if we're trying to clear the initial cookie and we're not injecting anything
   // dont set the cookies if we're not on the initial request
   if ((!value && !res.wantsInjection) || !res.isInitial) {
@@ -174,7 +174,7 @@ function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value
 // from - so the flag is stale and is expired here. The genuine
 // "navigated away" recovery is a redirect handled in the request middleware and
 // never reaches response injection, so clearing here cannot undermine it.
-function clearUnloadCookie (res: CypressOutgoingResponse, remoteState: any) {
+function clearUnloadCookie (res: CypressOutgoingResponseLike, remoteState: any) {
   if (!res.wantsInjection) {
     return
   }

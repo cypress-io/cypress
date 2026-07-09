@@ -52,9 +52,19 @@ async function tick () {
   await Promise.resolve()
 }
 
+async function readStream (stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = []
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  return Buffer.concat(chunks).toString()
+}
+
 describe('CdpFetchTransport', () => {
   describe('createCdpFetchCodec', () => {
-    it('decodes CDP request pauses to the minimal neutral request shape', () => {
+    it('decodes CDP request pauses to the neutral request shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
         id: 'network-1',
@@ -66,7 +76,10 @@ describe('CdpFetchTransport', () => {
       const request = codec.decodeRequest(transportRequest)
 
       expect(request).to.deep.equal({
+        body: undefined,
+        headers: {},
         id: 'network-1',
+        method: 'GET',
         url: 'https://example.test/',
       })
     })
@@ -90,7 +103,7 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.url).to.equal('https://example.test/mutated')
     })
 
-    it('round trips CDP response pauses through the minimal neutral response shape', () => {
+    it('round trips CDP response pauses through the neutral response shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
         id: 'network-1',
@@ -105,6 +118,10 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-response',
         responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
       }
 
       codec.decodeRequest(transportRequest)
@@ -112,7 +129,12 @@ describe('CdpFetchTransport', () => {
       const response = codec.decodeResponse(transportResponse)
 
       expect(response).to.deep.equal({
+        bodyStream: undefined,
+        headers: {
+          'content-type': 'text/plain',
+        },
         id: 'network-1',
+        statusCode: 200,
         url: 'https://example.test/',
       })
 
@@ -489,6 +511,75 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    it('exposes response pause bodies as a stream for middleware rewrites', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
+      client.send.withArgs('IO.read').onFirstCall().resolves({
+        data: Buffer.from('origin').toString('base64'),
+        base64Encoded: true,
+        eof: false,
+      })
+
+      client.send.withArgs('IO.read').onSecondCall().resolves({
+        data: '',
+        eof: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: `${await readStream(response.bodyStream!)}-rewritten`,
+          headers: {
+            'content-type': 'text/plain',
+          },
+          statusCode: 202,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.takeResponseBodyAsStream', {
+        requestId: 'fetch-response',
+      })
+
+      expect(client.send).to.have.been.calledWith('IO.read', {
+        handle: 'stream-1',
+      })
+
+      expect(client.send).to.have.been.calledWith('IO.close', {
+        handle: 'stream-1',
+      })
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-response',
+        responseCode: 202,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
+        body: Buffer.from('origin-rewritten').toString('base64'),
+      })
     })
 
     it('rejects the pending flow from a matching response failure pause', async () => {

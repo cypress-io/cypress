@@ -18,7 +18,7 @@ type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
   onResponseWrittenToClient?: () => Promise<void>
 }
 
-function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
+export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
   const inFlightRequests = new Map<string, HttpInterceptCtx>()
   const requireCtx = (id: string): HttpInterceptCtx => {
     const ctx = inFlightRequests.get(id)
@@ -32,7 +32,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
 
   return {
     decodeRequest (ctx: HttpInterceptCtx): HttpRequest {
-      const id = _.uniqueId('httpIntercept')
+      const id = ctx.id ?? _.uniqueId('httpIntercept')
 
       ctx.id = id
       inFlightRequests.set(id, ctx)
@@ -40,6 +40,9 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       return {
         id,
         url: ctx.req.proxiedUrl,
+        method: ctx.req.method,
+        headers: ctx.req.headers as HttpRequest['headers'],
+        body: ctx.req.body,
       }
     },
 
@@ -51,14 +54,15 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       return ctx
     },
 
-    getRequest (id: string): HttpInterceptCtx {
-      return inFlightRequests.get(id)!
-    },
-
     decodeResponse (ctx: HttpInterceptCtx): HttpResponse {
+      const incomingRes = ctx.incomingRes ?? ctx.httpInterceptIncomingRes
+
       return {
         id: ctx.id!,
         url: ctx.req.proxiedUrl,
+        bodyStream: ctx.incomingResStream ?? ctx.originBodyStream,
+        headers: incomingRes?.headers as HttpResponse['headers'],
+        statusCode: incomingRes?.statusCode,
       }
     },
 
@@ -66,7 +70,16 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       const ctx = requireCtx(response.id)
 
       ctx.req.proxiedUrl = response.url
-      inFlightRequests.delete(response.id)
+
+      if (ctx.httpInterceptIncomingRes) {
+        ctx.incomingRes = ctx.httpInterceptIncomingRes
+      }
+
+      if (response.bodyStream) {
+        ctx.incomingResStream = response.bodyStream
+      } else if (ctx.originBodyStream) {
+        ctx.incomingResStream = ctx.originBodyStream
+      }
 
       return ctx
     },

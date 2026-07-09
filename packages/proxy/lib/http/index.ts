@@ -9,7 +9,7 @@ import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin, proxyHttpCodec, resolveProxyResponseBodyStream } from '../adapters/http-codec'
+import { createFetchOrigin, proxyHttpCodec } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -20,11 +20,12 @@ import type { SocketBroadcaster } from '@packages/socket'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
+  CypressOutgoingResponseLike,
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore } from '@packages/network-interception'
+import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -77,9 +78,9 @@ export type HttpMiddlewareStacks = {
   }
 }
 
-type HttpMiddlewareCtx<T> = {
+export type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
-  res: CypressOutgoingResponse
+  res: CypressOutgoingResponseLike
   handleHttpRequestSpan?: Span
   reqMiddlewareSpan?: Span
   resMiddlewareSpan?: Span
@@ -386,71 +387,73 @@ export class Http {
     return onError
   }
 
-  runLegacyProxyPipeline: InterceptMiddleware = async (request, next): Promise<HttpResponse> => {
-    const ctx = proxyHttpCodec.getRequest(request.id)
+  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
+    return async (request, next): Promise<HttpResponse> => {
+      const ctx = codec.encodeRequest(request)
 
-    ctx.req.proxiedUrl = request.url
+      const onError = this.buildOnError(ctx)
 
-    const onError = this.buildOnError(ctx)
+      await _runStage(HttpStages.IncomingRequest, ctx, onError)
 
-    await _runStage(HttpStages.IncomingRequest, ctx, onError)
+      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+      // In this case we don't want to run the response middleware and should just exit.
+      if (ctx.res.destroyed) {
+        await onError(createBrowserConnectionClosedError())
 
-    // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-    // In this case we don't want to run the response middleware and should just exit.
-    if (ctx.res.destroyed) {
-      await onError(createBrowserConnectionClosedError())
-
-      return proxyHttpCodec.decodeResponse(ctx)
-    }
-
-    if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
-      const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
-
-      try {
-        request.url = ctx.req.proxiedUrl
-        const response = await next(request)
-
-        span?.end()
-
-        ctx.req.proxiedUrl = response.url
-        ctx.req.onInterceptResponseWritten = ctx.onResponseWrittenToClient
-
-        if (ctx.req.hadIntercept) {
-          setDefaultHeaders(ctx.req, ctx.httpInterceptIncomingRes!)
-        }
-
-        ctx.incomingRes = ctx.httpInterceptIncomingRes
-        ctx.incomingResStream = await resolveProxyResponseBodyStream(ctx)
-      } catch (err) {
-        span?.end()
-        await onError(err as Error)
-
-        return proxyHttpCodec.decodeResponse(ctx)
+        return codec.decodeResponse(ctx)
       }
+
+      if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
+        const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
+
+        try {
+          const response = await next(codec.decodeRequest(ctx))
+
+          span?.end()
+
+          codec.encodeResponse(response)
+          ctx.req.onInterceptResponseWritten = ctx.onResponseWrittenToClient
+
+          if (ctx.req.hadIntercept) {
+            setDefaultHeaders(ctx.req, ctx.incomingRes!)
+          }
+
+          if (ctx.incomingRes && !ctx.incomingResStream) {
+            throw new Error('Incoming response stream was not set by the HTTP transport codec.')
+          }
+        } catch (err) {
+          span?.end()
+          await onError(err as Error)
+
+          return codec.decodeResponse(ctx)
+        }
+      }
+
+      if (ctx.incomingRes) {
+        // start the span that is responsible for recording the start time of the entire middleware run on the stack
+        ctx.resMiddlewareSpan = telemetry.startSpan({
+          name: 'response:middleware',
+          parentSpan: ctx.handleHttpRequestSpan,
+          isVerbose,
+        })
+
+        await _runStage(HttpStages.IncomingResponse, ctx, onError)
+        .finally(() => {
+          ctx.resMiddlewareSpan?.end()
+        })
+
+        return codec.decodeResponse(ctx)
+      }
+
+      ctx.debug('Warning: Request was not fulfilled with a response.')
+
+      return codec.decodeResponse(ctx)
     }
-
-    if (ctx.incomingRes) {
-      // start the span that is responsible for recording the start time of the entire middleware run on the stack
-      ctx.resMiddlewareSpan = telemetry.startSpan({
-        name: 'response:middleware',
-        parentSpan: ctx.handleHttpRequestSpan,
-        isVerbose,
-      })
-
-      await _runStage(HttpStages.IncomingResponse, ctx, onError)
-      .finally(() => {
-        ctx.resMiddlewareSpan?.end()
-      })
-
-      return proxyHttpCodec.decodeResponse(ctx)
-    }
-
-    ctx.debug('Warning: Request was not fulfilled with a response.')
-
-    return proxyHttpCodec.decodeResponse(ctx)
   }
 
-  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+  runLegacyProxyPipeline: InterceptMiddleware = this.createLegacyProxyPipeline(proxyHttpCodec)
+
+  createMiddlewareContext (req: CypressIncomingRequest, res: CypressOutgoingResponseLike, handleHttpRequestSpan?: Span): HttpMiddlewareCtx<any> {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
@@ -513,6 +516,11 @@ export class Http {
       getCurrentBrowser: this.getCurrentBrowser,
     }
 
+    return ctx
+  }
+
+  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+    const ctx = this.createMiddlewareContext(req, res, handleHttpRequestSpan)
     const onError = this.buildOnError(ctx)
 
     // start the span that is responsible for recording the start time of the entire middleware run on the stack

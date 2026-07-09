@@ -1,6 +1,7 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
 import pDefer from 'p-defer'
+import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
@@ -21,6 +22,7 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
+  bodyStream?: Readable
   fulfilled?: boolean
   requestId: string
   responseCode: number
@@ -233,14 +235,68 @@ export class CdpFetchTransport {
       return
     }
 
+    const bodyStream = this.createResponseBodyStream(event.requestId, sessionId)
+
     deferred.resolve({
       ...event.request,
       id: event.networkId!,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders: event.responseHeaders,
+      bodyStream,
       sessionId,
     })
+  }
+
+  private createResponseBodyStream = (requestId: string, sessionId?: string): Readable => {
+    let reading = false
+    let stream: Protocol.IO.StreamHandle | undefined
+    let bodyStream: Readable
+
+    bodyStream = new Readable({
+      read: () => {
+        if (reading) {
+          return
+        }
+
+        reading = true
+
+        void (async () => {
+          try {
+            if (!stream) {
+              const response = await this.client.send('Fetch.takeResponseBodyAsStream', {
+                requestId,
+              }, sessionId) as Protocol.Fetch.TakeResponseBodyAsStreamResponse
+
+              stream = response.stream
+            }
+
+            const chunk = await this.client.send('IO.read', {
+              handle: stream,
+            }, sessionId) as Protocol.IO.ReadResponse
+
+            if (chunk.data) {
+              this.pushChunk(bodyStream, chunk)
+            }
+
+            if (chunk.eof) {
+              await this.safeSend('IO.close', { handle: stream }, sessionId)
+              bodyStream.push(null)
+            }
+          } catch (err) {
+            bodyStream.destroy(err as Error)
+          } finally {
+            reading = false
+          }
+        })()
+      },
+    })
+
+    return bodyStream
+  }
+
+  private pushChunk (readable: Readable, chunk: Protocol.IO.ReadResponse): void {
+    readable.push(Buffer.from(chunk.data, chunk.base64Encoded ? 'base64' : 'utf8'))
   }
 
   private safeSend = async (...args: Parameters<CdpFetchClient['send']>): Promise<void> => {

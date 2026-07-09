@@ -7,3 +7,7 @@ export { ProxyNetworkCaptureAdapter } from './proxy-network-capture'
 export { ProxyCookieStateAdapter } from './proxy-cookie-state'
 
 export { ProxyCommandLogAdapter } from './proxy-command-log'
+
+export { createSyntheticHttpCodec } from './synthetic-http-codec'
+
+export { createSyntheticExpressContext } from './synthetic-express-context'

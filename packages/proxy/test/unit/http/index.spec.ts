@@ -141,7 +141,7 @@ describe('http', function () {
       const http = new Http(httpOpts)
       const httpIntercept = new HttpIntercept(proxyHttpCodec)
 
-      httpIntercept.use(http.runLegacyProxyPipeline)
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
       http.networkInterception = httpIntercept
 
       return http

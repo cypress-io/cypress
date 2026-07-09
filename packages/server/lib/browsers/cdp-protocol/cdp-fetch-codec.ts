@@ -30,6 +30,24 @@ function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['r
   })
 }
 
+function toHttpHeaders (headers?: CdpFetchTransportResponse['responseHeaders']): HttpHeaders | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  return headers.reduce<HttpHeaders>((memo, { name, value }) => {
+    const existing = memo[name]
+
+    if (existing) {
+      memo[name] = ([] as string[]).concat(existing, value)
+    } else {
+      memo[name] = value
+    }
+
+    return memo
+  }, {})
+}
+
 function toResponseBody (body?: string | Buffer): string | undefined {
   if (body === undefined) {
     return undefined
@@ -78,6 +96,9 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       return {
         id: transportRequest.id,
         url: transportRequest.url,
+        method: transportRequest.method,
+        headers: transportRequest.headers,
+        body: transportRequest.postData,
       }
     },
 
@@ -95,12 +116,22 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       return {
         id: transportResponse.id,
         url: transportResponse.url,
+        bodyStream: transportResponse.bodyStream,
+        headers: toHttpHeaders(transportResponse.responseHeaders),
+        statusCode: transportResponse.responseCode,
       }
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
       const response = httpResponse as CdpFetchHttpResponse
-      const transportResponse = inFlightResponses.get(httpResponse.id) ?? {
+      const pausedResponse = inFlightResponses.get(httpResponse.id)
+      const transportResponse = pausedResponse ? {
+        ...pausedResponse,
+        fulfilled: response.body !== undefined,
+        responseCode: response.statusCode ?? pausedResponse.responseCode,
+        responseHeaders: toResponseHeaders(response.headers) ?? pausedResponse.responseHeaders,
+        ...(response.body !== undefined ? { body: toResponseBody(response.body) } : {}),
+      } : {
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,

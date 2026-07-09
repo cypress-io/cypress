@@ -10,6 +10,8 @@ export {
   ProxyNetworkCaptureAdapter,
   ProxyCookieStateAdapter,
   ProxyCommandLogAdapter,
+  createSyntheticHttpCodec,
+  createSyntheticExpressContext,
 } from './adapters'
 
 export { createProxyNetworkInterception } from './adapters/create-proxy-network-interception'
