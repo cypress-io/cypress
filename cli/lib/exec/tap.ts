@@ -7,6 +7,7 @@ import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
 import { reportStatus } from '../tap/status'
+import { runFrame } from '../tap/frame'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 import { errors } from '../errors'
@@ -98,6 +99,13 @@ const tapModule = {
     // session exists, so it short-circuits here. (A binding `status` is shadowed.)
     if (command === 'status') {
       return reportStatus(options, wantsHelp)
+    }
+
+    // `frame` is CLI-native too: its subcommands run CDP domains against the AUT
+    // frame, which the in-page binding cannot reach, so it parses and dispatches
+    // its own subcommand rather than going through the schema program.
+    if (command === 'frame') {
+      return runFrame(positionals.slice(1), options, wantsHelp)
     }
 
     try {

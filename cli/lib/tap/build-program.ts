@@ -92,6 +92,11 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   .description('report where a running Cypress instance is in its lifecycle')
   .action(() => {})
 
+  program
+  .command('frame')
+  .description('inspect the app-under-test frame over CDP (dom, ax, inspect)')
+  .action(() => {})
+
   for (const { name, description, params = [], options = [], hidden } of schema.commands) {
     if (hidden) {
       continue

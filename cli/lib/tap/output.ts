@@ -23,6 +23,7 @@ Interacts with a running Cypress instance over its tap binding.
 Commands:
   instances  list the running Cypress instances this CLI can reach
   status     report where a running Cypress instance is in its lifecycle
+  frame      inspect the app-under-test frame over CDP (dom, ax, inspect)
 
 Other commands are discovered from the running Cypress instance — start
 Cypress (e.g. \`cypress open\`), then run \`cypress tap\` to see them.
@@ -57,6 +58,10 @@ Options:
 
 export const renderStatusHelp = (): void => {
   logger.always(STATUS_USAGE)
+}
+
+export const renderFrameHelp = (program: commander.Command): void => {
+  logger.always(program.helpInformation())
 }
 
 const unknownCommandMessage = (schema: TapSchema, command: string): string => {

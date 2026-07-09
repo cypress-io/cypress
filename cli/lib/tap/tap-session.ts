@@ -35,6 +35,12 @@ export const throwTapError = (details: { description: string, solution: string }
 
 export interface TapSession {
   call (method: string, args?: unknown[]): Promise<unknown>
+  // Raw CDP access for the `tap frame` extractors, which run protocol domains
+  // (Page/DOM/CSS/Accessibility) against the runner page and its AUT child
+  // frame rather than routing through the binding. `sessionId` is a getter so
+  // it stays correct across the re-attach `call` performs on a lost session.
+  readonly client: CRI.Client
+  readonly sessionId: string
 }
 
 // Shape-checks the `exec` envelope; anything else is a transport failure, not a
@@ -266,7 +272,15 @@ export const withTapSession = async <T> (
       return response.result.value
     }
 
-    return await fn({ call })
+    const session: TapSession = {
+      call,
+      client,
+      get sessionId () {
+        return sessionId
+      },
+    }
+
+    return await fn(session)
   } finally {
     await client.close().catch(() => {})
   }
