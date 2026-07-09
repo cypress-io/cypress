@@ -4,6 +4,7 @@ import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 import { HttpIntercept } from '@packages/network-interception'
 import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
   describe('_runStage', function () {
@@ -385,6 +386,25 @@ describe('http', function () {
 
       expect(on).toHaveBeenCalledTimes(2)
       expect(off).toHaveBeenCalledTimes(10)
+    })
+
+    it('does not forward to origin when request middleware already ended the client response', async function () {
+      const sendOutgoing = vi.spyOn(sendRequestOutgoingModule, 'sendRequestOutgoing')
+
+      incomingRequest.mockImplementation(function () {
+        this.res.headersSent = true
+        this.res.writableFinished = true
+        this.end()
+      })
+
+      // @ts-expect-error
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+
+      expect(incomingRequest).toHaveBeenCalledOnce()
+      expect(incomingResponse).not.toHaveBeenCalled()
+      expect(sendOutgoing).not.toHaveBeenCalled()
+
+      sendOutgoing.mockRestore()
     })
   })
 

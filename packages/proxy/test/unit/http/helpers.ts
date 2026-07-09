@@ -8,7 +8,11 @@ export function createTestNetworkInterceptionCore () {
   })
 }
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onErrorHandler?: (error: Error) => void) {
+type TestMiddlewareStack = HttpMiddleware<any>[] | Record<string, HttpMiddleware<any>>
+
+export function testMiddleware (middleware: TestMiddlewareStack, ctx: Record<string, any> = {}, onErrorHandler?: (error: Error) => void) {
+  const { onlyRunMiddleware: _onlyRunMiddleware, onError: ctxOnError, ...ctxRest } = ctx
+
   const fullCtx = {
     debug: () => {},
     req: {},
@@ -20,10 +24,10 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onE
       0: middleware,
     },
 
-    ...ctx,
+    ...ctxRest,
   }
 
-  const onError = onErrorHandler ?? ((error) => {
+  const onError = onErrorHandler ?? ctxOnError ?? ((error) => {
     throw error
   })
 

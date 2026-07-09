@@ -66,7 +66,6 @@ describe('http/request-middleware', () => {
     function prepareContext (headers = {}) {
       return {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
-        onlyRunMiddleware: vi.fn(),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
         },
@@ -107,12 +106,25 @@ describe('http/request-middleware', () => {
         const ctx = prepareContext({
           'x-cypress-is-from-extra-target': 'true',
         })
+        let maybeSetBasicAuthHeadersRan = false
+        let skippedMiddlewareRan = false
 
-        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+        await testMiddleware({
+          ExtractCypressMetadataHeaders,
+          MaybeSetBasicAuthHeaders () {
+            maybeSetBasicAuthHeadersRan = true
+            this.next()
+          },
+          MaybeSimulateSecHeaders () {
+            skippedMiddlewareRan = true
+            this.next()
+          },
+        }, ctx)
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
-        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['MaybeSetBasicAuthHeaders'])
+        expect(maybeSetBasicAuthHeadersRan).toBe(true)
+        expect(skippedMiddlewareRan).toBe(false)
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
