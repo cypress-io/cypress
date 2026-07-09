@@ -235,7 +235,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         return resolve()
       }
 
+      // Spread ctx first so stage-owned callbacks always win. Origin fetch may
+      // temporarily attach onError/onResponse onto ctx; those must not clobber
+      // the per-middleware handlers below.
       const fullCtx = {
+        ...ctx,
         next: () => {
           fullCtx.next = () => {
             const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
@@ -267,7 +271,6 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
-        ...ctx,
       }
 
       try {

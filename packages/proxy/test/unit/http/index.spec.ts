@@ -107,6 +107,39 @@ describe('http', function () {
 
       expect(onError).not.toHaveBeenCalled()
     })
+
+    it('keeps a stage onError even when ctx.onError is undefined', async function () {
+      const onError = vi.fn()
+      const { PassThrough } = await import('stream')
+
+      const streamMiddleware = vi.fn().mockImplementation(function () {
+        expect(typeof this.onError).to.equal('function')
+
+        const pt = new PassThrough()
+
+        pt.on('error', this.onError)
+        this.next()
+        pt.emit('error', new Error('stream boom'))
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        onError: undefined,
+        middleware: {
+          [HttpStages.IncomingResponse]: { streamMiddleware },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingResponse, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).to.equal('stream boom')
+    })
   })
 
   describe('Http.handle', function () {
