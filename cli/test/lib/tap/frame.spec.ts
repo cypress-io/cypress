@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { resolveAutFrame, FrameCommandError } from '../../../lib/tap/aut-frame'
 import { extractDom } from '../../../lib/tap/frame/dom'
-import { extractAx } from '../../../lib/tap/frame/ax'
+import { extractAria } from '../../../lib/tap/frame/aria'
 import { extractInspect } from '../../../lib/tap/frame/inspect'
 import type { TapSession } from '../../../lib/tap/tap-session'
 
@@ -122,7 +122,7 @@ describe('lib/tap/frame/dom extractDom', () => {
   })
 })
 
-describe('lib/tap/frame/ax extractAx', () => {
+describe('lib/tap/frame/aria extractAria', () => {
   const ax = (nodeId: string, role: string, extra: Record<string, unknown> = {}) => ({
     nodeId,
     role: { value: role },
@@ -173,7 +173,7 @@ describe('lib/tap/frame/ax extractAx', () => {
   it('projects the whole tree, collapsing noise roles and reporting states/value', async () => {
     const { session } = makeAxSession()
 
-    const result = await extractAx(session, frame, undefined, 200)
+    const result = await extractAria(session, frame, undefined, 200)
 
     expect(result.url).to.eq('http://localhost:5555/index.html')
     expect(result.nodeCount).to.eq(3)
@@ -188,7 +188,7 @@ describe('lib/tap/frame/ax extractAx', () => {
   it('roots the tree at the selector match via its backend node id', async () => {
     const { session } = makeAxSession({ selectorObjectId: 'obj-1', backendNodeId: 99 })
 
-    const result = await extractAx(session, frame, '[data-testid=username]', 200)
+    const result = await extractAria(session, frame, '[data-testid=username]', 200)
 
     expect(result.nodes).to.deep.eq([
       { depth: 0, role: 'textbox', name: 'Username', value: 'ada', states: ['disabled'] },
@@ -198,7 +198,7 @@ describe('lib/tap/frame/ax extractAx', () => {
   it('returns an empty tree when the selector matches nothing', async () => {
     const { session } = makeAxSession({ selectorObjectId: undefined, selectorSubtype: 'null' })
 
-    const result = await extractAx(session, frame, '.missing', 200)
+    const result = await extractAria(session, frame, '.missing', 200)
 
     expect(result).to.deep.eq({ url: 'http://localhost:5555/index.html', nodes: [], nodeCount: 0 })
   })
@@ -206,13 +206,13 @@ describe('lib/tap/frame/ax extractAx', () => {
   it('maps a bad selector to INVALID_SELECTOR', async () => {
     const { session } = makeAxSession({ throwOnEval: true })
 
-    await expect(extractAx(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
+    await expect(extractAria(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
   })
 
   it('caps the tree at max-nodes and flags truncation', async () => {
     const { session } = makeAxSession()
 
-    const result = await extractAx(session, frame, undefined, 2)
+    const result = await extractAria(session, frame, undefined, 2)
 
     expect(result.nodeCount).to.eq(2)
     expect(result.truncated).to.eq(true)
@@ -283,7 +283,7 @@ describe('lib/tap/frame/inspect extractInspect', () => {
     expect(result.attributes).to.deep.eq({ 'data-testid': 'username-input', name: 'username' })
     expect(result.box).to.deep.eq({ x: 8, y: 40, width: 200, height: 30 })
     expect(result.styles).to.deep.eq({ display: 'block', color: 'rgb(0, 0, 0)', 'font-size': '16px' })
-    expect(result.ax).to.deep.eq({ role: 'textbox', name: 'Username', states: ['disabled'] })
+    expect(result.aria).to.deep.eq({ role: 'textbox', name: 'Username', states: ['disabled'] })
   })
 
   it('returns found:false when the selector matches nothing', async () => {
@@ -306,7 +306,7 @@ describe('lib/tap/frame/inspect extractInspect', () => {
     const result = await extractInspect(session, frame, '.plain')
 
     expect(result.found).to.eq(true)
-    expect(result.ax).to.be.undefined
+    expect(result.aria).to.be.undefined
     expect(result.tag).to.eq('input')
   })
 })

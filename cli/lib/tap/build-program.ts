@@ -89,7 +89,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
 
   // `frame` is CLI-native too but dispatches its own subcommands in exec/tap.ts,
   // so it registers here for the help listing only, like the commands above.
-  program.command('frame').description('inspect the app-under-test frame over CDP (dom, ax, inspect)')
+  program.command('frame').description('inspect the app-under-test frame over CDP (dom, aria, inspect)')
 
   for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
     const command = program.command(name)
