@@ -53,7 +53,7 @@ export interface FrameInspectResult {
   found: boolean
   tag?: string
   attributes?: Record<string, string>
-  ax?: { role?: string, name?: string, states?: string[] }
+  aria?: { role?: string, name?: string, states?: string[] }
   box?: { x: number, y: number, width: number, height: number }
   styles?: Record<string, string>
 }
@@ -65,22 +65,22 @@ interface ElementInfo {
   box: { x: number, y: number, width: number, height: number }
 }
 
-const projectAx = (node: AXNode | undefined): FrameInspectResult['ax'] => {
+const projectAria = (node: AXNode | undefined): FrameInspectResult['aria'] => {
   if (!node || node.ignored) {
     return undefined
   }
 
-  const ax: NonNullable<FrameInspectResult['ax']> = {}
+  const aria: NonNullable<FrameInspectResult['aria']> = {}
   const role = node.role?.value
 
   if (typeof role === 'string') {
-    ax.role = role
+    aria.role = role
   }
 
   const name = node.name?.value
 
   if (typeof name === 'string' && name.length > 0) {
-    ax.name = name
+    aria.name = name
   }
 
   const states = (node.properties ?? [])
@@ -88,13 +88,13 @@ const projectAx = (node: AXNode | undefined): FrameInspectResult['ax'] => {
   .map((property) => property.name)
 
   if (states.length) {
-    ax.states = states
+    aria.states = states
   }
 
-  return Object.keys(ax).length ? ax : undefined
+  return Object.keys(aria).length ? aria : undefined
 }
 
-const readAxNode = async (session: TapSession, objectId: string): Promise<FrameInspectResult['ax']> => {
+const readAriaNode = async (session: TapSession, objectId: string): Promise<FrameInspectResult['aria']> => {
   const { client, sessionId } = session
 
   try {
@@ -102,7 +102,7 @@ const readAxNode = async (session: TapSession, objectId: string): Promise<FrameI
     const { nodes } = await client.Accessibility.getPartialAXTree({ backendNodeId: node.backendNodeId, fetchRelatives: false }, sessionId)
     const axNodes = nodes as AXNode[]
 
-    return projectAx(axNodes.find((candidate) => candidate.backendDOMNodeId === node.backendNodeId) ?? axNodes[0])
+    return projectAria(axNodes.find((candidate) => candidate.backendDOMNodeId === node.backendNodeId) ?? axNodes[0])
   } catch {
     return undefined
   }
@@ -152,14 +152,14 @@ export const extractInspect = async (
   }
 
   const { tag, attributes, styles, box } = info.result.value as ElementInfo
-  const ax = await readAxNode(session, objectId)
+  const aria = await readAriaNode(session, objectId)
 
   return {
     ...base,
     found: true,
     tag,
     attributes,
-    ...(ax ? { ax } : {}),
+    ...(aria ? { aria } : {}),
     box,
     styles,
   }

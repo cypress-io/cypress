@@ -27,7 +27,7 @@ interface AXNode {
   backendDOMNodeId?: number
 }
 
-export interface AxNodeOut {
+export interface AriaNodeOut {
   depth: number
   role: string
   name?: string
@@ -35,21 +35,21 @@ export interface AxNodeOut {
   states?: string[]
 }
 
-export interface FrameAxResult {
+export interface FrameAriaResult {
   url?: string
-  nodes: AxNodeOut[]
+  nodes: AriaNodeOut[]
   nodeCount: number
   truncated?: true
 }
 
-const projectNode = (node: AXNode, depth: number): AxNodeOut | undefined => {
+const projectNode = (node: AXNode, depth: number): AriaNodeOut | undefined => {
   const role = node.role?.value
 
   if (typeof role !== 'string' || node.ignored || NOISE_ROLES.has(role)) {
     return undefined
   }
 
-  const out: AxNodeOut = { depth, role }
+  const out: AriaNodeOut = { depth, role }
   const name = node.name?.value
 
   if (typeof name === 'string' && name.length > 0) {
@@ -79,8 +79,8 @@ const projectNode = (node: AXNode, depth: number): AxNodeOut | undefined => {
  * skipped but its children keep flowing, so the output is a clean semantic
  * tree rather than the raw render tree. Stops at `maxNodes`.
  */
-const projectTree = (byId: Map<string, AXNode>, rootId: string, maxNodes: number): { nodes: AxNodeOut[], truncated: boolean } => {
-  const nodes: AxNodeOut[] = []
+const projectTree = (byId: Map<string, AXNode>, rootId: string, maxNodes: number): { nodes: AriaNodeOut[], truncated: boolean } => {
+  const nodes: AriaNodeOut[] = []
   let truncated = false
 
   const walk = (id: string, depth: number): void => {
@@ -150,12 +150,12 @@ const resolveSelectorBackendNodeId = async (
   return node.backendNodeId
 }
 
-export const extractAx = async (
+export const extractAria = async (
   session: TapSession,
   frame: AutFrame,
   selector: string | undefined,
   maxNodes: number,
-): Promise<FrameAxResult> => {
+): Promise<FrameAriaResult> => {
   const { client, sessionId } = session
 
   await client.DOM.enable({}, sessionId)
@@ -169,7 +169,7 @@ export const extractAx = async (
     byId.set(node.nodeId, node)
   }
 
-  const base: FrameAxResult = { ...(frame.url ? { url: frame.url } : {}), nodes: [], nodeCount: 0 }
+  const base: FrameAriaResult = { ...(frame.url ? { url: frame.url } : {}), nodes: [], nodeCount: 0 }
 
   let rootId: string | undefined
 

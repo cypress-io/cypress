@@ -779,7 +779,7 @@
       "exports",
       "types"
     ],
-    "cli/lib/tap/frame/ax.ts": [
+    "cli/lib/tap/frame/aria.ts": [
       "types"
     ],
     "cli/lib/tap/frame/dom.ts": [

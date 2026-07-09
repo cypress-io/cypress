@@ -5,7 +5,7 @@ import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
 import { withTapSession } from '../tap-session'
 import { resolveAutFrame, FrameCommandError } from '../aut-frame'
 import { extractDom, DEFAULT_MAX_CHARS } from './dom'
-import { extractAx, DEFAULT_MAX_NODES } from './ax'
+import { extractAria, DEFAULT_MAX_NODES } from './aria'
 import { extractInspect } from './inspect'
 import { renderResult, renderFailure, renderKnownFailure, renderFrameHelp } from '../output'
 
@@ -19,7 +19,7 @@ interface FrameOptions {
 }
 
 interface ParsedFrame {
-  sub: 'dom' | 'ax' | 'inspect'
+  sub: 'dom' | 'aria' | 'inspect'
   selector?: string
   maxChars?: string
   maxNodes?: string
@@ -55,11 +55,11 @@ const buildFrameProgram = (capture: (parsed: ParsedFrame) => void): commander.Co
   })
 
   program
-  .command('ax [selector]')
-  .description('read the accessibility tree of the app-under-test frame, or the subtree at a selector')
+  .command('aria [selector]')
+  .description('read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector')
   .option('--max-nodes <max-nodes>', 'cap on the number of accessibility nodes returned (default 200)')
   .action((selector, opts) => {
-    capture({ sub: 'ax', selector, maxNodes: opts.maxNodes })
+    capture({ sub: 'aria', selector, maxNodes: opts.maxNodes })
   })
 
   program
@@ -111,8 +111,8 @@ export const runFrame = async (operands: string[], options: FrameOptions, wantsH
       try {
         let result: unknown
 
-        if (parsed!.sub === 'ax') {
-          result = await extractAx(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxNodes, DEFAULT_MAX_NODES, 'max-nodes'))
+        if (parsed!.sub === 'aria') {
+          result = await extractAria(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxNodes, DEFAULT_MAX_NODES, 'max-nodes'))
         } else if (parsed!.sub === 'inspect') {
           result = await extractInspect(session, frame, parsed!.selector!)
         } else {

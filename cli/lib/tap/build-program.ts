@@ -94,7 +94,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
 
   program
   .command('frame')
-  .description('inspect the app-under-test frame over CDP (dom, ax, inspect)')
+  .description('inspect the app-under-test frame over CDP (dom, aria, inspect)')
   .action(() => {})
 
   for (const { name, description, params = [], options = [], hidden } of schema.commands) {
