@@ -3,6 +3,7 @@
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import $Cypress from '../../../src/cypress'
+import $utils from '../../../src/cypress/utils'
 
 describe('$Cypress', () => {
   let Cypress: any
@@ -80,6 +81,39 @@ describe('$Cypress', () => {
 
       // Should not throw and should complete successfully
       expect(Cypress.$autIframe).toBe(mockAutIframe)
+    })
+  })
+
+  describe('utils', () => {
+    describe('isValidHttpMethod', () => {
+      it('returns true for QUERY method', () => {
+        expect($utils.isValidHttpMethod('QUERY')).toBe(true)
+      })
+
+      it('returns true for lowercase query method', () => {
+        expect($utils.isValidHttpMethod('query')).toBe(true)
+      })
+
+      it('returns true for standard methods', () => {
+        expect($utils.isValidHttpMethod('GET')).toBe(true)
+        expect($utils.isValidHttpMethod('POST')).toBe(true)
+      })
+
+      it('returns false for null', () => {
+        expect($utils.isValidHttpMethod(null)).toBe(false)
+      })
+
+      it('returns false for undefined', () => {
+        expect($utils.isValidHttpMethod(undefined)).toBe(false)
+      })
+
+      it('returns false for an empty string', () => {
+        expect($utils.isValidHttpMethod('')).toBe(false)
+      })
+
+      it('returns false for an unknown method', () => {
+        expect($utils.isValidHttpMethod('INVALID')).toBe(false)
+      })
     })
   })
 })
