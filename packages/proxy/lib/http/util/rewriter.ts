@@ -1,7 +1,7 @@
 import * as inject from './inject'
 import * as regexRewriter from './regex-rewriter'
 import type { CypressWantsInjection } from '../../types'
-import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 
 export type SecurityOpts = {
   url: string

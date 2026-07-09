@@ -1,3 +1,4 @@
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
@@ -35,8 +36,12 @@ export class AutIframe {
 
   create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframes: JQuery<HTMLIFrameElement>[] } {
     const $iframe = this.$('<iframe>', {
-      id: `Your project: '${this.projectName}'`,
-      title: `Your project: '${this.projectName}'`,
+      id: `${AUT_FRAME_NAME_IDENTIFIER} '${this.projectName}'`,
+      // seeds window.name so the injected bridge can identify the AUT frame from
+      // inside the document — readable cross-origin (unlike frameElement.id) and
+      // persists across navigations. See #33849.
+      name: `${AUT_FRAME_NAME_IDENTIFIER} '${this.projectName}'`,
+      title: `${AUT_FRAME_NAME_IDENTIFIER} '${this.projectName}'`,
       class: 'aut-iframe',
     })
 

@@ -21,11 +21,11 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionCore } from '@packages/network-interception'
+import type { ForNetworkInterception, NetworkInterceptionCore } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
-import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
@@ -110,6 +110,7 @@ export type ServerCtx = Readonly<{
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   networkInterceptionCore: NetworkInterceptionCore
+  networkInterception?: ForNetworkInterception<any, any>
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
   request: ServerRequest
@@ -123,6 +124,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'getFileServerToken',
   'netStubbingState',
   'networkInterceptionCore',
+  'networkInterception',
   'next',
   'end',
   'onResponse',
@@ -311,6 +313,7 @@ export class Http {
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   networkInterceptionCore: NetworkInterceptionCore
+  networkInterception?: ForNetworkInterception<any, any>
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: ServerRequest
@@ -331,6 +334,7 @@ export class Http {
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.networkInterceptionCore = opts.networkInterceptionCore
+    this.networkInterception = opts.networkInterception
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
@@ -361,6 +365,7 @@ export class Http {
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       networkInterceptionCore: this.networkInterceptionCore,
+      networkInterception: this.networkInterception,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ProxyRequestInterceptionAdapter } from '../../../lib/adapters/proxy-request-interception'
 import { correlateBrowserPreRequest } from '../../../lib/adapters/correlate-browser-pre-request'
 import { endRequestsToBlockedHosts } from '../../../lib/adapters/end-requests-to-blocked-hosts'
-import { sendRequestOutgoing } from '../../../lib/adapters/send-request-outgoing'
+import { sendRequestOutgoing } from '../../../lib/http/send-request-outgoing'
 
 vi.mock('../../../lib/adapters/correlate-browser-pre-request', () => {
   return {
@@ -16,7 +16,7 @@ vi.mock('../../../lib/adapters/end-requests-to-blocked-hosts', () => {
   }
 })
 
-vi.mock('../../../lib/adapters/send-request-outgoing', () => {
+vi.mock('../../../lib/http/send-request-outgoing', () => {
   return {
     sendRequestOutgoing: vi.fn(),
   }
