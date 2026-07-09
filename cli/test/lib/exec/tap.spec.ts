@@ -4,6 +4,7 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
+import type { TapSession } from '../../../lib/tap/tap-session'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
@@ -61,7 +62,10 @@ const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { r
     return method === 'getSchema' ? sessionSchema : execOutcome
   })
 
-  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call }))
+  // These tests drive the binding exec/status paths, which use only `call`;
+  // the `tap frame` extractors (which use client/sessionId) are covered
+  // separately, so the session's CDP members are stubbed away here.
+  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
 
   return call
 }
