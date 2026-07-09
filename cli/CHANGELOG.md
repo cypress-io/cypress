@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.2
+
+**Bugfixes:**
+
+- Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
+
 ## 15.18.1
 
 **Performance:**
