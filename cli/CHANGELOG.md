@@ -8,6 +8,7 @@
 **Bugfixes:**
 
 - Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
+
 **Misc:**
 
 - Corrected the `@default` value in the TypeScript type definitions for the [`videoCompression`](https://on.cypress.io/configuration#Videos) configuration option from `32` to `false`. Addressed in [#34198](https://github.com/cypress-io/cypress/pull/34198).
