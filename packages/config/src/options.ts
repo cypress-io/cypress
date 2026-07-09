@@ -53,7 +53,6 @@ export type OverrideLevel = 'any' | 'suiteOrTest' | 'suite' | 'never'
 
 /**
  * The current level at which a test-time override is being applied. `suite` and `test`
- * correspond to `describe`/`context` and `it`/`test` config overrides respectively, while
  * `undefined` indicates a run-time mutation via `Cypress.config()` during test execution
  * (or while loading the support/spec file or in a `test:before:run` event).
  */

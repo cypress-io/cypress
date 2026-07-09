@@ -26,9 +26,7 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
     }
 
     // Cross-origin syncing applies the diff via Cypress.config() at run-time, so omit any
-    // value that cannot be set that way. `never` values are read-only, and `suiteOrTest`
-    // values (e.g. viewportWidth/viewportHeight) can only be set via suite-/test-level
-    // overrides. Viewport is synced to spec bridges via state, not config, so it is safe to omit.
+    // value that cannot be set that way.
     if (
       (overrideLevels === 'never' && configKey !== 'isDefaultProtocolEnabled') ||
       overrideLevels === 'suiteOrTest'
@@ -107,6 +105,13 @@ export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => 
   return undefined
 }
 
+// Extra guidance appended to the generic `suite_or_test_only` error, keyed by config option.
+// Add an entry here when a new `suiteOrTest` option needs option-specific advice.
+const suiteOrTestOnlyGuidance: Record<string, string> = {
+  viewportWidth: ' To change the viewport during a test, use `cy.viewport()`.',
+  viewportHeight: ' To change the viewport during a test, use `cy.viewport()`.',
+}
+
 // Configuration can be override at multiple run-time levels. Ensure the configuration keys can
 // be override and that the provided override values are the correct type.
 //
@@ -122,9 +127,6 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
   const mochaOverrideLevel = getMochaOverrideLevel(state)
 
   if (!skipConfigOverrideValidation && mochaOverrideLevel !== 'restoring') {
-    // `mochaOverrideLevel` is 'suite'/'test' when applying suite-/test-level config
-    // overrides (describe/it). Any other value (e.g. undefined) means the config is being
-    // mutated at run-time via Cypress.config() during test execution.
     const currentOverrideLevel = mochaOverrideLevel === 'suite' || mochaOverrideLevel === 'test'
       ? mochaOverrideLevel
       : undefined
@@ -142,7 +144,10 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
         errKey = 'config.invalid_mocha_config_override.read_only'
       }
 
-      throw new (state('specWindow').Error)($errUtils.errByPath(errKey, validationResult))
+      throw new (state('specWindow').Error)($errUtils.errByPath(errKey, {
+        ...validationResult,
+        additionalInfo: suiteOrTestOnlyGuidance[validationResult.invalidConfigKey] ?? '',
+      }))
     })
   }
 
