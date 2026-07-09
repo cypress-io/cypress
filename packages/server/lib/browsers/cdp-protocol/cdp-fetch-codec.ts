@@ -54,6 +54,31 @@ function toResponseBody (body?: string | Buffer): string | undefined {
   return Buffer.from(body).toString('base64')
 }
 
+function toRequestPostData (body: string | Buffer): Pick<CdpFetchTransportRequest, 'postData' | 'postDataIsBase64'> {
+  if (Buffer.isBuffer(body)) {
+    return {
+      postData: body.toString('base64'),
+      postDataIsBase64: true,
+    }
+  }
+
+  return {
+    postData: body,
+  }
+}
+
+function fromRequestPostData (transportRequest: CdpFetchTransportRequest): string | Buffer | undefined {
+  if (typeof transportRequest.postData === 'undefined') {
+    return undefined
+  }
+
+  if (transportRequest.postDataIsBase64) {
+    return Buffer.from(transportRequest.postData, 'base64')
+  }
+
+  return transportRequest.postData
+}
+
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
   const inFlightRequests = new Map<string, CdpFetchTransportRequest>()
   const inFlightResponses = new Map<string, CdpFetchTransportResponse>()
@@ -86,7 +111,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         url: transportRequest.url,
         method: transportRequest.method,
         headers: transportRequest.headers,
-        body: transportRequest.postData,
+        body: fromRequestPostData(transportRequest),
       }
     },
 
@@ -96,7 +121,10 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       transportRequest.url = httpRequest.url
       transportRequest.method = httpRequest.method ?? transportRequest.method
       transportRequest.headers = httpRequest.headers ? toCdpRequestHeaders(httpRequest.headers) : transportRequest.headers
-      transportRequest.postData = typeof httpRequest.body === 'undefined' ? transportRequest.postData : httpRequest.body.toString()
+
+      if (typeof httpRequest.body !== 'undefined') {
+        Object.assign(transportRequest, toRequestPostData(httpRequest.body))
+      }
 
       return transportRequest
     },

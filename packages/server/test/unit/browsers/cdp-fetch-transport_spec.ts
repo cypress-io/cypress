@@ -93,6 +93,28 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.url).to.equal('https://example.test/mutated')
     })
 
+    it('base64-encodes buffer request bodies for CDP continueRequest', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        requestId: 'fetch-request',
+        url: 'https://example.test/',
+        method: 'POST',
+        headers: {},
+      }
+      const body = Buffer.from([0x00, 0xff, 0x41])
+
+      const request = codec.decodeRequest(transportRequest)
+
+      const encoded = codec.encodeRequest({
+        ...request,
+        body,
+      })
+
+      expect(encoded.postData).to.equal(body.toString('base64'))
+      expect(encoded.postDataIsBase64).to.be.true
+    })
+
     it('round trips CDP response pauses through the minimal neutral response shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {

@@ -17,6 +17,7 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
   requestId?: string
   sessionId?: string
+  postDataIsBase64?: boolean
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
@@ -127,6 +128,8 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
+          ...(typeof outbound.postData !== 'undefined' ? { postData: outbound.postData } : {}),
+          ...(outbound.postDataIsBase64 ? { postDataIsBase64: true } : {}),
         }, outbound.sessionId)
 
         requestContinued = true
