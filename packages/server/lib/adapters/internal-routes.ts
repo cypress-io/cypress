@@ -4,6 +4,9 @@ type InternalRouteConfig = {
   port: number | null
   proxyUrl?: string
   socketIoRoute: string
+  // CT Vite/webpack assets live under this prefix (default /__cypress/src).
+  // They must not be treated as Express-owned internal routes.
+  devServerPublicPathRoute?: string
 }
 
 const LOCALHOST_NAMES = new Set([
@@ -24,6 +27,13 @@ function matchesPathPrefix (pathname: string, route: string): boolean {
 }
 
 export function isInternalCypressRoute (pathname: string, config: InternalRouteConfig): boolean {
+  // Component-testing app/spec assets are served by the bundler under
+  // /__cypress/src (or a custom public path). Matching the whole namespace
+  // would incorrectly loop those requests back to Express.
+  if (config.devServerPublicPathRoute && matchesPathPrefix(pathname, config.devServerPublicPathRoute)) {
+    return false
+  }
+
   const namespaceRoute = `/${config.namespace}`
   const internalRoutes = [
     namespaceRoute,

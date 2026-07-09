@@ -9,6 +9,7 @@ const config = {
   port: 1234,
   proxyUrl: 'http://localhost:1234',
   socketIoRoute: '/__socket',
+  devServerPublicPathRoute: '/__cypress/src',
 } as any
 
 describe('lib/adapters/internal-routes', () => {
@@ -17,6 +18,11 @@ describe('lib/adapters/internal-routes', () => {
     expect(isInternalCypressRoute('/__/assets/app.js', config)).to.be.true
     expect(isInternalCypressRoute('/__socket-graphql', config)).to.be.true
     expect(isInternalCypressRoute('/__cypress-studio/app.js', config)).to.be.true
+  })
+
+  it('does not match component-testing bundler assets under the namespace', () => {
+    expect(isInternalCypressRoute('/__cypress/src/cypress/support/component.jsx', config)).to.be.false
+    expect(isInternalCypressRoute('/__cypress/src/spec-0.js', config)).to.be.false
   })
 
   it('does not match internal route lookalikes', () => {
@@ -61,6 +67,25 @@ describe('lib/adapters/serve-internal-routes', () => {
     }, next, terminal)
 
     expect(response).to.deep.equal({ id: 'req-1', url: 'https://example.test/app' })
+    expect(next).to.have.been.calledOnce
+    expect(terminal).not.to.have.been.called
+    expect(serverRequest.create).not.to.have.been.called
+  })
+
+  it('delegates component-testing bundler assets to the next middleware', async () => {
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub().resolves({
+      id: 'req-1',
+      url: 'http://localhost:5173/__cypress/src/cypress/support/component.jsx',
+    })
+    const terminal = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://localhost:5173/__cypress/src/cypress/support/component.jsx',
+    }, next, terminal)
+
+    expect(response.url).to.equal('http://localhost:5173/__cypress/src/cypress/support/component.jsx')
     expect(next).to.have.been.calledOnce
     expect(terminal).not.to.have.been.called
     expect(serverRequest.create).not.to.have.been.called

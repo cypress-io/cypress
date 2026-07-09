@@ -5,7 +5,7 @@ import { isCypressServerOrigin, isInternalCypressRoute } from './internal-routes
 
 type ServeInternalRoutesConfig = Pick<
   CyServer.Config & Cypress.Config,
-  'clientRoute' | 'namespace' | 'port' | 'proxyUrl' | 'socketIoRoute'
+  'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'port' | 'proxyUrl' | 'socketIoRoute'
 >
 
 type CreateServeInternalRoutesMiddlewareOptions = {
