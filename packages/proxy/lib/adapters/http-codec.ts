@@ -84,6 +84,8 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       ctx.req.proxiedUrl = response.url
 
       if (typeof response.statusCode === 'number') {
+        // Synthesized replies skip sendRequestOutgoing, which normally ends this span.
+        ctx.reqMiddlewareSpan?.end()
         ctx.res.writeHead(response.statusCode, cleanHeaders(response.headers))
         ctx.res.end(response.body)
       }

@@ -1,7 +1,7 @@
 import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import { Readable } from 'stream'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { proxyHttpCodec, resolveProxyResponseBodyStream } from '../../../lib/adapters/http-codec'
 
 async function readStream (stream: Readable): Promise<string> {
@@ -123,7 +123,9 @@ describe('proxyHttpCodec', () => {
     const ctx = createCtx()
     const request = proxyHttpCodec.decodeRequest(ctx)
     const writes: any[] = []
+    const endSpan = vi.fn()
 
+    ctx.reqMiddlewareSpan = { end: endSpan }
     ctx.res.writeHead = (...args) => writes.push(['writeHead', ...args])
     ctx.res.end = (...args) => writes.push(['end', ...args])
 
@@ -143,6 +145,8 @@ describe('proxyHttpCodec', () => {
       ['writeHead', 201, { 'content-type': 'text/plain' }],
       ['end', 'created'],
     ])
+
+    expect(endSpan).toHaveBeenCalledOnce()
   })
 
   it('throws a descriptive error when middleware returns without forwarding', () => {

@@ -430,6 +430,10 @@ export class Http {
 
         return proxyHttpCodec.decodeResponse(ctx)
       }
+    } else if (!ctx.incomingRes) {
+      // Request middleware finished the browser response without setting
+      // incomingRes (redirects, blocked-host 503, etc.).
+      ctx.reqMiddlewareSpan?.end()
     }
 
     if (ctx.incomingRes) {
