@@ -5,6 +5,7 @@ import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
 import { withTapSession } from '../tap-session'
 import { resolveAutFrame, FrameCommandError } from '../aut-frame'
 import { extractDom, DEFAULT_MAX_CHARS } from './dom'
+import { extractAx, DEFAULT_MAX_NODES } from './ax'
 import { renderResult, renderFailure, renderKnownFailure, renderFrameHelp } from '../output'
 
 const debug = Debug('cypress:cli:tap')
@@ -17,20 +18,21 @@ interface FrameOptions {
 }
 
 interface ParsedFrame {
-  sub: 'dom'
+  sub: 'dom' | 'ax'
   selector?: string
   maxChars?: string
+  maxNodes?: string
 }
 
-const parseMaxChars = (raw: string | undefined): number => {
+const parsePositiveInt = (raw: string | undefined, fallback: number, label: string): number => {
   if (raw === undefined) {
-    return DEFAULT_MAX_CHARS
+    return fallback
   }
 
   const value = Number(raw)
 
   if (!Number.isInteger(value) || value <= 0) {
-    throw new FrameCommandError('INVALID_MAX_CHARS', 'max-chars must be a positive integer (the cap on returned HTML characters)')
+    throw new FrameCommandError('INVALID_LIMIT', `${label} must be a positive integer`)
   }
 
   return value
@@ -49,6 +51,14 @@ const buildFrameProgram = (capture: (parsed: ParsedFrame) => void): commander.Co
   .option('--max-chars <max-chars>', 'cap on returned HTML characters (default 30000)')
   .action((selector, opts) => {
     capture({ sub: 'dom', selector, maxChars: opts.maxChars })
+  })
+
+  program
+  .command('ax [selector]')
+  .description('read the accessibility tree of the app-under-test frame, or the subtree at a selector')
+  .option('--max-nodes <max-nodes>', 'cap on the number of accessibility nodes returned (default 200)')
+  .action((selector, opts) => {
+    capture({ sub: 'ax', selector, maxNodes: opts.maxNodes })
   })
 
   return program
@@ -91,8 +101,9 @@ export const runFrame = async (operands: string[], options: FrameOptions, wantsH
       const frame = await resolveAutFrame(session.client, session.sessionId)
 
       try {
-        // parsed.sub is 'dom' today; the switch grows with `ax` and `inspect`.
-        const result = await extractDom(session, frame, parsed!.selector, parseMaxChars(parsed!.maxChars))
+        const result = parsed!.sub === 'ax'
+          ? await extractAx(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxNodes, DEFAULT_MAX_NODES, 'max-nodes'))
+          : await extractDom(session, frame, parsed!.selector, parsePositiveInt(parsed!.maxChars, DEFAULT_MAX_CHARS, 'max-chars'))
 
         renderResult(result)
 

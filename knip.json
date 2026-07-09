@@ -779,6 +779,9 @@
       "exports",
       "types"
     ],
+    "cli/lib/tap/frame/ax.ts": [
+      "types"
+    ],
     "cli/lib/tap/frame/dom.ts": [
       "types"
     ],
