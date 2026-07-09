@@ -1,5 +1,7 @@
 import path from 'path'
 
+export * from './tap-contract'
+
 export const SCHEMA_VERSION = 1
 
 export const MIN_SCHEMA_VERSION = 1

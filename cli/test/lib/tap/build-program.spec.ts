@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import commander from 'commander'
 
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import type { TapSchema } from '../../../lib/tap/contract'
+import type { TapSchema } from '@packages/cypress-instances'
 
 const schema: TapSchema = {
-  protocolVersion: 1,
+  schemaVersion: 1,
   cypressVersion: '15.0.0',
   commands: [
     {
@@ -269,7 +269,7 @@ describe('lib/tap/build-program', () => {
 
   it('declares a required value option with requiredOption so commander enforces it', () => {
     const program = buildTapProgram({
-      protocolVersion: 1,
+      schemaVersion: 1,
       cypressVersion: '15.0.0',
       commands: [{
         name: 'login',

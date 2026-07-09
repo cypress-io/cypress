@@ -3,7 +3,7 @@ import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
 import type { ReadyInstanceState } from '../cypress-instances'
-import { TAP_BINDING_GLOBAL } from './contract'
+import { TAP_BINDING_GLOBAL } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -24,7 +24,7 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
   return err instanceof Error && messages.some((message) => err.message.includes(message))
 }
 
-const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
+export const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
   const err: any = new Error(message, cause === undefined ? undefined : { cause })
 
   err.details = details

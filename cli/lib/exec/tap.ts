@@ -1,0 +1,166 @@
+import Debug from 'debug'
+import commander from 'commander'
+
+import { CypressInstanceError, listLiveInstances, resolveInstance } from '../cypress-instances'
+import { withTapSession, throwTapError } from '../tap/tap-session'
+import type { TapSession } from '../tap/tap-session'
+import { buildTapProgram } from '../tap/build-program'
+import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
+import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
+import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
+import { errors } from '../errors'
+
+const debug = Debug('cypress:cli:tap')
+
+interface TapCliOptions {
+  instance?: number
+}
+
+const validateSchema = (value: unknown): TapSchema => {
+  const schema = value as TapSchema | null | undefined
+
+  if (!schema || typeof schema !== 'object' || typeof schema.schemaVersion !== 'number' || !Array.isArray(schema.commands)) {
+    return throwTapError(errors.tapInvalidSchema, `${TAP_SCHEMA_METHOD} returned an unrecognizable schema.`)
+  }
+
+  if (schema.schemaVersion > TAP_SCHEMA_VERSION) {
+    return throwTapError(errors.tapUnsupportedProtocol, `schema version v${schema.schemaVersion} is newer than the CLI's v${TAP_SCHEMA_VERSION}.`)
+  }
+
+  if (schema.schemaVersion < TAP_SCHEMA_VERSION) {
+    return throwTapError(errors.tapOutdatedProtocol, `schema version v${schema.schemaVersion} is older than the CLI's v${TAP_SCHEMA_VERSION}.`)
+  }
+
+  return schema
+}
+
+const isFailureError = (error: unknown): error is { code: string, message: string } => {
+  return !!error && typeof error === 'object' && typeof (error as any).code === 'string' && typeof (error as any).message === 'string'
+}
+
+const validateExecResult = (value: unknown): TapExecResult => {
+  const outcome = value as TapExecResult | null | undefined
+  const fail = () => throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
+
+  if (!outcome || typeof outcome !== 'object') return fail()
+
+  // execCommand dispatches on `'error' in outcome`, so a failure envelope must carry a
+  // well-formed error object — otherwise renderFailure would read code/message off garbage.
+  if ('error' in outcome) return isFailureError(outcome.error) ? outcome : fail()
+
+  if ('result' in outcome) return outcome
+
+  return fail()
+}
+
+const isHelpFlag = (arg: string): boolean => arg === '--help' || arg === '-h'
+
+interface CommandInfo {
+  wantsHelp: boolean
+  positionals: string[]
+  command: string | undefined
+}
+
+const buildCommandInfo = (operands: string[]): CommandInfo => {
+  const wantsHelp = operands.some(isHelpFlag)
+  const positionals = operands.filter((arg) => !isHelpFlag(arg))
+  const command = positionals[0]
+
+  return { wantsHelp, positionals, command }
+}
+
+const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>): Promise<number> => {
+  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
+
+  if ('error' in outcome) {
+    renderFailure(outcome.error)
+
+    return 1
+  }
+
+  renderResult(outcome.result)
+
+  return 0
+}
+
+const listInstances = async (options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
+  if (wantsHelp) {
+    renderInstancesHelp()
+
+    return 0
+  }
+
+  const instances = await listLiveInstances({ instance: options.instance })
+
+  renderResult(instances.map((instance) => ({
+    pid: instance.pid,
+    projectRoot: instance.projectRoot,
+    serverPort: instance.serverPort,
+    browserAttached: instance.cdpBrowserWsUrl !== null,
+  })))
+
+  return 0
+}
+
+const tapModule = {
+  async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
+    debug('tap invocation %o with options %o', operands, options)
+
+    const { wantsHelp, positionals, command } = buildCommandInfo(operands)
+
+    if (command === 'instances') {
+      return listInstances(options, wantsHelp)
+    }
+
+    try {
+      const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+
+      return await withTapSession(selection.instance, async (session) => {
+        const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
+
+        let dispatchCode = 0
+        const program = buildTapProgram(schema, async (name, args, options) => {
+          dispatchCode = await execCommand(session, name, args, options)
+        })
+
+        if (wantsHelp || !command) {
+          return renderSchemaHelp(program, schema, selection, command, wantsHelp)
+        }
+
+        try {
+          await program.parseAsync(positionals, { from: 'user' })
+        } catch (err: any) {
+          if (err instanceof commander.CommanderError) {
+            return 1
+          }
+
+          throw err
+        }
+
+        return dispatchCode
+      })
+    } catch (err: any) {
+      if (err instanceof CypressInstanceError) {
+        if ((wantsHelp || !command) && err.code === 'NO_INSTANCE') {
+          return renderGenericHelp(wantsHelp)
+        }
+
+        debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
+        renderFailure(err)
+
+        return 1
+      }
+
+      if (err.known && err.details) {
+        debug('tap %s failed: %s', command || '(help)', err.message)
+        renderKnownFailure(err)
+
+        return 1
+      }
+
+      throw err
+    }
+  },
+}
+
+export default tapModule

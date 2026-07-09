@@ -8,6 +8,7 @@ import logger from '../../lib/logger'
 import info from '../../lib/exec/info'
 import run from '../../lib/exec/run'
 import open from '../../lib/exec/open'
+import tap from '../../lib/exec/tap'
 import cache from '../../lib/tasks/cache'
 import state from '../../lib/tasks/state'
 import { start as verifyStart } from '../../lib/tasks/verify'
@@ -66,6 +67,18 @@ vi.mock('../../lib/exec/open', async (importActual) => {
 })
 
 vi.mock('../../lib/exec/info', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/exec/tap', async (importActual) => {
   const actual = await importActual()
 
   return {
@@ -802,6 +815,80 @@ describe('cli', () => {
       vi.mocked(cache.list).mockRejectedValue(err)
 
       await exec('cache list')
+
+      await flushPromises()
+
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
+    })
+  })
+
+  describe('cypress tap', () => {
+    beforeEach(() => {
+      vi.mocked(tap.start).mockResolvedValue(0)
+    })
+
+    it('forwards the operands and exits with tap.start’s code', async () => {
+      vi.mocked(tap.start).mockResolvedValue(1)
+
+      await exec('tap health')
+
+      await flushPromises()
+
+      expect(tap.start).toBeCalledWith(['health'], {})
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('forwards positional arguments after the sub-command', async () => {
+      await exec('tap run cypress/e2e/spec.cy.js')
+
+      await flushPromises()
+
+      expect(tap.start).toBeCalledWith(['run', 'cypress/e2e/spec.cy.js'], {})
+    })
+
+    it('forwards no operands for a bare invocation', async () => {
+      vi.mocked(tap.start).mockResolvedValue(1)
+
+      await exec('tap')
+
+      await flushPromises()
+
+      expect(tap.start).toBeCalledWith([], {})
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('forwards --help and -h as operands (resolved against the live schema)', async () => {
+      await exec('tap --help')
+      await exec('tap run -h')
+
+      await flushPromises()
+
+      expect(tap.start).toBeCalledWith(['--help'], {})
+      expect(tap.start).toBeCalledWith(['run', '-h'], {})
+    })
+
+    it('forwards an unknown flag as an operand (allowUnknownOption)', async () => {
+      await exec('tap --frobnicate')
+
+      await flushPromises()
+
+      expect(tap.start).toBeCalledWith(['--frobnicate'], {})
+    })
+
+    it('forwards --instance', async () => {
+      await exec('tap health --instance 123')
+
+      await flushPromises()
+
+      expect(tap.start).toBeCalledWith(['health'], { instance: 123 })
+    })
+
+    it('catches rejection and exits', async () => {
+      const err = new Error('tap health failed badly')
+
+      vi.mocked(tap.start).mockRejectedValue(err)
+
+      await exec('tap health')
 
       await flushPromises()
 

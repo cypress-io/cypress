@@ -24,7 +24,11 @@ describe('lib/tap public error catalog', () => {
         "tapBindingNotFound",
         "tapBindingThrew",
         "tapCdpUnreachable",
+        "tapInvalidExecResult",
+        "tapInvalidSchema",
+        "tapOutdatedProtocol",
         "tapStaleHandle",
+        "tapUnsupportedProtocol",
       ]
     `)
   })
@@ -62,6 +66,38 @@ describe('lib/tap public error catalog', () => {
       "The Cypress instance navigated while running the command.
 
       Try running the command again."
+    `)
+  })
+
+  it('tapInvalidSchema — the instance returned an unrecognizable schema', () => {
+    expect(render(errors.tapInvalidSchema)).toMatchInlineSnapshot(`
+      "The running Cypress returned a tap schema this CLI does not recognize.
+
+      The running version of Cypress may not support cypress tap."
+    `)
+  })
+
+  it('tapUnsupportedProtocol — the instance is newer than this CLI', () => {
+    expect(render(errors.tapUnsupportedProtocol)).toMatchInlineSnapshot(`
+      "The running Cypress is newer than this CLI and uses a tap protocol it does not understand.
+
+      Update the CLI (npm install --save-dev cypress@latest) and try again."
+    `)
+  })
+
+  it('tapOutdatedProtocol — the instance is older than this CLI', () => {
+    expect(render(errors.tapOutdatedProtocol)).toMatchInlineSnapshot(`
+      "The running Cypress is older than this CLI and speaks an earlier tap protocol.
+
+      Update Cypress in the running project to match this CLI (npm install --save-dev cypress@latest), then try again."
+    `)
+  })
+
+  it('tapInvalidExecResult — the instance returned an unrecognizable exec result', () => {
+    expect(render(errors.tapInvalidExecResult)).toMatchInlineSnapshot(`
+      "The running Cypress returned a result this CLI does not recognize.
+
+      The running version of Cypress may not support cypress tap."
     `)
   })
 })

@@ -427,6 +427,26 @@ const tapStaleHandle = {
   solution: 'Try running the command again.',
 }
 
+const tapInvalidSchema = {
+  description: 'The running Cypress returned a tap schema this CLI does not recognize.',
+  solution: `The running version of Cypress may not support ${chalk.cyan('cypress tap')}.`,
+}
+
+const tapUnsupportedProtocol = {
+  description: 'The running Cypress is newer than this CLI and uses a tap protocol it does not understand.',
+  solution: `Update the CLI (${chalk.cyan('npm install --save-dev cypress@latest')}) and try again.`,
+}
+
+const tapOutdatedProtocol = {
+  description: 'The running Cypress is older than this CLI and speaks an earlier tap protocol.',
+  solution: `Update Cypress in the running project to match this CLI (${chalk.cyan('npm install --save-dev cypress@latest')}), then try again.`,
+}
+
+const tapInvalidExecResult = {
+  description: 'The running Cypress returned a result this CLI does not recognize.',
+  solution: `The running version of Cypress may not support ${chalk.cyan('cypress tap')}.`,
+}
+
 export const errors = {
   unknownError,
   nonZeroExitCodeXvfb,
@@ -456,4 +476,8 @@ export const errors = {
   tapBindingNotFound,
   tapBindingThrew,
   tapStaleHandle,
+  tapInvalidSchema,
+  tapUnsupportedProtocol,
+  tapOutdatedProtocol,
+  tapInvalidExecResult,
 }

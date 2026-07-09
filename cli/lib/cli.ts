@@ -126,6 +126,7 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
+  instance: 'target a specific running Cypress instance by its server process id (pid)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
@@ -151,6 +152,7 @@ const knownCommands = [
   'install',
   'open',
   'run',
+  'tap',
   'verify',
   '-v',
   '--version',
@@ -578,6 +580,24 @@ const cliModule = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('tap')
+    .usage('[command] [args...]')
+    .description('Interacts with a running Cypress instance')
+    .helpOption(false)
+    .allowUnknownOption(true)
+    .option('--instance <pid>', text('instance'), coerceAnyStringToInt)
+    .action(async function (this: any, opts: any, args: string[]) {
+      try {
+        const { default: tapModule } = await import('./exec/tap')
+        const code = await tapModule.start(args || [], _.pick(opts, ['instance']))
+
+        process.exit(code)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     maybeAddDevFlag(program
