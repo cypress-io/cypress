@@ -18,8 +18,10 @@ Options:
   --instance <pid>  report the instance with this pid`
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
+  const pinned = runState.pinned ? { pinned: runState.pinned } : {}
+
   if (runState.state === undefined) {
-    return { ...base, status: 'spec not selected', totalSpecs: runState.totalSpecs }
+    return { ...base, status: 'spec not selected', totalSpecs: runState.totalSpecs, ...pinned }
   }
 
   return {
@@ -29,6 +31,7 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
     ...(runState.spec !== null ? { spec: runState.spec } : {}),
     totalTests: runState.totalTests,
     results: runState.results,
+    ...pinned,
   }
 }
 

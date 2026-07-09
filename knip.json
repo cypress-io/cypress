@@ -785,6 +785,9 @@
     "cli/lib/tap/frame/dom.ts": [
       "types"
     ],
+    "cli/lib/tap/frame/inspect.ts": [
+      "types"
+    ],
     "cli/lib/tap/tap-session.ts": [
       "exports",
       "types"

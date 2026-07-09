@@ -16,6 +16,17 @@ export interface TapCliCommand {
 }
 
 /**
+ * A reference to the currently pinned command, so a pin is always visible in
+ * `status` and a stranded one is recoverable.
+ */
+export interface PinnedRef {
+  /** The pinned command's name. */
+  command: string
+  /** Which test the pinned command belongs to. */
+  at: { index: number, name?: string }
+}
+
+/**
  * The `run-state` payload reported by the running Cypress instance's tap
  * binding. Mirrors the app-side result shape, which travels over CDP as
  * untyped JSON.
@@ -31,6 +42,8 @@ export interface TapRunState {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** The currently pinned command, if any. */
+  pinned?: PinnedRef
 }
 
 /**
@@ -59,4 +72,6 @@ export interface TapStatus {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** The currently pinned command, if any. */
+  pinned?: PinnedRef
 }
