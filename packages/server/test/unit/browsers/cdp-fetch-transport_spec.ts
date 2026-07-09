@@ -124,6 +124,25 @@ describe('CdpFetchTransport', () => {
       expect(encoded.url).to.equal('https://example.test/response')
     })
 
+    it('throws when encoding a response before a CDP response pause is decoded', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      codec.decodeRequest(transportRequest)
+
+      expect(() => {
+        codec.encodeResponse({
+          id: 'network-1',
+          url: 'https://example.test/',
+        })
+      }).to.throw('HttpIntercept middleware must call next() before returning a response')
+    })
+
     it('releases CDP request state when the intercept pipeline fails', async () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
@@ -398,6 +417,28 @@ describe('CdpFetchTransport', () => {
 
       httpIntercept.use(async () => {
         throw new Error('middleware failed')
+      })
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    it('continues the request pause when middleware returns a response without calling next', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req) => {
+        return req
       })
 
       await onRequestPaused(createPausedRequest({

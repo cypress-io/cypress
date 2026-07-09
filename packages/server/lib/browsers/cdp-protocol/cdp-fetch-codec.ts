@@ -10,6 +10,26 @@ import type {
 
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
   const inFlightRequests = new Map<string, CdpFetchTransportRequest>()
+  const inFlightResponses = new Map<string, CdpFetchTransportResponse>()
+  const requireRequest = (id: string): CdpFetchTransportRequest => {
+    const request = inFlightRequests.get(id)
+
+    if (!request) {
+      throw new Error(`No in-flight CDP Fetch request found for ${id}`)
+    }
+
+    return request
+  }
+
+  const requireResponse = (id: string): CdpFetchTransportResponse => {
+    const response = inFlightResponses.get(id)
+
+    if (!response) {
+      throw new Error(`No CDP Fetch response pause found for ${id}. HttpIntercept middleware must call next() before returning a response.`)
+    }
+
+    return response
+  }
 
   return {
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
@@ -22,7 +42,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     },
 
     encodeRequest (httpRequest: HttpRequest): CdpFetchTransportRequest {
-      const transportRequest = inFlightRequests.get(httpRequest.id)!
+      const transportRequest = requireRequest(httpRequest.id)
 
       transportRequest.url = httpRequest.url
 
@@ -30,7 +50,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     },
 
     decodeResponse (transportResponse: CdpFetchTransportResponse): HttpResponse {
-      inFlightRequests.set(transportResponse.id, transportResponse)
+      inFlightResponses.set(transportResponse.id, transportResponse)
 
       return {
         id: transportResponse.id,
@@ -39,16 +59,17 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
-      const transportResponse = inFlightRequests.get(httpResponse.id)! as CdpFetchTransportResponse
+      const transportResponse = requireResponse(httpResponse.id)
 
       transportResponse.url = httpResponse.url
-      inFlightRequests.delete(httpResponse.id)
+      inFlightResponses.delete(httpResponse.id)
 
       return transportResponse
     },
 
     releaseRequest (id: string): void {
       inFlightRequests.delete(id)
+      inFlightResponses.delete(id)
     },
   }
 }
