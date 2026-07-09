@@ -434,6 +434,55 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('sends method and header overrides when middleware mutates the neutral request', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const request = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'https://example.test/',
+      })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.method = 'GET'
+      request.request.headers = {
+        'x-original': '1',
+      }
+
+      httpIntercept.use((req, next) => {
+        return next({
+          ...req,
+          method: 'POST',
+          headers: {
+            'x-original': '1',
+            'x-mutated': '2',
+          },
+        })
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        method: 'POST',
+        headers: [{
+          name: 'x-original',
+          value: '1',
+        }, {
+          name: 'x-mutated',
+          value: '2',
+        }],
+      })
+
+      await onRequestPaused(response)
+
+      await handled
+    })
+
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 

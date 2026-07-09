@@ -13,6 +13,40 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 
+function toContinueRequestHeaders (headers: Record<string, string> = {}): Protocol.Fetch.HeaderEntry[] {
+  return Object.entries(headers).map(([name, value]) => ({ name, value }))
+}
+
+function requestHeadersChanged (
+  original: Record<string, string> = {},
+  updated: Record<string, string> = {},
+): boolean {
+  const originalKeys = Object.keys(original)
+  const updatedKeys = Object.keys(updated)
+
+  if (originalKeys.length !== updatedKeys.length) {
+    return true
+  }
+
+  return originalKeys.some((key) => original[key] !== updated[key])
+}
+
+function buildContinueRequestDetails (
+  event: Protocol.Fetch.RequestPausedEvent,
+  outbound: CdpFetchTransportRequest,
+): Protocol.Fetch.ContinueRequestRequest {
+  return {
+    requestId: event.requestId,
+    ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
+    ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
+    ...(requestHeadersChanged(event.request.headers, outbound.headers) ? {
+      headers: toContinueRequestHeaders(outbound.headers),
+    } : {}),
+    ...(typeof outbound.postData !== 'undefined' ? { postData: outbound.postData } : {}),
+    ...(outbound.postDataIsBase64 ? { postDataIsBase64: true } : {}),
+  }
+}
+
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
   requestId?: string
@@ -125,12 +159,7 @@ export class CdpFetchTransport {
       this.inFlightRequests.set(networkId, deferred)
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
-        await this.client.send('Fetch.continueRequest', {
-          requestId: event.requestId,
-          ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
-          ...(typeof outbound.postData !== 'undefined' ? { postData: outbound.postData } : {}),
-          ...(outbound.postDataIsBase64 ? { postDataIsBase64: true } : {}),
-        }, outbound.sessionId)
+        await this.client.send('Fetch.continueRequest', buildContinueRequestDetails(event, outbound), outbound.sessionId)
 
         requestContinued = true
 
