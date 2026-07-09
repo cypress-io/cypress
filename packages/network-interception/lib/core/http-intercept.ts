@@ -32,7 +32,7 @@ export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TReq
 
     const forward = this.middlewares.reduceRight<Forward>(
       (inner, middleware) => {
-        return (nextRequest) => middleware(nextRequest, inner)
+        return (nextRequest) => middleware(nextRequest, inner, terminal)
       },
       terminal,
     )

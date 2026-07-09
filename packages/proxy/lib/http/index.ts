@@ -5,9 +5,11 @@ import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import { telemetry, Span } from '@packages/telemetry'
+import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
+import { createFetchOrigin, proxyHttpCodec, resolveProxyResponseBodyStream } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -22,7 +24,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { ForNetworkInterception, NetworkInterceptionCore } from '@packages/network-interception'
+import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -350,6 +352,104 @@ export class Http {
     }
   }
 
+  private buildOnError (ctx: HttpMiddlewareCtx<any>) {
+    const onError = async (error: Error): Promise<void> => {
+      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
+
+      if (pendingRequest) {
+        delete ctx.pendingRequest
+        ctx.removePendingRequest(pendingRequest)
+      }
+
+      ctx.error = error
+
+      // if there is a pre-request and the error has not been handled and the response has not been destroyed
+      // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
+      //
+      // browsers will retry requests in the event of network errors, but they will not send pre-requests,
+      // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
+      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
+        ctx.req.browserPreRequest.errorHandled = true
+        const preRequest = {
+          ...ctx.req.browserPreRequest,
+          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+          errorHandled: false,
+        }
+
+        ctx.debug('Re-using pre-request data %o', preRequest)
+        await this.addPendingBrowserPreRequest(preRequest)
+      }
+
+      return _runStage(HttpStages.Error, ctx, onError)
+    }
+
+    return onError
+  }
+
+  runLegacyProxyPipeline: InterceptMiddleware = async (request, next): Promise<HttpResponse> => {
+    const ctx = proxyHttpCodec.getRequest(request.id)
+
+    ctx.req.proxiedUrl = request.url
+
+    const onError = this.buildOnError(ctx)
+
+    await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+    // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+    // In this case we don't want to run the response middleware and should just exit.
+    if (ctx.res.destroyed) {
+      await onError(createBrowserConnectionClosedError())
+
+      return proxyHttpCodec.decodeResponse(ctx)
+    }
+
+    if (!ctx.incomingRes) {
+      const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
+
+      try {
+        request.url = ctx.req.proxiedUrl
+        const response = await next(request)
+
+        span?.end()
+
+        ctx.req.proxiedUrl = response.url
+        ctx.req.onInterceptResponseWritten = ctx.onResponseWrittenToClient
+
+        if (ctx.req.hadIntercept) {
+          setDefaultHeaders(ctx.req, ctx.httpInterceptIncomingRes!)
+        }
+
+        ctx.incomingRes = ctx.httpInterceptIncomingRes
+        ctx.incomingResStream = await resolveProxyResponseBodyStream(ctx)
+      } catch (err) {
+        span?.end()
+        await onError(err as Error)
+
+        return proxyHttpCodec.decodeResponse(ctx)
+      }
+    }
+
+    if (ctx.incomingRes) {
+      // start the span that is responsible for recording the start time of the entire middleware run on the stack
+      ctx.resMiddlewareSpan = telemetry.startSpan({
+        name: 'response:middleware',
+        parentSpan: ctx.handleHttpRequestSpan,
+        isVerbose,
+      })
+
+      await _runStage(HttpStages.IncomingResponse, ctx, onError)
+      .finally(() => {
+        ctx.resMiddlewareSpan?.end()
+      })
+
+      return proxyHttpCodec.decodeResponse(ctx)
+    }
+
+    ctx.debug('Warning: Request was not fulfilled with a response.')
+
+    return proxyHttpCodec.decodeResponse(ctx)
+  }
+
   handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
@@ -413,35 +513,7 @@ export class Http {
       getCurrentBrowser: this.getCurrentBrowser,
     }
 
-    const onError = async (error: Error): Promise<void> => {
-      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
-
-      if (pendingRequest) {
-        delete ctx.pendingRequest
-        ctx.removePendingRequest(pendingRequest)
-      }
-
-      ctx.error = error
-
-      // if there is a pre-request and the error has not been handled and the response has not been destroyed
-      // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
-      //
-      // browsers will retry requests in the event of network errors, but they will not send pre-requests,
-      // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
-      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
-        ctx.req.browserPreRequest.errorHandled = true
-        const preRequest = {
-          ...ctx.req.browserPreRequest,
-          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
-          errorHandled: false,
-        }
-
-        ctx.debug('Re-using pre-request data %o', preRequest)
-        await this.addPendingBrowserPreRequest(preRequest)
-      }
-
-      return _runStage(HttpStages.Error, ctx, onError)
-    }
+    const onError = this.buildOnError(ctx)
 
     // start the span that is responsible for recording the start time of the entire middleware run on the stack
     // make this span a part of the middleware ctx so we can keep names simple when correlating
@@ -451,30 +523,12 @@ export class Http {
       isVerbose,
     })
 
-    return _runStage(HttpStages.IncomingRequest, ctx, onError)
-    .then(() => {
-      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-      // In this case we don't want to run the response middleware and should just exit.
-      if (res.destroyed) {
-        return onError(createBrowserConnectionClosedError())
-      }
+    if (!this.networkInterception) {
+      return onError(new Error('Network interception is not configured for the proxy runtime.'))
+    }
 
-      if (ctx.incomingRes) {
-        // start the span that is responsible for recording the start time of the entire middleware run on the stack
-        ctx.resMiddlewareSpan = telemetry.startSpan({
-          name: 'response:middleware',
-          parentSpan: handleHttpRequestSpan,
-          isVerbose,
-        })
-
-        return _runStage(HttpStages.IncomingResponse, ctx, onError)
-        .finally(() => {
-          ctx.resMiddlewareSpan?.end()
-        })
-      }
-
-      return ctx.debug('Warning: Request was not fulfilled with a response.')
-    })
+    return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
+    .catch(onError)
   }
 
   getRenderedHTMLOrigins = () => {

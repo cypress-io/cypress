@@ -18,6 +18,12 @@ function createCtx () {
   return {
     req: {
       proxiedUrl: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    },
+    res: {
+      writeHead () {},
+      end () {},
     },
   } as any
 }
@@ -28,6 +34,8 @@ describe('proxyHttpCodec', () => {
     const request = proxyHttpCodec.decodeRequest(ctx)
 
     expect(request.url).to.equal('https://example.test/')
+    expect(request.method).to.equal('GET')
+    expect(request.headers).to.deep.equal({})
     expect(request.id).to.be.a('string')
     expect(ctx.id).to.equal(request.id)
   })
@@ -40,6 +48,13 @@ describe('proxyHttpCodec', () => {
     proxyHttpCodec.encodeRequest(request)
 
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/mutated')
+  })
+
+  it('recovers the in-flight proxy ctx by request id', () => {
+    const ctx = createCtx()
+    const request = proxyHttpCodec.decodeRequest(ctx)
+
+    expect(proxyHttpCodec.getRequest(request.id)).to.equal(ctx)
   })
 
   it('round-trips request mutations through decode and encode', () => {
@@ -80,6 +95,32 @@ describe('proxyHttpCodec', () => {
 
     expect(encoded).to.equal(ctx)
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/encoded')
+  })
+
+  it('writes fulfilled neutral responses directly to the browser response', () => {
+    const ctx = createCtx()
+    const request = proxyHttpCodec.decodeRequest(ctx)
+    const writes: any[] = []
+
+    ctx.res.writeHead = (...args) => writes.push(['writeHead', ...args])
+    ctx.res.end = (...args) => writes.push(['end', ...args])
+
+    const encoded = proxyHttpCodec.encodeResponse({
+      id: request.id,
+      url: 'https://example.test/fulfilled',
+      statusCode: 201,
+      headers: {
+        'content-type': 'text/plain',
+        'x-empty': undefined,
+      },
+      body: 'created',
+    })
+
+    expect(encoded).to.equal(ctx)
+    expect(writes).to.deep.equal([
+      ['writeHead', 201, { 'content-type': 'text/plain' }],
+      ['end', 'created'],
+    ])
   })
 
   it('throws a descriptive error when middleware returns without forwarding', () => {

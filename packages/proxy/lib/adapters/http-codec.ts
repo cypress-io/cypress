@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import type { IncomingMessage } from 'http'
-import type { HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
+import type { HttpHeaders, HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
 import { getBodyStream } from '@packages/net-stubbing/lib/server/util'
 import type { Readable } from 'stream'
 import { sendRequestOutgoing } from '../http/send-request-outgoing'
@@ -8,12 +8,24 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
 
 type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
   id?: string
+  incomingRes?: IncomingMessage
+  incomingResStream?: Readable
   httpInterceptIncomingRes?: IncomingMessage
   originBodyStream?: Readable
   httpInterceptStubBody?: string | Buffer
   httpInterceptDelay?: number
   httpInterceptThrottleKbps?: number
   onResponseWrittenToClient?: () => Promise<void>
+}
+
+function cleanHeaders (headers: HttpHeaders = {}): Record<string, string | string[]> {
+  return Object.entries(headers).reduce<Record<string, string | string[]>>((memo, [key, value]) => {
+    if (typeof value !== 'undefined') {
+      memo[key] = value
+    }
+
+    return memo
+  }, {})
 }
 
 function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
@@ -38,6 +50,9 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       return {
         id,
         url: ctx.req.proxiedUrl,
+        method: ctx.req.method,
+        headers: ctx.req.headers,
+        body: ctx.req.body,
       }
     },
 
@@ -45,14 +60,23 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       const ctx = requireCtx(request.id)
 
       ctx.req.proxiedUrl = request.url
+      ctx.req.method = request.method ?? ctx.req.method
+      ctx.req.headers = request.headers ?? ctx.req.headers
+      ctx.req.body = request.body ?? ctx.req.body
 
       return ctx
+    },
+
+    getRequest (id: string): HttpInterceptCtx {
+      return inFlightRequests.get(id)!
     },
 
     decodeResponse (ctx: HttpInterceptCtx): HttpResponse {
       return {
         id: ctx.id!,
         url: ctx.req.proxiedUrl,
+        statusCode: ctx.httpInterceptIncomingRes?.statusCode,
+        headers: ctx.httpInterceptIncomingRes?.headers,
       }
     },
 
@@ -60,6 +84,12 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       const ctx = requireCtx(response.id)
 
       ctx.req.proxiedUrl = response.url
+
+      if (response.statusCode) {
+        ctx.res.writeHead(response.statusCode, cleanHeaders(response.headers))
+        ctx.res.end(response.body)
+      }
+
       inFlightRequests.delete(response.id)
 
       return ctx

@@ -1,7 +1,7 @@
 import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
-import type { ForNetworkInterception } from '@packages/network-interception'
+import type { ForHttpIntercept } from '@packages/network-interception'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
@@ -20,8 +20,9 @@ export class NetworkProxy {
   }
 
   withIntercept (
-    networkInterception: ForNetworkInterception<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
+    networkInterception: ForHttpIntercept<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
   ) {
+    networkInterception.use(this.http.runLegacyProxyPipeline)
     this.http.networkInterception = networkInterception
 
     return this

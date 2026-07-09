@@ -16,6 +16,7 @@ import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -37,7 +38,9 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 }
 
 export type CreateCdpFetchRuntimeDeps = {
+  config: CyServer.Config & Cypress.Config
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
+  request: ServerRequest
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -81,6 +84,11 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   })
   const networkInterception = new HttpIntercept(networkProxy.codec)
 
+  networkInterception.use(createServeInternalRoutesMiddleware({
+    config: deps.config,
+    request: deps.request,
+  }))
+
   networkProxy.withIntercept(networkInterception)
 
   return {
@@ -120,6 +128,12 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     policyRegistration: networkPolicyRegistration,
   })
   const networkInterception = new HttpIntercept(createCdpFetchCodec())
+
+  networkInterception.use(createServeInternalRoutesMiddleware({
+    config: deps.config,
+    request: deps.request,
+  }))
+
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception)
 
   return {

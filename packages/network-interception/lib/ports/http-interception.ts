@@ -1,13 +1,21 @@
-export type HttpHeaders = Record<string, string | string[]>
+export type HttpHeaders = Record<string, string | string[] | undefined>
+
+export type HttpBody = string | Buffer
 
 export type HttpRequest = {
   id: string
   url: string
+  method?: string
+  headers?: HttpHeaders
+  body?: HttpBody
 }
 
 export type HttpResponse = {
   id: string
   url: string
+  statusCode?: number
+  headers?: HttpHeaders
+  body?: HttpBody
 }
 
 export interface TransportCodecPort<TRequest, TResponse> {
@@ -15,12 +23,14 @@ export interface TransportCodecPort<TRequest, TResponse> {
   decodeRequest (request: TRequest): HttpRequest
   encodeResponse (response: HttpResponse): TResponse
   decodeResponse (response: TResponse): HttpResponse
+  getRequest (id: string): TRequest
   releaseRequest? (id: string): void
 }
 
 export type InterceptMiddleware = (
   request: HttpRequest,
   next: (request: HttpRequest) => Promise<HttpResponse>,
+  terminal: (request: HttpRequest) => Promise<HttpResponse>,
 ) => Promise<HttpResponse>
 
 export type TransportNext<TRequest, TResponse> = (

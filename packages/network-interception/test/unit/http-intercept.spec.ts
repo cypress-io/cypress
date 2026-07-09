@@ -34,6 +34,10 @@ function createCodec (): TransportCodecPort<TransportRequest, TransportResponse>
       return transportRequest
     },
 
+    getRequest (id) {
+      return inFlightRequests.get(id)!
+    },
+
     decodeResponse (response) {
       inFlightResponses.set(response.id, response)
 
@@ -173,6 +177,45 @@ describe('HttpIntercept', () => {
       id: 'req-1',
       href: 'https://example.test/mutated-response',
     })
+  })
+
+  it('passes the terminal forwarder to middleware so it can skip later layers', async () => {
+    const http = new HttpIntercept(createCodec())
+    const calls: string[] = []
+
+    http.use(async (request, _next, terminal) => {
+      calls.push('first')
+      request.url = 'https://example.test/terminal'
+
+      return terminal(request)
+    })
+
+    http.use(async (request, next) => {
+      calls.push('second')
+
+      return next(request)
+    })
+
+    const request: TransportRequest = {
+      id: 'req-1',
+      href: 'https://example.test/',
+    }
+
+    const response = await http.handle(request, async (nextRequest) => {
+      calls.push('origin')
+
+      return {
+        id: nextRequest.id,
+        href: nextRequest.href,
+      }
+    })
+
+    expect(calls).to.deep.equal([
+      'first',
+      'origin',
+    ])
+
+    expect(response.href).to.equal('https://example.test/terminal')
   })
 
   it('passes the transport returned from encodeRequest to next()', async () => {

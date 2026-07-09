@@ -68,6 +68,9 @@ describe('CdpFetchTransport', () => {
       expect(request).to.deep.equal({
         id: 'network-1',
         url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        body: undefined,
       })
     })
 
@@ -114,6 +117,8 @@ describe('CdpFetchTransport', () => {
       expect(response).to.deep.equal({
         id: 'network-1',
         url: 'https://example.test/',
+        statusCode: 200,
+        headers: undefined,
       })
 
       const encoded = codec.encodeResponse({
@@ -122,6 +127,36 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(encoded.url).to.equal('https://example.test/response')
+    })
+
+    it('encodes fulfilled neutral responses onto the CDP transport context', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        requestId: 'fetch-request',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      codec.decodeRequest(transportRequest)
+
+      const encoded = codec.encodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        statusCode: 201,
+        headers: {
+          'content-type': 'text/plain',
+        },
+        body: 'created',
+      })
+
+      expect(encoded.responseCode).to.equal(201)
+      expect(encoded.responseHeaders).to.deep.equal([
+        { name: 'content-type', value: 'text/plain' },
+      ])
+
+      expect(encoded.responseBody).to.equal(Buffer.from('created').toString('base64'))
     })
 
     it('releases CDP request state when the intercept pipeline fails', async () => {
@@ -168,6 +203,39 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-response',
         responseCode: 200,
       })
+    })
+
+    it('fulfills the request when middleware returns a synthetic response', async () => {
+      const client = createClient()
+      const http = new HttpIntercept(createCdpFetchCodec())
+
+      http.use(async (request) => {
+        return {
+          id: request.id,
+          url: request.url,
+          statusCode: 202,
+          headers: {
+            'content-type': 'text/plain',
+          },
+          body: 'accepted',
+        }
+      })
+
+      const transport = new CdpFetchTransport(client as any, http)
+      const onRequestPaused = await startTransport(transport, client)
+
+      await onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 202,
+        responseHeaders: [
+          { name: 'content-type', value: 'text/plain' },
+        ],
+        body: Buffer.from('accepted').toString('base64'),
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest')
     })
 
     it('matches request and response pauses by network id', async () => {

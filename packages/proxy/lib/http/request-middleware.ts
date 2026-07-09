@@ -6,8 +6,6 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
-import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
-import { createFetchOrigin, resolveProxyResponseBodyStream } from '../adapters/http-codec'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -56,7 +54,6 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
     this.onlyRunMiddleware([
       'MaybeSetBasicAuthHeaders',
-      'ApplyHttpInterception',
     ])
   }
 
@@ -275,40 +272,6 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   this.next()
 }
 
-const ApplyHttpInterception: RequestMiddleware = async function () {
-  const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
-
-  if (!this.networkInterception) {
-    span?.end()
-
-    return this.onError(new Error('Network interception is not configured for the proxy runtime.'))
-  }
-
-  try {
-    const ctx = await this.networkInterception.handle(this, createFetchOrigin(this))
-
-    span?.end()
-
-    this.req.onInterceptResponseWritten = ctx.onResponseWrittenToClient
-
-    if (this.req.hadIntercept) {
-      setDefaultHeaders(this.req, ctx.httpInterceptIncomingRes!)
-    }
-
-    const bodyStream = await resolveProxyResponseBodyStream(ctx)
-
-    return this.onResponse(ctx.httpInterceptIncomingRes!, bodyStream)
-  } catch (err) {
-    span?.end()
-
-    return this.onError(err as Error)
-  }
-}
-
-const SendRequestOutgoing: RequestMiddleware = function () {
-  this.networkInterceptionCore.forwardToOrigin(this)
-}
-
 export default {
   LogRequest,
   ExtractCypressMetadataHeaders,
@@ -325,6 +288,4 @@ export default {
   EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,
-  ApplyHttpInterception,
-  SendRequestOutgoing,
 }

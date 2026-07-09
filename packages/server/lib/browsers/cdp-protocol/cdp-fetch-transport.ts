@@ -15,6 +15,7 @@ const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
+  requestId?: string
   sessionId?: string
 }
 
@@ -22,6 +23,7 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
+  responseBody?: string
 }
 
 export class CdpFetchTransport {
@@ -111,6 +113,7 @@ export class CdpFetchTransport {
       const request: CdpFetchTransportRequest = {
         ...event.request,
         id: networkId,
+        requestId: event.requestId,
         sessionId,
       }
       const responseDeferred = pDefer<CdpFetchTransportResponse>()
@@ -144,6 +147,19 @@ export class CdpFetchTransport {
           }
         }
       })
+
+      if (response.responseBody || !requestContinued) {
+        await this.client.send('Fetch.fulfillRequest', {
+          requestId: response.requestId,
+          responseCode: response.responseCode,
+          ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
+          ...(response.responseBody ? { body: response.responseBody } : {}),
+        }, response.sessionId)
+
+        this.cleanup(networkId, deferred)
+
+        return
+      }
 
       await this.client.send('Fetch.continueResponse', {
         requestId: response.requestId,
