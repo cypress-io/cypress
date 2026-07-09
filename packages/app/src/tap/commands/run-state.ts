@@ -1,6 +1,7 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { getPinnedRef } from './pin'
+import { getPinnedRef, reconcilePin } from './pin'
+import type { PinReconcileRunner } from './pin'
 import { aggregateResults } from './test-state'
 import type { RunResults } from './test-state'
 
@@ -21,13 +22,19 @@ export const runStateCommand = defineCommand({
   params: [],
   handler: async (): Promise<RunStateResult> => {
     const totalSpecs = tapManagerDataSource.getRunnableSpecs().length
-    const pinned = getPinnedRef()
     const runner = tapManagerDataSource.getRunner()
 
     if (!runner) {
+      const pinned = getPinnedRef()
+
       return { spec: null, totalSpecs, ...(pinned ? { pinned } : {}) }
     }
 
+    // Release a stale pin (from a previous run) so status never reports one that
+    // no longer exists. The runner is the driver's, which has this method.
+    reconcilePin(runner as unknown as PinReconcileRunner)
+
+    const pinned = getPinnedRef()
     const { results, totalTests } = aggregateResults(runner)
     const state = !runner.isRunComplete() ? 'running' : results.failed > 0 ? 'failed' : 'passed'
 
