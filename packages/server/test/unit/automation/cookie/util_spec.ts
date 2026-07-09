@@ -1,8 +1,8 @@
-const { expect } = require('../../spec_helper')
+const { expect } = require('../../../spec_helper')
 
-import { cookieMatches, CyCookie } from '../../../lib/automation/util'
+import { cookieMatches, CyCookie } from '../../../../lib/automation/cookie/util'
 
-context('lib/automation/util', () => {
+context('lib/automation/cookie/util', () => {
   context('.cookieMatches', () => {
     it('matches same apex domain', () => {
       const cookie = { domain: 'example.com' } as CyCookie

@@ -1,6 +1,6 @@
 import { oneLine } from 'common-tags'
 import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } from '@packages/resolve-dist'
-import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import Debug from 'debug'
 
 const debug = Debug('cypress:proxy:http:inject')
