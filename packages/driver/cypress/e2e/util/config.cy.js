@@ -240,8 +240,8 @@ describe('driver/src/cypress/validate_config', () => {
       })
 
       expect(() => {
-        validateConfig(state, { viewportHeight: '300' })
-      }).to.throw(`Expected \`viewportHeight\` to be a number.\n\nInstead the value was: \`"300"\``)
+        validateConfig(state, { defaultCommandTimeout: '300' })
+      }).to.throw(`Expected \`defaultCommandTimeout\` to be a number.\n\nInstead the value was: \`"300"\``)
     })
   })
 })
