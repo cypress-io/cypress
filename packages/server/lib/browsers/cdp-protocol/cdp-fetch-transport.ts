@@ -15,10 +15,13 @@ const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
+  requestId?: string
   sessionId?: string
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
+  body?: string
+  fulfilled?: boolean
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
@@ -111,6 +114,7 @@ export class CdpFetchTransport {
       const request: CdpFetchTransportRequest = {
         ...event.request,
         id: networkId,
+        requestId: event.requestId,
         sessionId,
       }
       const responseDeferred = pDefer<CdpFetchTransportResponse>()
@@ -145,11 +149,20 @@ export class CdpFetchTransport {
         }
       })
 
-      await this.client.send('Fetch.continueResponse', {
-        requestId: response.requestId,
-        responseCode: response.responseCode,
-        ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
-      }, response.sessionId)
+      if (response.fulfilled) {
+        await this.client.send('Fetch.fulfillRequest', {
+          requestId: response.requestId,
+          responseCode: response.responseCode,
+          ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
+          ...(response.body !== undefined ? { body: response.body } : {}),
+        }, response.sessionId)
+      } else {
+        await this.client.send('Fetch.continueResponse', {
+          requestId: response.requestId,
+          responseCode: response.responseCode,
+          ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
+        }, response.sessionId)
+      }
 
       this.cleanup(networkId, deferred)
     } catch (err) {

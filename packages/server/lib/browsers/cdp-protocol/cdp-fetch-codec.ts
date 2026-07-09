@@ -1,4 +1,5 @@
 import type {
+  HttpHeaders,
   HttpRequest,
   HttpResponse,
   TransportCodecPort,
@@ -7,6 +8,35 @@ import type {
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
 } from './cdp-fetch-transport'
+
+type CdpFetchHttpResponse = HttpResponse & {
+  body?: string | Buffer
+  headers?: HttpHeaders
+  statusCode?: number
+}
+
+function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['responseHeaders'] {
+  if (!headers) {
+    return undefined
+  }
+
+  return Object.entries(headers).flatMap(([name, value]) => {
+    return ([] as string[]).concat(value).map((headerValue) => {
+      return {
+        name,
+        value: headerValue,
+      }
+    })
+  })
+}
+
+function toResponseBody (body?: string | Buffer): string | undefined {
+  if (body === undefined) {
+    return undefined
+  }
+
+  return Buffer.from(body).toString('base64')
+}
 
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
   const inFlightRequests = new Map<string, CdpFetchTransportRequest>()
@@ -19,6 +49,16 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     }
 
     return request
+  }
+
+  const requireRequestPause = (id: string): CdpFetchTransportRequest & { requestId: string } => {
+    const request = requireRequest(id)
+
+    if (!request.requestId) {
+      throw new Error(`No CDP Fetch request pause found for ${id}. Stubbed responses require the original request pause id.`)
+    }
+
+    return request as CdpFetchTransportRequest & { requestId: string }
   }
 
   const requireResponse = (id: string): CdpFetchTransportResponse => {
@@ -59,7 +99,14 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
-      const transportResponse = requireResponse(httpResponse.id)
+      const response = httpResponse as CdpFetchHttpResponse
+      const transportResponse = inFlightResponses.get(httpResponse.id) ?? {
+        ...requireRequestPause(httpResponse.id),
+        fulfilled: true,
+        responseCode: response.statusCode ?? 200,
+        responseHeaders: toResponseHeaders(response.headers),
+        body: toResponseBody(response.body),
+      }
 
       transportResponse.url = httpResponse.url
       inFlightResponses.delete(httpResponse.id)
