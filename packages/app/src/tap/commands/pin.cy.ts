@@ -121,6 +121,34 @@ describe('tap/commands/pin', () => {
     expect(restoreDom).not.to.have.been.called
   })
 
+  it('auto-releases a stale pin when its command no longer resolves (spec switch / re-run), without restoring stale DOM', async () => {
+    const getSnapshotPropsForLog = cy.stub().returns(SNAPSHOT_PROPS)
+
+    cy.stub(tapPinSource, 'getRunner').returns({ getTestsState: () => TESTS_STATE, getSnapshotPropsForLog })
+
+    const restoreDom = cy.stub()
+
+    cy.stub(tapPinSource, 'getAutIframe').returns({ detachDom: cy.stub().returns('ORIGINAL-DOM'), restoreDom })
+    cy.stub(tapPinSource, 'isRunning').returns(false)
+    cy.stub(tapPinSource, 'setPinned')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('pin', { test: 'r2', command: 'log-1' })
+    expect(restoreDom).to.have.been.calledOnce // the snapshot render
+
+    // Simulate a re-run: the command id is reused, but its snapshots are fresh
+    // objects — so identity no longer matches the object we pinned.
+    getSnapshotPropsForLog.returns({ url: SNAPSHOT_PROPS.url, snapshots: [{ name: 'before' }, { name: 'after' }] })
+
+    // Reconciliation drops the stale pin, so clear is a no-op that does NOT
+    // restore the now-stale original DOM.
+    const cleared = await manager.exec('pin', {}, { clear: 'true' })
+
+    expect(cleared).to.deep.eq({ result: { cleared: false } })
+    expect(restoreDom).to.have.been.calledOnce // still only the pin render — no stale restore
+  })
+
   it('requires a test and command (or --clear), without reading the runner', async () => {
     const { getRunner } = stubSource()
 

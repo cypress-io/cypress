@@ -21,9 +21,14 @@ export interface ClearResult {
 // commands read it, `pin --clear` restores. This module state (held in the
 // running app between calls) remembers the pre-pin DOM so clear can put it back.
 interface PinnedState {
+  test: string
   command: string
   at: SnapshotRef
   original: unknown
+  // The exact snapshot object we pinned. A new run (spec switch or re-run)
+  // re-captures fresh snapshot objects — even when the command id is reused —
+  // so object identity is what reliably tells a live pin from a stale one.
+  snapshot: PinSnapshotEntry
 }
 
 let pinned: PinnedState | undefined
@@ -37,6 +42,33 @@ export const resetPinState = (): void => {
 // a pin and a stranded one is always visible and recoverable).
 export const getPinnedRef = (): { command: string, at: SnapshotRef } | undefined => {
   return pinned ? { command: pinned.command, at: pinned.at } : undefined
+}
+
+export interface PinReconcileRunner {
+  getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
+}
+
+/**
+ * Drops a pin left over from a previous run — a spec switch or re-run — WITHOUT
+ * restoring its now-stale DOM (that run's page is gone). A pin is only valid
+ * while its command still resolves to a snapshot in the current run; a new run
+ * regenerates test and log ids, so the lookup misses and we release the pin.
+ * Safe to call anytime; a no-op when nothing is pinned.
+ */
+export const reconcilePin = (runner: PinReconcileRunner): void => {
+  if (!pinned) {
+    return
+  }
+
+  // The pin is live only while the exact snapshot object we rendered is still
+  // the command's current snapshot. A re-run replaces it (same id, new object),
+  // and a spec switch drops the command entirely — both fail this identity check.
+  const stillLive = liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.command)).includes(pinned.snapshot)
+
+  if (!stillLive) {
+    tapPinSource.setPinned(false)
+    pinned = undefined
+  }
 }
 
 const liveSnapshots = (props: PinSnapshotProps | undefined): PinSnapshotEntry[] => {
@@ -94,6 +126,15 @@ export const pinCommand = defineCommand({
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },
   ],
   handler: async ({ test, command }, { at, clear }): Promise<PinResult | ClearResult> => {
+    const runner = tapPinSource.getRunner()
+
+    // Release a pin left over from a previous run before anything else, so stale
+    // state never blocks a new pin, is never reported by status, and is never
+    // restored over the current run's DOM.
+    if (runner) {
+      reconcilePin(runner)
+    }
+
     if (clear) {
       return clearPin()
     }
@@ -101,8 +142,6 @@ export const pinCommand = defineCommand({
     if (test === undefined || command === undefined) {
       throw new TapCommandError('PIN_TARGET_REQUIRED', 'provide a test id and command id to pin (as listed by the tests and commands commands), or pass --clear to release the current pin')
     }
-
-    const runner = tapPinSource.getRunner()
 
     if (!runner) {
       throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')
@@ -150,7 +189,7 @@ export const pinCommand = defineCommand({
 
     const at_ = toRef(snapshots[index], index)
 
-    pinned = { command, at: at_, original }
+    pinned = { test, command, at: at_, original, snapshot: snapshots[index] }
 
     return {
       pinned: { test, command, at: at_ },
