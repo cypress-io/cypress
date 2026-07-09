@@ -6,57 +6,13 @@ import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
-import { cookieMatches, CyCookieFilter } from '../automation/util'
+import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
+import { normalizeGetCookieProps, normalizeSetCookieProps } from '../automation/cookie/converters/webkit'
 import utils from './utils'
-import type { CyCookie } from '../automation/util'
+import type { CyCookie } from '../automation/cookie/util'
 import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
-
-const extensionMap = {
-  'no_restriction': 'None',
-  'lax': 'Lax',
-  'strict': 'Strict',
-} as const
-
-function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
-  return str ? extensionMap[str] : undefined
-}
-
-const normalizeGetCookieProps = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
-  const cyCookie: CyCookie = {
-    name,
-    value,
-    domain,
-    path,
-    secure,
-    httpOnly,
-    hostOnly: false,
-    // Use expirationDate instead of expires
-    ...expires !== -1 ? { expirationDate: expires } : {},
-  }
-
-  if (sameSite === 'None') {
-    cyCookie.sameSite = 'no_restriction'
-  } else if (sameSite) {
-    cyCookie.sameSite = sameSite.toLowerCase() as CyCookie['sameSite']
-  }
-
-  return cyCookie
-}
-
-const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
-  return {
-    name: cookie.name,
-    value: cookie.value,
-    path: cookie.path,
-    domain: cookie.domain,
-    secure: cookie.secure,
-    httpOnly: cookie.httpOnly,
-    expires: cookie.expirationDate!,
-    sameSite: convertSameSiteExtensionToCypress(cookie.sameSite)!,
-  }
-}
 
 let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()

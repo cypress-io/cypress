@@ -20,10 +20,11 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
+  body?: string
+  fulfilled?: boolean
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
-  responseBody?: string
 }
 
 export class CdpFetchTransport {
@@ -148,24 +149,20 @@ export class CdpFetchTransport {
         }
       })
 
-      if (response.responseBody || !requestContinued) {
+      if (response.fulfilled) {
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
-          ...(response.responseBody ? { body: response.responseBody } : {}),
+          ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
-
-        this.cleanup(networkId, deferred)
-
-        return
+      } else {
+        await this.client.send('Fetch.continueResponse', {
+          requestId: response.requestId,
+          responseCode: response.responseCode,
+          ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
+        }, response.sessionId)
       }
-
-      await this.client.send('Fetch.continueResponse', {
-        requestId: response.requestId,
-        responseCode: response.responseCode,
-        ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
-      }, response.sessionId)
 
       this.cleanup(networkId, deferred)
     } catch (err) {

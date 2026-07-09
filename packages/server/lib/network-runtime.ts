@@ -7,7 +7,7 @@ import { NetworkInterceptionCore as NetworkInterceptionCoreImpl } from '@package
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
-import type { CookieJar } from './util/cookies'
+import type { CookieJar } from './automation/cookie/jar'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'

@@ -9,18 +9,10 @@ import type {
   CdpFetchTransportResponse,
 } from './cdp-fetch-transport'
 
-function toHeaderEntries (headers: HttpHeaders = {}): { name: string, value: string }[] {
-  return Object.entries(headers).flatMap(([name, value]) => {
-    if (typeof value === 'undefined') {
-      return []
-    }
-
-    if (Array.isArray(value)) {
-      return value.map((item) => ({ name, value: item }))
-    }
-
-    return [{ name, value }]
-  })
+type CdpFetchHttpResponse = HttpResponse & {
+  body?: string | Buffer
+  headers?: HttpHeaders
+  statusCode?: number
 }
 
 function toCdpRequestHeaders (headers: HttpHeaders = {}): Record<string, string> {
@@ -35,21 +27,28 @@ function toCdpRequestHeaders (headers: HttpHeaders = {}): Record<string, string>
   }, {})
 }
 
-function fromHeaderEntries (headers?: { name: string, value: string }[]): HttpHeaders | undefined {
+function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['responseHeaders'] {
   if (!headers) {
     return undefined
   }
 
-  return headers.reduce<HttpHeaders>((memo, header) => {
-    memo[header.name] = header.value
+  return Object.entries(headers).flatMap(([name, value]) => {
+    if (typeof value === 'undefined') {
+      return []
+    }
 
-    return memo
-  }, {})
+    return ([] as string[]).concat(value).map((headerValue) => {
+      return {
+        name,
+        value: headerValue,
+      }
+    })
+  })
 }
 
-function toBase64 (body: string | Buffer): string {
-  if (Buffer.isBuffer(body)) {
-    return body.toString('base64')
+function toResponseBody (body?: string | Buffer): string | undefined {
+  if (body === undefined) {
+    return undefined
   }
 
   return Buffer.from(body).toString('base64')
@@ -57,6 +56,26 @@ function toBase64 (body: string | Buffer): string {
 
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
   const inFlightRequests = new Map<string, CdpFetchTransportRequest>()
+  const inFlightResponses = new Map<string, CdpFetchTransportResponse>()
+  const requireRequest = (id: string): CdpFetchTransportRequest => {
+    const request = inFlightRequests.get(id)
+
+    if (!request) {
+      throw new Error(`No in-flight CDP Fetch request found for ${id}`)
+    }
+
+    return request
+  }
+
+  const requireRequestPause = (id: string): CdpFetchTransportRequest & { requestId: string } => {
+    const request = requireRequest(id)
+
+    if (!request.requestId) {
+      throw new Error(`No CDP Fetch request pause found for ${id}. Stubbed responses require the original request pause id.`)
+    }
+
+    return request as CdpFetchTransportRequest & { requestId: string }
+  }
 
   return {
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
@@ -72,7 +91,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     },
 
     encodeRequest (httpRequest: HttpRequest): CdpFetchTransportRequest {
-      const transportRequest = inFlightRequests.get(httpRequest.id)!
+      const transportRequest = requireRequest(httpRequest.id)
 
       transportRequest.url = httpRequest.url
       transportRequest.method = httpRequest.method ?? transportRequest.method
@@ -83,38 +102,37 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     },
 
     getRequest (id: string): CdpFetchTransportRequest {
-      return inFlightRequests.get(id)!
+      return requireRequest(id)
     },
 
     decodeResponse (transportResponse: CdpFetchTransportResponse): HttpResponse {
-      inFlightRequests.set(transportResponse.id, transportResponse)
+      inFlightResponses.set(transportResponse.id, transportResponse)
 
       return {
         id: transportResponse.id,
         url: transportResponse.url,
-        statusCode: transportResponse.responseCode,
-        headers: fromHeaderEntries(transportResponse.responseHeaders),
       }
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
-      const transportResponse = inFlightRequests.get(httpResponse.id)! as CdpFetchTransportResponse
-
-      transportResponse.url = httpResponse.url
-      transportResponse.responseCode = httpResponse.statusCode ?? transportResponse.responseCode
-      transportResponse.responseHeaders = httpResponse.headers ? toHeaderEntries(httpResponse.headers) : transportResponse.responseHeaders
-
-      if (typeof httpResponse.body !== 'undefined') {
-        transportResponse.responseBody = toBase64(httpResponse.body)
+      const response = httpResponse as CdpFetchHttpResponse
+      const transportResponse = inFlightResponses.get(httpResponse.id) ?? {
+        ...requireRequestPause(httpResponse.id),
+        fulfilled: true,
+        responseCode: response.statusCode ?? 200,
+        responseHeaders: toResponseHeaders(response.headers),
+        body: toResponseBody(response.body),
       }
 
-      inFlightRequests.delete(httpResponse.id)
+      transportResponse.url = httpResponse.url
+      inFlightResponses.delete(httpResponse.id)
 
       return transportResponse
     },
 
     releaseRequest (id: string): void {
       inFlightRequests.delete(id)
+      inFlightResponses.delete(id)
     },
   }
 }

@@ -28,7 +28,7 @@ import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, Network
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
-import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'

@@ -13,9 +13,9 @@ export type HttpRequest = {
 export type HttpResponse = {
   id: string
   url: string
-  statusCode?: number
-  headers?: HttpHeaders
   body?: HttpBody
+  headers?: HttpHeaders
+  statusCode?: number
 }
 
 export interface TransportCodecPort<TRequest, TResponse> {
