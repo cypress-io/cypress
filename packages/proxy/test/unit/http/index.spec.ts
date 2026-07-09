@@ -206,6 +206,31 @@ describe('http', function () {
       expect(off).toHaveBeenCalledTimes(2)
     })
 
+    it('does not fetch the origin when request middleware already sent a response', async function () {
+      incomingRequest.mockImplementation(function () {
+        this.res.redirect('/client')
+        this.end()
+      })
+
+      // @ts-expect-error
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, {
+        on,
+        off,
+        redirect: vi.fn(function () {
+          this.headersSent = true
+          this.writableFinished = true
+        }),
+        writableFinished: false,
+        headersSent: false,
+        destroyed: false,
+      })
+
+      expect(incomingRequest).toHaveBeenCalledOnce()
+      expect(incomingResponse).not.toHaveBeenCalled()
+      expect(httpOpts.request.rp).not.toHaveBeenCalled()
+      expect(error).not.toHaveBeenCalled()
+    })
+
     it('moves to Error stack if err in IncomingRequest', async function () {
       incomingRequest.mockImplementation(() => {
         throw new Error('oops')

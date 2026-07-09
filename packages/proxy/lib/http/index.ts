@@ -406,7 +406,7 @@ export class Http {
       return proxyHttpCodec.decodeResponse(ctx)
     }
 
-    if (!ctx.incomingRes) {
+    if (!ctx.incomingRes && !ctx.res.writableFinished && !ctx.res.headersSent) {
       const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
 
       try {
