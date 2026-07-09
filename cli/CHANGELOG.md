@@ -6,6 +6,14 @@
 - Fixed an issue where the browser's renderer process could crash (`We detected that the Chrome Renderer process just crashed`) when the application under test performed heavy layout work driven by a `ResizeObserver` loop (for example, a dialog dynamically showing many form fields with an open dropdown) while the command log was visible. The command log now renders in an isolated document so it no longer shares a layout pass with the application under test. Fixes [#33962](https://github.com/cypress-io/cypress/issues/33962) and [#34218](https://github.com/cypress-io/cypress/issues/34218).
 - Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
 
+**Bugfixes:**
+
+- Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
+
+**Misc:**
+
+- Corrected the `@default` value in the TypeScript type definitions for the [`videoCompression`](https://on.cypress.io/configuration#Videos) configuration option from `32` to `false`. Addressed in [#34198](https://github.com/cypress-io/cypress/pull/34198).
+
 ## 15.18.1
 
 **Performance:**
