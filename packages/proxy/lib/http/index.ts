@@ -235,35 +235,35 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         return resolve()
       }
 
-      // Spread ctx first so stage-owned callbacks always win. Origin fetch may
-      // temporarily attach onError/onResponse onto ctx; those must not clobber
-      // the per-middleware handlers below.
-      const fullCtx = {
-        ...ctx,
-        next: () => {
-          fullCtx.next = () => {
-            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+      const onResponse = (incomingRes: Response, resStream: Readable) => {
+        ctx.incomingRes = incomingRes
+        ctx.incomingResStream = resStream
 
-            if (ctx.error) {
-              error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
-              error['cause'] = ctx.error
-            }
+        _end()
+      }
 
-            throw error
+      const next = () => {
+        fullCtx.next = () => {
+          const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+
+          if (ctx.error) {
+            error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
+            error['cause'] = ctx.error
           }
 
-          copyChangedCtx()
+          throw error
+        }
 
-          ctx.res.off('close', onClose)
-          _end(runMiddlewareStack())
-        },
+        copyChangedCtx()
+
+        ctx.res.off('close', onClose)
+        _end(runMiddlewareStack())
+      }
+
+      const fullCtx = {
+        next,
         end: _end,
-        onResponse: (incomingRes: Response, resStream: Readable) => {
-          ctx.incomingRes = incomingRes
-          ctx.incomingResStream = resStream
-
-          _end()
-        },
+        onResponse,
         onError: _onError,
         skipMiddleware: (name: string) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
@@ -271,6 +271,22 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
+        // Spread last so test spies can override stage helpers.
+        ...ctx,
+      }
+
+      // Origin fetch can leave onError/onResponse as undefined on the shared
+      // ctx. Restore stage handlers whenever the spread wiped them out.
+      if (typeof fullCtx.onError !== 'function') {
+        fullCtx.onError = _onError
+      }
+
+      if (typeof fullCtx.onResponse !== 'function') {
+        fullCtx.onResponse = onResponse
+      }
+
+      if (typeof fullCtx.next !== 'function') {
+        fullCtx.next = next
       }
 
       try {

@@ -37,12 +37,17 @@ function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
   }, {})
 }
 
-function toLoopbackProxy (config: ServeInternalRoutesConfig): string {
+function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
   if (!config.port) {
     throw new Error('Cannot serve internal Cypress routes before the server port is assigned')
   }
 
-  return `http://127.0.0.1:${config.port}`
+  // Hit Express route handlers on the local server directly. Using the Cypress
+  // server as an HTTP proxy would re-enter HttpIntercept / this middleware and
+  // recurse forever when no earlier Express route owns the path.
+  const url = new URL(requestUrl, config.proxyUrl)
+
+  return `http://127.0.0.1:${config.port}${url.pathname}${url.search}`
 }
 
 function shouldSendBody (request: HttpRequest): boolean {
@@ -53,7 +58,7 @@ export function createServeInternalRoutesMiddleware ({
   config,
   request: serverRequest,
 }: CreateServeInternalRoutesMiddlewareOptions): InterceptMiddleware {
-  return async (request, next, terminal) => {
+  return async (request, next, _terminal) => {
     const url = new URL(request.url, config.proxyUrl)
 
     if (!isInternalCypressRoute(url.pathname, config)) {
@@ -65,8 +70,7 @@ export function createServeInternalRoutesMiddleware ({
     }
 
     const response = await serverRequest.create({
-      url: request.url,
-      proxy: toLoopbackProxy(config),
+      url: toLoopbackUrl(request.url, config),
       method: request.method ?? 'GET',
       headers: filterHeaders(request.headers),
       ...(shouldSendBody(request) ? { body: request.body } : {}),
