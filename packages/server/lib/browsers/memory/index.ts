@@ -11,6 +11,7 @@ import { telemetry } from '@packages/telemetry'
 
 import type { Automation } from '../../automation'
 import type { BrowserInstance } from '../types'
+import type { MemoryLog } from './cgroup-util'
 
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
@@ -40,7 +41,7 @@ let gcLog: { [key: string]: any } = {}
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
-  getAvailableMemory: (totalMemoryLimit: number, log?: { [key: string]: any }) => Promise<number>
+  getAvailableMemory: (totalMemoryLimit: number, log?: MemoryLog) => Promise<number>
 }
 
 /**
@@ -116,12 +117,25 @@ export const getJsHeapSizeLimit: (automation: Automation) => Promise<number> = m
 export const getMemoryHandler = async (): Promise<MemoryHandler> => {
   if (os.platform() === 'linux') {
     if (await fs.pathExists('/sys/fs/cgroup/cgroup.controllers')) {
-      // cgroup v2 can use the default handler so just pass through
-    } else {
-      debug('using cgroup v1 memory handler')
+      const cgroupV2 = (await import('./cgroup-v2')).default
 
-      return (await import('./cgroup-v1')).default
+      // on a non-containerized cgroup v2 host the memory interface files may not
+      // be exposed; fall back to the default handler rather than silently
+      // disabling memory management
+      if (await cgroupV2.isAvailable()) {
+        debug('using cgroup v2 memory handler')
+
+        return cgroupV2
+      }
+
+      debug('cgroup v2 memory files unavailable, using default memory handler')
+
+      return (await import('./default')).default
     }
+
+    debug('using cgroup v1 memory handler')
+
+    return (await import('./cgroup-v1')).default
   }
 
   debug('using default memory handler')
