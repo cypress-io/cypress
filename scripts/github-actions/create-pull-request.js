@@ -20,7 +20,14 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
 
     if (team_reviewers) requestReviewersParams.team_reviewers = team_reviewers
 
-    await github.rest.pulls.requestReviewers(requestReviewersParams)
+    try {
+      await github.rest.pulls.requestReviewers(requestReviewersParams)
+    } catch (err) {
+      // Requesting a team reviewer requires the token to have org `members: read`
+      // permission. Don't fail the workflow over reviewer assignment - the PR
+      // itself was already created successfully.
+      console.log(`Could not request reviewers for PR #${number}:`, err.message)
+    }
   }
 
   //add to firewatch board

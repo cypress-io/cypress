@@ -12,7 +12,7 @@ import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { HttpIntercept, NetworkPolicyRegistry } from '@packages/network-interception'
-import { CookieJar } from '@packages/server/lib/util/cookies'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 import { createProxyNetworkInterception } from '../../lib/adapters/create-proxy-network-interception'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}

@@ -1,7 +1,23 @@
+/**
+ * The automation-facing layer of the cookies domain: implements the Cypress cookie
+ * automation events (get:cookies, get:cookie, set:cookie, add:cookies, clear:cookies,
+ * change:cookie) on behalf of the Automation class.
+ *
+ * These events back the Cypress cookie APIs:
+ * - cy.getCookie() / cy.getCookies() / cy.getAllCookies()
+ * - cy.setCookie()
+ * - cy.clearCookie() / cy.clearCookies() / cy.clearAllCookies()
+ *
+ * When one of those commands runs, the driver sends the event over the websocket to
+ * the server, where it flows Automation -> Cookies (this class) -> the `automate`
+ * function, which is the browser-specific automation client (CDP, BiDi, extension,
+ * webkit) that performs the actual action. The result is normalized here and
+ * returned back to the driver.
+ */
 import _ from 'lodash'
 import Debug from 'debug'
-import { isHostOnlyCookie } from '../browsers/cdp-protocol/cdp_automation'
-import type { SerializableAutomationCookie } from '../util/cookies'
+import { isHostOnlyCookie } from './util'
+import type { SerializableAutomationCookie } from './jar'
 
 type AutomationFn<V, T> = (data: V) => Promise<T>
 
