@@ -236,6 +236,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       const fullCtx = {
+        ...ctx,
         next: () => {
           fullCtx.next = () => {
             const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
@@ -267,7 +268,6 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
-        ...ctx,
       }
 
       try {
