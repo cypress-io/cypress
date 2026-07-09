@@ -132,6 +132,8 @@ jobs:
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+          # Required to request a team (e.g. @cypress-io/app) as PR reviewer
+          permission-members: read
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
