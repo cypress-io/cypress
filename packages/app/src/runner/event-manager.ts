@@ -1036,6 +1036,14 @@ export class EventManager {
     this.reporterBus.emit('reporter:snapshot:unpinned')
   }
 
+  // Sync the reporter's command-log pin state when a pin originates outside the
+  // reporter (e.g. the tap CLI). The AUT render is already done via the native
+  // `pin:snapshot` path, so — unlike snapshotUnpinned — this only notifies the
+  // reporter; it does not touch the snapshot store.
+  snapshotPinned (testId: string, logId: number | string) {
+    this.reporterBus.emit('reporter:snapshot:pinned', testId, logId)
+  }
+
   _unpinSnapshot () {
     this.localBus.emit('unpin:snapshot')
   }
