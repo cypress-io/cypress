@@ -252,10 +252,6 @@ const browsers = {
 
       const browserDisplayName = instance?.browser?.displayName || 'unknown'
 
-      options.onBrowserClose()
-      browserLauncher.clearInstanceState()
-      instance = null
-
       // We are being very narrow on when to restart the browser here. The only case we can reliably test the 'SIGTRAP' signal.
       // We want to avoid adding signals in here that may intentionally be caused by a user.
       // For example exiting firefox through either force quitting or quitting via cypress will fire a 'SIGTERM' event which
@@ -263,7 +259,19 @@ const browsers = {
       // On windows the crash produces 2147483651 as an exit code. We should add to the list of crashes we handle as we see them.
       // In the future we may consider delegating to the browsers to determine if an exit is a crash since it might be different
       // depending on what browser has crashed.
-      if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
+      const browserDidCrash = code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null
+
+      // Must happen before we tear down instance state below, so that the
+      // post-spec teardown that follows a crash fails fast instead of hanging.
+      if (browserDidCrash) {
+        browserLauncher.markBrowserCrashed?.()
+      }
+
+      options.onBrowserClose()
+      browserLauncher.clearInstanceState()
+      instance = null
+
+      if (browserDidCrash) {
         const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
 
         if (!options.onError) {

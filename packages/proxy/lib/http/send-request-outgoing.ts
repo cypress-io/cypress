@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { telemetry } from '@packages/telemetry'
-import { isVerboseTelemetry as isVerbose } from '../http'
-import type { RequestInterceptionMiddlewareCtx } from './types'
+import { isVerboseTelemetry as isVerbose } from '.'
+import type { RequestInterceptionMiddlewareCtx } from '../adapters/types'
 
 /**
  * Send the proxied request to the origin via Node HTTP.
