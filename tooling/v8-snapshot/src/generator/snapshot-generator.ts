@@ -507,22 +507,19 @@ export class SnapshotGenerator {
 
       return { v8ContextFile: this.v8ContextFile, snapshotBinDir: this.snapshotBinDir }
     } catch (err: any) {
-      if (err.stderr || err.stdout) {
-        if (err.stderr != null) {
-          logError(err.stderr.toString())
-        }
-
-        if (err.stdout != null) {
-          logDebug(err.stdout.toString())
-        }
-      } else {
-        logError(err.toString())
+      if (err.stdout != null) {
+        logDebug(err.stdout.toString())
       }
 
       // If things went wrong print instructions on how to execute the
       // `mksnapshot` command directly to trouble shoot
       runInstructions()
-      throw new Error('Failed `mksnapshot` command')
+
+      // mksnapshot's stderr explains why it failed, so surface it on the thrown error.
+      const stderr = err.stderr?.toString().trim()
+      const detail = stderr || err.toString()
+
+      throw new Error(`Failed \`mksnapshot\` command\n${detail}`)
     }
   }
 

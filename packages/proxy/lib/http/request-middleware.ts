@@ -54,7 +54,6 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
     this.onlyRunMiddleware([
       'MaybeSetBasicAuthHeaders',
-      'SendRequestOutgoing',
     ])
   }
 
@@ -222,6 +221,11 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
   const acceptEncoding = this.req.headers['accept-encoding']
+
+  if (acceptEncoding && !this.req.originalAcceptEncoding) {
+    this.req.originalAcceptEncoding = acceptEncoding
+  }
+
   const supported = getSupportedAcceptEncoding(acceptEncoding)
 
   span?.setAttributes({
@@ -268,10 +272,6 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   this.next()
 }
 
-const SendRequestOutgoing: RequestMiddleware = function () {
-  this.networkInterceptionCore.forwardToOrigin(this)
-}
-
 export default {
   LogRequest,
   ExtractCypressMetadataHeaders,
@@ -288,5 +288,4 @@ export default {
   EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,
-  SendRequestOutgoing,
 }

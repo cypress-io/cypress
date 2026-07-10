@@ -1,6 +1,6 @@
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
 import type { Protocol } from 'devtools-protocol'
-import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
+import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client as WebDriverClient } from 'webdriver'
 
 const expressionToEvaluate = (forceReload = false) => `window.location.reload(${forceReload})`

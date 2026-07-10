@@ -63,12 +63,6 @@ commands:
           name: Pack workflows
           command: |
             ./scripts/pack-ci.sh --all
-  validate-workflows:
-    steps:
-      - run:
-          name: Validate workflows
-          command: |
-            ./scripts/pack-ci.sh --validate --pack=false
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
@@ -139,7 +133,7 @@ jobs:
   pack-workflows:
     docker:
         - image: cimg/base:stable
-    resource_class: small
+    resource_class: small.gen2
     steps:
         - cancel-draft-prs
         - checkout:
@@ -153,7 +147,7 @@ jobs:
   launch-primary-workflow:
       docker:
           - image: cimg/base:stable
-      resource_class: small
+      resource_class: small.gen2
       steps:
           - cancel-draft-prs
           - checkout:

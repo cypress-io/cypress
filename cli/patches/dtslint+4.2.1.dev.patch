@@ -1,0 +1,18 @@
+diff --git a/node_modules/dtslint/bin/lint.js b/node_modules/dtslint/bin/lint.js
+--- a/node_modules/dtslint/bin/lint.js
++++ b/node_modules/dtslint/bin/lint.js
+@@ -196,7 +196,13 @@ function range(minVersion, maxVersion) {
+     const minIdx = typescript_versions_1.TypeScriptVersion.shipped.indexOf(minVersion);
+     assert(minIdx >= 0);
+     if (maxVersion === typescript_versions_1.TypeScriptVersion.latest) {
+-        return [...typescript_versions_1.TypeScriptVersion.shipped.slice(minIdx), typescript_versions_1.TypeScriptVersion.latest];
++        // PATCHED (cypress): with the @definitelytyped/typescript-versions patch, `latest`
++        // equals the last shipped version; avoid testing it twice
++        const versions = typescript_versions_1.TypeScriptVersion.shipped.slice(minIdx);
++        if (versions[versions.length - 1] !== typescript_versions_1.TypeScriptVersion.latest) {
++            versions.push(typescript_versions_1.TypeScriptVersion.latest);
++        }
++        return versions;
+     }
+     const maxIdx = typescript_versions_1.TypeScriptVersion.shipped.indexOf(maxVersion);
+     assert(maxIdx >= minIdx);

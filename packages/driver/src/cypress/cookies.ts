@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Cookies from 'js-cookie'
-import { CookieJar } from '@packages/server/lib/util/cookies'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 
 import $errUtils from './error_utils'
 
