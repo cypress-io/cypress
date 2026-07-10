@@ -166,7 +166,9 @@ const proxyDisabledEnv = {
 const sharedRunOptions = {
   project: 'http2',
   browser: 'chrome' as const,
-  port: PORT,
+  // Cypress's own server port — must differ from the fixture servers (44700/44701),
+  // otherwise the browser can never reach the Cypress runner
+  port: 47710,
   config: {
     defaultCommandTimeout: 10000,
     pageLoadTimeout: 15000,

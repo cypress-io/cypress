@@ -671,10 +671,12 @@ const startServer = function (obj) {
 
   let srv
 
-  // allowHTTP1 so cy.request (Node HTTP/1.1 client) can reach the fixture server
+  // Strict h2-only origin: HTTP/1.1 clients are ALPN-rejected with a 403
+  // "Missing ALPN Protocol", keeping failures h2-specific. This includes
+  // cy.request, which is acceptable until it grows an h2 backend.
   const http2ServerOptions = {
     ...httpsServerTlsOptions,
-    allowHTTP1: true,
+    allowHTTP1: false,
   }
 
   if (useHttp2 && useHttp2Native) {
