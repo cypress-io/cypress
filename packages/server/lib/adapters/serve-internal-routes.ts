@@ -1,12 +1,9 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
-import type CyServer from '../../index.d.ts'
 import type { Request as ServerRequest } from '../request'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
+import type { InternalRouteConfig } from './internal-routes'
 
-type ServeInternalRoutesConfig = Pick<
-  CyServer.Config & Cypress.Config,
-  'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'port' | 'proxyUrl' | 'socketIoRoute'
->
+export type ServeInternalRoutesConfig = InternalRouteConfig
 
 type CreateServeInternalRoutesMiddlewareOptions = {
   config: ServeInternalRoutesConfig

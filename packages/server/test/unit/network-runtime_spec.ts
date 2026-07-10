@@ -165,6 +165,7 @@ describe('lib/network-runtime', () => {
     }
     const isAUTFrame = sinon.stub().resolves(true)
     const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
       client,
       isAUTFrame,
     })
@@ -182,7 +183,7 @@ describe('lib/network-runtime', () => {
       on: sinon.stub(),
       off: sinon.stub(),
     }
-    const runtime = createCdpFetchRuntime({ client })
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
     const onRequestPaused = await startCdpRuntime(runtime, client)
 
     const handled = onRequestPaused(createPausedRequest({
@@ -211,7 +212,7 @@ describe('lib/network-runtime', () => {
       on: sinon.stub(),
       off: sinon.stub(),
     }
-    const runtime = createCdpFetchRuntime({ client })
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
 
     await runtime.start()
     client.send.resetHistory()

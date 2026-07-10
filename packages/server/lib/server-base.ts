@@ -54,8 +54,8 @@ import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CdpFetchNetworkRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -185,6 +185,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   protected _networkInterceptionCore?: NetworkInterceptionCore
   protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
+  protected _openConfig?: Cfg
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -353,6 +354,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }: OpenServerOptions) {
     debug('server open')
     this.testingType = testingType
+    this._openConfig = config
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
@@ -501,6 +503,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const runtime = createCdpFetchRuntime({
       client,
       isAUTFrame,
+      config: this.ensureProp(this._openConfig, 'open'),
+      request: this.request,
     })
 
     this._cdpFetchRuntime = runtime

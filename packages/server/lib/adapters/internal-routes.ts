@@ -1,9 +1,9 @@
-type InternalRouteConfig = {
-  clientRoute: string
-  namespace: string
-  port: number | null
+export type InternalRouteConfig = {
+  clientRoute?: string
+  namespace?: string
+  port?: number | null
   proxyUrl?: string
-  socketIoRoute: string
+  socketIoRoute?: string
   // CT Vite/webpack assets live under this prefix (default /__cypress/src).
   // They must not be treated as Express-owned internal routes.
   devServerPublicPathRoute?: string

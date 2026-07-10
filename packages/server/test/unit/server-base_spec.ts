@@ -188,6 +188,10 @@ describe('lib/server-base', () => {
       }
     }
 
+    beforeEach(function () {
+      this.server._openConfig = this.config
+    })
+
     it('starts the CDP Fetch runtime and exposes its network context', async function () {
       const client = createClient()
       const isAUTFrame = sinon.stub().resolves(false)
