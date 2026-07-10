@@ -64,16 +64,14 @@ describe('lib/adapters/serve-internal-routes', () => {
   it('delegates non-internal requests to the next middleware', async () => {
     const { middleware, serverRequest } = createMiddleware()
     const next = sinon.stub().resolves({ id: 'req-1', url: 'https://example.test/app' })
-    const terminal = sinon.stub()
 
     const response = await middleware({
       id: 'req-1',
       url: 'https://example.test/app',
-    }, next, terminal)
+    }, next)
 
     expect(response).to.deep.equal({ id: 'req-1', url: 'https://example.test/app' })
     expect(next).to.have.been.calledOnce
-    expect(terminal).not.to.have.been.called
     expect(serverRequest.create).not.to.have.been.called
   })
 
@@ -83,32 +81,28 @@ describe('lib/adapters/serve-internal-routes', () => {
       id: 'req-1',
       url: 'http://localhost:5173/__cypress/src/cypress/support/component.jsx',
     })
-    const terminal = sinon.stub()
 
     const response = await middleware({
       id: 'req-1',
       url: 'http://localhost:5173/__cypress/src/cypress/support/component.jsx',
-    }, next, terminal)
+    }, next)
 
     expect(response.url).to.equal('http://localhost:5173/__cypress/src/cypress/support/component.jsx')
     expect(next).to.have.been.calledOnce
-    expect(terminal).not.to.have.been.called
     expect(serverRequest.create).not.to.have.been.called
   })
 
   it('forwards same-origin internal requests through the next middleware', async () => {
     const { middleware, serverRequest } = createMiddleware()
     const next = sinon.stub().resolves({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
-    const terminal = sinon.stub()
 
     const response = await middleware({
       id: 'req-1',
       url: 'http://localhost:1234/__cypress/xhrs/foo',
-    }, next, terminal)
+    }, next)
 
     expect(response).to.deep.equal({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
     expect(next).to.have.been.calledOnce
-    expect(terminal).not.to.have.been.called
     expect(serverRequest.create).not.to.have.been.called
   })
 
@@ -123,7 +117,6 @@ describe('lib/adapters/serve-internal-routes', () => {
       body: Buffer.from('created'),
     })
     const next = sinon.stub()
-    const terminal = sinon.stub()
 
     const response = await middleware({
       id: 'req-1',
@@ -135,16 +128,16 @@ describe('lib/adapters/serve-internal-routes', () => {
         connection: 'keep-alive',
       },
       body: '{"file":"spec.cy.ts"}',
-    }, next, terminal)
+    }, next)
 
     expect(next).not.to.have.been.called
-    expect(terminal).not.to.have.been.called
     expect(serverRequest.create).to.have.been.calledOnce
     expect(serverRequest.create).to.have.been.calledWithMatch({
       url: 'http://127.0.0.1:1234/__cypress/process-origin-callback?foo=1',
       method: 'POST',
       headers: {
         cookie: 'session=abc',
+        'x-cypress-internal-loopback': '1',
       },
       body: '{"file":"spec.cy.ts"}',
       encoding: null,

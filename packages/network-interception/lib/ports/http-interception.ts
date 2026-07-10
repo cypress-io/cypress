@@ -30,7 +30,6 @@ export interface TransportCodecPort<TRequest, TResponse> {
 export type InterceptMiddleware = (
   request: HttpRequest,
   next: (request: HttpRequest) => Promise<HttpResponse>,
-  terminal: (request: HttpRequest) => Promise<HttpResponse>,
 ) => Promise<HttpResponse>
 
 export type TransportNext<TRequest, TResponse> = (

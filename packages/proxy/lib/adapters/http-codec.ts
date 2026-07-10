@@ -68,7 +68,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
     },
 
     getRequest (id: string): HttpInterceptCtx {
-      return inFlightRequests.get(id)!
+      return requireCtx(id)
     },
 
     decodeResponse (ctx: HttpInterceptCtx): HttpResponse {

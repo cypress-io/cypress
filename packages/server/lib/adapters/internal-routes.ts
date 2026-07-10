@@ -9,6 +9,10 @@ type InternalRouteConfig = {
   devServerPublicPathRoute?: string
 }
 
+// Marks trusted Express loopbacks from serve-internal-routes so
+// _forceProxyMiddleware does not 302 path-only requests to clientRoute.
+export const CYPRESS_INTERNAL_LOOPBACK_HEADER = 'x-cypress-internal-loopback'
+
 const LOCALHOST_NAMES = new Set([
   'localhost',
   '127.0.0.1',

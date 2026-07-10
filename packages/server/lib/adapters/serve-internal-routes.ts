@@ -1,7 +1,7 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type CyServer from '../../index.d.ts'
 import type { Request as ServerRequest } from '../request'
-import { isCypressServerOrigin, isInternalCypressRoute } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isCypressServerOrigin, isInternalCypressRoute } from './internal-routes'
 
 type ServeInternalRoutesConfig = Pick<
   CyServer.Config & Cypress.Config,
@@ -58,7 +58,7 @@ export function createServeInternalRoutesMiddleware ({
   config,
   request: serverRequest,
 }: CreateServeInternalRoutesMiddlewareOptions): InterceptMiddleware {
-  return async (request, next, _terminal) => {
+  return async (request, next) => {
     const url = new URL(request.url, config.proxyUrl)
 
     if (!isInternalCypressRoute(url.pathname, config)) {
@@ -69,10 +69,18 @@ export function createServeInternalRoutesMiddleware ({
       return next(request)
     }
 
+    // Fulfill here instead of calling next()/terminal: CDP Fetch needs a
+    // synthesized response for fulfillRequest, and this hop must hit Express
+    // route handlers directly. That skips later intercept layers (including
+    // CorrelateBrowserPreRequest in MITM mode); pending pre-requests for these
+    // cross-origin internals are swept by the normal timeout path.
     const response = await serverRequest.create({
       url: toLoopbackUrl(request.url, config),
       method: request.method ?? 'GET',
-      headers: filterHeaders(request.headers),
+      headers: {
+        ...filterHeaders(request.headers),
+        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: '1',
+      },
       ...(shouldSendBody(request) ? { body: request.body } : {}),
       encoding: null,
       followRedirect: false,

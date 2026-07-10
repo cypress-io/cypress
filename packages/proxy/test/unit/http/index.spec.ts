@@ -1,4 +1,6 @@
 import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
+import { PassThrough } from 'stream'
+import { EventEmitter } from 'events'
 import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
 import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
@@ -31,9 +33,6 @@ describe('http', function () {
 
     it('propagates stream errors after middleware has called next()', async function () {
       const onError = vi.fn()
-      const { PassThrough } = await import('stream')
-      const { EventEmitter } = await import('events')
-
       const res = Object.assign(new EventEmitter(), {
         off: vi.fn(),
         on: vi.fn(),
@@ -110,7 +109,6 @@ describe('http', function () {
 
     it('keeps a stage onError even when ctx.onError is undefined', async function () {
       const onError = vi.fn()
-      const { PassThrough } = await import('stream')
 
       const streamMiddleware = vi.fn().mockImplementation(function () {
         expect(typeof this.onError).to.equal('function')
