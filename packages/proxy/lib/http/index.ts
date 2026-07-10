@@ -427,7 +427,14 @@ export class Http {
       const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
 
       try {
+        // Intercept handlers mutate the live proxied request (ctx.req). Sync those
+        // fields onto the neutral HttpRequest before next()/encodeRequest, which
+        // otherwise overwrite ctx.req with the pre-intercept decodeRequest values.
         request.url = ctx.req.proxiedUrl
+        request.method = ctx.req.method
+        request.headers = ctx.req.headers
+        request.body = ctx.req.body
+
         const response = await next(request)
 
         span?.end()

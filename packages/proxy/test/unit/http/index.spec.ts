@@ -231,6 +231,70 @@ describe('http', function () {
       expect(error).not.toHaveBeenCalled()
     })
 
+    it('forwards intercept method/header/body mutations to the origin fetch', async function () {
+      const { EventEmitter } = await import('events')
+      const create = vi.fn(() => {
+        const outgoing = new EventEmitter() as EventEmitter & { abort: Mock }
+
+        outgoing.abort = vi.fn()
+        queueMicrotask(() => {
+          outgoing.emit('response', {
+            statusCode: 200,
+            headers: {},
+            request: { timings: {} },
+          })
+        })
+
+        return outgoing
+      })
+
+      httpOpts.request = { create, rp: vi.fn() } as any
+      httpOpts.remoteStates = {
+        current: () => ({ strategy: 'http', origin: 'https://example.test', fileServer: null }),
+      } as any
+
+      httpOpts.getFileServerToken = vi.fn()
+
+      incomingRequest.mockImplementation(function () {
+        this.req.method = 'PATCH'
+        this.req.headers = { 'content-type': 'application/json' }
+        this.req.body = '{"foo":"bar"}'
+        this.next()
+      })
+
+      incomingResponse.mockImplementation(function () {
+        this.end()
+      })
+
+      const res = Object.assign(new EventEmitter(), {
+        on: vi.fn(),
+        off: vi.fn(),
+        writableFinished: false,
+        headersSent: false,
+        destroyed: false,
+      })
+
+      // @ts-expect-error
+      await createHttp().handleHttpRequest({
+        method: 'POST',
+        proxiedUrl: 'https://example.test/dump-method',
+        headers: {},
+        socket: new EventEmitter(),
+        res,
+      }, res)
+
+      expect(create).toHaveBeenCalledOnce()
+
+      expect(create.mock.calls[0][0]).toMatchObject({
+        url: 'https://example.test/dump-method',
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: '{"foo":"bar"}',
+      })
+
+      expect(incomingResponse).toHaveBeenCalledOnce()
+    })
+
     it('moves to Error stack if err in IncomingRequest', async function () {
       incomingRequest.mockImplementation(() => {
         throw new Error('oops')
