@@ -44,19 +44,19 @@ export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 /**
  * Where a configuration option is allowed to be overridden at test time:
  * - `any`: suite-level overrides, test-level overrides, and at run-time via `Cypress.config()`.
- * - `suiteOrTest`: suite-level and test-level overrides only. Cannot be set at run-time via
- *    `Cypress.config()` during test execution.
+ * - `suiteOrTest`: suite-level and test-level overrides only. Cannot be set via `Cypress.config()`
+ *    while a test is executing.
  * - `suite`: suite-level overrides only.
  * - `never`: cannot be overridden at test time.
  */
 export type OverrideLevel = 'any' | 'suiteOrTest' | 'suite' | 'never'
 
 /**
- * The current level at which a test-time override is being applied. `suite` and `test`
- * `undefined` indicates a run-time mutation via `Cypress.config()` during test execution
- * (or while loading the support/spec file or in a `test:before:run` event).
+ * The context in which a test-time config change is being applied: `suite`/`test` for
+ * `describe`/`it` config overrides, `runtime` for a `Cypress.config()` call while a test is
+ * executing, and `undefined` for anything else (support/spec file load or a `test:before:run` event).
  */
-export type CurrentOverrideLevel = 'suite' | 'test' | undefined
+export type CurrentOverrideLevel = 'suite' | 'test' | 'runtime' | undefined
 
 interface ConfigOption {
   name: string

@@ -278,7 +278,7 @@ describe('config/src/index', () => {
       it('calls onError handler if validating level is run-time', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, undefined, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, 'runtime', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(1)
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
@@ -305,10 +305,18 @@ describe('config/src/index', () => {
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
 
-      it('calls onError handler if validating level is run-time', () => {
+      it('does not call onError handler outside test execution (e.g. file load)', () => {
         const errorFn = vi.fn()
 
         configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, undefined, errorFn)
+
+        expect(errorFn).toHaveBeenCalledTimes(0)
+      })
+
+      it('calls onError handler if validating level is run-time', () => {
+        const errorFn = vi.fn()
+
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, 'runtime', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(2)
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({

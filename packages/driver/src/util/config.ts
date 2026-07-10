@@ -129,7 +129,7 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
   if (!skipConfigOverrideValidation && mochaOverrideLevel !== 'restoring') {
     const currentOverrideLevel = mochaOverrideLevel === 'suite' || mochaOverrideLevel === 'test'
       ? mochaOverrideLevel
-      : undefined
+      : state('duringUserTestExecution') ? 'runtime' : undefined
 
     validateOverridableAtRunTime(config, currentOverrideLevel, (validationResult) => {
       let errKey = 'config.cypress_config_api.read_only'

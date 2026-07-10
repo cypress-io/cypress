@@ -206,9 +206,6 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
 }
 
 export const validateOverridableAtRunTime = (config: any, currentOverrideLevel: CurrentOverrideLevel, onErr: (result: InvalidTestOverrideResult) => void) => {
-  const isSuiteLevelOverride = currentOverrideLevel === 'suite'
-  const isSuiteOrTestLevelOverride = currentOverrideLevel === 'suite' || currentOverrideLevel === 'test'
-
   Object.keys(config).some((configKey) => {
     const overrideLevel: OverrideLevel = testOverrideLevels[configKey]
 
@@ -242,8 +239,8 @@ export const validateOverridableAtRunTime = (config: any, currentOverrideLevel: 
 
     if (
       overrideLevel === 'never' ||
-      (overrideLevel === 'suite' && !isSuiteLevelOverride) ||
-      (overrideLevel === 'suiteOrTest' && !isSuiteOrTestLevelOverride)
+      (overrideLevel === 'suite' && currentOverrideLevel !== 'suite') ||
+      (overrideLevel === 'suiteOrTest' && currentOverrideLevel === 'runtime')
     ) {
       onErr({
         invalidConfigKey: configKey,

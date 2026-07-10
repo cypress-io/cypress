@@ -166,6 +166,21 @@ describe('driver/src/cypress/validate_config', () => {
             validateConfig(state, { viewportWidth: 200 })
           }).to.throw(`\`Cypress.config()\` cannot override \`viewportWidth\` during test execution`)
         })
+
+        it('does not throw when set outside test execution (e.g. support/spec file load)', () => {
+          const state = $SetterGetter.create({
+            duringUserTestExecution: false,
+            test: undefined,
+            specWindow: { Error },
+          })
+          const overrideLevel = getMochaOverrideLevel(state)
+
+          expect(overrideLevel).to.be.undefined
+
+          expect(() => {
+            validateConfig(state, { viewportWidth: 200, viewportHeight: 100 })
+          }).not.to.throw()
+        })
       })
 
       describe('when config override level is suite', () => {
