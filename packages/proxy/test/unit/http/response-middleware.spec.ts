@@ -95,6 +95,28 @@ describe('http/response-middleware', function () {
 
       expect(cookie).not.toHaveBeenCalledWith('__cypress.unload', '', expect.anything())
     })
+
+    // https://github.com/cypress-io/cypress/issues/34143
+    it('omits the domain attribute for IPv6 literal hosts so the cookie serializer does not throw', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '[::1]' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      // host-only cookie: no `domain` option, so express/cookie does not reject it
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { expires: new Date(0) })
+    })
+
+    it('keeps the domain attribute for IPv4 literal hosts', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '127.0.0.1' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: '127.0.0.1', expires: new Date(0) })
+    })
   })
 
   describe('multiple this.next invocations', () => {

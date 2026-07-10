@@ -1,41 +1,74 @@
 name: Upload SBOM as Release Asset
-# This workflow triggers whenever there is a new release published.  The 
-# action generates a Software Bill of Materials and uploads it as a
-# release artifact.  This satisfies compliance initiatives.
+
+# Generates an SPDX Software Bill of Materials (SBOM) for the repository and
+# attaches it to every published GitHub release, so SBOMs stay discoverable for
+# customer security reviews.
+#
+# The asset is named SBOM.rpt with SPDX tag-value (text) content, matching the
+# artifact the previous FOSSA workflow produced, so it is a drop-in replacement
+# for the SBOM.rpt already shared with customers.
+#
+# Least privilege: the workflow defaults to contents: read. Only the
+# attach-to-release job (which runs on release events only) elevates to
+# contents: write, so a manual workflow_dispatch run never holds a write-scoped
+# token. The SBOM is passed between jobs as a workflow artifact.
+
 on:
   release:
     types:
       - published
+  # Allow an operator to generate an SBOM on demand (e.g. an ad-hoc customer
+  # request) without cutting a release. On a manual run only the read-only
+  # generate job runs; the SBOM is available as the SBOM.rpt workflow artifact.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  generate_SBOM:
+  generate_sbom:
     runs-on: ubuntu-latest
-    env:
-          FOSSA_API_KEY: ${{secrets.FOSSAAPIKEY}}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v6
-      - name: Download Fossa binary and install
-# This step utilizes a curl of the latest install pkg from Fossa.  Using a git action from 
-# Fossa doesn't produce the SBOM artifact needed. This manual approach is the only way to 
-# create the report to upload as a release artifact.
-        run:  |
-          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
-      - name: Generate SBOM
-        run:  |
-          fossa analyze 
-          fossa report attribution --debug --format spdx >> SBOM.rpt
-      - name: Verify report
-        run:  |
-          ls -lht|head
-          cat SBOM.rpt      
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Generate SBOM (SPDX tag-value) as SBOM.rpt
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./SBOM.rpt
-          asset_name: SBOM.rpt
-          asset_content_type: text/plain
+          # Scan the checked-out source. Syft reads the committed lockfiles
+          # (yarn.lock / package.json) across all workspaces, so no install or
+          # build step is needed to enumerate resolved dependency versions.
+          path: .
+          # SPDX tag-value (text), the same content the old FOSSA report emitted.
+          format: spdx-tag-value
+          output-file: SBOM.rpt
+          # We upload the artifact and attach the release ourselves (below), with
+          # version-pinned actions — disable the action's own uploads.
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Upload SBOM.rpt as a workflow artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: SBOM.rpt
+          path: SBOM.rpt
+          if-no-files-found: error
+
+  attach_to_release:
+    # Only on a real release event: this is the only job that needs (and gets)
+    # contents: write, so workflow_dispatch runs stay read-only.
+    if: github.event_name == 'release'
+    needs: generate_sbom
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # required to upload the SBOM as a release asset
+    steps:
+      - name: Download the generated SBOM.rpt
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: SBOM.rpt
+
+      - name: Attach SBOM.rpt to the release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          files: SBOM.rpt

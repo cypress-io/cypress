@@ -1,7 +1,7 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
 import { ProtocolManagerShape } from '@packages/types'
-import type { CriClient } from '../../../lib/browsers/cri-client'
+import type { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
 import pDefer from 'p-defer'
 import type Protocol from 'devtools-protocol'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
@@ -61,11 +61,11 @@ describe('lib/browsers/cri-client', function () {
 
     criImport.New = sinon.stub().withArgs({ host: HOST, port: PORT, url: 'about:blank' }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
-    const CDPConnectionRef = proxyquire('../lib/browsers/cdp-connection', {
+    const CDPConnectionRef = proxyquire('../lib/browsers/cdp-protocol/cdp-connection', {
       'chrome-remote-interface': criImport,
     }).CDPConnection
 
-    const { CriClient } = proxyquire('../lib/browsers/cri-client', {
+    const { CriClient } = proxyquire('../lib/browsers/cdp-protocol/cri-client', {
       './cdp-connection': { CDPConnection: CDPConnectionRef },
     })
 
@@ -354,6 +354,56 @@ describe('lib/browsers/cri-client', function () {
       expect(criStub.send).to.be.calledWith('Page.enable')
       expect(criStub.send).to.be.calledWith('Network.enable')
       expect(protocolManager.cdpReconnect).to.be.called
+
+      await criStub.on.withArgs('disconnect').args[0][1]()
+    })
+
+    it('does not resend a domain that was disabled', async () => {
+      const client = await getClient()
+
+      client.send('Page.enable')
+      client.send('Fetch.enable')
+      client.send('Fetch.disable')
+
+      // clear out previous calls before reconnect
+      criStub.send.reset()
+
+      // @ts-ignore
+      await criStub.on.withArgs('disconnect').args[0][1]()
+
+      const reconnection = pDefer()
+
+      onReconnect.callsFake(() => reconnection.resolve())
+      await reconnection.promise
+
+      expect(criStub.send).to.be.calledOnce
+      expect(criStub.send).to.be.calledWith('Page.enable')
+      expect(criStub.send).not.to.be.calledWith('Fetch.enable')
+
+      await criStub.on.withArgs('disconnect').args[0][1]()
+    })
+
+    it('prunes disabled domains per session', async () => {
+      const client = await getClient()
+
+      client.send('Fetch.enable', undefined, 'session-a')
+      client.send('Fetch.enable', undefined, 'session-b')
+      client.send('Fetch.disable', undefined, 'session-a')
+
+      // clear out previous calls before reconnect
+      criStub.send.reset()
+
+      // @ts-ignore
+      await criStub.on.withArgs('disconnect').args[0][1]()
+
+      const reconnection = pDefer()
+
+      onReconnect.callsFake(() => reconnection.resolve())
+      await reconnection.promise
+
+      expect(criStub.send).to.be.calledOnce
+      expect(criStub.send).to.be.calledWith('Fetch.enable', undefined, 'session-b')
+      expect(criStub.send).not.to.be.calledWith('Fetch.enable', undefined, 'session-a')
 
       await criStub.on.withArgs('disconnect').args[0][1]()
     })

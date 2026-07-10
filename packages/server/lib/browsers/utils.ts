@@ -5,7 +5,7 @@ import * as plugins from '../plugins'
 import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 import * as profileCleaner from '../util/profile_cleaner'
 import * as appData from '../util/app_data'
 import path from 'path'
@@ -289,7 +289,7 @@ async function getWebKitBrowser () {
 
     return browser
   } catch (err) {
-    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+    debug('There was an error constructing the WebKit browser: %o', { err })
 
     return
   }

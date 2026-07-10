@@ -1,4 +1,4 @@
-import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { ICypress } from '../../cypress'
 
 // cross-origin cookies collected by the the proxy are sent down to the driver

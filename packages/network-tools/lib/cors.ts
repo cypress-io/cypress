@@ -1,27 +1,17 @@
 import _ from 'lodash'
 import { addDefaultPort, getAuthority } from './uri'
 import debugModule from 'debug'
-import _parseDomain from '@cypress/parse-domain'
+import { parseDomain } from './parse-domain'
 import type { ParsedHost, ParsedHostWithProtocolAndHost } from './types'
 
 export type Policy = 'same-origin' | 'same-super-domain-origin' | 'schemeful-same-site'
 
 const debug = debugModule('cypress:network:cors')
 
-// match IP addresses or anything following the last .
-const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
-
 export function getSuperDomain (url: string) {
   const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
 
   return _.compact([parsed.domain, parsed.tld]).join('.')
-}
-
-export function parseDomain (domain: string, options = {}) {
-  return _parseDomain(domain, _.defaults(options, {
-    privateTlds: true,
-    customTlds: customTldsRe,
-  }))
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {

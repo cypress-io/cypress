@@ -48,6 +48,14 @@ let isRunCancelled = false
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
+// WebKit records video through Playwright, which ties each recording to a single page and only
+// finalizes the file when that page closes (https://github.com/cypress-io/cypress/issues/23815).
+// That conflicts with single-tab mode reusing one page across specs, so when video is enabled
+// WebKit recycles the tab per spec instead. See the call sites for each per-spec consequence.
+function isWebKitRecordingVideo (browser: Browser, videoRecording?: VideoRecording) {
+  return browser.family === 'webkit' && !!videoRecording
+}
+
 let earlyExitTerminator = new EarlyExitTerminator()
 
 const relativeSpecPattern = (projectRoot, pattern) => {
@@ -499,7 +507,9 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
+  // WebKit + video recycles the tab per spec via the standard new-tab path (connectToNewSpec, see
+  // isWebKitRecordingVideo), so skip the in-place single-tab navigation and fall through to it.
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo(browser, options.videoRecording)) {
     // reset browser state to match default behavior when opening/closing a new tab
     const resetBrowserStateStartedAt = Date.now()
 
@@ -614,10 +624,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
+async function waitForTestsToFinishRunning (options: { project: Project, browser: Browser, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
+  const { project, browser, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -724,7 +734,13 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-  if (usingExperimentalSingleTabMode && !isLastSpec) {
+  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo: isWebKitRecordingVideo(browser, videoRecording) })
+
+  // WebKit + video already closed the page (and the runner socket) in endVideoCapture, so destroyAut
+  // would wait forever for an 'aut:destroy:complete' reply that never arrives. The tab is recreated
+  // per spec anyway (see isWebKitRecordingVideo), so skip it.
+  if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo(browser, videoRecording)) {
+    debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
 
     // Even though single-tab mode intentionally keeps the same browser tab open
@@ -1006,7 +1022,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
+    // WebKit + video can't reuse a controller across specs (its page-scoped video is finalized on
+    // close), so create a fresh recording per spec (see isWebKitRecordingVideo).
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && !isWebKitRecordingVideo(browser, project.videoRecording)) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
@@ -1026,6 +1044,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       spec,
       config,
       project,
+      browser,
       estimated,
       screenshots,
       videoRecording,

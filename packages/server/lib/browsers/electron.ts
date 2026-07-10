@@ -4,7 +4,7 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp-protocol/cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
@@ -17,7 +17,7 @@ import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -478,8 +478,7 @@ export = {
   _setProxy (webContents, proxyServer) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // this should really only be necessary when
-      // running Chromium versions >= 72
+      // bypass the proxy for loopback addresses
       // https://github.com/cypress-io/cypress/issues/1872
       proxyBypassRules: '<-loopback>',
     })
@@ -502,6 +501,10 @@ export = {
       browserCriClient?.close(options.gracefulShutdown).catch(() => {})
       browserCriClient = null
     }
+  },
+
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
   },
 
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {

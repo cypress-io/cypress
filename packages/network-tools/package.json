@@ -20,9 +20,9 @@
     "watch": "tsc -p tsconfig.cjs.json --watch"
   },
   "dependencies": {
-    "@cypress/parse-domain": "2.4.0",
     "debug": "^4.3.4",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "tldts": "^6.1.32"
   },
   "devDependencies": {
     "rimraf": "6.1.1",

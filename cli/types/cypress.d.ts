@@ -3039,7 +3039,7 @@ declare namespace Cypress {
     reporter: string
     /**
      * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
-     * @default "spec"
+     * @default null
      */
     reporterOptions: { [key: string]: any }
     /**
@@ -3074,6 +3074,15 @@ declare namespace Cypress {
      * @see https://on.cypress.io/configuration#modifyObstructiveCode
      */
     modifyObstructiveCode: boolean
+    /**
+     * Whether Cypress will strip the `integrity` attribute from `<script>` and `<link>` elements
+     * on first-party resources so they are not blocked by Subresource Integrity (SRI) enforcement
+     * after the proxy rewrites them (under `modifyObstructiveCode`). Covers `integrity` set via
+     * static HTML, a JavaScript string literal, or runtime DOM assignment. Third-party resources
+     * are only rewritten — and have their SRI stripped — under `experimentalModifyObstructiveThirdPartyCode`.
+     * @default false
+     */
+    removeSRIAttributes: boolean
     /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
@@ -3175,7 +3184,7 @@ declare namespace Cypress {
      * Enable compression by passing true to use the default CRF of 32.
      * Compress at custom CRF by passing a number between 1 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * Disable compression by passing false or 0.
-     * @default 32
+     * @default false
      */
     videoCompression: number | boolean
     /**
@@ -3233,7 +3242,8 @@ declare namespace Cypress {
     experimentalInteractiveRunEvents: boolean
     /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
-     * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
+     * NOTE: Setting this flag to true removes Subresource Integrity (SRI) from third-party resources.
+     * To strip SRI from first-party resources as well, use `removeSRIAttributes`.
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
      * This option has no impact on experimentalSourceRewriting and is only used with the
      * non-experimental source rewriter.
@@ -4043,7 +4053,7 @@ declare namespace Cypress {
     method: 'GET' | 'POST'
 
     /**
-     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
+     * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-form-urlencoded` header.
      *
      * @example
      *    cy.visit({
