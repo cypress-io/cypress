@@ -106,22 +106,36 @@ export const proxyHttpCodec = createProxyHttpCodec()
 export function createFetchOrigin (_mw: HttpInterceptCtx) {
   return (outbound: HttpInterceptCtx): Promise<HttpInterceptCtx> => {
     return new Promise((resolve, reject) => {
-      const originalOnResponse = outbound.onResponse
-      const originalOnError = outbound.onError
-      const callbacks = outbound as HttpInterceptCtx & {
-        onError: (error: Error) => void
-        onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
+      // Mutate through an any-bag so we can delete callback keys on restore.
+      // Assigning undefined leaves the keys on the shared proxy ctx and can
+      // wipe IncomingResponse stage onError when fullCtx spreads ctx.
+      const callbacks: any = outbound
+      const hadOnError = Object.prototype.hasOwnProperty.call(callbacks, 'onError')
+      const hadOnResponse = Object.prototype.hasOwnProperty.call(callbacks, 'onResponse')
+      const originalOnError = callbacks.onError
+      const originalOnResponse = callbacks.onResponse
+
+      const restoreCallbacks = () => {
+        if (hadOnError) {
+          callbacks.onError = originalOnError
+        } else {
+          delete callbacks.onError
+        }
+
+        if (hadOnResponse) {
+          callbacks.onResponse = originalOnResponse
+        } else {
+          delete callbacks.onResponse
+        }
       }
 
       callbacks.onError = (error: Error) => {
-        callbacks.onError = originalOnError
-        callbacks.onResponse = originalOnResponse
+        restoreCallbacks()
         reject(error)
       }
 
-      callbacks.onResponse = (incomingRes, incomingResStream) => {
-        callbacks.onError = originalOnError
-        callbacks.onResponse = originalOnResponse
+      callbacks.onResponse = (incomingRes: IncomingMessage, incomingResStream: Readable) => {
+        restoreCallbacks()
 
         outbound.httpInterceptIncomingRes = incomingRes
         outbound.originBodyStream = incomingResStream

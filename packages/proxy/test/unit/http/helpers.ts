@@ -16,6 +16,7 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onE
     req: {},
     res: {},
     config: {},
+    ...ctx,
     networkInterceptionCore: ctx.networkInterceptionCore ?? createTestNetworkInterceptionCore(),
     __trackOnlyRunMiddleware: (names: string[]) => {
       onlyRunMiddlewareCalls.push(names)
@@ -23,7 +24,6 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onE
     middleware: {
       0: middleware,
     },
-    ...ctx,
   }
 
   const onError = onErrorHandler ?? ((error) => {

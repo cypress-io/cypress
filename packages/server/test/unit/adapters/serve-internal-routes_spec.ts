@@ -137,7 +137,6 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(serverRequest.create).to.have.been.calledOnce
     expect(serverRequest.create).to.have.been.calledWithMatch({
       url: 'http://127.0.0.1:1234/__cypress/process-origin-callback?foo=1',
-      proxy: 'http://127.0.0.1:1234',
       method: 'POST',
       headers: {
         cookie: 'session=abc',

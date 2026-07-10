@@ -122,15 +122,6 @@ export type ServerCtx = Readonly<{
   getCurrentBrowser: () => FoundBrowser
 }>
 
-const MIDDLEWARE_STAGE_CALLBACK_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
-  'next',
-  'end',
-  'onResponse',
-  'onError',
-  'skipMiddleware',
-  'onlyRunMiddleware',
-]
-
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
@@ -244,41 +235,58 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         return resolve()
       }
 
-      // Omit stage callbacks from ctx so origin fetch cannot clobber onError/onResponse.
-      const fullCtx = {
-        ..._.omit(ctx, MIDDLEWARE_STAGE_CALLBACK_KEYS),
-        next: () => {
-          fullCtx.next = () => {
-            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+      const onResponse = (incomingRes: Response, resStream: Readable) => {
+        ctx.incomingRes = incomingRes
+        ctx.incomingResStream = resStream
 
-            if (ctx.error) {
-              error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
-              error['cause'] = ctx.error
-            }
+        _end()
+      }
 
-            throw error
+      const next = () => {
+        fullCtx.next = () => {
+          const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+
+          if (ctx.error) {
+            error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
+            error['cause'] = ctx.error
           }
 
-          copyChangedCtx()
+          throw error
+        }
 
-          ctx.res.off('close', onClose)
-          _end(runMiddlewareStack())
-        },
+        copyChangedCtx()
+
+        ctx.res.off('close', onClose)
+        _end(runMiddlewareStack())
+      }
+
+      const fullCtx = {
+        next,
         end: _end,
-        onResponse: (incomingRes: Response, resStream: Readable) => {
-          ctx.incomingRes = incomingRes
-          ctx.incomingResStream = resStream
-
-          _end()
-        },
+        onResponse,
         onError: _onError,
         skipMiddleware: (name: string) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
         },
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
-          ctx.__trackOnlyRunMiddleware?.(names)
         },
+        // Spread last so test spies can override stage helpers.
+        ...ctx,
+      }
+
+      // Origin fetch can leave onError/onResponse as undefined on the shared
+      // ctx. Restore stage handlers whenever the spread wiped them out.
+      if (typeof fullCtx.onError !== 'function') {
+        fullCtx.onError = _onError
+      }
+
+      if (typeof fullCtx.onResponse !== 'function') {
+        fullCtx.onResponse = onResponse
+      }
+
+      if (typeof fullCtx.next !== 'function') {
+        fullCtx.next = next
       }
 
       try {
