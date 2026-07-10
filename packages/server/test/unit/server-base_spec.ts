@@ -218,6 +218,17 @@ describe('lib/server-base', () => {
       expect(firstClient.send).to.have.been.calledWith('Fetch.disable')
       expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
     })
+
+    it('resets CDP Fetch between tests without disabling Fetch', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+      client.send.resetHistory()
+
+      await this.server['resetCdpFetchRuntime']()
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.disable')
+    })
   })
 
   describe('#createServer', () => {

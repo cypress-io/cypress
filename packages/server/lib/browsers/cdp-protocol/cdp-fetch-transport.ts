@@ -83,6 +83,14 @@ export class CdpFetchTransport {
     }
   }
 
+  /**
+   * Clears in-flight request correlation without disabling CDP Fetch.
+   * Used between tests so the next test still receives paused traffic.
+   */
+  async reset (): Promise<void> {
+    this.rejectAll(new Error('CDP Fetch transport reset'))
+  }
+
   async stop (): Promise<void> {
     if (!this.isStarted) {
       return
@@ -138,15 +146,14 @@ export class CdpFetchTransport {
       this.inFlightRequests.set(networkId, deferred)
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
+        const headers = await this.continueRequestHeaders(event, outbound)
+
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
           ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
           ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
-          ...(this.headersChanged(outbound.headers ?? {}, event.request.headers)
-            ? { headers: this.toContinueRequestHeaders(outbound.headers ?? {}) }
-            : {}),
-          ...(await this.autFrameHeader(event, outbound)),
+          ...(headers ? { headers } : {}),
         }, outbound.sessionId)
 
         requestContinued = true
@@ -346,23 +353,37 @@ export class CdpFetchTransport {
       requestId: event.requestId,
     },
   ): Promise<Pick<Protocol.Fetch.ContinueRequestRequest, 'headers'>> => {
+    const headers = await this.continueRequestHeaders(event, outbound)
+
+    return headers ? { headers } : {}
+  }
+
+  /**
+   * Builds continueRequest headers when the outbound headers changed or the
+   * request is from the AUT frame. Always preserves X-Cypress-Is-AUT-Frame
+   * alongside any mutated headers (a later headers overwrite must not drop it).
+   */
+  private continueRequestHeaders = async (
+    event: Protocol.Fetch.RequestPausedEvent,
+    outbound: CdpFetchTransportRequest,
+  ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
     const isAUTFrame = event.frameId && this.options.isAUTFrame ? await this.options.isAUTFrame(event.frameId) : false
+    const headersChanged = this.headersChanged(outbound.headers ?? {}, event.request.headers)
 
-    if (!isAUTFrame) {
-      return {}
+    if (!isAUTFrame && !headersChanged) {
+      return
     }
 
-    return {
-      headers: [
-        ...Object.entries(outbound.headers).map(([name, value]) => {
-          return { name, value: String(value) }
-        }),
-        {
-          name: AUT_FRAME_HEADER,
-          value: 'true',
-        },
-      ],
+    const headers = this.toContinueRequestHeaders(outbound.headers ?? {})
+
+    if (isAUTFrame) {
+      headers.push({
+        name: AUT_FRAME_HEADER,
+        value: 'true',
+      })
     }
+
+    return headers
   }
 
   private cleanup (networkId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {

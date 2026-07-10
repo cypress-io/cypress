@@ -48,6 +48,7 @@ export type CdpFetchNetworkRuntime = {
   fetchTransport: CdpFetchTransport
   start (): Promise<void>
   reset (): Promise<void>
+  stop (): Promise<void>
 }
 
 /**
@@ -137,6 +138,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       return fetchTransport.start()
     },
     reset () {
+      return fetchTransport.reset()
+    },
+    stop () {
       return fetchTransport.stop()
     },
   }

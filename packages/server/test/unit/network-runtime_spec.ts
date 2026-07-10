@@ -185,7 +185,7 @@ describe('lib/network-runtime', () => {
     const runtime = createCdpFetchRuntime({ client })
     const onRequestPaused = await startCdpRuntime(runtime, client)
 
-    await onRequestPaused(createPausedRequest({
+    const handled = onRequestPaused(createPausedRequest({
       requestId: 'fetch-request',
       networkId: 'network-1',
     }))
@@ -195,5 +195,33 @@ describe('lib/network-runtime', () => {
     expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
       requestId: 'fetch-request',
     })
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'fetch-response',
+      networkId: 'network-1',
+      responseStatusCode: 200,
+    }))
+
+    await handled
+  })
+
+  it('createCdpFetchRuntime reset clears in-flight state without disabling Fetch', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ client })
+
+    await runtime.start()
+    client.send.resetHistory()
+
+    await runtime.reset()
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.disable')
+
+    await runtime.stop()
+
+    expect(client.send).to.have.been.calledWith('Fetch.disable')
   })
 })

@@ -304,6 +304,51 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('keeps the AUT frame header when HttpIntercept mutates request headers', async () => {
+      const client = createClient()
+      const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept, { isAUTFrame })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Foo': 'Bar',
+      }
+
+      httpIntercept.use((req, next) => {
+        return next({
+          ...req,
+          headers: {
+            ...req.headers,
+            'X-Mutated': '1',
+          },
+        })
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'X-Foo',
+          value: 'Bar',
+        }, {
+          name: 'X-Mutated',
+          value: '1',
+        }, {
+          name: 'X-Cypress-Is-AUT-Frame',
+          value: 'true',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
     it('matches request and response pauses by network id', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
@@ -844,6 +889,47 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.disable')
+    })
+
+    it('clears in-flight flows on reset without disabling Fetch', async () => {
+      const client = createClient()
+      const transport = new CdpFetchTransport(client as any)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+      client.send.resetHistory()
+
+      await transport.reset()
+      await handled
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.disable')
+      expect(client.off).not.to.have.been.called
+
+      client.send.resetHistory()
+
+      const nextHandled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request-2',
+        networkId: 'network-2',
+      }))
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request-2',
+      })
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response-2',
+        networkId: 'network-2',
+        responseStatusCode: 200,
+      }))
+
+      await nextHandled
     })
 
     it('disables Fetch before removing handlers on stop', async () => {

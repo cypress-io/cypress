@@ -496,7 +496,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     client: Pick<ICriClient, 'send' | 'on' | 'off'>,
     isAUTFrame?: (frameId: string) => Promise<boolean>,
   ) {
-    await this.resetCdpFetchRuntime()
+    await this.stopCdpFetchRuntime()
 
     const runtime = createCdpFetchRuntime({
       client,
@@ -518,6 +518,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
 
     return reset
+  }
+
+  private stopCdpFetchRuntime () {
+    const stop = this._cdpFetchRuntime?.stop()
+
+    stop?.catch((err) => {
+      debug('CDP Fetch runtime stop failed: %s', err?.stack || err)
+    })
+
+    return stop
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
