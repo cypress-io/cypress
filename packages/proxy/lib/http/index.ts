@@ -9,7 +9,7 @@ import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin, proxyHttpCodec } from '../adapters/http-codec'
+import { createFetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -450,8 +450,6 @@ export class Http {
       return codec.decodeResponse(ctx)
     }
   }
-
-  runLegacyProxyPipeline: InterceptMiddleware = this.createLegacyProxyPipeline(proxyHttpCodec)
 
   createMiddlewareContext (req: CypressIncomingRequest, res: CypressOutgoingResponseLike, handleHttpRequestSpan?: Span): HttpMiddlewareCtx<any> {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined

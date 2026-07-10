@@ -1,11 +1,10 @@
-import { Readable } from 'stream'
 import type { HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
 import type { HttpMiddlewareCtx } from '../http'
 import { createProxyHttpCodec } from './http-codec'
 import {
+  createRequestBodyStream,
   createSyntheticExpressContext,
   createSyntheticIncomingResponse,
-
 } from './synthetic-express-context'
 import type { SyntheticCypressResponse } from './synthetic-express-context'
 
@@ -14,14 +13,6 @@ type SyntheticHttpCodecOptions = {
     request: ReturnType<typeof createSyntheticExpressContext>['req'],
     response: ReturnType<typeof createSyntheticExpressContext>['res'],
   ) => HttpMiddlewareCtx<any>
-}
-
-function createBodyStream (body?: string | Buffer): Readable {
-  if (typeof body === 'undefined') {
-    return Readable.from([])
-  }
-
-  return Readable.from([body])
 }
 
 export function createSyntheticHttpCodec (
@@ -48,7 +39,7 @@ export function createSyntheticHttpCodec (
       const ctx = coreCodec.encodeResponse(response)
 
       ctx.incomingRes = createSyntheticIncomingResponse(response)
-      ctx.incomingResStream = response.bodyStream ?? createBodyStream(response.body)
+      ctx.incomingResStream = response.bodyStream ?? createRequestBodyStream(response.body)
 
       return ctx
     },

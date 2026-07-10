@@ -35,19 +35,41 @@ function parseCookieHeader (header?: string | string[]): Record<string, string> 
 
 function serializeCookie (name: string, value: string, options: CookieOptions = {}): string {
   const parts = [`${name}=${encodeURIComponent(value)}`]
+  const path = options.path == null ? '/' : options.path
+
+  parts.push(`Path=${path}`)
 
   if (options.domain) {
     parts.push(`Domain=${options.domain}`)
   }
 
-  if (options.expires) {
+  if (options.maxAge != null) {
+    const maxAgeMs = Number(options.maxAge)
+
+    if (!Number.isNaN(maxAgeMs)) {
+      parts.push(`Max-Age=${Math.floor(maxAgeMs / 1000)}`)
+      parts.push(`Expires=${new Date(Date.now() + maxAgeMs).toUTCString()}`)
+    }
+  } else if (options.expires) {
     parts.push(`Expires=${options.expires.toUTCString()}`)
+  }
+
+  if (options.httpOnly) {
+    parts.push('HttpOnly')
+  }
+
+  if (options.secure) {
+    parts.push('Secure')
+  }
+
+  if (options.sameSite) {
+    parts.push(`SameSite=${options.sameSite === true ? 'true' : options.sameSite}`)
   }
 
   return parts.join('; ')
 }
 
-function createRequestBodyStream (body?: string | Buffer): Readable {
+export function createRequestBodyStream (body?: string | Buffer): Readable {
   if (typeof body === 'undefined') {
     return Readable.from([])
   }

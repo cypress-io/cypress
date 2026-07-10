@@ -146,7 +146,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   })
 
   networkInterception.use(networkProxy.http.createLegacyProxyPipeline(syntheticCodec))
-  networkProxy.http.networkInterception = networkInterception
+  // Keep the proxy-codec intercept for NetworkProxy.handleHttpRequest; the CDP
+  // codec intercept is owned by CdpFetchTransport and must not be shared.
+  networkProxy.withIntercept(new HttpIntercept(networkProxy.codec))
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception)
 
