@@ -36,7 +36,6 @@
     "cypress:verify": "cypress verify --dev",
     "dev": "gulp dev",
     "dev-debug": "node ./scripts/debug.js dev",
-    "dev:clean": "gulp dev:clean",
     "docker": "./scripts/run-docker-local.sh",
     "docker-dev": "./scripts/run-docker-local.sh dev",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
