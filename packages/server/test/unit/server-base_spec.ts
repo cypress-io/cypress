@@ -179,6 +179,47 @@ describe('lib/server-base', () => {
     })
   })
 
+  describe('#createCdpFetchNetworkRuntime', () => {
+    function createClient () {
+      return {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+    }
+
+    it('starts the CDP Fetch runtime and exposes its network context', async function () {
+      const client = createClient()
+      const isAUTFrame = sinon.stub().resolves(false)
+
+      await this.server.createCdpFetchNetworkRuntime(client, isAUTFrame)
+
+      expect(client.on).to.have.been.calledWith('Fetch.requestPaused')
+      expect(client.send).to.have.been.calledWith('Fetch.enable', {
+        patterns: [{
+          requestStage: 'Request',
+        }, {
+          requestStage: 'Response',
+        }],
+      })
+
+      expect(this.server._cdpFetchRuntime).to.exist
+      expect(this.server._networkPolicyRegistration).to.exist
+      expect(this.server._networkInterceptionCore).to.exist
+    })
+
+    it('stops the previous CDP Fetch runtime before replacing it', async function () {
+      const firstClient = createClient()
+      const secondClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(firstClient)
+      await this.server.createCdpFetchNetworkRuntime(secondClient)
+
+      expect(firstClient.send).to.have.been.calledWith('Fetch.disable')
+      expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
+    })
+  })
+
   describe('#createServer', () => {
     beforeEach(function () {
       this.port = 54321

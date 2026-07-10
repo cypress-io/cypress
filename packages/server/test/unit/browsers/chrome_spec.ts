@@ -450,6 +450,28 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
+      it('delegates Fetch ownership to the CDP runtime when the proxy is disabled', async function () {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        const onPageCriClientReady = sinon.stub().resolves()
+
+        try {
+          await chrome.open('chrome', 'http://', {
+            ...openOpts,
+            onPageCriClientReady,
+          }, this.automation)
+
+          expect(onPageCriClientReady).to.have.been.calledOnce
+          expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
+            patterns: [{
+              resourceType: 'Document',
+            }],
+          })
+        } finally {
+          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+        }
+      })
+
       it('does not add header when not a document', async function () {
         await chrome.open('chrome', 'http://', openOpts, this.automation)
 

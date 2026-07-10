@@ -18,6 +18,7 @@ import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
 import type { CriClient } from './cdp-protocol/cri-client'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -378,9 +379,19 @@ export = {
 
     // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
     if (cdpAutomation) {
-      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
+
+      if (isProxyDisabled()) {
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+        await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      } else {
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        await cdpAutomation._handlePausedRequests(pageCriClient)
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      }
     }
 
     await win.loadURL(url)

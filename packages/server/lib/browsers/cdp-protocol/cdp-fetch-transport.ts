@@ -13,6 +13,11 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
+const AUT_FRAME_HEADER = 'X-Cypress-Is-AUT-Frame'
+
+type CdpFetchTransportOptions = {
+  isAUTFrame?: (frameId: string) => Promise<boolean>
+}
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
@@ -37,6 +42,7 @@ export class CdpFetchTransport {
   constructor (
     private readonly client: CdpFetchClient,
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
+    private readonly options: CdpFetchTransportOptions = {},
   ) {}
 
   /**
@@ -109,6 +115,7 @@ export class CdpFetchTransport {
         debug('continuing request pause without network id: %s', event.request.url)
         await this.safeSend('Fetch.continueRequest', {
           requestId: event.requestId,
+          ...(await this.autFrameHeader(event)),
         }, sessionId)
 
         return
@@ -139,6 +146,7 @@ export class CdpFetchTransport {
           ...(this.headersChanged(outbound.headers ?? {}, event.request.headers)
             ? { headers: this.toContinueRequestHeaders(outbound.headers ?? {}) }
             : {}),
+          ...(await this.autFrameHeader(event, outbound)),
         }, outbound.sessionId)
 
         requestContinued = true
@@ -327,6 +335,33 @@ export class CdpFetchTransport {
       await this.client.send(...args)
     } catch (err) {
       debug('CDP Fetch send failed: %s', (err as Error).message)
+    }
+  }
+
+  private autFrameHeader = async (
+    event: Protocol.Fetch.RequestPausedEvent,
+    outbound: CdpFetchTransportRequest = {
+      ...event.request,
+      id: event.networkId ?? event.requestId,
+      requestId: event.requestId,
+    },
+  ): Promise<Pick<Protocol.Fetch.ContinueRequestRequest, 'headers'>> => {
+    const isAUTFrame = event.frameId && this.options.isAUTFrame ? await this.options.isAUTFrame(event.frameId) : false
+
+    if (!isAUTFrame) {
+      return {}
+    }
+
+    return {
+      headers: [
+        ...Object.entries(outbound.headers).map(([name, value]) => {
+          return { name, value: String(value) }
+        }),
+        {
+          name: AUT_FRAME_HEADER,
+          value: 'true',
+        },
+      ],
     }
   }
 

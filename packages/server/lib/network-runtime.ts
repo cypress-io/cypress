@@ -38,6 +38,7 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 
 export type CreateCdpFetchRuntimeDeps = CreateProxyRuntimeDeps & {
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
+  isAUTFrame?: (frameId: string) => Promise<boolean>
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -161,7 +162,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // codec intercept is owned by CdpFetchTransport and must not be shared.
   networkProxy.withIntercept(new HttpIntercept(networkProxy.codec))
 
-  const fetchTransport = new CdpFetchTransport(deps.client, networkInterception)
+  const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
+    isAUTFrame: deps.isAUTFrame,
+  })
 
   return {
     networkProxy,

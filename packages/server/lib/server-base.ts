@@ -50,10 +50,12 @@ import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookie/automation'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
-import { createProxyRuntime } from './network-runtime'
+import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
+import type { CdpFetchNetworkRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
+import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -175,6 +177,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   protected _networkInterceptionCore?: NetworkInterceptionCore
+  protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -482,6 +485,34 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkInterceptionCore = runtime.networkInterceptionCore
   }
 
+  async createCdpFetchNetworkRuntime (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+    isAUTFrame?: (frameId: string) => Promise<boolean>,
+  ) {
+    await this.resetCdpFetchRuntime()
+
+    const runtime = createCdpFetchRuntime({
+      client,
+      isAUTFrame,
+    })
+
+    this._cdpFetchRuntime = runtime
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
+    this._networkInterceptionCore = runtime.networkInterceptionCore
+
+    await runtime.start()
+  }
+
+  private resetCdpFetchRuntime () {
+    const reset = this._cdpFetchRuntime?.reset()
+
+    reset?.catch((err) => {
+      debug('CDP Fetch runtime reset failed: %s', err?.stack || err)
+    })
+
+    return reset
+  }
+
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
     // e2e only?
     options.onResolveUrl = this._onResolveUrl.bind(this)
@@ -498,6 +529,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     options.onResetServerState = () => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
+      void this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
@@ -674,6 +706,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
+    void this.resetCdpFetchRuntime()
     this._networkProxy?.clearCredentials()
     const baseUrl = this._baseUrl ?? '<root>'
 

@@ -89,6 +89,11 @@ export class OpenProject extends EventEmitter {
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
       ...(isProxyEnabled() ? { proxyServer: ensureProxyServer(cfg) } : {}),
+      ...(!isProxyEnabled() ? {
+        onPageCriClientReady: (client, isAUTFrame) => {
+          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame)
+        },
+      } : {}),
       socketIoRoute: cfg.socketIoRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: !!cfg.isTextTerminal,

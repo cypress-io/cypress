@@ -366,6 +366,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     return false
   }
 
+  isAUTFrame = (frameId: string) => {
+    return this._isAUTFrame(frameId)
+  }
+
   private _getAutFrame = async () => {
     try {
       if (this.gettingFrameTree) {

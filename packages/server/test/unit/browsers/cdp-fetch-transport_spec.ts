@@ -273,6 +273,37 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    it('marks AUT frame requests when continuing through CDP Fetch', async () => {
+      const client = createClient()
+      const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
+      const transport = new CdpFetchTransport(client as any, undefined, { isAUTFrame })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Foo': 'Bar',
+      }
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'X-Foo',
+          value: 'Bar',
+        }, {
+          name: 'X-Cypress-Is-AUT-Frame',
+          value: 'true',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
     it('matches request and response pauses by network id', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
