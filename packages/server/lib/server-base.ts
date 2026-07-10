@@ -99,9 +99,8 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
 
     // Trusted loopback from serve-internal-routes: path-only HTTP to Express
     // must reach internal route handlers instead of redirecting to clientRoute.
+    // Keep the header so a catch-all re-entry can detect the loop and stop.
     if (req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]) {
-      delete req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
-
       return next()
     }
 

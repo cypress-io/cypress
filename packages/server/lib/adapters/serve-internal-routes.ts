@@ -1,7 +1,7 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type CyServer from '../../index.d.ts'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isCypressServerOrigin, isInternalCypressRoute } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isInternalCypressRoute } from './internal-routes'
 
 type ServeInternalRoutesConfig = Pick<
   CyServer.Config & Cypress.Config,
@@ -25,6 +25,7 @@ const HOP_BY_HOP_HEADERS = new Set([
   'trailer',
   'transfer-encoding',
   'upgrade',
+  CYPRESS_INTERNAL_LOOPBACK_HEADER,
 ])
 
 function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
@@ -35,6 +36,10 @@ function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
 
     return memo
   }, {})
+}
+
+function hasLoopbackHeader (headers: HttpHeaders = {}): boolean {
+  return Object.keys(headers).some((key) => key.toLowerCase() === CYPRESS_INTERNAL_LOOPBACK_HEADER)
 }
 
 function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
@@ -65,15 +70,24 @@ export function createServeInternalRoutesMiddleware ({
       return next(request)
     }
 
-    if (isCypressServerOrigin(request.url, config)) {
-      return next(request)
+    // Re-entry after our own Express loopback: no route handler owned this path,
+    // so the catch-all proxy saw it again. Stop instead of looping forever.
+    if (hasLoopbackHeader(request.headers)) {
+      return {
+        id: request.id,
+        url: request.url,
+        statusCode: 404,
+        headers: { 'content-type': 'text/plain' },
+        body: 'Not Found',
+      }
     }
 
-    // Fulfill here instead of calling next()/terminal: CDP Fetch needs a
-    // synthesized response for fulfillRequest, and this hop must hit Express
-    // route handlers directly. That skips later intercept layers (including
-    // CorrelateBrowserPreRequest in MITM mode); pending pre-requests for these
-    // cross-origin internals are swept by the normal timeout path.
+    // Fulfill via Express for both same-origin and cross-origin internals.
+    // sendRequestOutgoing would hit Express as a path-only request and get
+    // forceProxy-redirected without the loopback header. CDP Fetch also needs
+    // a synthesized response for fulfillRequest. This skips later intercept
+    // layers (including CorrelateBrowserPreRequest in MITM mode); pending
+    // pre-requests for these internals are swept by the normal timeout path.
     const response = await serverRequest.create({
       url: toLoopbackUrl(request.url, config),
       method: request.method ?? 'GET',

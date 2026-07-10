@@ -92,18 +92,63 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(serverRequest.create).not.to.have.been.called
   })
 
-  it('forwards same-origin internal requests through the next middleware', async () => {
-    const { middleware, serverRequest } = createMiddleware()
-    const next = sinon.stub().resolves({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
+  it('forwards same-origin internal requests through Express loopback', async () => {
+    const { middleware, serverRequest } = createMiddleware({
+      statusCode: 200,
+      headers: { 'content-type': 'text/plain' },
+      body: 'ok',
+    })
+    const next = sinon.stub()
 
     const response = await middleware({
       id: 'req-1',
       url: 'http://localhost:1234/__cypress/xhrs/foo',
+      method: 'GET',
+      headers: {
+        host: 'localhost:1234',
+      },
     }, next)
 
-    expect(response).to.deep.equal({ id: 'req-1', url: 'http://localhost:1234/__cypress/xhrs/foo' })
-    expect(next).to.have.been.calledOnce
+    expect(next).not.to.have.been.called
+    expect(serverRequest.create).to.have.been.calledOnce
+    expect(serverRequest.create).to.have.been.calledWithMatch({
+      url: 'http://127.0.0.1:1234/__cypress/xhrs/foo',
+      method: 'GET',
+      headers: {
+        'x-cypress-internal-loopback': '1',
+      },
+    }, true)
+
+    expect(response).to.deep.equal({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress/xhrs/foo',
+      statusCode: 200,
+      headers: { 'content-type': 'text/plain' },
+      body: 'ok',
+    })
+  })
+
+  it('returns 404 when a loopback re-enters without an Express handler', async () => {
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://127.0.0.1:1234/__/unknown',
+      headers: {
+        'x-cypress-internal-loopback': '1',
+      },
+    }, next)
+
+    expect(next).not.to.have.been.called
     expect(serverRequest.create).not.to.have.been.called
+    expect(response).to.deep.equal({
+      id: 'req-1',
+      url: 'http://127.0.0.1:1234/__/unknown',
+      statusCode: 404,
+      headers: { 'content-type': 'text/plain' },
+      body: 'Not Found',
+    })
   })
 
   it('loops cross-origin internal requests back to the local Express router', async () => {

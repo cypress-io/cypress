@@ -124,6 +124,9 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
 
       if (typeof httpRequest.body !== 'undefined') {
         Object.assign(transportRequest, toRequestPostData(httpRequest.body))
+      } else {
+        delete transportRequest.postData
+        delete transportRequest.postDataIsBase64
       }
 
       return transportRequest
