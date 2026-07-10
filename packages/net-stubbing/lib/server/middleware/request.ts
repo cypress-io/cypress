@@ -15,7 +15,9 @@ const debug = null
 export const SetMatchingRoutes: RequestMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
 
-  const devServerUrl = new URL(this.req.proxiedUrl)
+  // proxiedUrl is normally absolute; path-only values can appear when Express
+  // re-enters the catch-all proxy (e.g. trusted internal loopbacks).
+  const devServerUrl = new URL(this.req.proxiedUrl, 'http://127.0.0.1')
 
   // if this is a request to the dev server, do not match any routes as
   // we do not want to allow the user to intercept requests to the dev server
