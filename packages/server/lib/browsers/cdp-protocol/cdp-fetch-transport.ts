@@ -250,7 +250,6 @@ export class CdpFetchTransport {
 
   private createResponseBodyStream = (requestId: string, sessionId?: string): Readable => {
     let reading = false
-    let stream: Protocol.IO.StreamHandle | undefined
     let bodyStream: Readable
 
     bodyStream = new Readable({
@@ -263,40 +262,25 @@ export class CdpFetchTransport {
 
         void (async () => {
           try {
-            if (!stream) {
-              const response = await this.client.send('Fetch.takeResponseBodyAsStream', {
-                requestId,
-              }, sessionId) as Protocol.Fetch.TakeResponseBodyAsStreamResponse
+            const response = await this.client.send('Fetch.getResponseBody', {
+              requestId,
+            }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-              stream = response.stream
+            const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
+
+            if (body.length) {
+              bodyStream.push(body)
             }
 
-            const chunk = await this.client.send('IO.read', {
-              handle: stream,
-            }, sessionId) as Protocol.IO.ReadResponse
-
-            if (chunk.data) {
-              this.pushChunk(bodyStream, chunk)
-            }
-
-            if (chunk.eof) {
-              await this.safeSend('IO.close', { handle: stream }, sessionId)
-              bodyStream.push(null)
-            }
+            bodyStream.push(null)
           } catch (err) {
             bodyStream.destroy(err as Error)
-          } finally {
-            reading = false
           }
         })()
       },
     })
 
     return bodyStream
-  }
-
-  private pushChunk (readable: Readable, chunk: Protocol.IO.ReadResponse): void {
-    readable.push(Buffer.from(chunk.data, chunk.base64Encoded ? 'base64' : 'utf8'))
   }
 
   private safeSend = async (...args: Parameters<CdpFetchClient['send']>): Promise<void> => {

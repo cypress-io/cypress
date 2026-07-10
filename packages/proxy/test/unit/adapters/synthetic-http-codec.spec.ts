@@ -60,6 +60,32 @@ describe('createSyntheticExpressContext', () => {
 
     expect(res.getCapturedBody().toString()).to.equal('created')
   })
+
+  it('serializes cookies with Express-compatible Path and attributes', () => {
+    const { res } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+    })
+
+    res.cookie('session', 'abc', {
+      domain: 'example.test',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 900000,
+    })
+
+    const setCookie = res.getHeader('Set-Cookie') as string
+
+    expect(setCookie).to.include('session=abc')
+    expect(setCookie).to.include('Path=/')
+    expect(setCookie).to.include('Domain=example.test')
+    expect(setCookie).to.include('Max-Age=900')
+    expect(setCookie).to.include('HttpOnly')
+    expect(setCookie).to.include('Secure')
+    expect(setCookie).to.include('SameSite=lax')
+    expect(setCookie).to.match(/Expires=/)
+  })
 })
 
 describe('createSyntheticHttpCodec', () => {

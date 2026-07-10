@@ -177,6 +177,8 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkInterceptionCore.networkCapture).to.exist
     expect(runtime.networkInterceptionCore.cookieState).to.exist
     expect(runtime.networkInterceptionCore.commandLog).to.exist
+    expect(runtime.networkProxy.http.networkInterception).to.exist
+    expect(runtime.networkProxy.http.networkInterception).to.not.equal(runtime.networkInterception)
   })
 
   it('runs legacy request and response middleware over the CDP runtime', async () => {
@@ -208,16 +210,9 @@ describe('lib/network-runtime', () => {
       [HttpStages.Error]: {},
     }
 
-    client.send.withArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
-    client.send.withArgs('IO.read').onFirstCall().resolves({
-      data: Buffer.from('origin').toString('base64'),
+    client.send.withArgs('Fetch.getResponseBody').resolves({
+      body: Buffer.from('origin').toString('base64'),
       base64Encoded: true,
-      eof: false,
-    })
-
-    client.send.withArgs('IO.read').onSecondCall().resolves({
-      data: '',
-      eof: true,
     })
 
     const onRequestPaused = await startCdpRuntime(runtime, client)
@@ -239,6 +234,12 @@ describe('lib/network-runtime', () => {
       requestId: 'fetch-request',
       url: 'https://example.test/mutated',
     })
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+      requestId: 'fetch-response',
+    })
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.takeResponseBodyAsStream')
 
     expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
       requestId: 'fetch-response',

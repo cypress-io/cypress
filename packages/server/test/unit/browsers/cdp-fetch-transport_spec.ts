@@ -519,16 +519,9 @@ describe('CdpFetchTransport', () => {
       const transport = new CdpFetchTransport(client as any, httpIntercept)
       const onRequestPaused = await startTransport(transport, client)
 
-      client.send.withArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
-      client.send.withArgs('IO.read').onFirstCall().resolves({
-        data: Buffer.from('origin').toString('base64'),
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
-        eof: false,
-      })
-
-      client.send.withArgs('IO.read').onSecondCall().resolves({
-        data: '',
-        eof: true,
       })
 
       httpIntercept.use(async (req, next) => {
@@ -559,17 +552,11 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      expect(client.send).to.have.been.calledWith('Fetch.takeResponseBodyAsStream', {
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
         requestId: 'fetch-response',
       })
 
-      expect(client.send).to.have.been.calledWith('IO.read', {
-        handle: 'stream-1',
-      })
-
-      expect(client.send).to.have.been.calledWith('IO.close', {
-        handle: 'stream-1',
-      })
+      expect(client.send).not.to.have.been.calledWith('Fetch.takeResponseBodyAsStream')
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-response',
@@ -579,6 +566,60 @@ describe('CdpFetchTransport', () => {
           value: 'text/plain',
         }],
         body: Buffer.from('origin-rewritten').toString('base64'),
+      })
+    })
+
+    it('fulfills rewritten empty response bodies without stalling', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: '',
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            'content-type': 'text/plain',
+          },
+          statusCode: 204,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 204,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-response',
+      })
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-response',
+        responseCode: 204,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
+        body: Buffer.from('').toString('base64'),
       })
     })
 
