@@ -4,6 +4,7 @@ import type {
   HttpResponse,
   TransportCodecPort,
 } from '@packages/network-interception'
+import type { Protocol } from 'devtools-protocol'
 import type {
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
@@ -13,18 +14,6 @@ type CdpFetchHttpResponse = HttpResponse & {
   body?: string | Buffer
   headers?: HttpHeaders
   statusCode?: number
-}
-
-function toCdpRequestHeaders (headers: HttpHeaders = {}): Record<string, string> {
-  return Object.entries(headers).reduce<Record<string, string>>((memo, [name, value]) => {
-    if (Array.isArray(value)) {
-      memo[name] = value.join(', ')
-    } else if (typeof value !== 'undefined') {
-      memo[name] = value
-    }
-
-    return memo
-  }, {})
 }
 
 function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['responseHeaders'] {
@@ -46,6 +35,24 @@ function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['r
   })
 }
 
+function toHttpHeaders (headers?: CdpFetchTransportResponse['responseHeaders']): HttpHeaders | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  return headers.reduce<HttpHeaders>((memo, { name, value }) => {
+    const existing = memo[name]
+
+    if (existing) {
+      memo[name] = ([] as string[]).concat(existing, value)
+    } else {
+      memo[name] = value
+    }
+
+    return memo
+  }, {})
+}
+
 function toResponseBody (body?: string | Buffer): string | undefined {
   if (body === undefined) {
     return undefined
@@ -54,29 +61,28 @@ function toResponseBody (body?: string | Buffer): string | undefined {
   return Buffer.from(body).toString('base64')
 }
 
-function toRequestPostData (body: string | Buffer): Pick<CdpFetchTransportRequest, 'postData' | 'postDataIsBase64'> {
-  if (Buffer.isBuffer(body)) {
-    return {
-      postData: body.toString('base64'),
-      postDataIsBase64: true,
-    }
+function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
+  if (!headers) {
+    return {}
   }
 
-  return {
-    postData: body,
-  }
+  return Object.entries(headers).reduce<Protocol.Network.Headers>((memo, [name, value]) => {
+    if (typeof value === 'undefined') {
+      return memo
+    }
+
+    memo[name] = ([] as string[]).concat(value).map(String).join(', ')
+
+    return memo
+  }, {})
 }
 
-function fromRequestPostData (transportRequest: CdpFetchTransportRequest): string | Buffer | undefined {
-  if (typeof transportRequest.postData === 'undefined') {
+function toRequestPostData (body?: string | Buffer): string | undefined {
+  if (body === undefined) {
     return undefined
   }
 
-  if (transportRequest.postDataIsBase64) {
-    return Buffer.from(transportRequest.postData, 'base64')
-  }
-
-  return transportRequest.postData
+  return typeof body === 'string' ? body : body.toString('utf8')
 }
 
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
@@ -102,6 +108,16 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     return request as CdpFetchTransportRequest & { requestId: string }
   }
 
+  const requireResponse = (id: string): CdpFetchTransportResponse => {
+    const response = inFlightResponses.get(id)
+
+    if (!response) {
+      throw new Error(`No CDP Fetch response pause found for ${id}. HttpIntercept middleware must call next() before returning a response.`)
+    }
+
+    return response
+  }
+
   return {
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
       inFlightRequests.set(transportRequest.id, transportRequest)
@@ -111,7 +127,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         url: transportRequest.url,
         method: transportRequest.method,
         headers: transportRequest.headers,
-        body: fromRequestPostData(transportRequest),
+        body: transportRequest.postData,
       }
     },
 
@@ -119,21 +135,20 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       const transportRequest = requireRequest(httpRequest.id)
 
       transportRequest.url = httpRequest.url
-      transportRequest.method = httpRequest.method ?? transportRequest.method
-      transportRequest.headers = httpRequest.headers ? toCdpRequestHeaders(httpRequest.headers) : transportRequest.headers
 
-      if (typeof httpRequest.body !== 'undefined') {
-        Object.assign(transportRequest, toRequestPostData(httpRequest.body))
-      } else {
-        delete transportRequest.postData
-        delete transportRequest.postDataIsBase64
+      if (httpRequest.method !== undefined) {
+        transportRequest.method = httpRequest.method
+      }
+
+      if (httpRequest.headers !== undefined) {
+        transportRequest.headers = toNetworkHeaders(httpRequest.headers)
+      }
+
+      if (httpRequest.body !== undefined) {
+        transportRequest.postData = toRequestPostData(httpRequest.body)
       }
 
       return transportRequest
-    },
-
-    getRequest (id: string): CdpFetchTransportRequest {
-      return requireRequest(id)
     },
 
     decodeResponse (transportResponse: CdpFetchTransportResponse): HttpResponse {
@@ -142,12 +157,22 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       return {
         id: transportResponse.id,
         url: transportResponse.url,
+        bodyStream: transportResponse.bodyStream,
+        headers: toHttpHeaders(transportResponse.responseHeaders),
+        statusCode: transportResponse.responseCode,
       }
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
       const response = httpResponse as CdpFetchHttpResponse
-      const transportResponse = inFlightResponses.get(httpResponse.id) ?? {
+      const pausedResponse = inFlightResponses.get(httpResponse.id)
+      const transportResponse = pausedResponse ? {
+        ...pausedResponse,
+        fulfilled: response.body !== undefined,
+        responseCode: response.statusCode ?? pausedResponse.responseCode,
+        responseHeaders: toResponseHeaders(response.headers) ?? pausedResponse.responseHeaders,
+        ...(response.body !== undefined ? { body: toResponseBody(response.body) } : {}),
+      } : {
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,

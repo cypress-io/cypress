@@ -1,3 +1,5 @@
+import type { Readable } from 'stream'
+
 export type HttpHeaders = Record<string, string | string[] | undefined>
 
 export type HttpBody = string | Buffer
@@ -14,6 +16,7 @@ export type HttpResponse = {
   id: string
   url: string
   body?: HttpBody
+  bodyStream?: Readable
   headers?: HttpHeaders
   statusCode?: number
 }
@@ -23,7 +26,6 @@ export interface TransportCodecPort<TRequest, TResponse> {
   decodeRequest (request: TRequest): HttpRequest
   encodeResponse (response: HttpResponse): TResponse
   decodeResponse (response: TResponse): HttpResponse
-  getRequest (id: string): TRequest
   releaseRequest? (id: string): void
 }
 

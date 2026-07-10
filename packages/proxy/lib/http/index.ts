@@ -5,11 +5,10 @@ import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import { telemetry, Span } from '@packages/telemetry'
-import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin, proxyHttpCodec, resolveProxyResponseBodyStream } from '../adapters/http-codec'
+import { createFetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -20,11 +19,12 @@ import type { SocketBroadcaster } from '@packages/socket'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
+  CypressOutgoingResponseLike,
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore } from '@packages/network-interception'
+import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -77,9 +77,9 @@ export type HttpMiddlewareStacks = {
   }
 }
 
-type HttpMiddlewareCtx<T> = {
+export type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
-  res: CypressOutgoingResponse
+  res: CypressOutgoingResponseLike
   handleHttpRequestSpan?: Span
   reqMiddlewareSpan?: Span
   resMiddlewareSpan?: Span
@@ -235,59 +235,41 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         return resolve()
       }
 
-      const onResponse = (incomingRes: Response, resStream: Readable) => {
-        ctx.incomingRes = incomingRes
-        ctx.incomingResStream = resStream
+      const fullCtx = {
+        // Spread ctx first so middleware helpers (next/end/onResponse/...) always
+        // win over any same-named fields that may exist on the request ctx.
+        ...ctx,
+        next: () => {
+          fullCtx.next = () => {
+            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
-        _end()
-      }
+            if (ctx.error) {
+              error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
+              error['cause'] = ctx.error
+            }
 
-      const next = () => {
-        fullCtx.next = () => {
-          const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
-
-          if (ctx.error) {
-            error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
-            error['cause'] = ctx.error
+            throw error
           }
 
-          throw error
-        }
+          copyChangedCtx()
 
-        copyChangedCtx()
-
-        ctx.res.off('close', onClose)
-        _end(runMiddlewareStack())
-      }
-
-      const fullCtx = {
-        next,
+          ctx.res.off('close', onClose)
+          _end(runMiddlewareStack())
+        },
         end: _end,
-        onResponse,
+        onResponse: (incomingRes: Response, resStream: Readable) => {
+          ctx.incomingRes = incomingRes
+          ctx.incomingResStream = resStream
+
+          _end()
+        },
         onError: _onError,
         skipMiddleware: (name: string) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
         },
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
-          ctx.__trackOnlyRunMiddleware?.(names)
         },
-        // Spread last so test spies can override stage helpers.
-        ...ctx,
-      }
-
-      // Origin fetch can leave onError/onResponse as undefined on the shared
-      // ctx. Restore stage handlers whenever the spread wiped them out.
-      if (typeof fullCtx.onError !== 'function') {
-        fullCtx.onError = _onError
-      }
-
-      if (typeof fullCtx.onResponse !== 'function') {
-        fullCtx.onResponse = onResponse
-      }
-
-      if (typeof fullCtx.next !== 'function') {
-        fullCtx.next = next
       }
 
       try {
@@ -385,6 +367,7 @@ export class Http {
 
       // if there is a pre-request and the error has not been handled and the response has not been destroyed
       // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
+      //
       // browsers will retry requests in the event of network errors, but they will not send pre-requests,
       // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
       if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
@@ -405,82 +388,86 @@ export class Http {
     return onError
   }
 
-  runLegacyProxyPipeline: InterceptMiddleware = async (request, next): Promise<HttpResponse> => {
-    const ctx = proxyHttpCodec.getRequest(request.id)
-
-    ctx.req.proxiedUrl = request.url
-
-    const onError = this.buildOnError(ctx)
-
-    await _runStage(HttpStages.IncomingRequest, ctx, onError)
-
-    // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-    // In this case we don't want to run the response middleware and should just exit.
-    if (ctx.res.destroyed) {
-      await onError(createBrowserConnectionClosedError())
-
-      return proxyHttpCodec.decodeResponse(ctx)
-    }
-
-    if (!ctx.incomingRes && !ctx.res.writableFinished && !ctx.res.headersSent) {
-      const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
-
+  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
+    return async (request, next): Promise<HttpResponse> => {
       try {
-        // Intercept handlers mutate the live proxied request (ctx.req). Sync those
-        // fields onto the neutral HttpRequest before next()/encodeRequest, which
-        // otherwise overwrite ctx.req with the pre-intercept decodeRequest values.
-        request.url = ctx.req.proxiedUrl
-        request.method = ctx.req.method
-        request.headers = ctx.req.headers
-        request.body = ctx.req.body
+        const ctx = codec.encodeRequest(request)
 
-        const response = await next(request)
+        const onError = this.buildOnError(ctx)
 
-        span?.end()
+        await _runStage(HttpStages.IncomingRequest, ctx, onError)
 
-        ctx.req.proxiedUrl = response.url
-        ctx.req.onInterceptResponseWritten = ctx.onResponseWrittenToClient
+        // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+        // In this case we don't want to run the response middleware and should just exit.
+        if (ctx.res.destroyed) {
+          const error = createBrowserConnectionClosedError()
 
-        if (ctx.req.hadIntercept) {
-          setDefaultHeaders(ctx.req, ctx.httpInterceptIncomingRes!)
+          await onError(error)
+
+          throw error
         }
 
-        ctx.incomingRes = ctx.httpInterceptIncomingRes
-        ctx.incomingResStream = await resolveProxyResponseBodyStream(ctx)
-      } catch (err) {
-        span?.end()
-        await onError(err as Error)
+        // Skip the origin fetch when request middleware already finished the client
+        // response (e.g. blocked-host 503 or unload redirect) without setting incomingRes.
+        // Middleware that ends the client response must set headersSent/writableFinished
+        // (or incomingRes); otherwise the pipeline will still call next()/origin.
+        if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
+          const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
 
-        return proxyHttpCodec.decodeResponse(ctx)
+          try {
+            const response = await next(codec.decodeRequest(ctx))
+
+            span?.end()
+
+            codec.encodeResponse(response)
+
+            if (ctx.incomingRes && !ctx.incomingResStream) {
+              throw new Error('Incoming response stream was not set by the HTTP transport codec.')
+            }
+          } catch (err) {
+            span?.end()
+            await onError(err as Error)
+
+            // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
+            // encoding a synthetic empty success body via decodeResponse.
+            throw err
+          }
+        }
+
+        if (ctx.incomingRes) {
+          // start the span that is responsible for recording the start time of the entire middleware run on the stack
+          ctx.resMiddlewareSpan = telemetry.startSpan({
+            name: 'response:middleware',
+            parentSpan: ctx.handleHttpRequestSpan,
+            isVerbose,
+          })
+
+          await _runStage(HttpStages.IncomingResponse, ctx, onError)
+          .finally(() => {
+            ctx.resMiddlewareSpan?.end()
+          })
+
+          if (ctx.error) {
+            throw ctx.error
+          }
+
+          return codec.decodeResponse(ctx)
+        }
+
+        if (ctx.error) {
+          throw ctx.error
+        }
+
+        ctx.debug('Warning: Request was not fulfilled with a response.')
+
+        return codec.decodeResponse(ctx)
+      } finally {
+        codec.releaseRequest?.(request.id)
       }
-    } else if (!ctx.incomingRes) {
-      // Request middleware finished the browser response without setting
-      // incomingRes (redirects, blocked-host 503, etc.).
-      ctx.reqMiddlewareSpan?.end()
     }
-
-    if (ctx.incomingRes) {
-      // start the span that is responsible for recording the start time of the entire middleware run on the stack
-      ctx.resMiddlewareSpan = telemetry.startSpan({
-        name: 'response:middleware',
-        parentSpan: ctx.handleHttpRequestSpan,
-        isVerbose,
-      })
-
-      await _runStage(HttpStages.IncomingResponse, ctx, onError)
-      .finally(() => {
-        ctx.resMiddlewareSpan?.end()
-      })
-
-      return proxyHttpCodec.decodeResponse(ctx)
-    }
-
-    ctx.debug('Warning: Request was not fulfilled with a response.')
-
-    return proxyHttpCodec.decodeResponse(ctx)
   }
 
-  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+  createMiddlewareContext (req: CypressIncomingRequest, res: CypressOutgoingResponseLike, handleHttpRequestSpan?: Span): HttpMiddlewareCtx<any> {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
@@ -543,6 +530,11 @@ export class Http {
       getCurrentBrowser: this.getCurrentBrowser,
     }
 
+    return ctx
+  }
+
+  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+    const ctx = this.createMiddlewareContext(req, res, handleHttpRequestSpan)
     const onError = this.buildOnError(ctx)
 
     // start the span that is responsible for recording the start time of the entire middleware run on the stack
@@ -558,7 +550,14 @@ export class Http {
     }
 
     return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
-    .catch(onError)
+    .catch((err) => {
+      // The legacy pipeline may already have run error middleware for this ctx.
+      if (ctx.error) {
+        return
+      }
+
+      return onError(err)
+    })
   }
 
   getRenderedHTMLOrigins = () => {

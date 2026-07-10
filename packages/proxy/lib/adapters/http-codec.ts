@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import type { IncomingMessage } from 'http'
-import type { HttpHeaders, HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
-import { getBodyStream } from '@packages/net-stubbing/lib/server/util'
+import type { HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import { sendRequestOutgoing } from '../http/send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
@@ -12,23 +11,17 @@ type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
   incomingResStream?: Readable
   httpInterceptIncomingRes?: IncomingMessage
   originBodyStream?: Readable
-  httpInterceptStubBody?: string | Buffer
-  httpInterceptDelay?: number
-  httpInterceptThrottleKbps?: number
-  onResponseWrittenToClient?: () => Promise<void>
 }
 
-function cleanHeaders (headers: HttpHeaders = {}): Record<string, string | string[]> {
-  return Object.entries(headers).reduce<Record<string, string | string[]>>((memo, [key, value]) => {
-    if (typeof value !== 'undefined') {
-      memo[key] = value
-    }
+// Retains the middleware ctx across createLegacyProxyPipeline's releaseRequest
+// so HttpIntercept.encodeResponse can still recover it on the MITM path.
+const PROXY_RESPONSE_CTX = Symbol('proxyResponseCtx')
 
-    return memo
-  }, {})
+type HttpResponseWithCtx = HttpResponse & {
+  [PROXY_RESPONSE_CTX]?: HttpInterceptCtx
 }
 
-function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
+export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
   const inFlightRequests = new Map<string, HttpInterceptCtx>()
   const requireCtx = (id: string): HttpInterceptCtx => {
     const ctx = inFlightRequests.get(id)
@@ -42,7 +35,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
 
   return {
     decodeRequest (ctx: HttpInterceptCtx): HttpRequest {
-      const id = _.uniqueId('httpIntercept')
+      const id = ctx.id ?? _.uniqueId('httpIntercept')
 
       ctx.id = id
       inFlightRequests.set(id, ctx)
@@ -51,7 +44,7 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
         id,
         url: ctx.req.proxiedUrl,
         method: ctx.req.method,
-        headers: ctx.req.headers,
+        headers: ctx.req.headers as HttpRequest['headers'],
         body: ctx.req.body,
       }
     },
@@ -60,37 +53,51 @@ function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInter
       const ctx = requireCtx(request.id)
 
       ctx.req.proxiedUrl = request.url
-      ctx.req.method = request.method ?? ctx.req.method
-      ctx.req.headers = request.headers ?? ctx.req.headers
-      ctx.req.body = request.body ?? ctx.req.body
+
+      if (request.method !== undefined) {
+        ctx.req.method = request.method
+      }
+
+      if (request.headers !== undefined) {
+        ctx.req.headers = request.headers
+      }
+
+      if (request.body !== undefined) {
+        ctx.req.body = request.body
+      }
 
       return ctx
     },
 
-    getRequest (id: string): HttpInterceptCtx {
-      return requireCtx(id)
-    },
-
     decodeResponse (ctx: HttpInterceptCtx): HttpResponse {
-      return {
+      const incomingRes = ctx.incomingRes ?? ctx.httpInterceptIncomingRes
+      const response: HttpResponseWithCtx = {
         id: ctx.id!,
         url: ctx.req.proxiedUrl,
+        bodyStream: ctx.incomingResStream ?? ctx.originBodyStream,
+        headers: incomingRes?.headers as HttpResponse['headers'],
+        statusCode: incomingRes?.statusCode,
       }
+
+      response[PROXY_RESPONSE_CTX] = ctx
+
+      return response
     },
 
     encodeResponse (response: HttpResponse): HttpInterceptCtx {
-      const ctx = requireCtx(response.id)
+      const ctx = (response as HttpResponseWithCtx)[PROXY_RESPONSE_CTX] ?? requireCtx(response.id)
 
       ctx.req.proxiedUrl = response.url
 
-      if (typeof response.statusCode === 'number') {
-        // Synthesized replies skip sendRequestOutgoing, which normally ends this span.
-        ctx.reqMiddlewareSpan?.end()
-        ctx.res.writeHead(response.statusCode, cleanHeaders(response.headers))
-        ctx.res.end(response.body)
+      if (ctx.httpInterceptIncomingRes) {
+        ctx.incomingRes = ctx.httpInterceptIncomingRes
       }
 
-      inFlightRequests.delete(response.id)
+      if (response.bodyStream) {
+        ctx.incomingResStream = response.bodyStream
+      } else if (ctx.originBodyStream) {
+        ctx.incomingResStream = ctx.originBodyStream
+      }
 
       return ctx
     },
@@ -106,36 +113,22 @@ export const proxyHttpCodec = createProxyHttpCodec()
 export function createFetchOrigin (_mw: HttpInterceptCtx) {
   return (outbound: HttpInterceptCtx): Promise<HttpInterceptCtx> => {
     return new Promise((resolve, reject) => {
-      // Mutate through an any-bag so we can delete callback keys on restore.
-      // Assigning undefined leaves the keys on the shared proxy ctx and can
-      // wipe IncomingResponse stage onError when fullCtx spreads ctx.
-      const callbacks: any = outbound
-      const hadOnError = Object.prototype.hasOwnProperty.call(callbacks, 'onError')
-      const hadOnResponse = Object.prototype.hasOwnProperty.call(callbacks, 'onResponse')
-      const originalOnError = callbacks.onError
-      const originalOnResponse = callbacks.onResponse
-
-      const restoreCallbacks = () => {
-        if (hadOnError) {
-          callbacks.onError = originalOnError
-        } else {
-          delete callbacks.onError
-        }
-
-        if (hadOnResponse) {
-          callbacks.onResponse = originalOnResponse
-        } else {
-          delete callbacks.onResponse
-        }
+      const originalOnResponse = outbound.onResponse
+      const originalOnError = outbound.onError
+      const callbacks = outbound as HttpInterceptCtx & {
+        onError: (error: Error) => void
+        onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
       }
 
       callbacks.onError = (error: Error) => {
-        restoreCallbacks()
+        callbacks.onError = originalOnError
+        callbacks.onResponse = originalOnResponse
         reject(error)
       }
 
-      callbacks.onResponse = (incomingRes: IncomingMessage, incomingResStream: Readable) => {
-        restoreCallbacks()
+      callbacks.onResponse = (incomingRes, incomingResStream) => {
+        callbacks.onError = originalOnError
+        callbacks.onResponse = originalOnResponse
 
         outbound.httpInterceptIncomingRes = incomingRes
         outbound.originBodyStream = incomingResStream
@@ -146,17 +139,4 @@ export function createFetchOrigin (_mw: HttpInterceptCtx) {
       sendRequestOutgoing(outbound)
     })
   }
-}
-
-export async function resolveProxyResponseBodyStream (
-  ctx: HttpInterceptCtx,
-): Promise<Readable> {
-  if (ctx.originBodyStream) {
-    return ctx.originBodyStream
-  }
-
-  return getBodyStream(ctx.httpInterceptStubBody, {
-    delay: ctx.httpInterceptDelay,
-    throttleKbps: ctx.httpInterceptThrottleKbps,
-  })
 }

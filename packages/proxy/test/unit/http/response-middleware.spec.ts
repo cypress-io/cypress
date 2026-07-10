@@ -133,10 +133,11 @@ describe('http/response-middleware', function () {
               on: (event, listener) => {},
               off: (event, listener) => {},
             },
-          }, (err) => {
-            expect(err.message).toEqual('Internal error while proxying "undefined undefined" in 0:\nError running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+            onError (err) {
+              expect(err.message).toEqual('Internal error while proxying "undefined undefined" in 0:\nError running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
-            resolve()
+              resolve()
+            },
           })
         })
       })
@@ -151,18 +152,17 @@ describe('http/response-middleware', function () {
         return new Promise<void>((resolve) => {
           testMiddleware([middleware], {
             error,
-            req: {
-              method: 'GET',
-              proxiedUrl: 'url',
-            },
             res: {
               on: (event, listener) => {},
               off: (event, listener) => {},
             },
-          }, (err) => {
-            expect(err.message).toContain('This middleware invocation previously encountered an error which may be related, see `error.cause`')
-            expect(err['cause']).toEqual(error)
-            resolve()
+            onError (err) {
+              expect(err.message).toContain('This middleware invocation previously encountered an error which may be related, see `error.cause`')
+              expect(err['cause']).toEqual(error)
+              resolve()
+            },
+            method: 'GET',
+            proxiedUrl: 'url',
           })
         })
       })
@@ -209,26 +209,40 @@ describe('http/response-middleware', function () {
 
     it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', async () => {
       ctx.req.isFromExtraTarget = true
+      let allowedMiddlewareRan = false
+      let skippedMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        AttachPlainTextStreamFn () {
+          allowedMiddlewareRan = true
+          this.next()
+        },
+        OmitProblematicHeaders () {
+          skippedMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
       expect(ctx.res.set).toHaveBeenCalledWith(headers)
 
-      expect(ctx.onlyRunMiddlewareCalls).to.deep.equal([[
-        'AttachPlainTextStreamFn',
-        'PatchExpressSetHeader',
-        'MaybeSendRedirectToClient',
-        'CopyResponseStatusCode',
-        'MaybeEndWithEmptyBody',
-        'CompressBody',
-        'SendResponseBodyToClient',
-      ]])
+      expect(allowedMiddlewareRan).toBe(true)
+      expect(skippedMiddlewareRan).toBe(false)
     })
 
     it('runs all subsequent middleware if request is not from an extra target', async () => {
       ctx.req.isFromMainTarget = false
+      let subsequentMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
-      expect(ctx.onlyRunMiddlewareCalls).to.deep.equal([])
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        OmitProblematicHeaders () {
+          subsequentMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
+      expect(subsequentMiddlewareRan).toBe(true)
     })
   })
 

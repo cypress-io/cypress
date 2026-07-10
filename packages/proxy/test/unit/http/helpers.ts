@@ -8,30 +8,30 @@ export function createTestNetworkInterceptionCore () {
   })
 }
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onErrorHandler?: (error: Error) => void) {
-  const onlyRunMiddlewareCalls: string[][] = []
+type TestMiddlewareStack = HttpMiddleware<any>[] | Record<string, HttpMiddleware<any>>
+
+export function testMiddleware (middleware: TestMiddlewareStack, ctx: Record<string, any> = {}, onErrorHandler?: (error: Error) => void) {
+  const { onlyRunMiddleware: _onlyRunMiddleware, onError: ctxOnError, ...ctxRest } = ctx
 
   const fullCtx = {
     debug: () => {},
     req: {},
     res: {},
     config: {},
-    ...ctx,
-    networkInterceptionCore: ctx.networkInterceptionCore ?? createTestNetworkInterceptionCore(),
-    __trackOnlyRunMiddleware: (names: string[]) => {
-      onlyRunMiddlewareCalls.push(names)
-    },
+    networkInterceptionCore: createTestNetworkInterceptionCore(),
+
     middleware: {
       0: middleware,
     },
+
+    ...ctxRest,
   }
 
-  const onError = onErrorHandler ?? ((error) => {
+  const onError = onErrorHandler ?? ctxOnError ?? ((error) => {
     throw error
   })
 
   return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
     Object.assign(ctx, fullCtx)
-    ctx.onlyRunMiddlewareCalls = onlyRunMiddlewareCalls
   })
 }

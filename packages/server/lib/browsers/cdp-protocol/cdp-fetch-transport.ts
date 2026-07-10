@@ -1,6 +1,7 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
 import pDefer from 'p-defer'
+import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
@@ -13,49 +14,15 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 
-function toContinueRequestHeaders (headers: Record<string, string> = {}): Protocol.Fetch.HeaderEntry[] {
-  return Object.entries(headers).map(([name, value]) => ({ name, value }))
-}
-
-function requestHeadersChanged (
-  original: Record<string, string> = {},
-  updated: Record<string, string> = {},
-): boolean {
-  const originalKeys = Object.keys(original)
-  const updatedKeys = Object.keys(updated)
-
-  if (originalKeys.length !== updatedKeys.length) {
-    return true
-  }
-
-  return originalKeys.some((key) => original[key] !== updated[key])
-}
-
-function buildContinueRequestDetails (
-  event: Protocol.Fetch.RequestPausedEvent,
-  outbound: CdpFetchTransportRequest,
-): Protocol.Fetch.ContinueRequestRequest {
-  return {
-    requestId: event.requestId,
-    ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
-    ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
-    ...(requestHeadersChanged(event.request.headers, outbound.headers) ? {
-      headers: toContinueRequestHeaders(outbound.headers),
-    } : {}),
-    ...(typeof outbound.postData !== 'undefined' ? { postData: outbound.postData } : {}),
-    ...(outbound.postDataIsBase64 ? { postDataIsBase64: true } : {}),
-  }
-}
-
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
   requestId?: string
   sessionId?: string
-  postDataIsBase64?: boolean
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
+  bodyStream?: Readable
   fulfilled?: boolean
   requestId: string
   responseCode: number
@@ -133,6 +100,8 @@ export class CdpFetchTransport {
     let networkId: string | undefined
     let requestContinued = false
     let response: CdpFetchTransportResponse | undefined
+    let responseRequestId: string | undefined
+    let responseSessionId: string | undefined
     let deferred: pDefer.DeferredPromise<CdpFetchTransportResponse> | undefined
 
     try {
@@ -148,6 +117,9 @@ export class CdpFetchTransport {
       networkId = event.networkId
       const request: CdpFetchTransportRequest = {
         ...event.request,
+        headers: {
+          ...event.request.headers,
+        },
         id: networkId,
         requestId: event.requestId,
         sessionId,
@@ -159,14 +131,22 @@ export class CdpFetchTransport {
       this.inFlightRequests.set(networkId, deferred)
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
-        await this.client.send('Fetch.continueRequest', buildContinueRequestDetails(event, outbound), outbound.sessionId)
+        await this.client.send('Fetch.continueRequest', {
+          requestId: event.requestId,
+          ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
+          ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
+          ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
+          ...(this.headersChanged(outbound.headers ?? {}, event.request.headers)
+            ? { headers: this.toContinueRequestHeaders(outbound.headers ?? {}) }
+            : {}),
+        }, outbound.sessionId)
 
         requestContinued = true
 
         let timeout: NodeJS.Timeout | undefined
 
         try {
-          return await Promise.race([
+          const pausedResponse = await Promise.race([
             responseDeferred.promise,
             new Promise<never>((_resolve, reject) => {
               timeout = setTimeout(() => {
@@ -174,6 +154,11 @@ export class CdpFetchTransport {
               }, RESPONSE_PAUSE_TIMEOUT_MS)
             }),
           ])
+
+          responseRequestId = pausedResponse.requestId
+          responseSessionId = pausedResponse.sessionId
+
+          return pausedResponse
         } finally {
           if (timeout) {
             clearTimeout(timeout)
@@ -210,10 +195,14 @@ export class CdpFetchTransport {
         await this.safeSend('Fetch.continueRequest', {
           requestId: event.requestId,
         }, sessionId)
-      } else if (response?.requestId) {
-        await this.safeSend('Fetch.continueResponse', {
-          requestId: response.requestId,
-        }, response.sessionId ?? sessionId)
+      } else {
+        const continueRequestId = response?.requestId ?? responseRequestId
+
+        if (continueRequestId) {
+          await this.safeSend('Fetch.continueResponse', {
+            requestId: continueRequestId,
+          }, response?.sessionId ?? responseSessionId ?? sessionId)
+        }
       }
 
       debug('CDP Fetch transport error: %s', (err as Error).stack || (err as Error).message)
@@ -265,14 +254,72 @@ export class CdpFetchTransport {
       return
     }
 
+    const bodyStream = this.createResponseBodyStream(event.requestId, sessionId)
+
     deferred.resolve({
       ...event.request,
       id: event.networkId!,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders: event.responseHeaders,
+      bodyStream,
       sessionId,
     })
+  }
+
+  private createResponseBodyStream = (requestId: string, sessionId?: string): Readable => {
+    let reading = false
+    let bodyStream: Readable
+
+    bodyStream = new Readable({
+      read: () => {
+        if (reading) {
+          return
+        }
+
+        reading = true
+
+        void (async () => {
+          try {
+            const response = await this.client.send('Fetch.getResponseBody', {
+              requestId,
+            }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
+
+            const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
+
+            if (body.length) {
+              bodyStream.push(body)
+            }
+
+            bodyStream.push(null)
+          } catch (err) {
+            bodyStream.destroy(err as Error)
+          }
+        })()
+      },
+    })
+
+    return bodyStream
+  }
+
+  private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
+    return Object.entries(headers).map(([name, value]) => {
+      return {
+        name,
+        value,
+      }
+    })
+  }
+
+  private headersChanged (left: Protocol.Network.Headers, right: Protocol.Network.Headers): boolean {
+    const leftKeys = Object.keys(left)
+    const rightKeys = Object.keys(right)
+
+    if (leftKeys.length !== rightKeys.length) {
+      return true
+    }
+
+    return leftKeys.some((key) => left[key] !== right[key])
   }
 
   private safeSend = async (...args: Parameters<CdpFetchClient['send']>): Promise<void> => {

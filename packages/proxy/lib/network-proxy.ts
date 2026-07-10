@@ -22,7 +22,7 @@ export class NetworkProxy {
   withIntercept (
     networkInterception: ForHttpIntercept<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
   ) {
-    networkInterception.use(this.http.runLegacyProxyPipeline)
+    networkInterception.use(this.http.createLegacyProxyPipeline(this.codec))
     this.http.networkInterception = networkInterception
 
     return this

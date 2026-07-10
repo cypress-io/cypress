@@ -103,23 +103,28 @@ describe('http/request-middleware', () => {
 
     describe('x-cypress-is-from-extra-target', () => {
       it('when it exists, sets in on the req and only runs necessary middleware', async () => {
-        const { ExtractCypressMetadataHeaders, MaybeSetBasicAuthHeaders } = RequestMiddleware
-        const logRequest = vi.fn(function () {
-          this.next()
-        })
         const ctx = prepareContext({
           'x-cypress-is-from-extra-target': 'true',
         })
+        let maybeSetBasicAuthHeadersRan = false
+        let skippedMiddlewareRan = false
 
-        await testMiddleware([
+        await testMiddleware({
           ExtractCypressMetadataHeaders,
-          logRequest,
-          MaybeSetBasicAuthHeaders,
-        ], ctx)
+          MaybeSetBasicAuthHeaders () {
+            maybeSetBasicAuthHeadersRan = true
+            this.next()
+          },
+          MaybeSimulateSecHeaders () {
+            skippedMiddlewareRan = true
+            this.next()
+          },
+        }, ctx)
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
-        expect(logRequest).not.toHaveBeenCalled()
+        expect(maybeSetBasicAuthHeadersRan).toBe(true)
+        expect(skippedMiddlewareRan).toBe(false)
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
@@ -957,8 +962,7 @@ describe('http/request-middleware', () => {
       expect(ctx.res.off).toHaveBeenCalledWith('close', expect.any(Function))
     })
 
-    it('errors when the request is destroyed prior to receiving a pre-request', async () => {
-      const onError = vi.fn()
+    it('errors when the request is destroyed prior to receiving a pre-request', () => {
       const ctx = {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
@@ -972,18 +976,20 @@ describe('http/request-middleware', () => {
           once: vi.fn(),
         },
         shouldCorrelatePreRequests: () => true,
-        getPreRequest: vi.fn().mockImplementation(() => {
-          ctx.res.once.mock.calls[0][1]()
-        }),
+        getPreRequest: vi.fn(),
+        onError: vi.fn(),
       }
 
-      await testMiddleware([CorrelateBrowserPreRequest], ctx, onError)
+      testMiddleware([CorrelateBrowserPreRequest], ctx)
+
+      // call the function handler to invoke the onClose function callback
+      ctx.res.once.mock.calls[0][1]()
 
       expect(ctx.getPreRequest).toHaveBeenCalledOnce()
       expect(ctx.req.noPreRequestExpected).toBeUndefined()
       expect(ctx.req.browserPreRequest).toBeUndefined()
       expect(ctx.res.once).toHaveBeenCalledWith('close', expect.any(Function))
-      expect(onError).toHaveBeenCalledOnce()
+      expect(ctx.onError).toHaveBeenCalledOnce()
     })
   })
 

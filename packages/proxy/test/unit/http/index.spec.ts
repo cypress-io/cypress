@@ -1,11 +1,10 @@
 import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
-import { PassThrough } from 'stream'
-import { EventEmitter } from 'events'
 import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
 import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 import { HttpIntercept } from '@packages/network-interception'
 import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
   describe('_runStage', function () {
@@ -33,6 +32,9 @@ describe('http', function () {
 
     it('propagates stream errors after middleware has called next()', async function () {
       const onError = vi.fn()
+      const { PassThrough } = await import('stream')
+      const { EventEmitter } = await import('events')
+
       const res = Object.assign(new EventEmitter(), {
         off: vi.fn(),
         on: vi.fn(),
@@ -106,38 +108,6 @@ describe('http', function () {
 
       expect(onError).not.toHaveBeenCalled()
     })
-
-    it('keeps a stage onError even when ctx.onError is undefined', async function () {
-      const onError = vi.fn()
-
-      const streamMiddleware = vi.fn().mockImplementation(function () {
-        expect(typeof this.onError).to.equal('function')
-
-        const pt = new PassThrough()
-
-        pt.on('error', this.onError)
-        this.next()
-        pt.emit('error', new Error('stream boom'))
-      })
-
-      const ctx = {
-        req: { method: 'GET', proxiedUrl: 'url' },
-        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
-        debug: () => {},
-        onError: undefined,
-        middleware: {
-          [HttpStages.IncomingResponse]: { streamMiddleware },
-        },
-      }
-
-      await _runStage(HttpStages.IncomingResponse, ctx, onError)
-
-      await vi.waitFor(() => {
-        expect(onError).toHaveBeenCalledOnce()
-      })
-
-      expect(onError.mock.calls[0][0].message).to.equal('stream boom')
-    })
   })
 
   describe('Http.handle', function () {
@@ -171,7 +141,7 @@ describe('http', function () {
       const http = new Http(httpOpts)
       const httpIntercept = new HttpIntercept(proxyHttpCodec)
 
-      httpIntercept.use(http.runLegacyProxyPipeline)
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
       http.networkInterception = httpIntercept
 
       return http
@@ -202,95 +172,6 @@ describe('http', function () {
       expect(error).not.toHaveBeenCalled()
       expect(on).toHaveBeenCalledOnce()
       expect(off).toHaveBeenCalledTimes(2)
-    })
-
-    it('does not fetch the origin when request middleware already sent a response', async function () {
-      incomingRequest.mockImplementation(function () {
-        this.res.redirect('/client')
-        this.end()
-      })
-
-      // @ts-expect-error
-      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, {
-        on,
-        off,
-        redirect: vi.fn(function () {
-          this.headersSent = true
-          this.writableFinished = true
-        }),
-        writableFinished: false,
-        headersSent: false,
-        destroyed: false,
-      })
-
-      expect(incomingRequest).toHaveBeenCalledOnce()
-      expect(incomingResponse).not.toHaveBeenCalled()
-      expect(httpOpts.request.rp).not.toHaveBeenCalled()
-      expect(error).not.toHaveBeenCalled()
-    })
-
-    it('forwards intercept method/header/body mutations to the origin fetch', async function () {
-      const { EventEmitter } = await import('events')
-      const create = vi.fn(() => {
-        const outgoing = new EventEmitter() as EventEmitter & { abort: Mock }
-
-        outgoing.abort = vi.fn()
-        queueMicrotask(() => {
-          outgoing.emit('response', {
-            statusCode: 200,
-            headers: {},
-            request: { timings: {} },
-          })
-        })
-
-        return outgoing
-      })
-
-      httpOpts.request = { create, rp: vi.fn() } as any
-      httpOpts.remoteStates = {
-        current: () => ({ strategy: 'http', origin: 'https://example.test', fileServer: null }),
-      } as any
-
-      httpOpts.getFileServerToken = vi.fn()
-
-      incomingRequest.mockImplementation(function () {
-        this.req.method = 'PATCH'
-        this.req.headers = { 'content-type': 'application/json' }
-        this.req.body = '{"foo":"bar"}'
-        this.next()
-      })
-
-      incomingResponse.mockImplementation(function () {
-        this.end()
-      })
-
-      const res = Object.assign(new EventEmitter(), {
-        on: vi.fn(),
-        off: vi.fn(),
-        writableFinished: false,
-        headersSent: false,
-        destroyed: false,
-      })
-
-      // @ts-expect-error
-      await createHttp().handleHttpRequest({
-        method: 'POST',
-        proxiedUrl: 'https://example.test/dump-method',
-        headers: {},
-        socket: new EventEmitter(),
-        res,
-      }, res)
-
-      expect(create).toHaveBeenCalledOnce()
-
-      expect(create.mock.calls[0][0]).toMatchObject({
-        url: 'https://example.test/dump-method',
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: '{"foo":"bar"}',
-      })
-
-      expect(incomingResponse).toHaveBeenCalledOnce()
     })
 
     it('moves to Error stack if err in IncomingRequest', async function () {
@@ -505,6 +386,25 @@ describe('http', function () {
 
       expect(on).toHaveBeenCalledTimes(2)
       expect(off).toHaveBeenCalledTimes(10)
+    })
+
+    it('does not forward to origin when request middleware already ended the client response', async function () {
+      const sendOutgoing = vi.spyOn(sendRequestOutgoingModule, 'sendRequestOutgoing')
+
+      incomingRequest.mockImplementation(function () {
+        this.res.headersSent = true
+        this.res.writableFinished = true
+        this.end()
+      })
+
+      // @ts-expect-error
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+
+      expect(incomingRequest).toHaveBeenCalledOnce()
+      expect(incomingResponse).not.toHaveBeenCalled()
+      expect(sendOutgoing).not.toHaveBeenCalled()
+
+      sendOutgoing.mockRestore()
     })
   })
 
