@@ -37,4 +37,9 @@ describe('toPosix', () => {
       expect(toPosix('/some/file')).toEqual('/some/file')
     })
   })
+
+  it('returns nullish inputs unchanged', () => {
+    expect(toPosix(undefined as any)).toEqual(undefined)
+    expect(toPosix(null as any)).toEqual(null)
+  })
 })
