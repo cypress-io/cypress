@@ -17,12 +17,17 @@ describe('lib/adapters/internal-routes', () => {
     expect(isInternalCypressRoute('/__cypress/xhrs/foo', config)).to.be.true
     expect(isInternalCypressRoute('/__/assets/app.js', config)).to.be.true
     expect(isInternalCypressRoute('/__socket-graphql', config)).to.be.true
-    expect(isInternalCypressRoute('/__cypress-studio/app.js', config)).to.be.true
   })
 
   it('does not match component-testing bundler assets under the namespace', () => {
     expect(isInternalCypressRoute('/__cypress/src/cypress/support/component.jsx', config)).to.be.false
     expect(isInternalCypressRoute('/__cypress/src/spec-0.js', config)).to.be.false
+  })
+
+  it('does not match studio or cy-prompt module-federation entries', () => {
+    // Parent cy-in-cy Express handlers re-enter the proxy for these paths.
+    expect(isInternalCypressRoute('/__cypress-studio/app-studio.js', config)).to.be.false
+    expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config)).to.be.false
   })
 
   it('does not match internal route lookalikes', () => {
