@@ -27,9 +27,24 @@ describe('proxyHttpCodec', () => {
     const request = proxyHttpCodec.decodeRequest(ctx)
 
     request.url = 'https://example.test/mutated'
+    request.method = 'POST'
+    request.headers = {
+      'accept-encoding': 'gzip, deflate',
+      authorization: 'Basic abc123',
+    }
+
+    request.body = 'payload'
+
     proxyHttpCodec.encodeRequest(request)
 
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/mutated')
+    expect(ctx.req.method).to.equal('POST')
+    expect(ctx.req.headers).to.deep.equal({
+      'accept-encoding': 'gzip, deflate',
+      authorization: 'Basic abc123',
+    })
+
+    expect(ctx.req.body).to.equal('payload')
   })
 
   it('round-trips request mutations through decode and encode', () => {

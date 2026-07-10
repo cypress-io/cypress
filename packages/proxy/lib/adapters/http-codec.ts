@@ -54,6 +54,18 @@ export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, Ht
 
       ctx.req.proxiedUrl = request.url
 
+      if (request.method !== undefined) {
+        ctx.req.method = request.method
+      }
+
+      if (request.headers !== undefined) {
+        ctx.req.headers = request.headers
+      }
+
+      if (request.body !== undefined) {
+        ctx.req.body = request.body
+      }
+
       return ctx
     },
 

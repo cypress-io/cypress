@@ -26,7 +26,13 @@ function parseCookieHeader (header?: string | string[]): Record<string, string> 
     const [name, ...value] = part.trim().split('=')
 
     if (name) {
-      memo[name] = decodeURIComponent(value.join('=') || '')
+      const rawValue = value.join('=') || ''
+
+      try {
+        memo[name] = decodeURIComponent(rawValue)
+      } catch {
+        memo[name] = rawValue
+      }
     }
 
     return memo
@@ -84,6 +90,7 @@ export type SyntheticCypressResponse = CypressOutgoingResponseLike & {
 }
 
 class SyntheticResponse extends Writable {
+  private readonly kOutHeaders = Symbol('kOutHeaders')
   isInitial: null | boolean = null
   wantsInjection: CypressOutgoingResponseLike['wantsInjection'] = false
   wantsSecurityRemoved: null | boolean = null
@@ -94,6 +101,14 @@ class SyntheticResponse extends Writable {
 
   private readonly headers: Record<string, { name: string, value: HeaderValue }> = {}
   private readonly chunks: Buffer[] = []
+
+  constructor () {
+    super()
+    Object.defineProperty(this, this.kOutHeaders, {
+      value: Object.create(null),
+      writable: true,
+    })
+  }
 
   _write (chunk: any, _encoding: BufferEncoding, callback: (error?: Error | null) => void) {
     this.headersSent = true

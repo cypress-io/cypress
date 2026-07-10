@@ -40,6 +40,18 @@ describe('createSyntheticExpressContext', () => {
     expect(await readStream(req)).to.equal('name=value')
   })
 
+  it('keeps malformed cookie values without throwing', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/form',
+      headers: {
+        cookie: 'valid=1; malformed=%',
+      },
+    })
+
+    expect(req.cookies).to.deep.equal({ valid: '1', malformed: '%' })
+  })
+
   it('captures response status, headers, and body', async () => {
     const { res } = createSyntheticExpressContext({
       id: 'network-1',
@@ -59,6 +71,19 @@ describe('createSyntheticExpressContext', () => {
     })
 
     expect(res.getCapturedBody().toString()).to.equal('created')
+  })
+
+  it('exposes a Node-compatible kOutHeaders symbol for header patching', () => {
+    const { res } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+    })
+
+    const kOutHeaders = Object.getOwnPropertySymbols(res).find((sym) => {
+      return sym.toString() === 'Symbol(kOutHeaders)'
+    })
+
+    expect(kOutHeaders).to.exist
   })
 
   it('serializes cookies with Express-compatible Path and attributes', () => {
