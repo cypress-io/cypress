@@ -59,12 +59,20 @@ function shouldSendBody (request: HttpRequest): boolean {
   return typeof request.body !== 'undefined' && !['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
 }
 
+function parseRequestUrl (requestUrl: string, config: ServeInternalRoutesConfig): URL {
+  if (/^https?:\/\//i.test(requestUrl)) {
+    return new URL(requestUrl)
+  }
+
+  return new URL(requestUrl, resolveProxyUrlBase(config))
+}
+
 export function createServeInternalRoutesMiddleware ({
   config,
   request: serverRequest,
 }: CreateServeInternalRoutesMiddlewareOptions): InterceptMiddleware {
   return async (request, next) => {
-    const url = new URL(request.url, resolveProxyUrlBase(config))
+    const url = parseRequestUrl(request.url, config)
 
     if (!isInternalCypressRoute(url.pathname, config)) {
       return next(request)

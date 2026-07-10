@@ -38,17 +38,12 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
     return false
   }
 
-  const namespaceRoute = `/${config.namespace}`
-  // Do not treat /__cypress-studio or /__cypress-cy-prompt as Express-owned
-  // internals. In cy-in-cy parent mode those Express routes re-enter the proxy;
-  // looping them back would recurse and skip parent cy.intercept. Same-origin
-  // studio/prompt loads already take the next() path via isCypressServerOrigin.
   const internalRoutes = [
-    namespaceRoute,
+    config.namespace ? `/${config.namespace}` : undefined,
     config.clientRoute,
     config.socketIoRoute,
-    `${config.socketIoRoute}-graphql`,
-  ]
+    config.socketIoRoute ? `${config.socketIoRoute}-graphql` : undefined,
+  ].filter((route): route is string => Boolean(route))
 
   return internalRoutes.some((route) => matchesPathPrefix(pathname, route))
 }
