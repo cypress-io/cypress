@@ -287,4 +287,27 @@ describe('lib/open_project', () => {
       await openProject.connectCyPromptToBrowser(options)
     })
   })
+
+  describe('#closeActiveProject', () => {
+    it('awaits projectBase.close before resetting and closing the browser', async function () {
+      let resolveClose
+      const closePromise = new Promise((resolve) => {
+        resolveClose = resolve
+      })
+      const closeStub = sinon.stub(ProjectBase.prototype, 'close').returns(closePromise)
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
+
+      const closing = openProject.closeActiveProject()
+
+      expect(closeStub).to.have.been.calledOnce
+      expect(closeBrowserStub).not.to.have.been.called
+      expect(openProject.getProject()).to.not.be.null
+
+      resolveClose()
+      await closing
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(openProject.getProject()).to.be.null
+    })
+  })
 })

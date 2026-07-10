@@ -215,10 +215,14 @@ export class OpenProject extends EventEmitter {
     return this.projectBase?.resetBrowserState()
   }
 
-  closeOpenProjectAndBrowsers () {
-    this.projectBase?.close().catch((e) => {
+  async closeOpenProjectAndBrowsers () {
+    // Wait for the HTTP server to release its port before the next open
+    // (cy-in-cy reopens on hardcoded 4455; Windows is especially sensitive).
+    try {
+      await this.projectBase?.close()
+    } catch (e) {
       this._ctx?.logTraceError(e)
-    })
+    }
 
     this.resetOpenProject()
 
