@@ -40,6 +40,13 @@ describe('lib/adapters/internal-routes', () => {
     expect(isCypressServerOrigin('http://127.0.0.1:1234/__cypress/runner/cypress_runner.js', config)).to.be.true
     expect(isCypressServerOrigin('https://example.test/__cypress/runner/cypress_runner.js', config)).to.be.false
   })
+
+  it('falls back to localhost:port when proxyUrl is unset', () => {
+    const withoutProxyUrl = { ...config, proxyUrl: undefined }
+
+    expect(isCypressServerOrigin('http://localhost:1234/__/', withoutProxyUrl)).to.be.true
+    expect(isCypressServerOrigin('/__/', withoutProxyUrl)).to.be.true
+  })
 })
 
 describe('lib/adapters/serve-internal-routes', () => {
@@ -47,14 +54,14 @@ describe('lib/adapters/serve-internal-routes', () => {
     statusCode: 200,
     headers: {},
     body: 'ok',
-  }) {
+  }, middlewareConfig = config) {
     const serverRequest = {
       create: sinon.stub().resolves(response),
     }
 
     return {
       middleware: createServeInternalRoutesMiddleware({
-        config,
+        config: middlewareConfig,
         request: serverRequest as any,
       }),
       serverRequest,
@@ -73,6 +80,28 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(response).to.deep.equal({ id: 'req-1', url: 'https://example.test/app' })
     expect(next).to.have.been.calledOnce
     expect(serverRequest.create).not.to.have.been.called
+  })
+
+  it('parses path-only URLs when proxyUrl is unset', async () => {
+    const { middleware, serverRequest } = createMiddleware({
+      statusCode: 200,
+      headers: {},
+      body: 'ok',
+    }, { ...config, proxyUrl: undefined })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: '/__cypress/xhrs/foo',
+      method: 'GET',
+    }, next)
+
+    expect(next).not.to.have.been.called
+    expect(serverRequest.create).to.have.been.calledWithMatch({
+      url: 'http://127.0.0.1:1234/__cypress/xhrs/foo',
+    }, true)
+
+    expect(response.statusCode).to.equal(200)
   })
 
   it('delegates component-testing bundler assets to the next middleware', async () => {

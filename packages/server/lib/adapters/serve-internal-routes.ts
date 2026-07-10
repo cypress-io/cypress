@@ -1,7 +1,7 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type CyServer from '../../index.d.ts'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isInternalCypressRoute } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
 
 type ServeInternalRoutesConfig = Pick<
   CyServer.Config & Cypress.Config,
@@ -50,7 +50,7 @@ function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): 
   // Hit Express route handlers on the local server directly. Using the Cypress
   // server as an HTTP proxy would re-enter HttpIntercept / this middleware and
   // recurse forever when no earlier Express route owns the path.
-  const url = new URL(requestUrl, config.proxyUrl)
+  const url = new URL(requestUrl, resolveProxyUrlBase(config))
 
   return `http://127.0.0.1:${config.port}${url.pathname}${url.search}`
 }
@@ -64,7 +64,7 @@ export function createServeInternalRoutesMiddleware ({
   request: serverRequest,
 }: CreateServeInternalRoutesMiddlewareOptions): InterceptMiddleware {
   return async (request, next) => {
-    const url = new URL(request.url, config.proxyUrl)
+    const url = new URL(request.url, resolveProxyUrlBase(config))
 
     if (!isInternalCypressRoute(url.pathname, config)) {
       return next(request)

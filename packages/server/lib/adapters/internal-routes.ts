@@ -53,12 +53,24 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
   return internalRoutes.some((route) => matchesPathPrefix(pathname, route))
 }
 
+export function resolveProxyUrlBase (config: Pick<InternalRouteConfig, 'port' | 'proxyUrl'>): string {
+  if (config.proxyUrl) {
+    return config.proxyUrl
+  }
+
+  if (!config.port) {
+    throw new Error('Cannot resolve Cypress proxy URL before the server port is assigned')
+  }
+
+  return `http://localhost:${config.port}`
+}
+
 export function isCypressServerOrigin (requestUrl: string, config: InternalRouteConfig): boolean {
   if (!config.port) {
     return false
   }
 
-  const serverUrl = new URL(config.proxyUrl ?? `http://localhost:${config.port}`)
+  const serverUrl = new URL(resolveProxyUrlBase(config))
   const url = new URL(requestUrl, serverUrl)
 
   if (url.port !== String(config.port)) {
