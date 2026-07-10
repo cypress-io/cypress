@@ -33,6 +33,40 @@ class TypeScriptNotFoundError extends Error {
 
 const typescriptExtensionRegex = /\.m?tsx?$/
 
+// Shared by the JS spec rule and the TypeScript 7+ rule (TS 7 has no compiler
+// API for ts-loader). `typescript: true` adds preset-typescript.
+const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } = {}) => {
+  return {
+    plugins: [
+      // Legacy decorators + metadata, ordered before class-properties, to keep
+      // emitDecoratorMetadata parity with ts-loader.
+      ...(typescript ? [
+        require.resolve('babel-plugin-transform-typescript-metadata'),
+        [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
+      ] : []),
+      ...[
+        'babel-plugin-add-module-exports',
+        '@babel/plugin-transform-class-properties',
+        '@babel/plugin-transform-object-rest-spread',
+      ].map((plugin) => require.resolve(plugin)),
+      [require.resolve('@babel/plugin-transform-runtime'), {
+        absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
+      }],
+    ],
+    presets: [
+      // the chrome version should be synced with
+      // packages/web-config/webpack.config.base.ts and
+      // packages/server/lib/browsers/chrome.ts
+      [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
+      require.resolve('@babel/preset-react'),
+      // Last preset runs first: strip types before preset-env/react.
+      ...(typescript ? [require.resolve('@babel/preset-typescript')] : []),
+    ],
+    configFile: false,
+    babelrc: false,
+  }
+}
+
 const hasTsLoader = (rules: any[]) => {
   return rules.some((rule) => {
     if (!rule.use || !Array.isArray(rule.use)) return false
@@ -94,50 +128,66 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     return options
   }
 
-  // tsx parses the moduleResolution default to node10 as well as moduleResolution="node" to node10
-  // ts-loader struggles to validate the node10 moduleResolution option depending on the version of typescript used,
-  // so we set it to node which is the same as node 10. @see https://www.typescriptlang.org/tsconfig/#moduleResolution.
-  if (configFile?.config?.compilerOptions?.moduleResolution === 'node10') {
-    configFile.config.compilerOptions.moduleResolution = 'node'
-  }
-
   const tsVersion = webpackPreprocessor.getResolvedTypescriptVersion(typeof typeScriptPath === 'string' ? typeScriptPath : undefined)
 
   let isLessThanTs6
   let isGreaterThanOrEqualToTs6
+  let isGreaterThanOrEqualToTs7
 
   if (tsVersion && semver.valid(tsVersion)) {
     isLessThanTs6 = semver.lt(tsVersion, '6.0.0-0')
     isGreaterThanOrEqualToTs6 = !isLessThanTs6
+    isGreaterThanOrEqualToTs7 = semver.gte(tsVersion, '7.0.0-0')
   }
 
-  // Use the v3 plugin for TS < 6 to remain passive; TS 6+ uses v4, which
-  // tolerates the missing-baseUrl shape recommended by TypeScript 6+.
+  if (isGreaterThanOrEqualToTs7) {
+    // TypeScript 7 ships no JavaScript compiler API, so ts-loader crashes.
+    // Transpile with Babel instead, matching the prior transpile-only behavior.
+    webpackOptions.module.rules.push({
+      test: typescriptExtensionRegex,
+      exclude: [/node_modules/],
+      use: [
+        {
+          loader: require.resolve('babel-loader'),
+          options: getBabelLoaderOptions({ typescript: true }),
+        },
+      ],
+    })
+  } else {
+    // tsx parses the moduleResolution default to node10 as well as moduleResolution="node" to node10
+    // ts-loader struggles to validate the node10 moduleResolution option depending on the version of typescript used,
+    // so we set it to node which is the same as node 10. @see https://www.typescriptlang.org/tsconfig/#moduleResolution.
+    if (configFile?.config?.compilerOptions?.moduleResolution === 'node10') {
+      configFile.config.compilerOptions.moduleResolution = 'node'
+    }
+
+    webpackOptions.module.rules.push({
+      test: typescriptExtensionRegex,
+      exclude: [/node_modules/],
+      use: [
+        {
+          loader: require.resolve('ts-loader'),
+          options: {
+            ...(isGreaterThanOrEqualToTs6 ? {
+              configFile: configFile?.path,
+            } : {}),
+            compiler: typeScriptPath,
+            ...(isLessThanTs6 ? {
+              compilerOptions: configFile?.config?.compilerOptions,
+            } : {}),
+            logLevel: 'error',
+            silent: true,
+            transpileOnly: true,
+          },
+        },
+      ],
+    })
+  }
+
+  // v3 plugin for TS < 6; TS 6+ uses v4, which tolerates the missing-baseUrl shape.
   const TsconfigPathsPlugin = isLessThanTs6
     ? require('tsconfig-paths-webpack-plugin-v3')
     : require('tsconfig-paths-webpack-plugin')
-
-  webpackOptions.module.rules.push({
-    test: typescriptExtensionRegex,
-    exclude: [/node_modules/],
-    use: [
-      {
-        loader: require.resolve('ts-loader'),
-        options: {
-          ...(isGreaterThanOrEqualToTs6 ? {
-            configFile: configFile?.path,
-          } : {}),
-          compiler: typeScriptPath,
-          ...(isLessThanTs6 ? {
-            compilerOptions: configFile?.config?.compilerOptions,
-          } : {}),
-          logLevel: 'error',
-          silent: true,
-          transpileOnly: true,
-        },
-      },
-    ],
-  })
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
   webpackOptions.resolve.extensionAlias = webpackOptions.resolve.extensionAlias || { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
@@ -179,27 +229,7 @@ const getDefaultWebpackOptions = () => {
         type: 'javascript/auto',
         use: [{
           loader: require.resolve('babel-loader'),
-          options: {
-            plugins: [
-              ...[
-                'babel-plugin-add-module-exports',
-                '@babel/plugin-transform-class-properties',
-                '@babel/plugin-transform-object-rest-spread',
-              ].map((plugin) => require.resolve(plugin)),
-              [require.resolve('@babel/plugin-transform-runtime'), {
-                absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
-              }],
-            ],
-            presets: [
-              // the chrome version should be synced with
-              // packages/web-config/webpack.config.base.ts and
-              // packages/server/lib/browsers/chrome.ts
-              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
-              require.resolve('@babel/preset-react'),
-            ],
-            configFile: false,
-            babelrc: false,
-          },
+          options: getBabelLoaderOptions(),
         }],
       }, {
         test: /\.coffee$/,
