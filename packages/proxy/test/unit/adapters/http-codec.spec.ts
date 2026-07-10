@@ -2,17 +2,7 @@ import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import { Readable } from 'stream'
 import { describe, expect, it } from 'vitest'
-import { proxyHttpCodec, resolveProxyResponseBodyStream } from '../../../lib/adapters/http-codec'
-
-async function readStream (stream: Readable): Promise<string> {
-  const chunks: Buffer[] = []
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-  }
-
-  return Buffer.concat(chunks).toString()
-}
+import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
 
 function createCtx () {
   return {
@@ -93,20 +83,25 @@ describe('proxyHttpCodec', () => {
     }).to.throw('HttpIntercept middleware must call next() before returning a response')
   })
 
-  it('materializes a stub body stream when committing to the proxy', async () => {
+  it('can encodeResponse after releaseRequest using the decoded response ctx', () => {
     const ctx = createCtx()
+    const request = proxyHttpCodec.decodeRequest(ctx)
+    const incomingRes = new IncomingMessage(new Socket)
 
-    ctx.httpInterceptStubBody = '<html><body>created</body></html>'
+    incomingRes.statusCode = 200
+    ctx.incomingRes = incomingRes
+    ctx.incomingResStream = Readable.from(['body'])
 
-    expect(await readStream(await resolveProxyResponseBodyStream(ctx))).to.equal('<html><body>created</body></html>')
-  })
+    const response = proxyHttpCodec.decodeResponse(ctx)
 
-  it('passes through the origin body stream when one is attached to the ctx', async () => {
-    const ctx = createCtx()
-    const bodyStream = Readable.from(['origin'])
+    proxyHttpCodec.releaseRequest?.(request.id)
 
-    ctx.originBodyStream = bodyStream
+    const encoded = proxyHttpCodec.encodeResponse({
+      ...response,
+      url: 'https://example.test/after-release',
+    })
 
-    expect(await resolveProxyResponseBodyStream(ctx)).to.equal(bodyStream)
+    expect(encoded).to.equal(ctx)
+    expect(ctx.req.proxiedUrl).to.equal('https://example.test/after-release')
   })
 })

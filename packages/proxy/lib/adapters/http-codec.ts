@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import type { IncomingMessage } from 'http'
 import type { HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
-import { getBodyStream } from '@packages/net-stubbing/lib/server/util'
 import type { Readable } from 'stream'
 import { sendRequestOutgoing } from '../http/send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
@@ -12,10 +11,14 @@ type HttpInterceptCtx = RequestInterceptionMiddlewareCtx & {
   incomingResStream?: Readable
   httpInterceptIncomingRes?: IncomingMessage
   originBodyStream?: Readable
-  httpInterceptStubBody?: string | Buffer
-  httpInterceptDelay?: number
-  httpInterceptThrottleKbps?: number
-  onResponseWrittenToClient?: () => Promise<void>
+}
+
+// Retains the middleware ctx across createLegacyProxyPipeline's releaseRequest
+// so HttpIntercept.encodeResponse can still recover it on the MITM path.
+const PROXY_RESPONSE_CTX = Symbol('proxyResponseCtx')
+
+type HttpResponseWithCtx = HttpResponse & {
+  [PROXY_RESPONSE_CTX]?: HttpInterceptCtx
 }
 
 export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, HttpInterceptCtx> {
@@ -56,18 +59,21 @@ export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, Ht
 
     decodeResponse (ctx: HttpInterceptCtx): HttpResponse {
       const incomingRes = ctx.incomingRes ?? ctx.httpInterceptIncomingRes
-
-      return {
+      const response: HttpResponseWithCtx = {
         id: ctx.id!,
         url: ctx.req.proxiedUrl,
         bodyStream: ctx.incomingResStream ?? ctx.originBodyStream,
         headers: incomingRes?.headers as HttpResponse['headers'],
         statusCode: incomingRes?.statusCode,
       }
+
+      response[PROXY_RESPONSE_CTX] = ctx
+
+      return response
     },
 
     encodeResponse (response: HttpResponse): HttpInterceptCtx {
-      const ctx = requireCtx(response.id)
+      const ctx = (response as HttpResponseWithCtx)[PROXY_RESPONSE_CTX] ?? requireCtx(response.id)
 
       ctx.req.proxiedUrl = response.url
 
@@ -121,17 +127,4 @@ export function createFetchOrigin (_mw: HttpInterceptCtx) {
       sendRequestOutgoing(outbound)
     })
   }
-}
-
-export async function resolveProxyResponseBodyStream (
-  ctx: HttpInterceptCtx,
-): Promise<Readable> {
-  if (ctx.originBodyStream) {
-    return ctx.originBodyStream
-  }
-
-  return getBodyStream(ctx.httpInterceptStubBody, {
-    delay: ctx.httpInterceptDelay,
-    throttleKbps: ctx.httpInterceptThrottleKbps,
-  })
 }

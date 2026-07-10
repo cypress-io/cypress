@@ -8,15 +8,21 @@ import {
 } from './synthetic-express-context'
 import type { SyntheticCypressResponse } from './synthetic-express-context'
 
-type SyntheticHttpCodecOptions = {
+type SyntheticProxyCodecOptions = {
   createMiddlewareContext: (
     request: ReturnType<typeof createSyntheticExpressContext>['req'],
     response: ReturnType<typeof createSyntheticExpressContext>['res'],
   ) => HttpMiddlewareCtx<any>
 }
 
-export function createSyntheticHttpCodec (
-  options: SyntheticHttpCodecOptions,
+/**
+ * Proxy codec variant for transports that start from a neutral HttpRequest
+ * (e.g. CDP Fetch) instead of a real Express req/res. Synthesizes the middleware
+ * ctx the legacy pipeline expects, then captures the written response for the
+ * transport to fulfill.
+ */
+export function createSyntheticProxyCodec (
+  options: SyntheticProxyCodecOptions,
 ): TransportCodecPort<HttpMiddlewareCtx<any>, HttpMiddlewareCtx<any>> {
   const coreCodec = createProxyHttpCodec()
 

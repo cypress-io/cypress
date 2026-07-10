@@ -9,7 +9,7 @@ import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
-import type { CypressIncomingRequest, CypressOutgoingResponseLike } from '../types'
+import type { CypressOutgoingResponseLike } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
@@ -17,27 +17,6 @@ import { cspHeaderNames, generateCspDirectives, parseCspHeaders, problematicCspD
 import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
-
-async function finishInterceptResponseWritten (
-  req: CypressIncomingRequest,
-  end: () => void,
-): Promise<void> {
-  const onWritten = req.onInterceptResponseWritten
-
-  if (!onWritten) {
-    end()
-
-    return
-  }
-
-  req.onInterceptResponseWritten = undefined
-
-  try {
-    await onWritten()
-  } finally {
-    end()
-  }
-}
 
 interface ResponseMiddlewareProps {
   /**
@@ -538,10 +517,8 @@ const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   this.debug('redirecting to new url %o', { statusCode, newUrl })
   span?.end()
 
-  await finishInterceptResponseWritten(this.req, () => {
-    this.res.redirect(Number(statusCode), newUrl)
-    this.end()
-  })
+  this.res.redirect(Number(statusCode), newUrl)
+  this.end()
 }
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {
@@ -567,10 +544,8 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
       isCached: this.incomingRes.statusCode === 304,
     })
 
-    await finishInterceptResponseWritten(this.req, () => {
-      this.res.end()
-      this.end()
-    })
+    this.res.end()
+    this.end()
 
     return
   }
@@ -593,11 +568,9 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
   ) {
     this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
 
-    await finishInterceptResponseWritten(this.req, () => {
-      this.res.setHeader('Content-Length', '0')
-      this.res.end()
-      this.end()
-    })
+    this.res.setHeader('Content-Length', '0')
+    this.res.end()
+    this.end()
 
     return
   }
@@ -691,9 +664,7 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.incomingResStream.pipe(this.res).on('error', this.onError)
 
   this.res.once('finish', () => {
-    void finishInterceptResponseWritten(this.req, () => {
-      this.end()
-    })
+    this.end()
   })
 }
 

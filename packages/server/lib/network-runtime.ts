@@ -1,5 +1,5 @@
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware, createSyntheticHttpCodec } from '@packages/proxy'
+import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware, createSyntheticProxyCodec } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
@@ -141,7 +141,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     getRenderedHTMLOrigins: () => ({}),
   })
   const networkInterception = new HttpIntercept(createCdpFetchCodec())
-  const syntheticCodec = createSyntheticHttpCodec({
+  const syntheticCodec = createSyntheticProxyCodec({
     createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
   })
 

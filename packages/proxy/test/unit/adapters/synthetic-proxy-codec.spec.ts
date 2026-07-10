@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
-import { createSyntheticHttpCodec } from '../../../lib/adapters/synthetic-http-codec'
+import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext } from '../../../lib/adapters/synthetic-express-context'
 
 async function readStream (stream: Readable): Promise<string> {
@@ -88,9 +88,9 @@ describe('createSyntheticExpressContext', () => {
   })
 })
 
-describe('createSyntheticHttpCodec', () => {
+describe('createSyntheticProxyCodec', () => {
   it('round-trips neutral request and response shapes through a synthetic proxy ctx', async () => {
-    const codec = createSyntheticHttpCodec({
+    const codec = createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => {
         return {
           req,

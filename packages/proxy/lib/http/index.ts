@@ -5,7 +5,6 @@ import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import { telemetry, Span } from '@packages/telemetry'
-import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
@@ -389,65 +388,66 @@ export class Http {
 
   createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
     return async (request, next): Promise<HttpResponse> => {
-      const ctx = codec.encodeRequest(request)
+      try {
+        const ctx = codec.encodeRequest(request)
 
-      const onError = this.buildOnError(ctx)
+        const onError = this.buildOnError(ctx)
 
-      await _runStage(HttpStages.IncomingRequest, ctx, onError)
+        await _runStage(HttpStages.IncomingRequest, ctx, onError)
 
-      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-      // In this case we don't want to run the response middleware and should just exit.
-      if (ctx.res.destroyed) {
-        await onError(createBrowserConnectionClosedError())
-
-        return codec.decodeResponse(ctx)
-      }
-
-      if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
-        const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
-
-        try {
-          const response = await next(codec.decodeRequest(ctx))
-
-          span?.end()
-
-          codec.encodeResponse(response)
-          ctx.req.onInterceptResponseWritten = ctx.onResponseWrittenToClient
-
-          if (ctx.req.hadIntercept) {
-            setDefaultHeaders(ctx.req, ctx.incomingRes!)
-          }
-
-          if (ctx.incomingRes && !ctx.incomingResStream) {
-            throw new Error('Incoming response stream was not set by the HTTP transport codec.')
-          }
-        } catch (err) {
-          span?.end()
-          await onError(err as Error)
+        // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+        // In this case we don't want to run the response middleware and should just exit.
+        if (ctx.res.destroyed) {
+          await onError(createBrowserConnectionClosedError())
 
           return codec.decodeResponse(ctx)
         }
-      }
 
-      if (ctx.incomingRes) {
-        // start the span that is responsible for recording the start time of the entire middleware run on the stack
-        ctx.resMiddlewareSpan = telemetry.startSpan({
-          name: 'response:middleware',
-          parentSpan: ctx.handleHttpRequestSpan,
-          isVerbose,
-        })
+        // Skip the origin fetch when request middleware already finished the client
+        // response (e.g. blocked-host 503 or unload redirect) without setting incomingRes.
+        if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
+          const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
 
-        await _runStage(HttpStages.IncomingResponse, ctx, onError)
-        .finally(() => {
-          ctx.resMiddlewareSpan?.end()
-        })
+          try {
+            const response = await next(codec.decodeRequest(ctx))
+
+            span?.end()
+
+            codec.encodeResponse(response)
+
+            if (ctx.incomingRes && !ctx.incomingResStream) {
+              throw new Error('Incoming response stream was not set by the HTTP transport codec.')
+            }
+          } catch (err) {
+            span?.end()
+            await onError(err as Error)
+
+            return codec.decodeResponse(ctx)
+          }
+        }
+
+        if (ctx.incomingRes) {
+          // start the span that is responsible for recording the start time of the entire middleware run on the stack
+          ctx.resMiddlewareSpan = telemetry.startSpan({
+            name: 'response:middleware',
+            parentSpan: ctx.handleHttpRequestSpan,
+            isVerbose,
+          })
+
+          await _runStage(HttpStages.IncomingResponse, ctx, onError)
+          .finally(() => {
+            ctx.resMiddlewareSpan?.end()
+          })
+
+          return codec.decodeResponse(ctx)
+        }
+
+        ctx.debug('Warning: Request was not fulfilled with a response.')
 
         return codec.decodeResponse(ctx)
+      } finally {
+        codec.releaseRequest?.(request.id)
       }
-
-      ctx.debug('Warning: Request was not fulfilled with a response.')
-
-      return codec.decodeResponse(ctx)
     }
   }
 
