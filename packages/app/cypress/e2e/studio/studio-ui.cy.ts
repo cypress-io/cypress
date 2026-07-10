@@ -174,6 +174,10 @@ describe('studio functionality', () => {
   })
 
   it('opens a cloud studio session with AI enabled', () => {
+    // Studio treats a session as anonymous unless the local app reports an
+    // authenticated cloud user, so log in to exercise the authenticated flow.
+    cy.loginUser()
+
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
