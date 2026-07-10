@@ -1,6 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
 import { NetworkInterceptionCore } from '@packages/network-interception'
-import { HttpStages } from '@packages/proxy/lib/http'
 import type { Protocol } from 'devtools-protocol'
 import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
@@ -158,153 +157,43 @@ describe('lib/network-runtime', () => {
     expect(spy).to.have.been.calledOnceWith(preRequest)
   })
 
-  it('createCdpFetchRuntime wires the CDP transport to the legacy proxy pipeline', () => {
+  it('createCdpFetchRuntime wires CDP Fetch without the legacy proxy pipeline', () => {
     const client = {
       send: sinon.stub(),
       on: sinon.stub(),
       off: sinon.stub(),
     }
+    const isAUTFrame = sinon.stub().resolves(true)
     const runtime = createCdpFetchRuntime({
-      ...baseDeps(),
       client,
+      isAUTFrame,
     })
 
-    expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
-    expect(runtime.netStubbingState.routes).to.deep.equal([])
-    expect(runtime.networkInterceptionCore.requestInterception).to.exist
-    expect(runtime.networkInterceptionCore.responseInterception).to.exist
-    expect(runtime.networkInterceptionCore.documentPreparation).to.exist
-    expect(runtime.networkInterceptionCore.networkCapture).to.exist
-    expect(runtime.networkInterceptionCore.cookieState).to.exist
-    expect(runtime.networkInterceptionCore.commandLog).to.exist
-    expect(runtime.networkProxy.http.networkInterception).to.exist
-    expect(runtime.networkProxy.http.networkInterception).to.not.equal(runtime.networkInterception)
+    expect(runtime.networkInterception).to.exist
+    expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
+    expect(runtime.networkPolicyRegistration).to.exist
+    expect(runtime.fetchTransport).to.exist
+    expect(runtime).not.to.have.property('networkProxy')
   })
 
-  it('runs legacy request and response middleware over the CDP runtime', async () => {
+  it('createCdpFetchRuntime starts Fetch interception and continues requests by default', async () => {
     const client = {
       send: sinon.stub().resolves({}),
       on: sinon.stub(),
       off: sinon.stub(),
     }
-    const runtime = createCdpFetchRuntime({
-      ...baseDeps(),
-      client,
-    })
-
-    runtime.networkProxy.http.middleware = {
-      [HttpStages.IncomingRequest]: {
-        mutateUrl () {
-          this.req.proxiedUrl = 'https://example.test/mutated'
-          this.next()
-        },
-      },
-      [HttpStages.IncomingResponse]: {
-        captureBody () {
-          this.res.status(202)
-          this.res.set('x-legacy-pipeline', 'true')
-          this.incomingResStream.pipe(this.res)
-          this.res.once('finish', () => this.end())
-        },
-      },
-      [HttpStages.Error]: {},
-    }
-
-    client.send.withArgs('Fetch.getResponseBody').resolves({
-      body: Buffer.from('origin').toString('base64'),
-      base64Encoded: true,
-    })
-
+    const runtime = createCdpFetchRuntime({ client })
     const onRequestPaused = await startCdpRuntime(runtime, client)
-    const handled = onRequestPaused(createPausedRequest({
+
+    await onRequestPaused(createPausedRequest({
       requestId: 'fetch-request',
       networkId: 'network-1',
     }))
 
     await tick()
-    await onRequestPaused(createPausedRequest({
-      requestId: 'fetch-response',
-      networkId: 'network-1',
-      responseStatusCode: 200,
-    }))
-
-    await handled
 
     expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
       requestId: 'fetch-request',
-      url: 'https://example.test/mutated',
-    })
-
-    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
-      requestId: 'fetch-response',
-    })
-
-    expect(client.send).not.to.have.been.calledWith('Fetch.takeResponseBodyAsStream')
-
-    expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-      requestId: 'fetch-response',
-      responseCode: 202,
-      responseHeaders: [{
-        name: 'x-legacy-pipeline',
-        value: 'true',
-      }],
-      body: Buffer.from('origin').toString('base64'),
-    })
-  })
-
-  it('does not fulfill an empty success when the CDP origin hop fails', async () => {
-    const client = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
-    }
-    const runtime = createCdpFetchRuntime({
-      ...baseDeps(),
-      client,
-    })
-
-    runtime.networkProxy.http.middleware = {
-      [HttpStages.IncomingRequest]: {
-        passThrough () {
-          this.next()
-        },
-      },
-      [HttpStages.IncomingResponse]: {
-        boom () {
-          throw new Error('response middleware failed')
-        },
-      },
-      [HttpStages.Error]: {
-        destroy () {
-          this.res.destroy()
-          this.end()
-        },
-      },
-    }
-
-    client.send.withArgs('Fetch.getResponseBody').resolves({
-      body: Buffer.from('origin').toString('base64'),
-      base64Encoded: true,
-    })
-
-    const onRequestPaused = await startCdpRuntime(runtime, client)
-    const handled = onRequestPaused(createPausedRequest({
-      requestId: 'fetch-request',
-      networkId: 'network-1',
-    }))
-
-    await tick()
-    await onRequestPaused(createPausedRequest({
-      requestId: 'fetch-response',
-      networkId: 'network-1',
-      responseStatusCode: 200,
-    }))
-
-    await handled
-
-    expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
-    expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-      requestId: 'fetch-response',
     })
   })
 })
