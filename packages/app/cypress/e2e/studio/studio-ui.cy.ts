@@ -174,10 +174,6 @@ describe('studio functionality', () => {
   })
 
   it('opens a cloud studio session with AI enabled', () => {
-    // Studio treats a session as anonymous unless the local app reports an
-    // authenticated cloud user, so log in to exercise the authenticated flow.
-    cy.loginUser()
-
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -212,7 +208,11 @@ describe('studio functionality', () => {
       url: 'http://localhost:3000/cypress/e2e/index.html',
     })
 
-    launchStudio()
+    // Studio treats a session as anonymous unless the local app reports an
+    // authenticated cloud user. launchStudio() calls cy.openProject(), which
+    // reinitializes the data context, so log in via beforeLaunch rather than
+    // before launchStudio() - otherwise the login is wiped before it's read.
+    launchStudio({ beforeLaunch: () => cy.loginUser() })
 
     // expand the recommendation
     cy.get('[aria-label="Expand recommendation"]').first().click()

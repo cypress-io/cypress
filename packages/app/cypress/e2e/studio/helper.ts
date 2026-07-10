@@ -20,8 +20,13 @@ export function openNewTestFromSpecHeader () {
   cy.get('[data-cy="runnable-popover-new-test"]').click()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
+export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''], beforeLaunch }: { specName?: string, createNewTestFromSuite?: boolean, createNewTestFromSpecHeader?: boolean, cliArgs?: string[], beforeLaunch?: () => void } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
+
+  // loadProjectAndRunSpec calls cy.openProject(), which reinitializes the data
+  // context (and wipes coreData.user) - run any auth setup after that, but
+  // before the studio panel launches and fetches its config.
+  beforeLaunch?.()
 
   const testTitle = 'visits a basic html page'
 
