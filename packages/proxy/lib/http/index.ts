@@ -270,6 +270,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         },
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
+          ctx.__trackOnlyRunMiddleware?.(names)
         },
         // Spread last so test spies can override stage helpers.
         ...ctx,
