@@ -671,6 +671,12 @@ const startServer = function (obj) {
 
   let srv
 
+  // allowHTTP1 so cy.request (Node HTTP/1.1 client) can reach the fixture server
+  const http2ServerOptions = {
+    ...httpsServerTlsOptions,
+    allowHTTP1: true,
+  }
+
   if (useHttp2 && useHttp2Native) {
     const { register, onStream } = createHttp2NativeRouter()
 
@@ -678,10 +684,10 @@ const startServer = function (obj) {
       onHttp2NativeServer(register)
     }
 
-    srv = http2.createSecureServer(httpsServerTlsOptions)
+    srv = http2.createSecureServer(http2ServerOptions)
     srv.on('stream', onStream)
   } else if (useHttp2) {
-    srv = http2.createSecureServer(httpsServerTlsOptions)
+    srv = http2.createSecureServer(http2ServerOptions)
 
     srv.on('request', (req, res) => {
       app(req, res)

@@ -185,14 +185,6 @@ describe('e2e http2', () => {
       http2Native: true,
       onHttp2NativeServer: registerHttp2NativeRoutes,
     }],
-    settings: {
-      hosts: {
-        '*.h2test.local': '127.0.0.1',
-      },
-      e2e: {
-        allowCypressEnv: false,
-      },
-    },
   })
 
   describe('with MITM proxy enabled (CYPRESS_INTERNAL_DISABLE_PROXY=0)', () => {
