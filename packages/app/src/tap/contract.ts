@@ -1,45 +1,26 @@
-// Internal negotiation signal handed to the CLI via getSchema so it can refuse
-// a Cypress whose tap contract it doesn't understand. It is deliberately kept
-// out of the public `cli/types` surface — nothing user-facing should expose it.
-export const TAP_SCHEMA_VERSION = 1
+// App-side view of the cross-process tap contract. The shared half (types and
+// constants both sides agree on) lives in `@packages/cypress-instances`; this
+// module re-exports it from the package source (Vite compiles the zero-dependency
+// contract module to ESM, the way the app consumes every other sibling package)
+// and adds the app-only declarations the CLI never sees. The CLI itself reads the
+// same contract from the package's compiled CJS build.
 
-export interface TapCommandParamSchema {
-  name: string
-  type: 'string' | 'number' | 'boolean'
-  required: boolean
-  description: string
-}
+import type { TapSchema, TapExecResult } from '@packages/cypress-instances/lib/tap-contract'
 
-export interface TapCommandOptionSchema {
-  name: string
-  alias?: string
-  type: 'string' | 'number' | 'boolean'
-  required: boolean
-  description: string
-}
+export {
+  TAP_SCHEMA_VERSION,
+} from '@packages/cypress-instances/lib/tap-contract'
 
-interface TapCommandSchema {
-  name: string
-  description: string
-  params: readonly TapCommandParamSchema[]
-  options: readonly TapCommandOptionSchema[]
-}
+export type {
+  TapCommandParamSchema,
+  TapCommandOptionSchema,
+  TapSchema,
+  TapExecResult,
+} from '@packages/cypress-instances/lib/tap-contract'
 
-export interface TapSchema {
-  schemaVersion: typeof TAP_SCHEMA_VERSION
-  cypressVersion: string
-  commands: TapCommandSchema[]
-}
-
-// UNKNOWN_COMMAND   – the command isn't in the registry
-// INVALID_PAYLOAD   – the args/options payload wasn't an object (or absent)
-// INVALID_ARGUMENTS – a positional argument failed schema validation
-// INVALID_OPTIONS   – a flag failed schema validation
-type TapExecFailureCode = 'UNKNOWN_COMMAND' | 'INVALID_PAYLOAD' | 'INVALID_ARGUMENTS' | 'INVALID_OPTIONS'
-
-export type TapExecResult =
-  | { result: unknown }
-  | { error: { code: TapExecFailureCode, message: string } }
+// Reserved dispatch-level failure codes `exec` itself produces; domain failures
+// carry a command-defined code, so TapExecResult.code stays an open string.
+export type TapExecDispatchFailureCode = 'UNKNOWN_COMMAND' | 'INVALID_PAYLOAD' | 'INVALID_ARGUMENTS' | 'INVALID_OPTIONS'
 
 export interface TapBindingContract {
   getSchema (): Promise<TapSchema>

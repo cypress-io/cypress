@@ -837,7 +837,10 @@
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
     ],
-    "packages/app/src/tap/commands.ts": [
+    "packages/app/src/tap/contract.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/definition.ts": [
       "exports"
     ],
     "packages/app/src/studio/studio-app-types.ts": [
