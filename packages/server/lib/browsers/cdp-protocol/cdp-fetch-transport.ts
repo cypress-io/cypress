@@ -117,6 +117,9 @@ export class CdpFetchTransport {
       networkId = event.networkId
       const request: CdpFetchTransportRequest = {
         ...event.request,
+        headers: {
+          ...event.request.headers,
+        },
         id: networkId,
         requestId: event.requestId,
         sessionId,

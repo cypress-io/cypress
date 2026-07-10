@@ -86,6 +86,19 @@ describe('createSyntheticExpressContext', () => {
     expect(setCookie).to.include('SameSite=lax')
     expect(setCookie).to.match(/Expires=/)
   })
+
+  it('serializes boolean SameSite as Strict', () => {
+    const { res } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+    })
+
+    res.cookie('session', 'abc', {
+      sameSite: true,
+    })
+
+    expect(res.getHeader('Set-Cookie')).to.equal('session=abc; Path=/; SameSite=Strict')
+  })
 })
 
 describe('createSyntheticProxyCodec', () => {

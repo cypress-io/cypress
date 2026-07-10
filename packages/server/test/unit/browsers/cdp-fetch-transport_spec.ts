@@ -513,6 +513,43 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('sends header overrides when middleware mutates request headers in place', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        accept: '*/*',
+      }
+
+      httpIntercept.use((req, next) => {
+        req.headers!['accept-encoding'] = 'gzip, deflate'
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'accept',
+          value: '*/*',
+        }, {
+          name: 'accept-encoding',
+          value: 'gzip, deflate',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 

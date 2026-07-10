@@ -63,7 +63,7 @@ function serializeCookie (name: string, value: string, options: CookieOptions = 
   }
 
   if (options.sameSite) {
-    parts.push(`SameSite=${options.sameSite === true ? 'true' : options.sameSite}`)
+    parts.push(`SameSite=${options.sameSite === true ? 'Strict' : options.sameSite}`)
   }
 
   return parts.join('; ')
