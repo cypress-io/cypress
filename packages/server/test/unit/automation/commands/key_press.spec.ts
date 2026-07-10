@@ -1,7 +1,7 @@
 import type Sinon from 'sinon'
 import type { expect as Expect } from 'chai'
 import { SupportedKey, NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
-import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automation'
+import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp-protocol/cdp_automation'
 import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
