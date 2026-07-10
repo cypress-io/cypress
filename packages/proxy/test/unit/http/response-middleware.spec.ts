@@ -133,11 +133,10 @@ describe('http/response-middleware', function () {
               on: (event, listener) => {},
               off: (event, listener) => {},
             },
-            onError (err) {
-              expect(err.message).toEqual('Internal error while proxying "undefined undefined" in 0:\nError running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+          }, (err) => {
+            expect(err.message).toEqual('Internal error while proxying "undefined undefined" in 0:\nError running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
-              resolve()
-            },
+            resolve()
           })
         })
       })
@@ -152,17 +151,18 @@ describe('http/response-middleware', function () {
         return new Promise<void>((resolve) => {
           testMiddleware([middleware], {
             error,
+            req: {
+              method: 'GET',
+              proxiedUrl: 'url',
+            },
             res: {
               on: (event, listener) => {},
               off: (event, listener) => {},
             },
-            onError (err) {
-              expect(err.message).toContain('This middleware invocation previously encountered an error which may be related, see `error.cause`')
-              expect(err['cause']).toEqual(error)
-              resolve()
-            },
-            method: 'GET',
-            proxiedUrl: 'url',
+          }, (err) => {
+            expect(err.message).toContain('This middleware invocation previously encountered an error which may be related, see `error.cause`')
+            expect(err['cause']).toEqual(error)
+            resolve()
           })
         })
       })
@@ -198,7 +198,6 @@ describe('http/response-middleware', function () {
     beforeEach(() => {
       headers = { 'header-name': 'header-value' }
       ctx = {
-        onlyRunMiddleware: vi.fn(),
         incomingRes: { headers },
         req: {},
         res: {
@@ -214,7 +213,7 @@ describe('http/response-middleware', function () {
       await testMiddleware([FilterNonProxiedResponse], ctx)
       expect(ctx.res.set).toHaveBeenCalledWith(headers)
 
-      expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith([
+      expect(ctx.onlyRunMiddlewareCalls).to.deep.equal([[
         'AttachPlainTextStreamFn',
         'PatchExpressSetHeader',
         'MaybeSendRedirectToClient',
@@ -222,14 +221,14 @@ describe('http/response-middleware', function () {
         'MaybeEndWithEmptyBody',
         'CompressBody',
         'SendResponseBodyToClient',
-      ])
+      ]])
     })
 
     it('runs all subsequent middleware if request is not from an extra target', async () => {
       ctx.req.isFromMainTarget = false
 
       await testMiddleware([FilterNonProxiedResponse], ctx)
-      expect(ctx['onlyRunMiddleware']).not.toHaveBeenCalled()
+      expect(ctx.onlyRunMiddlewareCalls).to.deep.equal([])
     })
   })
 

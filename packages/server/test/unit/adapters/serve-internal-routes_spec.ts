@@ -136,7 +136,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(terminal).not.to.have.been.called
     expect(serverRequest.create).to.have.been.calledOnce
     expect(serverRequest.create).to.have.been.calledWithMatch({
-      url: 'https://cross-origin.test/__cypress/process-origin-callback?foo=1',
+      url: 'http://127.0.0.1:1234/__cypress/process-origin-callback?foo=1',
       proxy: 'http://127.0.0.1:1234',
       method: 'POST',
       headers: {

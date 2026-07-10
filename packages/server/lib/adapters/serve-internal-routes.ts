@@ -45,6 +45,12 @@ function toLoopbackProxy (config: ServeInternalRoutesConfig): string {
   return `http://127.0.0.1:${config.port}`
 }
 
+function toLoopbackRequestUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
+  const url = new URL(requestUrl, config.proxyUrl)
+
+  return `${toLoopbackProxy(config)}${url.pathname}${url.search}${url.hash}`
+}
+
 function shouldSendBody (request: HttpRequest): boolean {
   return typeof request.body !== 'undefined' && !['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
 }
@@ -65,7 +71,7 @@ export function createServeInternalRoutesMiddleware ({
     }
 
     const response = await serverRequest.create({
-      url: request.url,
+      url: toLoopbackRequestUrl(request.url, config),
       proxy: toLoopbackProxy(config),
       method: request.method ?? 'GET',
       headers: filterHeaders(request.headers),

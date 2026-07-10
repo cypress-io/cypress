@@ -9,17 +9,20 @@ export function createTestNetworkInterceptionCore () {
 }
 
 export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onErrorHandler?: (error: Error) => void) {
+  const onlyRunMiddlewareCalls: string[][] = []
+
   const fullCtx = {
     debug: () => {},
     req: {},
     res: {},
     config: {},
-    networkInterceptionCore: createTestNetworkInterceptionCore(),
-
+    networkInterceptionCore: ctx.networkInterceptionCore ?? createTestNetworkInterceptionCore(),
+    __trackOnlyRunMiddleware: (names: string[]) => {
+      onlyRunMiddlewareCalls.push(names)
+    },
     middleware: {
       0: middleware,
     },
-
     ...ctx,
   }
 
@@ -29,5 +32,6 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onE
 
   return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
     Object.assign(ctx, fullCtx)
+    ctx.onlyRunMiddlewareCalls = onlyRunMiddlewareCalls
   })
 }
