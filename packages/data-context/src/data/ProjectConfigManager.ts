@@ -649,13 +649,15 @@ export class ProjectConfigManager {
 
   /**
    * Informs the child process if the main process will soon disconnect.
+   * Resolves even when there is no IPC or the child does not ack in time so
+   * teardown cannot flip a successful run to a non-zero exit code.
    * @returns promise
    */
   mainProcessWillDisconnect (): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!this._eventsIpc) {
         debug(`mainProcessWillDisconnect message not set, no IPC available`)
-        reject()
+        resolve()
 
         return
       }
@@ -663,10 +665,10 @@ export class ProjectConfigManager {
       debug('sending main:process:will:disconnect message')
       this._eventsIpc.send('main:process:will:disconnect')
 
-      // If for whatever reason we don't get an ack in 5s, bail.
+      // If for whatever reason we don't get an ack in 5s, continue teardown.
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
-        reject(new Error('mainProcessWillDisconnect message timed out'))
+        resolve()
       }, 5000)
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {

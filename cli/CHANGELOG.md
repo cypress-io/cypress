@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where `cypress run` could exit with code `1` after all specs passed when teardown waited on a config child-process disconnect that never acknowledged in time. Teardown now continues without flipping a successful run to a failure. Fixes [#34265](https://github.com/cypress-io/cypress/issues/34265).
 - Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 
