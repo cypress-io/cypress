@@ -135,6 +135,27 @@ describe('waitForDevServerSpecUpdate', () => {
     expect(resolved).toBe(true)
   })
 
+  it('waits for webpack JIT recompile when on-spec-updated arrives before jit-recompile:queued', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:on-spec-updated')
+    await tick()
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
+    await promise
+
+    expect(resolved).toBe(true)
+  })
+
   it('waits for webpack JIT recompile when bundler is unknown but JIT events fire', async () => {
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }

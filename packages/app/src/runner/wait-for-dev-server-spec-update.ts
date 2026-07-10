@@ -106,9 +106,25 @@ export function waitForDevServerSpecUpdate (
     }
 
     const onSpecUpdated = () => {
-      if (!webpackWaitActive) {
-        tryResolve()
+      if (webpackWaitActive) {
+        return
       }
+
+      // When bundler is unknown, defer resolving on spec-updated so webpack JIT
+      // events forwarded over IPC can arrive after the server ack.
+      if (bundler === undefined) {
+        setImmediate(() => {
+          setImmediate(() => {
+            if (!webpackWaitActive) {
+              tryResolve()
+            }
+          })
+        })
+
+        return
+      }
+
+      tryResolve()
     }
 
     events.once('dev-server:specs:unchanged', onSpecsUnchanged)
