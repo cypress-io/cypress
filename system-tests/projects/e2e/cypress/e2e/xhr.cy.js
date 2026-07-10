@@ -7,7 +7,9 @@ describe('xhrs', () => {
       }
     }
 
-    cy.intercept(/api/, getResp()).as('getApi')
+    // Match only our app's /api/ path. A bare /api/ also matches Chrome
+    // background URLs such as clientservices.googleapis.com/... and flakes CI.
+    cy.intercept(/\/api\//, getResp()).as('getApi')
     cy.visit('/index.html')
     cy.window().then((win) => {
       const xhr = new win.XMLHttpRequest

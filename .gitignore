@@ -411,3 +411,7 @@ system-tests/lib/validations
 settings.local.json
 
 .claude/*
+
+# chunk active sidecar tracking
+.chunk/sidecar.json
+.chunk/sidecar.*.json

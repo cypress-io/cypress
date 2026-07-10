@@ -1,61 +1,18 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp_automation'
+import { normalizeResourceType } from './cdp-protocol/cdp_automation'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
-import { cookieMatches, CyCookieFilter } from '../automation/util'
+import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
+import { normalizeGetCookieProps, normalizeSetCookieProps } from '../automation/cookie/converters/webkit'
 import utils from './utils'
-import type { CyCookie } from '../automation/util'
+import type { CyCookie } from '../automation/cookie/util'
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
-
-const extensionMap = {
-  'no_restriction': 'None',
-  'lax': 'Lax',
-  'strict': 'Strict',
-} as const
-
-function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
-  return str ? extensionMap[str] : undefined
-}
-
-const normalizeGetCookieProps = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
-  const cyCookie: CyCookie = {
-    name,
-    value,
-    domain,
-    path,
-    secure,
-    httpOnly,
-    hostOnly: false,
-    // Use expirationDate instead of expires
-    ...expires !== -1 ? { expirationDate: expires } : {},
-  }
-
-  if (sameSite === 'None') {
-    cyCookie.sameSite = 'no_restriction'
-  } else if (sameSite) {
-    cyCookie.sameSite = sameSite.toLowerCase() as CyCookie['sameSite']
-  }
-
-  return cyCookie
-}
-
-const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
-  return {
-    name: cookie.name,
-    value: cookie.value,
-    path: cookie.path,
-    domain: cookie.domain,
-    secure: cookie.secure,
-    httpOnly: cookie.httpOnly,
-    expires: cookie.expirationDate!,
-    sameSite: convertSameSiteExtensionToCypress(cookie.sameSite)!,
-  }
-}
 
 let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()
@@ -67,6 +24,8 @@ type WebKitAutomationOpts = {
   initialUrl: string
   downloadsFolder: string
   videoApi?: RunModeVideoApi
+  userAgent?: string | null
+  isHeadless: boolean
 }
 
 export class WebKitAutomation {
@@ -74,10 +33,14 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
+  private userAgent: string | null
+  private isHeadless: boolean
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
+    this.userAgent = opts.userAgent ?? null
+    this.isHeadless = opts.isHeadless
   }
 
   // static initializer to avoid "not definitively declared"
@@ -94,6 +57,13 @@ export class WebKitAutomation {
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
+      ...(this.userAgent ? { userAgent: this.userAgent } : {}),
+      // In headless mode, set a standard devicePixelRatio so that screenshots
+      // are consistent regardless of the host machine's DPI (e.g. 2x locally
+      // vs 1x in CI) and to avoid fuzzy text on high-DPI displays. This mirrors
+      // Chrome, which only forces `--force-device-scale-factor=1` when headless.
+      // https://github.com/cypress-io/cypress/issues/23808
+      ...(this.isHeadless ? { deviceScaleFactor: 1 } : {}),
       recordVideo: options.videoApi && {
         dir: os.tmpdir(),
         size: { width: 1280, height: 720 },
@@ -360,6 +330,38 @@ export class WebKitAutomation {
     return cookiesToClear
   }
 
+  /**
+   * Locates the AUT (application under test) frame within the runner page.
+   * Playwright's `frame.name()` returns the frame's `name` attribute, falling
+   * back to its `id` attribute, both of which the runner sets to
+   * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
+   */
+  private getAutFrame (): playwright.Frame {
+    const childFrames = this.page.mainFrame().childFrames()
+
+    let autFrame = childFrames.find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER))
+
+    // When running Cypress-in-Cypress E2E tests, the AUT frame is nested one
+    // level deeper inside the outer AUT frame.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && autFrame) {
+      autFrame = autFrame.childFrames().find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER)) ?? autFrame
+    }
+
+    // If for whatever reason we cannot identify the AUT frame by name, fall back
+    // to the first child frame, which should always be the AUT frame.
+    if (!autFrame) {
+      debug('could not identify AUT frame by name, falling back to first child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
+      autFrame = childFrames[0]
+    }
+
+    if (!autFrame) {
+      debug('could not find AUT frame: the runner page has no child frames')
+      throw new Error('Could not find AUT frame')
+    }
+
+    return autFrame
+  }
+
   private async takeScreenshot (data) {
     const buffer = await this.page.screenshot({
       fullPage: data.capture === 'fullPage',
@@ -391,8 +393,12 @@ export class WebKitAutomation {
         return await this.clearCookie(data)
       case 'take:screenshot':
         return await this.takeScreenshot(data)
+      case 'get:aut:url':
+        return this.getAutFrame().url()
+      case 'get:aut:title':
+        return await this.getAutFrame().title()
       case 'focus:browser:window':
-        return await this.context.pages[0]?.bringToFront()
+        return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':
         debug('stubbed reset:browser:state')
 

@@ -1,11 +1,10 @@
 import type { Protocol } from 'devtools-protocol'
-import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey } from '@packages/types'
-import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
+import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
 import { isEqual } from 'lodash'
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
-import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 

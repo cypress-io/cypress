@@ -59,8 +59,9 @@ describe('CyPromptLifecycleManager', () => {
       },
       'chokidar': {
         watch: watcherStub.returns({
-          on: watcherOnStub,
-          close: watcherCloseStub,
+          on: watcherOnStub.returnsThis(),
+          close: watcherCloseStub.resolves(),
+          removeAllListeners: sinon.stub(),
         }),
       },
     }).CyPromptLifecycleManager
@@ -479,7 +480,7 @@ describe('CyPromptLifecycleManager', () => {
 
       expect(readFileStub).to.be.calledWith(path.join('/path', 'to', 'cy-prompt', 'server', 'index.js'), 'utf8')
 
-      expect(CyPromptLifecycleManager['watcher']).to.be.present
+      expect(CyPromptLifecycleManager['watcher']).to.exist
       expect(watcherStub).to.be.calledWith(path.join('/path', 'to', 'cy-prompt', 'server', 'index.js'), {
         awaitWriteFinish: true,
       })
@@ -501,7 +502,7 @@ describe('CyPromptLifecycleManager', () => {
 
       onCallback()
 
-      expect(mockCyPromptManagerPromise).to.be.present
+      expect(mockCyPromptManagerPromise).to.exist
       expect(await mockCyPromptManagerPromise).to.equal(updatedCyPromptManager)
     })
 

@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "149.0.7827.155"
-chrome-beta-version: &chrome-beta-version "150.0.7871.24"
+chrome-stable-version: &chrome-stable-version "150.0.7871.46"
+chrome-beta-version: &chrome-beta-version "151.0.7922.10"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.24"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.46"
 firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -129,7 +129,15 @@ executors:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
-    resource_class: medium
+    resource_class: medium.gen2
+    environment:
+      PLATFORM: linux
+
+  # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check)
+  node-slim:
+    docker:
+      - image: cimg/node:22.19.0
+    resource_class: medium.gen2
     environment:
       PLATFORM: linux
 
@@ -137,7 +145,7 @@ executors:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
-    resource_class: medium
+    resource_class: medium.gen2
     environment:
       PLATFORM: linux
 
@@ -1666,7 +1674,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
       build-better-sqlite3:
         type: boolean
         default: false
@@ -1695,7 +1703,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1733,6 +1741,7 @@ jobs:
 
   check-ts:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1742,6 +1751,7 @@ jobs:
 
   health-check:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1752,7 +1762,7 @@ jobs:
   # a special job that closes the Percy build started by the required jobs
   percy-finalize:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     parameters:
       <<: *defaultsParameters
       required_env_var:
@@ -1800,7 +1810,7 @@ jobs:
   # verify accessibility scores from Cypress
   verify-accessibility-results:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       # Uses an inline when: not: or: instead of halt-if-skipped because this
       # job depends on multiple parameters. CircleCI boolean parameters cannot
@@ -1841,7 +1851,7 @@ jobs:
 
   ready-to-release:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     parameters:
       <<: *defaultsParameters
     steps:
@@ -1851,7 +1861,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-cli-tests >>
@@ -1882,7 +1892,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -1935,7 +1945,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -1985,9 +1995,6 @@ jobs:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
-      - install-browsers:
-          install-chrome: true
-          executor: << parameters.executor >>
       - when:
           condition:
             # several snapshots fails for windows due to paths.
@@ -2035,7 +2042,7 @@ jobs:
 
   verify-release-readiness:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     parallelism: 1
     environment:
       GITHUB_TOKEN: $GH_TOKEN
@@ -2051,6 +2058,7 @@ jobs:
 
   lint-types:
     <<: *defaults
+    executor: node-slim
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -2081,7 +2089,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -2234,7 +2242,7 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2243,7 +2251,7 @@ jobs:
 
   system-tests-electron:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2252,7 +2260,7 @@ jobs:
 
   system-tests-firefox:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2261,7 +2269,7 @@ jobs:
 
   system-tests-webkit:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 8
     steps:
       - run-system-tests:
@@ -2289,7 +2297,7 @@ jobs:
         type: boolean
         default: false
     parallelism: 3
-    resource_class: large
+    resource_class: large.gen2
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2323,7 +2331,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
       percy:
         type: boolean
         default: false
@@ -2344,7 +2352,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
       percy:
         type: boolean
         default: false
@@ -2365,7 +2373,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: large
+        default: large.gen2
       percy:
         type: boolean
         default: false
@@ -2383,7 +2391,7 @@ jobs:
   driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -2393,7 +2401,7 @@ jobs:
   driver-integration-tests-chrome-inject-document-domain:
     <<: *defaults
     parallelism: 5
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -2403,7 +2411,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2413,7 +2421,7 @@ jobs:
 
   driver-integration-tests-chrome-beta-inject-document-domain:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2424,7 +2432,7 @@ jobs:
 
   driver-integration-tests-firefox:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2433,7 +2441,7 @@ jobs:
 
   driver-integration-tests-electron:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2442,7 +2450,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
-    resource_class: large
+    resource_class: large.gen2
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -2470,7 +2478,7 @@ jobs:
 
   reporter-integration-tests:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 3
     steps:
       - halt-if-skipped:
@@ -2493,7 +2501,7 @@ jobs:
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     parallelism: 2
     steps:
       - halt-if-skipped:
@@ -2575,7 +2583,7 @@ jobs:
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-webpack-batteries-tests >>
@@ -2694,7 +2702,7 @@ jobs:
 
   npm-grep:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-grep-tests >>
@@ -2757,7 +2765,7 @@ jobs:
 
   npm-release:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - restore_cached_workspace
       - run:
@@ -2770,7 +2778,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: xlarge
+        default: xlarge.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -2797,7 +2805,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: small
+        default: small.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2813,7 +2821,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium
+        default: medium.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2848,7 +2856,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: medium+.gen2
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -2910,7 +2918,7 @@ jobs:
 
   test-npm-module-and-verify-binary:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - restore_cached_workspace
       # make sure we have cypress.zip received
@@ -2948,7 +2956,7 @@ jobs:
   # Test NPM module on minimum node version we support
   test-npm-module-on-minimum-node-version:
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     docker:
       - image: *base-internal-minimum-node
     steps:
@@ -2992,7 +3000,7 @@ jobs:
         type: string
         default: /root/test-cypress-and-jest
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
@@ -3028,7 +3036,7 @@ jobs:
         type: executor
         default: cy-docker
     <<: *defaults
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
@@ -3146,7 +3154,7 @@ jobs:
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults
-    resource_class: medium+
+    resource_class: medium+.gen2
     steps:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
@@ -3197,7 +3205,7 @@ jobs:
   all-jobs-passed:
     docker:
       - image: cimg/base:stable
-    resource_class: small
+    resource_class: small.gen2
     steps:
       - run:
           name: All jobs passed

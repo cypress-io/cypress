@@ -1,16 +1,21 @@
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { registerDefaultNetworkPolicies } from '@packages/network-interception'
+import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import { NetworkInterceptionCore as NetworkInterceptionCoreImpl } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
-import type { CookieJar } from './util/cookies'
+import type { CookieJar } from './automation/cookie/jar'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
+import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
+import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
+import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -29,6 +34,19 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
   networkInterceptionCore: NetworkInterceptionCore
+}
+
+export type CreateCdpFetchRuntimeDeps = {
+  client: Pick<ICriClient, 'send' | 'on' | 'off'>
+}
+
+export type CdpFetchNetworkRuntime = {
+  networkPolicyRegistration: ForNetworkPolicyRegistration
+  networkInterceptionCore: NetworkInterceptionCore
+  networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
+  fetchTransport: CdpFetchTransport
+  start (): Promise<void>
+  reset (): Promise<void>
 }
 
 /**
@@ -61,6 +79,9 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
   })
+  const networkInterception = new HttpIntercept(networkProxy.codec)
+
+  networkProxy.withIntercept(networkInterception)
 
   return {
     networkProxy,
@@ -81,6 +102,36 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     },
     addBrowserPreRequest (preRequest: BrowserPreRequest) {
       return networkProxy.addPendingBrowserPreRequest(preRequest)
+    },
+  }
+}
+
+/**
+ * Composition-root factory for the CDP Fetch network runtime.
+ *
+ * This is intentionally not wired into the default proxy runtime yet. The
+ * HTTP/2 migration can opt into it with an existing cri-client while preserving
+ * the minimal HttpRequest/HttpResponse transport-neutral contract.
+ */
+export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
+  const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
+
+  const networkInterceptionCore = new NetworkInterceptionCoreImpl({
+    policyRegistration: networkPolicyRegistration,
+  })
+  const networkInterception = new HttpIntercept(createCdpFetchCodec())
+  const fetchTransport = new CdpFetchTransport(deps.client, networkInterception)
+
+  return {
+    networkPolicyRegistration,
+    networkInterceptionCore,
+    networkInterception,
+    fetchTransport,
+    start () {
+      return fetchTransport.start()
+    },
+    reset () {
+      return fetchTransport.stop()
     },
   }
 }
