@@ -97,6 +97,13 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
   return function (req, res, next) {
+    // CDP Fetch owns browser traffic when the MITM proxy is disabled, so
+    // path-only requests to the Cypress server are expected — not a sign the
+    // browser was launched outside Cypress.
+    if (isProxyDisabled()) {
+      return next()
+    }
+
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
     // Trusted loopback from serve-internal-routes: path-only HTTP to Express

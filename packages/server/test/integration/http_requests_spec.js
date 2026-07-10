@@ -413,6 +413,41 @@ describe('Routes', () => {
     })
   })
 
+  context('when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
+    beforeEach(function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      return this.setup({ projectName: 'foobarbaz' })
+    })
+
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    it('does not redirect non-proxied traffic to clientRoute', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/xhrs/foo`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).not.to.eq(302)
+        expect(res.headers.location).to.be.undefined
+      })
+    })
+
+    it('serves the runner app from clientRoute instead of the Whoops page', function () {
+      return this.rp({
+        url: `${this.proxy}/__`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.match(/This browser was not launched through Cypress\./)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
+      })
+    })
+  })
+
   context('GET /__cypress/runner/*', () => {
     beforeEach(function () {
       return this.setup('http://localhost:8443')

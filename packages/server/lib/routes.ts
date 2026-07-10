@@ -22,6 +22,7 @@ import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { isProxyDisabled } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:routes')
 
@@ -276,7 +277,10 @@ export const createCommonRoutes = ({
   }
 
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
-    const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
+    // Path-only clientRoute hits are expected when CDP Fetch replaces the
+    // MITM proxy; only treat them as "not launched through Cypress" when the
+    // HTTP proxy is supposed to be in use.
+    const nonProxied = !isProxyDisabled() && (req.proxiedUrl?.startsWith('/') ?? false)
 
     getCtx().actions.app.setBrowserUserAgent(req.headers['user-agent'])
 
