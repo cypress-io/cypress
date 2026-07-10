@@ -103,6 +103,43 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.url).to.equal('https://example.test/mutated')
     })
 
+    it('encodes neutral request header, method, and body mutations onto the CDP transport context', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {
+          accept: '*/*',
+        },
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        method: 'POST',
+        headers: {
+          accept: '*/*',
+          'accept-encoding': 'gzip, deflate',
+          authorization: 'Basic abc123',
+          cookie: 'a=1; b=2',
+        },
+        body: 'name=value',
+      })
+
+      expect(transportRequest).to.deep.include({
+        method: 'POST',
+        postData: 'name=value',
+        headers: {
+          accept: '*/*',
+          'accept-encoding': 'gzip, deflate',
+          authorization: 'Basic abc123',
+          cookie: 'a=1; b=2',
+        },
+      })
+    })
+
     it('round trips CDP response pauses through the neutral response shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
@@ -428,6 +465,51 @@ describe('CdpFetchTransport', () => {
 
       await onRequestPaused(response)
 
+      await handled
+    })
+
+    it('sends header, method, and body overrides when middleware mutates the request', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use((req, next) => {
+        return next({
+          ...req,
+          method: 'POST',
+          headers: {
+            'accept-encoding': 'gzip, deflate',
+            authorization: 'Basic abc123',
+            cookie: 'session=1',
+          },
+          body: 'payload',
+        })
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        method: 'POST',
+        postData: 'payload',
+        headers: [{
+          name: 'accept-encoding',
+          value: 'gzip, deflate',
+        }, {
+          name: 'authorization',
+          value: 'Basic abc123',
+        }, {
+          name: 'cookie',
+          value: 'session=1',
+        }],
+      })
+
+      await onRequestPaused(response)
       await handled
     })
 

@@ -4,6 +4,7 @@ import type {
   HttpResponse,
   TransportCodecPort,
 } from '@packages/network-interception'
+import type { Protocol } from 'devtools-protocol'
 import type {
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
@@ -56,6 +57,26 @@ function toResponseBody (body?: string | Buffer): string | undefined {
   return Buffer.from(body).toString('base64')
 }
 
+function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
+  if (!headers) {
+    return {}
+  }
+
+  return Object.entries(headers).reduce<Protocol.Network.Headers>((memo, [name, value]) => {
+    memo[name] = ([] as string[]).concat(value).map(String).join(', ')
+
+    return memo
+  }, {})
+}
+
+function toRequestPostData (body?: string | Buffer): string | undefined {
+  if (body === undefined) {
+    return undefined
+  }
+
+  return typeof body === 'string' ? body : body.toString('utf8')
+}
+
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
   const inFlightRequests = new Map<string, CdpFetchTransportRequest>()
   const inFlightResponses = new Map<string, CdpFetchTransportResponse>()
@@ -106,6 +127,18 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       const transportRequest = requireRequest(httpRequest.id)
 
       transportRequest.url = httpRequest.url
+
+      if (httpRequest.method !== undefined) {
+        transportRequest.method = httpRequest.method
+      }
+
+      if (httpRequest.headers !== undefined) {
+        transportRequest.headers = toNetworkHeaders(httpRequest.headers)
+      }
+
+      if (httpRequest.body !== undefined) {
+        transportRequest.postData = toRequestPostData(httpRequest.body)
+      }
 
       return transportRequest
     },

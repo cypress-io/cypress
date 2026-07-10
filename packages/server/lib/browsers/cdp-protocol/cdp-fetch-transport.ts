@@ -131,6 +131,11 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
+          ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
+          ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
+          ...(this.headersChanged(outbound.headers ?? {}, event.request.headers)
+            ? { headers: this.toContinueRequestHeaders(outbound.headers ?? {}) }
+            : {}),
         }, outbound.sessionId)
 
         requestContinued = true
@@ -292,6 +297,26 @@ export class CdpFetchTransport {
     })
 
     return bodyStream
+  }
+
+  private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
+    return Object.entries(headers).map(([name, value]) => {
+      return {
+        name,
+        value,
+      }
+    })
+  }
+
+  private headersChanged (left: Protocol.Network.Headers, right: Protocol.Network.Headers): boolean {
+    const leftKeys = Object.keys(left)
+    const rightKeys = Object.keys(right)
+
+    if (leftKeys.length !== rightKeys.length) {
+      return true
+    }
+
+    return leftKeys.some((key) => left[key] !== right[key])
   }
 
   private safeSend = async (...args: Parameters<CdpFetchClient['send']>): Promise<void> => {
