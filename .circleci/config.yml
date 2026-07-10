@@ -139,7 +139,7 @@ jobs:
   pack-workflows:
     docker:
         - image: cimg/base:stable
-    resource_class: small
+    resource_class: small.gen2
     steps:
         - cancel-draft-prs
         - checkout:
@@ -153,7 +153,7 @@ jobs:
   launch-primary-workflow:
       docker:
           - image: cimg/base:stable
-      resource_class: small
+      resource_class: small.gen2
       steps:
           - cancel-draft-prs
           - checkout:
