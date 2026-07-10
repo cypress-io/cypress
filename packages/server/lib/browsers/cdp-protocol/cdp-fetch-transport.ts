@@ -100,6 +100,8 @@ export class CdpFetchTransport {
     let networkId: string | undefined
     let requestContinued = false
     let response: CdpFetchTransportResponse | undefined
+    let responseRequestId: string | undefined
+    let responseSessionId: string | undefined
     let deferred: pDefer.DeferredPromise<CdpFetchTransportResponse> | undefined
 
     try {
@@ -136,7 +138,7 @@ export class CdpFetchTransport {
         let timeout: NodeJS.Timeout | undefined
 
         try {
-          return await Promise.race([
+          const pausedResponse = await Promise.race([
             responseDeferred.promise,
             new Promise<never>((_resolve, reject) => {
               timeout = setTimeout(() => {
@@ -144,6 +146,11 @@ export class CdpFetchTransport {
               }, RESPONSE_PAUSE_TIMEOUT_MS)
             }),
           ])
+
+          responseRequestId = pausedResponse.requestId
+          responseSessionId = pausedResponse.sessionId
+
+          return pausedResponse
         } finally {
           if (timeout) {
             clearTimeout(timeout)
@@ -180,10 +187,14 @@ export class CdpFetchTransport {
         await this.safeSend('Fetch.continueRequest', {
           requestId: event.requestId,
         }, sessionId)
-      } else if (response?.requestId) {
-        await this.safeSend('Fetch.continueResponse', {
-          requestId: response.requestId,
-        }, response.sessionId ?? sessionId)
+      } else {
+        const continueRequestId = response?.requestId ?? responseRequestId
+
+        if (continueRequestId) {
+          await this.safeSend('Fetch.continueResponse', {
+            requestId: continueRequestId,
+          }, response?.sessionId ?? responseSessionId ?? sessionId)
+        }
       }
 
       debug('CDP Fetch transport error: %s', (err as Error).stack || (err as Error).message)

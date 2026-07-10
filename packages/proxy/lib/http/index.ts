@@ -400,9 +400,11 @@ export class Http {
         // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
         // In this case we don't want to run the response middleware and should just exit.
         if (ctx.res.destroyed) {
-          await onError(createBrowserConnectionClosedError())
+          const error = createBrowserConnectionClosedError()
 
-          return codec.decodeResponse(ctx)
+          await onError(error)
+
+          throw error
         }
 
         // Skip the origin fetch when request middleware already finished the client
@@ -426,7 +428,9 @@ export class Http {
             span?.end()
             await onError(err as Error)
 
-            return codec.decodeResponse(ctx)
+            // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
+            // encoding a synthetic empty success body via decodeResponse.
+            throw err
           }
         }
 
@@ -443,7 +447,15 @@ export class Http {
             ctx.resMiddlewareSpan?.end()
           })
 
+          if (ctx.error) {
+            throw ctx.error
+          }
+
           return codec.decodeResponse(ctx)
+        }
+
+        if (ctx.error) {
+          throw ctx.error
         }
 
         ctx.debug('Warning: Request was not fulfilled with a response.')
@@ -538,7 +550,14 @@ export class Http {
     }
 
     return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
-    .catch(onError)
+    .catch((err) => {
+      // The legacy pipeline may already have run error middleware for this ctx.
+      if (ctx.error) {
+        return
+      }
+
+      return onError(err)
+    })
   }
 
   getRenderedHTMLOrigins = () => {

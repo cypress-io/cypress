@@ -251,4 +251,60 @@ describe('lib/network-runtime', () => {
       body: Buffer.from('origin').toString('base64'),
     })
   })
+
+  it('does not fulfill an empty success when the CDP origin hop fails', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+    })
+
+    runtime.networkProxy.http.middleware = {
+      [HttpStages.IncomingRequest]: {
+        passThrough () {
+          this.next()
+        },
+      },
+      [HttpStages.IncomingResponse]: {
+        boom () {
+          throw new Error('response middleware failed')
+        },
+      },
+      [HttpStages.Error]: {
+        destroy () {
+          this.res.destroy()
+          this.end()
+        },
+      },
+    }
+
+    client.send.withArgs('Fetch.getResponseBody').resolves({
+      body: Buffer.from('origin').toString('base64'),
+      base64Encoded: true,
+    })
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'fetch-request',
+      networkId: 'network-1',
+    }))
+
+    await tick()
+    await onRequestPaused(createPausedRequest({
+      requestId: 'fetch-response',
+      networkId: 'network-1',
+      responseStatusCode: 200,
+    }))
+
+    await handled
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+      requestId: 'fetch-response',
+    })
+  })
 })
