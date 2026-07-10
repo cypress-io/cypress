@@ -880,7 +880,7 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', { responseTimeout: 2500 }, () => {
+      it('sets timeout to Cypress.config(defaultCommandTimeout)', { defaultCommandTimeout: 2500 }, () => {
         Cypress.automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -899,20 +899,20 @@ describe('src/cy/commands/cookies', () => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
+    })
 
-      it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves([])
+    // https://github.com/cypress-io/cypress/issues/4802
+    it('retries reading cookies until an assertion passes', () => {
+      const get = Cypress.automation.withArgs('get:cookies')
 
-        cy.timeout(100)
+      get.resolves([])
+      get.onCall(2).resolves([
+        { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
+      ])
 
-        cy.spy(cy, 'clearTimeout')
-
-        cy.getAllCookies().then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
-
-          // restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
-        })
+      cy.getAllCookies().should('have.length', 1).then((cookies) => {
+        expect(cookies[0].name).to.eq('foo')
+        expect(get.callCount).to.be.gte(3)
       })
     })
 
@@ -962,7 +962,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getAllCookies')
           expect(lastLog.get('message')).to.eq('')
-          expect(err.message).to.eq('`cy.getAllCookies()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.getAllCookies()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/getallcookies')
 
           done()
