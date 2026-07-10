@@ -4,6 +4,7 @@ import type {
   HttpResponse,
   TransportCodecPort,
 } from '@packages/network-interception'
+import type { Protocol } from 'devtools-protocol'
 import type {
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
@@ -30,12 +31,50 @@ function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['r
   })
 }
 
+function toHttpHeaders (headers?: CdpFetchTransportResponse['responseHeaders']): HttpHeaders | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  return headers.reduce<HttpHeaders>((memo, { name, value }) => {
+    const existing = memo[name]
+
+    if (existing) {
+      memo[name] = ([] as string[]).concat(existing, value)
+    } else {
+      memo[name] = value
+    }
+
+    return memo
+  }, {})
+}
+
 function toResponseBody (body?: string | Buffer): string | undefined {
   if (body === undefined) {
     return undefined
   }
 
   return Buffer.from(body).toString('base64')
+}
+
+function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
+  if (!headers) {
+    return {}
+  }
+
+  return Object.entries(headers).reduce<Protocol.Network.Headers>((memo, [name, value]) => {
+    memo[name] = ([] as string[]).concat(value).map(String).join(', ')
+
+    return memo
+  }, {})
+}
+
+function toRequestPostData (body?: string | Buffer): string | undefined {
+  if (body === undefined) {
+    return undefined
+  }
+
+  return typeof body === 'string' ? body : body.toString('utf8')
 }
 
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
@@ -78,6 +117,9 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       return {
         id: transportRequest.id,
         url: transportRequest.url,
+        method: transportRequest.method,
+        headers: transportRequest.headers,
+        body: transportRequest.postData,
       }
     },
 
@@ -85,6 +127,18 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       const transportRequest = requireRequest(httpRequest.id)
 
       transportRequest.url = httpRequest.url
+
+      if (httpRequest.method !== undefined) {
+        transportRequest.method = httpRequest.method
+      }
+
+      if (httpRequest.headers !== undefined) {
+        transportRequest.headers = toNetworkHeaders(httpRequest.headers)
+      }
+
+      if (httpRequest.body !== undefined) {
+        transportRequest.postData = toRequestPostData(httpRequest.body)
+      }
 
       return transportRequest
     },
@@ -95,12 +149,22 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       return {
         id: transportResponse.id,
         url: transportResponse.url,
+        bodyStream: transportResponse.bodyStream,
+        headers: toHttpHeaders(transportResponse.responseHeaders),
+        statusCode: transportResponse.responseCode,
       }
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
       const response = httpResponse as CdpFetchHttpResponse
-      const transportResponse = inFlightResponses.get(httpResponse.id) ?? {
+      const pausedResponse = inFlightResponses.get(httpResponse.id)
+      const transportResponse = pausedResponse ? {
+        ...pausedResponse,
+        fulfilled: response.body !== undefined,
+        responseCode: response.statusCode ?? pausedResponse.responseCode,
+        responseHeaders: toResponseHeaders(response.headers) ?? pausedResponse.responseHeaders,
+        ...(response.body !== undefined ? { body: toResponseBody(response.body) } : {}),
+      } : {
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,

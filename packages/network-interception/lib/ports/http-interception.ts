@@ -1,14 +1,20 @@
+import type { Readable } from 'stream'
+
 export type HttpHeaders = Record<string, string | string[]>
 
 export type HttpRequest = {
   id: string
   url: string
+  method?: string
+  headers?: HttpHeaders
+  body?: string | Buffer
 }
 
 export type HttpResponse = {
   id: string
   url: string
   body?: string | Buffer
+  bodyStream?: Readable
   headers?: HttpHeaders
   statusCode?: number
 }
