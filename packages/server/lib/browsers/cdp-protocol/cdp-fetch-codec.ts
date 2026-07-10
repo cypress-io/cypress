@@ -22,6 +22,10 @@ function toResponseHeaders (headers?: HttpHeaders): CdpFetchTransportResponse['r
   }
 
   return Object.entries(headers).flatMap(([name, value]) => {
+    if (typeof value === 'undefined') {
+      return []
+    }
+
     return ([] as string[]).concat(value).map((headerValue) => {
       return {
         name,
@@ -63,6 +67,10 @@ function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
   }
 
   return Object.entries(headers).reduce<Protocol.Network.Headers>((memo, [name, value]) => {
+    if (typeof value === 'undefined') {
+      return memo
+    }
+
     memo[name] = ([] as string[]).concat(value).map(String).join(', ')
 
     return memo
