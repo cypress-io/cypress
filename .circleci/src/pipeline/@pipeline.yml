@@ -5,11 +5,11 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "150.0.7871.46"
-chrome-beta-version: &chrome-beta-version "151.0.7922.10"
+chrome-stable-version: &chrome-stable-version "150.0.7871.114"
+chrome-beta-version: &chrome-beta-version "151.0.7922.19"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.46"
-firefox-stable-version: &firefox-stable-version "151.0.1"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.115"
+firefox-stable-version: &firefox-stable-version "152.0.5"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:24.15.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.15.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
