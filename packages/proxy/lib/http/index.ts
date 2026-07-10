@@ -236,6 +236,8 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       const fullCtx = {
+        // Spread ctx first so middleware helpers (next/end/onResponse/...) always
+        // win over any same-named fields that may exist on the request ctx.
         ...ctx,
         next: () => {
           fullCtx.next = () => {
@@ -405,6 +407,8 @@ export class Http {
 
         // Skip the origin fetch when request middleware already finished the client
         // response (e.g. blocked-host 503 or unload redirect) without setting incomingRes.
+        // Middleware that ends the client response must set headersSent/writableFinished
+        // (or incomingRes); otherwise the pipeline will still call next()/origin.
         if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
           const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
 
