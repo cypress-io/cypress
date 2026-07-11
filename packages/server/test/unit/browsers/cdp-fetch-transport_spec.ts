@@ -52,9 +52,19 @@ async function tick () {
   await Promise.resolve()
 }
 
+async function readStream (stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = []
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  return Buffer.concat(chunks).toString()
+}
+
 describe('CdpFetchTransport', () => {
   describe('createCdpFetchCodec', () => {
-    it('decodes CDP request pauses to the minimal neutral request shape', () => {
+    it('decodes CDP request pauses to the neutral request shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
         id: 'network-1',
@@ -66,7 +76,10 @@ describe('CdpFetchTransport', () => {
       const request = codec.decodeRequest(transportRequest)
 
       expect(request).to.deep.equal({
+        body: undefined,
+        headers: {},
         id: 'network-1',
+        method: 'GET',
         url: 'https://example.test/',
       })
     })
@@ -90,7 +103,44 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.url).to.equal('https://example.test/mutated')
     })
 
-    it('round trips CDP response pauses through the minimal neutral response shape', () => {
+    it('encodes neutral request header, method, and body mutations onto the CDP transport context', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {
+          accept: '*/*',
+        },
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        method: 'POST',
+        headers: {
+          accept: '*/*',
+          'accept-encoding': 'gzip, deflate',
+          authorization: 'Basic abc123',
+          cookie: 'a=1; b=2',
+        },
+        body: 'name=value',
+      })
+
+      expect(transportRequest).to.deep.include({
+        method: 'POST',
+        postData: 'name=value',
+        headers: {
+          accept: '*/*',
+          'accept-encoding': 'gzip, deflate',
+          authorization: 'Basic abc123',
+          cookie: 'a=1; b=2',
+        },
+      })
+    })
+
+    it('round trips CDP response pauses through the neutral response shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
         id: 'network-1',
@@ -105,6 +155,10 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-response',
         responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
       }
 
       codec.decodeRequest(transportRequest)
@@ -112,7 +166,12 @@ describe('CdpFetchTransport', () => {
       const response = codec.decodeResponse(transportResponse)
 
       expect(response).to.deep.equal({
+        bodyStream: undefined,
+        headers: {
+          'content-type': 'text/plain',
+        },
         id: 'network-1',
+        statusCode: 200,
         url: 'https://example.test/',
       })
 
@@ -409,6 +468,88 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('sends header, method, and body overrides when middleware mutates the request', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use((req, next) => {
+        return next({
+          ...req,
+          method: 'POST',
+          headers: {
+            'accept-encoding': 'gzip, deflate',
+            authorization: 'Basic abc123',
+            cookie: 'session=1',
+          },
+          body: 'payload',
+        })
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        method: 'POST',
+        postData: 'payload',
+        headers: [{
+          name: 'accept-encoding',
+          value: 'gzip, deflate',
+        }, {
+          name: 'authorization',
+          value: 'Basic abc123',
+        }, {
+          name: 'cookie',
+          value: 'session=1',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('sends header overrides when middleware mutates request headers in place', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        accept: '*/*',
+      }
+
+      httpIntercept.use((req, next) => {
+        req.headers!['accept-encoding'] = 'gzip, deflate'
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'accept',
+          value: '*/*',
+        }, {
+          name: 'accept-encoding',
+          value: 'gzip, deflate',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 
@@ -489,6 +630,116 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    it('exposes response pause bodies as a stream for middleware rewrites', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('origin').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: `${await readStream(response.bodyStream!)}-rewritten`,
+          headers: {
+            'content-type': 'text/plain',
+          },
+          statusCode: 202,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-response',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.takeResponseBodyAsStream')
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-response',
+        responseCode: 202,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
+        body: Buffer.from('origin-rewritten').toString('base64'),
+      })
+    })
+
+    it('fulfills rewritten empty response bodies without stalling', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: '',
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            'content-type': 'text/plain',
+          },
+          statusCode: 204,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 204,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-response',
+      })
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-response',
+        responseCode: 204,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
+        body: Buffer.from('').toString('base64'),
+      })
     })
 
     it('rejects the pending flow from a matching response failure pause', async () => {

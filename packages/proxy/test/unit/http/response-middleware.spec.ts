@@ -198,7 +198,6 @@ describe('http/response-middleware', function () {
     beforeEach(() => {
       headers = { 'header-name': 'header-value' }
       ctx = {
-        onlyRunMiddleware: vi.fn(),
         incomingRes: { headers },
         req: {},
         res: {
@@ -210,26 +209,40 @@ describe('http/response-middleware', function () {
 
     it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', async () => {
       ctx.req.isFromExtraTarget = true
+      let allowedMiddlewareRan = false
+      let skippedMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        AttachPlainTextStreamFn () {
+          allowedMiddlewareRan = true
+          this.next()
+        },
+        OmitProblematicHeaders () {
+          skippedMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
       expect(ctx.res.set).toHaveBeenCalledWith(headers)
 
-      expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith([
-        'AttachPlainTextStreamFn',
-        'PatchExpressSetHeader',
-        'MaybeSendRedirectToClient',
-        'CopyResponseStatusCode',
-        'MaybeEndWithEmptyBody',
-        'CompressBody',
-        'SendResponseBodyToClient',
-      ])
+      expect(allowedMiddlewareRan).toBe(true)
+      expect(skippedMiddlewareRan).toBe(false)
     })
 
     it('runs all subsequent middleware if request is not from an extra target', async () => {
       ctx.req.isFromMainTarget = false
+      let subsequentMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
-      expect(ctx['onlyRunMiddleware']).not.toHaveBeenCalled()
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        OmitProblematicHeaders () {
+          subsequentMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
+      expect(subsequentMiddlewareRan).toBe(true)
     })
   })
 
