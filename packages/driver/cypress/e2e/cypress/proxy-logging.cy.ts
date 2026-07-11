@@ -248,6 +248,56 @@ describe('Proxy Logging', () => {
         })
       })
 
+      it('shows successful indicator for 304 Not Modified responses', (done) => {
+        cy.intercept('/some-url', { statusCode: 304 }).as('alias')
+        .then(() => {
+          // tslint:disable:no-floating-promises
+          fetch('/some-url')
+        })
+
+        cy.on('log:changed', (log) => {
+          if (log.displayName !== 'fetch') return
+
+          try {
+            expect(log.renderProps).to.deep.include({
+              indicator: 'successful',
+              message: 'GET 304 /some-url',
+            })
+
+            done()
+          } catch (error) {
+            // don't throw, eventually the log update will come in
+            // eslint-disable-next-line no-console
+            console.error('assertion error', error)
+          }
+        })
+      })
+
+      it('shows successful indicator for 3xx redirect responses', (done) => {
+        cy.intercept('/some-url', { statusCode: 301, headers: { Location: '/other-url' } }).as('alias')
+        .then(() => {
+          // tslint:disable:no-floating-promises
+          fetch('/some-url', { redirect: 'manual' })
+        })
+
+        cy.on('log:changed', (log) => {
+          if (log.displayName !== 'fetch') return
+
+          try {
+            expect(log.renderProps).to.deep.include({
+              indicator: 'successful',
+              message: 'GET 301 /some-url',
+            })
+
+            done()
+          } catch (error) {
+            // don't throw, eventually the log update will come in
+            // eslint-disable-next-line no-console
+            console.error('assertion error', error)
+          }
+        })
+      })
+
       it('works with forceNetworkError', () => {
         const logs = new Map()
 
