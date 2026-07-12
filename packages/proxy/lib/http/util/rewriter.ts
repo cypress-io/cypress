@@ -28,6 +28,7 @@ const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i
 const bootstrapScriptRe = /(<script[^>]*\bdata-cy-bootstrap\b[^>]*>)([\s\S]*?)(<\/script>)/i
+const htmlCommentRe = /<!--[\s\S]*?-->/g
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
@@ -66,6 +67,22 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
     default:
       return
   }
+}
+
+// replaces HTML comments with same-length whitespace so the injection point
+// regexes can't match tags inside comments, while every index stays aligned
+// with the original html
+const maskHtmlComments = (html: string) => {
+  let masked = html.replace(htmlCommentRe, (comment) => ' '.repeat(comment.length))
+
+  // an unterminated comment swallows the rest of the document
+  const openComment = masked.indexOf('<!--')
+
+  if (openComment !== -1) {
+    masked = masked.slice(0, openComment) + ' '.repeat(masked.length - openComment)
+  }
+
+  return masked
 }
 
 const insertBefore = (originalString, match, stringToInsert) => {
@@ -109,26 +126,30 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
 
   // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
 
-  const headMatch = html.match(headRe)
+  // search a comment-masked copy so a commented-out tag can't become the
+  // injection point, then splice into the original html by index
+  const searchableHtml = maskHtmlComments(html)
+
+  const headMatch = searchableHtml.match(headRe)
 
   if (headMatch) {
     return insertAfter(html, headMatch, htmlToInject)
   }
 
-  const bodyMatch = html.match(bodyRe)
+  const bodyMatch = searchableHtml.match(bodyRe)
 
   if (bodyMatch) {
     return insertBefore(html, bodyMatch, `<head> ${htmlToInject} </head>`)
   }
 
-  const htmlMatch = html.match(htmlRe)
+  const htmlMatch = searchableHtml.match(htmlRe)
 
   if (htmlMatch) {
     return insertAfter(html, htmlMatch, `<head> ${htmlToInject} </head>`)
   }
 
   // if only <!DOCTYPE> content, inject <head> after doctype
-  if (doctypeRe.test(html)) {
+  if (doctypeRe.test(searchableHtml)) {
     return `${html}<head> ${htmlToInject} </head>`
   }
 
