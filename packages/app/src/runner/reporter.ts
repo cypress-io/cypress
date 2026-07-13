@@ -1,5 +1,5 @@
 import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
-import { getReporterElement } from './utils'
+import { getReporterElement, REPORTER_ID } from './utils'
 import { getEventManager } from '.'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
@@ -122,8 +122,20 @@ function renderReporter (
     idoc.documentElement.className = doc.documentElement.className
     idoc.documentElement.classList.add('force-dark')
     idoc.documentElement.style.colorScheme = 'dark'
+    idoc.documentElement.style.height = '100%'
     idoc.body.style.margin = '0'
     idoc.body.style.width = '100%'
+    idoc.body.style.height = '100%'
+
+    // Mount into a dedicated container rather than <body>: React warns that
+    // creating a root on document.body leads to reconciliation issues because
+    // other code mutates body's children, which manifests as unstable reporter
+    // rendering. Mirror the inline layout by reusing the reporter root id.
+    const mountElement = idoc.createElement('div')
+
+    mountElement.id = REPORTER_ID
+    mountElement.style.height = '100%'
+    idoc.body.appendChild(mountElement)
 
     // reporter code that binds document-level listeners or portals DOM nodes
     // (keyboard shortcuts, tooltips, popovers) must target the iframe document
@@ -133,7 +145,7 @@ function renderReporter (
     // before any driver events or resetReporter round-trips can fire; the
     // frame is only revealed once its stylesheets have loaded, with a timeout
     // so a stylesheet that never resolves cannot leave the command log hidden
-    reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(idoc.body)
+    reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(mountElement)
     reactDomRoot.render(reporter)
 
     const revealTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
