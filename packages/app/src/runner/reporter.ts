@@ -101,6 +101,11 @@ function renderReporter (
       const clone = node.cloneNode(true) as HTMLElement
 
       if (clone.tagName === 'LINK') {
+        // cloneNode copies the raw href attribute, so a relative href (e.g.
+        // Vite's `./assets/*.css`) would resolve against the iframe's
+        // about:blank base and silently fail to load — leaving the reporter
+        // without the app's stylesheet. Assign the resolved absolute URL.
+        (clone as HTMLLinkElement).href = (node as HTMLLinkElement).href
         pendingStylesheets.push(new Promise((resolve) => {
           clone.addEventListener('load', () => resolve())
           clone.addEventListener('error', () => resolve())
