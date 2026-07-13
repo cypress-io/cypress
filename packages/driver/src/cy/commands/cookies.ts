@@ -327,6 +327,45 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     return getSubject
   }
 
+  // getCookies and getAllCookies share identical setup: they default their
+  // options, derive the query timeout, and log the same plural-cookie
+  // consoleProps. Only the log message differs. getCookie is intentionally not
+  // routed through here - its consoleProps has a null/not-found branch and it
+  // validates its `name` argument, neither of which the plural commands share.
+  function setupCookiesQuery (userOptions: Cypress.CookieOptions, message: string | { domain: string }) {
+    const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      log: true,
+    })
+
+    const timeout = options.timeout || config('defaultCommandTimeout')
+
+    let cookies: Cypress.Cookie[] = []
+    const log: Cypress.Log | undefined = Cypress.log({
+      message,
+      hidden: !options.log,
+      timeout,
+      consoleProps () {
+        const obj = {}
+
+        if (cookies.length) {
+          obj['Yielded'] = cookies
+          obj['Num Cookies'] = cookies.length
+        }
+
+        return obj
+      },
+    })
+
+    return {
+      options,
+      timeout,
+      log,
+      onResult: (result: Cypress.Cookie[]) => {
+        cookies = result
+      },
+    }
+  }
+
   Commands.addQuery('getCookie', function getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
     const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
       log: true,
@@ -377,30 +416,9 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
   })
 
   Commands.addQuery('getCookies', function getCookies (userOptions: Cypress.CookieOptions = {}) {
-    const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-      log: true,
-    })
-
-    const timeout = options.timeout || config('defaultCommandTimeout')
+    const { options, timeout, log, onResult } = setupCookiesQuery(userOptions, userOptions.domain ? { domain: userOptions.domain } : '')
 
     this.set('timeout', timeout)
-
-    let cookies: Cypress.Cookie[] = []
-    const log: Cypress.Log | undefined = Cypress.log({
-      message: userOptions.domain ? { domain: userOptions.domain } : '',
-      hidden: !options.log,
-      timeout,
-      consoleProps () {
-        const obj = {}
-
-        if (cookies.length) {
-          obj['Yielded'] = cookies
-          obj['Num Cookies'] = cookies.length
-        }
-
-        return obj
-      },
-    })
 
     validateDomainOption(userOptions.domain, 'getCookies', log)
 
@@ -411,48 +429,23 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       // getDefaultDomain() is called here (rather than above where default
       // options are set) so a cross-origin access error is retried.
       buildOptions: () => ({ domain: options.domain || getDefaultDomain() }),
-      onResult: (result: Cypress.Cookie[]) => {
-        cookies = result
-      },
+      onResult,
       log,
       timeout,
     })
   })
 
   Commands.addQuery('getAllCookies', function getAllCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-    const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-      log: true,
-    })
-
-    const timeout = options.timeout || config('defaultCommandTimeout')
+    const { timeout, log, onResult } = setupCookiesQuery(userOptions, '')
 
     this.set('timeout', timeout)
-
-    let cookies: Cypress.Cookie[] = []
-    const log: Cypress.Log | undefined = Cypress.log({
-      message: '',
-      hidden: !options.log,
-      timeout,
-      consoleProps () {
-        const obj = {}
-
-        if (cookies.length) {
-          obj['Yielded'] = cookies
-          obj['Num Cookies'] = cookies.length
-        }
-
-        return obj
-      },
-    })
 
     return createCookieQuery({
       commandName: 'getAllCookies',
       event: 'get:cookies',
       action: 'reading cookies from',
       buildOptions: () => ({}),
-      onResult: (result: Cypress.Cookie[]) => {
-        cookies = result
-      },
+      onResult,
       log,
       timeout,
       checkAUTCommunication: false,
