@@ -3,11 +3,13 @@ import type { SerializedTest } from '@packages/types'
 // Optional fields throughout are absent rather than null: JSON drops undefined
 // keys at the CDP boundary, so the in-memory shape already equals the wire form.
 
+export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
+
 export interface TestStateEntry {
   id: string
   title: string
   duration?: number
-  state: string
+  state: TestStateValue
   /** Retries actually taken this run, not the configured maximum. */
   retries?: number
 }
@@ -24,7 +26,7 @@ export interface TestDetailEntry {
   /** Suite titles leading to this test plus its own, joined with ` > `. */
   fullTitle: string
   duration?: number
-  state: string
+  state: TestStateValue
   retries?: number
   timings?: Record<string, unknown>
   error?: TestError
@@ -64,19 +66,24 @@ export const serializeTestsState = (runner: TapTestsRunner): TestStateEntry[] =>
       id,
       title,
       ...(duration !== undefined ? { duration } : {}),
-      ...(state !== undefined ? { state } : { state: 'pending' }),
+      // The driver marks `it.skip` tests 'pending' explicitly (mocha `pending`
+      // event), so a state-less test was never reached — 'skipped', matching
+      // the driver's own run summary.
+      state: state ?? 'skipped',
       ...(currentRetry !== undefined ? { retries: currentRetry } : {}),
     }
   })
 }
 
+// The driver's `wrapErr` copies these props verbatim from whatever the user
+// threw, so a non-Error throw can put non-strings here — narrow, don't cast.
 const serializeTestError = (err: Record<string, unknown>): TestError => {
   const { name, message, stack } = err
 
   return {
-    ...(name !== undefined ? { name: name as string } : {}),
-    ...(message !== undefined ? { message: message as string } : {}),
-    ...(stack !== undefined ? { stack: stack as string } : {}),
+    ...(typeof name === 'string' ? { name } : {}),
+    ...(typeof message === 'string' ? { message } : {}),
+    ...(typeof stack === 'string' ? { stack } : {}),
   }
 }
 
@@ -89,19 +96,20 @@ export const serializeTestDetail = (runner: TapTestsRunner, testId: string): Tes
     return undefined
   }
 
-  const { id, title, duration, state, currentRetry } = test
-  const titlePath = test._titlePath as string[] | undefined
-  const timings = test.timings as Record<string, unknown> | undefined
-  const err = test.err as Record<string, unknown> | undefined
+  const { id, title, duration, state, currentRetry, timings, err } = test
+  const titlePath = test._titlePath
 
   return {
     id,
     title,
     fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : title,
     ...(duration !== undefined ? { duration } : {}),
-    ...(state !== undefined ? { state } : { state: 'pending' }),
+    state: state ?? 'skipped',
     ...(currentRetry !== undefined ? { retries: currentRetry } : {}),
-    ...(timings !== undefined ? { timings } : {}),
-    ...(err !== undefined ? { error: serializeTestError(err) } : {}),
+    // The driver's serialization shallow-copies the runnable, so `timings` is a
+    // live reference into its test object — JSON-clone to return a snapshot
+    // (which is also exactly the wire form).
+    ...(timings != null ? { timings: JSON.parse(JSON.stringify(timings)) } : {}),
+    ...(err != null ? { error: serializeTestError(err) } : {}),
   }
 }

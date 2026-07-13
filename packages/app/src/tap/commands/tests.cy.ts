@@ -25,6 +25,13 @@ describe('tap/commands/tests', () => {
       currentRetry: 0,
       body: 'function () {}',
     },
+    // The driver sets 'pending' explicitly for `it.skip` — distinct from the
+    // state-less r3, which never ran and comes back 'skipped'.
+    r4: {
+      id: 'r4',
+      title: 'stays logged in',
+      state: 'pending',
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -60,12 +67,13 @@ describe('tap/commands/tests', () => {
     expect(outcome).to.deep.eq({
       result: [
         { id: 'r2', title: 'logs in', duration: 120, state: 'passed', retries: 1 },
-        { id: 'r3', title: 'logs out', retries: 0, state: 'pending' },
+        { id: 'r3', title: 'logs out', retries: 0, state: 'skipped' },
+        { id: 'r4', title: 'stays logged in', state: 'pending' },
       ],
     })
   })
 
-  it('omits duration and retries of a test that has not run, defaults its state to pending, and round-trips through JSON', async () => {
+  it('omits duration and retries of a test that never ran, defaults its state to skipped, and round-trips through JSON', async () => {
     stubRunner({ getTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -73,7 +81,7 @@ describe('tap/commands/tests', () => {
     const outcome = await manager.exec('tests')
 
     expect(outcome).to.deep.eq({
-      result: [{ id: 'r2', title: 'logs in', state: 'pending' }],
+      result: [{ id: 'r2', title: 'logs in', state: 'skipped' }],
     })
 
     expect(Object.keys((outcome as { result: object[] }).result[0])).to.deep.eq(['id', 'title', 'state'])
@@ -178,9 +186,12 @@ describe('tap/commands/tests', () => {
           },
         },
       })
+
+      // A snapshot, not the driver's live timings object.
+      expect((outcome as { result: { timings: object } }).result.timings).to.not.equal(DETAIL_STATE.r2.timings)
     })
 
-    it('omits duration, timings, and error for a known test that has not run, defaults its state to pending, and round-trips through JSON', async () => {
+    it('omits duration, timings, and error for a known test that never ran, defaults its state to skipped, and round-trips through JSON', async () => {
       stubRunner({ getTestsState: () => DETAIL_STATE })
 
       const manager = new TapManager(CYPRESS_VERSION)
@@ -188,7 +199,7 @@ describe('tap/commands/tests', () => {
       const outcome = await manager.exec('tests', { test: 'r3' })
 
       expect(outcome).to.deep.eq({
-        result: { id: 'r3', title: 'logs out', fullTitle: 'auth > logout > logs out', state: 'pending' },
+        result: { id: 'r3', title: 'logs out', fullTitle: 'auth > logout > logs out', state: 'skipped' },
       })
 
       expect(Object.keys((outcome as { result: object }).result)).to.deep.eq(['id', 'title', 'fullTitle', 'state'])
@@ -203,7 +214,37 @@ describe('tap/commands/tests', () => {
       const outcome = await manager.exec('tests', { test: 'r2' })
 
       expect(outcome).to.deep.eq({
-        result: { id: 'r2', title: 'logs in', fullTitle: 'logs in', state: 'pending' },
+        result: { id: 'r2', title: 'logs in', fullTitle: 'logs in', state: 'skipped' },
+      })
+    })
+
+    it('treats null err and timings as absent rather than crashing on them', async () => {
+      stubRunner({ getTestsState: () => ({ r2: { id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null } }) })
+
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      const outcome = await manager.exec('tests', { test: 'r2' })
+
+      expect(outcome).to.deep.eq({
+        result: { id: 'r2', title: 'logs in', fullTitle: 'logs in', state: 'passed' },
+      })
+    })
+
+    it('drops non-string error props, which a non-Error user throw can carry', async () => {
+      stubRunner({
+        getTestsState: () => {
+          return {
+            r2: { id: 'r2', title: 'logs in', state: 'failed', err: { name: 42, message: 'thrown', stack: undefined } },
+          }
+        },
+      })
+
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      const outcome = await manager.exec('tests', { test: 'r2' })
+
+      expect(outcome).to.deep.eq({
+        result: { id: 'r2', title: 'logs in', fullTitle: 'logs in', state: 'failed', error: { message: 'thrown' } },
       })
     })
   })
