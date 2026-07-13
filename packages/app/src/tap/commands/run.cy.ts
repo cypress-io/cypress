@@ -19,9 +19,15 @@ describe('tap/commands/run', () => {
     },
   ]
 
-  // Really setting the hash here would navigate the spec frame and stop
-  // the test mid-command, so every test stubs the navigation seam.
-  const stubNavigation = () => cy.stub(tapNavigation, 'setHash')
+  // Stub the navigation seam — a real hash change would navigate away and stop
+  // the test mid-command. Writes feed the stubbed read, like the real hash.
+  const stubNavigation = (initialHash = '') => {
+    const getHash = cy.stub(tapNavigation, 'getHash').returns(initialHash)
+
+    return cy.stub(tapNavigation, 'setHash').callsFake((hash: string) => {
+      getHash.returns(`#${hash}`)
+    })
+  }
 
   afterEach(() => {
     delete (window as any).__RUN_MODE_SPECS__
@@ -108,6 +114,17 @@ describe('tap/commands/run', () => {
 
     expect(first).to.be.a('number').and.not.be.NaN
     expect(second).to.be.greaterThan(first)
+  })
+
+  it('advances past a tapRun already in the hash, as after a page reload', async () => {
+    window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
+
+    const setHash = stubNavigation('#/specs/runner?file=cypress/e2e/login.cy.ts&tapRun=7')
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
+
+    expect(setHash.firstCall.args[0]).to.eq('/specs/runner?file=cypress/e2e/login.cy.ts&tapRun=8')
   })
 
   it('matches windows-style entries against posix input and emits the posix form in the URL', async () => {

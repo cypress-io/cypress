@@ -3,21 +3,25 @@ import { defineCommand, TapCommandError } from './definition'
 import { getRunnableSpecs, toSpecListEntry } from './specs-list'
 import type { SpecListEntry } from './specs-list'
 
-// Bumped per invocation so rerunning the active spec still changes route.query,
-// which is what makes unifiedRunner's watchSpecs kick off a fresh run.
-let tapRunNonce = 0
-
-/**
- * Seam over the command's one side effect so component tests can stub it —
- * really navigating moves the spec frame and stops the test mid-command. Uses
- * the `hash` setter (not `location.href`) for a synchronous same-document
- * navigation that never reloads, so the `exec` promise still resolves over CDP
- * even when the runner page is itself an AUT (cypress-in-cypress).
- */
+// Seam so component tests can stub navigation — really navigating would stop
+// the test mid-command. The `hash` setter (not `href`) keeps it a synchronous
+// same-document navigation, so `exec` still resolves over CDP.
 export const tapNavigation = {
+  getHash () {
+    return window.location.hash
+  },
   setHash (hash: string) {
     window.location.hash = hash
   },
+}
+
+// watchSpecs only reruns a spec when route.query changes, so bump past whatever
+// tapRun the hash already holds — module state would reset to zero on a page
+// reload while the old value survives in the URL.
+const nextTapRunNonce = () => {
+  const current = /[?&]tapRun=(\d+)/.exec(tapNavigation.getHash())
+
+  return (current ? Number(current[1]) : 0) + 1
 }
 
 export const runCommand = defineCommand({
@@ -43,7 +47,7 @@ export const runCommand = defineCommand({
     // route.query.file back through getPathForPlatform.
     const file = encodeURIComponent(posixify(match.relative)).replace(/%2F/g, '/')
 
-    tapNavigation.setHash(`/specs/runner?file=${file}&tapRun=${++tapRunNonce}`)
+    tapNavigation.setHash(`/specs/runner?file=${file}&tapRun=${nextTapRunNonce()}`)
 
     return toSpecListEntry(match)
   },
