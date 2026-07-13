@@ -29,8 +29,6 @@ export const runCommand = defineCommand({
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
-  // Fire-and-forget: a successful return means the run was triggered, not that
-  // the spec finished or passed.
   handler: async ({ spec }): Promise<SpecListEntry> => {
     if (spec.length === 0) {
       throw new TapCommandError('INVALID_SPEC', 'spec must be a non-empty string (a project-relative spec path)')
