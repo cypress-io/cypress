@@ -136,22 +136,20 @@ export interface RunResults {
 
 export const aggregateResults = (runner: TapTestsRunner): { results: RunResults, totalTests: number } => {
   const tests = Object.values(getAllTests(runner))
+  const runComplete = runner.isRunComplete()
   const results: RunResults = { passed: 0, failed: 0, pending: 0, skipped: 0 }
 
   for (const test of tests) {
-    // The serialized type lists only passed/failed/pending, but the driver also
-    // marks 'skipped' at runtime, so widen before comparing.
-    const state = test.state as string | undefined
+    const state = test.state ?? unreachedState(runComplete)
 
     if (state === 'passed') {
       results.passed++
     } else if (state === 'failed') {
       results.failed++
-    } else if (state === 'skipped') {
-      results.skipped++
-    } else {
-      // No state (not run) and explicit 'pending' both count as pending.
+    } else if (state === 'pending') {
       results.pending++
+    } else {
+      results.skipped++
     }
   }
 
