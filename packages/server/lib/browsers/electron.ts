@@ -4,7 +4,7 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp-protocol/cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
@@ -17,7 +17,7 @@ import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
