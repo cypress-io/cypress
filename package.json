@@ -36,7 +36,6 @@
     "cypress:verify": "cypress verify --dev",
     "dev": "gulp dev",
     "dev-debug": "node ./scripts/debug.js dev",
-    "dev:clean": "gulp dev:clean",
     "docker": "./scripts/run-docker-local.sh",
     "docker-dev": "./scripts/run-docker-local.sh dev",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
@@ -69,6 +68,7 @@
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore=@packages/{driver,root,static,web-config}",
     "type-check": "yarn lerna exec yarn type-check --scope=@tooling/system-tests && node scripts/type_check",
+    "validate:proxy-middleware": "bash scripts/validate-proxy-middleware-transport.sh both",
     "verify:mocha:results": "node ./scripts/verify-mocha-results.js",
     "watch": "yarn gulp watch"
   },

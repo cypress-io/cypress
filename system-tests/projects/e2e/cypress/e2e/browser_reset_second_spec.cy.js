@@ -24,10 +24,17 @@ const indexedDB = (win) => {
     DBOpenRequest.onsuccess = (e) => {
       const db = e.target.result
 
-      expect(db.objectStoreNames.contains('toDoList')).to.be.false
-
-      resolve(win)
+      try {
+        expect(db.objectStoreNames.contains('toDoList')).to.be.false
+        resolve(win)
+      } catch (err) {
+        reject(err)
+      } finally {
+        db.close()
+      }
     }
+
+    DBOpenRequest.onerror = () => reject(DBOpenRequest.error)
   })
 }
 
