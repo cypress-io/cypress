@@ -327,11 +327,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     return getSubject
   }
 
-  // getCookies and getAllCookies share identical setup: they default their
-  // options, derive the query timeout, and log the same plural-cookie
-  // consoleProps. Only the log message differs. getCookie is intentionally not
-  // routed through here - its consoleProps has a null/not-found branch and it
-  // validates its `name` argument, neither of which the plural commands share.
   function setupCookiesQuery (userOptions: Cypress.CookieOptions, message: string | { domain: string }) {
     const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
       log: true,
