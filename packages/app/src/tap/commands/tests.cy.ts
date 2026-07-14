@@ -35,8 +35,13 @@ describe('tap/commands/tests', () => {
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
-  // the runner seam rather than replace it.
-  const stubRunner = (runner: unknown) => cy.stub(tapRunnerSource, 'getRunner').returns(runner)
+  // the runner seam rather than replace it. Fixtures stand for a completed run
+  // by default; a test overrides isRunComplete to exercise the mid-run path.
+  const stubRunner = (runner: unknown) => {
+    return cy.stub(tapRunnerSource, 'getRunner').returns(
+      runner && typeof runner === 'object' ? { isRunComplete: () => true, ...runner } : runner,
+    )
+  }
 
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
@@ -70,6 +75,24 @@ describe('tap/commands/tests', () => {
         { id: 'r3', title: 'logs out', retries: 0, state: 'skipped' },
         { id: 'r4', title: 'stays logged in', state: 'pending' },
       ],
+    })
+  })
+
+  it('reports a state-less test as pending while the run is still going, skipped once it completes', async () => {
+    const state = { r3: { id: 'r3', title: 'logs out' } }
+
+    stubRunner({ getTestsState: () => state, isRunComplete: () => false })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('tests')).to.deep.eq({
+      result: [{ id: 'r3', title: 'logs out', state: 'pending' }],
+    })
+
+    stubRunner({ getTestsState: () => state, isRunComplete: () => true })
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('tests')).to.deep.eq({
+      result: [{ id: 'r3', title: 'logs out', state: 'skipped' }],
     })
   })
 

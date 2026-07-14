@@ -89,6 +89,13 @@ export class EventManager {
     return Cypress
   }
 
+  // Whether the active spec's mocha run has finished. The tap `tests` command
+  // reads this to tell an unreached test (still pending, run in flight) from a
+  // genuinely skipped one (run complete).
+  get runComplete (): boolean {
+    return hasMochaRunEnded
+  }
+
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.
