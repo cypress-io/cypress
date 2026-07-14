@@ -5,7 +5,8 @@ const CYPRESS_VERSION = '15.0.0'
 
 describe('tap/commands/commands', () => {
   // Commands carry extras (displayName, hookId, …) to prove the handler keeps
-  // only the lean fields.
+  // only the lean fields. r2's failed first attempt has its own command log,
+  // distinct from the passing latest attempt, so attempt selection is observable.
   const TESTS_STATE = {
     r2: {
       id: 'r2',
@@ -14,6 +15,17 @@ describe('tap/commands/commands', () => {
       commands: [
         { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent', displayName: 'visit', hookId: 'h1' },
         { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+      ],
+      prevAttempts: [
+        {
+          id: 'r2',
+          title: 'logs in',
+          state: 'failed',
+          commands: [
+            { id: 'log-a', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
+            { id: 'log-b', name: 'get', message: '#user', state: 'failed', type: 'parent', displayName: 'get' },
+          ],
+        },
       ],
     },
     r3: {
@@ -79,6 +91,41 @@ describe('tap/commands/commands', () => {
         { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
       ],
     })
+  })
+
+  it('returns the requested attempt’s command log, 1-based (attempt 1 = first run, defaults to the latest)', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('commands', {}, { test: 'r2', attempt: '1' })).to.deep.eq({
+      result: [
+        { id: 'log-a', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
+        { id: 'log-b', name: 'get', message: '#user', state: 'failed', type: 'parent' },
+      ],
+    })
+
+    // Attempt 2 is the latest, so it matches the default (no --attempt) result above.
+    const latest = await manager.exec('commands', {}, { test: 'r2' })
+
+    expect(await manager.exec('commands', {}, { test: 'r2', attempt: '2' })).to.deep.eq(latest)
+  })
+
+  it('fails with ATTEMPT_NOT_FOUND when the attempt is out of range or not a positive integer', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    for (const attempt of ['3', '0', '1.5']) {
+      const outcome = await manager.exec('commands', {}, { test: 'r2', attempt })
+
+      expect(outcome, `attempt ${attempt}`).to.deep.eq({
+        error: {
+          code: 'ATTEMPT_NOT_FOUND',
+          message: 'test "r2" has 2 attempt(s); pass --attempt 1–2 (defaults to the latest)',
+        },
+      })
+    }
   })
 
   it('returns an empty command list for a known test that has not run yet, and round-trips through JSON', async () => {

@@ -1,4 +1,5 @@
 import type { SerializedTest } from '@packages/types'
+import { TapCommandError } from './definition'
 
 import type { TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from '../types'
 
@@ -50,21 +51,64 @@ const serializeTestError = (err: Record<string, unknown>): TestError => {
   }
 }
 
-export const serializeTestDetail = (runner: TapTestsRunner, testId: string): TestDetailEntry | undefined => {
+// A test's attempts oldest→latest. The top-level test IS the latest attempt;
+// earlier ones live on prevAttempts, each carrying its own commands, state, err
+// and timings.
+const attemptsOf = (test: SerializedTest): SerializedTest[] => {
+  const prev = Array.isArray(test.prevAttempts) ? test.prevAttempts : []
+
+  return [...prev, test]
+}
+
+type AttemptSelection =
+  | { test: SerializedTest, attempt: SerializedTest }
+  | { error: 'TEST_NOT_FOUND' }
+  | { error: 'ATTEMPT_NOT_FOUND', attempts: number }
+
+const isAttemptInRange = (attempt: number, count: number): boolean => {
+  return Number.isInteger(attempt) && attempt >= 1 && attempt <= count
+}
+
+// Resolve one attempt of a test. `attempt` is 1-based (attempt 1 = the first
+// run), matching the reporter UI; `undefined` selects the latest attempt.
+export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, testId: string, attempt?: number): AttemptSelection => {
   const test = runner.getTestState(testId)
 
   if (!test) {
-    return undefined
+    return { error: 'TEST_NOT_FOUND' }
   }
 
-  const runComplete = runner.isRunComplete()
-  const { id, title, duration, state, currentRetry, timings, err } = test
+  const attempts = attemptsOf(test)
+
+  if (attempt === undefined) {
+    return { test, attempt: attempts[attempts.length - 1] }
+  }
+
+  if (!isAttemptInRange(attempt, attempts.length)) {
+    return { error: 'ATTEMPT_NOT_FOUND', attempts: attempts.length }
+  }
+
+  return { test, attempt: attempts[attempt - 1] }
+}
+
+export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapCommandError => {
+  if (selection.error === 'TEST_NOT_FOUND') {
+    return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the tests command to list this run’s tests`)
+  }
+
+  return new TapCommandError('ATTEMPT_NOT_FOUND', `test "${testId}" has ${selection.attempts} attempt(s); pass --attempt 1–${selection.attempts} (defaults to the latest)`)
+}
+
+// Identity fields (id, title, fullTitle) come from the test; execution fields
+// (state, duration, timings, error) come from the selected attempt.
+export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTest, runComplete: boolean): TestDetailEntry => {
   const titlePath = test._titlePath
+  const { duration, state, currentRetry, timings, err } = attempt
 
   return {
-    id,
-    title,
-    fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : title,
+    id: test.id,
+    title: test.title,
+    fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : test.title,
     ...(duration !== undefined ? { duration } : {}),
     state: state ?? unreachedState(runComplete),
     ...(currentRetry !== undefined ? { retries: currentRetry } : {}),
@@ -73,14 +117,8 @@ export const serializeTestDetail = (runner: TapTestsRunner, testId: string): Tes
   }
 }
 
-export const serializeTestCommands = (runner: Pick<TapTestsRunner, 'getTestState'>, testId: string): CommandEntry[] | undefined => {
-  const test = runner.getTestState(testId)
-
-  if (!test) {
-    return undefined
-  }
-
-  const commands = (test.commands ?? []) as Array<Record<string, unknown>>
+export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
+  const commands = (attempt.commands ?? []) as Array<Record<string, unknown>>
 
   return commands.map(({ id, name, message, state, type }): CommandEntry => {
     return {

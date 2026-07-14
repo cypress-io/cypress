@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../TapManagerDataSource'
 import { defineCommand, TapCommandError } from './definition'
-import { serializeTestCommands } from './test-state'
+import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from './test-state'
 import type { CommandEntry } from './test-state'
 
 export const commandsCommand = defineCommand({
@@ -8,20 +8,21 @@ export const commandsCommand = defineCommand({
   params: [],
   options: [
     { name: 'test', type: 'string', required: true, description: 'test id, as listed by the tests command' },
+    { name: 'attempt', type: 'number', required: false, description: '1-based attempt to read (attempt 1 = first run); defaults to the latest' },
   ],
-  handler: async (_params, { test }): Promise<CommandEntry[]> => {
+  handler: async (_params, { test, attempt }): Promise<CommandEntry[]> => {
     const runner = tapManagerDataSource.getRunner()
 
     if (!runner) {
       throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')
     }
 
-    const commands = serializeTestCommands(runner, test)
+    const selection = selectTestAttempt(runner, test, attempt)
 
-    if (commands === undefined) {
-      throw new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${test}" — use the tests command to list this run’s tests`)
+    if ('error' in selection) {
+      throw attemptSelectionError(selection, test)
     }
 
-    return commands
+    return serializeTestCommands(selection.attempt)
   },
 })
