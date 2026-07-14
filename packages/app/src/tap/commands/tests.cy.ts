@@ -43,6 +43,9 @@ describe('tap/commands/tests', () => {
     )
   }
 
+  // Mirror the driver: getTestState resolves one test by id, or undefined.
+  const getTestStateFrom = (state: Record<string, unknown>) => cy.stub().callsFake((id: string) => state[id])
+
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
@@ -165,15 +168,15 @@ describe('tap/commands/tests', () => {
     })
 
     it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
-      const getAllTestsState = cy.stub().returns(DETAIL_STATE)
+      const getTestState = getTestStateFrom(DETAIL_STATE)
 
-      stubRunner({ getAllTestsState })
+      stubRunner({ getTestState })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('tests', { test: 'nope' })
 
-      expect(getAllTestsState).to.have.been.calledOnce
+      expect(getTestState).to.have.been.calledOnceWith('nope')
       expect(outcome).to.deep.eq({
         error: {
           code: 'TEST_NOT_FOUND',
@@ -183,15 +186,15 @@ describe('tap/commands/tests', () => {
     })
 
     it('returns the full title, timings, and trimmed error of the matching test', async () => {
-      const getAllTestsState = cy.stub().returns(DETAIL_STATE)
+      const getTestState = getTestStateFrom(DETAIL_STATE)
 
-      stubRunner({ getAllTestsState })
+      stubRunner({ getTestState })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('tests', { test: 'r2' })
 
-      expect(getAllTestsState).to.have.been.calledOnce
+      expect(getTestState).to.have.been.calledOnceWith('r2')
 
       expect(outcome).to.deep.eq({
         result: {
@@ -215,7 +218,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('omits duration, timings, and error for a known test that never ran, defaults its state to skipped, and round-trips through JSON', async () => {
-      stubRunner({ getAllTestsState: () => DETAIL_STATE })
+      stubRunner({ getTestState: (id: string) => DETAIL_STATE[id] })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -230,7 +233,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('falls back to the plain title when the test carries no title path', async () => {
-      stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
+      stubRunner({ getTestState: () => ({ id: 'r2', title: 'logs in' }) })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -242,7 +245,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('treats null err and timings as absent rather than crashing on them', async () => {
-      stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null } }) })
+      stubRunner({ getTestState: () => ({ id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null }) })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -255,10 +258,8 @@ describe('tap/commands/tests', () => {
 
     it('drops non-string error props, which a non-Error user throw can carry', async () => {
       stubRunner({
-        getAllTestsState: () => {
-          return {
-            r2: { id: 'r2', title: 'logs in', state: 'failed', err: { name: 42, message: 'thrown', stack: undefined } },
-          }
+        getTestState: () => {
+          return { id: 'r2', title: 'logs in', state: 'failed', err: { name: 42, message: 'thrown', stack: undefined } }
         },
       })
 

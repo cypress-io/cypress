@@ -51,7 +51,7 @@ const serializeTestError = (err: Record<string, unknown>): TestError => {
 }
 
 export const serializeTestDetail = (runner: TapTestsRunner, testId: string): TestDetailEntry | undefined => {
-  const test = runner.getAllTestsState()[testId]
+  const test = runner.getTestState(testId)
 
   if (!test) {
     return undefined
@@ -73,8 +73,8 @@ export const serializeTestDetail = (runner: TapTestsRunner, testId: string): Tes
   }
 }
 
-export const serializeTestCommands = (runner: TapTestsRunner, testId: string): CommandEntry[] | undefined => {
-  const test = runner.getAllTestsState()[testId]
+export const serializeTestCommands = (runner: Pick<TapTestsRunner, 'getTestState'>, testId: string): CommandEntry[] | undefined => {
+  const test = runner.getTestState(testId)
 
   if (!test) {
     return undefined

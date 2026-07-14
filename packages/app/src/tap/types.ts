@@ -1,7 +1,13 @@
 import type { FoundSpec, SerializedTest } from '@packages/types'
 
+/**
+ * `getAllTestsState()` serializes every test of the run keyed by id.
+ * `getTestState(testId)` serializes just that one test via an O(1) id lookup,
+ * so detail/commands don't pay the whole-run serialization cost.
+ */
 export interface TapTestsRunner {
   getAllTestsState (): Record<string, SerializedTest>
+  getTestState (testId: string): SerializedTest | undefined
   isRunComplete (): boolean
 }
 

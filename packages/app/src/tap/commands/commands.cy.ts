@@ -26,6 +26,9 @@ describe('tap/commands/commands', () => {
   // the runner seam rather than replace it.
   const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
 
+  // Mirror the driver: getTestState resolves one test by id, or undefined.
+  const getTestStateFrom = (state: Record<string, unknown>) => cy.stub().callsFake((id: string) => state[id])
+
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
@@ -42,15 +45,15 @@ describe('tap/commands/commands', () => {
   })
 
   it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
-    const getAllTestsState = cy.stub().returns(TESTS_STATE)
+    const getTestState = getTestStateFrom(TESTS_STATE)
 
-    stubRunner({ getAllTestsState })
+    stubRunner({ getTestState })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
     const outcome = await manager.exec('commands', {}, { test: 'nope' })
 
-    expect(getAllTestsState).to.have.been.calledOnce
+    expect(getTestState).to.have.been.calledOnceWith('nope')
     expect(outcome).to.deep.eq({
       error: {
         code: 'TEST_NOT_FOUND',
@@ -59,16 +62,16 @@ describe('tap/commands/commands', () => {
     })
   })
 
-  it('returns just the command log, keeping only the lean entry fields', async () => {
-    const getAllTestsState = cy.stub().returns(TESTS_STATE)
+  it('returns just the command log for the requested test, keeping only the lean entry fields', async () => {
+    const getTestState = getTestStateFrom(TESTS_STATE)
 
-    stubRunner({ getAllTestsState })
+    stubRunner({ getTestState })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
     const outcome = await manager.exec('commands', {}, { test: 'r2' })
 
-    expect(getAllTestsState).to.have.been.calledOnce
+    expect(getTestState).to.have.been.calledOnceWith('r2')
 
     expect(outcome).to.deep.eq({
       result: [
@@ -79,7 +82,7 @@ describe('tap/commands/commands', () => {
   })
 
   it('returns an empty command list for a known test that has not run yet, and round-trips through JSON', async () => {
-    stubRunner({ getAllTestsState: () => TESTS_STATE })
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -91,7 +94,7 @@ describe('tap/commands/commands', () => {
   })
 
   it('fails dispatch without reading the runner when the required test option is missing', async () => {
-    const getRunner = stubRunner({ getAllTestsState: () => ({}) })
+    const getRunner = stubRunner({ getTestState: () => undefined })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
