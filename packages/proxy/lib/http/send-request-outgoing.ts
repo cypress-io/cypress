@@ -21,7 +21,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     isVerbose,
   })
 
-  const requestOptions = {
+  const requestOptions: Record<string, any> = {
     browserPreRequest: mw.req.browserPreRequest,
     timeout: mw.req.responseTimeout,
     strictSSL: false,
@@ -46,8 +46,12 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
   }
 
+  // Always forward method/headers from the (possibly intercepted) proxied request.
+  // Body is only attached when buffered; otherwise the IncomingMessage is piped below.
+  _.assign(requestOptions, _.pick(mw.req, 'method', 'headers'))
+
   if (requestBodyBuffered) {
-    _.assign(requestOptions, _.pick(mw.req, 'method', 'body', 'headers'))
+    requestOptions.body = mw.req.body
   }
 
   const req = mw.request.create(requestOptions)
