@@ -10,6 +10,7 @@
 
 - Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
+- Fixed an issue where passing the `options` argument to [`cy.env()`](https://on.cypress.io/env), such as `cy.env(['FOO'], { log: false })`, raised a TypeScript error (`Expected 1 arguments, but got 2`) even though the command accepts these options at runtime. Fixes [#34284](https://github.com/cypress-io/cypress/issues/34284).
 
 **Misc:**
 
