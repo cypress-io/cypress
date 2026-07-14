@@ -199,9 +199,11 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('withFailure.spec').click()
 
     cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
-    // open the specs list by clicking the reporter's toggle (which now lives in
-    // the command-log iframe) rather than a synthetic `f` keydown to the app
-    // body, which does not reach the iframe's handler in cy-in-cy
+    // this test switches specs mid-run, so we can't wait for the run to finish
+    // before opening the specs list. Click the reporter's toggle (its onClick is
+    // bound at render) rather than pressing `f`, whose keydown handler binds in a
+    // passive effect that can lag the iframe reporter's mount on slower machines.
+    // The `f` shortcut itself is covered by reporter_header.cy.ts.
     cy.reporter().find('.toggle-specs-wrapper').click()
     cy.contains('Search specs')
     cy.contains('withWait.spec').click()

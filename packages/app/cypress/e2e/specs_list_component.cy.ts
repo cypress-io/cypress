@@ -27,11 +27,12 @@ describe('App: Spec List (Component)', () => {
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
 
-    cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
-    // open the specs list by clicking the reporter's toggle (which now lives in
-    // the command-log iframe) rather than a synthetic `f` keydown to the app
-    // body, which does not reach the iframe's handler in cy-in-cy
-    cy.reporter().find('.toggle-specs-wrapper').click()
+    // wait for the run to finish so the reporter (now rendered in the
+    // command-log iframe) has bound its `f` keyboard-shortcut handler before we
+    // press it — otherwise the keydown can race the iframe reporter's mount on
+    // slower machines and the specs list never opens
+    cy.waitForSpecToFinish()
+    cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')
   })
