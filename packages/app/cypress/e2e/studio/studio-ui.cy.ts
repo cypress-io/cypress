@@ -174,23 +174,6 @@ describe('studio functionality', () => {
   })
 
   it('opens a cloud studio session with AI enabled for a logged in user', () => {
-    // cloudViewer is a real remote GraphQL field, only fetched once logged
-    // in - stub it so it doesn't hit the network in tests.
-    cy.remoteGraphQLIntercept((obj) => {
-      if (obj.result.data && 'cloudViewer' in obj.result.data) {
-        obj.result.data.cloudViewer = {
-          id: 'test-user-id',
-          email: 'test@example.com',
-          fullName: 'Test User',
-          cloudOrganizationsUrl: null,
-          firstOrganization: { nodes: [{ id: 'test-org-id' }] },
-          organizations: { nodes: [{ id: 'test-org-id', name: 'Test Org', projects: { nodes: [] } }] },
-        }
-      }
-
-      return obj.result
-    })
-
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -225,35 +208,7 @@ describe('studio functionality', () => {
       url: 'http://localhost:3000/cypress/e2e/index.html',
     })
 
-    launchStudio({ shouldLogin: true, afterLaunch: () => {
-      // mock the studio:get:config event to return the AI enabled config
-      cy.window().then((win) => {
-        const eventManager = (win as any).getEventManager()
-        const originalEmit = eventManager.ws.emit.bind(eventManager.ws)
-
-        eventManager.ws.emit = (event: string, ...args: any[]) => {
-          if (event === 'studio:get:config') {
-            const callback = args[args.length - 1]
-
-            callback({
-              data: {
-                AI: {
-                  enabled: true,
-                  disabledReason: undefined,
-                  requiredCypressVersion: '15.11.0',
-                },
-                isAuthenticated: true,
-                featureFlags: { studioAI: true, studioNonNativeEvents: true },
-              },
-            })
-
-            return
-          }
-
-          return originalEmit(event, ...args)
-        }
-      })
-    } })
+    launchStudio({ shouldLogin: true })
 
     // expand the recommendation
     cy.get('[aria-label="Expand recommendation"]').first().click()
