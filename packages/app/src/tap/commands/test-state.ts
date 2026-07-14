@@ -46,7 +46,7 @@ export const tapRunnerSource = {
       }
 
       return {
-        getTestsState: runner.getTestsState.bind(runner),
+        getTestsState: runner.getTestsState,
         isRunComplete: () => eventManager.runComplete,
       }
     } catch {
