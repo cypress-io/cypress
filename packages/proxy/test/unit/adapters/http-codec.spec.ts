@@ -2,17 +2,7 @@ import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import { Readable } from 'stream'
 import { describe, expect, it } from 'vitest'
-import { proxyHttpCodec, resolveProxyResponseBodyStream } from '../../../lib/adapters/http-codec'
-
-async function readStream (stream: Readable): Promise<string> {
-  const chunks: Buffer[] = []
-
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-  }
-
-  return Buffer.concat(chunks).toString()
-}
+import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
 
 function createCtx () {
   return {
@@ -37,9 +27,24 @@ describe('proxyHttpCodec', () => {
     const request = proxyHttpCodec.decodeRequest(ctx)
 
     request.url = 'https://example.test/mutated'
+    request.method = 'POST'
+    request.headers = {
+      'accept-encoding': 'gzip, deflate',
+      authorization: 'Basic abc123',
+    }
+
+    request.body = 'payload'
+
     proxyHttpCodec.encodeRequest(request)
 
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/mutated')
+    expect(ctx.req.method).to.equal('POST')
+    expect(ctx.req.headers).to.deep.equal({
+      'accept-encoding': 'gzip, deflate',
+      authorization: 'Basic abc123',
+    })
+
+    expect(ctx.req.body).to.equal('payload')
   })
 
   it('round-trips request mutations through decode and encode', () => {
@@ -65,6 +70,8 @@ describe('proxyHttpCodec', () => {
 
     expect(response.id).to.equal(request.id)
     expect(response.url).to.equal('https://example.test/')
+    expect(response.bodyStream).to.equal(ctx.originBodyStream)
+    expect(response.statusCode).to.equal(204)
   })
 
   it('returns the same ctx from encodeResponse', () => {
@@ -82,20 +89,34 @@ describe('proxyHttpCodec', () => {
     expect(ctx.req.proxiedUrl).to.equal('https://example.test/encoded')
   })
 
-  it('materializes a stub body stream when committing to the proxy', async () => {
-    const ctx = createCtx()
-
-    ctx.httpInterceptStubBody = '<html><body>created</body></html>'
-
-    expect(await readStream(await resolveProxyResponseBodyStream(ctx))).to.equal('<html><body>created</body></html>')
+  it('throws a descriptive error when middleware returns without forwarding', () => {
+    expect(() => {
+      proxyHttpCodec.encodeResponse({
+        id: 'missing-request-id',
+        url: 'https://example.test/',
+      })
+    }).to.throw('HttpIntercept middleware must call next() before returning a response')
   })
 
-  it('passes through the origin body stream when one is attached to the ctx', async () => {
+  it('can encodeResponse after releaseRequest using the decoded response ctx', () => {
     const ctx = createCtx()
-    const bodyStream = Readable.from(['origin'])
+    const request = proxyHttpCodec.decodeRequest(ctx)
+    const incomingRes = new IncomingMessage(new Socket)
 
-    ctx.originBodyStream = bodyStream
+    incomingRes.statusCode = 200
+    ctx.incomingRes = incomingRes
+    ctx.incomingResStream = Readable.from(['body'])
 
-    expect(await resolveProxyResponseBodyStream(ctx)).to.equal(bodyStream)
+    const response = proxyHttpCodec.decodeResponse(ctx)
+
+    proxyHttpCodec.releaseRequest?.(request.id)
+
+    const encoded = proxyHttpCodec.encodeResponse({
+      ...response,
+      url: 'https://example.test/after-release',
+    })
+
+    expect(encoded).to.equal(ctx)
+    expect(ctx.req.proxiedUrl).to.equal('https://example.test/after-release')
   })
 })

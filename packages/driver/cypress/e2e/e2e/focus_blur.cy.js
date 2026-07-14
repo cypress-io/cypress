@@ -509,6 +509,10 @@ describe('polyfill programmatic blur events', () => {
   })
 })
 
+// Firefox 152 aligned with Chrome: moving focus from a text input to a
+// non-editable element no longer fires `selectionchange` on the document
+const isFirefoxBelow152 = Cypress.isBrowser({ family: 'firefox' }) && Cypress.browserMajorVersion() < 152
+
 // TODO(webkit): fix+unskip for webkit release
 describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
   beforeEach(() => {
@@ -540,7 +544,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.isBrowser('firefox')) {
+    if (isFirefoxBelow152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -557,7 +561,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.isBrowser('firefox')) {
+    if (isFirefoxBelow152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -574,7 +578,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.isBrowser('firefox')) {
+    if (isFirefoxBelow152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -600,7 +604,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     $el.appendTo(cy.$$('body'))
     $el[0].focus()
 
-    if (Cypress.isBrowser('firefox')) {
+    if (isFirefoxBelow152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
