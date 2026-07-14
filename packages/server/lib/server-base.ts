@@ -545,7 +545,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
     })
 
-    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
+    // The rendered-HTML-origins map is populated by the proxy's HTML
+    // injection; without the proxy there is nothing to track (yet), but the
+    // driver still requests it between tests, so fall back to an empty map.
+    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins ?? (() => ({}))
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {

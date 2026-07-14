@@ -458,6 +458,23 @@ describe('lib/server-base', () => {
         expect(this.startListening).to.be.calledWith(this.server.getHttpServer(), 1, 2, arg2)
       })
     })
+
+    it('falls back to an empty rendered-HTML-origins map when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      return this.server.open(this.config, getOpenOptions())
+      .then(() => {
+        const options: Record<string, any> = {}
+
+        this.server.startWebsockets(1, 2, options)
+
+        expect(this.server._networkProxy).to.be.undefined
+        expect(options.getRenderedHTMLOrigins()).to.deep.eq({})
+      })
+      .finally(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+    })
   })
 
   describe('#reset', () => {
