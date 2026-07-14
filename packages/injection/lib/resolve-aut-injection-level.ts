@@ -5,11 +5,12 @@
  * rather than HTTP response facts.
  *
  * - `none`         → nothing to inject: the runner's own top frame, or any non-AUT frame
- * - `full`         → the AUT frame, same-origin as the primary origin (or pre-navigation "null" origin)
- * - `cross-origin` → the AUT frame, cross-origin from the primary origin (#33859)
+ * - `full`         → the AUT frame, same-origin as the primary origin (or the initial `about:blank` document)
+ * - `cross-origin` → the AUT frame, cross-origin from the primary origin
  *
- * (There is no separate `partial` level: any `document.domain` glue is applied up front for every
- * frame by `injectAutBridge`, so a non-AUT frame has nothing left to inject and resolves to `none`.)
+ * (There is no separate `partial` level: the `document.domain` assignment — the equivalent of the
+ * proxy's `partial` injection — is applied up front by `injectAutBridge` for every document it
+ * applies to, so a non-AUT frame has nothing left to inject and resolves to `none`.)
  */
 export type AutInjectionLevel = 'none' | 'full' | 'cross-origin'
 
@@ -26,15 +27,15 @@ export interface AutFrameSignals {
   windowName: string | undefined
   /** `window.frameElement.id` — same-origin-only fallback; `undefined` when inaccessible. */
   frameElementId: string | undefined
-  /** `window.location.origin === 'null'` — pre-navigation about:blank state. */
-  isNullOrigin: boolean
+  /** the initial `about:blank` document — `location.origin === 'null' && location.href === 'about:blank'`. */
+  isInitialAboutBlank: boolean
   /** the frame's own origin matches the primary origin (both reduced through the injector); `false` when they differ. */
   originMatchesTop: boolean
 }
 
 /**
  * Pure injection-level decision for the AUT bridge. Bundled (by rollup) into the page-context
- * script alongside {@link installAutBridgeInFrame}; it is also unit-tested directly in this package.
+ * script alongside {@link installAutBridgeInFrame}.
  */
 export function resolveAutInjectionLevel (marker: string, signals: AutFrameSignals): AutInjectionLevel {
   // if it's top, do nothing (the runner's own frame)
@@ -52,17 +53,17 @@ export function resolveAutInjectionLevel (marker: string, signals: AutFrameSigna
 
   const isAutFrame = nameIsAutFrame || frameIdIsAutFrame
 
-  // full: AUT frame whose origin matches the primary origin, or the pre-navigation "null" origin.
-  if (isAutFrame && (signals.originMatchesTop || signals.isNullOrigin)) {
+  // full: AUT frame whose origin matches the primary origin, or the initial about:blank document.
+  if (isAutFrame && (signals.originMatchesTop || signals.isInitialAboutBlank)) {
     return 'full'
   }
 
-  // cross-origin (#33859): AUT frame at a different origin than the primary origin.
+  // cross-origin: AUT frame at a different origin than the primary origin.
   if (isAutFrame && !signals.originMatchesTop) {
     return 'cross-origin'
   }
 
-  // none: any non-AUT frame — nothing to inject (document.domain glue, if any, is applied up front
-  // by injectAutBridge for every frame).
+  // none: any non-AUT frame — nothing to inject (the document.domain assignment, if any, is
+  // applied up front by injectAutBridge).
   return 'none'
 }

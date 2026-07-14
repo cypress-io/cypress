@@ -9,7 +9,7 @@ const signals = (overrides: Partial<AutFrameSignals> = {}): AutFrameSignals => {
     isTop: false,
     windowName: undefined,
     frameElementId: undefined,
-    isNullOrigin: false,
+    isInitialAboutBlank: false,
     originMatchesTop: false,
     ...overrides,
   }
@@ -32,19 +32,19 @@ describe('resolveAutInjectionLevel', () => {
       }))).toEqual('full')
     })
 
-    it('returns "full" for the pre-navigation "null" origin even when origin does not match top', () => {
+    it('returns "full" for the initial about:blank document even when origin does not match top', () => {
       expect(resolveAutInjectionLevel(marker, signals({
         windowName: `${marker} my-project`,
-        isNullOrigin: true,
+        isInitialAboutBlank: true,
         originMatchesTop: false,
       }))).toEqual('full')
     })
 
-    it('returns "cross-origin" when the origin does not match top and is not the null origin', () => {
+    it('returns "cross-origin" when the origin does not match top and is not the initial about:blank document', () => {
       expect(resolveAutInjectionLevel(marker, signals({
         windowName: `${marker} my-project`,
         originMatchesTop: false,
-        isNullOrigin: false,
+        isInitialAboutBlank: false,
       }))).toEqual('cross-origin')
     })
   })

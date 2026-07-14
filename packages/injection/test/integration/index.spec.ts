@@ -10,11 +10,12 @@ import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 const setWindow = ({
   name = `${AUT_FRAME_NAME_IDENTIFIER} proj`,
   origin = 'https://app.example.com',
+  href = undefined as string | undefined,
   domain = 'app.example.com',
-}: { name?: string, origin?: string, domain?: string } = {}) => {
+}: { name?: string, origin?: string, href?: string, domain?: string } = {}) => {
   const win: any = {
     name,
-    location: { origin, href: `${origin}/some/path` },
+    location: { origin, href: href ?? `${origin}/some/path` },
     document: { domain },
     frameElement: null,
   }
@@ -59,6 +60,37 @@ describe('injectAutBridge', () => {
       }, '')
 
       expect((globalThis as any).window.document.domain).toEqual('app.example.com')
+    })
+
+    it('leaves document.domain untouched in a cross-superdomain (third-party) frame', () => {
+      // the proxy's partial injection only applies to documents on the primary superdomain — a
+      // third-party frame must not have its document.domain relaxed
+      setWindow({ name: 'some-third-party-frame', origin: 'https://ads.thirdparty.com', domain: 'ads.thirdparty.com' })
+
+      injectAutBridge('https://app.example.com', { injectDocumentDomain: true, testingType: 'e2e' }, '', {
+        shouldInjectDocumentDomain: true,
+        modifyObstructiveThirdPartyCode: false,
+        modifyObstructiveCode: true,
+        simulatedCookies: [],
+      }, '')
+
+      expect((globalThis as any).window.document.domain).toEqual('ads.thirdparty.com')
+    })
+
+    it('skips document.domain on the initial about:blank document but still runs full injection', () => {
+      // about:blank has no hostname (assigning document.domain = '' throws in the browser), and
+      // that failure must not prevent the bridge install on the initial AUT document
+      setWindow({ origin: 'null', href: 'about:blank', domain: '' })
+
+      injectAutBridge('https://app.example.com', { injectDocumentDomain: true, testingType: 'e2e' }, 'globalThis.__injectionProbe = "full-ran"', {
+        shouldInjectDocumentDomain: true,
+        modifyObstructiveThirdPartyCode: false,
+        modifyObstructiveCode: true,
+        simulatedCookies: [],
+      }, '')
+
+      expect((globalThis as any).window.document.domain).toEqual('')
+      expect((globalThis as any).__injectionProbe).toEqual('full-ran')
     })
   })
 
@@ -152,8 +184,9 @@ describe('injectAutBridge', () => {
     })
   })
 
-  it('swallows errors so a bridge failure never breaks the AUT document', () => {
-    // a full AUT frame whose runner source throws when eval'd — injectAutBridge must not propagate it
+  it('propagates a bridge-install failure loudly', () => {
+    // a full AUT frame whose runner source throws when eval'd — that failure is fatal for the
+    // frame, so it must surface rather than silently producing a frame without window.Cypress
     setWindow({ origin: 'https://app.example.com' })
 
     expect(() => {
@@ -163,6 +196,26 @@ describe('injectAutBridge', () => {
         modifyObstructiveCode: true,
         simulatedCookies: [],
       }, '')
-    }).not.toThrow()
+    }).toThrow('boom')
+  })
+
+  it('swallows a document.domain failure and still injects', () => {
+    // document.domain is a defensive nicety — a failure setting it must not abort the injection
+    const win = setWindow({ origin: 'https://app.example.com' })
+
+    Object.defineProperty(win.document, 'domain', {
+      set () {
+        throw new Error('document.domain assignment rejected')
+      },
+    })
+
+    injectAutBridge('https://app.example.com', { injectDocumentDomain: true, testingType: 'e2e' }, 'globalThis.__injectionProbe = "full-ran"', {
+      shouldInjectDocumentDomain: true,
+      modifyObstructiveThirdPartyCode: false,
+      modifyObstructiveCode: true,
+      simulatedCookies: [],
+    }, '')
+
+    expect((globalThis as any).__injectionProbe).toEqual('full-ran')
   })
 })

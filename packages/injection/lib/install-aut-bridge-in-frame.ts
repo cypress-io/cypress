@@ -12,16 +12,16 @@ export interface BridgeWindow {
   name?: string
   /** `window.top`; `=== win` for the top (runner) frame. */
   top: BridgeWindow
-  /** `window.frameElement`; `null` (or a throwing access) when cross-origin. */
+  /** `window.frameElement`; `null` when the embedding document is cross-origin. The read is guarded anyway, in case an engine throws a `SecurityError` instead — a throw is treated the same as `null`. */
   frameElement: { id?: string } | null
-  location: { origin: string }
+  location: { origin: string, href: string }
 }
 
 /** The per-level injection bodies, run for whichever level this frame resolves to. */
 interface BridgeHandlers {
-  /** AUT frame, same-origin as the primary origin (or pre-navigation "null" origin). */
+  /** AUT frame, same-origin as the primary origin (or the initial `about:blank` document). */
   onFull: () => void
-  /** AUT frame, cross-origin from the primary origin (#33859). */
+  /** AUT frame, cross-origin from the primary origin. */
   onCrossOrigin: () => void
 }
 
@@ -50,12 +50,15 @@ export function installAutBridgeInFrame (
 
     frameElementId = frameElement && typeof frameElement.id === 'string' ? frameElement.id : undefined
   } catch (e) {
-    // frameElement is null/inaccessible cross-origin — leave frameElementId undefined
+    // defensive: the spec returns null for a cross-origin embedder, but guard against an
+    // engine surfacing the denial as a SecurityError — either way, no frameElementId
   }
 
-  // pre-navigation (about:blank) reports origin as the string "null"; that's the
-  // initial AUT document state, so treat it as full without requiring an origin match.
-  const isNullOrigin = win.location.origin === 'null'
+  // the initial about:blank document (the AUT frame before cy.visit navigates it) has an opaque
+  // origin, which location.origin serializes as the string "null". Other documents have opaque
+  // origins too (sandboxed iframes, data: documents), so also require href === 'about:blank' to
+  // scope this to the true pre-navigation document.
+  const isInitialAboutBlank = win.location.origin === 'null' && win.location.href === 'about:blank'
 
   // does this frame belong to the same (super)domain as the primary/top origin?
   //
@@ -80,7 +83,7 @@ export function installAutBridgeInFrame (
     isTop: win === win.top,
     windowName,
     frameElementId,
-    isNullOrigin,
+    isInitialAboutBlank,
     originMatchesTop,
   })
 
@@ -91,7 +94,7 @@ export function installAutBridgeInFrame (
   }
 
   // level === 'none' → the runner's own top frame, or a non-AUT frame; do nothing (any
-  // document.domain glue was already applied up front by injectAutBridge)
+  // document.domain assignment was already applied up front by injectAutBridge)
 
   return level
 }

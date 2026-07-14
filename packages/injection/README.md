@@ -7,7 +7,7 @@ knowledge of *how* it actually gets into the page.
 ## Why this package exists
 
 Historically Cypress injects its bridge (`window.Cypress`, the spec bridge, the
-`document.domain` glue) by **rewriting AUT HTML at the MITM proxy**: every AUT HTML
+`document.domain` assignment) by **rewriting AUT HTML at the MITM proxy**: every AUT HTML
 response flows through `@packages/proxy`, which splices an injection `<script>` into the
 document (see `@packages/proxy/lib/http/util/inject.ts`). That only works when the proxy is enabled, 
 which will not be the case with http/2 as the requests need to multiplex.
@@ -77,8 +77,9 @@ proxy-rewrite path).
 
 - **`injectAutBridge(...)`** (`lib/index.ts`) — the page-context entry point. Runs in every
   frame: builds the `DocumentDomainInjection` behavior, sets `document.domain` when the config
-  calls for it (e2e + `injectDocumentDomain`), then resolves the injection level and runs the
-  matching runner source. Takes the **primary origin** (known on the Node side) as an argument so
+  calls for it (e2e + `injectDocumentDomain`) and the document is on the primary superdomain —
+  mirroring the proxy's `partial` injection gate, so third-party frames are left untouched —
+  then resolves the injection level and runs the matching runner source. Takes the **primary origin** (known on the Node side) as an argument so
   the level decision never has to read `window.top.location`. This is the function the bundle
   exposes for an automation client to invoke.
 - **`resolveAutInjectionLevel`** (`lib/resolve-aut-injection-level.ts`) — the pure decision

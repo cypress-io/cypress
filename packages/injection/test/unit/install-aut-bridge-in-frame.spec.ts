@@ -20,13 +20,16 @@ interface FakeWindowOptions {
   frameElementId?: string
   frameElementThrows?: boolean
   origin?: string
+  href?: string
   topThrows?: boolean
 }
 
 const fakeWindow = (opts: FakeWindowOptions = {}): BridgeWindow => {
+  const origin = opts.origin ?? PRIMARY_ORIGIN
+
   const win: any = {
     name: opts.name,
-    location: { origin: opts.origin ?? PRIMARY_ORIGIN },
+    location: { origin, href: opts.href ?? `${origin}/some/path` },
   }
 
   if (opts.frameElementThrows) {
@@ -83,13 +86,30 @@ describe('installAutBridgeInFrame', () => {
     expect(handlers.onCrossOrigin).not.toHaveBeenCalled()
   })
 
-  it('treats the pre-navigation "null" origin as full', () => {
+  it('treats the initial about:blank document as full', () => {
     const handlers = mockHandlers()
 
-    const level = installAutBridgeInFrame(fakeWindow({ name: `${marker} proj`, origin: 'null' }), originInjector, PRIMARY_ORIGIN, handlers)
+    const level = installAutBridgeInFrame(fakeWindow({ name: `${marker} proj`, origin: 'null', href: 'about:blank' }), originInjector, PRIMARY_ORIGIN, handlers)
 
     expect(level).toEqual('full')
     expect(handlers.onFull).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not treat other opaque-origin documents (sandboxed / data:) as the initial document', () => {
+    const handlers = mockHandlers()
+
+    // a sandboxed or data: document also reports origin "null", but its href is a real URL —
+    // it must not take the pre-navigation full path
+    const level = installAutBridgeInFrame(
+      fakeWindow({ name: `${marker} proj`, origin: 'null', href: 'https://sandboxed.example.com/page' }),
+      originInjector,
+      PRIMARY_ORIGIN,
+      handlers,
+    )
+
+    expect(level).toEqual('cross-origin')
+    expect(handlers.onFull).not.toHaveBeenCalled()
+    expect(handlers.onCrossOrigin).toHaveBeenCalledTimes(1)
   })
 
   it('runs onCrossOrigin for an AUT frame at a different origin than the primary origin', () => {

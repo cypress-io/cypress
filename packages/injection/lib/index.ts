@@ -28,27 +28,39 @@ export function injectAutBridge (
   crossOriginInjectionConfig: CrossOriginInjectionConfig,
   crossOriginInjectionContents: string,
 ) {
+  const injector = DocumentDomainInjection.InjectionBehavior(documentDomainConfig)
+
   try {
-    const injector = DocumentDomainInjection.InjectionBehavior(documentDomainConfig)
+    // mirror the proxy's `partial` injection gate: only relax document.domain for documents on
+    // the same superdomain as the primary origin — a cross-superdomain (third-party) frame is
+    // left untouched, matching what the proxy pipeline injects today.
+    if (injector.shouldInjectDocumentDomain(window.location.href) && injector.urlsMatch(window.location.href, primaryOrigin)) {
+      const hostname = injector.getHostname(window.location.href)
 
-    if (injector.shouldInjectDocumentDomain(window.location.href)) {
-      window.document.domain = injector.getHostname(window.location.href)
+      // about:blank and other non-http(s) documents have no hostname, and assigning '' throws.
+      // Skipping loses nothing: this script runs once per document, so when the frame navigates
+      // to a real URL, the new document gets its own pass and the assignment happens then.
+      if (hostname) {
+        window.document.domain = hostname
+      }
     }
-
-    installAutBridgeInFrame(window, injector, primaryOrigin, {
-      onFull () {
-        // boot window.Cypress in the AUT frame
-        // eslint-disable-next-line no-eval
-        eval(fullInjectionContents)
-      },
-      onCrossOrigin () {
-        // the cross-origin spec-bridge references `cypressConfig` — supply it exactly as the proxy
-        // does (inject.ts fullCrossOrigin): wrap the contents in an IIFE that passes the config in.
-        // eslint-disable-next-line no-eval
-        eval(`(function (cypressConfig) {\n${crossOriginInjectionContents}\n}(${JSON.stringify(crossOriginInjectionConfig)}))`)
-      },
-    })
   } catch (e) {
-    // swallow so a bridge failure never breaks the AUT document
+    // swallow: a document.domain failure must not abort level resolution + injection below
   }
+
+  // deliberately NOT wrapped in try/catch: a bridge-install failure is fatal for the AUT frame,
+  // so let it surface loudly rather than silently producing a frame without window.Cypress
+  installAutBridgeInFrame(window, injector, primaryOrigin, {
+    onFull () {
+      // boot window.Cypress in the AUT frame
+      // eslint-disable-next-line no-eval
+      eval(fullInjectionContents)
+    },
+    onCrossOrigin () {
+      // the cross-origin spec-bridge references `cypressConfig` — supply it exactly as the proxy
+      // does (inject.ts fullCrossOrigin): wrap the contents in an IIFE that passes the config in.
+      // eslint-disable-next-line no-eval
+      eval(`(function (cypressConfig) {\n${crossOriginInjectionContents}\n}(${JSON.stringify(crossOriginInjectionConfig)}))`)
+    },
+  })
 }

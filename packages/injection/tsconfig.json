@@ -6,8 +6,9 @@
   "exclude": [
     "test"
   ],
-  "module": "ESNext",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "declaration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
