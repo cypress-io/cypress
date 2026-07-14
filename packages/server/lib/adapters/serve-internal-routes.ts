@@ -93,12 +93,16 @@ export function createServeInternalRoutesMiddleware ({
     // a synthesized response for fulfillRequest. This skips later intercept
     // layers (including CorrelateBrowserPreRequest in MITM mode); pending
     // pre-requests for these internals are swept by the normal timeout path.
+    // The loopback request line is path-only, but Express consumers (e.g. the
+    // spec-bridge iframe controller) derive the request origin from
+    // req.proxiedUrl, so carry the browser's original absolute URL in the
+    // loopback header for setProxiedUrl to restore.
     const response = await serverRequest.create({
       url: toLoopbackUrl(request.url, config),
       method: request.method ?? 'GET',
       headers: {
         ...filterHeaders(request.headers),
-        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: '1',
+        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
       },
       ...(shouldSendBody(request) ? { body: request.body } : {}),
       encoding: null,

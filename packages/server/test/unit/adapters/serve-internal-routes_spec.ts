@@ -144,7 +144,7 @@ describe('lib/adapters/serve-internal-routes', () => {
       url: 'http://127.0.0.1:1234/__cypress/xhrs/foo',
       method: 'GET',
       headers: {
-        'x-cypress-internal-loopback': '1',
+        'x-cypress-internal-loopback': 'http://localhost:1234/__cypress/xhrs/foo',
       },
     }, true)
 
@@ -211,7 +211,7 @@ describe('lib/adapters/serve-internal-routes', () => {
       method: 'POST',
       headers: {
         cookie: 'session=abc',
-        'x-cypress-internal-loopback': '1',
+        'x-cypress-internal-loopback': 'https://cross-origin.test/__cypress/process-origin-callback?foo=1',
       },
       body: '{"file":"spec.cy.ts"}',
       encoding: null,

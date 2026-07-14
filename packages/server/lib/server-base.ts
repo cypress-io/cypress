@@ -144,6 +144,19 @@ const setProxiedUrl = function (req) {
     return
   }
 
+  // Loopback requests from serve-internal-routes arrive path-only, but carry
+  // the browser's original absolute URL in the loopback header so consumers
+  // like the spec-bridge iframe controller can still derive the origin.
+  const loopbackUrl = req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
+
+  if (typeof loopbackUrl === 'string' && fullyQualifiedRe.test(loopbackUrl)) {
+    req.proxiedUrl = removeDefaultPort(loopbackUrl)
+
+    req.url = getPath(req.url)
+
+    return
+  }
+
   // backup the original proxied url
   // and slice out the host/origin
   // and only leave the path which is
