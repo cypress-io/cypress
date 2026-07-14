@@ -11,6 +11,7 @@ import { normalizeGetCookieProps, normalizeSetCookieProps } from '../automation/
 import utils from './utils'
 import type { CyCookie } from '../automation/cookie/util'
 import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { AUT_FRAME_HEADER } from './constants'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -154,7 +155,7 @@ export class WebKitAutomation {
       return route.continue({
         headers: {
           ...request.headers(),
-          'X-Cypress-Is-AUT-Frame': 'true',
+          [AUT_FRAME_HEADER]: 'true',
         },
       })
     })

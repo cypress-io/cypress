@@ -528,23 +528,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   private resetCdpFetchRuntime () {
-    const reset = this._cdpFetchRuntime?.reset()
-
-    reset?.catch((err) => {
+    try {
+      this._cdpFetchRuntime?.reset()
+    } catch (err) {
       debug('CDP Fetch runtime reset failed: %s', err?.stack || err)
-    })
-
-    return reset
+    }
   }
 
   private stopCdpFetchRuntime () {
-    const stop = this._cdpFetchRuntime?.stop()
-
-    stop?.catch((err) => {
+    // Stopping sends Fetch.disable to the previous page client, which may
+    // already be gone (spec change, browser relaunch); failing to stop the
+    // old runtime must not fail the next launch.
+    return this._cdpFetchRuntime?.stop().catch((err) => {
       debug('CDP Fetch runtime stop failed: %s', err?.stack || err)
     })
-
-    return stop
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
@@ -566,7 +563,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     options.onResetServerState = () => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
-      void this.resetCdpFetchRuntime()
+      this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
@@ -743,7 +740,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
-    void this.resetCdpFetchRuntime()
+    this.resetCdpFetchRuntime()
     this._networkProxy?.clearCredentials()
     const baseUrl = this._baseUrl ?? '<root>'
 

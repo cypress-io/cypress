@@ -223,13 +223,29 @@ describe('lib/server-base', () => {
       expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
     })
 
+    it('still starts the new runtime when stopping the previous one fails', async function () {
+      const firstClient = createClient()
+      const secondClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(firstClient)
+
+      // the previous page client is typically gone by the time a new spec or
+      // relaunch replaces the runtime
+      firstClient.send.withArgs('Fetch.disable').rejects(new Error('Fetch.disable will not run as the target browser or tab CRI connection has crashed'))
+
+      await this.server.createCdpFetchNetworkRuntime(secondClient)
+
+      expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
+      expect(this.server._cdpFetchRuntime).to.exist
+    })
+
     it('resets CDP Fetch between tests without disabling Fetch', async function () {
       const client = createClient()
 
       await this.server.createCdpFetchNetworkRuntime(client)
       client.send.resetHistory()
 
-      await this.server['resetCdpFetchRuntime']()
+      this.server['resetCdpFetchRuntime']()
 
       expect(client.send).not.to.have.been.calledWith('Fetch.disable')
     })

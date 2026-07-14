@@ -440,6 +440,10 @@ describe('lib/browsers/chrome', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
       it('sends Fetch.enable only for Document ResourceType', async function () {
         await chrome.open('chrome', 'http://', openOpts, this.automation)
 
@@ -455,21 +459,17 @@ describe('lib/browsers/chrome', () => {
 
         const onPageCriClientReady = sinon.stub().resolves()
 
-        try {
-          await chrome.open('chrome', 'http://', {
-            ...openOpts,
-            onPageCriClientReady,
-          }, this.automation)
+        await chrome.open('chrome', 'http://', {
+          ...openOpts,
+          onPageCriClientReady,
+        }, this.automation)
 
-          expect(onPageCriClientReady).to.have.been.calledOnce
-          expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
-            patterns: [{
-              resourceType: 'Document',
-            }],
-          })
-        } finally {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-        }
+        expect(onPageCriClientReady).to.have.been.calledOnce
+        expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
       })
 
       it('does not add header when not a document', async function () {

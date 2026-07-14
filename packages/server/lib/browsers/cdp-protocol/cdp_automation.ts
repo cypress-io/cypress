@@ -15,6 +15,7 @@ import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie
 import { normalizeGetCookies, normalizeSetCookieProps } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../../automation/commands/key_press'
+import { AUT_FRAME_HEADER } from '../constants'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
@@ -426,7 +427,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
         return this._continueRequest(client, params, {
-          name: 'X-Cypress-Is-AUT-Frame',
+          name: AUT_FRAME_HEADER,
           value: 'true',
         })
       }

@@ -9,6 +9,7 @@ function createPausedRequest (options: {
   requestId: string
   networkId?: string
   url?: string
+  resourceType?: Protocol.Network.ResourceType
   responseStatusCode?: number
   responseErrorReason?: Protocol.Network.ErrorReason
 }): Protocol.Fetch.RequestPausedEvent {
@@ -16,7 +17,7 @@ function createPausedRequest (options: {
     requestId: options.requestId,
     networkId: options.networkId,
     frameId: 'frame-1',
-    resourceType: 'Document',
+    resourceType: options.resourceType ?? 'Document',
     request: {
       url: options.url ?? 'https://example.test/',
       method: 'GET',
@@ -295,6 +296,55 @@ describe('CdpFetchTransport', () => {
           name: 'X-Foo',
           value: 'Bar',
         }, {
+          name: 'X-Cypress-Is-AUT-Frame',
+          value: 'true',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('does not mark AUT-frame subresource requests (e.g. XHR) with the AUT frame header', async () => {
+      const client = createClient()
+      const isAUTFrame = sinon.stub().resolves(true)
+      const transport = new CdpFetchTransport(client as any, undefined, { isAUTFrame })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'XHR' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', resourceType: 'XHR', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(isAUTFrame).not.to.have.been.called
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('does not duplicate the AUT frame header when a redirect re-pauses the request', async () => {
+      const client = createClient()
+      const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
+      const transport = new CdpFetchTransport(client as any, undefined, { isAUTFrame })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Cypress-Is-AUT-Frame': 'true',
+      }
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
           name: 'X-Cypress-Is-AUT-Frame',
           value: 'true',
         }],
@@ -904,7 +954,7 @@ describe('CdpFetchTransport', () => {
       await tick()
       client.send.resetHistory()
 
-      await transport.reset()
+      transport.reset()
       await handled
 
       expect(client.send).not.to.have.been.calledWith('Fetch.disable')

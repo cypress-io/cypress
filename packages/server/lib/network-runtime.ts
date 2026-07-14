@@ -50,7 +50,7 @@ export type CdpFetchNetworkRuntime = {
   networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
   fetchTransport: CdpFetchTransport
   start (): Promise<void>
-  reset (): Promise<void>
+  reset (): void
   stop (): Promise<void>
 }
 
@@ -120,6 +120,9 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
  * Composition-root factory for the CDP Fetch network runtime used when the
  * MITM proxy is disabled. Keeps the transport-neutral HttpIntercept surface
  * without wiring the legacy proxy pipeline.
+ *
+ * Config that depends on the proxy is not enforced yet — most notably
+ * `hosts` and `blockHosts`.
  */
 export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
@@ -147,7 +150,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       return fetchTransport.start()
     },
     reset () {
-      return fetchTransport.reset()
+      fetchTransport.reset()
     },
     stop () {
       return fetchTransport.stop()

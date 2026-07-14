@@ -6,6 +6,7 @@ import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
+import { AUT_FRAME_HEADER } from '../constants'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -13,7 +14,6 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
-const AUT_FRAME_HEADER = 'X-Cypress-Is-AUT-Frame'
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
@@ -87,7 +87,7 @@ export class CdpFetchTransport {
    * Clears in-flight request correlation without disabling CDP Fetch.
    * Used between tests so the next test still receives paused traffic.
    */
-  async reset (): Promise<void> {
+  reset (): void {
     this.rejectAll(new Error('CDP Fetch transport reset'))
   }
 
@@ -360,23 +360,31 @@ export class CdpFetchTransport {
 
   /**
    * Builds continueRequest headers when the outbound headers changed or the
-   * request is from the AUT frame. Always preserves X-Cypress-Is-AUT-Frame
-   * alongside any mutated headers (a later headers overwrite must not drop it).
+   * request is an AUT-frame document. Only document requests are marked —
+   * parity with the other automation layers — so AUT subresource traffic
+   * (XHR/fetch/assets) never carries the header out to the origin server.
+   * Always preserves X-Cypress-Is-AUT-Frame alongside any mutated headers
+   * (a later headers overwrite must not drop it).
    */
   private continueRequestHeaders = async (
     event: Protocol.Fetch.RequestPausedEvent,
     outbound: CdpFetchTransportRequest,
   ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const isAUTFrame = event.frameId && this.options.isAUTFrame ? await this.options.isAUTFrame(event.frameId) : false
+    const markAsAUTFrame = event.resourceType === 'Document' && event.frameId && this.options.isAUTFrame
+      ? await this.options.isAUTFrame(event.frameId)
+      : false
     const headersChanged = this.headersChanged(outbound.headers ?? {}, event.request.headers)
 
-    if (!isAUTFrame && !headersChanged) {
+    if (!markAsAUTFrame && !headersChanged) {
       return
     }
 
+    // A redirect hop re-pauses with the previously injected header already in
+    // the request; strip it so the header is never sent upstream duplicated.
     const headers = this.toContinueRequestHeaders(outbound.headers ?? {})
+    .filter(({ name }) => name.toLowerCase() !== AUT_FRAME_HEADER.toLowerCase())
 
-    if (isAUTFrame) {
+    if (markAsAUTFrame) {
       headers.push({
         name: AUT_FRAME_HEADER,
         value: 'true',

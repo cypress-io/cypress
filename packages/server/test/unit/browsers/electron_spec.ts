@@ -703,6 +703,10 @@ describe('lib/browsers/electron', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
       it('sends Fetch.enable only for Document ResourceType', async function () {
         await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
 
@@ -718,21 +722,17 @@ describe('lib/browsers/electron', () => {
 
         const onPageCriClientReady = sinon.stub().resolves()
 
-        try {
-          await electron._launch(this.win, this.url, this.automation, {
-            ...this.options,
-            onPageCriClientReady,
-          }, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, {
+          ...this.options,
+          onPageCriClientReady,
+        }, undefined, undefined, { attachCDPClient: sinon.stub() })
 
-          expect(onPageCriClientReady).to.have.been.calledOnce
-          expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
-            patterns: [{
-              resourceType: 'Document',
-            }],
-          })
-        } finally {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-        }
+        expect(onPageCriClientReady).to.have.been.calledOnce
+        expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
       })
 
       it('does not add header when not a document', async function () {

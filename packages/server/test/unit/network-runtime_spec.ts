@@ -217,7 +217,7 @@ describe('lib/network-runtime', () => {
     await runtime.start()
     client.send.resetHistory()
 
-    await runtime.reset()
+    runtime.reset()
 
     expect(client.send).not.to.have.been.calledWith('Fetch.disable')
 
