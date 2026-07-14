@@ -199,7 +199,10 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('withFailure.spec').click()
 
     cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
-    cy.get('body').type('f')
+    // open the specs list by clicking the reporter's toggle (which now lives in
+    // the command-log iframe) rather than a synthetic `f` keydown to the app
+    // body, which does not reach the iframe's handler in cy-in-cy
+    cy.reporter().find('.toggle-specs-wrapper').click()
     cy.contains('Search specs')
     cy.contains('withWait.spec').click()
     cy.waitForSpecToFinish()

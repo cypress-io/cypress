@@ -28,7 +28,10 @@ describe('App: Spec List (Component)', () => {
     cy.contains('fails').click()
 
     cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
-    cy.get('body').type('f')
+    // open the specs list by clicking the reporter's toggle (which now lives in
+    // the command-log iframe) rather than a synthetic `f` keydown to the app
+    // body, which does not reach the iframe's handler in cy-in-cy
+    cy.reporter().find('.toggle-specs-wrapper').click()
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')
   })
