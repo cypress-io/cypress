@@ -3,9 +3,6 @@ import { defineCommand, TapCommandError } from './definition'
 import { getRunnableSpecs, toSpecListEntry } from './specs-list'
 import type { SpecListEntry } from './specs-list'
 
-// Seam so component tests can stub navigation — really navigating would stop
-// the test mid-command. The `hash` setter (not `href`) keeps it a synchronous
-// same-document navigation, so `exec` still resolves over CDP.
 export const tapNavigation = {
   getHash () {
     return window.location.hash
@@ -15,13 +12,11 @@ export const tapNavigation = {
   },
 }
 
-// watchSpecs only reruns a spec when route.query changes, so bump past whatever
-// tapRun the hash already holds — module state would reset to zero on a page
-// reload while the old value survives in the URL.
 const nextTapRunNonce = () => {
-  const current = /[?&]tapRun=(\d+)/.exec(tapNavigation.getHash())
+  const query = tapNavigation.getHash().split('?')[1] ?? ''
+  const current = Number(new URLSearchParams(query).get('tapRun'))
 
-  return (current ? Number(current[1]) : 0) + 1
+  return (Number.isInteger(current) ? current : 0) + 1
 }
 
 export const runCommand = defineCommand({
@@ -41,9 +36,9 @@ export const runCommand = defineCommand({
       throw new TapCommandError('SPEC_NOT_FOUND', `no spec matches the path "${spec}" — use the specs command to list runnable specs`)
     }
 
-    // Encode the path but keep its slashes literal, since watchSpecs reads
+    // Encode each segment but keep the slashes literal, since watchSpecs reads
     // route.query.file back through getPathForPlatform.
-    const file = encodeURIComponent(posixify(match.relative)).replace(/%2F/g, '/')
+    const file = posixify(match.relative).split('/').map(encodeURIComponent).join('/')
 
     tapNavigation.setHash(`/specs/runner?file=${file}&tapRun=${nextTapRunNonce()}`)
 
