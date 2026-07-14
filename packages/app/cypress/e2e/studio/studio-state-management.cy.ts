@@ -68,9 +68,9 @@ describe('Cypress Studio - State Management', () => {
   it('remains in studio mode when the test name is changed on the file system and file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
 
-    // since we aren't logged in, we need to close the connect to cloud panel
+    // since we aren't logged in, dismiss the anonymous AI consent banner
     cy.get('[data-cy="studio-error"]').within(() => {
-      cy.contains('Login').should('be.visible')
+      cy.contains('Turn on AI recommendations').should('be.visible')
       cy.get('[aria-label="Close"]').click()
     })
 
