@@ -16,3 +16,16 @@ class Service {
 const paramTypes = Reflect.getMetadata('design:paramtypes', Service) as unknown[]
 
 expect(paramTypes).to.deep.equal([Dep])
+
+function Field () {
+  return (_target: any, _propertyKey: string) => {}
+}
+
+class Model {
+  @Field() name: string = ''
+}
+
+// A decorated class field (property-decorator + class-properties) must emit its design:type.
+const fieldType = Reflect.getMetadata('design:type', Model.prototype, 'name')
+
+expect(fieldType).to.equal(String)

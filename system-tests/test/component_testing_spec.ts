@@ -13,6 +13,16 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
+  // Vite is the one component testing bundler that works with typescript@7,
+  // since it never touches the TypeScript compiler API. @see https://github.com/cypress-io/cypress/issues/34258
+  systemTests.it('react-vite-ts7-configured', {
+    project: 'react-vite-ts7-configured',
+    testingType: 'component',
+    spec: 'src/App.cy.tsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
   systemTests.it('vue3-webpack-ts-configured', {
     project: 'vue3-webpack-ts-configured',
     testingType: 'component',
