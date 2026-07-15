@@ -39,8 +39,8 @@ describe('tap/commands/specs', () => {
 
     expect(await manager.exec('specs')).to.deep.eq({
       result: [
-        { relative: 'cypress/e2e/login.cy.ts', specType: 'integration' },
-        { relative: 'src/Button.cy.tsx', specType: 'component' },
+        { relativePath: 'cypress/e2e/login.cy.ts', specType: 'integration' },
+        { relativePath: 'src/Button.cy.tsx', specType: 'component' },
       ],
     })
   })

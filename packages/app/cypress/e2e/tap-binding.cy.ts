@@ -26,12 +26,12 @@ describe('tap binding', () => {
 
       expect('result' in outcome).to.eq(true)
 
-      const specs = (outcome as { result: Array<{ relative: string, specType: string }> }).result
+      const specs = (outcome as { result: Array<{ relativePath: string, specType: string }> }).result
 
-      expect(specs).to.deep.include({ relative: 'cypress/e2e/dom-content.spec.js', specType: 'integration' })
+      expect(specs).to.deep.include({ relativePath: 'cypress/e2e/dom-content.spec.js', specType: 'integration' })
 
       for (const spec of specs) {
-        expect(Object.keys(spec), `entry ${spec.relative}`).to.deep.eq(['relative', 'specType'])
+        expect(Object.keys(spec), `entry ${spec.relativePath}`).to.deep.eq(['relativePath', 'specType'])
       }
     })
   })
