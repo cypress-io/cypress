@@ -23,7 +23,9 @@ Interacts with a running Cypress instance over its tap binding.
 Commands:
   instances  list the running Cypress instances this CLI can reach
   status     report where a running Cypress instance is in its lifecycle
-  frame      inspect the app-under-test frame over CDP (dom, aria, inspect)
+  dom        read the app-under-test DOM over CDP, whole-page or by selector
+  aria       read the accessibility (ARIA) tree of the app-under-test frame
+  inspect    inspect one element: attributes, styles, box model, ARIA node
 
 Other commands are discovered from the running Cypress instance — start
 Cypress (e.g. \`cypress open\`), then run \`cypress tap\` to see them.

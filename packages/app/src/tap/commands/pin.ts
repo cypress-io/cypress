@@ -170,7 +170,7 @@ const clearPin = (): ClearResult => {
 }
 
 export const pinCommand = defineCommand({
-  description: 'pin a command’s DOM snapshot into the live app-under-test frame so the frame commands can read it; pass --clear to release',
+  description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
   params: [
     { name: 'test', type: 'string', required: false, description: 'test id, as listed by the tests command' },
     { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command' },

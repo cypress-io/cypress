@@ -92,9 +92,22 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   .description('report where a running Cypress instance is in its lifecycle')
   .action(() => {})
 
+  // The frame commands are CLI-native (see `../frame`); these entries only make
+  // them show up in the connected help listing — routing intercepts them before
+  // this program ever parses.
   program
-  .command('frame')
-  .description('inspect the app-under-test frame over CDP (dom, aria, inspect)')
+  .command('dom [selector]')
+  .description('read the app-under-test DOM: the page HTML, or just the elements matching a selector')
+  .action(() => {})
+
+  program
+  .command('aria [selector]')
+  .description('read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector')
+  .action(() => {})
+
+  program
+  .command('inspect <selector>')
+  .description('inspect one element: its tag, attributes, computed styles, box model, and accessibility node')
   .action(() => {})
 
   for (const { name, description, params = [], options = [], hidden } of schema.commands) {

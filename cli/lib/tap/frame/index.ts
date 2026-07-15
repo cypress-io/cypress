@@ -11,9 +11,11 @@ import { renderResult, renderFailure, renderKnownFailure, renderFrameHelp } from
 
 const debug = Debug('cypress:cli:tap')
 
-// `tap frame` is CLI-native: the extractors run CDP domains the in-page binding
-// cannot reach, so they are parsed and dispatched here rather than through the
-// schema-driven binding program.
+// The frame commands (`dom`, `aria`, `inspect`) are CLI-native: the extractors
+// run CDP domains the in-page binding cannot reach, so they are parsed and
+// dispatched here rather than through the schema-driven binding program.
+export const FRAME_COMMAND_NAMES = ['dom', 'aria', 'inspect'] as const
+
 interface FrameOptions {
   instance?: number
 }
@@ -40,7 +42,7 @@ const parsePositiveInt = (raw: string | undefined, fallback: number, label: stri
 }
 
 const buildFrameProgram = (capture: (parsed: ParsedFrame) => void): commander.Command => {
-  const program = new commander.Command('cypress tap frame')
+  const program = new commander.Command('cypress tap')
 
   program.exitOverride()
   program.addHelpCommand(false)
@@ -73,7 +75,7 @@ const buildFrameProgram = (capture: (parsed: ParsedFrame) => void): commander.Co
 }
 
 export const runFrame = async (operands: string[], options: FrameOptions, wantsHelp: boolean): Promise<number> => {
-  debug('tap frame %o', operands)
+  debug('tap frame command %o', operands)
 
   let parsed: ParsedFrame | undefined
   const program = buildFrameProgram((value) => {
@@ -81,7 +83,10 @@ export const runFrame = async (operands: string[], options: FrameOptions, wantsH
   })
 
   if (wantsHelp) {
-    renderFrameHelp(program)
+    // The commands are top-level, so help renders the one being asked about.
+    const subcommand = program.commands.find((command) => command.name() === operands[0])
+
+    renderFrameHelp(subcommand ?? program)
 
     return 0
   }
