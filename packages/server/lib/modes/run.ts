@@ -225,11 +225,29 @@ async function trashAssets (config: Cfg) {
     return
   }
 
+  const trashAssetFolder = (folder: string | false | undefined) => {
+    if (typeof folder !== 'string') {
+      return Promise.resolve()
+    }
+
+    // A misconfigured assets folder (e.g. `downloadsFolder: ''` resolves to the
+    // project root and `'../'` to its parent) would trash the user's project.
+    // Warn and skip rather than deleting it.
+    // See https://github.com/cypress-io/cypress/issues/26393
+    if (trash.wouldTrashProjectRoot(folder, config.projectRoot)) {
+      errors.warning('CANNOT_TRASH_ASSETS', new Error(`Refusing to trash '${folder}' because it is the project root or a parent of it.`))
+
+      return Promise.resolve()
+    }
+
+    return trash.folder(folder)
+  }
+
   try {
     await Promise.all([
-      trash.folder(config.videosFolder),
-      typeof config.screenshotsFolder === 'string' ? trash.folder(config.screenshotsFolder) : Promise.resolve(),
-      trash.folder(config.downloadsFolder),
+      trashAssetFolder(config.videosFolder),
+      trashAssetFolder(config.screenshotsFolder),
+      trashAssetFolder(config.downloadsFolder),
     ])
   } catch (err) {
     // dont make trashing assets fail the build

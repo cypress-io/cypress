@@ -20,6 +20,27 @@ const trashItem = async (itemPath: string): Promise<void> => {
   }
 }
 
+// True when trashing `folderToTrash` would remove the project itself — i.e. the
+// folder is the project root or an ancestor of it. Guards against a
+// misconfigured assets folder, e.g. `downloadsFolder: ''` resolves to the
+// project root and `'../'` to its parent, either of which would empty the whole
+// project (including .git). See https://github.com/cypress-io/cypress/issues/26393
+export const wouldTrashProjectRoot = (folderToTrash: string, projectRoot: string): boolean => {
+  const resolvedFolder = path.resolve(folderToTrash)
+  const resolvedProjectRoot = path.resolve(projectRoot)
+
+  if (resolvedFolder === resolvedProjectRoot) {
+    return true
+  }
+
+  // The project root resolves to a location inside the folder we are about to
+  // trash, so the folder is an ancestor of the project. Mirrors the isInsideDir
+  // path-traversal idiom used elsewhere in the server package.
+  const relativeToFolder = path.relative(resolvedFolder, resolvedProjectRoot)
+
+  return relativeToFolder !== '' && !relativeToFolder.startsWith('..') && !path.isAbsolute(relativeToFolder)
+}
+
 // Moves a folder's contents to the trash (or empties it on Linux)
 export const folder = async (pathToFolder: string): Promise<void> => {
   try {
@@ -47,4 +68,5 @@ export const folder = async (pathToFolder: string): Promise<void> => {
 
 export default {
   folder,
+  wouldTrashProjectRoot,
 }

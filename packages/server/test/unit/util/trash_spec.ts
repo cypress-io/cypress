@@ -124,4 +124,44 @@ describe('lib/util/trash', () => {
       fs.rmdirSync(basePath)
     })
   })
+
+  context('.wouldTrashProjectRoot', () => {
+    // Guards against https://github.com/cypress-io/cypress/issues/26393, where a
+    // misconfigured assets folder resolves to the project root (or an ancestor)
+    // and trashing it wipes the whole project. These are pure path checks, so no
+    // directories need to exist on disk.
+    let projectRoot: string
+
+    beforeEach(() => {
+      projectRoot = path.join(tempDir, 'my-project')
+    })
+
+    it('returns true when the folder is the project root (e.g. downloadsFolder: "")', () => {
+      expect(trash.wouldTrashProjectRoot(projectRoot, projectRoot)).to.be.true
+    })
+
+    it('returns true when the folder is the parent of the project root (e.g. downloadsFolder: "../")', () => {
+      expect(trash.wouldTrashProjectRoot(path.resolve(projectRoot, '..'), projectRoot)).to.be.true
+    })
+
+    it('returns true when the folder is a distant ancestor of the project root', () => {
+      expect(trash.wouldTrashProjectRoot(path.resolve(projectRoot, '..', '..'), projectRoot)).to.be.true
+    })
+
+    it('returns false for a folder nested inside the project root', () => {
+      expect(trash.wouldTrashProjectRoot(path.join(projectRoot, 'cypress', 'downloads'), projectRoot)).to.be.false
+    })
+
+    it('returns false for a child folder whose name starts with ".."', () => {
+      expect(trash.wouldTrashProjectRoot(path.join(projectRoot, '..downloads'), projectRoot)).to.be.false
+    })
+
+    it('returns false for a sibling folder outside the project root', () => {
+      expect(trash.wouldTrashProjectRoot(path.resolve(projectRoot, '..', 'other-downloads'), projectRoot)).to.be.false
+    })
+
+    it('returns false for an unrelated absolute path', () => {
+      expect(trash.wouldTrashProjectRoot(path.resolve(tempDir, 'somewhere', 'else'), path.join(tempDir, 'project'))).to.be.false
+    })
+  })
 })

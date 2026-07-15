@@ -12,6 +12,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where setting [`downloadsFolder`](https://on.cypress.io/configuration#Downloads) to a value that resolves to the project root or a parent directory — such as an empty string or `../` — could delete the entire project (including the `.git` directory) during `cypress run`. Cypress now leaves such folders untouched instead of trashing them. This also applies to the [`videosFolder`](https://on.cypress.io/configuration#Videos) and [`screenshotsFolder`](https://on.cypress.io/configuration#Screenshots) configuration options. Fixes [#26393](https://github.com/cypress-io/cypress/issues/26393).
 - Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 
