@@ -1,6 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import { isCypressServerOrigin, isInternalCypressRoute } from '../../../lib/adapters/internal-routes'
+import { decodeLoopbackHeader, encodeLoopbackHeader, isCypressServerOrigin, isInternalCypressRoute } from '../../../lib/adapters/internal-routes'
 import { createServeInternalRoutesMiddleware } from '../../../lib/adapters/serve-internal-routes'
 
 const config = {
@@ -46,6 +46,20 @@ describe('lib/adapters/internal-routes', () => {
 
     expect(isCypressServerOrigin('http://localhost:1234/__/', withoutProxyUrl)).to.be.true
     expect(isCypressServerOrigin('/__/', withoutProxyUrl)).to.be.true
+  })
+
+  it('round-trips a URL through the token-signed loopback header', () => {
+    const url = 'https://cross-origin.test/__cypress/xhrs/foo?bar=1'
+
+    expect(decodeLoopbackHeader(encodeLoopbackHeader(url))).to.eq(url)
+  })
+
+  it('rejects loopback header values that lack the per-process token', () => {
+    expect(decodeLoopbackHeader('https://attacker.test/__/')).to.be.undefined
+    expect(decodeLoopbackHeader('sometoken https://attacker.test/__/')).to.be.undefined
+    expect(decodeLoopbackHeader('1')).to.be.undefined
+    expect(decodeLoopbackHeader(undefined)).to.be.undefined
+    expect(decodeLoopbackHeader(['a', 'b'])).to.be.undefined
   })
 })
 
@@ -144,7 +158,7 @@ describe('lib/adapters/serve-internal-routes', () => {
       url: 'http://127.0.0.1:1234/__cypress/xhrs/foo',
       method: 'GET',
       headers: {
-        'x-cypress-internal-loopback': 'http://localhost:1234/__cypress/xhrs/foo',
+        'x-cypress-internal-loopback': encodeLoopbackHeader('http://localhost:1234/__cypress/xhrs/foo'),
       },
     }, true)
 
@@ -211,7 +225,7 @@ describe('lib/adapters/serve-internal-routes', () => {
       method: 'POST',
       headers: {
         cookie: 'session=abc',
-        'x-cypress-internal-loopback': 'https://cross-origin.test/__cypress/process-origin-callback?foo=1',
+        'x-cypress-internal-loopback': encodeLoopbackHeader('https://cross-origin.test/__cypress/process-origin-callback?foo=1'),
       },
       body: '{"file":"spec.cy.ts"}',
       encoding: null,

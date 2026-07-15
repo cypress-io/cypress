@@ -30,6 +30,7 @@ const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-ins
  */
 const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
+const { encodeLoopbackHeader } = require(`../../lib/adapters/internal-routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
 const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
@@ -383,20 +384,57 @@ describe('Routes', () => {
       })
     })
 
-    it('internal loopback header bypasses forceProxy redirect without a proxy set', function () {
+    it('token-verified loopback header bypasses forceProxy redirect without a proxy set', function () {
       // serve-internal-routes hits Express as a path-only request; without this
       // header _forceProxyMiddleware would 302 to clientRoute (see previous test).
+      const loopbackUrl = `${this.proxy}/__cypress/automation/getLocalStorage`
+
       return this.rp({
-        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        url: loopbackUrl,
         proxy: null,
         headers: {
-          'x-cypress-internal-loopback': '1',
+          'x-cypress-internal-loopback': encodeLoopbackHeader(loopbackUrl),
         },
         followRedirect: false,
       })
       .then((res) => {
         expect(res.statusCode).to.eq(200)
         expect(res.headers['location']).to.be.undefined
+      })
+    })
+
+    it('loopback header without the per-process token does not bypass forceProxy redirect', function () {
+      // AUT content can send this header itself (same-origin fetch allows
+      // custom headers); without the token it must be ignored.
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': `${this.proxy}/__cypress/automation/getLocalStorage`,
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
+      })
+    })
+
+    it('loopback header without the per-process token does not influence proxiedUrl', function () {
+      // A trusted loopback header makes proxiedUrl absolute, which the
+      // clientRoute handler reads as "launched through Cypress". A spoofed
+      // header must not flip that decision.
+      return this.rp({
+        url: `${this.proxy}/__`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': `${this.proxy}/__`,
+        },
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/This browser was not launched through Cypress\./)
       })
     })
 

@@ -55,7 +55,7 @@ import type { CdpFetchNetworkRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, decodeLoopbackHeader } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -106,10 +106,11 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
 
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-    // Trusted loopback from serve-internal-routes: path-only HTTP to Express
-    // must reach internal route handlers instead of redirecting to clientRoute.
-    // Keep the header so a catch-all re-entry can detect the loop and stop.
-    if (req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]) {
+    // Token-verified loopback from serve-internal-routes: path-only HTTP to
+    // Express must reach internal route handlers instead of redirecting to
+    // clientRoute. Keep the header so a catch-all re-entry can detect the
+    // loop and stop.
+    if (decodeLoopbackHeader(req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER])) {
       return next()
     }
 
@@ -146,10 +147,12 @@ const setProxiedUrl = function (req) {
 
   // Loopback requests from serve-internal-routes arrive path-only, but carry
   // the browser's original absolute URL in the loopback header so consumers
-  // like the spec-bridge iframe controller can still derive the origin.
-  const loopbackUrl = req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
+  // like the spec-bridge iframe controller can still derive the origin. The
+  // header is only honored when it carries the per-process loopback token —
+  // AUT content can send the header itself, and must not control proxiedUrl.
+  const loopbackUrl = decodeLoopbackHeader(req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER])
 
-  if (typeof loopbackUrl === 'string' && fullyQualifiedRe.test(loopbackUrl)) {
+  if (loopbackUrl && fullyQualifiedRe.test(loopbackUrl)) {
     req.proxiedUrl = removeDefaultPort(loopbackUrl)
 
     req.url = getPath(req.url)
