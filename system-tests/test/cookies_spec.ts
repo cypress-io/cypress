@@ -414,3 +414,98 @@ describe('cookie jar stays in sync after same-origin requests', () => {
     spec: 'stale_cookie.cy.js',
   })
 })
+
+// https://github.com/cypress-io/cypress/issues/29719
+describe('OAuth/SSO redirect-back cookie', () => {
+  // Primary app (localhost:3500) — sets an oauth_state cookie on /oauth_login
+  // and verifies it arrives at /oauth_callback after the IdP redirects back.
+  const onPrimaryServer = (app) => {
+    app.use(parser())
+
+    app.get('/oauth_login', (req, res) => {
+      // Set the CSRF state cookie on the first (primary-origin) page load.
+      // This is the exact scenario fixed in #29719: the cookie is set on the
+      // very first cy.visit when currentAUTUrl is still undefined.
+      res.cookie('oauth_state', 'csrf-token-abc', { httpOnly: true })
+
+      const idpUrl = `http://www.idp.com:${idpPort}/oauth_authorize?redirect_uri=${encodeURIComponent(`http://localhost:${primaryPort}/oauth_callback`)}`
+
+      return res.type('html').send(`
+        <html><body>
+          <a data-cy="login-with-idp" href="${idpUrl}">Login with IdP</a>
+        </body></html>
+      `)
+    })
+
+    app.get('/oauth_callback', (req, res) => {
+      // The proxy fix must re-attach the oauth_state cookie that the browser
+      // drops on a cross-site iframe navigation.
+      if (!req.cookies.oauth_state) {
+        return res.type('html').send(`
+          <html><body>
+            <div data-cy="result">oauth login failed: missing state cookie</div>
+          </body></html>
+        `)
+      }
+
+      return res.type('html').send(`
+        <html><body>
+          <div data-cy="result">oauth login success</div>
+        </body></html>
+      `)
+    })
+  }
+
+  // Mock IdP (www.idp.com:3501) — immediately server-side redirects back to
+  // the primary origin callback without any user interaction required.
+  const onIdpServer = (app) => {
+    app.get('/oauth_authorize', (req, res) => {
+      // Render a minimal page with a submit button so cy.origin can click it.
+      // The button navigates to the callback via a server-side redirect.
+      const redirectUri = req.query.redirect_uri
+
+      return res.type('html').send(`
+        <html><body>
+          <form method="GET" action="/oauth_do_redirect">
+            <input type="hidden" name="redirect_uri" value="${redirectUri}">
+            <button data-cy="idp-submit" type="submit">Authorize</button>
+          </form>
+        </body></html>
+      `)
+    })
+
+    app.get('/oauth_do_redirect', (req, res) => {
+      // Server-side 302 back to the primary origin — this is the redirect that
+      // previously caused the oauth_state cookie to be dropped.
+      return res.redirect(302, req.query.redirect_uri)
+    })
+  }
+
+  const primaryPort = 3500
+  const idpPort = 3501
+
+  systemTests.setup({
+    servers: [{
+      onServer: onPrimaryServer,
+      port: primaryPort,
+    }, {
+      onServer: onIdpServer,
+      port: idpPort,
+    }],
+    settings: {
+      hosts: {
+        '*.idp.com': '127.0.0.1',
+      },
+      e2e: {},
+    },
+  })
+
+  it('sends primary-origin cookies set on the first visit through an IdP server-side redirect', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
+    config: {
+      baseUrl: `http://localhost:${primaryPort}`,
+      allowCypressEnv: false,
+    },
+    spec: 'oauth_redirect_cookie.cy.js',
+  })
+})
