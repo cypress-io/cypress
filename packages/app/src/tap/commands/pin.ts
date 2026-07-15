@@ -1,5 +1,5 @@
 import { defineCommand, TapCommandError } from './definition'
-import { serializeTestCommands } from './test-state'
+import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from './test-state'
 import { tapPinSource } from './snapshot-pin'
 import type { PinSnapshotEntry, PinSnapshotProps } from './snapshot-pin'
 
@@ -216,11 +216,13 @@ export const pinCommand = defineCommand({
       throw new TapCommandError('ALREADY_PINNED', `command "${pinned.command}" is already pinned — release it with pin --clear before pinning another`)
     }
 
-    const commands = serializeTestCommands(runner, test)
+    const selection = selectTestAttempt(runner, test)
 
-    if (commands === undefined) {
-      throw new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${test}" — use the tests command to list this run’s tests`)
+    if ('error' in selection) {
+      throw attemptSelectionError(selection, test)
     }
+
+    const commands = serializeTestCommands(selection.attempt)
 
     if (!commands.some((entry) => entry.id === command)) {
       throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the commands command to list this test’s commands`)
