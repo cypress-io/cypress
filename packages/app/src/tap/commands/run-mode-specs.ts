@@ -1,10 +1,7 @@
 import type { FoundSpec } from '@packages/types'
 
-export interface SpecListEntry {
-  /** Project-relative spec path — the form `cypress run --spec` accepts. */
-  relative: string
-  specType: 'integration' | 'component'
-}
+/** `relative` is the project-relative spec path — the form `cypress run --spec` accepts. */
+export type SpecListEntry = Pick<FoundSpec, 'relative' | 'specType'>
 
 export const readRunModeSpecs = (): FoundSpec[] => {
   return (window.__RUN_MODE_SPECS__ ?? []) as FoundSpec[]
