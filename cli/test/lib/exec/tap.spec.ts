@@ -63,8 +63,8 @@ const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { r
   })
 
   // These tests drive the binding exec/status paths, which use only `call`;
-  // the `tap frame` extractors (which use client/sessionId) are covered
-  // separately, so the session's CDP members are stubbed away here.
+  // the frame extractors (dom/aria/inspect, which use client/sessionId) are
+  // covered separately, so the session's CDP members are stubbed away here.
   vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
 
   return call

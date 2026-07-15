@@ -10,7 +10,7 @@ const debug = Debug('cypress:cli:tap')
 const AUT_FRAME_NAME_PREFIX = 'Your project:'
 
 /**
- * A failure in a `tap frame` command, surfaced to the user as `{ code, message }`
+ * A failure in a frame command (dom/aria/inspect), surfaced to the user as `{ code, message }`
  * via `renderFailure`. The frame commands are CLI-native and never cross the
  * binding's `exec` envelope, so this mirrors the binding's `TapCommandError`
  * on the CLI side.
