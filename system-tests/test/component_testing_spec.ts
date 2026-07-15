@@ -5,18 +5,10 @@ import Fixtures from '../lib/fixtures'
 describe('component testing projects', function () {
   systemTests.setup()
 
+  // Uses typescript@7, exercising vite component testing under the native
+  // compiler (which ships no TypeScript compiler API).
   systemTests.it('react-vite-ts-configured', {
     project: 'react-vite-ts-configured',
-    testingType: 'component',
-    spec: 'src/App.cy.tsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  // Vite is the one component testing bundler that works with typescript@7,
-  // since it never touches the TypeScript compiler API. @see https://github.com/cypress-io/cypress/issues/34258
-  systemTests.it('react-vite-ts7-configured', {
-    project: 'react-vite-ts7-configured',
     testingType: 'component',
     spec: 'src/App.cy.tsx',
     browser: 'chrome',
