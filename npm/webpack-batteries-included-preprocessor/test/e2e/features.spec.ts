@@ -130,7 +130,7 @@ describe('webpack-batteries-included-preprocessor features', () => {
     })
   })
 
-  describe('with typescript 7 (native compiler)', () => {
+  describe('with typescript 7', () => {
     const options = { typescript: require.resolve('typescript-v7') }
 
     it('handles typescript (and tsconfig paths) via babel', async () => {

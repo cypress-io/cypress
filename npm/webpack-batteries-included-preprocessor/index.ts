@@ -33,8 +33,8 @@ class TypeScriptNotFoundError extends Error {
 
 const typescriptExtensionRegex = /\.m?tsx?$/
 
-// Shared by the JS spec rule and the TypeScript 7+ rule (TS 7 has no compiler
-// API for ts-loader). `typescript: true` adds preset-typescript.
+// Shared by the JS spec rule and the TypeScript 7+ rule. `typescript: true`
+// adds preset-typescript.
 const getBabelLoaderOptions = ({ typescript = false }: { typescript?: boolean } = {}) => {
   return {
     plugins: [

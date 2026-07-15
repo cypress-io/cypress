@@ -7,7 +7,7 @@
 
 **Features:**
 
-- Added support for TypeScript 7 when preprocessing TypeScript spec and support files, and the component testing setup wizard now accepts TypeScript 7. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
+- Added support for TypeScript 7 when preprocessing TypeScript spec and support files. The component testing setup wizard now accepts TypeScript 7 as well. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
 
 **Bugfixes:**
 
