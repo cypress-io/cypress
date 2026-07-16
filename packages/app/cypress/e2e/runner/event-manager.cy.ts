@@ -65,10 +65,7 @@ describe('event-manager', () => {
 
     cy.visitApp(`specs`)
 
-    // asserting exactly-once is flaky here: re-scaffolding the project can
-    // trigger a delayed file-watcher rerun from the server, which also runs
-    // the teardown path
-    cy.get('@resetState').should('have.been.called')
+    cy.get('@resetState').should('have.been.calledOnce')
   })
 
   it('should reset the spec dirty data store', () => {
@@ -85,10 +82,7 @@ describe('event-manager', () => {
 
     cy.visitApp(`specs`)
 
-    // asserting exactly-once is flaky here: re-scaffolding the project can
-    // trigger a delayed file-watcher rerun from the server, which also runs
-    // the teardown path
-    cy.get('@resetDirtyState').should('have.been.called')
+    cy.get('@resetDirtyState').should('have.been.calledOnce')
   })
 
   it('forwards open:login:connect:modal from reporter to local bus', () => {

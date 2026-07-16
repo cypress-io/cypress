@@ -85,7 +85,7 @@ class ElementOverrideManager {
 
     observer.observe(cy.$$('html')[0], observeOptions)
 
-    // The reporter command log renders inside a same-origin iframe
+    // The reporter renders inside a same-origin iframe
     // (#reporter-frame), so selectors targeting reporter content resolve against
     // that document rather than the top one. Include the iframe document when
     // applying overrides, and observe it too so the mutations are reverted after

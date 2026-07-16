@@ -65,126 +65,92 @@ function renderReporter (
     codeEditorLineWrap: runnerUiStore.codeEditorLineWrap,
   })
 
-  // Render the command log inside a same-origin iframe so its layout lives in a
-  // separate document from the AUT iframe's parent document. When a heavy AUT
-  // reflow (e.g. a ResizeObserver loop) and the live command-log tree share one
-  // document, Chromium can crash the renderer process. Weaker isolation (Shadow
-  // DOM, CSS containment) does not prevent the crash — only a separate document
-  // does. The reporterBus EventEmitter and MobX store are passed by reference
-  // and work across same-origin frames. Falls back to inline rendering if the
-  // iframe cannot be set up.
-  try {
-    const doc = root.ownerDocument
-    const frame = doc.createElement('iframe')
+  // Render the reporter inside a same-origin iframe so its layout lives in a
+  // separate document from the AUT iframe's parent document. When an AUT reflow
+  // (e.g. a ResizeObserver loop) and the live reporter tree share one document,
+  // Chromium can crash the renderer process.
+  const doc = root.ownerDocument
+  const frame = doc.createElement('iframe')
 
-    frame.id = 'reporter-frame'
-    frame.title = 'Cypress Reporter'
-    // hidden until the cloned stylesheets load so the reporter is never shown
-    // (or interacted with) unstyled
-    frame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:transparent;visibility:hidden'
-    root.appendChild(frame)
-    // track the frame as soon as it is in the DOM so the catch path can
-    // remove it if any of the remaining setup throws
-    reporterFrame = frame
+  frame.id = 'reporter-frame'
+  frame.title = 'Cypress Reporter'
+  // hidden until the cloned stylesheets load so the reporter is never shown
+  // (or interacted with) unstyled
+  frame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:transparent;visibility:hidden'
+  root.appendChild(frame)
+  reporterFrame = frame
 
-    const idoc = frame.contentDocument
+  const idoc = frame.contentDocument
 
-    if (!idoc) throw new Error('reporter iframe contentDocument unavailable')
+  if (!idoc) throw new Error('reporter iframe contentDocument unavailable')
 
-    // clone the parent document's stylesheets (the reporter's own styles from
-    // `cypress_runner.css` plus app-level resets like the Tailwind preflight)
-    // and root classes so the reporter is styled exactly as it is when
-    // rendered inline
-    const pendingStylesheets: Promise<void>[] = []
+  // clone the parent document's stylesheets (the reporter's own styles from
+  // `cypress_runner.css` plus app-level resets like the Tailwind preflight)
+  // and root classes so the reporter is styled exactly as it is when
+  // rendered inline
+  const pendingStylesheets: Promise<void>[] = []
 
-    doc.querySelectorAll('head link[rel="stylesheet"], head style').forEach((node) => {
-      const clone = node.cloneNode(true) as HTMLElement
+  doc.querySelectorAll('head link[rel="stylesheet"], head style').forEach((node) => {
+    const clone = node.cloneNode(true) as HTMLElement
 
-      if (clone.tagName === 'LINK') {
-        // cloneNode copies the raw href attribute, so a relative href (e.g.
-        // Vite's `./assets/*.css`) would resolve against the iframe's
-        // about:blank base and silently fail to load — leaving the reporter
-        // without the app's stylesheet. Assign the resolved absolute URL.
-        (clone as HTMLLinkElement).href = (node as HTMLLinkElement).href
-        pendingStylesheets.push(new Promise((resolve) => {
-          clone.addEventListener('load', () => resolve())
-          clone.addEventListener('error', () => resolve())
-        }))
-      }
-
-      idoc.head.appendChild(clone)
-    })
-
-    // Tailwind's responsive `.container` component (cloned along with the
-    // app's stylesheets) collides with the reporter's `.container` element;
-    // its media queries resolve against the narrow iframe viewport and clamp
-    // the command log's width at Tailwind's breakpoints
-    const styleOverrides = idoc.createElement('style')
-
-    styleOverrides.textContent = '.reporter .container { max-width: none; }'
-    idoc.head.appendChild(styleOverrides)
-
-    idoc.documentElement.className = doc.documentElement.className
-    idoc.documentElement.classList.add('force-dark')
-    idoc.documentElement.style.colorScheme = 'dark'
-    idoc.documentElement.style.height = '100%'
-    idoc.body.style.margin = '0'
-    idoc.body.style.width = '100%'
-    idoc.body.style.height = '100%'
-
-    // Mount into a dedicated container rather than <body>: React warns that
-    // creating a root on document.body leads to reconciliation issues because
-    // other code mutates body's children, which manifests as unstable reporter
-    // rendering. Mirror the inline layout by reusing the reporter root id.
-    const mountElement = idoc.createElement('div')
-
-    mountElement.id = REPORTER_ID
-    mountElement.style.height = '100%'
-    idoc.body.appendChild(mountElement)
-
-    // reporter code that binds document-level listeners or portals DOM nodes
-    // (keyboard shortcuts, tooltips, popovers) must target the iframe document
-    window.UnifiedRunner.setReporterDocument(idoc)
-
-    // mount synchronously so the reporter's event listeners are registered
-    // before any driver events or resetReporter round-trips can fire; the
-    // frame is only revealed once its stylesheets have loaded, with a timeout
-    // so a stylesheet that never resolves cannot leave the command log hidden
-    reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(mountElement)
-    reactDomRoot.render(reporter)
-
-    const revealTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
-
-    Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
-      frame.style.visibility = ''
-    })
-
-    return
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[reporter] iframe render failed, falling back to inline', err)
-    if (reactDomRoot) {
-      // don't leave a detached React tree behind before creating the inline
-      // root; never let cleanup prevent the fallback from rendering
-      try {
-        reactDomRoot.unmount()
-      } catch {
-        // ignore
-      }
-      reactDomRoot = null
+    if (clone.tagName === 'LINK') {
+      // cloneNode copies the raw href attribute, so a relative href (e.g.
+      // Vite's `./assets/*.css`) would resolve against the iframe's
+      // about:blank base and silently fail to load — leaving the reporter
+      // without the app's stylesheet. Assign the resolved absolute URL.
+      (clone as HTMLLinkElement).href = (node as HTMLLinkElement).href
+      pendingStylesheets.push(new Promise((resolve) => {
+        clone.addEventListener('load', () => resolve())
+        clone.addEventListener('error', () => resolve())
+      }))
     }
 
-    if (reporterFrame) {
-      reporterFrame.remove()
-      reporterFrame = null
-    }
+    idoc.head.appendChild(clone)
+  })
 
-    window.UnifiedRunner.setReporterDocument(document)
-  }
+  // Tailwind's responsive `.container` component (cloned along with the
+  // app's stylesheets) collides with the reporter's `.container` element;
+  // its media queries resolve against the narrow iframe viewport and clamp
+  // the reporter's width at Tailwind's breakpoints
+  const styleOverrides = idoc.createElement('style')
 
-  reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)
+  styleOverrides.textContent = '.reporter .container { max-width: none; }'
+  idoc.head.appendChild(styleOverrides)
 
+  idoc.documentElement.className = doc.documentElement.className
+  idoc.documentElement.classList.add('force-dark')
+  idoc.documentElement.style.colorScheme = 'dark'
+  idoc.documentElement.style.height = '100%'
+  idoc.body.style.margin = '0'
+  idoc.body.style.width = '100%'
+  idoc.body.style.height = '100%'
+
+  // Mount into a dedicated container rather than <body>: React warns that
+  // creating a root on document.body leads to reconciliation issues because
+  // other code mutates body's children, which manifests as unstable reporter
+  // rendering. Mirror the inline layout by reusing the reporter root id.
+  const mountElement = idoc.createElement('div')
+
+  mountElement.id = REPORTER_ID
+  mountElement.style.height = '100%'
+  idoc.body.appendChild(mountElement)
+
+  // reporter code that binds document-level listeners or portals DOM nodes
+  // (keyboard shortcuts, tooltips, popovers) must target the iframe document
+  window.UnifiedRunner.setReporterDocument(idoc)
+
+  // mount synchronously so the reporter's event listeners are registered
+  // before any driver events or resetReporter round-trips can fire; the
+  // frame is only revealed once its stylesheets have loaded, with a timeout
+  // so a stylesheet that never resolves cannot leave the reporter hidden
+  reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(mountElement)
   reactDomRoot.render(reporter)
+
+  const revealTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
+
+  Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
+    frame.style.visibility = ''
+  })
 }
 
 export const UnifiedReporterAPI = {

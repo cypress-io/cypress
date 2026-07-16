@@ -2,10 +2,9 @@
 // properly. it tests the actual reporter instead of the AUT like other tests
 describe('special characters', () => {
   it('displays file name with decoded special characters', () => {
-    // the runner renders the command log inside a same-origin iframe; fall
-    // back to the top document if the reporter rendered inline
+    // the runner renders the reporter inside a same-origin iframe
     const topDoc = window.top!.document
-    const reporterDoc = topDoc.querySelector<HTMLIFrameElement>('#reporter-frame')?.contentDocument ?? topDoc
+    const reporterDoc = topDoc.querySelector<HTMLIFrameElement>('#reporter-frame')!.contentDocument!
 
     cy.wrap(Cypress.$(reporterDoc.body))
     .find('.reporter .runnable-header')

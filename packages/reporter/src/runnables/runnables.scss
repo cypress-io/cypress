@@ -595,7 +595,7 @@ $dotted-line-left-padding: 19px;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 250px;
-  // the popover renders in the command-log iframe and cannot overflow it, so
+  // the popover renders in the reporter iframe and cannot overflow it, so
   // shrink to the iframe's viewport when the panel is narrower than 250px
   max-width: calc(100vw - 16px);
   padding: 8px;

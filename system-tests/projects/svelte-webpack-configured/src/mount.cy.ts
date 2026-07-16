@@ -4,13 +4,11 @@ import Context from './lib/Context.svelte'
 import Store from './lib/Store.svelte'
 import { messageStore } from './lib/store'
 
-// the command log renders inside a same-origin iframe (#reporter-frame); fall
-// back to the top document if the reporter rendered inline
+// the reporter renders inside a same-origin iframe (#reporter-frame)
 const reporterBody = () => {
-  const topDoc = window.top!.document
-  const frame = topDoc.querySelector('#reporter-frame') as HTMLIFrameElement | null
+  const frame = window.top!.document.querySelector('#reporter-frame') as HTMLIFrameElement
 
-  return Cypress.$((frame?.contentDocument || topDoc).body)
+  return Cypress.$(frame.contentDocument!.body)
 }
 
 describe('Svelte mount', () => {

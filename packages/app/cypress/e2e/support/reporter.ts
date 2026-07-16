@@ -2,7 +2,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       /**
-       * Yields the body of the command-log iframe (`#reporter-frame`) once
+       * Yields the body of the reporter iframe (`#reporter-frame`) once
        * the reporter has mounted into it. The reporter renders into its own
        * document, so top-document queries cannot reach it — scope reporter
        * assertions through this command, e.g. `cy.reporter().find('.command')`

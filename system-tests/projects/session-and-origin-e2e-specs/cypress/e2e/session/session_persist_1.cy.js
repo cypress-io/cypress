@@ -7,12 +7,9 @@
  * and global session data is persisted between specs in run mode.
  */
 
-// the command log renders inside a same-origin iframe (#reporter-frame); fall
-// back to the top document if the reporter rendered inline
+// the reporter renders inside a same-origin iframe (#reporter-frame)
 const reporterDocument = () => {
-  const frame = top.document.querySelector('#reporter-frame')
-
-  return (frame && frame.contentDocument) || top.document
+  return top.document.querySelector('#reporter-frame').contentDocument
 }
 
 describe('creates global session', () => {

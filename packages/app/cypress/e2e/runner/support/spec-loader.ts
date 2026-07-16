@@ -89,10 +89,7 @@ export function loadSpec (options: LoadSpecOptions) {
 
   cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
 
-  // Spec navigation within the app remounts the reporter iframe. Wait for the
-  // new spec's file name to show in the runnable header so queries can't
-  // anchor to the outgoing spec's reporter.
-  cy.reporter({ timeout: 30000 }).find('[data-cy="runnable-header"]', { timeout: 30000 }).should('contain', Cypress._.last(filePath.split('/')))
+  cy.reporter().find('[data-cy="runnable-header"]', { timeout: 30000 }).should('contain', Cypress._.last(filePath.split('/')))
 
   if (setup) {
     setup()

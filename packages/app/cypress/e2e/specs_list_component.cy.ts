@@ -27,10 +27,9 @@ describe('App: Spec List (Component)', () => {
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
 
-    // wait for the run to finish so the reporter (now rendered in the
-    // command-log iframe) has bound its `f` keyboard-shortcut handler before we
-    // press it — otherwise the keydown can race the iframe reporter's mount on
-    // slower machines and the specs list never opens
+    // wait for the run to finish so the reporter has bound its `f` shortcut
+    // handler; otherwise the keydown can race the reporter's mount and the
+    // specs list never opens
     cy.waitForSpecToFinish()
     cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')

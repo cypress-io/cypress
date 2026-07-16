@@ -156,11 +156,10 @@ export class BidiAutomation {
     }
 
     // The top-level context has more than one direct child iframe — the AUT and
-    // the reporter's command-log iframe — and their creation order is not
-    // guaranteed, so identify the AUT by its window.name (seeded with
-    // AUT_FRAME_NAME_IDENTIFIER for exactly this purpose, see #33849) rather than
-    // assuming it is the first child created. This matches how the CDP and WebKit
-    // automations locate the AUT frame.
+    // the reporter iframe — and their creation order is not guaranteed, so
+    // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
+    // for exactly this purpose) rather than assuming it is the first child
+    // created. This matches how the CDP and WebKit automations locate the AUT frame.
     let contextName = ''
 
     try {

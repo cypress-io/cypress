@@ -3,13 +3,9 @@ const { _ } = Cypress
 let count = 1
 let openInIdePath = Cypress.spec
 
-// the command log renders inside a same-origin iframe (#reporter-frame); fall
-// back to the top document if the reporter rendered inline
+// the reporter renders inside a same-origin iframe (#reporter-frame)
 const reporterDocument = () => {
-  const topDoc = window.top.document
-  const frame = topDoc.querySelector('#reporter-frame')
-
-  return (frame && frame.contentDocument) || topDoc
+  return window.top.document.querySelector('#reporter-frame').contentDocument
 }
 
 // ensure title is unique since it's necessary for querying the UI

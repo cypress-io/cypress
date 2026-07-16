@@ -1,12 +1,9 @@
 const { $, _, Promise } = Cypress
 
-// the command log renders inside a same-origin iframe in the runner UI, so
-// reporter queries must target that document (falling back to the top
-// document if the reporter rendered inline)
+// the reporter renders inside a same-origin iframe in the runner UI, so
+// reporter queries must target that document
 const getReporterDocument = () => {
-  const frame = top?.document.querySelector<HTMLIFrameElement>('#reporter-frame')
-
-  return frame?.contentDocument ?? top?.document
+  return top!.document.querySelector<HTMLIFrameElement>('#reporter-frame')!.contentDocument!
 }
 
 export const getCommandLogWithText = (command, type?) => {

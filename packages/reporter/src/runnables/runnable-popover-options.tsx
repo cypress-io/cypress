@@ -45,7 +45,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
 
       setPopoverPosition({
         top: rect.bottom + 4,
-        // the popover renders in the command-log iframe and cannot overflow
+        // the popover renders in the reporter iframe and cannot overflow
         // it, so keep it inside the left edge when the panel is narrow
         // (250px is the popover width)
         left: Math.max(8, rect.right - 250),
