@@ -1,5 +1,6 @@
+import { tapManagerDataSource } from '../TapManagerDataSource'
 import { defineCommand, TapCommandError } from './definition'
-import { serializeTestDetail, serializeTestsState, tapRunnerSource } from './test-state'
+import { serializeTestDetail, serializeTestsState } from './test-state'
 import type { TestDetailEntry, TestStateEntry } from './test-state'
 
 export const testsCommand = defineCommand({
@@ -8,7 +9,7 @@ export const testsCommand = defineCommand({
     { name: 'test', type: 'string', required: false, description: 'test id to detail (timings, error, full title); omit to list every test' },
   ],
   handler: async ({ test }): Promise<TestStateEntry[] | TestDetailEntry> => {
-    const runner = tapRunnerSource.getRunner()
+    const runner = tapManagerDataSource.getRunner()
 
     if (!runner) {
       throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')

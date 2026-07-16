@@ -1,7 +1,7 @@
 import type { FoundSpec } from '@packages/types'
 
+import { tapManagerDataSource } from '../TapManagerDataSource'
 import { TapManager } from '../tap-manager'
-import { tapNavigation } from './run'
 
 const CYPRESS_VERSION = '15.0.0'
 
@@ -22,9 +22,9 @@ describe('tap/commands/run', () => {
   // Stub the navigation seam — a real hash change would navigate away and stop
   // the test mid-command. Writes feed the stubbed read, like the real hash.
   const stubNavigation = (initialHash = '') => {
-    const getHash = cy.stub(tapNavigation, 'getHash').returns(initialHash)
+    const getHash = cy.stub(tapManagerDataSource, 'getHash').returns(initialHash)
 
-    return cy.stub(tapNavigation, 'setHash').callsFake((hash: string) => {
+    return cy.stub(tapManagerDataSource, 'setHash').callsFake((hash: string) => {
       getHash.returns(`#${hash}`)
     })
   }

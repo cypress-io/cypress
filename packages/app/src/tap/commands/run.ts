@@ -1,19 +1,11 @@
 import { posixify } from '../../paths'
+import { tapManagerDataSource } from '../TapManagerDataSource'
 import { defineCommand, TapCommandError } from './definition'
-import { getRunnableSpecs, toSpecListEntry } from './specs-list'
+import { toSpecListEntry } from './specs-list'
 import type { SpecListEntry } from './specs-list'
 
-export const tapNavigation = {
-  getHash () {
-    return window.location.hash
-  },
-  setHash (hash: string) {
-    window.location.hash = hash
-  },
-}
-
 const nextTapRunNonce = () => {
-  const query = tapNavigation.getHash().split('?')[1] ?? ''
+  const query = tapManagerDataSource.getHash().split('?')[1] ?? ''
   const current = Number(new URLSearchParams(query).get('tapRun'))
 
   return (Number.isInteger(current) ? current : 0) + 1
@@ -30,7 +22,7 @@ export const runCommand = defineCommand({
     }
 
     const wanted = posixify(spec)
-    const match = getRunnableSpecs().find((entry) => posixify(entry.relative) === wanted)
+    const match = tapManagerDataSource.getRunnableSpecs().find((entry) => posixify(entry.relative) === wanted)
 
     if (!match) {
       throw new TapCommandError('SPEC_NOT_FOUND', `no spec matches the path "${spec}" — use the specs command to list runnable specs`)
@@ -40,7 +32,7 @@ export const runCommand = defineCommand({
     // route.query.file back through getPathForPlatform.
     const file = posixify(match.relative).split('/').map(encodeURIComponent).join('/')
 
-    tapNavigation.setHash(`/specs/runner?file=${file}&tapRun=${nextTapRunNonce()}`)
+    tapManagerDataSource.setHash(`/specs/runner?file=${file}&tapRun=${nextTapRunNonce()}`)
 
     return toSpecListEntry(match)
   },

@@ -7,10 +7,6 @@ export interface SpecListEntry {
   specType: FoundSpec['specType']
 }
 
-export const getRunnableSpecs = (): FoundSpec[] => {
-  return (window.__RUN_MODE_SPECS__ ?? []) as FoundSpec[]
-}
-
 export const toSpecListEntry = ({ relative, specType }: FoundSpec): SpecListEntry => {
   return { relativePath: relative, specType }
 }

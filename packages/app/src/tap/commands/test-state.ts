@@ -1,5 +1,7 @@
 import type { SerializedTest } from '@packages/types'
 
+import type { TapTestsRunner } from '../TapManagerDataSource'
+
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
 
 export interface TestStateEntry {
@@ -27,32 +29,6 @@ export interface TestDetailEntry {
   retries?: number
   timings?: Record<string, unknown>
   error?: TestError
-}
-
-export interface TapTestsRunner {
-  getTestsState (testId?: string): Record<string, SerializedTest>
-  isRunComplete (): boolean
-}
-
-export const tapRunnerSource = {
-  getRunner (): TapTestsRunner | undefined {
-    try {
-      // Both a throw and undefined here mean there is no run to read yet.
-      const eventManager = window.getEventManager?.()
-      const runner = eventManager?.getCypress()?.runner
-
-      if (!eventManager || !runner) {
-        return undefined
-      }
-
-      return {
-        getTestsState: runner.getTestsState,
-        isRunComplete: () => eventManager.runComplete,
-      }
-    } catch {
-      return undefined
-    }
-  },
 }
 
 // A state-less test was never reached: 'pending' while the run is still going,

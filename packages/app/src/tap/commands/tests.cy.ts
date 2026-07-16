@@ -1,5 +1,5 @@
+import { tapManagerDataSource } from '../TapManagerDataSource'
 import { TapManager } from '../tap-manager'
-import { tapRunnerSource } from './test-state'
 
 const CYPRESS_VERSION = '15.0.0'
 
@@ -38,7 +38,7 @@ describe('tap/commands/tests', () => {
   // the runner seam rather than replace it. Fixtures stand for a completed run
   // by default; a test overrides isRunComplete to exercise the mid-run path.
   const stubRunner = (runner: unknown) => {
-    return cy.stub(tapRunnerSource, 'getRunner').returns(
+    return cy.stub(tapManagerDataSource, 'getRunner').returns(
       runner && typeof runner === 'object' ? { isRunComplete: () => true, ...runner } : runner,
     )
   }
