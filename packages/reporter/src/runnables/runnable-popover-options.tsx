@@ -117,9 +117,9 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
       }
     }
 
-    // listen on both the top document and the reporter's document (they
-    // differ when the reporter renders inside an iframe) so interactions
-    // anywhere in the app dismiss the popover
+    // the reporter renders into its own document (the iframe) while its JS runs
+    // in the top window, so listen on both documents to dismiss the popover on
+    // interactions anywhere in the app
     const doc = getReporterDocument()
     const docs = new Set([document, doc])
     const wins = new Set([window, doc.defaultView ?? window])

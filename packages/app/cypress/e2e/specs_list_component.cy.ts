@@ -27,10 +27,9 @@ describe('App: Spec List (Component)', () => {
   it('highlights the currently running spec', () => {
     cy.contains('fails').click()
 
-    // wait for the run to finish so the reporter has bound its `f` shortcut
-    // handler; otherwise the keydown can race the reporter's mount and the
-    // specs list never opens
-    cy.waitForSpecToFinish()
+    // the reporter binds its `f` shortcut handler as it mounts (the same effect
+    // that adds the `mounted` class), so wait for that before pressing `f`
+    cy.reporter().find('.reporter.mounted')
     cy.get('body').type('f')
     cy.get('[data-selected-spec="true"]').should('contain', 'fails')
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')
