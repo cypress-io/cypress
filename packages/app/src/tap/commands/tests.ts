@@ -1,7 +1,7 @@
 import { tapManagerDataSource } from '../TapManagerDataSource'
 import { defineCommand, TapCommandError } from './definition'
 import { serializeTestDetail, serializeTestsState } from './test-state'
-import type { TestDetailEntry, TestStateEntry } from './test-state'
+import type { TestDetailEntry, TestStateEntry } from '../types'
 
 export const testsCommand = defineCommand({
   description: 'list the tests of the active run and their state, or detail one by id',
