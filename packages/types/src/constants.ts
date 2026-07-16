@@ -61,10 +61,6 @@ export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
  */
 export const MAX_VISIBILITY_CHECK_ELEMENTS = 10
 
-// The own-property allowlists the driver keeps when serializing a runnable
-// (`wrapAll`/`mixinLogs` in driver `src/cypress/runner.ts`). Shared here so
-// consumers of the serialized shape (e.g. `Cypress.runner.getTestsState`) use
-// one key source with the driver.
 export const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 
 export const RUNNABLE_PROPS = [
