@@ -116,7 +116,7 @@ describe('tap/commands/tests', () => {
   })
 
   it('fails with ATTEMPT_NOT_FOUND when --attempt is given without a test id to detail', async () => {
-    stubRunner({ getTestsState: () => TESTS_STATE })
+    stubRunner({ getAllTestsState: () => TESTS_STATE })
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('tests', {}, { attempt: '1' })
 
