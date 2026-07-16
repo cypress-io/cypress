@@ -1,4 +1,26 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.19.0
+
+**Performance:**
+
+- Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
+- Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
+
+**Features:**
+
+- Added support for TypeScript 7 when preprocessing TypeScript spec and support files. The component testing setup wizard now accepts TypeScript 7 as well. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
+- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#34178](https://github.com/cypress-io/cypress/pull/34178).
+
+**Bugfixes:**
+
+- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`. Asserting that a raw DOM element exists (via `.exist` or its `.exists` alias) now yields the element so further assertions can be chained off it. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
+- Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
+- Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
+
+**Misc:**
+
+- Corrected the `@default` value in the TypeScript type definitions for the [`videoCompression`](https://on.cypress.io/configuration#Videos) configuration option from `32` to `false`. Addressed in [#34198](https://github.com/cypress-io/cypress/pull/34198).
+
 ## 15.18.1
 
 **Performance:**
@@ -7,11 +29,19 @@
 
 **Bugfixes:**
 
-- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`. Asserting that a raw DOM element exists now yields the element so further assertions can be chained off it. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
+- Fixed an issue where Cypress could hang until the spec timed out if the browser process crashed mid-run (for example, an out-of-memory or GPU crash) while video recording was disabled. The current spec now fails and the run continues to the next spec as expected. Fixed in [#34126](https://github.com/cypress-io/cypress/pull/34126).
+- Fixed an issue where asserting focus with Chai's property syntax, such as `expect($el).to.have.focus` or `expect($el).to.be.focused`, raised a TypeScript error (`Property 'focus' does not exist on type 'Assertion'`) even though the assertion works at runtime. Fixes [#23905](https://github.com/cypress-io/cypress/issues/23905). Fixed in [#34177](https://github.com/cypress-io/cypress/pull/34177).
 - Fixed an issue where [`cy.type()`](https://on.cypress.io/type) fired the simulated `keyup` event in the same turn as `keydown` and `input`, so `keyup` handlers that read state updated asynchronously in an `input` listener could observe stale values. `keyup` is now deferred to the next microtask, matching real browser event ordering. Fixes [#14864](https://github.com/cypress-io/cypress/issues/14864). Fixed in [#34068](https://github.com/cypress-io/cypress/pull/34068).
 - Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808). Fixed in [#34088](https://github.com/cypress-io/cypress/pull/34088).
 - Fixed an issue where the [`userAgent`](https://on.cypress.io/configuration#Browser) configuration option was not applied when running tests in the experimental WebKit browser. Fixes [#33349](https://github.com/cypress-io/cypress/issues/33349).
 - Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
+- Fixed an issue where opening an unconfigured project from a git repository sub-directory (such as a monorepo package) skipped project setup. Additionally, the component testing setup wizard now reliably displays the auto-detected framework and bundler. Fixes [#27410](https://github.com/cypress-io/cypress/issues/27410) and [#29544](https://github.com/cypress-io/cypress/issues/29544). Fixed in [#34129](https://github.com/cypress-io/cypress/pull/34129) and [#34212](https://github.com/cypress-io/cypress/pull/34212).
+- Fixed an issue where interacting with an element inside a horizontally-scrollable container could scroll the element to the container's right edge, placing it underneath a right-floating `position: sticky` or `position: fixed` element and causing the action to fail or land on the wrong element. Elements are now scrolled to their top, leftmost point as documented. Fixes [#33884](https://github.com/cypress-io/cypress/issues/33884). Fixed in [#34108](https://github.com/cypress-io/cypress/pull/34108).
+- Fixed a regression in [15.17.0](#15-17-0) where `cypress run --spec` printed a spurious `The following --spec pattern did not match any spec files and will be ignored` warning for patterns that actually did match spec files, such as patterns using regex-style alternation groups (for example `cypress/e2e/(a|b)/*.js`). Fixes [#34160](https://github.com/cypress-io/cypress/issues/34160).
+
+**Dependency Updates:**
+
+- Upgraded `esbuild` from `0.28.0` to `0.28.1` to address a [Resources Downloaded over Insecure Protocol](https://security.snyk.io/vuln/SNYK-JS-ESBUILD-17750822) vulnerability reported in security scans. Addressed in [#34211](https://github.com/cypress-io/cypress/pull/34211).
 
 ## 15.18.0
 

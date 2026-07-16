@@ -363,7 +363,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
       verify('from chai assert', {
         column: [12, 13],
-        message: 'object tested must be an array',
+        message: 'is invalid for this assertion',
       })
     })
 

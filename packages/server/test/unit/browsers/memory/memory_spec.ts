@@ -63,13 +63,136 @@ describe('lib/browsers/memory', () => {
       expect(await memory.getMemoryHandler()).to.eq(cgroupV1Handler)
     })
 
-    it('returns "default" for linux cgroup v2', async () => {
+    it('returns "cgroup-v2" for linux cgroup v2 when the cgroup has a memory limit', async () => {
+      const cgroupV2Handler = require('../../../../lib/browsers/memory/cgroup-v2').default
+
+      sinon.stub(os, 'platform').returns('linux')
+      sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
+
+      const readFile = sinon.stub(fs, 'readFile')
+
+      readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+      readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('2147483648\n')
+
+      expect(await memory.getMemoryHandler()).to.eq(cgroupV2Handler)
+    })
+
+    it('returns "default" for linux cgroup v2 when the cgroup is unconstrained', async () => {
       const defaultHandler = require('../../../../lib/browsers/memory/default').default
 
       sinon.stub(os, 'platform').returns('linux')
       sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
 
+      const readFile = sinon.stub(fs, 'readFile')
+
+      readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+      readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('max\n')
+
       expect(await memory.getMemoryHandler()).to.eq(defaultHandler)
+    })
+
+    it('returns "default" for linux cgroup v2 when the memory files are not readable', async () => {
+      const defaultHandler = require('../../../../lib/browsers/memory/default').default
+
+      sinon.stub(os, 'platform').returns('linux')
+      sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
+
+      const readFile = sinon.stub(fs, 'readFile')
+
+      readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+      readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').rejects(new Error('ENOENT'))
+
+      expect(await memory.getMemoryHandler()).to.eq(defaultHandler)
+    })
+  })
+
+  describe('cgroup-v2 handler', () => {
+    const cgroupV2 = require('../../../../lib/browsers/memory/cgroup-v2').default
+
+    describe('#isAvailable', () => {
+      it('is true when memory.max is a numeric limit', async () => {
+        const readFile = sinon.stub(fs, 'readFile')
+
+        readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+        readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('2147483648\n')
+
+        expect(await cgroupV2.isAvailable()).to.be.true
+      })
+
+      it('is false when the cgroup is unconstrained (memory.max is "max")', async () => {
+        const readFile = sinon.stub(fs, 'readFile')
+
+        readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+        readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('max\n')
+
+        expect(await cgroupV2.isAvailable()).to.be.false
+      })
+
+      it('is false when memory.max is not readable', async () => {
+        const readFile = sinon.stub(fs, 'readFile')
+
+        readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+        readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').rejects(new Error('ENOENT'))
+
+        expect(await cgroupV2.isAvailable()).to.be.false
+      })
+
+      it('resolves the cgroup path from /proc/self/cgroup on a non-containerized host', async () => {
+        const readFile = sinon.stub(fs, 'readFile')
+
+        readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/user.slice/user-1000.slice\n')
+        // only the resolved sub-cgroup path is stubbed, so a true result proves the path was resolved
+        readFile.withArgs('/sys/fs/cgroup/user.slice/user-1000.slice/memory.max', 'utf8').resolves('2147483648\n')
+
+        expect(await cgroupV2.isAvailable()).to.be.true
+      })
+    })
+
+    describe('#getTotalMemoryLimit', () => {
+      it('reads the memory limit in bytes from memory.max', async () => {
+        const readFile = sinon.stub(fs, 'readFile')
+
+        readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+        readFile.withArgs('/sys/fs/cgroup/memory.max', 'utf8').resolves('2147483648\n')
+
+        expect(await cgroupV2.getTotalMemoryLimit()).to.eq(2147483648)
+      })
+    })
+
+    describe('#getAvailableMemory', () => {
+      it('subtracts the working set (usage minus inactive file cache) from the total limit', async () => {
+        const readFile = sinon.stub(fs, 'readFile')
+
+        readFile.withArgs('/proc/self/cgroup', 'utf8').resolves('0::/\n')
+        readFile.withArgs('/sys/fs/cgroup/memory.current', 'utf8').resolves('1000\n')
+        readFile.withArgs('/sys/fs/cgroup/memory.stat', 'utf8').resolves('anon 400\ninactive_file 300\n')
+
+        const log: { [key: string]: any } = {}
+
+        // working set = 1000 - 300 = 700, available = 2000 - 700 = 1300
+        expect(await cgroupV2.getAvailableMemory(2000, log)).to.eq(1300)
+        expect(log.totalMemoryWorkingSetUsed).to.eq(700)
+      })
+    })
+  })
+
+  describe('cgroup-util', () => {
+    const cgroupUtil = require('../../../../lib/browsers/memory/cgroup-util')
+
+    describe('#parseMemoryStat', () => {
+      it('parses `key value` lines into a numeric lookup', () => {
+        expect(cgroupUtil.parseMemoryStat('anon 400\ninactive_file 300\n')).to.deep.eq({ anon: 400, inactive_file: 300 })
+      })
+    })
+
+    describe('#availableFromWorkingSet', () => {
+      it('returns the limit minus the working set and records it on the log', () => {
+        const log: { [key: string]: any } = {}
+
+        // working set = 1000 - 300 = 700, available = 2000 - 700 = 1300
+        expect(cgroupUtil.availableFromWorkingSet(2000, 1000, 300, log)).to.eq(1300)
+        expect(log.totalMemoryWorkingSetUsed).to.eq(700)
+      })
     })
   })
 

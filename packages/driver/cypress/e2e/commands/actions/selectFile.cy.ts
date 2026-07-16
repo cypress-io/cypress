@@ -763,7 +763,7 @@ is being covered by another element:
         cy.get('#scroll').selectFile({ contents: '@foo' }, { scrollBehavior: 'bottom' })
 
         cy.get('#scroll').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
         })
       })
     })
