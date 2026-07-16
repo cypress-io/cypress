@@ -1,5 +1,5 @@
 import { useAutStore } from '../../store'
-import { tapManagerDataSource } from '../TapManagerDataSource'
+import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
 import { aggregateResults } from './test-state'
 import type { RunResults } from './test-state'
