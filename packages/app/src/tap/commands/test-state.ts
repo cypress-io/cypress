@@ -1,6 +1,6 @@
 import type { SerializedTest } from '@packages/types'
 
-import type { TapTestsRunner } from '../TapManagerDataSource'
+import type { TapTestsRunner } from '../types'
 
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
 

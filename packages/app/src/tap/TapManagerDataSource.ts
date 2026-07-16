@@ -1,9 +1,6 @@
-import type { FoundSpec, SerializedTest } from '@packages/types'
+import type { FoundSpec } from '@packages/types'
 
-export interface TapTestsRunner {
-  getTestsState (testId?: string): Record<string, SerializedTest>
-  isRunComplete (): boolean
-}
+import type { TapTestsRunner } from './types'
 
 // Every runner-window global a tap command reads (or writes) goes through this
 // one seam, so component tests stub a method here instead of the real globals.
