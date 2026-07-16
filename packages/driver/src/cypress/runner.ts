@@ -1955,6 +1955,10 @@ export default {
 
         const test = serializeTest(testRunnable)
 
+        // `_titlePath` is only stamped on the normalized runnable copy;
+        // `getTestById` resolves the raw runnable, so read it off the live one.
+        test._titlePath = testRunnable.titlePath()
+
         test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
 
         return test
