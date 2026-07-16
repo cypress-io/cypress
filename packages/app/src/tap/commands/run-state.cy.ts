@@ -31,8 +31,8 @@ describe('tap/commands/run-state', () => {
   ]
 
   // A test of each explicit outcome plus two that never ran. The driver sets
-  // 'pending' explicitly for `it.skip` (r3); a state-less test (r4, r5) is
-  // pending mid-run and skipped once the run completes.
+  // 'pending' explicitly for `it.skip` (r3); a test with no state set yet
+  // (r4, r5) is pending mid-run and skipped once the run completes.
   const TESTS_STATE = {
     r1: { id: 'r1', title: 'passes', state: 'passed' },
     r2: { id: 'r2', title: 'fails', state: 'failed' },
@@ -79,7 +79,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports a run in progress as running, with the active spec and partial results', async () => {
-    stubRunner({ getTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => false })
+    stubRunner({ getAllTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => false })
     stubRunning(true)
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
@@ -99,7 +99,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports a settled run with a failure as failed, counting never-run tests as skipped', async () => {
-    stubRunner({ getTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => true })
+    stubRunner({ getAllTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => true })
     stubRunning(false)
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
@@ -119,7 +119,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports a settled run with no failures as passed', async () => {
-    stubRunner({ getTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => true })
+    stubRunner({ getAllTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => true })
     stubRunning(false)
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
@@ -138,7 +138,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('falls back to a null spec when the active spec path is unavailable', async () => {
-    stubRunner({ getTestsState: cy.stub().returns({}), isRunComplete: () => false })
+    stubRunner({ getAllTestsState: cy.stub().returns({}), isRunComplete: () => false })
     stubRunning(true)
     stubActiveSpec(undefined)
 
