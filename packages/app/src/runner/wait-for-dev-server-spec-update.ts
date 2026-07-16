@@ -91,6 +91,10 @@ export function waitForDevServerSpecUpdate (
     }
 
     const onSpecsUnchanged = () => {
+      if (expectedJitRecompileGeneration !== undefined) {
+        return
+      }
+
       webpackWaitActive = true
       tryResolve()
     }
