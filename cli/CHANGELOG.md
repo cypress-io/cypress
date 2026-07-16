@@ -9,6 +9,7 @@
 **Features:**
 
 - Added support for TypeScript 7 when preprocessing TypeScript spec and support files. The component testing setup wizard now accepts TypeScript 7 as well. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
+- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#34178](https://github.com/cypress-io/cypress/pull/34178).
 
 **Bugfixes:**
 
@@ -24,10 +25,6 @@
 **Performance:**
 
 - Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
-
-**Features:**
-
-- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#34178](https://github.com/cypress-io/cypress/pull/34178).
 
 **Bugfixes:**
 
