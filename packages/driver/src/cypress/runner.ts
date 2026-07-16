@@ -1928,6 +1928,20 @@ export default {
         return tests
       },
 
+      getAllTestsState (): Record<string, SerializedTest> {
+        const tests: Record<string, SerializedTest> = {}
+
+        for (let testRunnable of _tests) {
+          const test = serializeTest(testRunnable)
+
+          test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+
+          tests[test.id] = test
+        }
+
+        return tests
+      },
+
       stop () {
         if (_runner.stopped) {
           return

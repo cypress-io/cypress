@@ -16,7 +16,7 @@ export const tapManagerDataSource = {
       }
 
       return {
-        getTestsState: runner.getTestsState,
+        getAllTestsState: runner.getAllTestsState,
         isRunComplete: () => eventManager.runComplete,
       }
     } catch {

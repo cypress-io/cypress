@@ -25,8 +25,8 @@ describe('tap/commands/tests', () => {
       currentRetry: 0,
       body: 'function () {}',
     },
-    // The driver sets 'pending' explicitly for `it.skip` — distinct from the
-    // state-less r3, which never ran and comes back 'skipped'.
+    // The driver sets 'pending' explicitly for `it.skip` — distinct from r3,
+    // which has no state because it never ran and comes back 'skipped'.
     r4: {
       id: 'r4',
       title: 'stays logged in',
@@ -58,16 +58,16 @@ describe('tap/commands/tests', () => {
     })
   })
 
-  it('serializes every test via the __never__ sentinel, keeping only the lean entry fields', async () => {
-    const getTestsState = cy.stub().returns(TESTS_STATE)
+  it('serializes every test, keeping only the lean entry fields', async () => {
+    const getAllTestsState = cy.stub().returns(TESTS_STATE)
 
-    stubRunner({ getTestsState })
+    stubRunner({ getAllTestsState })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
     const outcome = await manager.exec('tests')
 
-    expect(getTestsState).to.have.been.calledOnceWith('__never__')
+    expect(getAllTestsState).to.have.been.calledOnce
 
     expect(outcome).to.deep.eq({
       result: [
@@ -78,10 +78,10 @@ describe('tap/commands/tests', () => {
     })
   })
 
-  it('reports a state-less test as pending while the run is still going, skipped once it completes', async () => {
+  it('reports a test with no state yet as pending while the run is still going, skipped once it completes', async () => {
     const state = { r3: { id: 'r3', title: 'logs out' } }
 
-    const getRunner = stubRunner({ getTestsState: () => state, isRunComplete: () => false })
+    const getRunner = stubRunner({ getAllTestsState: () => state, isRunComplete: () => false })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -90,7 +90,7 @@ describe('tap/commands/tests', () => {
     })
 
     // Re-program the existing stub: a second cy.stub on the same method throws.
-    getRunner.returns({ getTestsState: () => state, isRunComplete: () => true })
+    getRunner.returns({ getAllTestsState: () => state, isRunComplete: () => true })
 
     expect(await new TapManager(CYPRESS_VERSION).exec('tests')).to.deep.eq({
       result: [{ id: 'r3', title: 'logs out', state: 'skipped' }],
@@ -98,7 +98,7 @@ describe('tap/commands/tests', () => {
   })
 
   it('omits duration and retries of a test that never ran, defaults its state to skipped, and round-trips through JSON', async () => {
-    stubRunner({ getTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
+    stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -113,7 +113,7 @@ describe('tap/commands/tests', () => {
   })
 
   it('fails dispatch without reading the runner when an unknown arg is given', async () => {
-    const getRunner = stubRunner({ getTestsState: () => ({}) })
+    const getRunner = stubRunner({ getAllTestsState: () => ({}) })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -165,15 +165,15 @@ describe('tap/commands/tests', () => {
     })
 
     it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
-      const getTestsState = cy.stub().returns(DETAIL_STATE)
+      const getAllTestsState = cy.stub().returns(DETAIL_STATE)
 
-      stubRunner({ getTestsState })
+      stubRunner({ getAllTestsState })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('tests', { test: 'nope' })
 
-      expect(getTestsState).to.have.been.calledOnceWith('__never__')
+      expect(getAllTestsState).to.have.been.calledOnce
       expect(outcome).to.deep.eq({
         error: {
           code: 'TEST_NOT_FOUND',
@@ -182,17 +182,16 @@ describe('tap/commands/tests', () => {
       })
     })
 
-    it('returns the full title, timings, and trimmed error of the matching test via the __never__ sentinel', async () => {
-      const getTestsState = cy.stub().returns(DETAIL_STATE)
+    it('returns the full title, timings, and trimmed error of the matching test', async () => {
+      const getAllTestsState = cy.stub().returns(DETAIL_STATE)
 
-      stubRunner({ getTestsState })
+      stubRunner({ getAllTestsState })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('tests', { test: 'r2' })
 
-      // Must query with the sentinel, not 'r2': getTestsState excludes the matching id.
-      expect(getTestsState).to.have.been.calledOnceWith('__never__')
+      expect(getAllTestsState).to.have.been.calledOnce
 
       expect(outcome).to.deep.eq({
         result: {
@@ -216,7 +215,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('omits duration, timings, and error for a known test that never ran, defaults its state to skipped, and round-trips through JSON', async () => {
-      stubRunner({ getTestsState: () => DETAIL_STATE })
+      stubRunner({ getAllTestsState: () => DETAIL_STATE })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -231,7 +230,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('falls back to the plain title when the test carries no title path', async () => {
-      stubRunner({ getTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
+      stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -243,7 +242,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('treats null err and timings as absent rather than crashing on them', async () => {
-      stubRunner({ getTestsState: () => ({ r2: { id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null } }) })
+      stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null } }) })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -256,7 +255,7 @@ describe('tap/commands/tests', () => {
 
     it('drops non-string error props, which a non-Error user throw can carry', async () => {
       stubRunner({
-        getTestsState: () => {
+        getAllTestsState: () => {
           return {
             r2: { id: 'r2', title: 'logs in', state: 'failed', err: { name: 42, message: 'thrown', stack: undefined } },
           }

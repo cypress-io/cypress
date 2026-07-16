@@ -1,7 +1,7 @@
 import type { FoundSpec, SerializedTest } from '@packages/types'
 
 export interface TapTestsRunner {
-  getTestsState (testId?: string): Record<string, SerializedTest>
+  getAllTestsState (): Record<string, SerializedTest>
   isRunComplete (): boolean
 }
 
