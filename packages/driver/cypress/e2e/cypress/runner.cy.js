@@ -36,6 +36,26 @@ describe('async timeouts', () => {
   })
 })
 
+describe('getAllTestsState', () => {
+  it('serializes every test of the spec keyed by id, run or not', () => {
+    const tests = Cypress.runner.getAllTestsState()
+    const byTitle = _.keyBy(_.values(tests), 'title')
+
+    _.each(tests, (test, id) => {
+      expect(test.id, 'key is the test id').to.eq(id)
+      expect(test.prevAttempts, 'prevAttempts is serialized').to.be.an('array')
+    })
+
+    expect(byTitle['is not pending'].state).to.eq('passed')
+    expect(byTitle['is pending 1'].state).to.eq('pending')
+
+    // Unlike getTestsState, the currently running test and tests that have
+    // not run yet are included — with no state set.
+    expect(byTitle['serializes every test of the spec keyed by id, run or not'].state).to.be.undefined
+    expect(byTitle['test 2'].state).to.be.undefined
+  })
+})
+
 // NOTE: this test must remain the last test in the spec
 // so we can test the root after hook
 // https://github.com/cypress-io/cypress/issues/2296
