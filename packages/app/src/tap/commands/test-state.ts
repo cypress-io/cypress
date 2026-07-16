@@ -77,6 +77,13 @@ export const serializeTestsState = (runner: TapTestsRunner): TestStateEntry[] =>
   })
 }
 
+// The driver serializes a runnable by copying own properties, so object values
+// like `timings` are live references into its runner state. The JSON round-trip
+// snapshots the value at read time and normalizes it to its wire form.
+const cloneReferenceObject = <T>(value: T): T => {
+  return JSON.parse(JSON.stringify(value))
+}
+
 const serializeTestError = (err: Record<string, unknown>): TestError => {
   const { name, message, stack } = err
 
@@ -98,7 +105,7 @@ export const serializeTestDetail = (test: SerializedTest, runComplete: boolean):
     ...(duration !== undefined ? { duration } : {}),
     state: state ?? unreachedState(runComplete),
     ...(currentRetry !== undefined ? { retries: currentRetry } : {}),
-    ...(timings != null ? { timings: JSON.parse(JSON.stringify(timings)) } : {}),
+    ...(timings != null ? { timings: cloneReferenceObject(timings) } : {}),
     ...(err != null ? { error: serializeTestError(err) } : {}),
   }
 }

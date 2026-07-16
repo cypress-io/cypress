@@ -1,4 +1,5 @@
 import type { ReporterRunState } from './reporter'
+import type { RUNNABLE_LOGS, RUNNABLE_PROPS } from './constants'
 
 interface MochaRunnerState {
   startTime?: number
@@ -28,16 +29,6 @@ export type StoredSessions = Record<string, Cypress.ServerSessionData>
 export interface CachedTestState {
   activeSessions: StoredSessions
 }
-
-// The own-property allowlists the driver keeps when serializing a runnable
-// (`wrapAll`/`mixinLogs` in driver `src/cypress/runner.ts`). Shared here so
-// consumers of the serialized shape (e.g. `Cypress.runner.getTestsState`) use
-// one key source with the driver.
-export const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
-
-export const RUNNABLE_PROPS = [
-  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
-] as const
 
 // The subset of the serialized shape that is stable across driver versions.
 // `timings` and `err` stay opaque objects: their values are heterogeneous
