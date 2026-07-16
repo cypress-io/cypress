@@ -81,7 +81,7 @@ describe('tap/commands/tests', () => {
   it('reports a state-less test as pending while the run is still going, skipped once it completes', async () => {
     const state = { r3: { id: 'r3', title: 'logs out' } }
 
-    stubRunner({ getTestsState: () => state, isRunComplete: () => false })
+    const getRunner = stubRunner({ getTestsState: () => state, isRunComplete: () => false })
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -89,7 +89,8 @@ describe('tap/commands/tests', () => {
       result: [{ id: 'r3', title: 'logs out', state: 'pending' }],
     })
 
-    stubRunner({ getTestsState: () => state, isRunComplete: () => true })
+    // Re-program the existing stub: a second cy.stub on the same method throws.
+    getRunner.returns({ getTestsState: () => state, isRunComplete: () => true })
 
     expect(await new TapManager(CYPRESS_VERSION).exec('tests')).to.deep.eq({
       result: [{ id: 'r3', title: 'logs out', state: 'skipped' }],
