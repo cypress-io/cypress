@@ -89,6 +89,10 @@ export class EventManager {
     return Cypress
   }
 
+  get runComplete (): boolean {
+    return hasMochaRunEnded
+  }
+
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.

@@ -1,11 +1,12 @@
+import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { getRunnableSpecs, toSpecListEntry } from './specs-list'
-import type { SpecListEntry } from './specs-list'
+import { toSpecListEntry } from './specs-list'
+import type { SpecListEntry } from '../types'
 
 export const specsCommand = defineCommand({
   description: 'List all runnable specs for the selected Cypress instance.',
   params: [],
   handler: async (): Promise<SpecListEntry[]> => {
-    return getRunnableSpecs().map(toSpecListEntry)
+    return tapManagerDataSource.getRunnableSpecs().map(toSpecListEntry)
   },
 })

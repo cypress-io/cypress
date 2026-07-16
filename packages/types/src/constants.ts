@@ -60,3 +60,9 @@ export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
  * This number is fairly arbitrary.
  */
 export const MAX_VISIBILITY_CHECK_ELEMENTS = 10
+
+export const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
+
+export const RUNNABLE_PROPS = [
+  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+] as const
