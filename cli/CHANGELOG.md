@@ -5,6 +5,7 @@
 
 - Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
 - Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
+- Reduced the CPU overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) on Linux systems using cgroup v1, such as older CI containers. The memory profiler samples memory roughly once per second for the entire run, and each sample is now significantly cheaper, so it competes less with the tests themselves for CPU. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105).
 
 **Features:**
 
