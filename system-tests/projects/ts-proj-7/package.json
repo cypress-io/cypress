@@ -1,0 +1,8 @@
+{
+  "name": "ts-proj-7",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "typescript": "7.0.2"
+  }
+}
