@@ -39,4 +39,56 @@ describe('ProjectConfigManager', () => {
       expect(configManager.eventProcessPid).toEqual(undefined)
     })
   })
+
+  describe('#mainProcessWillDisconnect', () => {
+    it('resolves when there is no events ipc', async () => {
+      // @ts-expect-error
+      configManager._eventsIpc = undefined
+
+      await expect(configManager.mainProcessWillDisconnect()).resolves.toBeUndefined()
+    })
+
+    it('resolves when the child acks disconnect', async () => {
+      const listeners: Record<string, Function[]> = {}
+      const ipc = {
+        send: jest.fn(),
+        on: jest.fn((event: string, cb: Function) => {
+          listeners[event] = listeners[event] || []
+          listeners[event].push(cb)
+        }),
+        childProcessPid: 123,
+      }
+
+      // @ts-expect-error
+      configManager._eventsIpc = ipc
+
+      const pending = configManager.mainProcessWillDisconnect()
+
+      expect(ipc.send).toHaveBeenCalledWith('main:process:will:disconnect')
+      listeners['main:process:will:disconnect:ack'].forEach((cb) => cb())
+
+      await expect(pending).resolves.toBeUndefined()
+    })
+
+    it('resolves when the disconnect ack times out', async () => {
+      jest.useFakeTimers()
+
+      const ipc = {
+        send: jest.fn(),
+        on: jest.fn(),
+        childProcessPid: 123,
+      }
+
+      // @ts-expect-error
+      configManager._eventsIpc = ipc
+
+      const pending = configManager.mainProcessWillDisconnect()
+
+      jest.advanceTimersByTime(5000)
+
+      await expect(pending).resolves.toBeUndefined()
+
+      jest.useRealTimers()
+    })
+  })
 })

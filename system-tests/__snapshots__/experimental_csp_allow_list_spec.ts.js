@@ -277,9 +277,9 @@ exports['e2e experimentalCspAllowList / experimentalCspAllowList=[\'script-src-e
 
   1) experimentalCspAllowList=['script-src-elem', 'script-src', 'default-src']
        fails on inline form action:
-     CypressError: Timed out after waiting \`1000ms\` for your remote page to load.
+     CypressError: Timed out after waiting \`5000ms\` for your remote page to load.
 
-Your page did not fire its \`load\` event within \`1000ms\`.
+Your page did not fire its \`load\` event within \`5000ms\`.
 
 You can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
 

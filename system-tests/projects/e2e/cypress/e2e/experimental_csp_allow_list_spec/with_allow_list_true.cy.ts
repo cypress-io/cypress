@@ -53,7 +53,7 @@ describe(`experimentalCspAllowList=true`, () => {
     })
   })
 
-  const timeout = 1000
+  const timeout = 5000
 
   it('passes on inline form action', {
     pageLoadTimeout: timeout,

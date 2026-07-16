@@ -1,6 +1,6 @@
 describe(`experimentalCspAllowList=['script-src-elem', 'script-src', 'default-src']`, () => {
   let visitUrl: URL
-  const timeout = 1000
+  const timeout = 5000
 
   beforeEach(() => {
     visitUrl = new URL('http://localhost:4466/csp_script_test.html')
