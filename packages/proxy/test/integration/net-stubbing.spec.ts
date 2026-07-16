@@ -11,8 +11,8 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { NetworkPolicyRegistry } from '@packages/network-interception'
-import { CookieJar } from '@packages/server/lib/util/cookies'
+import { HttpIntercept, NetworkPolicyRegistry } from '@packages/network-interception'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 import { createProxyNetworkInterception } from '../../lib/adapters/create-proxy-network-interception'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
@@ -68,6 +68,9 @@ describe('network stubbing', () => {
       serverBus: new EventEmitter(),
       getCurrentBrowser: vi.fn(),
     })
+    const httpIntercept = new HttpIntercept(proxy.codec)
+
+    proxy.withIntercept(httpIntercept)
 
     app.use((req, res, next) => {
       req.proxiedUrl = req.url = req.url.slice(1)

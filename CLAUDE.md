@@ -39,4 +39,10 @@
 
 - **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
 
+## Working Constraints
+
+- Worktrees must use a full `yarn` install in the worktree. Do not symlink `node_modules` or packages back to another checkout.
+- E2E and packaged-binary integration tests do not run in the sandbox. When they are needed, provide the exact commands and ask the user to run them.
+- Before committing or pushing, `yarn check-ts`, `yarn lint`, and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
+
 @AGENTS.md

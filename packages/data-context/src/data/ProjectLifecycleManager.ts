@@ -84,6 +84,11 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
+      // An unconfigured project has no projectId, so skip loading the config.
+      if (!this.metaState.hasValidConfigFile) {
+        return null
+      }
+
       const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null

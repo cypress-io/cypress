@@ -125,7 +125,7 @@ export class CDPSocket extends EventEmitter {
 
       debugVerbose('sending message to browser %o', { expression })
 
-      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId }).then((result) => {
+      this._cdpClient?.send('Runtime.evaluate', { expression, contextId: this._executionContextId, returnByValue: true }).then((result) => {
         debugVerbose('successfully sent message to browser %o', result)
       }).catch((error) => {
         debugVerbose('error sending message to browser %o', { error })

@@ -42,6 +42,12 @@ export type BrowserLauncher = {
    */
   clearInstanceState: () => void
   /**
+   * Marks the browser as crashed after an unexpected crash, so that teardown
+   * commands fail fast instead of hanging on the dead connection. Only
+   * implemented by browsers that support it.
+   */
+  markBrowserCrashed?: () => void
+  /**
    * Used to connect the protocol to an existing browser.
    */
   connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>

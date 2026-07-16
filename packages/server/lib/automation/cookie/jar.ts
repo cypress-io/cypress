@@ -1,5 +1,5 @@
 import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
-import type { AutomationCookie } from '../automation/cookies'
+import type { AutomationCookie } from './automation'
 
 interface SerializableAutomationCookie extends Omit<AutomationCookie, 'expiry'> {
   expiry: 'Infinity' | '-Infinity' | number | null

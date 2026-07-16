@@ -9,7 +9,7 @@ import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
-import type { CypressOutgoingResponse } from '../types'
+import type { CypressOutgoingResponseLike } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
@@ -113,7 +113,7 @@ function isIPv6Host (domain: string): boolean {
   return !!domain && isIP(domain.replace(/^\[|\]$/g, '')) === 6
 }
 
-function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
+function setCookie (res: CypressOutgoingResponseLike, k: string, v: string, domain: string) {
   // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
   // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
   // Domain and let the cookie default to host-only. See #34143.
@@ -128,7 +128,7 @@ function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: 
   return res.cookie(k, v, opts)
 }
 
-function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value) {
+function setInitialCookie (res: CypressOutgoingResponseLike, remoteState: any, value) {
   // dont modify any cookies if we're trying to clear the initial cookie and we're not injecting anything
   // dont set the cookies if we're not on the initial request
   if ((!value && !res.wantsInjection) || !res.isInitial) {
@@ -153,7 +153,7 @@ function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value
 // from - so the flag is stale and is expired here. The genuine
 // "navigated away" recovery is a redirect handled in the request middleware and
 // never reaches response injection, so clearing here cannot undermine it.
-function clearUnloadCookie (res: CypressOutgoingResponse, remoteState: any) {
+function clearUnloadCookie (res: CypressOutgoingResponseLike, remoteState: any) {
   if (!res.wantsInjection) {
     return
   }
@@ -489,7 +489,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
 // TODO: this shouldn't really even be necessary?
-const MaybeSendRedirectToClient: ResponseMiddleware = function () {
+const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan, isVerbose })
 
   const { statusCode, headers } = this.incomingRes
@@ -515,12 +515,10 @@ const MaybeSendRedirectToClient: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.remoteStates.current(), true)
 
   this.debug('redirecting to new url %o', { statusCode, newUrl })
-  this.res.redirect(Number(statusCode), newUrl)
-
   span?.end()
 
-  // TODO; how do we instrument end?
-  return this.end()
+  this.res.redirect(Number(statusCode), newUrl)
+  this.end()
 }
 
 const CopyResponseStatusCode: ResponseMiddleware = function () {
@@ -540,15 +538,16 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
+const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, {
       isCached: this.incomingRes.statusCode === 304,
     })
 
     this.res.end()
+    this.end()
 
-    return this.end()
+    return
   }
 
   // When the origin response declared `Content-Length: 0`, short-circuit with an
@@ -568,10 +567,12 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsSecurityRemoved
   ) {
     this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
+
     this.res.setHeader('Content-Length', '0')
     this.res.end()
+    this.end()
 
-    return this.end()
+    return
   }
 
   this.next()
