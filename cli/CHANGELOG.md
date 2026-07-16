@@ -1,10 +1,14 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.18.2
+## 15.19.0
 
 **Performance:**
 
 - Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
 - Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
+
+**Features:**
+
+- Added support for TypeScript 7 when preprocessing TypeScript spec and support files. The component testing setup wizard now accepts TypeScript 7 as well. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
 
 **Bugfixes:**
 
