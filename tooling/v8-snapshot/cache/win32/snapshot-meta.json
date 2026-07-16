@@ -138,6 +138,7 @@
     "./node_modules/@babel/helper-create-class-features-plugin/node_modules/@babel/core/lib/transform.js",
     "./node_modules/@babel/helper-create-class-features-plugin/node_modules/@babel/core/lib/transformation/file/file.js",
     "./node_modules/@babel/helper-create-class-features-plugin/node_modules/@babel/core/lib/transformation/normalize-file.js",
+    "./node_modules/@babel/helper-create-class-features-plugin/node_modules/@babel/core/lib/transformation/read-input-source-map-file.js",
     "./node_modules/@babel/helper-create-class-features-plugin/node_modules/semver/semver.js",
     "./node_modules/@babel/helper-module-transforms/lib/dynamic-import.js",
     "./node_modules/@babel/helper-module-transforms/lib/index.js",
@@ -165,6 +166,7 @@
     "./node_modules/@babel/helper-replace-supers/node_modules/@babel/core/lib/transform.js",
     "./node_modules/@babel/helper-replace-supers/node_modules/@babel/core/lib/transformation/file/file.js",
     "./node_modules/@babel/helper-replace-supers/node_modules/@babel/core/lib/transformation/normalize-file.js",
+    "./node_modules/@babel/helper-replace-supers/node_modules/@babel/core/lib/transformation/read-input-source-map-file.js",
     "./node_modules/@babel/helper-replace-supers/node_modules/semver/semver.js",
     "./node_modules/@babel/preset-typescript/lib/index.js",
     "./node_modules/@babel/preset-typescript/node_modules/@babel/core/lib/config/config-chain.js",
@@ -188,6 +190,7 @@
     "./node_modules/@babel/preset-typescript/node_modules/@babel/core/lib/transformation/file/file.js",
     "./node_modules/@babel/preset-typescript/node_modules/@babel/core/lib/transformation/index.js",
     "./node_modules/@babel/preset-typescript/node_modules/@babel/core/lib/transformation/normalize-file.js",
+    "./node_modules/@babel/preset-typescript/node_modules/@babel/core/lib/transformation/read-input-source-map-file.js",
     "./node_modules/@babel/preset-typescript/node_modules/@babel/plugin-transform-modules-commonjs/lib/dynamic-import.js",
     "./node_modules/@babel/preset-typescript/node_modules/@babel/plugin-transform-modules-commonjs/lib/index.js",
     "./node_modules/@babel/preset-typescript/node_modules/@babel/plugin-transform-modules-commonjs/lib/lazy.js",
@@ -572,6 +575,7 @@
     "./node_modules/react-docgen/node_modules/@babel/core/lib/tools/build-external-helpers.js",
     "./node_modules/react-docgen/node_modules/@babel/core/lib/transformation/file/file.js",
     "./node_modules/react-docgen/node_modules/@babel/core/lib/transformation/normalize-file.js",
+    "./node_modules/react-docgen/node_modules/@babel/core/lib/transformation/read-input-source-map-file.js",
     "./node_modules/react-docgen/node_modules/semver/semver.js",
     "./node_modules/readable-stream/lib/_stream_duplex.js",
     "./node_modules/readable-stream/lib/_stream_passthrough.js",
@@ -3928,5 +3932,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "f5107ae75b0aabddb5bab9448ac5ec45106cd5846b4b9c21846f3bb54ea85e04"
+  "deferredHash": "fb8ab45ca1f23cae81ca7f6184d25ea566e2b5bbddd628b391593977aba1900f"
 }
