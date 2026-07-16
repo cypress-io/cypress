@@ -96,7 +96,7 @@ describe('tap binding', () => {
       const detail = (detailOutcome as { result: Record<string, unknown> }).result
 
       expect(detail.id).to.eq(tests[0].id)
-      expect(detail.fullTitle).to.be.a('string').and.contain(tests[0].title)
+      expect(detail.fullTitle).to.eq('Dom Content > renders the test content')
       expect(detail.state).to.eq('passed')
       expect(detail.timings).to.be.an('object')
       expect(detail.error).to.be.undefined

@@ -46,6 +46,7 @@ describe('getAllTestsState', () => {
       expect(test.prevAttempts, 'prevAttempts is serialized').to.be.an('array')
     })
 
+    expect(byTitle['is not pending']._titlePath).to.deep.eq(['src/cypress/runner', 'pending tests', 'is not pending'])
     expect(byTitle['is not pending'].state).to.eq('passed')
     expect(byTitle['is pending 1'].state).to.eq('pending')
 
