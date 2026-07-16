@@ -8,7 +8,7 @@ async, JSON-only methods — `getSchema()` and `exec(command, args?, options?)`.
 ## Layout
 
 - `tap-manager.ts` — the binding surface; validates the wire payload and dispatches to a command.
-- `TapManagerDataSource.ts` — the single seam onto runner-window globals (`getEventManager` → `getCypress().runner` → `getAllTestsState` plus `runComplete`, `__RUN_MODE_SPECS__`, `location.hash`). Commands read globals only through it.
+- `tap-manager-data-source.ts` — the single seam onto runner-window globals (`getEventManager` → `getCypress().runner` → `getAllTestsState` plus `runComplete`, `__RUN_MODE_SPECS__`, `location.hash`). Commands read globals only through it; component tests stub its methods instead of the real globals.
 - `contract.ts` — the frozen cross-process contract. The shared half lives in `@packages/cypress-instances`; the CLI reads the same contract from that package's compiled build. Do not fork it here.
 - `exec-args.ts` — app-side coercion of raw wire strings into typed params/options.
 - `commands/index.ts` — the command registry, the single source of truth for available subcommands.

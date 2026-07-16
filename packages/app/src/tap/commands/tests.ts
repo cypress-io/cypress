@@ -1,4 +1,4 @@
-import { tapManagerDataSource } from '../TapManagerDataSource'
+import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand, TapCommandError } from './definition'
 import { serializeTestDetail, serializeTestsState } from './test-state'
 import type { TestDetailEntry, TestStateEntry } from '../types'

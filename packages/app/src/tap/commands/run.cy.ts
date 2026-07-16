@@ -1,6 +1,6 @@
 import type { FoundSpec } from '@packages/types'
 
-import { tapManagerDataSource } from '../TapManagerDataSource'
+import { tapManagerDataSource } from '../tap-manager-data-source'
 import { TapManager } from '../tap-manager'
 
 const CYPRESS_VERSION = '15.0.0'
