@@ -8,12 +8,13 @@ async, JSON-only methods — `getSchema()` and `exec(command, args?, options?)`.
 ## Layout
 
 - `tap-manager.ts` — the binding surface; validates the wire payload and dispatches to a command.
+- `TapManagerDataSource.ts` — the single seam onto runner-window globals (`getEventManager` → `getCypress().runner` → `getTestsState` plus `runComplete`, `__RUN_MODE_SPECS__`, `location.hash`). Commands read globals only through it.
 - `contract.ts` — the frozen cross-process contract. The shared half lives in `@packages/cypress-instances`; the CLI reads the same contract from that package's compiled build. Do not fork it here.
 - `exec-args.ts` — app-side coercion of raw wire strings into typed params/options.
 - `commands/index.ts` — the command registry, the single source of truth for available subcommands.
 - `commands/definition.ts` — `defineCommand` authoring helper and `TapCommandError` (domain failures).
 - `commands/*.ts` — one module per subcommand (`specs`, `run`, `tests`).
-- `commands/test-state.ts` — the seam onto Cypress internals for the `tests` command (`getEventManager` → `getCypress().runner` → `getTestsState`, plus `runComplete`).
+- `commands/test-state.ts` — serialization of runner test state for the `tests` command.
 
 ## Contracts MUST be validated in the e2e tests, without mocking
 
@@ -36,7 +37,7 @@ Rules:
   not just presence — the contract is that nothing internal leaks onto the wire.
 
 The co-located `*.cy.ts` component tests (e.g. `commands/tests.cy.ts`) stub the seam
-(`tapRunnerSource.getRunner`) to exercise serialization branches and edge cases
+(`tapManagerDataSource.getRunner`) to exercise serialization branches and edge cases
 cheaply. They are a supplement, never a substitute: because they replace the seam,
 they cannot catch a Cypress-internals change. Never treat green component tests as
 proof a contract holds.
