@@ -2,7 +2,7 @@ import { posixify } from '../../paths'
 import { tapManagerDataSource } from '../TapManagerDataSource'
 import { defineCommand, TapCommandError } from './definition'
 import { toSpecListEntry } from './specs-list'
-import type { SpecListEntry } from './specs-list'
+import type { SpecListEntry } from '../types'
 
 const nextTapRunNonce = () => {
   const query = tapManagerDataSource.getHash().split('?')[1] ?? ''
