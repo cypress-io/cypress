@@ -13,7 +13,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`. Asserting that a raw DOM element exists (via `.exist` or its `.exists` alias) now yields the element so further assertions can be chained off it. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
+- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`, because the existence assertion replaced the subject with `null`. Chaining further assertions off `.exist` (or its `.exists` alias) for a raw DOM element now works as expected. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
 - Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 

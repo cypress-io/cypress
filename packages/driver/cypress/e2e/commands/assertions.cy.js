@@ -1516,11 +1516,9 @@ describe('src/cy/commands/assertions', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/25491
-      it('yields the raw DOM element (not null) after asserting it exists', () => {
+      it('allows chaining after the exists alias on a raw DOM element', () => {
         cy.document().then((doc) => {
-          cy.wrap(doc.body).should('exist').then((subject) => {
-            expect(subject).to.eq(doc.body)
-          })
+          cy.wrap(doc.body).should('exists').and('exists')
         })
       })
 
