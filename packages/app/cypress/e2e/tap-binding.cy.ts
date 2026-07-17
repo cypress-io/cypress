@@ -1,14 +1,14 @@
-describe('tap binding', () => {
-  const getBinding = (win: Cypress.AUTWindow) => {
-    const binding = win.__CYPRESS_TAP_BINDING__
+const getBinding = (win: Cypress.AUTWindow) => {
+  const binding = win.__CYPRESS_TAP_BINDING__
 
-    if (!binding) {
-      throw new Error('"window.__CYPRESS_TAP_BINDING__" is expected to be available')
-    }
-
-    return binding
+  if (!binding) {
+    throw new Error('"window.__CYPRESS_TAP_BINDING__" is expected to be available')
   }
 
+  return binding
+}
+
+describe('tap binding', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
@@ -149,10 +149,23 @@ describe('tap binding', () => {
       cy.location('hash').should('eq', hashBefore)
     })
   })
+})
+
+// The retrying fixture lives in its own project: adding a spec to the shared
+// cypress-in-cypress project shifts its spec count, breaking the app e2e
+// specs that assert exact counts against it.
+describe('tap binding with a retrying spec', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
 
   it('selects a retried test’s attempt via --attempt on tests and commands', () => {
     cy.window().then(async (win) => {
-      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/retries.spec.js' })
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/retries.cy.js' })
 
       expect('result' in outcome).to.eq(true)
     })
