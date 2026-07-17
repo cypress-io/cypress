@@ -173,7 +173,7 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
-  it('opens a cloud studio session with AI enabled', () => {
+  it('opens a cloud studio session with AI enabled for a logged in user', () => {
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -208,7 +208,7 @@ describe('studio functionality', () => {
       url: 'http://localhost:3000/cypress/e2e/index.html',
     })
 
-    launchStudio()
+    launchStudio({ shouldLogin: true })
 
     // expand the recommendation
     cy.get('[aria-label="Expand recommendation"]').first().click()
