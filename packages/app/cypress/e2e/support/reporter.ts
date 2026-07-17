@@ -19,6 +19,8 @@ declare global {
 }
 
 export const reporter = (options: { timeout?: number } = {}) => {
+  Cypress.log({ name: 'reporter', message: '' })
+
   const opts: { log: false, timeout?: number } = { log: false }
 
   if (options.timeout != null) {
