@@ -43,7 +43,6 @@ describe('tap/commands/tests', () => {
     )
   }
 
-  // Mirror the driver: getTestState resolves one test by id, or undefined.
   const getTestStateFrom = (state: Record<string, unknown>) => cy.stub().callsFake((id: string) => state[id])
 
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {

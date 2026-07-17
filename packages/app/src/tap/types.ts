@@ -1,12 +1,9 @@
-import type { FoundSpec, SerializedTest } from '@packages/types'
+import type { FoundSpec, SerializedCommandLog, SerializedTest } from '@packages/types'
 
-/**
- * `getAllTestsState()` serializes every test of the run keyed by id.
- * `getTestState(testId)` serializes just that one test via an O(1) id lookup,
- * so detail/commands don't pay the whole-run serialization cost.
- */
 export interface TapTestsRunner {
+  /** Serializes every test of the run, keyed by id. */
   getAllTestsState (): Record<string, SerializedTest>
+  /** Serializes one test by id lookup, skipping the whole-run serialization cost. */
   getTestState (testId: string): SerializedTest | undefined
   isRunComplete (): boolean
 }
@@ -59,4 +56,17 @@ export interface TestDetailEntry {
   timings?: Record<string, unknown>
   /** The failure that ended the test; absent unless it failed. */
   error?: TestError
+}
+
+export interface CommandEntry {
+  /** The driver's command log id, e.g. `log-<origin>-3`. */
+  id: string
+  /** The command name as logged, e.g. `visit`, `get`, `assert`. */
+  name?: string
+  /** The command log's display message — arguments/assertion text, not output. */
+  message?: string
+  /** `pending` while the command runs, then `passed` or `failed`. */
+  state?: SerializedCommandLog['state']
+  /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */
+  type?: SerializedCommandLog['type']
 }

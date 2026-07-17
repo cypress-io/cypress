@@ -1,7 +1,7 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand, TapCommandError } from './definition'
 import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from './test-state'
-import type { CommandEntry } from './test-state'
+import type { CommandEntry } from '../types'
 
 export const commandsCommand = defineCommand({
   description: 'list the command-log entries of a test of the active run',

@@ -30,6 +30,18 @@ export interface CachedTestState {
   activeSessions: StoredSessions
 }
 
+// A command log entry as the driver attaches it to a serialized test: the raw
+// attrs the driver's Log emits, typed only where stable. Other attrs (snapshots,
+// renderProps, ...) vary by command and stay opaque.
+export interface SerializedCommandLog {
+  id: string
+  name?: string
+  message?: string
+  state?: 'pending' | 'passed' | 'failed'
+  type?: 'parent' | 'child' | 'system'
+  [key: string]: unknown
+}
+
 // The subset of the serialized shape that is stable across driver versions.
 // `timings` and `err` stay opaque objects: their values are heterogeneous
 // (`err` carries whatever the user's thrown object had on it), so consumers
@@ -44,6 +56,7 @@ interface SerializedTestStable {
   retries?: number
   timings?: Record<string, unknown> | null
   err?: Record<string, unknown> | null
+  commands?: SerializedCommandLog[]
   prevAttempts?: SerializedTest[]
 }
 

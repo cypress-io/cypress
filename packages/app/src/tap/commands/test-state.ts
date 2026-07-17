@@ -1,16 +1,7 @@
 import type { SerializedTest } from '@packages/types'
 import { TapCommandError } from './definition'
 
-import type { TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from '../types'
-
-export interface CommandEntry {
-  id: string
-  name?: string
-  message?: string
-  state?: string
-  /** `parent` | `child` | `dual`. */
-  type?: string
-}
+import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from '../types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
@@ -51,9 +42,6 @@ const serializeTestError = (err: Record<string, unknown>): TestError => {
   }
 }
 
-// A test's attempts oldest→latest. The top-level test IS the latest attempt;
-// earlier ones live on prevAttempts, each carrying its own commands, state, err
-// and timings.
 const attemptsOf = (test: SerializedTest): SerializedTest[] => {
   const prev = Array.isArray(test.prevAttempts) ? test.prevAttempts : []
 
@@ -69,8 +57,6 @@ const isAttemptInRange = (attempt: number, count: number): boolean => {
   return Number.isInteger(attempt) && attempt >= 1 && attempt <= count
 }
 
-// Resolve one attempt of a test. `attempt` is 1-based (attempt 1 = the first
-// run), matching the reporter UI; `undefined` selects the latest attempt.
 export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, testId: string, attempt?: number): AttemptSelection => {
   const test = runner.getTestState(testId)
 
@@ -99,8 +85,6 @@ export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | {
   return new TapCommandError('ATTEMPT_NOT_FOUND', `test "${testId}" has ${selection.attempts} attempt(s); pass --attempt 1–${selection.attempts} (defaults to the latest)`)
 }
 
-// Identity fields (id, title, fullTitle) come from the test; execution fields
-// (state, duration, timings, error) come from the selected attempt.
 export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTest, runComplete: boolean): TestDetailEntry => {
   const titlePath = test._titlePath
   const { duration, state, currentRetry, timings, err } = attempt
@@ -118,15 +102,15 @@ export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTes
 }
 
 export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
-  const commands = (attempt.commands ?? []) as Array<Record<string, unknown>>
+  const commands = attempt.commands ?? []
 
   return commands.map(({ id, name, message, state, type }): CommandEntry => {
     return {
-      id: id as string,
-      ...(name !== undefined ? { name: name as string } : {}),
-      ...(message !== undefined ? { message: message as string } : {}),
-      ...(state !== undefined ? { state: state as string } : {}),
-      ...(type !== undefined ? { type: type as string } : {}),
+      id,
+      ...(name !== undefined ? { name } : {}),
+      ...(message !== undefined ? { message } : {}),
+      ...(state !== undefined ? { state } : {}),
+      ...(type !== undefined ? { type } : {}),
     }
   })
 }
