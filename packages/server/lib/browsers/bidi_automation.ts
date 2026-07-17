@@ -170,7 +170,13 @@ export class BidiAutomation {
         // @ts-expect-error - result is not typed
       }))?.result?.value ?? ''
     } catch (err) {
-      debugVerbose(`could not read window.name for browsing context ${params.context}: %o`, err)
+      // reading window.name fails when the context is torn down mid-evaluation
+      // (a transient child, or the reporter frame remounting), which is safe to
+      // skip. If this were the live AUT, autContextId stays unset and the first
+      // driver command needing it throws an explicit "no AUT context
+      // initialized" error, so log the cause at the debug level here rather than
+      // swallowing it silently.
+      debug(`could not read window.name for browsing context ${params.context}; skipping AUT identification for it: %o`, err)
 
       return
     }
