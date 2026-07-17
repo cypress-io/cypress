@@ -68,6 +68,75 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
   }
 }
 
+// replaces HTML comments with same-length whitespace so the injection point
+// regexes can't match tags inside comments, while every index stays aligned
+// with the original html. a small scanner tracks tag and quoted-attribute
+// state so `<!--` inside an attribute value is not mistaken for a comment,
+// comments may close with `-->`, `--!>` or abruptly (`<!-->`, `<!--->`), and
+// an unterminated comment blanks the rest of the document
+const maskHtmlComments = (html: string) => {
+  const masked: string[] = []
+  let i = 0
+  let inTag = false
+  let quote = ''
+
+  while (i < html.length) {
+    const ch = html[i]
+
+    if (inTag) {
+      if (quote) {
+        if (ch === quote) {
+          quote = ''
+        }
+      } else if (ch === '"' || ch === '\'') {
+        quote = ch
+      } else if (ch === '>') {
+        inTag = false
+      }
+
+      masked.push(ch)
+      i++
+
+      continue
+    }
+
+    if (html.startsWith('<!--', i)) {
+      let end
+
+      if (html.startsWith('>', i + 4)) {
+        end = i + 5
+      } else if (html.startsWith('->', i + 4)) {
+        end = i + 6
+      } else {
+        const normalClose = html.indexOf('-->', i + 4)
+        const bangClose = html.indexOf('--!>', i + 4)
+
+        if (normalClose !== -1 && (bangClose === -1 || normalClose < bangClose)) {
+          end = normalClose + 3
+        } else if (bangClose !== -1) {
+          end = bangClose + 4
+        } else {
+          end = html.length
+        }
+      }
+
+      masked.push(' '.repeat(end - i))
+      i = end
+
+      continue
+    }
+
+    if (ch === '<' && /[a-zA-Z!/?]/.test(html[i + 1] || '')) {
+      inTag = true
+    }
+
+    masked.push(ch)
+    i++
+  }
+
+  return masked.join('')
+}
+
 const insertBefore = (originalString, match, stringToInsert) => {
   const index = match.index || 0
 
@@ -93,7 +162,11 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     return html
   }
 
-  const bootstrapMatch = html.match(bootstrapScriptRe)
+  // search a comment-masked copy so a commented-out tag can't become the
+  // injection point, then splice into the original html by index
+  const searchableHtml = maskHtmlComments(html)
+
+  const bootstrapMatch = searchableHtml.match(bootstrapScriptRe)
 
   if (bootstrapMatch) {
     const contentToInject = htmlToInject.replace(/^<script[^>]*>|<\/script>$/g, '')
@@ -104,31 +177,34 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
       openTag = openTag.replace(/>$/, ` nonce="${opts.cspNonce}">`)
     }
 
-    return html.replace(bootstrapScriptRe, `${openTag}${contentToInject}${bootstrapMatch[3]}`)
+    const start = bootstrapMatch.index || 0
+    const end = start + bootstrapMatch[0].length
+
+    return `${html.slice(0, start)}${openTag}${contentToInject}${bootstrapMatch[3]}${html.slice(end)}`
   }
 
   // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
 
-  const headMatch = html.match(headRe)
+  const headMatch = searchableHtml.match(headRe)
 
   if (headMatch) {
     return insertAfter(html, headMatch, htmlToInject)
   }
 
-  const bodyMatch = html.match(bodyRe)
+  const bodyMatch = searchableHtml.match(bodyRe)
 
   if (bodyMatch) {
     return insertBefore(html, bodyMatch, `<head> ${htmlToInject} </head>`)
   }
 
-  const htmlMatch = html.match(htmlRe)
+  const htmlMatch = searchableHtml.match(htmlRe)
 
   if (htmlMatch) {
     return insertAfter(html, htmlMatch, `<head> ${htmlToInject} </head>`)
   }
 
   // if only <!DOCTYPE> content, inject <head> after doctype
-  if (doctypeRe.test(html)) {
+  if (doctypeRe.test(searchableHtml)) {
     return `${html}<head> ${htmlToInject} </head>`
   }
 
