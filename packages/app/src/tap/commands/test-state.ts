@@ -104,13 +104,16 @@ export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTes
 export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
   const commands = attempt.commands ?? []
 
+  // The driver's reduceMemory nulls (not deletes) non-preserved command attrs
+  // once a test falls out of numTestsKeptInMemory, so treat null as absent to
+  // keep the wire contract's optional fields absent-not-null.
   return commands.map(({ id, name, message, state, type }): CommandEntry => {
     return {
       id,
-      ...(name !== undefined ? { name } : {}),
-      ...(message !== undefined ? { message } : {}),
-      ...(state !== undefined ? { state } : {}),
-      ...(type !== undefined ? { type } : {}),
+      ...(name != null ? { name } : {}),
+      ...(message != null ? { message } : {}),
+      ...(state != null ? { state } : {}),
+      ...(type != null ? { type } : {}),
     }
   })
 }

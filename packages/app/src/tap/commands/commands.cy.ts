@@ -32,6 +32,16 @@ describe('tap/commands/commands', () => {
       id: 'r3',
       title: 'logs out',
     },
+    // Once a test falls out of numTestsKeptInMemory, the driver's reduceMemory
+    // nulls (not deletes) every non-preserved command attr, e.g. message.
+    r4: {
+      id: 'r4',
+      title: 'evicted from memory',
+      state: 'passed',
+      commands: [
+        { id: 'log-c', name: 'visit', message: null, state: 'passed', type: 'parent', _hasBeenCleanedUp: true },
+      ],
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -88,6 +98,20 @@ describe('tap/commands/commands', () => {
       result: [
         { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
         { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+      ],
+    })
+  })
+
+  it('drops command fields nulled by the driver’s memory cleanup instead of leaking null on the wire', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    const outcome = await manager.exec('commands', {}, { test: 'r4' })
+
+    expect(outcome).to.deep.eq({
+      result: [
+        { id: 'log-c', name: 'visit', state: 'passed', type: 'parent' },
       ],
     })
   })
