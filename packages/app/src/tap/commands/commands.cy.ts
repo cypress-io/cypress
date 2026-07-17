@@ -102,7 +102,7 @@ describe('tap/commands/commands', () => {
     })
   })
 
-  it('drops command fields nulled by the driver’s memory cleanup instead of leaking null on the wire', async () => {
+  it('drops command fields nulled by the driver’s memory cleanup and marks the entry cleanedUp', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -111,7 +111,7 @@ describe('tap/commands/commands', () => {
 
     expect(outcome).to.deep.eq({
       result: [
-        { id: 'log-c', name: 'visit', state: 'passed', type: 'parent' },
+        { id: 'log-c', name: 'visit', state: 'passed', type: 'parent', cleanedUp: true },
       ],
     })
   })

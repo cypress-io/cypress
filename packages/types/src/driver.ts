@@ -39,6 +39,8 @@ export interface SerializedCommandLog {
   message?: string
   state?: 'pending' | 'passed' | 'failed'
   type?: 'parent' | 'child' | 'system'
+  /** Set by the driver's reduceMemory when the test fell out of numTestsKeptInMemory. */
+  _hasBeenCleanedUp?: boolean
   [key: string]: unknown
 }
 

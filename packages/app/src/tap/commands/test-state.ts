@@ -106,14 +106,17 @@ export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] =
 
   // The driver's reduceMemory nulls (not deletes) non-preserved command attrs
   // once a test falls out of numTestsKeptInMemory, so treat null as absent to
-  // keep the wire contract's optional fields absent-not-null.
-  return commands.map(({ id, name, message, state, type }): CommandEntry => {
+  // keep the wire contract's optional fields absent-not-null. Its
+  // _hasBeenCleanedUp marker is surfaced as `cleanedUp` so consumers can tell
+  // eviction apart from fields that were never set.
+  return commands.map(({ id, name, message, state, type, _hasBeenCleanedUp }): CommandEntry => {
     return {
       id,
       ...(name != null ? { name } : {}),
       ...(message != null ? { message } : {}),
       ...(state != null ? { state } : {}),
       ...(type != null ? { type } : {}),
+      ...(_hasBeenCleanedUp === true ? { cleanedUp: true } : {}),
     }
   })
 }

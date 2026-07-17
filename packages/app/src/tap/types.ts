@@ -69,4 +69,10 @@ export interface CommandEntry {
   state?: SerializedCommandLog['state']
   /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */
   type?: SerializedCommandLog['type']
+  /**
+   * Present (always `true`) only when the driver evicted this test's command
+   * details from memory (numTestsKeptInMemory), so scrubbed fields like
+   * `message` are absent because of the eviction, not because they were unset.
+   */
+  cleanedUp?: true
 }
