@@ -146,7 +146,7 @@ describe('tap/commands/commands', () => {
 
     const outcome = await manager.exec('commands')
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_ARGUMENTS')
+    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
     expect(getRunner).not.to.have.been.called
   })
 })
