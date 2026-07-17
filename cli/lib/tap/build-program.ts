@@ -92,11 +92,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   .description('report where a running Cypress instance is in its lifecycle')
   .action(() => {})
 
-  for (const { name, description, params = [], options = [], hidden } of schema.commands) {
-    if (hidden) {
-      continue
-    }
-
+  for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
     const command = program.command(name)
 
     if (params.length) {

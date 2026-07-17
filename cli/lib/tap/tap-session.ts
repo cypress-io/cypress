@@ -37,9 +37,6 @@ export interface TapSession {
   call (method: string, args?: unknown[]): Promise<unknown>
 }
 
-// Shape-checks the `exec` envelope; anything else is a transport failure, not a
-// domain result. Lives here (below both callers) so exec/tap and status can
-// share it without an import cycle.
 const isFailureError = (error: unknown): error is { code: string, message: string } => {
   return !!error && typeof error === 'object' && typeof (error as any).code === 'string' && typeof (error as any).message === 'string'
 }
@@ -50,8 +47,6 @@ export const validateExecResult = (value: unknown): TapExecResult => {
 
   if (!outcome || typeof outcome !== 'object') return fail()
 
-  // callers dispatch on `'error' in outcome`, so a failure envelope must carry a
-  // well-formed error object — otherwise renderFailure would read code/message off garbage.
   if ('error' in outcome) return isFailureError(outcome.error) ? outcome : fail()
 
   if ('result' in outcome) return outcome

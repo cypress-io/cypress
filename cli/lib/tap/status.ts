@@ -5,26 +5,7 @@ import { renderKnownFailure, renderResult, renderStatusHelp } from './output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import { errors } from '../errors'
 import type { TapCliOptions } from '../exec/tap'
-
-interface TapRunState {
-  spec: string | null
-  totalSpecs: number
-  state?: 'running' | 'passed' | 'failed'
-  totalTests?: number
-  results?: { passed: number, failed: number, pending: number, skipped: number }
-}
-
-interface TapStatus {
-  status: string
-  pid?: number
-  projectRoot?: string
-  testingType?: 'e2e' | 'component' | null
-  browserAttached?: boolean
-  totalSpecs?: number
-  spec?: string
-  totalTests?: number
-  results?: { passed: number, failed: number, pending: number, skipped: number }
-}
+import type { TapRunState, TapStatus } from './types'
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   if (runState.state === undefined) {
@@ -85,8 +66,6 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
       const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
 
       if ('error' in outcome) {
-        // run-state has no domain failures, so an { error } envelope means the
-        // running Cypress lacks the command — a binding mismatch.
         return throwTapError(errors.tapInvalidExecResult, `${outcome.error.code}: ${outcome.error.message}`)
       }
 
@@ -97,8 +76,6 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
 
     return 0
   } catch (err: any) {
-    // Browser attached but runner unreachable (loading, tab closed, CDP gone) —
-    // a transport fault, surfaced like other commands.
     if (err.known && err.details) {
       renderKnownFailure(err)
 
