@@ -1,10 +1,14 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
 
-export function loadProjectAndRunSpec ({ projectName = 'studio' as ProjectFixtureDir, specName = 'spec.cy.js', cliArgs = [''], specSelector = 'data-cy-row' } = {}) {
+export function loadProjectAndRunSpec ({ projectName = 'studio' as ProjectFixtureDir, specName = 'spec.cy.js', cliArgs = [''], specSelector = 'data-cy-row', shouldLogin = false } = {}) {
   cy.viewport(1500, 1000)
 
   cy.scaffoldProject(projectName)
   cy.openProject(projectName, cliArgs)
+
+  if (shouldLogin) {
+    cy.loginUser()
+  }
 
   cy.startAppServer('e2e')
   cy.visitApp()
@@ -20,8 +24,8 @@ export function openNewTestFromSpecHeader () {
   cy.get('[data-cy="runnable-popover-new-test"]').click()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
-  loadProjectAndRunSpec({ specName, cliArgs })
+export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''], afterLaunch = () => {}, shouldLogin = false }: { specName?: string, createNewTestFromSuite?: boolean, createNewTestFromSpecHeader?: boolean, cliArgs?: string[], afterLaunch?: () => void, shouldLogin?: boolean } = {}) {
+  loadProjectAndRunSpec({ specName, cliArgs, shouldLogin })
 
   const testTitle = 'visits a basic html page'
 
@@ -33,6 +37,8 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
 
   cy.get('@item')
   .closest('.runnable-wrapper').as('runnable-wrapper')
+
+  afterLaunch?.()
 
   if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     if (createNewTestFromSpecHeader) {

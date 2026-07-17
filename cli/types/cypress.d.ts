@@ -4243,6 +4243,16 @@ declare namespace Cypress {
      */
     (chainer: 'be.gte', value: number): Chainable<Subject>
     /**
+     * Asserts that the target is a number or a `n` date greater than or equal to the given number or date n respectively.
+     * However, it's often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('be.greaterThanOrEqual', 5)
+     * @alias least
+     * @see http://chaijs.com/api/bdd/#method_least
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.greaterThanOrEqual', value: number): Chainable<Subject>
+    /**
      * Asserts that the target is a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it's often best to assert that the target is equal to its expected value.
      * @example
@@ -4272,6 +4282,16 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'be.lte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is a number or a date less than or equal to the given number or date n respectively.
+     * However, it's often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('be.lessThanOrEqual', 5)
+     * @alias most
+     * @see http://chaijs.com/api/bdd/#method_most
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.lessThanOrEqual', value: number): Chainable<Subject>
     /**
      * Asserts that the target is loosely (`==`) equal to `true`. However, it's often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
@@ -4852,6 +4872,16 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.gte', value: number): Chainable<Subject>
     /**
+     * Asserts that the target is not a number or a `n` date greater than or equal to the given number or date n respectively.
+     * However, it's often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(6).should('not.be.greaterThanOrEqual', 7)
+     * @alias least
+     * @see http://chaijs.com/api/bdd/#method_least
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.greaterThanOrEqual', value: number): Chainable<Subject>
+    /**
      * Asserts that the target is not a number or a `n` date less than or equal to the given number or date n respectively.
      * However, it's often best to assert that the target is equal to its expected value.
      * @example
@@ -4881,6 +4911,16 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.be.lte', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target is not a number or a date less than or equal to the given number or date n respectively.
+     * However, it's often best to assert that the target is equal to its expected value.
+     * @example
+     *    cy.wrap(4).should('not.be.lessThanOrEqual', 3)
+     * @alias most
+     * @see http://chaijs.com/api/bdd/#method_most
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.lessThanOrEqual', value: number): Chainable<Subject>
     /**
      * Asserts that the target is not loosely (`==`) equal to `true`. However, it's often best to assert that the target is strictly (`===`) or deeply equal to its expected value.
      * @example
