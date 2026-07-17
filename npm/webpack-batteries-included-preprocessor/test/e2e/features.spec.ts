@@ -121,4 +121,25 @@ describe('webpack-batteries-included-preprocessor features', () => {
       }
     })
   })
+
+  describe('with typescript 7', () => {
+    const options = { typescript: require.resolve('typescript-v7') }
+
+    it('handles typescript (and tsconfig paths) via babel', async () => {
+      await runAndEval('ts_spec.ts', { ...options })
+    })
+
+    it('handles tsx via babel', async () => {
+      await runAndEval('tsx_spec.tsx', { ...options })
+    })
+
+    it('handles importing .ts and .tsx via babel', async () => {
+      await runAndEval('typescript_imports_spec.js', { ...options })
+    })
+
+    // Babel must still emit decorator metadata for TypeScript 7, as ts-loader did.
+    it('emits decorator metadata (emitDecoratorMetadata parity) via babel', async () => {
+      await runAndEval('typescript_decorators_spec.ts', { ...options })
+    })
+  })
 })
