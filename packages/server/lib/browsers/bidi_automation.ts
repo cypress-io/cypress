@@ -148,7 +148,7 @@ export class BidiAutomation {
   }
 
   private onBrowsingContextCreated = async (params: BrowsingContextInfo) => {
-    debugVerbose('received browsingContext.contextCreated %o', params)
+    debug('received browsingContext.contextCreated %o', params)
 
     // Only direct children of the top-level context are candidates for the AUT.
     if (this.autContextId || !params.parent || this.topLevelContextId !== params.parent) {
@@ -159,7 +159,7 @@ export class BidiAutomation {
     // the reporter iframe — and their creation order is not guaranteed, so
     // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
     // for exactly this purpose) rather than assuming it is the first child
-    // created. This matches how the CDP and WebKit automations locate the AUT frame.
+    // created.
     let contextName = ''
 
     try {
@@ -170,24 +170,18 @@ export class BidiAutomation {
         // @ts-expect-error - result is not typed
       }))?.result?.value ?? ''
     } catch (err) {
-      // reading window.name fails when the context is torn down mid-evaluation
-      // (a transient child, or the reporter frame remounting), which is safe to
-      // skip. If this were the live AUT, autContextId stays unset and the first
-      // driver command needing it throws an explicit "no AUT context
-      // initialized" error, so log the cause at the debug level here rather than
-      // swallowing it silently.
       debug(`could not read window.name for browsing context ${params.context}; skipping AUT identification for it: %o`, err)
 
       return
     }
 
     if (!contextName.startsWith(AUT_FRAME_NAME_IDENTIFIER)) {
-      debugVerbose(`browsing context ${params.context} (name: '${contextName}') is not the AUT; skipping.`)
+      debug(`browsing context ${params.context} (name: '${contextName}') is not the AUT; skipping.`)
 
       return
     }
 
-    debug(`new browsing context ${params.context} created within top-level parent context ${params.parent}.`)
+    debug(`new browsing context ${params.context} (name: '${contextName}' created within top-level parent context ${params.parent}.`)
     debug(`setting browsing context ${params.context} as the AUT context.`)
 
     this.autContextId = params.context
@@ -196,14 +190,14 @@ export class BidiAutomation {
     // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
     // AUT in the request interceptor.
     if (!this.interceptId) {
-      debugVerbose(`no interceptor defined for top-level context ${params.parent}.`)
-      debugVerbose(`creating interceptor to determine if a request belongs to the AUT.`)
+      debug(`no interceptor defined for top-level context ${params.parent}.`)
+      debug(`creating interceptor to determine if a request belongs to the AUT.`)
       // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
       // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
       // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
       const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
 
-      debugVerbose(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
+      debug(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
 
       // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
       this.interceptId = intercept
