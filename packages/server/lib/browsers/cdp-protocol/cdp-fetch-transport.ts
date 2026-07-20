@@ -139,6 +139,18 @@ export class CdpFetchTransport {
         requestId: event.requestId,
         sessionId,
       }
+
+      // Mark AUT documents for the intercept/legacy pipeline the same way the
+      // MITM path does (header in, stripped before upstream). Never send this
+      // internal marker to the origin on Fetch.continueRequest.
+      const markAsAUTFrame = event.resourceType === 'Document' && event.frameId && this.options.isAUTFrame
+        ? await this.options.isAUTFrame(event.frameId)
+        : false
+
+      if (markAsAUTFrame) {
+        request.headers[AUT_FRAME_HEADER] = 'true'
+      }
+
       const responseDeferred = pDefer<CdpFetchTransportResponse>()
 
       deferred = responseDeferred
@@ -353,45 +365,47 @@ export class CdpFetchTransport {
       requestId: event.requestId,
     },
   ): Promise<Pick<Protocol.Fetch.ContinueRequestRequest, 'headers'>> => {
+    // Requests without a networkId skip the intercept pipeline, so there is no
+    // middleware to consume/strip the AUT marker. Never send it upstream.
     const headers = await this.continueRequestHeaders(event, outbound)
 
     return headers ? { headers } : {}
   }
 
   /**
-   * Builds continueRequest headers when the outbound headers changed or the
-   * request is an AUT-frame document. Only document requests are marked —
-   * parity with the other automation layers — so AUT subresource traffic
-   * (XHR/fetch/assets) never carries the header out to the origin server.
-   * Always preserves X-Cypress-Is-AUT-Frame alongside any mutated headers
-   * (a later headers overwrite must not drop it).
+   * Builds continueRequest headers when outbound headers differ from the pause
+   * (excluding X-Cypress-Is-AUT-Frame). That marker is injected onto the paused
+   * request for the intercept/legacy pipeline and must never be forwarded to
+   * the origin — parity with ExtractCypressMetadataHeaders on the MITM path.
    */
   private continueRequestHeaders = async (
     event: Protocol.Fetch.RequestPausedEvent,
     outbound: CdpFetchTransportRequest,
   ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const markAsAUTFrame = event.resourceType === 'Document' && event.frameId && this.options.isAUTFrame
-      ? await this.options.isAUTFrame(event.frameId)
-      : false
-    const headersChanged = this.headersChanged(outbound.headers ?? {}, event.request.headers)
+    const stripAut = (headers: Protocol.Network.Headers) => {
+      return Object.fromEntries(
+        Object.entries(headers).filter(([name]) => {
+          return name.toLowerCase() !== AUT_FRAME_HEADER.toLowerCase()
+        }),
+      )
+    }
 
-    if (!markAsAUTFrame && !headersChanged) {
+    const outboundWithoutAut = stripAut(outbound.headers ?? {})
+    const originalWithoutAut = stripAut(event.request.headers)
+    const originalHadAut = Object.keys(event.request.headers).some((name) => {
+      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
+    })
+    const outboundHadAut = Object.keys(outbound.headers ?? {}).some((name) => {
+      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
+    })
+
+    // No meaningful header mutations and nothing to strip — omit headers from
+    // continueRequest so CDP keeps the browser's original set.
+    if (!this.headersChanged(outboundWithoutAut, originalWithoutAut) && !originalHadAut && !outboundHadAut) {
       return
     }
 
-    // A redirect hop re-pauses with the previously injected header already in
-    // the request; strip it so the header is never sent upstream duplicated.
-    const headers = this.toContinueRequestHeaders(outbound.headers ?? {})
-    .filter(({ name }) => name.toLowerCase() !== AUT_FRAME_HEADER.toLowerCase())
-
-    if (markAsAUTFrame) {
-      headers.push({
-        name: AUT_FRAME_HEADER,
-        value: 'true',
-      })
-    }
-
-    return headers
+    return this.toContinueRequestHeaders(outboundWithoutAut)
   }
 
   private cleanup (networkId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {

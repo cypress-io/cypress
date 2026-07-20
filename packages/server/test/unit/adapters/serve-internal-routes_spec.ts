@@ -1,6 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import { isCypressServerOrigin, isInternalCypressRoute } from '../../../lib/adapters/internal-routes'
+import { isCypressServerOrigin, isInternalCypressRoute, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
 import { createServeInternalRoutesMiddleware } from '../../../lib/adapters/serve-internal-routes'
 
 const config = {
@@ -145,6 +145,7 @@ describe('lib/adapters/serve-internal-routes', () => {
       method: 'GET',
       headers: {
         'x-cypress-internal-loopback': 'http://localhost:1234/__cypress/xhrs/foo',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
       },
     }, true)
 
@@ -212,6 +213,7 @@ describe('lib/adapters/serve-internal-routes', () => {
       headers: {
         cookie: 'session=abc',
         'x-cypress-internal-loopback': 'https://cross-origin.test/__cypress/process-origin-callback?foo=1',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
       },
       body: '{"file":"spec.cy.ts"}',
       encoding: null,

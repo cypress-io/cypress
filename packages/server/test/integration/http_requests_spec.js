@@ -384,19 +384,37 @@ describe('Routes', () => {
     })
 
     it('internal loopback header bypasses forceProxy redirect without a proxy set', function () {
-      // serve-internal-routes hits Express as a path-only request; without this
-      // header _forceProxyMiddleware would 302 to clientRoute (see previous test).
+      // serve-internal-routes hits Express as a path-only request; without the
+      // trusted token _forceProxyMiddleware would 302 to clientRoute.
+      const { cypressInternalLoopbackToken } = require('../../lib/adapters/internal-routes')
+
       return this.rp({
         url: `${this.proxy}/__cypress/automation/getLocalStorage`,
         proxy: null,
         headers: {
           'x-cypress-internal-loopback': '1',
+          'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
         },
         followRedirect: false,
       })
       .then((res) => {
         expect(res.statusCode).to.eq(200)
         expect(res.headers['location']).to.be.undefined
+      })
+    })
+
+    it('spoofed loopback header without the process token does not bypass forceProxy', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': 'https://evil.example/__/',
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
       })
     })
 

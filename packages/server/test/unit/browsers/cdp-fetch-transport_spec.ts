@@ -274,10 +274,12 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('marks AUT frame requests when continuing through CDP Fetch', async () => {
+    it('marks AUT frame documents for the intercept pipeline without sending the header upstream', async () => {
       const client = createClient()
       const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
-      const transport = new CdpFetchTransport(client as any, undefined, { isAUTFrame })
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenIsAutFrameHeader = sinon.stub()
+      const transport = new CdpFetchTransport(client as any, httpIntercept, { isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
@@ -286,18 +288,24 @@ describe('CdpFetchTransport', () => {
         'X-Foo': 'Bar',
       }
 
+      httpIntercept.use((req, next) => {
+        seenIsAutFrameHeader(req.headers?.['X-Cypress-Is-AUT-Frame'] ?? req.headers?.['x-cypress-is-aut-frame'])
+
+        return next(req)
+      })
+
       const handled = onRequestPaused(request)
 
       await tick()
 
+      expect(isAUTFrame).to.have.been.calledOnceWith('frame-1')
+      expect(seenIsAutFrameHeader).to.have.been.calledWith('true')
+      // AUT marker must not leave the process toward the origin.
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
           name: 'X-Foo',
           value: 'Bar',
-        }, {
-          name: 'X-Cypress-Is-AUT-Frame',
-          value: 'true',
         }],
       })
 
@@ -326,7 +334,7 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
-    it('does not duplicate the AUT frame header when a redirect re-pauses the request', async () => {
+    it('strips a previously injected AUT frame header on redirect re-pause', async () => {
       const client = createClient()
       const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
       const transport = new CdpFetchTransport(client as any, undefined, { isAUTFrame })
@@ -336,6 +344,7 @@ describe('CdpFetchTransport', () => {
 
       request.request.headers = {
         'X-Cypress-Is-AUT-Frame': 'true',
+        'X-Foo': 'Bar',
       }
 
       const handled = onRequestPaused(request)
@@ -345,8 +354,8 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
-          name: 'X-Cypress-Is-AUT-Frame',
-          value: 'true',
+          name: 'X-Foo',
+          value: 'Bar',
         }],
       })
 
@@ -354,7 +363,7 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
-    it('keeps the AUT frame header when HttpIntercept mutates request headers', async () => {
+    it('keeps mutated request headers without re-adding the AUT frame header upstream', async () => {
       const client = createClient()
       const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
@@ -389,9 +398,6 @@ describe('CdpFetchTransport', () => {
         }, {
           name: 'X-Mutated',
           value: '1',
-        }, {
-          name: 'X-Cypress-Is-AUT-Frame',
-          value: 'true',
         }],
       })
 

@@ -55,7 +55,7 @@ import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-r
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
+import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -108,8 +108,8 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
 
     // Trusted loopback from serve-internal-routes: path-only HTTP to Express
     // must reach internal route handlers instead of redirecting to clientRoute.
-    // Keep the header so a catch-all re-entry can detect the loop and stop.
-    if (req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]) {
+    // Require the per-process token — AUT content can forge the URL header alone.
+    if (isTrustedInternalLoopback(req.headers)) {
       return next()
     }
 
@@ -147,7 +147,8 @@ const setProxiedUrl = function (req) {
   // Loopback requests from serve-internal-routes arrive path-only, but carry
   // the browser's original absolute URL in the loopback header so consumers
   // like the spec-bridge iframe controller can still derive the origin.
-  const loopbackUrl = req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
+  // Only honor the URL when accompanied by the per-process loopback token.
+  const loopbackUrl = getTrustedLoopbackUrl(req.headers)
 
   if (typeof loopbackUrl === 'string' && fullyQualifiedRe.test(loopbackUrl)) {
     req.proxiedUrl = removeDefaultPort(loopbackUrl)

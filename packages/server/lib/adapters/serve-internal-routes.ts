@@ -1,6 +1,6 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 export type ServeInternalRoutesConfig = InternalRouteConfig
@@ -23,6 +23,7 @@ const HOP_BY_HOP_HEADERS = new Set([
   'transfer-encoding',
   'upgrade',
   CYPRESS_INTERNAL_LOOPBACK_HEADER,
+  CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER,
 ])
 
 function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
@@ -103,6 +104,7 @@ export function createServeInternalRoutesMiddleware ({
       headers: {
         ...filterHeaders(request.headers),
         [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
+        [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
       },
       ...(shouldSendBody(request) ? { body: request.body } : {}),
       encoding: null,
