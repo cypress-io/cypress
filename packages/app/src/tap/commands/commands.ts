@@ -4,7 +4,7 @@ import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from 
 import type { CommandEntry } from '../types'
 
 export const commandsCommand = defineCommand({
-  description: 'list the command-log entries of a test of the active run',
+  description: 'list the command log entries of a test of the active run',
   params: [],
   options: [
     { name: 'test', type: 'string', required: true, description: 'test id, as listed by the tests command' },

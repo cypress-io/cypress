@@ -82,7 +82,13 @@ export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | {
     return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the tests command to list this run’s tests`)
   }
 
-  return new TapCommandError('ATTEMPT_NOT_FOUND', `test "${testId}" has ${selection.attempts} attempt(s); pass --attempt 1–${selection.attempts} (defaults to the latest)`)
+  const { attempts } = selection
+
+  const message = attempts === 1
+    ? `test "${testId}" has only 1 attempt; --attempt selects an earlier attempt of a retried test`
+    : `test "${testId}" has ${attempts} attempts; pass --attempt 1–${attempts} (defaults to the latest)`
+
+  return new TapCommandError('ATTEMPT_NOT_FOUND', message)
 }
 
 export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTest, runComplete: boolean): TestDetailEntry => {

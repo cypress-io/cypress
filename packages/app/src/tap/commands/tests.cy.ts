@@ -274,7 +274,20 @@ describe('tap/commands/tests', () => {
       expect(outcome).to.deep.eq({
         error: {
           code: 'ATTEMPT_NOT_FOUND',
-          message: 'test "r2" has 2 attempt(s); pass --attempt 1–2 (defaults to the latest)',
+          message: 'test "r2" has 2 attempts; pass --attempt 1–2 (defaults to the latest)',
+        },
+      })
+    })
+
+    it('reports a single-attempt test without a nonsensical 1–1 range', async () => {
+      stubRunner({ getTestState: getTestStateFrom(DETAIL_STATE) })
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('tests', { test: 'r3' }, { attempt: '2' })
+
+      expect(outcome).to.deep.eq({
+        error: {
+          code: 'ATTEMPT_NOT_FOUND',
+          message: 'test "r3" has only 1 attempt; --attempt selects an earlier attempt of a retried test',
         },
       })
     })

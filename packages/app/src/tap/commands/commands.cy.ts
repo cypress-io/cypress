@@ -145,10 +145,25 @@ describe('tap/commands/commands', () => {
       expect(outcome, `attempt ${attempt}`).to.deep.eq({
         error: {
           code: 'ATTEMPT_NOT_FOUND',
-          message: 'test "r2" has 2 attempt(s); pass --attempt 1–2 (defaults to the latest)',
+          message: 'test "r2" has 2 attempts; pass --attempt 1–2 (defaults to the latest)',
         },
       })
     }
+  })
+
+  it('reports a single-attempt test without a nonsensical 1–1 range', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    const outcome = await manager.exec('commands', {}, { test: 'r4', attempt: '2' })
+
+    expect(outcome).to.deep.eq({
+      error: {
+        code: 'ATTEMPT_NOT_FOUND',
+        message: 'test "r4" has only 1 attempt; --attempt selects an earlier attempt of a retried test',
+      },
+    })
   })
 
   it('returns an empty command list for a known test that has not run yet, and round-trips through JSON', async () => {
