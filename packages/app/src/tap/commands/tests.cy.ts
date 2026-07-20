@@ -43,6 +43,8 @@ describe('tap/commands/tests', () => {
     )
   }
 
+  const getTestStateFrom = (state: Record<string, unknown>) => cy.stub().callsFake((id: string) => state[id])
+
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
@@ -112,6 +114,19 @@ describe('tap/commands/tests', () => {
     expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
   })
 
+  it('fails with ATTEMPT_NOT_FOUND when --attempt is given without a test id to detail', async () => {
+    stubRunner({ getAllTestsState: () => TESTS_STATE })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('tests', {}, { attempt: '1' })
+
+    expect(outcome).to.deep.eq({
+      error: {
+        code: 'ATTEMPT_NOT_FOUND',
+        message: 'the --attempt option applies only when detailing a single test; pass a <test> id',
+      },
+    })
+  })
+
   it('fails dispatch without reading the runner when an unknown arg is given', async () => {
     const getRunner = stubRunner({ getAllTestsState: () => ({}) })
 
@@ -141,6 +156,20 @@ describe('tap/commands/tests', () => {
           stack: 'AssertionError: expected true to be false\n  at <anonymous>',
           codeFrame: { line: 3 },
         },
+        // The first run, which carries its own state, duration, timings and error;
+        // its serialized shape lacks _titlePath, so fullTitle must still resolve
+        // from the top-level test's identity.
+        prevAttempts: [
+          {
+            id: 'r2',
+            title: 'logs in',
+            duration: 90,
+            state: 'failed',
+            currentRetry: 0,
+            timings: { lifecycle: 20 },
+            err: { name: 'AssertionError', message: 'first attempt failed', stack: 'AssertionError: first attempt failed' },
+          },
+        ],
       },
       r3: {
         id: 'r3',
@@ -165,15 +194,15 @@ describe('tap/commands/tests', () => {
     })
 
     it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
-      const getAllTestsState = cy.stub().returns(DETAIL_STATE)
+      const getTestState = getTestStateFrom(DETAIL_STATE)
 
-      stubRunner({ getAllTestsState })
+      stubRunner({ getTestState })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('tests', { test: 'nope' })
 
-      expect(getAllTestsState).to.have.been.calledOnce
+      expect(getTestState).to.have.been.calledOnceWith('nope')
       expect(outcome).to.deep.eq({
         error: {
           code: 'TEST_NOT_FOUND',
@@ -183,15 +212,15 @@ describe('tap/commands/tests', () => {
     })
 
     it('returns the full title, timings, and trimmed error of the matching test', async () => {
-      const getAllTestsState = cy.stub().returns(DETAIL_STATE)
+      const getTestState = getTestStateFrom(DETAIL_STATE)
 
-      stubRunner({ getAllTestsState })
+      stubRunner({ getTestState })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('tests', { test: 'r2' })
 
-      expect(getAllTestsState).to.have.been.calledOnce
+      expect(getTestState).to.have.been.calledOnceWith('r2')
 
       expect(outcome).to.deep.eq({
         result: {
@@ -214,8 +243,57 @@ describe('tap/commands/tests', () => {
       expect((outcome as { result: { timings: object } }).result.timings).to.not.equal(DETAIL_STATE.r2.timings)
     })
 
+    it('details the requested attempt, 1-based, keeping the test’s identity but the attempt’s outcome', async () => {
+      stubRunner({ getTestState: getTestStateFrom(DETAIL_STATE) })
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('tests', { test: 'r2' }, { attempt: '1' })
+
+      expect(outcome).to.deep.eq({
+        result: {
+          id: 'r2',
+          title: 'logs in',
+          fullTitle: 'auth > login > logs in',
+          duration: 90,
+          state: 'failed',
+          retries: 0,
+          timings: { lifecycle: 20 },
+          error: {
+            name: 'AssertionError',
+            message: 'first attempt failed',
+            stack: 'AssertionError: first attempt failed',
+          },
+        },
+      })
+    })
+
+    it('fails with ATTEMPT_NOT_FOUND when the attempt is out of range', async () => {
+      stubRunner({ getTestState: getTestStateFrom(DETAIL_STATE) })
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('tests', { test: 'r2' }, { attempt: '3' })
+
+      expect(outcome).to.deep.eq({
+        error: {
+          code: 'ATTEMPT_NOT_FOUND',
+          message: 'test "r2" has 2 attempts; pass --attempt 1–2 (defaults to the latest)',
+        },
+      })
+    })
+
+    it('reports a single-attempt test without a nonsensical 1–1 range', async () => {
+      stubRunner({ getTestState: getTestStateFrom(DETAIL_STATE) })
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('tests', { test: 'r3' }, { attempt: '2' })
+
+      expect(outcome).to.deep.eq({
+        error: {
+          code: 'ATTEMPT_NOT_FOUND',
+          message: 'test "r3" has only 1 attempt; --attempt selects an earlier attempt of a retried test',
+        },
+      })
+    })
+
     it('omits duration, timings, and error for a known test that never ran, defaults its state to skipped, and round-trips through JSON', async () => {
-      stubRunner({ getAllTestsState: () => DETAIL_STATE })
+      stubRunner({ getTestState: (id: string) => DETAIL_STATE[id] })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -230,7 +308,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('falls back to the plain title when the test carries no title path', async () => {
-      stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in' } }) })
+      stubRunner({ getTestState: () => ({ id: 'r2', title: 'logs in' }) })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -242,7 +320,7 @@ describe('tap/commands/tests', () => {
     })
 
     it('treats null err and timings as absent rather than crashing on them', async () => {
-      stubRunner({ getAllTestsState: () => ({ r2: { id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null } }) })
+      stubRunner({ getTestState: () => ({ id: 'r2', title: 'logs in', state: 'passed', err: null, timings: null }) })
 
       const manager = new TapManager(CYPRESS_VERSION)
 
@@ -255,10 +333,8 @@ describe('tap/commands/tests', () => {
 
     it('drops non-string error props, which a non-Error user throw can carry', async () => {
       stubRunner({
-        getAllTestsState: () => {
-          return {
-            r2: { id: 'r2', title: 'logs in', state: 'failed', err: { name: 42, message: 'thrown', stack: undefined } },
-          }
+        getTestState: () => {
+          return { id: 'r2', title: 'logs in', state: 'failed', err: { name: 42, message: 'thrown', stack: undefined } }
         },
       })
 

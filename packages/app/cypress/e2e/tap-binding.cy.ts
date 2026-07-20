@@ -1,11 +1,23 @@
+const getBinding = (win: Cypress.AUTWindow) => {
+  const binding = win.__CYPRESS_TAP_BINDING__
+
+  if (!binding) {
+    throw new Error('"window.__CYPRESS_TAP_BINDING__" is expected to be available')
+  }
+
+  return binding
+}
+
 describe('tap binding', () => {
-  it('mounts window.__CYPRESS_TAP_BINDING__ on the runner top window', () => {
+  beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('e2e')
     cy.visitApp()
     cy.specsPageIsVisible()
+  })
 
+  it('mounts window.__CYPRESS_TAP_BINDING__ on the runner top window', () => {
     cy.window().then(async (win) => {
       const binding = win.__CYPRESS_TAP_BINDING__
 
@@ -16,7 +28,7 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests'])
+      expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests', 'commands'])
 
       const unknown = await binding.exec('not-a-command')
 
@@ -26,6 +38,10 @@ describe('tap binding', () => {
       const testsBeforeRun = await binding.exec('tests')
 
       expect((testsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+
+      const commandsBeforeRun = await binding.exec('commands', {}, { test: 'r1' })
+
+      expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
       const outcome = await binding.exec('specs')
 
@@ -42,22 +58,6 @@ describe('tap binding', () => {
   })
 
   it('runs and reruns a spec via the run command', () => {
-    cy.scaffoldProject('cypress-in-cypress')
-    cy.openProject('cypress-in-cypress')
-    cy.startAppServer('e2e')
-    cy.visitApp()
-    cy.specsPageIsVisible()
-
-    const getBinding = (win: Cypress.AUTWindow) => {
-      const binding = win.__CYPRESS_TAP_BINDING__
-
-      if (!binding) {
-        throw new Error('"window.__CYPRESS_TAP_BINDING__" is expected to be available')
-      }
-
-      return binding
-    }
-
     cy.window().then(async (win) => {
       const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })
 
@@ -104,6 +104,25 @@ describe('tap binding', () => {
       const missingDetail = await getBinding(win).exec('tests', { test: 'not-a-test' })
 
       expect((missingDetail as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const testId = tests[0].id as string
+
+      const commandsOutcome = await getBinding(win).exec('commands', {}, { test: testId })
+
+      expect('result' in commandsOutcome).to.eq(true)
+
+      const commands = (commandsOutcome as { result: Array<Record<string, unknown>> }).result
+
+      expect(commands).to.have.length.greaterThan(0)
+
+      for (const command of commands) {
+        expect(Object.keys(command), `command ${command.id}`).to.include.members(['id', 'name'])
+        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type'].includes(key)))
+      }
+
+      const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
+
+      expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
     })
 
     // Rerunning advances the nonce, so the query changes even though the spec is unchanged.
@@ -128,6 +147,80 @@ describe('tap binding', () => {
 
       // A domain failure never navigates.
       cy.location('hash').should('eq', hashBefore)
+    })
+  })
+})
+
+// The retrying fixture lives in its own project: adding a spec to the shared
+// cypress-in-cypress project shifts its spec count, breaking the app e2e
+// specs that assert exact counts against it.
+describe('tap binding with a retrying spec', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  it('selects a retried test’s attempt via --attempt on tests and commands', () => {
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/retries.cy.js' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    // The test fails on its first attempt, then passes on the retry.
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      const listOutcome = await binding.exec('tests')
+      const tests = (listOutcome as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+
+      // One retry was taken, so two attempts exist.
+      expect(tests[0].state).to.eq('passed')
+      expect(tests[0].retries).to.eq(1)
+
+      const latest = (await binding.exec('tests', { test: testId })) as { result: Record<string, unknown> }
+
+      expect(latest.result.state).to.eq('passed')
+      expect(latest.result.error).to.be.undefined
+
+      const first = (await binding.exec('tests', { test: testId }, { attempt: '1' })) as { result: Record<string, unknown> }
+
+      expect(first.result.id).to.eq(testId)
+      expect(first.result.fullTitle).to.eq(latest.result.fullTitle)
+      expect(first.result.state).to.eq('failed')
+      expect(first.result.error).to.be.an('object')
+
+      const second = (await binding.exec('tests', { test: testId }, { attempt: '2' })) as { result: Record<string, unknown> }
+
+      expect(second.result).to.deep.eq(latest.result)
+
+      const outOfRange = await binding.exec('tests', { test: testId }, { attempt: '3' })
+
+      expect((outOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+
+      const listWithAttempt = await binding.exec('tests', {}, { attempt: '1' })
+
+      expect((listWithAttempt as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+
+      const latestCommands = (await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }
+      const firstCommands = (await binding.exec('commands', {}, { test: testId, attempt: '1' })) as { result: Array<Record<string, unknown>> }
+
+      expect(latestCommands.result).to.have.length.greaterThan(0)
+      expect(firstCommands.result).to.have.length.greaterThan(0)
+
+      // The failing first attempt has a failed command; the passing latest has none.
+      expect(firstCommands.result.some((command) => command.state === 'failed')).to.eq(true)
+      expect(latestCommands.result.every((command) => command.state !== 'failed')).to.eq(true)
+
+      const commandsOutOfRange = await binding.exec('commands', {}, { test: testId, attempt: '3' })
+
+      expect((commandsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     })
   })
 })

@@ -1946,6 +1946,22 @@ export default {
         return tests
       },
 
+      getTestState (testId: string): SerializedTest | undefined {
+        const testRunnable = getTestById(testId)
+
+        if (!testRunnable) {
+          return undefined
+        }
+
+        const test = serializeTest(testRunnable)
+
+        test._titlePath = testRunnable.titlePath()
+
+        test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+
+        return test
+      },
+
       stop () {
         if (_runner.stopped) {
           return

@@ -30,6 +30,16 @@ export interface CachedTestState {
   activeSessions: StoredSessions
 }
 
+export interface SerializedCommandLog {
+  id: string
+  name?: string
+  message?: string
+  state?: 'pending' | 'passed' | 'failed'
+  type?: 'parent' | 'child' | 'system'
+  _hasBeenCleanedUp?: boolean
+  [key: string]: unknown
+}
+
 // The subset of the serialized shape that is stable across driver versions.
 // `timings` and `err` stay opaque objects: their values are heterogeneous
 // (`err` carries whatever the user's thrown object had on it), so consumers
@@ -44,6 +54,7 @@ interface SerializedTestStable {
   retries?: number
   timings?: Record<string, unknown> | null
   err?: Record<string, unknown> | null
+  commands?: SerializedCommandLog[]
   prevAttempts?: SerializedTest[]
 }
 
