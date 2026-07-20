@@ -80,7 +80,7 @@ const normalizeResourceType = (type: RequestInitiatorType): ResourceType => {
   }
 }
 
-const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
+const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartialCookie => {
   const cookieToClearFilter: StoragePartialCookie = {
     name: cookie.name,
     value: {
@@ -91,7 +91,7 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVe
     path: cookie.path,
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
   }
 
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
@@ -124,13 +124,11 @@ export class BidiAutomation {
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
-  private majorFirefoxVersion: number | undefined
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
     debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
-    this.majorFirefoxVersion = parseInt(webDriverClient?.capabilities?.browserVersion || '') || undefined
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
@@ -422,7 +420,7 @@ export class BidiAutomation {
 
     // if it does, convert it to a BiDi cookie filter and delete the cookie
     await this.webDriverClient.storageDeleteCookies({
-      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared, this.majorFirefoxVersion) as StorageCookieFilter,
+      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared) as StorageCookieFilter,
     })
 
     return cookieToBeCleared
@@ -464,7 +462,7 @@ export class BidiAutomation {
         {
           debugCookies(`set:cookie %o`, data)
           await this.webDriverClient.storageSetCookie({
-            cookie: convertCyCookieToBiDiCookie(data, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+            cookie: convertCyCookieToBiDiCookie(data) as BidiStoragePartialCookie,
           })
 
           const cookies = await this.getAllCookiesMatchingFilter(data)
@@ -476,7 +474,7 @@ export class BidiAutomation {
           debugCookies(`add:cookies %o`, data)
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+              cookie: convertCyCookieToBiDiCookie(cookie) as BidiStoragePartialCookie,
             })
           }))
 
@@ -489,7 +487,7 @@ export class BidiAutomation {
 
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+              cookie: convertCyCookieToBiDiCookie(cookie) as BidiStoragePartialCookie,
             })
           }))
 
