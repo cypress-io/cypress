@@ -12,15 +12,24 @@ describe('lib/network-runtime', () => {
     } as Cypress.Config,
     remoteStates: {
       hasPrimary: sinon.stub().returns(false),
-      getPrimary: sinon.stub(),
+      getPrimary: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
+      get: sinon.stub().returns(undefined),
+      current: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
+      isPrimarySuperDomainBasedOrigin: sinon.stub().returns(false),
+      isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+      getByStrategy: sinon.stub(),
       reset: sinon.stub(),
     } as any,
     getFileServerToken: () => 'token',
-    getCookieJar: () => ({}) as any,
+    getCookieJar: () => ({
+      getCookies: sinon.stub().returns([]),
+    }) as any,
     socket: {
       toDriver: sinon.stub(),
     } as any,
-    request: {} as any,
+    request: {
+      rp: sinon.stub(),
+    } as any,
     serverBus: { emit: sinon.stub() } as any,
     getCurrentBrowser: () => ({}) as any,
   })
@@ -60,6 +69,16 @@ describe('lib/network-runtime', () => {
 
   async function tick () {
     await Promise.resolve()
+  }
+
+  async function flush () {
+    // Legacy middleware runs several async Bluebird stages before the transport
+    // continues the CDP request; flush a handful of microtasks/macrotasks.
+    for (let i = 0; i < 10; i++) {
+      await tick()
+    }
+
+    await new Promise((resolve) => setImmediate(resolve))
   }
 
   it('createProxyRuntime constructs networkProxy and netStubbingState', () => {
@@ -157,7 +176,7 @@ describe('lib/network-runtime', () => {
     expect(spy).to.have.been.calledOnceWith(preRequest)
   })
 
-  it('createCdpFetchRuntime wires CDP Fetch without the legacy proxy pipeline', () => {
+  it('createCdpFetchRuntime wires CDP Fetch with the legacy proxy pipeline', () => {
     const client = {
       send: sinon.stub(),
       on: sinon.stub(),
@@ -170,16 +189,99 @@ describe('lib/network-runtime', () => {
       isAUTFrame,
     })
 
+    expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
+    expect(runtime.netStubbingState.routes).to.deep.equal([])
     expect(runtime.networkInterception).to.exist
     expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
     expect(runtime.networkPolicyRegistration).to.exist
     expect(runtime.fetchTransport).to.exist
-    expect(runtime).not.to.have.property('networkProxy')
+    expect(runtime.networkProxy.http.networkInterception).to.equal(runtime.networkInterception)
+
+    const policies = runtime.networkPolicyRegistration.getPolicies()
+
+    expect(policies.map((p) => p.name)).to.include.members([
+      'blocked-hosts',
+      'csp-allow-list',
+      'document-rewrite',
+    ])
+  })
+
+  it('createCdpFetchRuntime reuses a provided netStubbingState', () => {
+    const client = {
+      send: sinon.stub(),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const existingState = {
+      routes: [{ id: 'existing-route' }],
+      requests: {},
+      reset: sinon.stub(),
+    } as any
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      netStubbingState: existingState,
+    })
+
+    expect(runtime.netStubbingState).to.equal(existingState)
+    expect(runtime.networkProxy.http.netStubbingState).to.equal(existingState)
+  })
+
+  it('createCdpFetchRuntime registers blocked-hosts policy for the CDP path', () => {
+    const client = {
+      send: sinon.stub(),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+        blockHosts: ['blocked.example.test'],
+      } as Cypress.Config,
+    })
+
+    const policies = runtime.networkPolicyRegistration.getPolicies()
+    const blockedHosts = policies.find((p) => p.name === 'blocked-hosts')
+
+    expect(blockedHosts).to.exist
+    expect(blockedHosts!.when({ url: 'http://blocked.example.test/' })).to.be.true
+    expect(blockedHosts!.when({ url: 'http://allowed.example.test/' })).to.be.false
+  })
+
+  it('createCdpFetchRuntime reset clears NetworkProxy and transport state without disabling Fetch', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const networkProxyReset = sinon.spy(runtime.networkProxy, 'reset')
+
+    await runtime.start()
+    client.send.resetHistory()
+
+    runtime.reset()
+
+    expect(networkProxyReset).to.have.been.calledOnceWith({ resetBetweenSpecs: false })
+    expect(client.send).not.to.have.been.calledWith('Fetch.disable')
+
+    await runtime.stop()
+
+    expect(client.send).to.have.been.calledWith('Fetch.disable')
   })
 
   it('createCdpFetchRuntime starts Fetch interception and continues requests by default', async () => {
     const client = {
-      send: sinon.stub().resolves({}),
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
       on: sinon.stub(),
       off: sinon.stub(),
     }
@@ -191,11 +293,13 @@ describe('lib/network-runtime', () => {
       networkId: 'network-1',
     }))
 
-    await tick()
+    await flush()
 
-    expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
-      requestId: 'fetch-request',
-    })
+    // Legacy request middleware may mutate headers (e.g. accept-encoding) before continue.
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(continueCall!.args[1]).to.include({ requestId: 'fetch-request' })
 
     await onRequestPaused(createPausedRequest({
       requestId: 'fetch-response',
@@ -203,26 +307,7 @@ describe('lib/network-runtime', () => {
       responseStatusCode: 200,
     }))
 
+    await flush()
     await handled
-  })
-
-  it('createCdpFetchRuntime reset clears in-flight state without disabling Fetch', async () => {
-    const client = {
-      send: sinon.stub().resolves({}),
-      on: sinon.stub(),
-      off: sinon.stub(),
-    }
-    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-
-    await runtime.start()
-    client.send.resetHistory()
-
-    runtime.reset()
-
-    expect(client.send).not.to.have.been.calledWith('Fetch.disable')
-
-    await runtime.stop()
-
-    expect(client.send).to.have.been.calledWith('Fetch.disable')
   })
 })

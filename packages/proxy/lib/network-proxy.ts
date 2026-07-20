@@ -6,7 +6,6 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
 import { proxyHttpCodec } from './adapters/http-codec'
-import type { RequestInterceptionMiddlewareCtx } from './adapters/types'
 
 export class NetworkProxy {
   http: Http
@@ -19,10 +18,9 @@ export class NetworkProxy {
     return proxyHttpCodec
   }
 
-  withIntercept (
-    networkInterception: ForHttpIntercept<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
+  withIntercept <TRequest, TResponse> (
+    networkInterception: ForHttpIntercept<TRequest, TResponse>,
   ) {
-    networkInterception.use(this.http.createLegacyProxyPipeline(this.codec))
     this.http.networkInterception = networkInterception
 
     return this

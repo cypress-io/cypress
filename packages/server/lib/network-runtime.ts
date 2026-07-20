@@ -1,7 +1,7 @@
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware } from '@packages/proxy'
+import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { HttpIntercept, registerDefaultNetworkPolicies, NetworkInterceptionCore as NetworkInterceptionCoreImpl } from '@packages/network-interception'
+import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
@@ -16,7 +16,6 @@ import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
-import type { ServeInternalRoutesConfig } from './adapters/serve-internal-routes'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -40,11 +39,22 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export type CreateCdpFetchRuntimeDeps = {
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
-  config: ServeInternalRoutesConfig
+  config: CyServer.Config & Cypress.Config
+  shouldCorrelatePreRequests?: () => boolean
+  remoteStates: RemoteStates
+  getFileServerToken: () => string | undefined
+  getCookieJar: () => CookieJar
+  socket: SocketBroadcaster
   request: ServerRequest
+  serverBus: EventEmitter
+  getCurrentBrowser: () => FoundBrowser
+  // Prefer the state already bound to the driver socket (created at open()).
+  netStubbingState?: NetStubbingState
 }
 
 export type CdpFetchNetworkRuntime = {
+  networkProxy: NetworkProxy
+  netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
   networkInterceptionCore: NetworkInterceptionCore
   networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
@@ -91,6 +101,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     request: deps.request,
   }))
 
+  networkInterception.use(networkProxy.http.createLegacyProxyPipeline(networkProxy.codec))
   networkProxy.withIntercept(networkInterception)
 
   return {
@@ -118,18 +129,38 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
 
 /**
  * Composition-root factory for the CDP Fetch network runtime used when the
- * MITM proxy is disabled. Keeps the transport-neutral HttpIntercept surface
- * without wiring the legacy proxy pipeline.
- *
- * Config that depends on the proxy is not enforced yet — most notably
- * `hosts` and `blockHosts`.
+ * MITM proxy is disabled. Reuses NetworkProxy so the legacy middleware
+ * pipeline (cookies, hosts, blockHosts, rewriter, net-stubbing) runs through
+ * a synthetic Express ctx via createSyntheticProxyCodec.
  */
 export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
+  const stubbingState = deps.netStubbingState ?? netStubbingState()
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
-  const networkInterceptionCore = new NetworkInterceptionCoreImpl({
+  registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
+    matchesBlockedHost: blocked.matches,
+  })
+
+  const networkInterceptionCore = createProxyNetworkInterception({
     policyRegistration: networkPolicyRegistration,
   })
+
+  const networkProxy = new NetworkProxy({
+    config: deps.config,
+    shouldCorrelatePreRequests: deps.shouldCorrelatePreRequests,
+    remoteStates: deps.remoteStates,
+    getFileServerToken: deps.getFileServerToken,
+    getCookieJar: deps.getCookieJar,
+    socket: deps.socket,
+    netStubbingState: stubbingState,
+    networkInterceptionCore,
+    request: deps.request,
+    serverBus: deps.serverBus,
+    getCurrentBrowser: deps.getCurrentBrowser,
+    middleware: defaultMiddleware,
+    getRenderedHTMLOrigins: () => ({}),
+  })
+
   const networkInterception = new HttpIntercept(createCdpFetchCodec())
 
   networkInterception.use(createServeInternalRoutesMiddleware({
@@ -137,11 +168,21 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     request: deps.request,
   }))
 
+  networkInterception.use(networkProxy.http.createLegacyProxyPipeline(
+    createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
+    }),
+  ))
+
+  networkProxy.withIntercept(networkInterception)
+
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
   })
 
   return {
+    networkProxy,
+    netStubbingState: stubbingState,
     networkPolicyRegistration,
     networkInterceptionCore,
     networkInterception,
@@ -150,6 +191,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       return fetchTransport.start()
     },
     reset () {
+      networkProxy.reset({ resetBetweenSpecs: false })
       fetchTransport.reset()
     },
     stop () {

@@ -190,6 +190,17 @@ describe('lib/server-base', () => {
 
     beforeEach(function () {
       this.server._openConfig = this.config
+      this.server._socket = {
+        toDriver: sinon.stub(),
+        close: sinon.stub(),
+      }
+
+      this.server.getCurrentBrowser = () => null
+      this.server._netStubbingState = {
+        routes: [],
+        requests: {},
+        reset: sinon.stub(),
+      }
     })
 
     it('starts the CDP Fetch runtime and exposes its network context', async function () {
@@ -208,8 +219,20 @@ describe('lib/server-base', () => {
       })
 
       expect(this.server._cdpFetchRuntime).to.exist
+      expect(this.server._networkProxy).to.exist
+      expect(this.server._netStubbingState).to.exist
       expect(this.server._networkPolicyRegistration).to.exist
       expect(this.server._networkInterceptionCore).to.exist
+    })
+
+    it('reuses the existing netStubbingState when attaching NetworkProxy', async function () {
+      const client = createClient()
+      const existingState = this.server._netStubbingState
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      expect(this.server._netStubbingState).to.equal(existingState)
+      expect(this.server._networkProxy.http.netStubbingState).to.equal(existingState)
     })
 
     it('stops the previous CDP Fetch runtime before replacing it', async function () {

@@ -51,7 +51,7 @@ import type { AutomationCookie } from './automation/cookie/automation'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
-import type { CdpFetchNetworkRuntime } from './network-runtime'
+import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
@@ -206,6 +206,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
+  private shouldCorrelatePreRequests: () => boolean = () => false
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
   private _documentDomainInjection: DocumentDomainInjection
@@ -368,6 +369,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('server open')
     this.testingType = testingType
     this._openConfig = config
+    this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
@@ -386,6 +388,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     clientCertificates.loadClientCertificateConfig(config)
 
     if (isProxyDisabled()) {
+      // CDP Fetch runtime attaches NetworkProxy later in createCdpFetchNetworkRuntime.
+      // Create netStubbingState now so startWebsockets can bind driver intercept registration.
       this._netStubbingState = netStubbingState()
     } else {
       this.createNetworkProxy({
@@ -516,11 +520,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const runtime = createCdpFetchRuntime({
       client,
       isAUTFrame,
-      config: this.ensureProp(this._openConfig, 'open'),
+      config: this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config'],
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      remoteStates: this._remoteStates,
+      getFileServerToken: () => this._fileServer?.token,
+      getCookieJar: () => cookieJar,
+      socket: this.socket,
       request: this.request,
+      serverBus: this._eventBus,
+      getCurrentBrowser: this.getCurrentBrowser ?? (() => {
+        throw new Error('getCurrentBrowser is not available')
+      }),
+      netStubbingState: this._netStubbingState,
     })
 
     this._cdpFetchRuntime = runtime
+    this._networkProxy = runtime.networkProxy
+    this._netStubbingState = runtime.netStubbingState
     this._networkPolicyRegistration = runtime.networkPolicyRegistration
     this._networkInterceptionCore = runtime.networkInterceptionCore
 
