@@ -1,6 +1,6 @@
 const { expect } = require('../../../spec_helper')
 
-import { cookieMatches, CyCookie } from '../../../../lib/automation/cookie/util'
+import { cookieMatches, isHostOnlyCookie, CyCookie } from '../../../../lib/automation/cookie/util'
 
 context('lib/automation/cookie/util', () => {
   context('.cookieMatches', () => {
@@ -58,6 +58,25 @@ context('lib/automation/cookie/util', () => {
       const filter = { domain: 'www.example.com' }
 
       expect(cookieMatches(cookie, filter, { strictDomain: true })).to.be.false
+    })
+  })
+
+  context('.isHostOnlyCookie', () => {
+    it('is false for a dot-prefixed (domain) cookie', () => {
+      expect(isHostOnlyCookie({ domain: '.foo.com' })).to.be.false
+    })
+
+    it('is true for a registrable domain', () => {
+      expect(isHostOnlyCookie({ domain: 'foo.com' })).to.be.true
+      expect(isHostOnlyCookie({ domain: 'www.foo.com' })).to.be.true
+    })
+
+    it('is falsy for localhost', () => {
+      expect(isHostOnlyCookie({ domain: 'localhost' })).to.not.be.ok
+    })
+
+    it('is falsy for an IP address', () => {
+      expect(isHostOnlyCookie({ domain: '127.0.0.1' })).to.not.be.ok
     })
   })
 })
