@@ -30,16 +30,12 @@ export interface CachedTestState {
   activeSessions: StoredSessions
 }
 
-// A command log entry as the driver attaches it to a serialized test: the raw
-// attrs the driver's Log emits, typed only where stable. Other attrs (snapshots,
-// renderProps, ...) vary by command and stay opaque.
 export interface SerializedCommandLog {
   id: string
   name?: string
   message?: string
   state?: 'pending' | 'passed' | 'failed'
   type?: 'parent' | 'child' | 'system'
-  /** Set by the driver's reduceMemory when the test fell out of numTestsKeptInMemory. */
   _hasBeenCleanedUp?: boolean
   [key: string]: unknown
 }
