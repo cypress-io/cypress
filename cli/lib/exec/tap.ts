@@ -122,7 +122,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if ((wantsHelp || !command) && err.code === 'NO_INSTANCE') {
-          return renderGenericHelp(wantsHelp)
+          return renderGenericHelp(wantsHelp, tapCliCommands)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)

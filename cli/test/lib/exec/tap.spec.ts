@@ -4,6 +4,7 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
+import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
@@ -564,6 +565,10 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).toContain('discovered from the running Cypress instance')
+
+      for (const { name, description } of tapCliCommands) {
+        expect(logger.print()).toMatch(new RegExp(`^  ${name} +${description}$`, 'm'))
+      }
     })
 
     it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {

@@ -2,6 +2,7 @@ import commander from 'commander'
 
 import logger from '../logger'
 import type { InstanceSelection } from '../cypress-instances'
+import type { TapCliCommand } from './types'
 import type { TapSchema } from '@packages/cypress-instances'
 
 export const renderFailure = (err: { code: string, message: string }): void => {
@@ -16,19 +17,23 @@ export const renderResult = (result: unknown): void => {
   logger.always(typeof result === 'string' ? result : JSON.stringify(result, null, 2))
 }
 
-const GENERIC_TAP_USAGE = `Usage: cypress tap [command] [args...] [options]
+const genericTapUsage = (commands: readonly Pick<TapCliCommand, 'name' | 'description'>[]): string => {
+  const width = Math.max(...commands.map(({ name }) => name.length))
+  const commandList = commands.map(({ name, description }) => `  ${name.padEnd(width)}  ${description}`).join('\n')
+
+  return `Usage: cypress tap [command] [args...] [options]
 
 Interacts with a running Cypress instance over its tap binding.
 
 Commands:
-  instances  list the running Cypress instances this CLI can reach
-  status     report where a running Cypress instance is in its lifecycle
+${commandList}
 
 Other commands are discovered from the running Cypress instance — start
 Cypress (e.g. \`cypress open\`), then run \`cypress tap\` to see them.
 
 Options:
   --instance <pid>  target a specific running Cypress instance by its pid`
+}
 
 export const renderUsage = (usage: string): void => {
   logger.always(usage)
@@ -73,8 +78,8 @@ export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, 
   return wantsHelp ? 0 : 1
 }
 
-export const renderGenericHelp = (wantsHelp: boolean): number => {
-  logger.always(GENERIC_TAP_USAGE)
+export const renderGenericHelp = (wantsHelp: boolean, commands: readonly Pick<TapCliCommand, 'name' | 'description'>[]): number => {
+  logger.always(genericTapUsage(commands))
 
   return wantsHelp ? 0 : 1
 }
