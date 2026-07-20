@@ -11,16 +11,6 @@ export interface RunStateResult {
   results?: RunResults
 }
 
-export const tapRunStateSource = {
-  getActiveSpecRelative (): string | undefined {
-    try {
-      return window.getEventManager?.().getCypress()?.spec?.relative
-    } catch {
-      return undefined
-    }
-  },
-}
-
 export const runStateCommand = defineCommand({
   description: 'report where the running Cypress instance is in its run lifecycle',
   // The CLI surfaces this through the friendlier `status` command, not as its own.
@@ -38,7 +28,7 @@ export const runStateCommand = defineCommand({
     const state = !runner.isRunComplete() ? 'running' : results.failed > 0 ? 'failed' : 'passed'
 
     return {
-      spec: tapRunStateSource.getActiveSpecRelative() ?? null,
+      spec: tapManagerDataSource.getActiveSpecRelative() ?? null,
       totalSpecs,
       state,
       totalTests,

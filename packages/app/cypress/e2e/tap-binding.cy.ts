@@ -54,6 +54,17 @@ describe('tap binding', () => {
       for (const spec of specs) {
         expect(Object.keys(spec), `entry ${spec.relativePath}`).to.deep.eq(['relativePath', 'specType'])
       }
+
+      // With no run yet there is no runner to read, so run-state omits the run-only fields.
+      const runStateBeforeRun = await binding.exec('run-state')
+
+      expect('result' in runStateBeforeRun).to.eq(true)
+
+      const beforeRun = (runStateBeforeRun as { result: Record<string, unknown> }).result
+
+      expect(Object.keys(beforeRun)).to.deep.eq(['spec', 'totalSpecs'])
+      expect(beforeRun.spec).to.eq(null)
+      expect(beforeRun.totalSpecs).to.eq(specs.length)
     })
   })
 
@@ -123,6 +134,20 @@ describe('tap binding', () => {
       const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
 
       expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const runStateOutcome = await getBinding(win).exec('run-state')
+
+      expect('result' in runStateOutcome).to.eq(true)
+
+      const runState = (runStateOutcome as { result: Record<string, any> }).result
+
+      expect(Object.keys(runState)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results'])
+      expect(runState.spec).to.eq('cypress/e2e/dom-content.spec.js')
+      expect(runState.state).to.eq('passed')
+      expect(runState.totalTests).to.eq(tests.length)
+      expect(Object.keys(runState.results)).to.deep.eq(['passed', 'failed', 'pending', 'skipped'])
+      expect(runState.results.passed).to.eq(tests.length)
+      expect(runState.results.failed).to.eq(0)
     })
 
     // Rerunning advances the nonce, so the query changes even though the spec is unchanged.

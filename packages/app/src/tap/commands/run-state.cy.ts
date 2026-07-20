@@ -2,7 +2,6 @@ import type { FoundSpec } from '@packages/types'
 
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { TapManager } from '../tap-manager'
-import { tapRunStateSource } from './run-state'
 
 const CYPRESS_VERSION = '15.0.0'
 
@@ -44,7 +43,7 @@ describe('tap/commands/run-state', () => {
   // The spec's own window.Cypress is the instance running this test, so stub
   // the seams rather than replace live state.
   const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
-  const stubActiveSpec = (relative: string | undefined) => cy.stub(tapRunStateSource, 'getActiveSpecRelative').returns(relative)
+  const stubActiveSpec = (relative: string | undefined) => cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns(relative)
 
   beforeEach(() => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
@@ -60,7 +59,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: { spec: null, totalSpecs: 2 },
     })
   })
@@ -72,7 +70,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: { spec: null, totalSpecs: 0 },
     })
   })
@@ -84,7 +81,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: {
         spec: 'cypress/e2e/login.cy.ts',
         totalSpecs: 2,
@@ -103,7 +99,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: {
         spec: 'cypress/e2e/login.cy.ts',
         totalSpecs: 2,
@@ -121,7 +116,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: {
         spec: 'cypress/e2e/login.cy.ts',
         totalSpecs: 2,
@@ -140,7 +134,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: {
         spec: 'cypress/e2e/login.cy.ts',
         totalSpecs: 2,
@@ -158,7 +151,6 @@ describe('tap/commands/run-state', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('run-state')).to.deep.eq({
-      ok: true,
       result: {
         spec: null,
         totalSpecs: 2,
