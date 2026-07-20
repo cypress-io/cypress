@@ -148,6 +148,14 @@ describe('lib/tap/build-program', () => {
     )
   })
 
+  it('throws a catchable excessArguments error for operands passed to the CLI-native status command', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['status', 'extra'], { from: 'user' })).toThrowError(
+      expect.objectContaining({ code: 'commander.excessArguments' }),
+    )
+  })
+
   it('throws a catchable unknownCommand error for a command not in the schema', () => {
     const program = buildTapProgram(schema, vi.fn())
 

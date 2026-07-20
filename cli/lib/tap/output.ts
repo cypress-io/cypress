@@ -30,33 +30,8 @@ Cypress (e.g. \`cypress open\`), then run \`cypress tap\` to see them.
 Options:
   --instance <pid>  target a specific running Cypress instance by its pid`
 
-const INSTANCES_USAGE = `Usage: cypress tap instances [options]
-
-Lists the running Cypress instances this CLI can reach (those whose tap
-binding answers a liveness probe), as a JSON array. Pass a instance's pid to
-\`--instance\` to target it with another tap command.
-
-Options:
-  --instance <pid>  only list the instance with this pid`
-
-export const renderInstancesHelp = (): void => {
-  logger.always(INSTANCES_USAGE)
-}
-
-const STATUS_USAGE = `Usage: cypress tap status [options]
-
-Reports where a running Cypress instance is in its lifecycle, as JSON — for
-polling and "where am I?" checks. Always exits 0 for a determinable stage
-(including "not connected"); a poller branches on the \`status\` field.
-
-Stages: not connected, browser not selected, spec not selected, running,
-passed, failed.
-
-Options:
-  --instance <pid>  report the instance with this pid`
-
-export const renderStatusHelp = (): void => {
-  logger.always(STATUS_USAGE)
+export const renderUsage = (usage: string): void => {
+  logger.always(usage)
 }
 
 const unknownCommandMessage = (schema: TapSchema, command: string): string => {
@@ -82,7 +57,6 @@ export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, 
   if (command) {
     const entry = schema.commands.find(({ name }) => name === command)
 
-    // Hidden commands are absent from the program, so treat them as unknown.
     if (!entry || entry.hidden) {
       renderFailure({ code: 'UNKNOWN_COMMAND', message: unknownCommandMessage(schema, command) })
 

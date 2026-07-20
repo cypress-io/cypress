@@ -1,21 +1,18 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { CypressInstanceError, listLiveInstances, resolveInstance } from '../cypress-instances'
+import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
-import { reportStatus } from '../tap/status'
+import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
+import { tapCliCommands } from '../tap/commands'
+import type { TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
-
-export interface TapCliOptions {
-  instance?: number
-}
 
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
@@ -65,39 +62,22 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
   return 0
 }
 
-const listInstances = async (options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
-  if (wantsHelp) {
-    renderInstancesHelp()
-
-    return 0
-  }
-
-  const instances = await listLiveInstances({ instance: options.instance })
-
-  renderResult(instances.map((instance) => ({
-    pid: instance.pid,
-    projectRoot: instance.projectRoot,
-    serverPort: instance.serverPort,
-    browserAttached: instance.cdpBrowserWsUrl !== null,
-  })))
-
-  return 0
-}
-
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
 
     const { wantsHelp, positionals, command } = buildCommandInfo(operands)
 
-    if (command === 'instances') {
-      return listInstances(options, wantsHelp)
-    }
+    const native = tapCliCommands.find(({ name }) => name === command)
 
-    // Reserved CLI command, like `instances`: must work before any browser or
-    // session exists, so it short-circuits here. (A binding `status` is shadowed.)
-    if (command === 'status') {
-      return reportStatus(options, wantsHelp)
+    if (native) {
+      if (wantsHelp) {
+        renderUsage(native.usage)
+
+        return 0
+      }
+
+      return native.handler(options)
     }
 
     try {

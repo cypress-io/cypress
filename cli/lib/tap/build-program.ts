@@ -1,5 +1,6 @@
 import commander from 'commander'
 
+import { tapCliCommands } from './commands'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
@@ -79,18 +80,16 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   program.addHelpCommand(false)
   program.description('Interacts with a running Cypress instance')
 
-  const instances = program
-  .command('instances')
-  .description('list the running Cypress instances this CLI can reach')
+  // CLI-native commands register here only so help output and argument
+  // validation cover them; their real dispatch short-circuits in exec/tap.ts
+  // before the program ever parses.
+  for (const { name, description } of tapCliCommands) {
+    const command = program.command(name).description(description)
 
-  instances.action(() => {
-    rejectExcessArguments('instances', [], instances.args)
-  })
-
-  program
-  .command('status')
-  .description('report where a running Cypress instance is in its lifecycle')
-  .action(() => {})
+    command.action(() => {
+      rejectExcessArguments(name, [], command.args)
+    })
+  }
 
   for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
     const command = program.command(name)

@@ -1,3 +1,20 @@
+/** Options `cypress tap` accepts from the top-level CLI. */
+export interface TapCliOptions {
+  instance?: number
+}
+
+/**
+ * A tap subcommand implemented entirely in the CLI, as opposed to the
+ * commands discovered from the running Cypress instance's schema.
+ */
+export interface TapCliCommand {
+  name: string
+  description: string
+  /** Full usage text rendered for `cypress tap <name> --help`. */
+  usage: string
+  handler: (options: TapCliOptions) => Promise<number>
+}
+
 /**
  * The `run-state` payload reported by the running Cypress instance's tap
  * binding. Mirrors the app-side result shape, which travels over CDP as

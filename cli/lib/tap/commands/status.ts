@@ -1,11 +1,22 @@
-import { CypressInstanceError, resolveLiveInstance } from '../cypress-instances'
-import type { ReadyInstanceState } from '../cypress-instances'
-import { withTapSession, throwTapError, validateExecResult } from './tap-session'
-import { renderKnownFailure, renderResult, renderStatusHelp } from './output'
+import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
+import type { ReadyInstanceState } from '../../cypress-instances'
+import { withTapSession, throwTapError, validateExecResult } from '../tap-session'
+import { renderKnownFailure, renderResult } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
-import { errors } from '../errors'
-import type { TapCliOptions } from '../exec/tap'
-import type { TapRunState, TapStatus } from './types'
+import { errors } from '../../errors'
+import type { TapCliCommand, TapCliOptions, TapRunState, TapStatus } from '../types'
+
+const STATUS_USAGE = `Usage: cypress tap status [options]
+
+Reports where a running Cypress instance is in its lifecycle, as JSON — for
+polling and "where am I?" checks. Always exits 0 for a determinable stage
+(including "not connected"); a poller branches on the \`status\` field.
+
+Stages: not connected, browser not selected, spec not selected, running,
+passed, failed.
+
+Options:
+  --instance <pid>  report the instance with this pid`
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   if (runState.state === undefined) {
@@ -22,13 +33,7 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   }
 }
 
-export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
-  if (wantsHelp) {
-    renderStatusHelp()
-
-    return 0
-  }
-
+const reportStatus = async (options: TapCliOptions): Promise<number> => {
   let selection
 
   try {
@@ -84,4 +89,11 @@ export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): 
 
     throw err
   }
+}
+
+export const statusCommand: TapCliCommand = {
+  name: 'status',
+  description: 'report where a running Cypress instance is in its lifecycle',
+  usage: STATUS_USAGE,
+  handler: reportStatus,
 }
