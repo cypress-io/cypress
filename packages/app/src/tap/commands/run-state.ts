@@ -1,4 +1,3 @@
-import { useAutStore } from '../../store'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
 import { aggregateResults } from './test-state'
@@ -13,13 +12,6 @@ export interface RunStateResult {
 }
 
 export const tapRunStateSource = {
-  isRunning (): boolean {
-    try {
-      return useAutStore().isRunning
-    } catch {
-      return false
-    }
-  },
   getActiveSpecRelative (): string | undefined {
     try {
       return window.getEventManager?.().getCypress()?.spec?.relative
@@ -43,7 +35,7 @@ export const runStateCommand = defineCommand({
     }
 
     const { results, totalTests } = aggregateResults(runner)
-    const state = tapRunStateSource.isRunning() ? 'running' : results.failed > 0 ? 'failed' : 'passed'
+    const state = !runner.isRunComplete() ? 'running' : results.failed > 0 ? 'failed' : 'passed'
 
     return {
       spec: tapRunStateSource.getActiveSpecRelative() ?? null,

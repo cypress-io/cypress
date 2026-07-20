@@ -44,7 +44,6 @@ describe('tap/commands/run-state', () => {
   // The spec's own window.Cypress is the instance running this test, so stub
   // the seams rather than replace live state.
   const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
-  const stubRunning = (isRunning: boolean) => cy.stub(tapRunStateSource, 'isRunning').returns(isRunning)
   const stubActiveSpec = (relative: string | undefined) => cy.stub(tapRunStateSource, 'getActiveSpecRelative').returns(relative)
 
   beforeEach(() => {
@@ -80,7 +79,6 @@ describe('tap/commands/run-state', () => {
 
   it('reports a run in progress as running, with the active spec and partial results', async () => {
     stubRunner({ getAllTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => false })
-    stubRunning(true)
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -98,9 +96,26 @@ describe('tap/commands/run-state', () => {
     })
   })
 
+  it('reports an unsettled run with no failures as running, never a premature passed', async () => {
+    stubRunner({ getAllTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => false })
+    stubActiveSpec('cypress/e2e/login.cy.ts')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('run-state')).to.deep.eq({
+      ok: true,
+      result: {
+        spec: 'cypress/e2e/login.cy.ts',
+        totalSpecs: 2,
+        state: 'running',
+        totalTests: 1,
+        results: { passed: 1, failed: 0, pending: 0, skipped: 0 },
+      },
+    })
+  })
+
   it('reports a settled run with a failure as failed, counting never-run tests as skipped', async () => {
     stubRunner({ getAllTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => true })
-    stubRunning(false)
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -120,7 +135,6 @@ describe('tap/commands/run-state', () => {
 
   it('reports a settled run with no failures as passed', async () => {
     stubRunner({ getAllTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => true })
-    stubRunning(false)
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -139,7 +153,6 @@ describe('tap/commands/run-state', () => {
 
   it('falls back to a null spec when the active spec path is unavailable', async () => {
     stubRunner({ getAllTestsState: cy.stub().returns({}), isRunComplete: () => false })
-    stubRunning(true)
     stubActiveSpec(undefined)
 
     const manager = new TapManager(CYPRESS_VERSION)
