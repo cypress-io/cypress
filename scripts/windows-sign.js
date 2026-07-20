@@ -13,9 +13,42 @@ const fs = require('fs-extra')
 const childProcess = require('child_process')
 
 const TEMP_DIR = path.join(tmpdir(), 'release', 'tmp')
+const CODE_SIGN_TOOL_FALLBACK_URL = 'https://www.ssl.com/wp-content/uploads/2024/10/CodeSignTool-v1.3.1-windows.zip'
 
 // create the temp directory we need for CodeSignTool in order to avoid manual confirmations
 fs.ensureDirSync(TEMP_DIR)
+
+function resolveCodeSignToolDownloadUrl () {
+  try {
+    const page = childProcess.execSync('curl -fsSL https://www.ssl.com/downloads/', { encoding: 'utf8' })
+    const matches = [...page.matchAll(/href="(https:\/\/[^"]*CodeSignTool-v[\d.]+-windows\.zip)"/g)]
+
+    if (matches.length > 0) {
+      return matches[matches.length - 1][1].replace('://ssl.com/', '://www.ssl.com/')
+    }
+  } catch (e) {
+    console.warn('Could not parse SSL.com downloads page for CodeSignTool, using fallback URL')
+  }
+
+  return CODE_SIGN_TOOL_FALLBACK_URL
+}
+
+function downloadAndExtractCodeSignTool () {
+  const downloadUrl = resolveCodeSignToolDownloadUrl()
+  const archivePath = 'codesigntool-for-windows.zip'
+
+  console.log(`downloading CodeSignTool for Windows from ${downloadUrl}...`)
+  childProcess.execSync(`curl -fSL "${downloadUrl}" -o ${archivePath}`)
+
+  const archive = fs.readFileSync(archivePath)
+
+  if (archive[0] !== 0x50 || archive[1] !== 0x4B) {
+    throw new Error('Downloaded CodeSignTool archive is not a valid zip file')
+  }
+
+  childProcess.execSync(`tar -xf ${archivePath}`)
+  childProcess.execSync(`rm ./${archivePath}`)
+}
 
 function sign (configuration) {
   // credentials from ssl.com
@@ -31,10 +64,7 @@ function sign (configuration) {
     // Since the CodeSignTool can only be run in the directory it is installed, we want to
     // download the CodeSignTool and explode it into the current directory. This isn't a repeat operation
     // in this case since we are only signing the executable, which is one file.
-    console.log('downloading CodeSignTool for Windows from ssl.com...')
-    childProcess.execSync('curl https://www.ssl.com/download/codesigntool-for-windows/ -o codesigntool-for-windows.zip')
-    childProcess.execSync('tar -xvf codesigntool-for-windows.zip')
-    childProcess.execSync('rm ./codesigntool-for-windows.zip')
+    downloadAndExtractCodeSignTool()
 
     // CodeSignTool can't sign in place without verifying the overwrite with a
     // manual interaction so we are creating a new file in a temp directory and
