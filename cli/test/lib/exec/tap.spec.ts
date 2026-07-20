@@ -356,6 +356,12 @@ describe('lib/exec/tap', () => {
       expect(listLiveInstances).not.toHaveBeenCalled()
       expect(withTapSession).not.toHaveBeenCalled()
     })
+
+    it('exits 1 on an excess positional and never enumerates', async () => {
+      expect(await tap.start(['instances', 'extra'], {})).toBe(1)
+      expect(listLiveInstances).not.toHaveBeenCalled()
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
   })
 
   describe('the CLI-native status command', () => {
@@ -488,6 +494,12 @@ describe('lib/exec/tap', () => {
     it('prints status usage for `status --help` and exits 0, without resolving', async () => {
       expect(await tap.start(['status', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap status')
+      expect(resolveLiveInstance).not.toHaveBeenCalled()
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('exits 1 on an excess positional and never resolves an instance', async () => {
+      expect(await tap.start(['status', 'extra'], {})).toBe(1)
       expect(resolveLiveInstance).not.toHaveBeenCalled()
       expect(withTapSession).not.toHaveBeenCalled()
     })

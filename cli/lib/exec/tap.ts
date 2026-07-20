@@ -4,7 +4,7 @@ import commander from 'commander'
 import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
-import { buildTapProgram } from '../tap/build-program'
+import { buildTapProgram, rejectExcessArguments } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import type { TapCliOptions } from '../tap/types'
@@ -75,6 +75,18 @@ const tapModule = {
         renderUsage(native.usage)
 
         return 0
+      }
+
+      // Native commands take no positionals, so anything past the name is excess.
+      // The schema path validates through commander; this path must do it itself.
+      try {
+        rejectExcessArguments(native.name, [], positionals.slice(1))
+      } catch (err: any) {
+        if (err instanceof commander.CommanderError) {
+          return 1
+        }
+
+        throw err
       }
 
       return native.handler(options)

@@ -43,7 +43,7 @@ const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly 
   return forwarded
 }
 
-const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
+export const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
   if (args.length <= params.length) {
     return
   }
@@ -80,15 +80,11 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   program.addHelpCommand(false)
   program.description('Interacts with a running Cypress instance')
 
-  // CLI-native commands register here only so help output and argument
-  // validation cover them; their real dispatch short-circuits in exec/tap.ts
-  // before the program ever parses.
+  // CLI-native commands register here only so the help listing includes them.
+  // Their dispatch and excess-argument rejection run in exec/tap.ts, which
+  // short-circuits before this program ever parses, so no action belongs here.
   for (const { name, description } of tapCliCommands) {
-    const command = program.command(name).description(description)
-
-    command.action(() => {
-      rejectExcessArguments(name, [], command.args)
-    })
+    program.command(name).description(description)
   }
 
   for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
