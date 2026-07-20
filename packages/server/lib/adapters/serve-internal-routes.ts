@@ -3,7 +3,7 @@ import type { Request as ServerRequest } from '../request'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
-export type ServeInternalRoutesConfig = InternalRouteConfig
+type ServeInternalRoutesConfig = InternalRouteConfig
 
 type CreateServeInternalRoutesMiddlewareOptions = {
   config: ServeInternalRoutesConfig
