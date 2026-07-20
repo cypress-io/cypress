@@ -476,11 +476,13 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)
     })
 
-    it('exits 1 when the running Cypress lacks the run-state command', async () => {
+    it('exits 1 and surfaces the binding error when the running Cypress lacks the run-state command', async () => {
       mockLiveResolved(liveInstance())
       mockSession(schema, { error: { code: 'UNKNOWN_COMMAND', message: 'no such command' } } satisfies TapExecResult)
 
       expect(await tap.start(['status'], {})).toBe(1)
+      expect(logger.print()).toContain('UNKNOWN_COMMAND: no such command')
+      expect(logger.print()).not.toContain(errors.tapInvalidExecResult.description)
     })
 
     it('prints status usage for `status --help` and exits 0, without resolving', async () => {

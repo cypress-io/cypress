@@ -1,9 +1,8 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
 import type { ReadyInstanceState } from '../../cypress-instances'
-import { withTapSession, throwTapError, validateExecResult } from '../tap-session'
-import { renderKnownFailure, renderResult } from '../output'
+import { withTapSession, validateExecResult } from '../tap-session'
+import { renderFailure, renderKnownFailure, renderResult } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
-import { errors } from '../../errors'
 import type { TapCliCommand, TapCliOptions, TapRunState, TapStatus } from '../types'
 
 const STATUS_USAGE = `Usage: cypress tap status [options]
@@ -67,17 +66,17 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   }
 
   try {
-    const runState = await withTapSession(instance as ReadyInstanceState, async (session) => {
-      const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
-
-      if ('error' in outcome) {
-        return throwTapError(errors.tapInvalidExecResult, `${outcome.error.code}: ${outcome.error.message}`)
-      }
-
-      return outcome.result as TapRunState
+    const outcome = await withTapSession(instance as ReadyInstanceState, async (session) => {
+      return validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
     })
 
-    renderResult(mergeRunState(base, runState))
+    if ('error' in outcome) {
+      renderFailure(outcome.error)
+
+      return 1
+    }
+
+    renderResult(mergeRunState(base, outcome.result as TapRunState))
 
     return 0
   } catch (err: any) {
