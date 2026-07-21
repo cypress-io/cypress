@@ -8,42 +8,36 @@
 
 // sampled from https://github.com/electron-userland/electron-builder/issues/6158#issuecomment-899798533
 const path = require('path')
+const crypto = require('crypto')
 const { tmpdir } = require('os')
 const fs = require('fs-extra')
 const childProcess = require('child_process')
 
 const TEMP_DIR = path.join(tmpdir(), 'release', 'tmp')
-const CODE_SIGN_TOOL_FALLBACK_URL = 'https://www.ssl.com/wp-content/uploads/2024/10/CodeSignTool-v1.3.1-windows.zip'
+
+// ssl.com publishes CodeSignTool releases on GitHub. Pin an exact version and
+// checksum so the tool that signs our binaries only changes via a reviewed bump.
+// When bumping the version, regenerate the hash with:
+//   curl -fSL <CODE_SIGN_TOOL_URL> | shasum -a 256
+const CODE_SIGN_TOOL_VERSION = 'v1.3.2'
+const CODE_SIGN_TOOL_URL = `https://github.com/SSLcom/CodeSignTool/releases/download/${CODE_SIGN_TOOL_VERSION}/CodeSignTool-${CODE_SIGN_TOOL_VERSION}-windows.zip`
+const CODE_SIGN_TOOL_SHA256 = '4afc32e8b7f79bbe1de7e4e7049aaad4e0f754357613b9bbec0e3052f06fd36b'
 
 // create the temp directory we need for CodeSignTool in order to avoid manual confirmations
 fs.ensureDirSync(TEMP_DIR)
 
-function resolveCodeSignToolDownloadUrl () {
-  try {
-    const page = childProcess.execSync('curl -fsSL https://www.ssl.com/downloads/', { encoding: 'utf8' })
-    const matches = [...page.matchAll(/href="(https:\/\/[^"]*CodeSignTool-v[\d.]+-windows\.zip)"/g)]
-
-    if (matches.length > 0) {
-      return matches[matches.length - 1][1].replace('://ssl.com/', '://www.ssl.com/')
-    }
-  } catch (e) {
-    console.warn('Could not parse SSL.com downloads page for CodeSignTool, using fallback URL')
-  }
-
-  return CODE_SIGN_TOOL_FALLBACK_URL
-}
-
 function downloadAndExtractCodeSignTool () {
-  const downloadUrl = resolveCodeSignToolDownloadUrl()
   const archivePath = 'codesigntool-for-windows.zip'
 
-  console.log(`downloading CodeSignTool for Windows from ${downloadUrl}...`)
-  childProcess.execSync(`curl -fSL "${downloadUrl}" -o ${archivePath}`)
+  console.log(`downloading CodeSignTool ${CODE_SIGN_TOOL_VERSION} for Windows from GitHub...`)
+  childProcess.execSync(`curl -fSL "${CODE_SIGN_TOOL_URL}" -o ${archivePath}`)
 
-  const archive = fs.readFileSync(archivePath)
+  // Verify the download against a pinned checksum so a swapped or corrupted
+  // response can never be extracted and used to sign our binaries.
+  const actualSha256 = crypto.createHash('sha256').update(fs.readFileSync(archivePath)).digest('hex')
 
-  if (archive[0] !== 0x50 || archive[1] !== 0x4B) {
-    throw new Error('Downloaded CodeSignTool archive is not a valid zip file')
+  if (actualSha256 !== CODE_SIGN_TOOL_SHA256) {
+    throw new Error(`Downloaded CodeSignTool archive checksum ${actualSha256} does not match expected ${CODE_SIGN_TOOL_SHA256}`)
   }
 
   childProcess.execSync(`tar -xf ${archivePath}`)
