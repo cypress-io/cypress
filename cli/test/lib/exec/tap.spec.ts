@@ -5,8 +5,8 @@ import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveIn
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
 import type { TapSession } from '../../../lib/tap/tap-session'
-import { withResolvedAutFrame } from '../../../lib/tap/aut-frame'
-import type { AutFrame } from '../../../lib/tap/aut-frame'
+import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
+import type { AutFrame } from '../../../lib/tap/aut/frame'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
@@ -37,8 +37,8 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
 
 // The AUT-frame reader drives CDP, covered in frame.spec.ts; here we assert only
 // that dom/aria/inspect route to it with their parsed args, so stub it out.
-vi.mock('../../../lib/tap/aut-frame', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/tap/aut-frame')>()
+vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/tap/aut/frame')>()
 
   return {
     ...actual,

@@ -1,10 +1,10 @@
 import type { TapSession } from '../tap-session'
-import type { AutFrame } from '../aut-frame'
-import { FrameCommandError, withResolvedAutFrame } from '../aut-frame'
-import { collectTrueStates, querySelectorObjectId } from '../frame-cdp'
-import type { AXValue } from '../frame-cdp'
-import { readElementInfo } from '../frame-scripts'
-import type { ElementInfo } from '../frame-scripts'
+import type { AutFrame } from '../aut/frame'
+import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
+import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
+import type { AXValue } from '../aut/cdp'
+import { readElementInfo } from '../aut/scripts'
+import type { ElementInfo } from '../aut/scripts'
 import type { TapCliCommand } from '../types'
 
 const INSPECT_DETAILS = `Inspects one element of the app-under-test: its tag, attributes, curated

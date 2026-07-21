@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { resolveAutFrame, parsePositiveInt, FrameCommandError } from '../../../lib/tap/aut-frame'
+import { resolveAutFrame, parsePositiveInt, FrameCommandError } from '../../../lib/tap/aut/frame'
 import { extractDom } from '../../../lib/tap/commands/dom'
 import { extractAria } from '../../../lib/tap/commands/aria'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
@@ -28,7 +28,7 @@ const makePageClient = (tree: ReturnType<typeof frameTree>) => {
   }
 }
 
-describe('lib/tap/aut-frame resolveAutFrame', () => {
+describe('lib/tap/aut/frame resolveAutFrame', () => {
   it('resolves the AUT child frame by its name prefix, ignoring snapshot buffers and the spec bridge', async () => {
     const client = makePageClient(frameTree())
 
@@ -52,7 +52,7 @@ describe('lib/tap/aut-frame resolveAutFrame', () => {
   })
 })
 
-describe('lib/tap/aut-frame parsePositiveInt', () => {
+describe('lib/tap/aut/frame parsePositiveInt', () => {
   it('falls back when the value is absent', () => {
     expect(parsePositiveInt(undefined, 200, 'max-nodes')).to.eq(200)
   })

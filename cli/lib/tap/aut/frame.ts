@@ -1,11 +1,11 @@
 import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
-import { CypressInstanceError, resolveInstance } from '../cypress-instances'
-import { withTapSession } from './tap-session'
-import type { TapSession } from './tap-session'
-import { renderResult, renderFailure, renderKnownFailure } from './output'
-import type { TapCliOptions } from './types'
+import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
+import { withTapSession } from '../tap-session'
+import type { TapSession } from '../tap-session'
+import { renderResult, renderFailure, renderKnownFailure } from '../output'
+import type { TapCliOptions } from '../types'
 
 const debug = Debug('cypress:cli:tap')
 

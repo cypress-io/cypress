@@ -1,6 +1,6 @@
-import type { TapSession } from './tap-session'
-import type { AutFrame } from './aut-frame'
-import { FrameCommandError } from './aut-frame'
+import type { TapSession } from '../tap-session'
+import type { AutFrame } from './frame'
+import { FrameCommandError } from './frame'
 
 // A separate JS context that shares the frame's DOM but not its globals, so
 // nothing the tap reads pollutes the page.

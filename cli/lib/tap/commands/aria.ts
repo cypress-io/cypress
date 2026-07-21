@@ -1,8 +1,8 @@
 import type { TapSession } from '../tap-session'
-import type { AutFrame } from '../aut-frame'
-import { parsePositiveInt, withResolvedAutFrame } from '../aut-frame'
-import { collectTrueStates, querySelectorObjectId } from '../frame-cdp'
-import type { AXProperty, AXValue } from '../frame-cdp'
+import type { AutFrame } from '../aut/frame'
+import { parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
+import type { AXProperty, AXValue } from '../aut/cdp'
 import type { TapCliCommand } from '../types'
 
 // The accessibility tree of a real app is deep; cap the projection so it stays

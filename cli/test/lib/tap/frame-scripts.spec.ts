@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { readDom, readElementInfo } from '../../../lib/tap/frame-scripts'
+import { readDom, readElementInfo } from '../../../lib/tap/aut/scripts'
 
 // These run in the AUT frame over CDP; here we call the real functions with the
 // handful of DOM globals they touch stubbed, so the logic is tested without a
@@ -11,7 +11,7 @@ afterEach(() => {
 
 const stubDocument = (doc: unknown) => vi.stubGlobal('document', doc)
 
-describe('lib/tap/frame-scripts readDom', () => {
+describe('lib/tap/aut/scripts readDom', () => {
   it('returns the whole-document HTML when no selector is given', () => {
     stubDocument({ documentElement: { outerHTML: '<html>hi</html>' } })
 
@@ -54,7 +54,7 @@ describe('lib/tap/frame-scripts readDom', () => {
   })
 })
 
-describe('lib/tap/frame-scripts readElementInfo', () => {
+describe('lib/tap/aut/scripts readElementInfo', () => {
   const fakeElement = (overrides: Record<string, unknown> = {}) => ({
     tagName: 'INPUT',
     attributes: [{ name: 'data-testid', value: 'username' }, { name: 'name', value: 'username' }],

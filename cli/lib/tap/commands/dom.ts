@@ -1,9 +1,9 @@
 import type { TapSession } from '../tap-session'
-import type { AutFrame } from '../aut-frame'
-import { FrameCommandError, parsePositiveInt, withResolvedAutFrame } from '../aut-frame'
-import { createFrameIsolatedWorld } from '../frame-cdp'
-import { readDom } from '../frame-scripts'
-import type { DomReadResult } from '../frame-scripts'
+import type { AutFrame } from '../aut/frame'
+import { FrameCommandError, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { createFrameIsolatedWorld } from '../aut/cdp'
+import { readDom } from '../aut/scripts'
+import type { DomReadResult } from '../aut/scripts'
 import type { TapCliCommand } from '../types'
 
 const DEFAULT_MAX_CHARS = 30000
