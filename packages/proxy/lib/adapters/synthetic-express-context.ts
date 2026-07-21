@@ -15,6 +15,20 @@ function normalizeHeaderName (name: string): string {
   return name.toLowerCase()
 }
 
+/**
+ * Node lowercases IncomingMessage header keys; legacy proxy middleware looks
+ * them up that way (cookie, sec-fetch-dest, accept-encoding, …). CDP Fetch
+ * preserves the browser's original casing, so normalize here when synthesizing
+ * an Express-like req.
+ */
+function lowercaseRequestHeaders (headers: HttpHeaders): HttpHeaders {
+  return Object.entries(headers).reduce<HttpHeaders>((memo, [name, value]) => {
+    memo[normalizeHeaderName(name)] = value
+
+    return memo
+  }, {})
+}
+
 function parseCookieHeader (header?: string | string[]): Record<string, string> {
   const raw = Array.isArray(header) ? header.join('; ') : header
 
@@ -243,7 +257,7 @@ export function createSyntheticExpressContext (request: HttpRequest): {
   res: SyntheticCypressResponse
 } {
   const req = createRequestBodyStream(request.body) as CypressIncomingRequest
-  const headers = request.headers ?? {}
+  const headers = lowercaseRequestHeaders(request.headers ?? {})
 
   req.method = request.method ?? 'GET'
   req.headers = headers

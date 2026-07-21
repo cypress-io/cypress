@@ -40,6 +40,26 @@ describe('createSyntheticExpressContext', () => {
     expect(await readStream(req)).to.equal('name=value')
   })
 
+  it('lowercases request header keys like Node IncomingMessage', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+      headers: {
+        Cookie: 'session=abc',
+        'Sec-Fetch-Dest': 'document',
+        'Accept-Encoding': 'gzip',
+      },
+    })
+
+    expect(req.headers).to.deep.equal({
+      cookie: 'session=abc',
+      'sec-fetch-dest': 'document',
+      'accept-encoding': 'gzip',
+    })
+
+    expect(req.cookies).to.deep.equal({ session: 'abc' })
+  })
+
   it('keeps malformed cookie values without throwing', () => {
     const { req } = createSyntheticExpressContext({
       id: 'network-1',

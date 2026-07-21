@@ -341,14 +341,24 @@ export class CdpFetchTransport {
   }
 
   private headersChanged (left: Protocol.Network.Headers, right: Protocol.Network.Headers): boolean {
-    const leftKeys = Object.keys(left)
-    const rightKeys = Object.keys(right)
+    // Compare case-insensitively — the synthetic Express path lowercases keys
+    // like Node IncomingMessage, while CDP pause events keep browser casing.
+    const normalize = (headers: Protocol.Network.Headers) => {
+      return Object.fromEntries(
+        Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]),
+      )
+    }
+
+    const leftNorm = normalize(left)
+    const rightNorm = normalize(right)
+    const leftKeys = Object.keys(leftNorm)
+    const rightKeys = Object.keys(rightNorm)
 
     if (leftKeys.length !== rightKeys.length) {
       return true
     }
 
-    return leftKeys.some((key) => left[key] !== right[key])
+    return leftKeys.some((key) => leftNorm[key] !== rightNorm[key])
   }
 
   private safeSend = async (...args: Parameters<CdpFetchClient['send']>): Promise<void> => {
