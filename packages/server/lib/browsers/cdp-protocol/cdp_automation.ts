@@ -59,6 +59,7 @@ export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
+  childFrames?: HasFrame[]
 }
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -356,9 +357,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       await this.gettingFrameTree
     }
 
-    const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
+    let frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
       return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
     }) as HasFrame | undefined
+
+    // Cy-in-cy nests the real AUT under the outer AUT frame — match _getAutFrame.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
+      frame = _.find(frame.childFrames || [], (item: HasFrame) => {
+        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+      }) as HasFrame | undefined
+    }
 
     if (frame) {
       return frame.frame.id === frameId
@@ -387,8 +395,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
       // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
-        // @ts-expect-error
-        frame = _.find(frame?.childFrames || [], (item: HasFrame) => {
+        frame = _.find(frame.childFrames || [], (item: HasFrame) => {
           return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
         }) as HasFrame | undefined
       }
