@@ -558,7 +558,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // Stopping sends Fetch.disable to the previous page client, which may
     // already be gone (spec change, browser relaunch); failing to stop the
     // old runtime must not fail the next launch.
-    return this._cdpFetchRuntime?.stop().catch((err) => {
+    const previous = this._cdpFetchRuntime
+
+    this._cdpFetchRuntime = undefined
+
+    if (!previous) {
+      return
+    }
+
+    // Dispose NetworkProxy before/while stopping Fetch so PreRequests sweep
+    // intervals from replaced runtimes do not accumulate across specs.
+    try {
+      previous.networkProxy.dispose()
+    } catch (err) {
+      debug('CDP Fetch NetworkProxy dispose failed: %s', err?.stack || err)
+    }
+
+    return previous.stop().catch((err) => {
       debug('CDP Fetch runtime stop failed: %s', err?.stack || err)
     })
   }

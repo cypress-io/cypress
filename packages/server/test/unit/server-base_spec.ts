@@ -240,10 +240,16 @@ describe('lib/server-base', () => {
       const secondClient = createClient()
 
       await this.server.createCdpFetchNetworkRuntime(firstClient)
+
+      const firstProxy = this.server._networkProxy
+      const disposeSpy = sinon.spy(firstProxy, 'dispose')
+
       await this.server.createCdpFetchNetworkRuntime(secondClient)
 
       expect(firstClient.send).to.have.been.calledWith('Fetch.disable')
+      expect(disposeSpy).to.have.been.calledOnce
       expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
+      expect(this.server._networkProxy).to.not.equal(firstProxy)
     })
 
     it('still starts the new runtime when stopping the previous one fails', async function () {

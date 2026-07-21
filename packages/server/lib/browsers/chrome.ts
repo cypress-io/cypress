@@ -516,9 +516,13 @@ export = {
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
-    // Fetch must be wired here when the MITM proxy is disabled.
+    // Fetch must be wired here when the MITM proxy is disabled. The page is
+    // already loaded — enable Page, listen for future frame changes, and seed
+    // the frame tree so isAUTFrame works before any new frameAttached events.
     if (isProxyDisabled()) {
+      await pageCriClient.send('Page.enable')
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await cdpAutomation.seedFrameTree(pageCriClient)
       await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
     }
   },

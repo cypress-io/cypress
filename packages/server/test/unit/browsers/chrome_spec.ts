@@ -607,6 +607,7 @@ describe('lib/browsers/chrome', () => {
       }
       const cdpAutomation = {
         _listenForFrameTreeChanges: sinon.stub(),
+        seedFrameTree: sinon.stub().resolves(),
         isAUTFrame: sinon.stub().resolves(false),
       }
       const onPageCriClientReady = sinon.stub().resolves()
@@ -628,7 +629,9 @@ describe('lib/browsers/chrome', () => {
         cdpSocketServer as any,
       )
 
+      expect(pageCriClient.send).to.have.been.calledWith('Page.enable')
       expect(cdpAutomation._listenForFrameTreeChanges).to.have.been.calledOnceWith(pageCriClient)
+      expect(cdpAutomation.seedFrameTree).to.have.been.calledOnceWith(pageCriClient)
       expect(onPageCriClientReady).to.have.been.calledOnceWith(pageCriClient, cdpAutomation.isAUTFrame)
     })
 

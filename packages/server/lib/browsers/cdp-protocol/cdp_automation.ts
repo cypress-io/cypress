@@ -446,6 +446,15 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
   }
 
+  /**
+   * Fetch and cache the current frame tree. Needed when attaching to an
+   * already-loaded page (e.g. cy-in-cy connectToExisting) where frameAttached
+   * will not fire for existing frames.
+   */
+  seedFrameTree = async (client: CriClient) => {
+    await this._updateFrameTree(client, 'seedFrameTree')()
+  }
+
   onRequest = async <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
     let setCookie
 

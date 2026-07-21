@@ -87,6 +87,15 @@ export class NetworkProxy {
     this.http.reset(options)
   }
 
+  /**
+   * Releases long-lived timers owned by this proxy. Used when replacing the
+   * CDP Fetch NetworkProxy so prior PreRequests sweep intervals do not leak.
+   */
+  dispose () {
+    this.http.preRequests.dispose()
+    this.reset({ resetBetweenSpecs: true })
+  }
+
   setProtocolManager (protocolManager) {
     this.http.setProtocolManager(protocolManager)
   }
