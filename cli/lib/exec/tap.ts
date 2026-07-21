@@ -4,11 +4,10 @@ import commander from 'commander'
 import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
-import { buildTapProgram, rejectExcessArguments } from '../tap/build-program'
+import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
-import { runFrame, FRAME_COMMAND_NAMES } from '../tap/frame'
 import { tapCliCommands } from '../tap/commands'
-import type { TapCliOptions } from '../tap/types'
+import type { TapCliCommand, TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 import { errors } from '../errors'
@@ -49,6 +48,31 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
   return { wantsHelp, positionals, command }
 }
 
+const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
+  if (wantsHelp) {
+    renderUsage(native.usage)
+
+    return 0
+  }
+
+  let dispatchCode: number | undefined
+  const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
+    dispatchCode = await native.handler(options, args, commandOptions)
+  })
+
+  try {
+    await program.parseAsync(positionals, { from: 'user' })
+  } catch (err: any) {
+    if (err instanceof commander.CommanderError) {
+      return 1
+    }
+
+    throw err
+  }
+
+  return dispatchCode ?? 1
+}
+
 const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
@@ -72,32 +96,7 @@ const tapModule = {
     const native = tapCliCommands.find(({ name }) => name === command)
 
     if (native) {
-      if (wantsHelp) {
-        renderUsage(native.usage)
-
-        return 0
-      }
-
-      // Native commands take no positionals, so anything past the name is excess.
-      // The schema path validates through commander; this path must do it itself.
-      try {
-        rejectExcessArguments(native.name, [], positionals.slice(1))
-      } catch (err: any) {
-        if (err instanceof commander.CommanderError) {
-          return 1
-        }
-
-        throw err
-      }
-
-      return native.handler(options)
-    }
-
-    // The frame commands are CLI-native too: they run CDP domains against the
-    // AUT frame, which the in-page binding cannot reach, so they parse and
-    // dispatch here rather than going through the schema program.
-    if (command && (FRAME_COMMAND_NAMES as readonly string[]).includes(command)) {
-      return runFrame(positionals, options, wantsHelp)
+      return runNativeCommand(native, positionals, options, wantsHelp)
     }
 
     try {

@@ -1,9 +1,17 @@
 import commander from 'commander'
 
 import { tapCliCommands } from './commands'
+import type { TapCliCommand } from './types'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
+
+interface CommandSpec {
+  name: string
+  description: string
+  params?: readonly TapCommandParamSchema[]
+  options?: readonly TapCommandOptionSchema[]
+}
 
 // attributeName() exists at runtime in commander 6 but is only typed from v7
 type DeclaredOption = commander.Option & { attributeName(): string }
@@ -43,7 +51,7 @@ const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly 
   return forwarded
 }
 
-export const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
+const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
   if (args.length <= params.length) {
     return
   }
@@ -73,7 +81,29 @@ const forwardedOptions = (command: commander.Command, options: readonly TapComma
   return forwarded
 }
 
-export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
+const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?: TapDispatch): void => {
+  const { name, description, params = [], options = [] } = spec
+  const command = program.command(name)
+
+  if (params.length) {
+    command.arguments(argumentsOf(params))
+    command.description(description, argumentDescriptions(params))
+  } else {
+    command.description(description)
+  }
+
+  declareOptions(command, options)
+
+  if (dispatch) {
+    command.action(() => {
+      rejectExcessArguments(name, params, command.args)
+
+      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, options))
+    })
+  }
+}
+
+const newProgram = (): commander.Command => {
   const program = new commander.Command('cypress tap')
 
   program.exitOverride()
@@ -81,38 +111,33 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   program.description('Interacts with a running Cypress instance')
   program.usage('[command] [args...] [options]')
 
-  // CLI-native commands register here only so the help listing includes them.
-  // Their dispatch and excess-argument rejection run in exec/tap.ts, which
-  // short-circuits before this program ever parses, so no action belongs here.
-  for (const { name, description } of tapCliCommands) {
-    program.command(name).description(description)
+  return program
+}
+
+export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
+  const program = newProgram()
+
+  // CLI-native commands register here only so the help listing includes them
+  // (with their grammar). Their dispatch runs in exec/tap.ts, which short-
+  // circuits before this program ever parses, so they get no action.
+  for (const native of tapCliCommands) {
+    declareCommand(program, native)
   }
 
-  // The frame commands are CLI-native (see `../frame`); these entries only make
-  // them show up in the connected help listing — routing intercepts them before
-  // this program ever parses, so no action belongs here.
-  program.command('dom [selector]').description('read the app-under-test DOM: the page HTML, or just the elements matching a selector')
-  program.command('aria [selector]').description('read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector')
-  program.command('inspect <selector>').description('inspect one element: its tag, attributes, computed styles, box model, and accessibility node')
-
-  for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
-    const command = program.command(name)
-
-    if (params.length) {
-      command.arguments(argumentsOf(params))
-      command.description(description, argumentDescriptions(params))
-    } else {
-      command.description(description)
-    }
-
-    declareOptions(command, options)
-
-    command.action(() => {
-      rejectExcessArguments(name, params, command.args)
-
-      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, options))
-    })
+  for (const command of schema.commands.filter(({ hidden }) => !hidden)) {
+    declareCommand(program, command, dispatch)
   }
+
+  return program
+}
+
+// A one-command program used by exec/tap.ts to parse a single CLI-native
+// command, so its positionals and options validate through the same commander
+// grammar the schema commands use.
+export const buildNativeProgram = (native: TapCliCommand, dispatch: TapDispatch): commander.Command => {
+  const program = newProgram()
+
+  declareCommand(program, native, dispatch)
 
   return program
 }

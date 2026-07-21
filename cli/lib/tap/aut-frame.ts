@@ -1,6 +1,12 @@
 import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
+import { CypressInstanceError, resolveInstance } from '../cypress-instances'
+import { withTapSession } from './tap-session'
+import type { TapSession } from './tap-session'
+import { renderResult, renderFailure, renderKnownFailure } from './output'
+import type { TapCliOptions } from './types'
+
 const debug = Debug('cypress:cli:tap')
 
 // The app names the AUT iframe deterministically (packages/app/src/runner/
@@ -9,12 +15,6 @@ const debug = Debug('cypress:cli:tap')
 // double-buffer frames (`AUT Snapshot - N`) and the spec bridge (`Your Spec`).
 const AUT_FRAME_NAME_PREFIX = 'Your project:'
 
-/**
- * A failure in a frame command (dom/aria/inspect), surfaced to the user as `{ code, message }`
- * via `renderFailure`. The frame commands are CLI-native and never cross the
- * binding's `exec` envelope, so this mirrors the binding's `TapCommandError`
- * on the CLI side.
- */
 export class FrameCommandError extends Error {
   code: string
 
@@ -73,4 +73,65 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
   debug('resolved AUT frame %o', found)
 
   return { frameId: found.id, url: found.url }
+}
+
+export const parsePositiveInt = (raw: string | undefined, fallback: number, label: string): number => {
+  if (raw === undefined) {
+    return fallback
+  }
+
+  const value = Number(raw)
+
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new FrameCommandError('INVALID_LIMIT', `${label} must be a positive integer`)
+  }
+
+  return value
+}
+
+/**
+ * Shared flow for the AUT-frame commands: resolve a running instance, open a
+ * tap session, locate the AUT frame, run `read`, and render the result. Maps
+ * the CLI-native `FrameCommandError` and the discovery/transport failures to
+ * the same rendered output the schema commands use.
+ */
+export const withResolvedAutFrame = async (
+  options: TapCliOptions,
+  read: (session: TapSession, frame: AutFrame) => Promise<unknown>,
+): Promise<number> => {
+  try {
+    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+
+    return await withTapSession(selection.instance, async (session) => {
+      const frame = await resolveAutFrame(session.client, session.sessionId)
+
+      try {
+        renderResult(await read(session, frame))
+
+        return 0
+      } catch (err: any) {
+        if (err instanceof FrameCommandError) {
+          renderFailure({ code: err.code, message: err.message })
+
+          return 1
+        }
+
+        throw err
+      }
+    })
+  } catch (err: any) {
+    if (err instanceof CypressInstanceError) {
+      renderFailure(err)
+
+      return 1
+    }
+
+    if (err.known && err.details) {
+      renderKnownFailure(err)
+
+      return 1
+    }
+
+    throw err
+  }
 }

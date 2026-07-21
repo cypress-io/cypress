@@ -1,6 +1,22 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut-frame'
-import { FrameCommandError } from '../aut-frame'
+import { FrameCommandError, withResolvedAutFrame } from '../aut-frame'
+import { collectTrueStates, querySelectorObjectId } from '../frame-cdp'
+import type { AXValue } from '../frame-cdp'
+import { readElementInfo } from '../frame-scripts'
+import type { ElementInfo } from '../frame-scripts'
+import type { TapCliCommand } from '../types'
+
+const INSPECT_USAGE = `Usage: cypress tap inspect <selector> [options]
+
+Inspects one element of the app-under-test: its tag, attributes, curated
+computed styles, box model, and accessibility node.
+
+Arguments:
+  selector          a CSS selector identifying the element to inspect
+
+Options:
+  --instance <pid>  target a specific running Cypress instance by its pid`
 
 // A full computed style is ~350 properties; this curated set answers the
 // "why does it look/behave this way" questions (layout, visibility, box).
@@ -11,34 +27,8 @@ const REPORTED_STYLES = [
   'z-index', 'overflow', 'pointer-events', 'cursor',
 ]
 
-// Read the element's tag, attributes, curated computed styles, and box rect in
-// one isolated-world call on the element itself — avoiding the DOM/CSS node-id
-// dance (requestNode needs a fetched document tree and is brittle across
-// worlds). The accessibility node still comes from CDP (below).
-const ELEMENT_INFO_FN = `function () {
-  var computed = getComputedStyle(this)
-  var styles = {}
-  var props = ${JSON.stringify(REPORTED_STYLES)}
-  for (var i = 0; i < props.length; i++) {
-    var value = computed.getPropertyValue(props[i])
-    if (value) styles[props[i]] = value
-  }
-  var attributes = {}
-  for (var j = 0; j < this.attributes.length; j++) {
-    attributes[this.attributes[j].name] = this.attributes[j].value
-  }
-  var rect = this.getBoundingClientRect()
-  return {
-    tag: this.tagName.toLowerCase(),
-    attributes: attributes,
-    styles: styles,
-    box: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
-  }
-}`
-
 const REPORTED_STATES = new Set(['focused', 'disabled', 'required', 'invalid', 'checked', 'expanded', 'selected', 'pressed', 'readonly', 'hidden'])
 
-interface AXValue { value?: unknown }
 interface AXNode {
   role?: AXValue
   name?: AXValue
@@ -47,7 +37,7 @@ interface AXNode {
   backendDOMNodeId?: number
 }
 
-export interface FrameInspectResult {
+interface FrameInspectResult {
   url?: string
   selector: string
   found: boolean
@@ -56,13 +46,6 @@ export interface FrameInspectResult {
   aria?: { role?: string, name?: string, states?: string[] }
   box?: { x: number, y: number, width: number, height: number }
   styles?: Record<string, string>
-}
-
-interface ElementInfo {
-  tag: string
-  attributes: Record<string, string>
-  styles: Record<string, string>
-  box: { x: number, y: number, width: number, height: number }
 }
 
 const projectAria = (node: AXNode | undefined): FrameInspectResult['aria'] => {
@@ -83,9 +66,7 @@ const projectAria = (node: AXNode | undefined): FrameInspectResult['aria'] => {
     aria.name = name
   }
 
-  const states = (node.properties ?? [])
-  .filter((property) => REPORTED_STATES.has(property.name) && property.value?.value === true)
-  .map((property) => property.name)
+  const states = collectTrueStates(node.properties, REPORTED_STATES)
 
   if (states.length) {
     aria.states = states
@@ -118,32 +99,17 @@ export const extractInspect = async (
   await client.DOM.enable({}, sessionId)
   await client.Accessibility.enable(sessionId)
 
-  const { executionContextId } = await client.Page.createIsolatedWorld({
-    frameId: frame.frameId,
-    worldName: 'cypress-tap',
-  }, sessionId)
-
-  const query = await client.Runtime.callFunctionOn({
-    functionDeclaration: 'function (selector) { return document.querySelector(selector) }',
-    executionContextId,
-    arguments: [{ value: selector }],
-  }, sessionId)
-
-  if (query.exceptionDetails) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
-  }
-
   const base: FrameInspectResult = { ...(frame.url ? { url: frame.url } : {}), selector, found: false }
+  const objectId = await querySelectorObjectId(session, frame, selector)
 
-  if (!query.result.objectId || query.result.subtype === 'null') {
+  if (!objectId) {
     return base
   }
 
-  const objectId = query.result.objectId
-
   const info = await client.Runtime.callFunctionOn({
-    functionDeclaration: ELEMENT_INFO_FN,
+    functionDeclaration: readElementInfo.toString(),
     objectId,
+    arguments: [{ value: REPORTED_STYLES }],
     returnByValue: true,
   }, sessionId)
 
@@ -163,4 +129,14 @@ export const extractInspect = async (
     box,
     styles,
   }
+}
+
+export const inspectCommand: TapCliCommand = {
+  name: 'inspect',
+  description: 'inspect one element: its tag, attributes, computed styles, box model, and accessibility node',
+  usage: INSPECT_USAGE,
+  params: [{ name: 'selector', type: 'string', required: true, description: 'a CSS selector identifying the element to inspect' }],
+  handler: (options, args) => withResolvedAutFrame(options, (session, frame) => {
+    return extractInspect(session, frame, args.selector)
+  }),
 }

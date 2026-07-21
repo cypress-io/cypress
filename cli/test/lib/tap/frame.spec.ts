@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { resolveAutFrame, FrameCommandError } from '../../../lib/tap/aut-frame'
-import { extractDom } from '../../../lib/tap/frame/dom'
-import { extractAria } from '../../../lib/tap/frame/aria'
-import { extractInspect } from '../../../lib/tap/frame/inspect'
+import { resolveAutFrame, parsePositiveInt, FrameCommandError } from '../../../lib/tap/aut-frame'
+import { extractDom } from '../../../lib/tap/commands/dom'
+import { extractAria } from '../../../lib/tap/commands/aria'
+import { extractInspect } from '../../../lib/tap/commands/inspect'
 import type { TapSession } from '../../../lib/tap/tap-session'
 
 const SESSION_ID = 'S1'
@@ -52,7 +52,23 @@ describe('lib/tap/aut-frame resolveAutFrame', () => {
   })
 })
 
-describe('lib/tap/frame/dom extractDom', () => {
+describe('lib/tap/aut-frame parsePositiveInt', () => {
+  it('falls back when the value is absent', () => {
+    expect(parsePositiveInt(undefined, 200, 'max-nodes')).to.eq(200)
+  })
+
+  it('parses a positive integer', () => {
+    expect(parsePositiveInt('50', 200, 'max-nodes')).to.eq(50)
+  })
+
+  it('rejects zero, negatives, and non-integers with INVALID_LIMIT', () => {
+    for (const bad of ['0', '-5', '1.5', 'abc']) {
+      expect(() => parsePositiveInt(bad, 200, 'max-nodes')).to.throw(FrameCommandError).that.includes({ code: 'INVALID_LIMIT' })
+    }
+  })
+})
+
+describe('lib/tap/commands/dom extractDom', () => {
   const makeSession = (fnValue: unknown, exceptionDetails?: unknown) => {
     const createIsolatedWorld = vi.fn().mockResolvedValue({ executionContextId: 42 })
     const callFunctionOn = vi.fn().mockResolvedValue({ result: { value: fnValue }, exceptionDetails })
@@ -122,7 +138,7 @@ describe('lib/tap/frame/dom extractDom', () => {
   })
 })
 
-describe('lib/tap/frame/aria extractAria', () => {
+describe('lib/tap/commands/aria extractAria', () => {
   const ax = (nodeId: string, role: string, extra: Record<string, unknown> = {}) => ({
     nodeId,
     role: { value: role },
@@ -219,7 +235,7 @@ describe('lib/tap/frame/aria extractAria', () => {
   })
 })
 
-describe('lib/tap/frame/inspect extractInspect', () => {
+describe('lib/tap/commands/inspect extractInspect', () => {
   const frame = { frameId: 'aut-frame-id', url: 'http://localhost:5555/index.html' }
 
   const ELEMENT_INFO = {

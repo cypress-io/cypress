@@ -1,10 +1,26 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut-frame'
-import { FrameCommandError } from '../aut-frame'
+import { parsePositiveInt, withResolvedAutFrame } from '../aut-frame'
+import { collectTrueStates, querySelectorObjectId } from '../frame-cdp'
+import type { AXProperty, AXValue } from '../frame-cdp'
+import type { TapCliCommand } from '../types'
 
 // The accessibility tree of a real app is deep; cap the projection so it stays
 // affordable for an LLM. A selector roots it at a subtree for finer reads.
-export const DEFAULT_MAX_NODES = 200
+const DEFAULT_MAX_NODES = 200
+
+const ARIA_USAGE = `Usage: cypress tap aria [selector] [options]
+
+Reads the accessibility (ARIA) tree of the app-under-test frame, or the
+subtree rooted at a CSS selector. Structural and text-only roles are dropped,
+leaving the compact role/name/state tree DevTools shows.
+
+Arguments:
+  selector          a CSS selector to root the tree at; omit for the whole frame
+
+Options:
+  --max-nodes <n>   cap on the number of accessibility nodes returned (default 200)
+  --instance <pid>  target a specific running Cypress instance by its pid`
 
 // Structural/text roles carry no semantic signal on their own — dropping them
 // yields the compact role/name tree DevTools shows, not the raw render tree.
@@ -13,8 +29,6 @@ const NOISE_ROLES = new Set(['InlineTextBox', 'StaticText', 'LineBreak', 'generi
 // The boolean states worth reporting when true; the rest are rarely actionable.
 const REPORTED_STATES = new Set(['focused', 'disabled', 'required', 'invalid', 'checked', 'expanded', 'selected', 'pressed', 'readonly', 'hidden', 'modal', 'busy'])
 
-interface AXValue { value?: unknown }
-interface AXProperty { name: string, value?: AXValue }
 interface AXNode {
   nodeId: string
   parentId?: string
@@ -27,7 +41,7 @@ interface AXNode {
   backendDOMNodeId?: number
 }
 
-export interface AriaNodeOut {
+interface AriaNodeOut {
   depth: number
   role: string
   name?: string
@@ -35,7 +49,7 @@ export interface AriaNodeOut {
   states?: string[]
 }
 
-export interface FrameAriaResult {
+interface FrameAriaResult {
   url?: string
   nodes: AriaNodeOut[]
   nodeCount: number
@@ -62,9 +76,7 @@ const projectNode = (node: AXNode, depth: number): AriaNodeOut | undefined => {
     out.value = String(value)
   }
 
-  const states = (node.properties ?? [])
-  .filter((property) => REPORTED_STATES.has(property.name) && property.value?.value === true)
-  .map((property) => property.name)
+  const states = collectTrueStates(node.properties, REPORTED_STATES)
 
   if (states.length) {
     out.states = states
@@ -124,28 +136,13 @@ const resolveSelectorBackendNodeId = async (
   selector: string,
 ): Promise<number | undefined> => {
   const { client, sessionId } = session
+  const objectId = await querySelectorObjectId(session, frame, selector)
 
-  const { executionContextId } = await client.Page.createIsolatedWorld({
-    frameId: frame.frameId,
-    worldName: 'cypress-tap',
-  }, sessionId)
-
-  const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
-    functionDeclaration: 'function (selector) { return document.querySelector(selector) }',
-    executionContextId,
-    arguments: [{ value: selector }],
-  }, sessionId)
-
-  if (exceptionDetails) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
-  }
-
-  // querySelector returned null — a real "nothing matched" answer, not an error.
-  if (!result.objectId || result.subtype === 'null') {
+  if (objectId === undefined) {
     return undefined
   }
 
-  const { node } = await client.DOM.describeNode({ objectId: result.objectId }, sessionId)
+  const { node } = await client.DOM.describeNode({ objectId }, sessionId)
 
   return node.backendNodeId
 }
@@ -203,4 +200,15 @@ export const extractAria = async (
     nodeCount: nodes.length,
     ...(truncated ? { truncated: true } : {}),
   }
+}
+
+export const ariaCommand: TapCliCommand = {
+  name: 'aria',
+  description: 'read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector',
+  usage: ARIA_USAGE,
+  params: [{ name: 'selector', type: 'string', required: false, description: 'a CSS selector to root the tree at; omit for the whole frame' }],
+  options: [{ name: 'max-nodes', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' }],
+  handler: (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
+    return extractAria(session, frame, args.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'))
+  }),
 }

@@ -37,10 +37,6 @@ export const renderUsage = (usage: string): void => {
   logger.always(usage)
 }
 
-export const renderFrameHelp = (program: commander.Command): void => {
-  logger.always(program.helpInformation())
-}
-
 const unknownCommandMessage = (schema: TapSchema, command: string): string => {
   return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${schema.commands.filter(({ hidden }) => !hidden).map(({ name }) => name).join(', ')}.`
 }
