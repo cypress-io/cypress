@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.19.1
+
+**Bugfixes:**
+
+- Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
+
 ## 15.19.0
 
 **Performance:**
@@ -39,7 +45,6 @@
 - Fixed an issue where opening an unconfigured project from a git repository sub-directory (such as a monorepo package) skipped project setup. Additionally, the component testing setup wizard now reliably displays the auto-detected framework and bundler. Fixes [#27410](https://github.com/cypress-io/cypress/issues/27410) and [#29544](https://github.com/cypress-io/cypress/issues/29544). Fixed in [#34129](https://github.com/cypress-io/cypress/pull/34129) and [#34212](https://github.com/cypress-io/cypress/pull/34212).
 - Fixed an issue where interacting with an element inside a horizontally-scrollable container could scroll the element to the container's right edge, placing it underneath a right-floating `position: sticky` or `position: fixed` element and causing the action to fail or land on the wrong element. Elements are now scrolled to their top, leftmost point as documented. Fixes [#33884](https://github.com/cypress-io/cypress/issues/33884). Fixed in [#34108](https://github.com/cypress-io/cypress/pull/34108).
 - Fixed a regression in [15.17.0](#15-17-0) where `cypress run --spec` printed a spurious `The following --spec pattern did not match any spec files and will be ignored` warning for patterns that actually did match spec files, such as patterns using regex-style alternation groups (for example `cypress/e2e/(a|b)/*.js`). Fixes [#34160](https://github.com/cypress-io/cypress/issues/34160).
-- Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 
 **Dependency Updates:**
 
