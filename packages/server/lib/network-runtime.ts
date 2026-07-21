@@ -206,8 +206,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     start () {
       return fetchTransport.start()
     },
+    // Transport only — callers (server-base) already own networkProxy.reset so
+    // we do not double-reset with a conflicting resetBetweenSpecs flag.
     reset () {
-      networkProxy.reset({ resetBetweenSpecs: false })
       fetchTransport.reset()
     },
     stop () {

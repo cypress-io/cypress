@@ -97,6 +97,17 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
   return function (req, res, next) {
+    // if this request is a non-proxied cy-in-cy request,
+    // we need to update the proxiedUrl and allow it to pass through
+    // (runs even when the MITM proxy is disabled — cy-in-cy self tests may use that path)
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && _isNonProxiedRequest(req) && req.headers.referer) {
+      const referrerUrl = new URL(req.headers.referer)
+
+      req.proxiedUrl = `${referrerUrl.origin}${req.proxiedUrl}`
+
+      return next()
+    }
+
     // CDP Fetch owns browser traffic when the MITM proxy is disabled, so
     // path-only requests to the Cypress server are expected — not a sign the
     // browser was launched outside Cypress.
@@ -110,16 +121,6 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     // must reach internal route handlers instead of redirecting to clientRoute.
     // Require the per-process token — AUT content can forge the URL header alone.
     if (isTrustedInternalLoopback(req.headers)) {
-      return next()
-    }
-
-    // if this request is a non-proxied cy-in-cy request,
-    // we need to update the proxiedUrl and allow it to pass through
-    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && _isNonProxiedRequest(req) && req.headers.referer) {
-      const referrerUrl = new URL(req.headers.referer)
-
-      req.proxiedUrl = `${referrerUrl.origin}${req.proxiedUrl}`
-
       return next()
     }
 

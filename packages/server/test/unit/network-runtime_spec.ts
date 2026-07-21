@@ -274,7 +274,7 @@ describe('lib/network-runtime', () => {
     expect(blockedHosts!.when({ url: 'http://allowed.example.test/' })).to.be.false
   })
 
-  it('createCdpFetchRuntime reset clears NetworkProxy and transport state without disabling Fetch', async () => {
+  it('createCdpFetchRuntime reset clears transport state without resetting NetworkProxy or disabling Fetch', async () => {
     const client = {
       send: sinon.stub().resolves({}),
       on: sinon.stub(),
@@ -282,13 +282,16 @@ describe('lib/network-runtime', () => {
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
     const networkProxyReset = sinon.spy(runtime.networkProxy, 'reset')
+    const transportReset = sinon.spy(runtime.fetchTransport, 'reset')
 
     await runtime.start()
     client.send.resetHistory()
 
     runtime.reset()
 
-    expect(networkProxyReset).to.have.been.calledOnceWith({ resetBetweenSpecs: false })
+    // server-base owns networkProxy.reset; runtime.reset is transport-only
+    expect(networkProxyReset).not.to.have.been.called
+    expect(transportReset).to.have.been.calledOnce
     expect(client.send).not.to.have.been.calledWith('Fetch.disable')
 
     await runtime.stop()

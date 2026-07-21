@@ -381,13 +381,15 @@ export = {
     if (cdpAutomation) {
       const pageCriClient = browserCriClient?.currentlyAttachedTarget
 
-      if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
-
       if (isProxyDisabled()) {
+        if (!pageCriClient) {
+          throw new Error('Missing pageCriClient in _launch')
+        }
+
         // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
         cdpAutomation._listenForFrameTreeChanges(pageCriClient)
         await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
-      } else {
+      } else if (pageCriClient) {
         // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
         await cdpAutomation._handlePausedRequests(pageCriClient)
         cdpAutomation._listenForFrameTreeChanges(pageCriClient)

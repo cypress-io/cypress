@@ -1,5 +1,9 @@
 import { id as randomId } from '../util/random'
 
+// Fields are optional at the type level because RuntimeConfigOptions extends
+// Partial<...>. At runtime, `port` is required before loopback (toLoopbackUrl
+// throws without it); `clientRoute` / `namespace` / `socketIoRoute` should be
+// present whenever Express-owned internals are expected to match.
 export type InternalRouteConfig = {
   clientRoute?: string
   namespace?: string
