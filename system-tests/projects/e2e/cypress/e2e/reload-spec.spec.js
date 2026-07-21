@@ -1,5 +1,10 @@
 top.count = top.count || 0
 
+// the reporter renders inside a same-origin iframe (#reporter-frame)
+const reporterDocument = () => {
+  return top.document.querySelector('#reporter-frame').contentDocument
+}
+
 describe('runner reload', () => {
   before(() => {
 
@@ -22,8 +27,8 @@ describe('runner reload', () => {
 
       // this simulates user clicking the stop and reload button
       // in the browser reporter gui
-      cy.$$('button.stop', top.document).click()
-      cy.$$('button.restart', top.document).click()
+      cy.$$('button.stop', reporterDocument()).click()
+      cy.$$('button.restart', reporterDocument()).click()
     }
   })
 

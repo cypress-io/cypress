@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- Fixed an issue where the browser's renderer process could crash (`We detected that the Chrome Renderer process just crashed`) when the application under test triggered a `ResizeObserver` loop while the command log was visible. Fixes [#33962](https://github.com/cypress-io/cypress/issues/33962) and [#34218](https://github.com/cypress-io/cypress/issues/34218).
 - Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
 - Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
 
@@ -14,6 +15,7 @@
 **Bugfixes:**
 
 - Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
+- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`, because the existence assertion replaced the subject with `null`. Chaining further assertions off `.exist` (or its `.exists` alias) for a raw DOM element now works as expected. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
 - Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 
