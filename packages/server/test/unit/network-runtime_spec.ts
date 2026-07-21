@@ -195,7 +195,9 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
     expect(runtime.networkPolicyRegistration).to.exist
     expect(runtime.fetchTransport).to.exist
-    expect(runtime.networkProxy.http.networkInterception).to.equal(runtime.networkInterception)
+    // Express handleHttpRequest uses a proxy-codec intercept; CDP traffic uses a distinct one.
+    expect(runtime.networkProxy.http.networkInterception).to.exist
+    expect(runtime.networkProxy.http.networkInterception).to.not.equal(runtime.networkInterception)
 
     const policies = runtime.networkPolicyRegistration.getPolicies()
 
@@ -204,6 +206,27 @@ describe('lib/network-runtime', () => {
       'csp-allow-list',
       'document-rewrite',
     ])
+  })
+
+  it('createCdpFetchRuntime routes handleHttpRequest through the Express intercept', async () => {
+    const client = {
+      send: sinon.stub(),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+    })
+    const expressIntercept = runtime.networkProxy.http.networkInterception!
+    const handleStub = sinon.stub(expressIntercept, 'handle').resolves({} as any)
+    const req = { proxiedUrl: 'http://example.com/', get: sinon.stub() } as any
+    const res = {} as any
+
+    await runtime.networkProxy.handleHttpRequest(req, res)
+
+    expect(handleStub).to.have.been.calledOnce
+    expect(handleStub.firstCall.args[0]).to.include({ req, res })
   })
 
   it('createCdpFetchRuntime reuses a provided netStubbingState', () => {

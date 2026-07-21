@@ -2,7 +2,7 @@ import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
@@ -161,20 +161,36 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     getRenderedHTMLOrigins: () => ({}),
   })
 
-  const networkInterception = new HttpIntercept(createCdpFetchCodec())
-
-  networkInterception.use(createServeInternalRoutesMiddleware({
+  // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;
+  // CDP Fetch needs its own codec. Share middleware stages, keep intercepts distinct.
+  const serveInternalRoutes = createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
-  }))
+  })
 
-  networkInterception.use(networkProxy.http.createLegacyProxyPipeline(
+  const attachStages = <TRequest, TResponse>(
+    intercept: HttpIntercept<TRequest, TResponse>,
+    pipelineCodec: TransportCodecPort<any, any>,
+  ) => {
+    intercept.use(serveInternalRoutes)
+    intercept.use(networkProxy.http.createLegacyProxyPipeline(pipelineCodec))
+
+    return intercept
+  }
+
+  const expressInterception = attachStages(
+    new HttpIntercept(networkProxy.codec),
+    networkProxy.codec,
+  )
+
+  networkProxy.withIntercept(expressInterception)
+
+  const networkInterception = attachStages(
+    new HttpIntercept(createCdpFetchCodec()),
     createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
     }),
-  ))
-
-  networkProxy.withIntercept(networkInterception)
+  )
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
