@@ -33,8 +33,8 @@ Cypress (e.g. \`cypress open\`), then run \`cypress tap\` to see them.
 Options:
   --instance <pid>  target a specific running Cypress instance by its pid`
 
-export const renderUsage = (usage: string): void => {
-  logger.always(usage)
+export const renderNativeHelp = (program: commander.Command, command: string): void => {
+  logger.always(program.commands.find((subcommand) => subcommand.name() === command)!.helpInformation())
 }
 
 const unknownCommandMessage = (schema: TapSchema, command: string): string => {

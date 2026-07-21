@@ -35,6 +35,11 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
       command.option(flags, description)
     }
   }
+
+  // Every tap command accepts `--instance`; it is consumed by the top-level
+  // `cypress tap` command before a subprogram parses, so declaring it here is
+  // purely so it renders in each command's generated help.
+  command.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
 }
 
 const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly string[]): Record<string, string> => {
@@ -117,9 +122,6 @@ const newProgram = (): commander.Command => {
 export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
   const program = newProgram()
 
-  // CLI-native commands register here only so the help listing includes them
-  // (with their grammar). Their dispatch runs in exec/tap.ts, which short-
-  // circuits before this program ever parses, so they get no action.
   for (const native of tapCliCommands) {
     declareCommand(program, native)
   }
@@ -137,7 +139,10 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
 export const buildNativeProgram = (native: TapCliCommand, dispatch: TapDispatch): commander.Command => {
   const program = newProgram()
 
-  declareCommand(program, native, dispatch)
+  // A native command's standalone help is rendered only here, so its full
+  // `details` prose stands in for the one-line `description` commander prints
+  // between the usage line and the generated Arguments/Options sections.
+  declareCommand(program, { ...native, description: native.details ?? native.description }, dispatch)
 
   return program
 }

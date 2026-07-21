@@ -5,7 +5,7 @@ import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
+import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
@@ -49,16 +49,16 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
 }
 
 const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
-  if (wantsHelp) {
-    renderUsage(native.usage)
-
-    return 0
-  }
-
   let dispatchCode: number | undefined
   const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
     dispatchCode = await native.handler(options, args, commandOptions)
   })
+
+  if (wantsHelp) {
+    renderNativeHelp(program, native.name)
+
+    return 0
+  }
 
   try {
     await program.parseAsync(positionals, { from: 'user' })

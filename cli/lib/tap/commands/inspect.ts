@@ -7,16 +7,8 @@ import { readElementInfo } from '../frame-scripts'
 import type { ElementInfo } from '../frame-scripts'
 import type { TapCliCommand } from '../types'
 
-const INSPECT_USAGE = `Usage: cypress tap inspect <selector> [options]
-
-Inspects one element of the app-under-test: its tag, attributes, curated
-computed styles, box model, and accessibility node.
-
-Arguments:
-  selector          a CSS selector identifying the element to inspect
-
-Options:
-  --instance <pid>  target a specific running Cypress instance by its pid`
+const INSPECT_DETAILS = `Inspects one element of the app-under-test: its tag, attributes, curated
+computed styles, box model, and accessibility node.`
 
 // A full computed style is ~350 properties; this curated set answers the
 // "why does it look/behave this way" questions (layout, visibility, box).
@@ -134,7 +126,7 @@ export const extractInspect = async (
 export const inspectCommand: TapCliCommand = {
   name: 'inspect',
   description: 'inspect one element: its tag, attributes, computed styles, box model, and accessibility node',
-  usage: INSPECT_USAGE,
+  details: INSPECT_DETAILS,
   params: [{ name: 'selector', type: 'string', required: true, description: 'a CSS selector identifying the element to inspect' }],
   handler: (options, args) => withResolvedAutFrame(options, (session, frame) => {
     return extractInspect(session, frame, args.selector)

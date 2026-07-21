@@ -8,18 +8,9 @@ import type { TapCliCommand } from '../types'
 
 const DEFAULT_MAX_CHARS = 30000
 
-const DOM_USAGE = `Usage: cypress tap dom [selector] [options]
-
-Reads the app-under-test DOM over CDP: the whole page's HTML, or just the
+const DOM_DETAILS = `Reads the app-under-test DOM over CDP: the whole page's HTML, or just the
 elements matching a CSS selector. Output is capped browser-side so a heavy
-page never ships megabytes across the wire.
-
-Arguments:
-  selector          a CSS selector; omit to read the whole document
-
-Options:
-  --max-chars <n>   cap on returned HTML characters (default 30000)
-  --instance <pid>  target a specific running Cypress instance by its pid`
+page never ships megabytes across the wire.`
 
 interface FrameDomResult {
   url?: string
@@ -65,7 +56,7 @@ export const extractDom = async (
 export const domCommand: TapCliCommand = {
   name: 'dom',
   description: 'read the app-under-test DOM: the page HTML, or just the elements matching a selector',
-  usage: DOM_USAGE,
+  details: DOM_DETAILS,
   params: [{ name: 'selector', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' }],
   options: [{ name: 'max-chars', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' }],
   handler: (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {

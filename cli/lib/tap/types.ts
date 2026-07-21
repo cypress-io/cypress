@@ -14,8 +14,13 @@ export interface TapCliOptions {
 export interface TapCliCommand {
   name: string
   description: string
-  /** Full usage text rendered for `cypress tap <name> --help`. */
-  usage: string
+  /**
+   * Extended prose shown between the usage line and the generated
+   * Arguments/Options sections in `cypress tap <name> --help`. Everything
+   * else in the help output is derived from `description`, `params`, and
+   * `options` — this carries only what those fields can't express.
+   */
+  details?: string
   /** Positional arguments, if any; parsed and forwarded keyed by param name. */
   params?: readonly TapCommandParamSchema[]
   /** Options, if any; parsed and forwarded keyed by option name. */

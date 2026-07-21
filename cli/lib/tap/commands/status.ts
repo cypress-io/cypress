@@ -5,17 +5,12 @@ import { renderFailure, renderKnownFailure, renderResult } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import type { TapCliCommand, TapCliOptions, TapRunState, TapStatus } from '../types'
 
-const STATUS_USAGE = `Usage: cypress tap status [options]
-
-Reports where a running Cypress instance is in its lifecycle, as JSON — for
+const STATUS_DETAILS = `Reports where a running Cypress instance is in its lifecycle, as JSON — for
 polling and "where am I?" checks. Always exits 0 for a determinable stage
 (including "not connected"); a poller branches on the \`status\` field.
 
 Stages: not connected, browser not selected, spec not selected, running,
-passed, failed.
-
-Options:
-  --instance <pid>  report the instance with this pid`
+passed, failed.`
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   if (runState.state === undefined) {
@@ -93,6 +88,6 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
 export const statusCommand: TapCliCommand = {
   name: 'status',
   description: 'report where a running Cypress instance is in its lifecycle',
-  usage: STATUS_USAGE,
+  details: STATUS_DETAILS,
   handler: reportStatus,
 }
