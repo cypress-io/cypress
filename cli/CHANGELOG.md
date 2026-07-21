@@ -13,6 +13,7 @@
 - The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm when migrating to the modern visibility algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
 - [`cy.getCookie()`](https://on.cypress.io/getcookie) and [`cy.getCookies()`](https://on.cypress.io/getcookies) are now query commands. They re-read the cookie(s) from the browser and retry any attached assertions until they pass or the command times out, so `cy.getCookie('token').should('exist')` now waits for a cookie that is set asynchronously (for example, after a login request resolves) instead of failing on the first read. As a result, their timeout now follows `defaultCommandTimeout` (default `4000`) rather than `responseTimeout` (default `30000`), and to overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#4802](https://github.com/cypress-io/cypress/issues/4802).
 - Removed the `experimentalSourceRewriting` configuration option. The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting, so default behavior is unchanged. You can safely remove this option from your config. Addresses [#34213](https://github.com/cypress-io/cypress/issues/34213).
+- The `cypress info` command no longer prints proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or `CYPRESS_*` environment variables. The command now reports only Cypress-specific details such as file paths, version, and system information. Addresses [#34103](https://github.com/cypress-io/cypress/issues/34103). Fixed in [#34314](https://github.com/cypress-io/cypress/pull/34314).
 
 **Deprecations:**
 
@@ -21,10 +22,6 @@
 **Features:**
 
 - `Angular` version 22 is now supported within component testing, including Launchpad project detection and the `@cypress/schematic` Angular CLI integration. Addresses [#33753](https://github.com/cypress-io/cypress/issues/33753).
-
-**Bugfixes:**
-
-- The `cypress info` command no longer prints proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or `CYPRESS_*` environment variables, which could expose credentials or other secrets in CI logs, screenshots, and support tickets. The command now reports only Cypress-specific details such as file paths, version, and system information. Addresses [#34103](https://github.com/cypress-io/cypress/issues/34103).
 
 **Dependency Updates:**
 
