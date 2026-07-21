@@ -1393,7 +1393,7 @@ describe('src/cy/commands/cookies', () => {
 
       // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1550032
       // Firefox bidi returns "unspecified" for sameSite;
-      // webkit & firefox < 135 return "no_restriction" for sameSite;
+      // webkit returns "no_restriction" for sameSite;
       // other browsers do not return sameSite at all
       const sameSite = (
         Cypress.isBrowser('webkit')
