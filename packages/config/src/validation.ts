@@ -412,7 +412,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
     if (certsForUrl.ca) {
       for (let k = 0; k < certsForUrl.ca.length; k++) {
         if (path.isAbsolute(certsForUrl.ca[k] || '')) {
-          return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+          return errMsg(`clientCertificates[${i}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
         }
       }
     }
