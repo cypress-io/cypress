@@ -289,7 +289,7 @@ describe('CdpFetchTransport', () => {
       }
 
       httpIntercept.use((req, next) => {
-        seenIsAutFrameHeader(req.headers?.['X-Cypress-Is-AUT-Frame'] ?? req.headers?.['x-cypress-is-aut-frame'])
+        seenIsAutFrameHeader(req.headers?.['x-cypress-is-aut-frame'])
 
         return next(req)
       })

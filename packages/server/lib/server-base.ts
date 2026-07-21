@@ -412,6 +412,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
       networkProxy: this._networkProxy,
+      getNetworkProxy: () => this._networkProxy,
       onError,
       getSpec,
       testingType,
@@ -572,10 +573,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
     })
 
-    // The rendered-HTML-origins map is populated by the proxy's HTML
-    // injection; without the proxy there is nothing to track (yet), but the
-    // driver still requests it between tests, so fall back to an empty map.
-    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins ?? (() => ({}))
+    // Lazy lookup: under proxy-disabled mode NetworkProxy is created later in
+    // createCdpFetchNetworkRuntime, after websockets start. The legacy HTML
+    // injection pipeline populates this map once that runtime exists.
+    options.getRenderedHTMLOrigins = () => {
+      return this._networkProxy?.http.getRenderedHTMLOrigins() ?? {}
+    }
+
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {

@@ -148,7 +148,9 @@ export class CdpFetchTransport {
         : false
 
       if (markAsAUTFrame) {
-        request.headers[AUT_FRAME_HEADER] = 'true'
+        // Node's IncomingMessage lowercases headers on the MITM path; the
+        // synthetic CDP codec does not. Use the lowercase form ExtractCypressMetadataHeaders reads.
+        request.headers['x-cypress-is-aut-frame'] = 'true'
       }
 
       const responseDeferred = pDefer<CdpFetchTransportResponse>()
