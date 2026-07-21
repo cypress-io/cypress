@@ -22,6 +22,10 @@
 
 - `Angular` version 22 is now supported within component testing, including Launchpad project detection and the `@cypress/schematic` Angular CLI integration. Addresses [#33753](https://github.com/cypress-io/cypress/issues/33753).
 
+**Bugfixes:**
+
+- The `cypress info` command no longer prints proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or `CYPRESS_*` environment variables, which could expose credentials or other secrets in CI logs, screenshots, and support tickets. The command now reports only Cypress-specific details such as file paths, version, and system information. Addresses [#34103](https://github.com/cypress-io/cypress/issues/34103).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
