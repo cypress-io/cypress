@@ -17,7 +17,7 @@ Cypress.on('uncaught:exception', () => false)
 function verifyErrorOnlyCapturedOnce (err: string) {
   let count = 0
 
-  return cy.get('.command-message-text').each(($el) => {
+  return cy.reporter().find('.command-message-text').each(($el) => {
     if ($el.text().includes(err)) {
       count++
     }
@@ -37,12 +37,12 @@ function loadErrorSpec (options: Options): VerifyFunc {
   cy.startAppServer('component')
   cy.visitApp(`specs/runner?file=${filePath}`)
 
-  cy.get('.runnable-header', { log: false }).should('be.visible')
+  cy.reporter().find('.runnable-header', { log: false }).should('be.visible')
   // Extended timeout needed due to lengthy Angular bootstrap on Windows
-  cy.contains('Your tests are loading...', { timeout: 60000, log: false }).should('not.exist')
+  cy.reporter({ timeout: 60000 }).contains('Your tests are loading...', { timeout: 60000, log: false }).should('not.exist')
   // Then ensure the tests have finished
-  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
-  cy.findByLabelText('Stats').within(() => {
+  cy.reporter().find('[aria-label="Rerun all tests"]', { timeout: 30000 })
+  cy.reporter().find('.stats').within(() => {
     cy.get('.passed .num').should('have.text', `${passCount}`)
     cy.get('.failed .num').should('have.text', `${failCount}`)
   })

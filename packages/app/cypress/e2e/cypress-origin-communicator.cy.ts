@@ -117,7 +117,7 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
       cy.waitForSpecToFinish()
       trackRemoveAllListenersOnAllCypressInstances()
 
-      cy.get('[aria-controls="reporter-inline-specs-list"]').type('{enter}')
+      cy.reporter().find('[aria-controls="reporter-inline-specs-list"]').click()
       cy.get('[data-cy="spec-row-item"]').contains('123').click()
       cy.waitForSpecToFinish()
 
@@ -149,9 +149,9 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
 
       cy.findByTestId('sidebar-link-specs-page').click()
       cy.location('hash').should('include', '/specs')
@@ -159,9 +159,9 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
     })
 
     it('passes upon test reload mid test execution', () => {
@@ -176,9 +176,9 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
 
       cy.withCtx(async (ctx) => {
         const indexPath = ctx.path.join('cypress', 'e2e', 'origin', 'simple_origin.cy.js')
@@ -191,9 +191,9 @@ describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 1000
 
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
     })
   })
 })

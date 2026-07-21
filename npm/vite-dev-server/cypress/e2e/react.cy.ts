@@ -26,8 +26,7 @@ for (const project of VITE_REACT) {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.contains('App.cy.jsx').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 2)
+      cy.waitForSpecToFinish({ passCount: 2 })
     })
 
     it('MissingReact: should fail, rerun, succeed', () => {
@@ -39,15 +38,14 @@ for (const project of VITE_REACT) {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.contains('MissingReact.cy.jsx').click()
-      cy.waitForSpecToFinish()
-      cy.get('.failed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ failCount: 1 })
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReact.jsx`,
             `import React from 'react';
             ${await ctx.file.readFileInProject('src/MissingReact.jsx')}`)
       })
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
     })
 
     it('MissingReactInSpec: should fail, rerun, succeed', () => {
@@ -59,15 +57,14 @@ for (const project of VITE_REACT) {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.contains('MissingReactInSpec.cy.jsx').click()
-      cy.waitForSpecToFinish()
-      cy.get('.failed > .num').should('contain', 1)
-      cy.get('.test-err-code-frame').should('be.visible')
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.reporter().find('.test-err-code-frame').should('be.visible')
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
           await ctx.file.readFileInProject('src/App.cy.jsx'))
       })
 
-      cy.get('.passed > .num').should('contain', 2)
+      cy.waitForSpecToFinish({ passCount: 2 })
     })
 
     it('AppCompilationError: should fail with uncaught exception error', () => {
@@ -79,10 +76,9 @@ for (const project of VITE_REACT) {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.contains('AppCompilationError.cy.jsx').click()
-      cy.waitForSpecToFinish()
-      cy.get('.failed > .num').should('contain', 1)
-      cy.contains('An uncaught error was detected outside of a test')
-      cy.contains('The following error originated from your test code, not from Cypress.')
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.reporter().contains('An uncaught error was detected outside of a test')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.')
 
       // Correct the problem
       cy.withCtx(async (ctx) => {
@@ -92,8 +88,7 @@ for (const project of VITE_REACT) {
         )
       })
 
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 2)
+      cy.waitForSpecToFinish({ passCount: 2 })
 
       const appCompilationErrorSpec = dedent`
         import React from 'react'
@@ -115,10 +110,9 @@ for (const project of VITE_REACT) {
         )
       }, { appCompilationErrorSpec })
 
-      cy.waitForSpecToFinish()
-      cy.get('.failed > .num').should('contain', 1)
-      cy.contains('An uncaught error was detected outside of a test')
-      cy.contains('The following error originated from your test code, not from Cypress.')
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.reporter().contains('An uncaught error was detected outside of a test')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.')
     })
   })
 }
