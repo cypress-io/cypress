@@ -23,6 +23,14 @@ export const tapManagerDataSource = {
     }
   },
 
+  getActiveSpecRelative (): string | undefined {
+    try {
+      return window.getEventManager?.().getCypress()?.spec?.relative
+    } catch {
+      return undefined
+    }
+  },
+
   getRunnableSpecs (): FoundSpec[] {
     return (window.__RUN_MODE_SPECS__ ?? []) as FoundSpec[]
   },

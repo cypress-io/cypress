@@ -71,6 +71,14 @@ describe('tap/tap-manager', () => {
       })
     })
 
+    it('flags run-state hidden so the CLI omits it from its command listing', async () => {
+      const manager = new TapManager(CYPRESS_VERSION)
+      const schema = await manager.getSchema()
+      const runState = schema.commands.find((command) => command.name === 'run-state')
+
+      expect(runState?.hidden).to.eq(true)
+    })
+
     it('round-trips through JSON (the CDP returnByValue boundary)', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
       const schema = await manager.getSchema()

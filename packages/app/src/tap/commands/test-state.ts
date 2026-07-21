@@ -126,3 +126,32 @@ export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] =
     }
   })
 }
+
+export interface RunResults {
+  passed: number
+  failed: number
+  pending: number
+  skipped: number
+}
+
+export const aggregateResults = (runner: TapTestsRunner): { results: RunResults, totalTests: number } => {
+  const tests = Object.values(runner.getAllTestsState())
+  const runComplete = runner.isRunComplete()
+  const results: RunResults = { passed: 0, failed: 0, pending: 0, skipped: 0 }
+
+  for (const test of tests) {
+    const state = test.state ?? unreachedState(runComplete)
+
+    if (state === 'passed') {
+      results.passed++
+    } else if (state === 'failed') {
+      results.failed++
+    } else if (state === 'pending') {
+      results.pending++
+    } else {
+      results.skipped++
+    }
+  }
+
+  return { results, totalTests: tests.length }
+}

@@ -35,6 +35,13 @@ const schema: TapSchema = {
       ],
       options: [],
     },
+    {
+      name: 'run-state',
+      description: 'report where the running Cypress instance is in its run lifecycle',
+      params: [],
+      options: [],
+      hidden: true,
+    },
   ],
 }
 
@@ -47,10 +54,16 @@ describe('lib/tap/build-program', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
-  it('registers the CLI-native `instances` command first, then one subcommand per advertised command', () => {
+  it('registers the CLI-native `instances` and `status` commands first, then one subcommand per advertised command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'health', 'run', 'open'])
+    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'health', 'run', 'open'])
+  })
+
+  it('omits commands flagged hidden from the program (still exec-able, just not advertised)', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(program.commands.map((command) => command.name())).not.toContain('run-state')
   })
 
   it('names the program so generated usage reads `cypress tap <command>`', () => {
@@ -123,14 +136,6 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
-    )
-  })
-
-  it('throws a catchable excessArguments error for operands passed to the CLI-native instances command', () => {
-    const program = buildTapProgram(schema, vi.fn())
-
-    expect(() => program.parse(['instances', 'extra'], { from: 'user' })).toThrowError(
       expect.objectContaining({ code: 'commander.excessArguments' }),
     )
   })

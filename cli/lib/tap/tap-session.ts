@@ -3,7 +3,8 @@ import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
 import type { ReadyInstanceState } from '../cypress-instances'
-import { TAP_BINDING_GLOBAL } from '@packages/cypress-instances'
+import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import type { TapExecResult } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -34,6 +35,23 @@ export const throwTapError = (details: { description: string, solution: string }
 
 export interface TapSession {
   call (method: string, args?: unknown[]): Promise<unknown>
+}
+
+const isFailureError = (error: unknown): error is { code: string, message: string } => {
+  return !!error && typeof error === 'object' && typeof (error as any).code === 'string' && typeof (error as any).message === 'string'
+}
+
+export const validateExecResult = (value: unknown): TapExecResult => {
+  const outcome = value as TapExecResult | null | undefined
+  const fail = () => throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
+
+  if (!outcome || typeof outcome !== 'object') return fail()
+
+  if ('error' in outcome) return isFailureError(outcome.error) ? outcome : fail()
+
+  if ('result' in outcome) return outcome
+
+  return fail()
 }
 
 const isStaleHandleError = (err: unknown): boolean => {

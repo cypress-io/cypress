@@ -1,20 +1,18 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { CypressInstanceError, listLiveInstances, resolveInstance } from '../cypress-instances'
-import { withTapSession, throwTapError } from '../tap/tap-session'
+import { CypressInstanceError, resolveInstance } from '../cypress-instances'
+import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
-import { buildTapProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
+import { buildTapProgram, rejectExcessArguments } from '../tap/build-program'
+import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
+import { tapCliCommands } from '../tap/commands'
+import type { TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
-import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
+import type { TapSchema } from '@packages/cypress-instances'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
-
-interface TapCliOptions {
-  instance?: number
-}
 
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
@@ -32,25 +30,6 @@ const validateSchema = (value: unknown): TapSchema => {
   }
 
   return schema
-}
-
-const isFailureError = (error: unknown): error is { code: string, message: string } => {
-  return !!error && typeof error === 'object' && typeof (error as any).code === 'string' && typeof (error as any).message === 'string'
-}
-
-const validateExecResult = (value: unknown): TapExecResult => {
-  const outcome = value as TapExecResult | null | undefined
-  const fail = () => throwTapError(errors.tapInvalidExecResult, `${TAP_EXEC_METHOD} returned an unrecognizable result.`)
-
-  if (!outcome || typeof outcome !== 'object') return fail()
-
-  // execCommand dispatches on `'error' in outcome`, so a failure envelope must carry a
-  // well-formed error object — otherwise renderFailure would read code/message off garbage.
-  if ('error' in outcome) return isFailureError(outcome.error) ? outcome : fail()
-
-  if ('result' in outcome) return outcome
-
-  return fail()
 }
 
 const isHelpFlag = (arg: string): boolean => arg === '--help' || arg === '-h'
@@ -83,33 +62,34 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
   return 0
 }
 
-const listInstances = async (options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
-  if (wantsHelp) {
-    renderInstancesHelp()
-
-    return 0
-  }
-
-  const instances = await listLiveInstances({ instance: options.instance })
-
-  renderResult(instances.map((instance) => ({
-    pid: instance.pid,
-    projectRoot: instance.projectRoot,
-    serverPort: instance.serverPort,
-    browserAttached: instance.cdpBrowserWsUrl !== null,
-  })))
-
-  return 0
-}
-
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
 
     const { wantsHelp, positionals, command } = buildCommandInfo(operands)
 
-    if (command === 'instances') {
-      return listInstances(options, wantsHelp)
+    const native = tapCliCommands.find(({ name }) => name === command)
+
+    if (native) {
+      if (wantsHelp) {
+        renderUsage(native.usage)
+
+        return 0
+      }
+
+      // Native commands take no positionals, so anything past the name is excess.
+      // The schema path validates through commander; this path must do it itself.
+      try {
+        rejectExcessArguments(native.name, [], positionals.slice(1))
+      } catch (err: any) {
+        if (err instanceof commander.CommanderError) {
+          return 1
+        }
+
+        throw err
+      }
+
+      return native.handler(options)
     }
 
     try {
@@ -142,7 +122,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if ((wantsHelp || !command) && err.code === 'NO_INSTANCE') {
-          return renderGenericHelp(wantsHelp)
+          return renderGenericHelp(wantsHelp, tapCliCommands)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)

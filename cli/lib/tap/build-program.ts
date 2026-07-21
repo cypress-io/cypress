@@ -1,5 +1,6 @@
 import commander from 'commander'
 
+import { tapCliCommands } from './commands'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
@@ -42,7 +43,7 @@ const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly 
   return forwarded
 }
 
-const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
+export const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
   if (args.length <= params.length) {
     return
   }
@@ -79,15 +80,14 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   program.addHelpCommand(false)
   program.description('Interacts with a running Cypress instance')
 
-  const instances = program
-  .command('instances')
-  .description('list the running Cypress instances this CLI can reach')
+  // CLI-native commands register here only so the help listing includes them.
+  // Their dispatch and excess-argument rejection run in exec/tap.ts, which
+  // short-circuits before this program ever parses, so no action belongs here.
+  for (const { name, description } of tapCliCommands) {
+    program.command(name).description(description)
+  }
 
-  instances.action(() => {
-    rejectExcessArguments('instances', [], instances.args)
-  })
-
-  for (const { name, description, params = [], options = [] } of schema.commands) {
+  for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
     const command = program.command(name)
 
     if (params.length) {
