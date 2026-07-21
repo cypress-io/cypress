@@ -54,10 +54,10 @@ describe('lib/tap/build-program', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
-  it('registers the CLI-native `instances` and `status` commands first, then one subcommand per advertised command', () => {
+  it('registers the CLI-native commands first, then one subcommand per advertised command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'health', 'run', 'open'])
+    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'dom', 'aria', 'inspect', 'health', 'run', 'open'])
   })
 
   it('omits commands flagged hidden from the program (still exec-able, just not advertised)', () => {

@@ -6,6 +6,7 @@ import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-se
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, rejectExcessArguments } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
+import { runFrame, FRAME_COMMAND_NAMES } from '../tap/frame'
 import { tapCliCommands } from '../tap/commands'
 import type { TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
@@ -92,6 +93,13 @@ const tapModule = {
       return native.handler(options)
     }
 
+    // The frame commands are CLI-native too: they run CDP domains against the
+    // AUT frame, which the in-page binding cannot reach, so they parse and
+    // dispatch here rather than going through the schema program.
+    if (command && (FRAME_COMMAND_NAMES as readonly string[]).includes(command)) {
+      return runFrame(positionals, options, wantsHelp)
+    }
+
     try {
       const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
 
@@ -122,7 +130,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if (wantsHelp || !command) {
-          return renderGenericHelp(wantsHelp, tapCliCommands)
+          return renderGenericHelp(wantsHelp)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)

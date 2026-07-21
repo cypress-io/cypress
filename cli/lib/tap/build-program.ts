@@ -88,6 +88,13 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     program.command(name).description(description)
   }
 
+  // The frame commands are CLI-native (see `../frame`); these entries only make
+  // them show up in the connected help listing — routing intercepts them before
+  // this program ever parses, so no action belongs here.
+  program.command('dom [selector]').description('read the app-under-test DOM: the page HTML, or just the elements matching a selector')
+  program.command('aria [selector]').description('read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector')
+  program.command('inspect <selector>').description('inspect one element: its tag, attributes, computed styles, box model, and accessibility node')
+
   for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
     const command = program.command(name)
 
