@@ -12,7 +12,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.reporter().find('.passed > .num').should('contain', 1)
     cy.withCtx(async (ctx) => {
       // Add a new spec with bg-blue-100 that asserts the style is correct
       // If HMR + Tailwind is working properly, it'll pass.
@@ -40,7 +40,7 @@ describe('Config options', () => {
     })
 
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 2)
+    cy.reporter().find('.passed > .num').should('contain', 2)
   })
 
   it('supports supportFile = false', () => {
@@ -53,7 +53,7 @@ describe('Config options', () => {
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     // no support file means there is no mount function registered, so all tests should fail
-    cy.get('.failed > .num').should('contain', 2)
+    cy.reporter().find('.failed > .num').should('contain', 2)
   })
 
   it('supports serving files with whitespace', () => {
@@ -73,7 +73,7 @@ describe('Config options', () => {
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.contains(specWithWhitespace).click()
-    cy.get('.passed > .num').should('contain', 2)
+    cy.reporter().find('.passed > .num').should('contain', 2)
   })
 
   it('supports @cypress/vite-dev-server', () => {
@@ -85,7 +85,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 2)
+    cy.reporter().find('.passed > .num').should('contain', 2)
   })
 
   it('supports viteConfig as an async function', () => {
@@ -97,7 +97,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 2)
+    cy.reporter().find('.passed > .num').should('contain', 2)
     cy.withCtx(async (ctx) => {
       const verifyFile = await ctx.file.readFileInProject('wrote-to-file')
 
@@ -156,14 +156,14 @@ describe('sourcemaps', () => {
       cy.specsPageIsVisible()
       cy.contains(specName).click()
       cy.waitForSpecToFinish()
-      cy.get('.failed > .num').should('contain', 2)
-      cy.get('.runnable-err-file-path').eq(1).should('contain', `${specName}:${line}:${column}`)
+      cy.reporter().find('.failed > .num').should('contain', 2)
+      cy.reporter().find('.runnable-err-file-path').eq(1).should('contain', `${specName}:${line}:${column}`)
       cy.window().then((win) => {
         // @ts-expect-error
         cy.stub(win.getEventManager(), 'emit').as('emit')
       })
 
-      cy.get('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
+      cy.reporter().find('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
       cy.get('@filePath').should('contain', `${specName}:${line}:${column}`)
       cy.get('@filePath').then(($el) => {
         $el.find('span').trigger('click')
