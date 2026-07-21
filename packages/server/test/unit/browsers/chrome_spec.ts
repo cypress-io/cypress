@@ -588,6 +588,86 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
+  describe('#connectToExisting', () => {
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    it('wires CDP Fetch when the proxy is disabled (cy-in-cy path)', async function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const browserCriClient = {
+        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+      const cdpAutomation = {
+        _listenForFrameTreeChanges: sinon.stub(),
+        isAUTFrame: sinon.stub().resolves(false),
+      }
+      const onPageCriClientReady = sinon.stub().resolves()
+      const automation = { use: sinon.stub() }
+      const cdpSocketServer = { attachCDPClient: sinon.stub() }
+
+      sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient as any)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation as any)
+      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
+
+      await chrome.connectToExisting(
+        { displayName: 'Chrome' } as any,
+        {
+          ...openOpts,
+          url: 'http://localhost:3000/__/',
+          onPageCriClientReady,
+        },
+        automation as any,
+        cdpSocketServer as any,
+      )
+
+      expect(cdpAutomation._listenForFrameTreeChanges).to.have.been.calledOnceWith(pageCriClient)
+      expect(onPageCriClientReady).to.have.been.calledOnceWith(pageCriClient, cdpAutomation.isAUTFrame)
+    })
+
+    it('does not wire CDP Fetch when the proxy is enabled', async function () {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const browserCriClient = {
+        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+      const cdpAutomation = {
+        _listenForFrameTreeChanges: sinon.stub(),
+        isAUTFrame: sinon.stub().resolves(false),
+      }
+      const onPageCriClientReady = sinon.stub().resolves()
+      const automation = { use: sinon.stub() }
+
+      sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient as any)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation as any)
+      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
+
+      await chrome.connectToExisting(
+        { displayName: 'Chrome' } as any,
+        {
+          ...openOpts,
+          url: 'http://localhost:3000/__/',
+          onPageCriClientReady,
+        },
+        automation as any,
+      )
+
+      expect(cdpAutomation._listenForFrameTreeChanges).not.to.have.been.called
+      expect(onPageCriClientReady).not.to.have.been.called
+    })
+  })
+
   describe('#connectToNewSpec', () => {
     it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
       const protocolManager = {

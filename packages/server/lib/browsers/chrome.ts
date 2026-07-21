@@ -513,7 +513,14 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+
+    // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
+    // Fetch must be wired here when the MITM proxy is disabled.
+    if (isProxyDisabled()) {
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+    }
   },
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
