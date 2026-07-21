@@ -401,11 +401,15 @@ chai.use((chai, u) => {
           // Cast to JQuery since we've already checked isJquery || isElement above
           const $obj = (obj as JQuery<any>)
 
-          if (!$obj.length) {
+          // Only an empty jQuery collection (length 0) represents a non-existent
+          // subject. A raw DOM element always exists and has no `length`, so nulling
+          // it out here would break chaining further assertions off `should('exist')`.
+          // https://github.com/cypress-io/cypress/issues/25491
+          if ($dom.isJquery($obj) && !$obj.length) {
             this._obj = null
           }
 
-          const node = $obj.length ? $dom.stringify($obj, 'short') : ($obj as any).selector
+          const node = ($dom.isElement($obj) || $obj.length) ? $dom.stringify($obj, 'short') : ($obj as any).selector
 
           try {
             return this.assert(

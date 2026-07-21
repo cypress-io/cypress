@@ -62,6 +62,13 @@ declare global {
       shortcuts: {
         stop: () => void
       }
+
+      /**
+       * Points reporter code that binds document-level listeners or portals
+       * DOM nodes at the document the reporter is rendered into (the reporter
+       * renders inside a same-origin iframe).
+       */
+      setReporterDocument: (doc: Document) => void
     }
   }
 }

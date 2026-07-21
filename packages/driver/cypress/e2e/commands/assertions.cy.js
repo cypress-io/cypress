@@ -1508,6 +1508,20 @@ describe('src/cy/commands/assertions', () => {
         cy.get('#does-not-exist').should('not.exist')
       })
 
+      // https://github.com/cypress-io/cypress/issues/25491
+      it('allows chaining another assertion after exist on a raw DOM element', () => {
+        cy.document().then((doc) => {
+          cy.wrap(doc.body).should('exist').and('exist')
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/25491
+      it('allows chaining after the exists alias on a raw DOM element', () => {
+        cy.document().then((doc) => {
+          cy.wrap(doc.body).should('exists').and('exists')
+        })
+      })
+
       // chai's `exists` alias is a separate property from `exist`, so verify it
       // gets Cypress's DOM-aware existence behavior and not chai's nullish check
       // (an empty jQuery object is non-null, so vanilla chai would pass `exists`).
