@@ -7,6 +7,7 @@ import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/browsers/bidi_automation'
 import type { Automation } from '../../../lib/automation'
 import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, NetworkResponseStartedParameters } from 'webdriver/build/bidi/localTypes'
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 // make sure testing promises resolve before asserting on async function conditions
 const flushPromises = () => {
@@ -70,6 +71,8 @@ describe('lib/browsers/bidi_automation', () => {
         beforeEach(() => {
           mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'mockInterceptId' })
           mockWebdriverClient.networkRemoveIntercept = sinon.stub().resolves()
+          // the AUT is identified by its window.name, seeded with AUT_FRAME_NAME_IDENTIFIER
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
         })
 
         it('does nothing if parent context is not initially assigned', async () => {
@@ -102,6 +105,32 @@ describe('lib/browsers/bidi_automation', () => {
           await flushPromises()
 
           expect(mockWebdriverClient.networkRemoveIntercept).not.to.have.been.called
+        })
+
+        it('does not set the AUT context for a non-AUT child frame (e.g. the reporter iframe)', async () => {
+          // the reporter iframe is also a direct child of the top-level context, but its
+          // window.name does not carry the AUT identifier, so it must be ignored
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: 'Cypress Reporter' } })
+
+          const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+          bidiAutomationInstance.setTopLevelContextId('123')
+
+          mockWebdriverClient.emit('browsingContext.contextCreated', {
+            parent: '123',
+            context: '456',
+            url: 'www.foobar.com',
+            userContext: '',
+            children: [],
+          })
+
+          await flushPromises()
+
+          // @ts-expect-error
+          expect(bidiAutomationInstance.autContextId).to.be.undefined
+          // @ts-expect-error
+          expect(bidiAutomationInstance.interceptId).to.be.undefined
+          expect(mockWebdriverClient.networkAddIntercept).not.to.have.been.called
         })
 
         describe('correctly sets the AUT frame and intercepts requests from the frame when the top frame is set.', () => {
@@ -209,6 +238,8 @@ describe('lib/browsers/bidi_automation', () => {
         beforeEach(() => {
           mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'mockInterceptId' })
           mockWebdriverClient.networkContinueRequest = sinon.stub().resolves()
+          // the AUT is identified by its window.name, seeded with AUT_FRAME_NAME_IDENTIFIER
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
 
           mockRequest = {
             context: '123',
