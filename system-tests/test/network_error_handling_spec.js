@@ -397,9 +397,8 @@ describe('e2e network error handling', function () {
           },
         })
         .then(() => {
-          // Only count CONNECTs to the test server. The browser also makes
-          // background component/Widevine downloads to *.gvt1.com that tunnel
-          // through HTTP_PROXY, and their count is timing-dependent.
+          // Only count CONNECTs to the test server. The browser may also make
+          // additional requests, and their count is timing-dependent.
           const connectsToServer = onConnect.getCalls().filter((call) => {
             return call.args[0].host === 'localhost' && call.args[0].port === HTTPS_PORT
           })
