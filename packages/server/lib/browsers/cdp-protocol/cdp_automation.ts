@@ -12,7 +12,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
-import { normalizeGetCookies, normalizeSetCookieProps } from '../../automation/cookie/converters/cdp'
+import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../../automation/commands/key_press'
 
@@ -42,11 +42,7 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
     return resourceType as ResourceType
   }
 
-  if (resourceType === 'img') {
-    return 'image'
-  }
-
-  return ffToStandardResourceTypeMap[resourceType] || 'other'
+  return 'other'
 }
 
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
@@ -60,15 +56,10 @@ interface HasFrame {
   frame: Protocol.Page.Frame
 }
 
-// the intersection of what's valid in CDP and what's valid in FFCDP
-// Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
+// the resource types passed through to request middleware / cy.intercept matching; any
+// other type reported by the protocol (e.g. 'document', 'media', 'preflight') normalizes to 'other'
 // CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
 const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
-const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
-  'img': 'image',
-  'csp': 'cspviolationreport',
-  'webmanifest': 'manifest',
-}
 
 export class CdpAutomation implements CDPClient, AutomationMiddleware {
   on: OnFn
@@ -170,10 +161,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
 
-    let url = params.request.url
-
-    // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
-    if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
+    const url = params.request.url
 
     // Filter out "data:" urls from being cached - fixes: https://github.com/cypress-io/cypress/issues/17853
     // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
@@ -264,7 +252,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private getAllCookies = async (filter: CyCookieFilter) => {
     const result: Protocol.Network.GetAllCookiesResponse = await this.sendDebuggerCommandFn('Network.getAllCookies')
 
-    return normalizeGetCookies(result.cookies)
+    return convertCdpCookiesToCyCookies(result.cookies)
     .filter((cookie: CyCookie) => {
       const matches = cookieMatches(cookie, filter)
 
@@ -281,7 +269,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     const isLocalhost = isLocalhostNetworkTools(new URL(url))
 
-    return normalizeGetCookies(result.cookies)
+    return convertCdpCookiesToCyCookies(result.cookies)
     .filter((cookie) => {
       // Chrome returns all cookies for a URL, even if they wouldn't normally
       // be sent with a request. This standardizes it by filtering out ones
@@ -454,7 +442,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'get:cookie':
         return this.getCookie(data)
       case 'set:cookie': {
-        setCookie = normalizeSetCookieProps(data)
+        setCookie = convertCyCookieToCdpCookie(data)
 
         const result: Protocol.Network.SetCookieResponse = await this.sendDebuggerCommandFn('Network.setCookie', setCookie)
 
@@ -468,12 +456,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       case 'add:cookies':
-        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+        setCookie = data.map((cookie) => convertCyCookieToCdpCookie(cookie)) as Protocol.Network.SetCookieRequest[]
 
         return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
 
       case 'set:cookies':
-        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+        setCookie = data.map((cookie) => convertCyCookieToCdpCookie(cookie))
 
         await this.sendDebuggerCommandFn('Network.clearBrowserCookies')
 
@@ -495,7 +483,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       case 'clear:cookies': {
-        const clearedCookies: (CyCookie | undefined)[] = []
+        const clearedCookies: CyCookie[] = []
 
         for (const cookie of data as CyCookieFilter[]) {
           // resolve with the value of the removed cookie
@@ -503,8 +491,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
           // that matches the cookie domain that is really stored
           const cookieToBeCleared = await this.getCookie(cookie)
 
+          // if the cookie no longer exists, there is nothing to clear or report back
           if (!cookieToBeCleared) {
-            clearedCookies.push(undefined)
             continue
           }
 

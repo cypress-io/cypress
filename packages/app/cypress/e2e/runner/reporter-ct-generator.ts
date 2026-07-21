@@ -466,7 +466,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
         verify('displays as link in interactive mode', {
           verifyFn () {
-            cy.contains('.runnable-title', 'displays as link in interactive mode')
+            cy.reporter().contains('.runnable-title', 'displays as link in interactive mode')
             .closest('.runnable').within(() => {
               cy
               .get('.runnable-err-message')
@@ -479,7 +479,7 @@ export const generateCtErrorTests = (server: 'Webpack' | 'Vite', configFile: str
 
         verify('is text in error message in run mode', {
           verifyFn () {
-            cy.contains('.runnable-title', 'is text in error message in run mode')
+            cy.reporter().contains('.runnable-title', 'is text in error message in run mode')
             .closest('.runnable').within(() => {
               cy
               .get('.runnable-err-message')
