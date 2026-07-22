@@ -93,18 +93,16 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
     return snapshots.length - 1
   }
 
-  if (/^[0-9]+$/.test(at)) {
-    const index = Number(at)
+  const index = Number(at)
 
-    if (index >= 1 && index <= snapshots.length) {
-      return index - 1
-    }
-  } else {
-    const index = snapshots.findIndex((entry) => entry.name === at)
+  if (Number.isInteger(index) && index >= 1 && index <= snapshots.length) {
+    return index - 1
+  }
 
-    if (index !== -1) {
-      return index
-    }
+  const named = snapshots.findIndex((entry) => entry.name === at)
+
+  if (named !== -1) {
+    return named
   }
 
   const available = snapshots.map((entry, index) => (entry.name !== undefined ? `"${entry.name}" (${index + 1})` : `${index + 1}`)).join(', ')
