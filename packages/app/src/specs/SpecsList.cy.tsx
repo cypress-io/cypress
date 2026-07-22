@@ -245,8 +245,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.percySnapshot('medium')
         cy.viewport(1200, 850)
         cy.percySnapshot('wide')
-        cy.viewport(2000, 850)
-        cy.percySnapshot('widest')
+        // 'widest' (2000px) dropped: past the lg (1024px) grid breakpoint the layout matches 'wide' — only the 1fr first column widens
       })
     })
   })

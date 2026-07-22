@@ -176,14 +176,10 @@ describe('<DebugRunNavigation />', () => {
 
       cy.viewport(616, 850) //currently the narrowest the parent component will go
       cy.percySnapshot('narrowest')
-      cy.viewport(650, 850)
-      cy.percySnapshot('narrow')
-      cy.viewport(800, 850)
-      cy.percySnapshot('medium')
+      // 'narrow' (650px) and 'medium' (800px) dropped: below the lg (1024px) breakpoint the layout matches 'narrowest' — the only responsive class here is lg:block
       cy.viewport(1200, 850)
       cy.percySnapshot('wide')
-      cy.viewport(2000, 850)
-      cy.percySnapshot('widest')
+      // 'widest' (2000px) dropped: past the lg (1024px) breakpoint the layout matches 'wide'
     })
   })
 

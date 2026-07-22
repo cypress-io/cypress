@@ -4,11 +4,11 @@ import { dayjs } from '../../runs/utils/day.js'
 
 describe('EnableNotificationsBanner', () => {
   context('render', () => {
-    [1200, 800].forEach((viewportWidth) => {
-      it(`renders at ${viewportWidth}px width`, { viewportWidth }, () => {
-        cy.mount(<EnableNotificationsBanner />)
-        cy.percySnapshot()
-      })
+    // 1200px dropped: the banner has no responsive breakpoints and its button group fits without
+    // reflowing at both widths, so the single narrower snapshot covers the layout
+    it('renders at 800px width', { viewportWidth: 800 }, () => {
+      cy.mount(<EnableNotificationsBanner />)
+      cy.percySnapshot()
     })
   })
 
