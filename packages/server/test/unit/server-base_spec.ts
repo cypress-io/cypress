@@ -193,6 +193,7 @@ describe('lib/server-base', () => {
       this.server._socket = {
         toDriver: sinon.stub(),
         close: sinon.stub(),
+        setProtocolManager: sinon.stub(),
       }
 
       this.server.getCurrentBrowser = () => null
@@ -233,6 +234,21 @@ describe('lib/server-base', () => {
 
       expect(this.server._netStubbingState).to.equal(existingState)
       expect(this.server._networkProxy.http.netStubbingState).to.equal(existingState)
+    })
+
+    it('applies a previously stored protocol manager to the late-bound CDP NetworkProxy', async function () {
+      const client = createClient()
+      const protocolManager = { isProtocolEnabled: true } as any
+
+      this.server.setProtocolManager(protocolManager)
+      this.server.setPreRequestTimeout(1234)
+
+      expect(this.server._networkProxy).to.be.undefined
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      expect(this.server._networkProxy.http.preRequests.protocolManager).to.equal(protocolManager)
+      expect(this.server._networkProxy.http.preRequests.requestTimeout).to.equal(1234)
     })
 
     it('stops the previous CDP Fetch runtime before replacing it', async function () {

@@ -201,6 +201,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkInterceptionCore?: NetworkInterceptionCore
   protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
   protected _openConfig?: Cfg
+  // Retained so late-bound CDP Fetch NetworkProxy (created after open when the
+  // MITM proxy is disabled) still receives protocol / pre-request settings.
+  private _protocolManager?: ProtocolManagerShape
+  private _preRequestTimeout?: number
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -273,11 +277,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
+    this._protocolManager = protocolManager
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
   }
 
   setPreRequestTimeout (timeout: number) {
+    this._preRequestTimeout = timeout
     this._networkProxy?.setPreRequestTimeout(timeout)
   }
 
@@ -542,6 +548,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._netStubbingState = runtime.netStubbingState
     this._networkPolicyRegistration = runtime.networkPolicyRegistration
     this._networkInterceptionCore = runtime.networkInterceptionCore
+
+    // NetworkProxy was created after open(); re-apply settings that may have
+    // been stored while _networkProxy was still undefined.
+    if (this._protocolManager) {
+      this._networkProxy.setProtocolManager(this._protocolManager)
+    }
+
+    if (this._preRequestTimeout != null) {
+      this._networkProxy.setPreRequestTimeout(this._preRequestTimeout)
+    }
 
     await runtime.start()
   }
