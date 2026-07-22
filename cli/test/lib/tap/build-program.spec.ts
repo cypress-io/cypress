@@ -72,6 +72,14 @@ describe('lib/tap/build-program', () => {
     expect(subcommand(program, 'run').helpInformation()).toContain('Usage: cypress tap run [options] <spec>')
   })
 
+  it('sets a top-level usage reflecting that options follow the command, not precede it', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(program.usage()).toBe('[command] [args...] [options]')
+    expect(program.helpInformation()).toContain('Usage: cypress tap [command] [args...] [options]')
+    expect(program.helpInformation()).not.toContain('[options] [command]')
+  })
+
   it('derives positional grammar from each param schema (required <>, optional [])', () => {
     const program = buildTapProgram(schema, vi.fn())
 

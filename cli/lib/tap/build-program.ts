@@ -79,6 +79,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   program.exitOverride()
   program.addHelpCommand(false)
   program.description('Interacts with a running Cypress instance')
+  program.usage('[command] [args...] [options]')
 
   // CLI-native commands register here only so the help listing includes them.
   // Their dispatch and excess-argument rejection run in exec/tap.ts, which
