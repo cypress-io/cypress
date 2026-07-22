@@ -107,7 +107,21 @@ export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTes
   }
 }
 
-export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
+const MAX_COMMAND_MESSAGE_LENGTH = 200
+
+const messageField = (message: string | null | undefined, full: boolean): Pick<CommandEntry, 'message' | 'truncated'> => {
+  if (message == null) {
+    return {}
+  }
+
+  if (!full && message.length > MAX_COMMAND_MESSAGE_LENGTH) {
+    return { message: message.slice(0, MAX_COMMAND_MESSAGE_LENGTH), truncated: true }
+  }
+
+  return { message }
+}
+
+export const serializeTestCommands = (attempt: SerializedTest, { full = false }: { full?: boolean } = {}): CommandEntry[] => {
   const commands = attempt.commands ?? []
 
   // The driver's reduceMemory nulls (not deletes) non-preserved command attrs
@@ -119,7 +133,7 @@ export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] =
     return {
       id,
       ...(name != null ? { name } : {}),
-      ...(message != null ? { message } : {}),
+      ...messageField(message, full),
       ...(state != null ? { state } : {}),
       ...(type != null ? { type } : {}),
       ...(_hasBeenCleanedUp === true ? { cleanedUp: true } : {}),

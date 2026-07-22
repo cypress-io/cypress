@@ -65,6 +65,8 @@ export interface CommandEntry {
   name?: string
   /** The command log's display message — arguments/assertion text, not output. */
   message?: string
+  /** Present (always `true`) when `message` was truncated; re-run with `--full` for the whole message. */
+  truncated?: true
   /** `pending` while the command runs, then `passed` or `failed`. */
   state?: SerializedCommandLog['state']
   /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */

@@ -9,8 +9,9 @@ export const commandsCommand = defineCommand({
   options: [
     { name: 'test', type: 'string', required: true, description: 'test id, as listed by the tests command' },
     { name: 'attempt', type: 'number', required: false, description: '1-based attempt to read (attempt 1 = first run); defaults to the latest' },
+    { name: 'full', type: 'boolean', required: false, description: 'return full command messages instead of truncating long ones' },
   ],
-  handler: async (_params, { test, attempt }): Promise<CommandEntry[]> => {
+  handler: async (_params, { test, attempt, full }): Promise<CommandEntry[]> => {
     const runner = tapManagerDataSource.getRunner()
 
     if (!runner) {
@@ -23,6 +24,6 @@ export const commandsCommand = defineCommand({
       throw attemptSelectionError(selection, test)
     }
 
-    return serializeTestCommands(selection.attempt)
+    return serializeTestCommands(selection.attempt, { full })
   },
 })

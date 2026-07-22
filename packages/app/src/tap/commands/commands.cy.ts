@@ -42,6 +42,14 @@ describe('tap/commands/commands', () => {
         { id: 'log-c', name: 'visit', message: null, state: 'passed', type: 'parent', _hasBeenCleanedUp: true },
       ],
     },
+    r5: {
+      id: 'r5',
+      title: 'long assertion message',
+      state: 'passed',
+      commands: [
+        { id: 'log-long', name: 'assert', message: 'x'.repeat(250), state: 'passed', type: 'child' },
+      ],
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -98,6 +106,30 @@ describe('tap/commands/commands', () => {
       result: [
         { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
         { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+      ],
+    })
+  })
+
+  it('truncates a long command message by default and marks the entry truncated', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('commands', {}, { test: 'r5' })).to.deep.eq({
+      result: [
+        { id: 'log-long', name: 'assert', message: 'x'.repeat(200), truncated: true, state: 'passed', type: 'child' },
+      ],
+    })
+  })
+
+  it('returns the full command message when --full is set', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('commands', {}, { test: 'r5', full: 'true' })).to.deep.eq({
+      result: [
+        { id: 'log-long', name: 'assert', message: 'x'.repeat(250), state: 'passed', type: 'child' },
       ],
     })
   })
