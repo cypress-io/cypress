@@ -252,9 +252,6 @@ jobs:
   - npm-angular:
       requires:
         - ready-to-test
-  - npm-angular-zoneless:
-      requires:
-        - ready-to-test
   - npm-mount-utils:
       requires:
         - ready-to-test
@@ -424,7 +421,6 @@ jobs:
         - npm-puppeteer-cypress-tests
         - npm-react
         - npm-angular
-        - npm-angular-zoneless
         - npm-mount-utils
         - npm-grep
         - npm-eslint-plugin-dev
