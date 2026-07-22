@@ -48,11 +48,7 @@ app.use(Toast, {
 })
 
 await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
-  // Open mode has a live spec set behind GraphQL; run mode does not, so tap
-  // there falls back to the served snapshot.
-  if (!config.isTextTerminal) {
-    tapRuntime.gqlClient = client
-  }
+  tapRuntime.gqlClient = client
 
   app.use(urql, client)
   app.use(createRouter())
