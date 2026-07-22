@@ -126,8 +126,49 @@ commands:
                     exit 0
                   fi
 
-                  # otherwise, the build is not a PR so we cancel it 
+                  # otherwise, the build is not a PR so we cancel it
                   cancel_build
+
+  # Halt superseded pipelines before the primary workflow (and its Percy
+  # snapshot jobs) launch. When several commits are pushed to a PR in quick
+  # succession, only the pipeline for the current PR head does real work; older
+  # ones stop here so we don't re-bill the full Percy snapshot fan-out per push.
+  # Fails open: any uncertainty about the head SHA lets the build run.
+  cancel-superseded-commits:
+    steps:
+      - when:
+          condition:
+            not:
+              or:
+                - equal: [<<pipeline.trigger_source>>, 'api']
+                - equal: [<<pipeline.git.branch>>, 'develop']
+                - matches:
+                    pattern: /^release\/.*/
+                    value: <<pipeline.git.branch>>
+          steps:
+            - run:
+                name: Halt if a newer commit exists on this PR
+                command: |
+                  # Only PR-triggered pipelines can be superseded by a newer push.
+                  if [ -z "${CIRCLE_PULL_REQUEST:-}" ]; then
+                    echo "Not a PR pipeline - skipping superseded-commit check."
+                    exit 0
+                  fi
+
+                  PR_NUMBER="${CIRCLE_PULL_REQUEST##*/}"
+                  HEAD_SHA=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${PR_NUMBER}" | jq -r '.head.sha')
+
+                  if [ -z "${HEAD_SHA}" ] || [ "${HEAD_SHA}" == "null" ]; then
+                    echo "Could not determine PR head SHA - running build."
+                    exit 0
+                  fi
+
+                  if [ "${HEAD_SHA}" != "${CIRCLE_SHA1}" ]; then
+                    echo "Pipeline commit ${CIRCLE_SHA1} is superseded by PR head ${HEAD_SHA} - halting to avoid redundant Percy snapshots and CI usage."
+                    circleci-agent step halt
+                  fi
+
+                  echo "Pipeline commit is the current PR head - continuing."
 
 jobs:
   pack-workflows:
@@ -136,6 +177,7 @@ jobs:
     resource_class: small.gen2
     steps:
         - cancel-draft-prs
+        - cancel-superseded-commits
         - checkout:
             method: blobless
         - restore-src-checksum-cache
@@ -150,6 +192,7 @@ jobs:
       resource_class: small.gen2
       steps:
           - cancel-draft-prs
+          - cancel-superseded-commits
           - checkout:
               method: blobless
           - attach_workspace:
