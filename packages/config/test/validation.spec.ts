@@ -314,6 +314,20 @@ describe('config/src/validation', () => {
           expect(result).toMatchSnapshot()
         })
 
+        it('detect-flake-and-pass-on-threshold: missing passesRequired reports the passesRequired value', () => {
+          const result = validation.isValidRetriesConfig(mockKey, {
+            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+            experimentalOptions: {
+              maxRetries: 2,
+              stopIfAnyPassed: true,
+            },
+          })
+
+          expect(result).not.toBe(true)
+          expect((result as any).key).toEqual('mockConfigKey.experimentalOptions.passesRequired')
+          expect((result as any).value).toBeUndefined()
+        })
+
         ;['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold'].forEach((strategy) => {
           it(`${strategy}: valid strategy w/ other invalid options with experiment`, () => {
             const result = validation.isValidRetriesConfig(mockKey, {
