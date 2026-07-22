@@ -312,6 +312,28 @@ describe('lib/server-base', () => {
 
       expect(client.send).not.to.have.been.calledWith('Fetch.disable')
     })
+
+    it('stops and disposes the CDP Fetch runtime on server close', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      const proxy = this.server._networkProxy
+      const disposeSpy = sinon.spy(proxy, 'dispose')
+
+      sinon.stub(this.server._remoteStates, 'set')
+      this.server.isListening = true
+      this.server._server = {
+        destroyAsync: sinon.stub().resolves(),
+      }
+
+      await this.server['_close']()
+
+      expect(disposeSpy).to.have.been.calledOnce
+      expect(client.send).to.have.been.calledWith('Fetch.disable')
+      expect(this.server._cdpFetchRuntime).to.be.undefined
+      expect(this.server._networkProxy).to.be.undefined
+    })
   })
 
   describe('#createServer', () => {

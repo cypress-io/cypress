@@ -819,7 +819,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     evilDns.clear()
 
-    return this._server.destroyAsync()
+    // Fully tear down CDP Fetch (Fetch.disable + NetworkProxy.dispose). reset()
+    // only clears in-flight state so the next test can keep using Fetch.
+    return Promise.resolve(this.stopCdpFetchRuntime())
+    .then(() => this._server!.destroyAsync())
     .then(() => {
       this.isListening = false
     })
