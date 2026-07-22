@@ -46,9 +46,13 @@ const onExternalUnpin = (): void => {
 
   const runner = tapManagerDataSource.getSnapshotRunner()
 
-  if (runner) {
-    reconcilePin(runner)
+  if (!runner || tapManagerDataSource.isRunning()) {
+    releasePin()
+
+    return
   }
+
+  reconcilePin(runner)
 
   if (!pinned) {
     return
@@ -158,6 +162,12 @@ export const pinCommand = defineCommand({
     }
 
     if (clear) {
+      if (!runner || tapManagerDataSource.isRunning()) {
+        releasePin()
+
+        return { cleared: false }
+      }
+
       return clearPin()
     }
 
