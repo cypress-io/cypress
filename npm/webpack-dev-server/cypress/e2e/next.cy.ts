@@ -38,7 +38,7 @@ for (const project of NEXT_PROJECTS_TSCONFIG_TAILWIND) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.get('.runnable-err-message').should('be.visible')
+      cy.reporter().find('.runnable-err-message').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const indexTestPath = ctx.path.join('app', 'page.cy.tsx')
@@ -71,7 +71,7 @@ for (const project of NEXT_PROJECTS_TSCONFIG_TAILWIND) {
 
       // The test should fail and the stack trace should appear in the command log
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
 
     it('should detect new spec', { retries: 15 }, () => {

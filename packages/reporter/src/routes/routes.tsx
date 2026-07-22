@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 // @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 
 import Collapsible from '../collapsible/collapsible'
 import Tag from '../lib/tag'
