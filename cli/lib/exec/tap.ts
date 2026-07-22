@@ -121,10 +121,6 @@ const tapModule = {
       })
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
-        // Help must never require a live instance or an attached browser. When
-        // discovery can't reach an instance to produce schema help — for any
-        // reason (none running, stale, or up but no browser) — fall back to the
-        // static command listing instead of surfacing the discovery error.
         if (wantsHelp || !command) {
           return renderGenericHelp(wantsHelp, tapCliCommands)
         }
