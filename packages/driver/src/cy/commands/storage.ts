@@ -74,15 +74,21 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
     })
 
     const fetch = () => {
-      // if a read is already in flight, wait for it instead of starting a new one
+      // if a read is already in flight, wait for it instead of starting a new one.
+      // getStorage reads cross-origin storage by attaching a `message` listener to
+      // the shared spec window, so overlapping reads could accept each other's
+      // postMessage responses - this guard keeps reads strictly serialized.
       if (pending) {
         return
       }
 
+      // getStorage bounds itself (getPostMessageLocalStorage has its own timeout),
+      // so we don't wrap it in our own `.timeout()`: doing so would clear `pending`
+      // while the underlying read is still running, defeating the guard above. The
+      // command's overall timeout is enforced by the query retry mechanism.
       pending = Promise.try(() => {
         return getStorage(Cypress, { origin: '*' })
       })
-      .timeout(timeout)
       .then((storages) => {
         storageByOrigin = storages[type].reduce((memo, storage) => {
           memo[storage.origin] = storage.value
@@ -91,11 +97,6 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
         }, {} as Cypress.StorageByOrigin)
 
         hasResult = true
-      })
-      .catch(Promise.TimeoutError, () => {
-        mostRecentError = $errUtils.cypressErrByPath('getAllStorage.timed_out', {
-          args: { cmd: commandName, timeout },
-        })
       })
       .catch((err) => {
         mostRecentError = err
