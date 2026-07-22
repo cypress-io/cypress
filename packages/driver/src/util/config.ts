@@ -25,12 +25,7 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
       return
     }
 
-    // Cross-origin syncing applies the diff via Cypress.config() at run-time, so omit any
-    // value that cannot be set that way.
-    if (
-      (overrideLevels === 'never' && configKey !== 'isDefaultProtocolEnabled') ||
-      overrideLevels === 'suiteOrTest'
-    ) {
+    if ((overrideLevels === 'never' && configKey !== 'isDefaultProtocolEnabled')) {
       delete objectLikeConfig[configKey]
     }
   })
@@ -61,7 +56,21 @@ export const syncConfigToCurrentOrigin = (config: Cypress.Config) => {
   const shallowConfigDiff = syncToCurrentOrigin(config, Cypress.config())
   const valuesToSync = omitConfigReadOnlyDifferences(shallowConfigDiff)
 
-  Cypress.config(valuesToSync)
+  // These values are already-resolved config from the other origin, not user overrides, so
+  // skip test-override validation while applying them. Otherwise syncing viewportWidth/
+  // viewportHeight (which can't be set via Cypress.config() during a test) would throw here,
+  // and skipping the sync would leave those values stale in a reused spec bridge. In a spec
+  // bridge window.top is cross-origin, so mirror the target the config setter reads from.
+  const skipValidateConfigTarget = Cypress.isCrossOriginSpecBridge ? window : window.top!
+  const previousSkipValidateConfig = skipValidateConfigTarget.__cySkipValidateConfig
+
+  skipValidateConfigTarget.__cySkipValidateConfig = true
+
+  try {
+    Cypress.config(valuesToSync)
+  } finally {
+    skipValidateConfigTarget.__cySkipValidateConfig = previousSkipValidateConfig
+  }
 }
 
 export const syncExposeToCurrentOrigin = (expose: Cypress.ObjectLike) => {
