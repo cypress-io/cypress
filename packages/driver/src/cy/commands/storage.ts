@@ -39,9 +39,7 @@ const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypre
 
 export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) => {
   // getAllLocalStorage and getAllSessionStorage are query commands: they re-read
-  // storage across all origins and re-run any attached assertions until they pass
-  // or the command times out. This lets `cy.getAllLocalStorage().should(...)` wait
-  // for storage that is populated asynchronously instead of failing on the first read.
+  // storage from all origins and retry attached assertions until they pass or time out.
   function createGetAllStorageQuery (type: StorageType, commandName: string, userOptions: Options = {}) {
     const options: Options = {
       log: true,
@@ -74,22 +72,17 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
     })
 
     const fetch = () => {
-      // if a read is already in flight for this command, reuse it instead of
-      // starting another. getStorage reads cross-origin storage by attaching a
-      // `message` listener to the shared spec window, so this serializes the
-      // repeated reads a single command issues while retrying. Note this is
-      // per-command: a command's trailing background read can still briefly
-      // overlap the next storage command's read. That is benign - a single
-      // getStorage call returns both storage types and each command yields only
-      // its own type, so an overlapping read cannot cross-contaminate results.
+      // getStorage attaches a `message` listener to the shared spec window, so the
+      // pending guard serializes the reads one command issues while retrying. It's
+      // per-command: a trailing read can briefly overlap the next command's, but
+      // that's benign since each command yields only its own storage type.
       if (pending) {
         return
       }
 
-      // getStorage bounds itself (getPostMessageLocalStorage has its own timeout),
-      // so we don't wrap it in our own `.timeout()`: doing so would clear `pending`
-      // while the underlying read is still running, defeating the guard above. The
-      // command's overall timeout is enforced by the query retry mechanism.
+      // getStorage bounds itself, so wrapping it in our own `.timeout()` would only
+      // clear `pending` while the underlying read kept running, defeating the guard
+      // above. The command's overall timeout is handled by the query retry mechanism.
       pending = Promise.try(() => {
         return getStorage(Cypress, { origin: '*' })
       })
@@ -112,9 +105,8 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
 
     return () => {
       if (hasResult) {
-        // kick off a background re-read (without discarding the current result) so
-        // subsequent assertion retries - including assertions chained through
-        // another query - see up-to-date storage.
+        // re-read in the background (keeping the current result) so retries -
+        // including assertions chained through another query - see fresh storage.
         fetch()
 
         return storageByOrigin
@@ -122,8 +114,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
 
       fetch()
 
-      // no result yet - the read is pending. throw and wait for it to resolve on
-      // a future retry.
+      // no result yet - throw to retry once the pending read resolves.
       throw mostRecentError
     }
   }

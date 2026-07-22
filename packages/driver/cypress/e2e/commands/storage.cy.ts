@@ -49,8 +49,7 @@ describe('src/cy/commands/storage', () => {
       })
     })
 
-    // exercises the background re-read path (hasResult === true) that feeds fresh
-    // storage to retries when the assertion is chained through another query
+    // chained through .its() to exercise the background re-read that feeds retries
     it('retries through a chained query until asynchronously-set storage passes', () => {
       cy.window().then((win) => {
         setTimeout(() => {
@@ -241,8 +240,7 @@ describe('src/cy/commands/storage', () => {
       })
     })
 
-    // exercises the background re-read path (hasResult === true) that feeds fresh
-    // storage to retries when the assertion is chained through another query
+    // chained through .its() to exercise the background re-read that feeds retries
     it('retries through a chained query until asynchronously-set storage passes', () => {
       cy.window().then((win) => {
         setTimeout(() => {
@@ -266,9 +264,8 @@ describe('src/cy/commands/storage', () => {
       cy.getAllSessionStorage({ timeout: 100 }).should('have.property', 'http://does-not-exist.com:3500')
     })
 
-    // back-to-back local/session reads: a trailing background read from the first
-    // command can overlap the second, but each command yields only its own type,
-    // so results must not cross-contaminate
+    // a trailing background read from the first command can overlap the second;
+    // each command must still yield only its own storage type
     it('does not cross-contaminate back-to-back local and session storage reads', () => {
       cy.window().then((win) => {
         setTimeout(() => {
