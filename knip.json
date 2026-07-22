@@ -843,9 +843,6 @@
     "packages/app/src/tap/commands/run-state.ts": [
       "types"
     ],
-    "packages/app/src/tap/commands/snapshot-pin.ts": [
-      "types"
-    ],
     "packages/app/src/tap/commands/test-state.ts": [
       "types"
     ],
