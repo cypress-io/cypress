@@ -251,6 +251,24 @@ describe('lib/server-base', () => {
       expect(this.server._networkProxy.http.preRequests.requestTimeout).to.equal(1234)
     })
 
+    it('clears _networkProxy before disposing the previous CDP runtime', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      const firstProxy = this.server._networkProxy
+      let networkProxyDuringDispose: NetworkProxy | undefined | null = null
+
+      sinon.stub(firstProxy, 'dispose').callsFake(() => {
+        networkProxyDuringDispose = this.server._networkProxy
+      })
+
+      await this.server['stopCdpFetchRuntime']()
+
+      expect(networkProxyDuringDispose).to.be.undefined
+      expect(this.server._networkProxy).to.be.undefined
+    })
+
     it('stops the previous CDP Fetch runtime before replacing it', async function () {
       const firstClient = createClient()
       const secondClient = createClient()

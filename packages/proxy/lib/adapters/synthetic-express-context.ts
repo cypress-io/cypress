@@ -19,11 +19,23 @@ function normalizeHeaderName (name: string): string {
  * Node lowercases IncomingMessage header keys; legacy proxy middleware looks
  * them up that way (cookie, content-encoding, content-type, set-cookie, …).
  * CDP Fetch preserves the browser's original casing, so normalize here when
- * synthesizing Express-like req/incomingRes objects.
+ * synthesizing Express-like req/incomingRes objects. Values for the same
+ * lowercased key are concatenated (Set-Cookie must not drop siblings).
  */
 function lowercaseHeaders (headers: HttpHeaders): HttpHeaders {
   return Object.entries(headers).reduce<HttpHeaders>((memo, [name, value]) => {
-    memo[normalizeHeaderName(name)] = value
+    if (typeof value === 'undefined') {
+      return memo
+    }
+
+    const key = normalizeHeaderName(name)
+    const existing = memo[key]
+
+    if (existing) {
+      memo[key] = ([] as string[]).concat(existing, value)
+    } else {
+      memo[key] = value
+    }
 
     return memo
   }, {})

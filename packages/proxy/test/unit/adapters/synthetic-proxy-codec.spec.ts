@@ -79,6 +79,20 @@ describe('createSyntheticExpressContext', () => {
     })
   })
 
+  it('merges multi-value headers that differ only by case when lowercasing', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+      headers: {
+        'Set-Cookie': 'a=1',
+        'set-cookie': 'b=2',
+      },
+    })
+
+    expect(incomingRes.headers['set-cookie']).to.deep.equal(['a=1', 'b=2'])
+  })
+
   it('keeps malformed cookie values without throwing', () => {
     const { req } = createSyntheticExpressContext({
       id: 'network-1',

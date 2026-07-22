@@ -578,6 +578,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._cdpFetchRuntime = undefined
 
+    // Drop the shared pointer before dispose so concurrent getNetworkProxy /
+    // addBrowserPreRequest callers cannot use a NetworkProxy whose sweep
+    // timer has already been cleared.
+    if (previous && this._networkProxy === previous.networkProxy) {
+      this._networkProxy = undefined
+    }
+
     if (!previous) {
       return
     }
