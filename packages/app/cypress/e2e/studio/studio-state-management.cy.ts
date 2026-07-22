@@ -50,17 +50,17 @@ describe('Cypress Studio - State Management', () => {
 
     // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
     // TODO: https://github.com/cypress-io/cypress-services/issues/11085
-    cy.get('.command-name-visit').within(() => {
+    cy.reporter().find('.command-name-visit').within(() => {
       cy.contains('visit')
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').first().within(() => {
+    cy.reporter().find('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
 
-    cy.get('.command-name-click').within(() => {
+    cy.reporter().find('.command-name-click').within(() => {
       cy.contains('click')
     })
   })

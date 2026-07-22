@@ -2,18 +2,14 @@
 
 import _ from 'lodash'
 import type { Protocol } from 'devtools-protocol'
-import { isHostOnlyCookie } from '../util'
+import { isHostOnlyCookie, sameSiteExtensionToProtocolMap } from '../util'
 import type { CyCookie } from '../util'
 
 function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
-  return str ? ({
-    'no_restriction': 'None',
-    'lax': 'Lax',
-    'strict': 'Strict',
-  })[str] as Protocol.Network.CookieSameSite : str as undefined
+  return str ? sameSiteExtensionToProtocolMap[str] : undefined
 }
 
-function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
+function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite | undefined): CyCookie['sameSite'] {
   if (_.isUndefined(str)) {
     return str
   }
@@ -22,37 +18,34 @@ function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): c
     return 'no_restriction'
   }
 
-  return str.toLowerCase() as chrome.cookies.SameSiteStatus
+  return str.toLowerCase() as CyCookie['sameSite']
 }
 
-const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
-  if (cookie.expires === -1) {
-    // @ts-ignore
-    delete cookie.expires
+const convertCdpCookieToCyCookie = (cookie: Protocol.Network.Cookie): CyCookie => {
+  const cyCookie: CyCookie = {
+    name: cookie.name,
+    value: cookie.value,
+    domain: cookie.domain,
+    path: cookie.path,
+    secure: cookie.secure,
+    httpOnly: cookie.httpOnly,
+    sameSite: convertSameSiteCdpToExtension(cookie.sameSite),
+    // CDP signals a session cookie with a -1 expiry
+    expirationDate: cookie.expires === -1 ? undefined : cookie.expires,
   }
 
   if (isHostOnlyCookie(cookie)) {
-    // @ts-ignore
-    cookie.hostOnly = true
+    cyCookie.hostOnly = true
   }
 
-  // @ts-ignore
-  cookie.sameSite = convertSameSiteCdpToExtension(cookie.sameSite)
-
-  // @ts-ignore
-  cookie.expirationDate = cookie.expires
-  // @ts-ignore
-  delete cookie.expires
-
-  // @ts-ignore
-  return cookie
+  return cyCookie
 }
 
-export const normalizeGetCookies = (cookies: Protocol.Network.Cookie[]) => {
-  return _.map(cookies, normalizeGetCookieProps)
+export const convertCdpCookiesToCyCookies = (cookies: Protocol.Network.Cookie[]) => {
+  return _.map(cookies, convertCdpCookieToCyCookie)
 }
 
-export const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
+export const convertCyCookieToCdpCookie = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
   // this logic forms a SetCookie request that will be received by Chrome
   // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
   // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
@@ -78,11 +71,6 @@ export const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetC
   // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
     setCookieRequest.domain = `.${cookie.domain}`
-  }
-
-  if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
-    // @ts-ignore
-    delete cookie.hostOnly
   }
 
   if (setCookieRequest.name.startsWith('__Host-')) {
