@@ -10,7 +10,7 @@ import {
 } from './options'
 
 import type { BreakingErrResult, TestingType } from '@packages/types'
-import type { BreakingOption, BreakingOptionErrorKey, CurrentOverrideLevel, OverrideLevel } from './options'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideContext, OverrideLevel } from './options'
 import type { ErrResult } from './validation'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
@@ -205,7 +205,7 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateOverridableAtRunTime = (config: any, currentOverrideLevel: CurrentOverrideLevel, onErr: (result: InvalidTestOverrideResult) => void) => {
+export const validateOverridableAtRunTime = (config: any, overrideContext: OverrideContext, onErr: (result: InvalidTestOverrideResult) => void) => {
   Object.keys(config).some((configKey) => {
     const overrideLevel: OverrideLevel = testOverrideLevels[configKey]
 
@@ -239,8 +239,8 @@ export const validateOverridableAtRunTime = (config: any, currentOverrideLevel: 
 
     if (
       overrideLevel === 'never' ||
-      (overrideLevel === 'suite' && currentOverrideLevel !== 'suite') ||
-      (overrideLevel === 'suiteOrTest' && currentOverrideLevel === 'runtime')
+      (overrideLevel === 'suite' && overrideContext !== 'suite') ||
+      (overrideLevel === 'suiteOrTest' && overrideContext === 'runtime')
     ) {
       onErr({
         invalidConfigKey: configKey,

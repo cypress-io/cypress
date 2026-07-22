@@ -263,7 +263,7 @@ export default {
         docsUrl: 'https://on.cypress.io/config',
       },
       suite_or_test_only: {
-        message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` during test execution because it would affect the next test rather than the current one and is not reflected in Test Replay. Set \`{{invalidConfigKey}}\` in the test configuration of a \`describe\`/\`context\` or \`it\` block instead.{{additionalInfo}}`,
+        message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` during test execution because it would affect the next test rather than the current one. Set \`{{invalidConfigKey}}\` in the test configuration of a \`describe\`/\`context\` or \`it\` block instead.{{additionalInfo}}`,
         docsUrl: 'https://on.cypress.io/config',
       },
     },

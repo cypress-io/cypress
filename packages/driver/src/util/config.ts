@@ -127,11 +127,11 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
   const mochaOverrideLevel = getMochaOverrideLevel(state)
 
   if (!skipConfigOverrideValidation && mochaOverrideLevel !== 'restoring') {
-    const currentOverrideLevel = mochaOverrideLevel === 'suite' || mochaOverrideLevel === 'test'
+    const overrideContext = mochaOverrideLevel === 'suite' || mochaOverrideLevel === 'test'
       ? mochaOverrideLevel
       : state('duringUserTestExecution') ? 'runtime' : undefined
 
-    validateOverridableAtRunTime(config, currentOverrideLevel, (validationResult) => {
+    validateOverridableAtRunTime(config, overrideContext, (validationResult) => {
       let errKey = 'config.cypress_config_api.read_only'
 
       if (validationResult.supportedOverrideLevel === 'global_only') {

@@ -56,7 +56,7 @@ export type OverrideLevel = 'any' | 'suiteOrTest' | 'suite' | 'never'
  * `describe`/`it` config overrides, `runtime` for a `Cypress.config()` call while a test is
  * executing, and `undefined` for anything else (support/spec file load or a `test:before:run` event).
  */
-export type CurrentOverrideLevel = 'suite' | 'test' | 'runtime' | undefined
+export type OverrideContext = 'suite' | 'test' | 'runtime' | undefined
 
 interface ConfigOption {
   name: string
