@@ -16,8 +16,8 @@ export const runStateCommand = defineCommand({
   // The CLI surfaces this through the friendlier `status` command, not as its own.
   hidden: true,
   params: [],
-  handler: async (): Promise<RunStateResult> => {
-    const totalSpecs = tapManagerDataSource.getRunnableSpecs().length
+  handler: async (_params, _options, runtime): Promise<RunStateResult> => {
+    const totalSpecs = (await tapManagerDataSource.getRunnableSpecs(runtime.gqlClient)).length
     const runner = tapManagerDataSource.getRunner()
 
     if (!runner) {

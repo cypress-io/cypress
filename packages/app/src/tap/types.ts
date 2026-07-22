@@ -8,6 +8,10 @@ export interface TapTestsRunner {
   isRunComplete (): boolean
 }
 
+// The fields the tap commands read off a runnable spec, sourced live from
+// GraphQL in open mode or from the served snapshot as a fallback.
+export type RunnableSpec = Pick<FoundSpec, 'relative' | 'specType'>
+
 export interface SpecListEntry {
   /** Project-relative spec path — the form `cypress run --spec` accepts. */
   relativePath: string

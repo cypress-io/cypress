@@ -16,13 +16,14 @@ export const runCommand = defineCommand({
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
-  handler: async ({ spec }): Promise<SpecListEntry> => {
+  handler: async ({ spec }, _options, runtime): Promise<SpecListEntry> => {
     if (spec.length === 0) {
       throw new TapCommandError('INVALID_SPEC', 'spec must be a non-empty string (a project-relative spec path)')
     }
 
     const wanted = posixify(spec)
-    const match = tapManagerDataSource.getRunnableSpecs().find((entry) => posixify(entry.relative) === wanted)
+    const specs = await tapManagerDataSource.getRunnableSpecs(runtime.gqlClient)
+    const match = specs.find((entry) => posixify(entry.relative) === wanted)
 
     if (!match) {
       throw new TapCommandError('SPEC_NOT_FOUND', `no spec matches the path "${spec}" — use the specs command to list runnable specs`)

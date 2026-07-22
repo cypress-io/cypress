@@ -1,7 +1,5 @@
-import type { FoundSpec } from '@packages/types'
+import type { RunnableSpec, SpecListEntry } from '../types'
 
-import type { SpecListEntry } from '../types'
-
-export const toSpecListEntry = ({ relative, specType }: FoundSpec): SpecListEntry => {
+export const toSpecListEntry = ({ relative, specType }: RunnableSpec): SpecListEntry => {
   return { relativePath: relative, specType }
 }

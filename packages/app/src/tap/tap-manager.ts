@@ -4,6 +4,7 @@ import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
 import { TAP_SCHEMA_VERSION } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
+import type { TapRuntime } from './tap-runtime'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
 // to `{}` (absent); a primitive or array would otherwise slip past `Object.keys`
@@ -23,7 +24,7 @@ const normalizePayload = (value: unknown): Record<string, string> | null => {
 // The surface mounted at `window.__CYPRESS_TAP_BINDING__`, invoked by the CLI
 // over CDP `Runtime.callFunctionOn` — both methods are async and JSON-only per `./contract`.
 export class TapManager implements TapBindingContract {
-  constructor (private cypressVersion: string) {}
+  constructor (private cypressVersion: string, private runtime: TapRuntime = { gqlClient: null }) {}
 
   async getSchema (): Promise<TapSchema> {
     return {
@@ -92,7 +93,7 @@ export class TapManager implements TapBindingContract {
     }
 
     try {
-      return { result: await definition.handler(coercedArgs.args, coercedOptions.options) }
+      return { result: await definition.handler(coercedArgs.args, coercedOptions.options, this.runtime) }
     } catch (err) {
       // A handler's TapCommandError is a domain failure; surface it as { error }.
       // Any other throw is a real binding bug.

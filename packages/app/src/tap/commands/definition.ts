@@ -1,4 +1,5 @@
 import type { TapCommandOptionSchema, TapCommandParamSchema } from '../contract'
+import type { TapRuntime } from '../tap-runtime'
 
 /**
  * Thrown by a handler to report a domain failure (no run mounted, no such test
@@ -44,7 +45,7 @@ export const defineCommand = <
   params: P
   options?: O
   hidden?: boolean
-  handler: (params: ParamsToObject<P>, options: OptionsToObject<O>) => Promise<unknown>
+  handler: (params: ParamsToObject<P>, options: OptionsToObject<O>, runtime: TapRuntime) => Promise<unknown>
 }) => {
   return definition
 }

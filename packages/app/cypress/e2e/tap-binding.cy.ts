@@ -68,6 +68,40 @@ describe('tap binding', () => {
     })
   })
 
+  it('lists a spec added while the instance is open, with no runner reload', () => {
+    const added = 'cypress/e2e/added-while-open.spec.js'
+
+    const relativePaths = async (win: Cypress.AUTWindow): Promise<string[]> => {
+      const outcome = await getBinding(win).exec('specs')
+
+      return (outcome as { result: Array<{ relativePath: string }> }).result.map((spec) => spec.relativePath)
+    }
+
+    cy.window().then(async (win) => {
+      expect(await relativePaths(win), 'absent before it is written').not.to.include(added)
+    })
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.added, `describe('added while open', () => { it('runs', () => { expect(true).to.be.true }) })`)
+    }, { added })
+
+    // The spec watcher pushes the new spec over GraphQL; tap reads it live, with
+    // no page reload. Poll the binding until the watcher-updated query reflects it.
+    cy.window().then((win) => {
+      return (async () => {
+        for (let attempt = 0; attempt < 20; attempt++) {
+          if ((await relativePaths(win)).includes(added)) {
+            return
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 250))
+        }
+
+        throw new Error(`spec "${added}" was never listed by tap specs after being written`)
+      })()
+    })
+  })
+
   it('runs and reruns a spec via the run command', () => {
     cy.window().then(async (win) => {
       const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })

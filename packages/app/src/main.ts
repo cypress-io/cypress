@@ -8,6 +8,7 @@ import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { TapManager } from './tap/tap-manager'
+import type { TapRuntime } from './tap/tap-runtime'
 import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
@@ -29,7 +30,9 @@ const ws = createWebsocket(config)
 
 window.ws = ws
 
-window.__CYPRESS_TAP_BINDING__ = new TapManager(config.version)
+const tapRuntime: TapRuntime = { gqlClient: null }
+
+window.__CYPRESS_TAP_BINDING__ = new TapManager(config.version, tapRuntime)
 
 telemetry.attachWebSocket(ws)
 
@@ -45,6 +48,12 @@ app.use(Toast, {
 })
 
 await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
+  // Open mode has a live spec set behind GraphQL; run mode does not, so tap
+  // there falls back to the served snapshot.
+  if (!config.isTextTerminal) {
+    tapRuntime.gqlClient = client
+  }
+
   app.use(urql, client)
   app.use(createRouter())
   app.use(createI18n())

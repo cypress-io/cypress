@@ -1,8 +1,16 @@
 import type { FoundSpec } from '@packages/types'
+import type { Client } from '@urql/core'
 
 import { TapManager } from '../tap-manager'
+import type { RunnableSpec } from '../types'
 
 const CYPRESS_VERSION = '15.0.0'
+
+const stubGqlClient = (specs: RunnableSpec[]): Client => {
+  return {
+    query: () => ({ toPromise: async () => ({ data: { currentProject: { specs } } }) }),
+  } as unknown as Client
+}
 
 describe('tap/commands/specs', () => {
   const RUN_MODE_SPECS: FoundSpec[] = [
@@ -32,7 +40,22 @@ describe('tap/commands/specs', () => {
     delete (window as any).__RUN_MODE_SPECS__
   })
 
-  it('lists the server-embedded specs, keeping only the lean entry fields', async () => {
+  it('lists specs from the live GraphQL client when one is provided (open mode)', async () => {
+    window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
+
+    const gqlClient = stubGqlClient([
+      { relative: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration' },
+    ])
+    const manager = new TapManager(CYPRESS_VERSION, { gqlClient })
+
+    expect(await manager.exec('specs')).to.deep.eq({
+      result: [
+        { relativePath: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration' },
+      ],
+    })
+  })
+
+  it('falls back to the server-embedded snapshot when there is no GraphQL client', async () => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -45,7 +68,7 @@ describe('tap/commands/specs', () => {
     })
   })
 
-  it('resolves an empty list when the specs global is not present', async () => {
+  it('resolves an empty list when neither a client nor the specs global is present', async () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect(await manager.exec('specs')).to.deep.eq({ result: [] })
