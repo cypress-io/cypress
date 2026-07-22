@@ -901,7 +901,6 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    // https://github.com/cypress-io/cypress/issues/4802
     it('retries reading cookies until an assertion passes', () => {
       const get = Cypress.automation.withArgs('get:cookies')
 
