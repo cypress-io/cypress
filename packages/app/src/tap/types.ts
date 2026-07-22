@@ -1,4 +1,4 @@
-import type { FoundSpec, SerializedCommandLog, SerializedTest } from '@packages/types'
+import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 
 export interface TapTestsRunner {
   /** Serializes every test of the run, keyed by id. */
@@ -11,8 +11,6 @@ export interface TapTestsRunner {
 export interface SpecListEntry {
   /** Project-relative spec path — the form `cypress run --spec` accepts. */
   relativePath: string
-  /** Whether the spec is an end-to-end (integration) or component spec. */
-  specType: FoundSpec['specType']
 }
 
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'

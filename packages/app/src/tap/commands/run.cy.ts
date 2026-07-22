@@ -91,7 +91,7 @@ describe('tap/commands/run', () => {
     const outcome = await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
 
     expect(outcome).to.deep.eq({
-      result: { relativePath: 'cypress/e2e/login.cy.ts', specType: 'integration' },
+      result: { relativePath: 'cypress/e2e/login.cy.ts' },
     })
 
     expect(setHash).to.have.been.calledOnce
@@ -136,7 +136,7 @@ describe('tap/commands/run', () => {
     const outcome = await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
 
     expect(outcome).to.deep.eq({
-      result: { relativePath: 'cypress\\e2e\\login.cy.ts', specType: 'integration' },
+      result: { relativePath: 'cypress\\e2e\\login.cy.ts' },
     })
 
     expect(setHash.firstCall.args[0]).to.contain('file=cypress/e2e/login.cy.ts')
