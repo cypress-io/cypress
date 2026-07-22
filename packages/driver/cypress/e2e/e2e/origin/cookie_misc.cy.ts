@@ -75,10 +75,10 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     // wait for the async XHR response to arrive
     cy.wait('@async')
-    // cy.getAllCookies does not wait for the cookies to be set, so we need to wait manually
-    cy.wait(500)
 
-    cy.getAllCookies().then((cookies) => {
+    // getAllCookies is a query and retries until the assertions pass, so it
+    // waits for the async cookie to be set without a manual wait.
+    cy.getAllCookies().should((cookies) => {
       const isFirefox = Cypress.isBrowser({ family: 'firefox' })
 
       // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
