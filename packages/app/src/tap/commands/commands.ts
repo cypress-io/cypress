@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from './test-state'
+import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from '../test-state'
 import type { CommandEntry } from '../types'
 
 export const commandsCommand = defineCommand({

@@ -1,7 +1,7 @@
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from './test-state'
-import { tapPinSource } from './snapshot-pin'
-import type { PinSnapshotEntry, PinSnapshotProps } from './snapshot-pin'
+import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from '../test-state'
+import { tapManagerDataSource } from '../tap-manager-data-source'
+import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner } from '../types'
 
 export interface SnapshotRef {
   index: number
@@ -60,17 +60,13 @@ const onExternalUnpin = (): void => {
   const { original } = pinned
 
   releasePin()
-  tapPinSource.getAutIframe()?.restoreDom(original)
+  tapManagerDataSource.getAutIframe()?.restoreDom(original)
 }
 
 // The current pin, for the run-state command to surface (so `status` can report
 // a pin and a stranded one is always visible and recoverable).
 export const getPinnedRef = (): { command: string, at: SnapshotRef } | undefined => {
   return pinned ? { command: pinned.command, at: pinned.at } : undefined
-}
-
-export interface PinReconcileRunner {
-  getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
 }
 
 /**
@@ -80,7 +76,7 @@ export interface PinReconcileRunner {
  * regenerates test and log ids, so the lookup misses and we release the pin.
  * Safe to call anytime; a no-op when nothing is pinned.
  */
-export const reconcilePin = (runner: PinReconcileRunner): void => {
+export const reconcilePin = (runner: PinSnapshotRunner): void => {
   if (!pinned) {
     return
   }
@@ -130,18 +126,13 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
   throw new TapCommandError('SNAPSHOT_NOT_FOUND', `no snapshot of this command matches "${at}" — available snapshots: ${available}`)
 }
 
-// Re-select which snapshot of the already-pinned command the runner shows,
-// without a clear/re-pin round trip. Reached only when the target matches the
-// live pin, so the DOM captured on the first pin and the unpin listener stay
-// put and clear still restores correctly. Resolving `at` before switching means
-// a bad `--at` leaves the current pin untouched.
-const movePin = (runner: PinReconcileRunner, at: string | undefined): PinResult => {
+const movePin = (runner: PinSnapshotRunner, at: string | undefined): PinResult => {
   const current = pinned!
   const props = runner.getSnapshotPropsForLog(current.test, current.command)
   const snapshots = liveSnapshots(props)
   const index = resolveAt(snapshots, at)
 
-  tapPinSource.changeSnapshotState(index)
+  tapManagerDataSource.changeSnapshotState(index)
 
   const at_ = toRef(snapshots[index], index)
 
@@ -163,8 +154,8 @@ const clearPin = (): ClearResult => {
   // Stop listening before unpinning, or our own unpin would re-enter the
   // external-unpin handler and restore twice.
   releasePin()
-  tapPinSource.getAutIframe()?.restoreDom(original)
-  tapPinSource.unpinSnapshot()
+  tapManagerDataSource.getAutIframe()?.restoreDom(original)
+  tapManagerDataSource.unpinSnapshot()
 
   return { cleared: true }
 }
@@ -180,7 +171,7 @@ export const pinCommand = defineCommand({
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },
   ],
   handler: async ({ test, command }, { at, clear }): Promise<PinResult | ClearResult> => {
-    const runner = tapPinSource.getRunner()
+    const runner = tapManagerDataSource.getSnapshotRunner()
 
     // Release a pin left over from a previous run before anything else, so stale
     // state never blocks a new pin, is never reported by status, and is never
@@ -201,19 +192,12 @@ export const pinCommand = defineCommand({
       throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')
     }
 
-    if (tapPinSource.isRunning()) {
+    if (tapManagerDataSource.isRunning()) {
       throw new TapCommandError('RUN_IN_PROGRESS', 'a spec is currently running — wait for it to finish before pinning a snapshot')
     }
 
-    if (pinned) {
-      // Re-pinning the same command moves the pin to the requested snapshot in
-      // place; a different command must be released first so the single-pin
-      // invariant (one live pin, one captured DOM) holds.
-      if (pinned.test === test && pinned.command === command) {
-        return movePin(runner, at)
-      }
-
-      throw new TapCommandError('ALREADY_PINNED', `command "${pinned.command}" is already pinned — release it with pin --clear before pinning another`)
+    if (pinned && pinned.test === test && pinned.command === command) {
+      return movePin(runner, at)
     }
 
     const selection = selectTestAttempt(runner, test)
@@ -237,23 +221,19 @@ export const pinCommand = defineCommand({
 
     const index = resolveAt(snapshots, at)
 
-    const autIframe = tapPinSource.getAutIframe()
+    const autIframe = tapManagerDataSource.getAutIframe()
 
     if (!autIframe) {
       throw new TapCommandError('NO_AUT', 'the app under test is not available to pin a snapshot into')
     }
 
-    // Capture the current DOM so we can restore it on release, then hand the
-    // chosen snapshot to the app's own pin so the runner renders it and shows
-    // the native banner/controls (synchronous for a same-origin AUT). Pass the
-    // filtered snapshots so the state toggle and our `index` stay aligned.
-    const original = autIframe.detachDom()
+    const original = pinned ? pinned.original : autIframe.detachDom()
 
-    tapPinSource.pinSnapshot({ ...props, snapshots }, index, test, command)
+    tapManagerDataSource.pinSnapshot({ ...props, snapshots }, index, test, command)
 
-    // The native pin can be released from the runner's ✕; restore our captured
-    // DOM and drop our state when it is, so status never reports a phantom pin.
-    stopListeningForUnpin = tapPinSource.onUnpinned(onExternalUnpin)
+    if (!pinned) {
+      stopListeningForUnpin = tapManagerDataSource.onSnapshotUnpinned(onExternalUnpin)
+    }
 
     const at_ = toRef(snapshots[index], index)
 
