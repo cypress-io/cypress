@@ -272,9 +272,12 @@ describe('tap binding pin lifecycle', () => {
     cy.waitForSpecToFinish({ passCount: 1 })
   }
 
+  // Re-reads the live document on every retry: pinning restores the snapshot
+  // asynchronously and replaces the AUT body, so a body reference captured once
+  // would go stale and keep reporting the pre-swap DOM.
   const expectAutStatus = (text: string) => {
-    cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
-      cy.get('#status').should('have.text', text)
+    cy.get('iframe.aut-iframe').should(($autIframe) => {
+      expect($autIframe.contents().find('#status').text()).to.eq(text)
     })
   }
 
