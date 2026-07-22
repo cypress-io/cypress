@@ -27,7 +27,12 @@
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
-## 15.18.2
+## 15.19.1
+
+**Bugfixes:**
+
+- Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+
 ## 15.19.0
 
 **Performance:**
