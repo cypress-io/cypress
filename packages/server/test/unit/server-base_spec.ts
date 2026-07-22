@@ -286,6 +286,26 @@ describe('lib/server-base', () => {
       expect(this.server._networkProxy).to.not.equal(firstProxy)
     })
 
+    it('disposes NetworkProxy only after Fetch.disable completes', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      const proxy = this.server._networkProxy
+      const disposeSpy = sinon.spy(proxy, 'dispose')
+      let disposeDuringFetchDisable = false
+
+      client.send.withArgs('Fetch.disable').callsFake(async () => {
+        disposeDuringFetchDisable = disposeSpy.called
+      })
+
+      await this.server['stopCdpFetchRuntime']()
+
+      expect(disposeDuringFetchDisable).to.be.false
+      expect(client.send).to.have.been.calledWith('Fetch.disable')
+      expect(disposeSpy).to.have.been.calledOnce
+    })
+
     it('still starts the new runtime when stopping the previous one fails', async function () {
       const firstClient = createClient()
       const secondClient = createClient()

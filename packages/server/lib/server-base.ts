@@ -589,16 +589,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return
     }
 
-    // Dispose NetworkProxy before/while stopping Fetch so PreRequests sweep
-    // intervals from replaced runtimes do not accumulate across specs.
-    try {
-      previous.networkProxy.dispose()
-    } catch (err) {
-      debug('CDP Fetch NetworkProxy dispose failed: %s', err?.stack || err)
-    }
-
+    // Disable Fetch and drop handlers before dispose so paused requests cannot
+    // enter the legacy pipeline against a NetworkProxy whose PreRequests
+    // sweep/buffers are already cleared. Then dispose so replaced runtimes do
+    // not leave sweep timers accumulating across specs.
     return previous.stop().catch((err) => {
       debug('CDP Fetch runtime stop failed: %s', err?.stack || err)
+    }).finally(() => {
+      try {
+        previous.networkProxy.dispose()
+      } catch (err) {
+        debug('CDP Fetch NetworkProxy dispose failed: %s', err?.stack || err)
+      }
     })
   }
 
