@@ -15,6 +15,15 @@ export interface SpecListEntry {
   specType: FoundSpec['specType']
 }
 
+export interface RunAck {
+  /** Project-relative spec path, as listed by the specs command. */
+  spec: string
+  status: 'running'
+  /** Total tests in the started spec; absent if the run hadn't registered them yet. */
+  totalTests?: number
+  message: string
+}
+
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
 
 export interface TestStateEntry {

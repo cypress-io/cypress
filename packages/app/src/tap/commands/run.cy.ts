@@ -29,6 +29,21 @@ describe('tap/commands/run', () => {
     })
   }
 
+  const stubStartedRun = (relative: string, testCount: number) => {
+    cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns(relative)
+    const tests = Object.fromEntries(
+      Array.from({ length: testCount }, (_, index) => [`r${index + 1}`, { id: `r${index + 1}`, state: 'passed' }]),
+    )
+
+    cy.stub(tapManagerDataSource, 'getRunner').returns({
+      getAllTestsState: () => tests,
+      getTestState: () => undefined,
+      isRunComplete: () => false,
+    })
+  }
+
+  const RUN_ACK_MESSAGE = 'spec is running — poll `cypress tap status` for progress'
+
   afterEach(() => {
     delete (window as any).__RUN_MODE_SPECS__
   })
@@ -82,7 +97,30 @@ describe('tap/commands/run', () => {
     expect(setHash).not.to.have.been.called
   })
 
-  it('navigates to the runner URL and resolves with the lean entry of the started spec', async () => {
+  it('navigates to the runner URL and acknowledges the started spec with its test count', async () => {
+    window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
+
+    const setHash = stubNavigation()
+
+    stubStartedRun('cypress/e2e/login.cy.ts', 2)
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    const outcome = await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
+
+    expect(outcome).to.deep.eq({
+      result: {
+        spec: 'cypress/e2e/login.cy.ts',
+        status: 'running',
+        totalTests: 2,
+        message: RUN_ACK_MESSAGE,
+      },
+    })
+
+    expect(setHash).to.have.been.calledOnce
+    expect(setHash.firstCall.args[0]).to.match(/^\/specs\/runner\?file=cypress\/e2e\/login\.cy\.ts&tapRun=\d+$/)
+  })
+
+  it('omits the test count when the started run does not register tests in time', async () => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
 
     const setHash = stubNavigation()
@@ -91,17 +129,22 @@ describe('tap/commands/run', () => {
     const outcome = await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
 
     expect(outcome).to.deep.eq({
-      result: { relativePath: 'cypress/e2e/login.cy.ts', specType: 'integration' },
+      result: {
+        spec: 'cypress/e2e/login.cy.ts',
+        status: 'running',
+        message: RUN_ACK_MESSAGE,
+      },
     })
 
     expect(setHash).to.have.been.calledOnce
-    expect(setHash.firstCall.args[0]).to.match(/^\/specs\/runner\?file=cypress\/e2e\/login\.cy\.ts&tapRun=\d+$/)
   })
 
   it('advances the tapRun nonce so rerunning the same spec changes the query', async () => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
 
     const setHash = stubNavigation()
+
+    stubStartedRun('cypress/e2e/login.cy.ts', 1)
     const manager = new TapManager(CYPRESS_VERSION)
 
     const readNonce = (href: string) => Number(href.match(/tapRun=(\d+)$/)?.[1])
@@ -120,6 +163,8 @@ describe('tap/commands/run', () => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
 
     const setHash = stubNavigation('#/specs/runner?file=cypress/e2e/login.cy.ts&tapRun=7')
+
+    stubStartedRun('cypress/e2e/login.cy.ts', 1)
     const manager = new TapManager(CYPRESS_VERSION)
 
     await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
@@ -131,12 +176,19 @@ describe('tap/commands/run', () => {
     window.__RUN_MODE_SPECS__ = [{ ...RUN_MODE_SPECS[0], relative: 'cypress\\e2e\\login.cy.ts' }]
 
     const setHash = stubNavigation()
+
+    stubStartedRun('cypress\\e2e\\login.cy.ts', 3)
     const manager = new TapManager(CYPRESS_VERSION)
 
     const outcome = await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
 
     expect(outcome).to.deep.eq({
-      result: { relativePath: 'cypress\\e2e\\login.cy.ts', specType: 'integration' },
+      result: {
+        spec: 'cypress\\e2e\\login.cy.ts',
+        status: 'running',
+        totalTests: 3,
+        message: RUN_ACK_MESSAGE,
+      },
     })
 
     expect(setHash.firstCall.args[0]).to.contain('file=cypress/e2e/login.cy.ts')
@@ -146,6 +198,8 @@ describe('tap/commands/run', () => {
     window.__RUN_MODE_SPECS__ = [{ ...RUN_MODE_SPECS[0], relative: 'cypress/e2e/a&b?c+d%e.cy.ts' }]
 
     const setHash = stubNavigation()
+
+    stubStartedRun('cypress/e2e/a&b?c+d%e.cy.ts', 1)
     const manager = new TapManager(CYPRESS_VERSION)
 
     const outcome = await manager.exec('run', { spec: 'cypress/e2e/a&b?c+d%e.cy.ts' })

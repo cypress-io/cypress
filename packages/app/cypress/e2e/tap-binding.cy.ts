@@ -72,9 +72,12 @@ describe('tap binding', () => {
     cy.window().then(async (win) => {
       const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })
 
-      expect(outcome).to.deep.eq({
-        result: { relativePath: 'cypress/e2e/dom-content.spec.js', specType: 'integration' },
-      })
+      const ack = (outcome as { result: Record<string, unknown> }).result
+
+      expect(ack.spec).to.eq('cypress/e2e/dom-content.spec.js')
+      expect(ack.status).to.eq('running')
+      expect(ack.totalTests).to.eq(1)
+      expect(ack.message).to.contain('cypress tap status')
     })
 
     cy.location('hash')
