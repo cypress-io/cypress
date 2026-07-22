@@ -74,10 +74,14 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
     })
 
     const fetch = () => {
-      // if a read is already in flight, wait for it instead of starting a new one.
-      // getStorage reads cross-origin storage by attaching a `message` listener to
-      // the shared spec window, so overlapping reads could accept each other's
-      // postMessage responses - this guard keeps reads strictly serialized.
+      // if a read is already in flight for this command, reuse it instead of
+      // starting another. getStorage reads cross-origin storage by attaching a
+      // `message` listener to the shared spec window, so this serializes the
+      // repeated reads a single command issues while retrying. Note this is
+      // per-command: a command's trailing background read can still briefly
+      // overlap the next storage command's read. That is benign - a single
+      // getStorage call returns both storage types and each command yields only
+      // its own type, so an overlapping read cannot cross-contaminate results.
       if (pending) {
         return
       }
