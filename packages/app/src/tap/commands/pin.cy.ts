@@ -248,6 +248,42 @@ describe('tap/commands/pin', () => {
     expect(restoreDom).not.to.have.been.called // never a stale restore
   })
 
+  it('drops a stale pin without restoring when an external unpin fires after a re-run', async () => {
+    const getSnapshotPropsForLog = cy.stub().returns(SNAPSHOT_PROPS)
+
+    cy.stub(tapManagerDataSource, 'getSnapshotRunner').returns({ getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE], getSnapshotPropsForLog })
+
+    const restoreDom = cy.stub()
+
+    cy.stub(tapManagerDataSource, 'getAutIframe').returns({ detachDom: cy.stub().returns('ORIGINAL-DOM'), restoreDom })
+    cy.stub(tapManagerDataSource, 'isRunning').returns(false)
+    cy.stub(tapManagerDataSource, 'pinSnapshot')
+    cy.stub(tapManagerDataSource, 'unpinSnapshot')
+
+    const onUnpinned = cy.stub(tapManagerDataSource, 'onSnapshotUnpinned').returns(cy.stub())
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('pin', { test: 'r2', command: 'log-1' })
+
+    // Simulate a re-run: the command id is reused, but its snapshots are fresh
+    // objects — the captured DOM now belongs to the dead run.
+    getSnapshotPropsForLog.returns({ url: SNAPSHOT_PROPS.url, snapshots: [{ name: 'before' }, { name: 'after' }] })
+
+    // The unpin listener outlives the re-run until a tap command reconciles; a
+    // pin/unpin in the new run fires it while our pin is stale.
+    const onExternalUnpin = onUnpinned.firstCall.args[0] as () => void
+
+    onExternalUnpin()
+
+    expect(restoreDom).not.to.have.been.called // never a stale restore over the live AUT
+
+    // The stale pin was released, so a fresh pin lands cleanly.
+    const outcome = await manager.exec('pin', { test: 'r2', command: 'log-1' })
+
+    expect((outcome as { result: any }).result.pinned.command).to.eq('log-1')
+  })
+
   it('requires a test and command (or --clear) before attempting a pin', async () => {
     const { detachDom, pinSnapshot } = stubSource()
 

@@ -109,10 +109,14 @@ export const tapManagerDataSource = {
       return () => {}
     }
 
-    em.reporterBus.on('reporter:snapshot:unpinned', handler)
+    // localBus `unpin:snapshot` is the one event every app-side unpin funnels
+    // through — the ✕ over the AUT and clicking the pinned command in the
+    // reporter; the reporterBus `reporter:snapshot:unpinned` event only fires
+    // for the ✕, so listening there would miss the reporter-click unpin.
+    em.localBus.on('unpin:snapshot', handler)
 
     return () => {
-      em.reporterBus.off('reporter:snapshot:unpinned', handler)
+      em.localBus.off('unpin:snapshot', handler)
     }
   },
 }

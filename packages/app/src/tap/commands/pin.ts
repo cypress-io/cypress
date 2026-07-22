@@ -33,9 +33,10 @@ interface PinnedState {
 
 let pinned: PinnedState | undefined
 
-// Detaches the external-unpin listener wired while a pin is live. The runner's
-// native pin exposes a ✕ that unpins through the app; that path can't restore
-// our cold pin's DOM or clear our state, so we listen and do it ourselves.
+// Detaches the external-unpin listener wired while a pin is live. The app has
+// its own unpin paths — the ✕ over the AUT, clicking the pinned command in the
+// reporter — that can't restore our cold pin's DOM or clear our state, so we
+// listen and do it ourselves.
 let stopListeningForUnpin: (() => void) | undefined
 
 const releasePin = (): void => {
@@ -49,10 +50,23 @@ export const resetPinState = (): void => {
   releasePin()
 }
 
-// The runner's ✕ (or any app-side unpin) fired while we hold a pin: the store
-// has already reset itself, so we only restore the DOM we captured and drop our
-// state — never call unpinSnapshot here, or it would re-enter this handler.
+// An app-side unpin fired while we hold a pin: the store has already reset
+// itself, so we only restore the DOM we captured and drop our state — never
+// call unpinSnapshot here, or it would re-enter this handler.
 const onExternalUnpin = (): void => {
+  if (!pinned) {
+    return
+  }
+
+  // This listener outlives a re-run until a tap command reconciles, so the pin
+  // may already be stale — its captured DOM belongs to the dead run, and
+  // restoring it would clobber the live AUT. Verify first and drop a stale pin.
+  const runner = tapManagerDataSource.getSnapshotRunner()
+
+  if (runner) {
+    reconcilePin(runner)
+  }
+
   if (!pinned) {
     return
   }
