@@ -92,6 +92,9 @@ export type BrowserLaunchOpts = {
   relaunchBrowser?: () => Promise<any>
   protocolManager?: ProtocolManagerShape
   onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>) => Promise<void>
+  // Only set when the MITM proxy is disabled: `hosts` is translated into
+  // browser-level resolver rules instead of the Node-side DNS remap.
+  hosts?: { [host: string]: string } | null
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
