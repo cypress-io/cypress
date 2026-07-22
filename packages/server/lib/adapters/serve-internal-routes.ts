@@ -1,6 +1,6 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 type ServeInternalRoutesConfig = InternalRouteConfig
@@ -34,10 +34,6 @@ function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
 
     return memo
   }, {})
-}
-
-function hasLoopbackHeader (headers: HttpHeaders = {}): boolean {
-  return Object.keys(headers).some((key) => key.toLowerCase() === CYPRESS_INTERNAL_LOOPBACK_HEADER)
 }
 
 function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
@@ -78,7 +74,8 @@ export function createServeInternalRoutesMiddleware ({
 
     // Re-entry after our own Express loopback: no route handler owned this path,
     // so the catch-all proxy saw it again. Stop instead of looping forever.
-    if (hasLoopbackHeader(request.headers)) {
+    // Require the process token — AUT content can forge the URL header alone.
+    if (isTrustedInternalLoopback(request.headers)) {
       return {
         id: request.id,
         url: request.url,

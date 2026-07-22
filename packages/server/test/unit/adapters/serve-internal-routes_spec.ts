@@ -158,7 +158,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     })
   })
 
-  it('returns 404 when a loopback re-enters without an Express handler', async () => {
+  it('returns 404 when a trusted loopback re-enters without an Express handler', async () => {
     const { middleware, serverRequest } = createMiddleware()
     const next = sinon.stub()
 
@@ -166,7 +166,8 @@ describe('lib/adapters/serve-internal-routes', () => {
       id: 'req-1',
       url: 'http://127.0.0.1:1234/__/unknown',
       headers: {
-        'x-cypress-internal-loopback': '1',
+        'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__/unknown',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
       },
     }, next)
 
@@ -179,6 +180,27 @@ describe('lib/adapters/serve-internal-routes', () => {
       headers: { 'content-type': 'text/plain' },
       body: 'Not Found',
     })
+  })
+
+  it('does not short-circuit on a spoofed loopback header without the process token', async () => {
+    const { middleware, serverRequest } = createMiddleware({
+      statusCode: 200,
+      headers: { 'content-type': 'text/plain' },
+      body: 'ok',
+    })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress/xhrs/foo',
+      headers: {
+        'x-cypress-internal-loopback': 'https://evil.example/__/',
+      },
+    }, next)
+
+    expect(next).not.to.have.been.called
+    expect(serverRequest.create).to.have.been.calledOnce
+    expect(response.statusCode).to.equal(200)
   })
 
   it('loops cross-origin internal requests back to the local Express router', async () => {
