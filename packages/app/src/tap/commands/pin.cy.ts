@@ -206,6 +206,31 @@ describe('tap/commands/pin', () => {
     expect((outcome as { result: any }).result.pinned.command).to.eq('log-1')
   })
 
+  it('run-state reports the pin once verified against a live runner', async () => {
+    stubSource()
+    cy.stub(tapManagerDataSource, 'getRunner').returns({ getAllTestsState: () => ({}), isRunComplete: () => true })
+    cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/login.cy.ts')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('pin', { test: 'r2', command: 'log-1' })
+
+    const outcome = await manager.exec('run-state')
+
+    expect((outcome as { result: any }).result.pinned).to.deep.eq({ command: 'log-1', at: { index: 2, name: 'after' } })
+  })
+
+  it('run-state omits the pin while there is no runner to verify it against (runner being replaced)', async () => {
+    stubSource()
+    cy.stub(tapManagerDataSource, 'getRunner').returns(undefined)
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('pin', { test: 'r2', command: 'log-1' })
+
+    expect(await manager.exec('run-state')).to.deep.eq({ result: { spec: null, totalSpecs: 0 } })
+  })
+
   it('treats --clear with nothing pinned as an idempotent no-op', async () => {
     const { restoreDom, unpinSnapshot } = stubSource()
 

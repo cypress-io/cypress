@@ -10,7 +10,7 @@ export interface RunStateResult {
   state?: 'running' | 'passed' | 'failed'
   totalTests?: number
   results?: RunResults
-  /** The currently pinned command's snapshot, if any (see the pin command). */
+  /** The currently pinned command's snapshot, if any — only reported once verified against a live runner (see the pin command). */
   pinned?: { command: string, at: { index: number, name?: string } }
 }
 
@@ -24,9 +24,7 @@ export const runStateCommand = defineCommand({
     const runner = tapManagerDataSource.getRunner()
 
     if (!runner) {
-      const pinned = getPinnedRef()
-
-      return { spec: null, totalSpecs, ...(pinned ? { pinned } : {}) }
+      return { spec: null, totalSpecs }
     }
 
     // Release a stale pin (from a previous run) so status never reports one that
