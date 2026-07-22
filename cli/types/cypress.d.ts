@@ -986,7 +986,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getalllocalstorage
      */
-    getAllLocalStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+    getAllLocalStorage(options?: Partial<Loggable & Timeoutable>): Chainable<StorageByOrigin>
 
     /**
      * Clear local storage for all origins.
@@ -1005,7 +1005,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getallsessionstorage
      */
-    getAllSessionStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+    getAllSessionStorage(options?: Partial<Loggable & Timeoutable>): Chainable<StorageByOrigin>
 
     /**
      * Clear session storage for all origins.

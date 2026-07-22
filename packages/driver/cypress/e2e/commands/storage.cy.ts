@@ -37,6 +37,28 @@ describe('src/cy/commands/storage', () => {
       })
     })
 
+    it('retries until an assertion on asynchronously-set storage passes', () => {
+      cy.window().then((win) => {
+        setTimeout(() => {
+          win.localStorage.setItem('asyncKey', 'asyncValue')
+        }, 250)
+      })
+
+      cy.getAllLocalStorage().should((storage) => {
+        expect(storage['http://localhost:3500']).to.have.property('asyncKey', 'asyncValue')
+      })
+    })
+
+    it('times out with a retry error when the assertion never passes', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Timed out retrying after 100ms')
+
+        done()
+      })
+
+      cy.getAllLocalStorage({ timeout: 100 }).should('have.property', 'http://does-not-exist.com:3500')
+    })
+
     it('logs once', () => {
       cy.getAllLocalStorage().then(() => {
         assertLogLength(logs, 2)
@@ -171,7 +193,7 @@ describe('src/cy/commands/storage', () => {
       cy.visit('/fixtures/set-storage-on-multiple-origins.html')
     })
 
-    it('gets local storage from all origins', () => {
+    it('gets session storage from all origins', () => {
       cy.getAllSessionStorage().should('deep.equal', {
         'http://localhost:3500': {
           key11: 'value11',
@@ -190,6 +212,28 @@ describe('src/cy/commands/storage', () => {
           key18: 'value18',
         },
       })
+    })
+
+    it('retries until an assertion on asynchronously-set storage passes', () => {
+      cy.window().then((win) => {
+        setTimeout(() => {
+          win.sessionStorage.setItem('asyncKey', 'asyncValue')
+        }, 250)
+      })
+
+      cy.getAllSessionStorage().should((storage) => {
+        expect(storage['http://localhost:3500']).to.have.property('asyncKey', 'asyncValue')
+      })
+    })
+
+    it('times out with a retry error when the assertion never passes', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Timed out retrying after 100ms')
+
+        done()
+      })
+
+      cy.getAllSessionStorage({ timeout: 100 }).should('have.property', 'http://does-not-exist.com:3500')
     })
 
     it('logs once', () => {
