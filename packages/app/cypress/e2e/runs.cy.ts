@@ -749,7 +749,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         moveToRunsPage()
 
         cy.contains('h2', 'Cannot connect to Cypress Cloud')
-        // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
         cy.remoteGraphQLIntercept((obj) => {
           if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
