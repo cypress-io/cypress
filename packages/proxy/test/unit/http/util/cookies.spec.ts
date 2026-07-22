@@ -231,7 +231,6 @@ describe('shouldAttachAndSetCookies', () => {
     })
   })
 
-  // @see https://github.com/cypress-io/cypress/issues/29719
   describe('no AUT URL (first visit)', () => {
     it('returns true when the request comes from the AUT frame', () => {
       // the AUT URL isn't set until the first visit's response is sent to the browser,
