@@ -17,26 +17,16 @@ export interface ClearResult {
   cleared: boolean
 }
 
-// The pin outlives a single tap call: `pin` mutates the live AUT, later `frame`
-// commands read it, `pin --clear` restores. This module state (held in the
-// running app between calls) remembers the pre-pin DOM so clear can put it back.
 interface PinnedState {
   test: string
   command: string
   at: SnapshotRef
   original: unknown
-  // The exact snapshot object we pinned. A new run (spec switch or re-run)
-  // re-captures fresh snapshot objects — even when the command id is reused —
-  // so object identity is what reliably tells a live pin from a stale one.
   snapshot: PinSnapshotEntry
 }
 
 let pinned: PinnedState | undefined
 
-// Detaches the external-unpin listener wired while a pin is live. The app has
-// its own unpin paths — the ✕ over the AUT, clicking the pinned command in the
-// reporter — that can't restore our cold pin's DOM or clear our state, so we
-// listen and do it ourselves.
 let stopListeningForUnpin: (() => void) | undefined
 
 const releasePin = (): void => {
@@ -45,22 +35,15 @@ const releasePin = (): void => {
   pinned = undefined
 }
 
-// Test-only: reset the module-level pin between component tests.
 export const resetPinState = (): void => {
   releasePin()
 }
 
-// An app-side unpin fired while we hold a pin: the store has already reset
-// itself, so we only restore the DOM we captured and drop our state — never
-// call unpinSnapshot here, or it would re-enter this handler.
 const onExternalUnpin = (): void => {
   if (!pinned) {
     return
   }
 
-  // This listener outlives a re-run until a tap command reconciles, so the pin
-  // may already be stale — its captured DOM belongs to the dead run, and
-  // restoring it would clobber the live AUT. Verify first and drop a stale pin.
   const runner = tapManagerDataSource.getSnapshotRunner()
 
   if (runner) {
@@ -77,33 +60,18 @@ const onExternalUnpin = (): void => {
   tapManagerDataSource.getAutIframe()?.restoreDom(original)
 }
 
-// The current pin, for the run-state command to surface (so `status` can report
-// a pin and a stranded one is always visible and recoverable).
 export const getPinnedRef = (): { command: string, at: SnapshotRef } | undefined => {
   return pinned ? { command: pinned.command, at: pinned.at } : undefined
 }
 
-/**
- * Drops a pin left over from a previous run — a spec switch or re-run — WITHOUT
- * restoring its now-stale DOM (that run's page is gone). A pin is only valid
- * while its command still resolves to a snapshot in the current run; a new run
- * regenerates test and log ids, so the lookup misses and we release the pin.
- * Safe to call anytime; a no-op when nothing is pinned.
- */
 export const reconcilePin = (runner: PinSnapshotRunner): void => {
   if (!pinned) {
     return
   }
 
-  // The pin is live only while the exact snapshot object we rendered is still
-  // the command's current snapshot. A re-run replaces it (same id, new object),
-  // and a spec switch drops the command entirely — both fail this identity check.
   const stillLive = liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.command)).includes(pinned.snapshot)
 
   if (!stillLive) {
-    // A new run already reset the snapshot store (run:start clears it) and its
-    // DOM is gone, so there is nothing to unpin or restore — just drop our own
-    // tracking and stop listening for that run's unpins.
     releasePin()
   }
 }
@@ -165,8 +133,6 @@ const clearPin = (): ClearResult => {
 
   const { original } = pinned
 
-  // Stop listening before unpinning, or our own unpin would re-enter the
-  // external-unpin handler and restore twice.
   releasePin()
   tapManagerDataSource.getAutIframe()?.restoreDom(original)
   tapManagerDataSource.unpinSnapshot()
@@ -187,9 +153,6 @@ export const pinCommand = defineCommand({
   handler: async ({ test, command }, { at, clear }): Promise<PinResult | ClearResult> => {
     const runner = tapManagerDataSource.getSnapshotRunner()
 
-    // Release a pin left over from a previous run before anything else, so stale
-    // state never blocks a new pin, is never reported by status, and is never
-    // restored over the current run's DOM.
     if (runner) {
       reconcilePin(runner)
     }
