@@ -69,7 +69,6 @@ interface AutomationEventsAndOptions {
   'get:cookies': {
     domain?: string
   }
-  'get:all:cookies': {}
   'set:cookie': {
     domain: string
     expiry: number
