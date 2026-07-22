@@ -24,6 +24,8 @@ describe('lib/tap public error catalog', () => {
         "tapBindingNotFound",
         "tapBindingThrew",
         "tapCdpUnreachable",
+        "tapGraphqlFailed",
+        "tapGraphqlUnreachable",
         "tapInvalidExecResult",
         "tapInvalidSchema",
         "tapOutdatedProtocol",
@@ -90,6 +92,24 @@ describe('lib/tap public error catalog', () => {
       "The running Cypress is older than this CLI and speaks an earlier tap protocol.
 
       Update Cypress in the running project to match this CLI (npm install --save-dev cypress@latest), then try again."
+    `)
+  })
+
+  it('tapGraphqlUnreachable — the instance data layer could not be reached', () => {
+    expect(render(errors.tapGraphqlUnreachable)).toMatchInlineSnapshot(`
+      "Could not reach the Cypress instance to read its data.
+
+      The instance may have just closed. Make sure Cypress is running in open mode, then try again."
+    `)
+  })
+
+  it('tapGraphqlFailed — the instance failed while answering a data query', () => {
+    expect(render(errors.tapGraphqlFailed)).toMatchInlineSnapshot(`
+      "The Cypress instance failed while answering a data query.
+
+      Search for an existing issue or open a GitHub issue at
+
+        https://github.com/cypress-io/cypress/issues"
     `)
   })
 

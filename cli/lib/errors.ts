@@ -447,6 +447,16 @@ const tapInvalidExecResult = {
   solution: `The running version of Cypress may not support ${chalk.cyan('cypress tap')}.`,
 }
 
+const tapGraphqlUnreachable = {
+  description: 'Could not reach the Cypress instance to read its data.',
+  solution: 'The instance may have just closed. Make sure Cypress is running in open mode, then try again.',
+}
+
+const tapGraphqlFailed = {
+  description: 'The Cypress instance failed while answering a data query.',
+  solution: genericErrorSolution,
+}
+
 export const errors = {
   unknownError,
   nonZeroExitCodeXvfb,
@@ -480,4 +490,6 @@ export const errors = {
   tapUnsupportedProtocol,
   tapOutdatedProtocol,
   tapInvalidExecResult,
+  tapGraphqlUnreachable,
+  tapGraphqlFailed,
 }
