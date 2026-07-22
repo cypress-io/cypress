@@ -92,7 +92,11 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   ]
 
   const isAllowedProxyBypass = (trimmedUrl: string) => {
-    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith(INSTANCES_ROUTE_PREFIX)
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) ||
+      trimmedUrl.startsWith(INSTANCES_ROUTE_PREFIX) ||
+      // The tap CLI queries GraphQL directly over HTTP; like the instances
+      // probe, those requests arrive non-proxied.
+      trimmedUrl.startsWith(`/${namespace}/graphql/`)
   }
 
   // normalize clientRoute to help with comparison
