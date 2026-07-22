@@ -88,7 +88,11 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     program.command(name).description(description)
   }
 
-  for (const { name, description, params = [], options = [] } of schema.commands.filter(({ hidden }) => !hidden)) {
+  // A schema command sharing a native command's name is unreachable — the
+  // native short-circuit wins at dispatch — so it must not be listed twice.
+  const nativeNames = new Set(tapCliCommands.map(({ name }) => name))
+
+  for (const { name, description, params = [], options = [] } of schema.commands.filter(({ name, hidden }) => !hidden && !nativeNames.has(name))) {
     const command = program.command(name)
 
     if (params.length) {
