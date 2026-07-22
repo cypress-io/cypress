@@ -7,7 +7,7 @@ import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
-import { normalizeGetCookieProps, normalizeSetCookieProps } from '../automation/cookie/converters/webkit'
+import { convertPlaywrightCookieToCyCookie, convertCyCookieToPlaywrightCookie } from '../automation/cookie/converters/webkit'
 import utils from './utils'
 import type { CyCookie } from '../automation/cookie/util'
 import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
@@ -253,7 +253,7 @@ export class WebKitAutomation {
     .filter((cookie) => {
       return cookieMatches(cookie, filter)
     })
-    .map(normalizeGetCookieProps)
+    .map(convertPlaywrightCookieToCyCookie)
   }
 
   private async getCookie (filter: CyCookieFilter) {
@@ -275,7 +275,7 @@ export class WebKitAutomation {
       if (!cookie) return null
     }
 
-    return normalizeGetCookieProps(cookie)
+    return convertPlaywrightCookieToCyCookie(cookie)
   }
 
   /**
@@ -384,10 +384,10 @@ export class WebKitAutomation {
       case 'get:cookie':
         return await this.getCookie(data)
       case 'set:cookie':
-        return await this.context.addCookies([normalizeSetCookieProps(data)])
+        return await this.context.addCookies([convertCyCookieToPlaywrightCookie(data)])
       case 'add:cookies':
       case 'set:cookies':
-        return await this.context.addCookies(data.map(normalizeSetCookieProps))
+        return await this.context.addCookies(data.map(convertCyCookieToPlaywrightCookie))
       case 'clear:cookies':
         return await this.clearCookies(data)
       case 'clear:cookie':

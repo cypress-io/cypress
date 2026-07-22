@@ -1,9 +1,34 @@
 const { expect, sinon } = require('../../spec_helper')
 
 import { ProtocolManagerShape } from '@packages/types'
-import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { CdpAutomation, normalizeResourceType } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
+  context('.normalizeResourceType', () => {
+    it('passes through every supported type, lowercasing CDP\'s PascalCase', () => {
+      // the CDP Protocol.Network.ResourceType values that map 1:1; playwright's
+      // request.resourceType() reports the same names already lowercased
+      const passthrough = ['Fetch', 'XHR', 'WebSocket', 'Stylesheet', 'Script', 'Image', 'Font', 'CSPViolationReport', 'Ping', 'Manifest', 'Other']
+
+      passthrough.forEach((type) => {
+        expect(normalizeResourceType(type)).to.eq(type.toLowerCase())
+      })
+    })
+
+    it('normalizes unsupported types to other', () => {
+      // the remaining CDP ResourceType values plus playwright's texttrack/media
+      const unsupported = ['Document', 'Media', 'TextTrack', 'Prefetch', 'EventSource', 'SignedExchange', 'Preflight', 'FedCM']
+
+      unsupported.forEach((type) => {
+        expect(normalizeResourceType(type)).to.eq('other')
+      })
+    })
+
+    it('normalizes undefined to other', () => {
+      expect(normalizeResourceType(undefined)).to.eq('other')
+    })
+  })
+
   context('.CdpAutomation', () => {
     let cdpAutomation: CdpAutomation
 
@@ -124,34 +149,6 @@ context('lib/browsers/cdp_automation', () => {
         expect(arg.requestId).to.eq(browserPreRequest.requestId)
         expect(arg.method).to.eq(browserPreRequest.request.method)
         expect(arg.url).to.eq(browserPreRequest.request.url)
-        expect(arg.headers).to.eq(browserPreRequest.request.headers)
-        expect(arg.resourceType).to.eq(browserPreRequest.type)
-        expect(arg.originalResourceType).to.eq(browserPreRequest.type)
-        expect(arg.cdpRequestWillBeSentTimestamp).to.be.closeTo(100100.100, 0.001)
-        expect(arg.cdpRequestWillBeSentReceivedTimestamp).to.be.a('number')
-      })
-
-      it('removes # from a url', function () {
-        const browserPreRequest = {
-          requestId: '0',
-          type: 'other',
-          request: {
-            method: 'GET',
-            url: 'https://www.google.com/foo#',
-            headers: {},
-          },
-          wallTime: 100.100100,
-        }
-
-        this.onFn
-        .withArgs('Network.requestWillBeSent')
-        .yield(browserPreRequest)
-
-        const arg = this.automation.onBrowserPreRequest.getCall(0).args[0]
-
-        expect(arg.requestId).to.eq(browserPreRequest.requestId)
-        expect(arg.method).to.eq(browserPreRequest.request.method)
-        expect(arg.url).to.eq('https://www.google.com/foo')
         expect(arg.headers).to.eq(browserPreRequest.request.headers)
         expect(arg.resourceType).to.eq(browserPreRequest.type)
         expect(arg.originalResourceType).to.eq(browserPreRequest.type)

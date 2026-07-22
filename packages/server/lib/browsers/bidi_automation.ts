@@ -8,7 +8,7 @@ import { AutomationNotImplemented } from '../automation/automation_not_implement
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import { AutomationMiddleware, AutomationCommands, toSupportedKey } from '@packages/types'
+import { AutomationMiddleware, AutomationCommands, toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,
@@ -81,7 +81,7 @@ const normalizeResourceType = (type: RequestInitiatorType): ResourceType => {
   }
 }
 
-const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
+const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartialCookie => {
   const cookieToClearFilter: StoragePartialCookie = {
     name: cookie.name,
     value: {
@@ -92,7 +92,7 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVe
     path: cookie.path,
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
   }
 
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
@@ -125,13 +125,11 @@ export class BidiAutomation {
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
-  private majorFirefoxVersion: number | undefined
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
     debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
-    this.majorFirefoxVersion = parseInt(webDriverClient?.capabilities?.browserVersion || '') || undefined
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
@@ -149,30 +147,59 @@ export class BidiAutomation {
   }
 
   private onBrowsingContextCreated = async (params: BrowsingContextInfo) => {
-    debugVerbose('received browsingContext.contextCreated %o', params)
-    // the AUT iframe is always the FIRST child created by the top level parent (second is the reporter, if it exists which isnt the case for headless/test replay)
-    if (!this.autContextId && params.parent && this.topLevelContextId === params.parent) {
-      debug(`new browsing context ${params.context} created within top-level parent context ${params.parent}.`)
-      debug(`setting browsing context ${params.context} as the AUT context.`)
+    debug('received browsingContext.contextCreated %o', params)
 
-      this.autContextId = params.context
+    // Only direct children of the top-level context are candidates for the AUT.
+    if (this.autContextId || !params.parent || this.topLevelContextId !== params.parent) {
+      return
+    }
 
-      // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
-      // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
-      // AUT in the request interceptor.
-      if (!this.interceptId) {
-        debugVerbose(`no interceptor defined for top-level context ${params.parent}.`)
-        debugVerbose(`creating interceptor to determine if a request belongs to the AUT.`)
-        // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
-        // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
-        // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
-        const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
+    // The top-level context has more than one direct child iframe — the AUT and
+    // the reporter iframe — and their creation order is not guaranteed, so
+    // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
+    // for exactly this purpose) rather than assuming it is the first child
+    // created.
+    let contextName = ''
 
-        debugVerbose(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
+    try {
+      contextName = (await this.webDriverClient.scriptEvaluate({
+        expression: 'window.name',
+        target: { context: params.context },
+        awaitPromise: false,
+        // @ts-expect-error - result is not typed
+      }))?.result?.value ?? ''
+    } catch (err) {
+      debug(`could not read window.name for browsing context ${params.context}; skipping AUT identification for it: %o`, err)
 
-        // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
-        this.interceptId = intercept
-      }
+      return
+    }
+
+    if (!contextName.startsWith(AUT_FRAME_NAME_IDENTIFIER)) {
+      debug(`browsing context ${params.context} (name: '${contextName}') is not the AUT; skipping.`)
+
+      return
+    }
+
+    debug(`new browsing context ${params.context} (name: '${contextName}' created within top-level parent context ${params.parent}.`)
+    debug(`setting browsing context ${params.context} as the AUT context.`)
+
+    this.autContextId = params.context
+
+    // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
+    // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
+    // AUT in the request interceptor.
+    if (!this.interceptId) {
+      debug(`no interceptor defined for top-level context ${params.parent}.`)
+      debug(`creating interceptor to determine if a request belongs to the AUT.`)
+      // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
+      // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
+      // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
+      const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
+
+      debug(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
+
+      // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
+      this.interceptId = intercept
     }
   }
 
@@ -423,7 +450,7 @@ export class BidiAutomation {
 
     // if it does, convert it to a BiDi cookie filter and delete the cookie
     await this.webDriverClient.storageDeleteCookies({
-      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared, this.majorFirefoxVersion) as StorageCookieFilter,
+      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared) as StorageCookieFilter,
     })
 
     return cookieToBeCleared
@@ -465,7 +492,7 @@ export class BidiAutomation {
         {
           debugCookies(`set:cookie %o`, data)
           await this.webDriverClient.storageSetCookie({
-            cookie: convertCyCookieToBiDiCookie(data, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+            cookie: convertCyCookieToBiDiCookie(data) as BidiStoragePartialCookie,
           })
 
           const cookies = await this.getAllCookiesMatchingFilter(data)
@@ -477,7 +504,7 @@ export class BidiAutomation {
           debugCookies(`add:cookies %o`, data)
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+              cookie: convertCyCookieToBiDiCookie(cookie) as BidiStoragePartialCookie,
             })
           }))
 
@@ -490,7 +517,7 @@ export class BidiAutomation {
 
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+              cookie: convertCyCookieToBiDiCookie(cookie) as BidiStoragePartialCookie,
             })
           }))
 
