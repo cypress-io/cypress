@@ -9,14 +9,19 @@ export interface TapTestsRunner {
 }
 
 // The fields the tap commands read off a runnable spec, sourced live from
-// GraphQL in open mode or from the served snapshot as a fallback.
-export type RunnableSpec = Pick<FoundSpec, 'relative' | 'specType'>
+// GraphQL in open mode or from the served snapshot as a fallback. `lastModified`
+// comes from git and is only available over the live client (open mode).
+export type RunnableSpec = Pick<FoundSpec, 'relative' | 'specType'> & {
+  lastModified?: string
+}
 
 export interface SpecListEntry {
   /** Project-relative spec path — the form `cypress run --spec` accepts. */
   relativePath: string
   /** Whether the spec is an end-to-end (integration) or component spec. */
   specType: FoundSpec['specType']
+  /** Human-readable last-modified time from git (e.g. "2 hours ago"); absent in run mode. */
+  lastModified?: string
 }
 
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'

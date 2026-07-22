@@ -2,11 +2,16 @@ import type { FoundSpec } from '@packages/types'
 import type { Client } from '@urql/core'
 
 import { TapManager } from '../tap-manager'
-import type { RunnableSpec } from '../types'
 
 const CYPRESS_VERSION = '15.0.0'
 
-const stubGqlClient = (specs: RunnableSpec[]): Client => {
+interface StubSpec {
+  relative: string
+  specType: 'integration' | 'component'
+  gitInfo?: { lastModifiedHumanReadable: string | null } | null
+}
+
+const stubGqlClient = (specs: StubSpec[]): Client => {
   return {
     query: () => ({ toPromise: async () => ({ data: { currentProject: { specs } } }) }),
   } as unknown as Client
@@ -40,17 +45,21 @@ describe('tap/commands/specs', () => {
     delete (window as any).__RUN_MODE_SPECS__
   })
 
-  it('lists specs from the live GraphQL client when one is provided (open mode)', async () => {
+  it('lists specs from the live GraphQL client, with git last-modified, when a client is set (open mode)', async () => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
 
     const gqlClient = stubGqlClient([
-      { relative: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration' },
+      { relative: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration', gitInfo: { lastModifiedHumanReadable: '2 hours ago' } },
+      { relative: 'cypress/e2e/no-git.cy.ts', specType: 'integration', gitInfo: null },
     ])
-    const manager = new TapManager(CYPRESS_VERSION, { gqlClient })
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    manager.setGqlClient(gqlClient)
 
     expect(await manager.exec('specs')).to.deep.eq({
       result: [
-        { relativePath: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration' },
+        { relativePath: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration', lastModified: '2 hours ago' },
+        { relativePath: 'cypress/e2e/no-git.cy.ts', specType: 'integration' },
       ],
     })
   })

@@ -8,7 +8,6 @@ import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { TapManager } from './tap/tap-manager'
-import type { TapRuntime } from './tap/tap-runtime'
 import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
@@ -30,9 +29,9 @@ const ws = createWebsocket(config)
 
 window.ws = ws
 
-const tapRuntime: TapRuntime = { gqlClient: null }
+const tapManager = new TapManager(config.version)
 
-window.__CYPRESS_TAP_BINDING__ = new TapManager(config.version, tapRuntime)
+window.__CYPRESS_TAP_BINDING__ = tapManager
 
 telemetry.attachWebSocket(ws)
 
@@ -48,7 +47,7 @@ app.use(Toast, {
 })
 
 await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
-  tapRuntime.gqlClient = client
+  tapManager.setGqlClient(client)
 
   app.use(urql, client)
   app.use(createRouter())

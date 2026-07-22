@@ -49,10 +49,11 @@ describe('tap binding', () => {
 
       const specs = (outcome as { result: Array<{ relativePath: string, specType: string }> }).result
 
-      expect(specs).to.deep.include({ relativePath: 'cypress/e2e/dom-content.spec.js', specType: 'integration' })
+      expect(specs.map((spec) => spec.relativePath)).to.include('cypress/e2e/dom-content.spec.js')
 
       for (const spec of specs) {
-        expect(Object.keys(spec), `entry ${spec.relativePath}`).to.deep.eq(['relativePath', 'specType'])
+        expect(spec, `entry ${spec.relativePath}`).to.include.keys(['relativePath', 'specType'])
+        expect(Object.keys(spec), `entry ${spec.relativePath}`).to.satisfy((keys: string[]) => keys.every((key) => ['relativePath', 'specType', 'lastModified'].includes(key)))
       }
 
       // With no run yet there is no runner to read, so run-state omits the run-only fields.

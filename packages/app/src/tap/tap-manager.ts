@@ -5,6 +5,7 @@ import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
 import { TAP_SCHEMA_VERSION } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 import type { TapRuntime } from './tap-runtime'
+import type { Client } from '@urql/core'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
 // to `{}` (absent); a primitive or array would otherwise slip past `Object.keys`
@@ -24,7 +25,15 @@ const normalizePayload = (value: unknown): Record<string, string> | null => {
 // The surface mounted at `window.__CYPRESS_TAP_BINDING__`, invoked by the CLI
 // over CDP `Runtime.callFunctionOn` — both methods are async and JSON-only per `./contract`.
 export class TapManager implements TapBindingContract {
-  constructor (private cypressVersion: string, private runtime: TapRuntime = { gqlClient: null }) {}
+  private runtime: TapRuntime = { gqlClient: null }
+
+  constructor (private cypressVersion: string) {}
+
+  // Open mode threads its long-lived urql client in once it resolves; handlers
+  // read it off the runtime to query live project state (e.g. the spec set).
+  setGqlClient (client: Client): void {
+    this.runtime.gqlClient = client
+  }
 
   async getSchema (): Promise<TapSchema> {
     return {

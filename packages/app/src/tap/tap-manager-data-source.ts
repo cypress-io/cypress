@@ -13,6 +13,9 @@ query TapSpecs {
       id
       relative
       specType
+      gitInfo {
+        lastModifiedHumanReadable
+      }
     }
   }
 }
@@ -53,7 +56,13 @@ export const tapManagerDataSource = {
       const specs = result.data?.currentProject?.specs
 
       if (specs) {
-        return specs.map(({ relative, specType }) => ({ relative, specType }))
+        return specs.map(({ relative, specType, gitInfo }) => {
+          return {
+            relative,
+            specType,
+            ...(gitInfo?.lastModifiedHumanReadable != null ? { lastModified: gitInfo.lastModifiedHumanReadable } : {}),
+          }
+        })
       }
     }
 
