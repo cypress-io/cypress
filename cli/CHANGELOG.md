@@ -14,6 +14,7 @@
 - [`cy.getCookie()`](https://on.cypress.io/getcookie) and [`cy.getCookies()`](https://on.cypress.io/getcookies) are now query commands. They re-read the cookie(s) from the browser and retry any attached assertions until they pass or the command times out, so `cy.getCookie('token').should('exist')` now waits for a cookie that is set asynchronously (for example, after a login request resolves) instead of failing on the first read. As a result, their timeout now follows `defaultCommandTimeout` (default `4000`) rather than `responseTimeout` (default `30000`), and to overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#4802](https://github.com/cypress-io/cypress/issues/4802).
 - [`cy.getAllLocalStorage()`](https://on.cypress.io/getalllocalstorage) and [`cy.getAllSessionStorage()`](https://on.cypress.io/getallsessionstorage) are now query commands. They re-read storage from all origins and retry any attached assertions until they pass or the command times out, so `cy.getAllLocalStorage().should(...)` now waits for storage that is populated asynchronously instead of failing on the first read. To overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#26422](https://github.com/cypress-io/cypress/issues/26422).
 - Removed the `experimentalSourceRewriting` configuration option. The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting, so default behavior is unchanged. You can safely remove this option from your config. Addresses [#34213](https://github.com/cypress-io/cypress/issues/34213).
+- The `cypress info` command no longer prints proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or `CYPRESS_*` environment variables. The command now reports only Cypress-specific details such as file paths, version, and system information. Addresses [#34103](https://github.com/cypress-io/cypress/issues/34103). Fixed in [#34314](https://github.com/cypress-io/cypress/pull/34314).
 
 **Deprecations:**
 
@@ -28,7 +29,14 @@
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
-## 15.18.2
+## 15.19.1
+
+**Bugfixes:**
+
+- Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
+- Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
+- Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+
 ## 15.19.0
 
 **Performance:**
