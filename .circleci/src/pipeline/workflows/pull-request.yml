@@ -58,6 +58,11 @@ jobs:
       filters:
         branches:
           only: /^pull\/[0-9]+/
+  - ready-to-test:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
   - check-ts:
       requires:
         - internal-pr-build
@@ -81,35 +86,23 @@ jobs:
   - cli-visual-tests:
       context: test-runner:percy
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - unit-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - server-unit-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - server-integration-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - server-performance-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - system-tests-node-modules-install:
       context: test-runner:performance-tracking
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - system-tests-chrome:
       context: test-runner:performance-tracking
       requires:
@@ -134,50 +127,34 @@ jobs:
   - driver-integration-tests-chrome:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-tests-chrome-inject-document-domain:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-tests-chrome-beta:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-tests-chrome-beta-inject-document-domain:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-tests-firefox:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-tests-electron:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-tests-webkit:
       context: test-runner:cypress-record-key
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - driver-integration-memory-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - run-frontend-shared-component-tests-chrome:
       context:
         [
@@ -187,9 +164,7 @@ jobs:
         ]
       percy: true
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - run-launchpad-integration-tests-chrome:
       context:
         [
@@ -199,9 +174,7 @@ jobs:
         ]
       percy: true
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - run-launchpad-component-tests-chrome:
       context:
         [
@@ -211,9 +184,7 @@ jobs:
         ]
       percy: true
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - run-app-integration-tests-chrome:
       context:
         [
@@ -223,9 +194,7 @@ jobs:
         ]
       percy: true
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - run-webpack-dev-server-integration-tests:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
@@ -243,90 +212,61 @@ jobs:
         ]
       percy: true
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - run-reporter-component-tests-chrome:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       percy: true
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - reporter-integration-tests:
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-webpack-dev-server:
       requires:
         - system-tests-node-modules-install
   - npm-vite-dev-server:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-vite-plugin-cypress-esm:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-webpack-preprocessor:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-webpack-batteries-included-preprocessor:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-vue:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-puppeteer-unit-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-puppeteer-cypress-tests:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-react:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-angular:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
+  - npm-angular-zoneless:
+      requires:
+        - ready-to-test
   - npm-mount-utils:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-grep:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-eslint-plugin-dev:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - npm-cypress-schematic:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - v8-integration-tests:
       requires:
         - system-tests-node-modules-install
@@ -354,9 +294,7 @@ jobs:
         - wait-for-binary-publish
   - test-kitchensink:
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - ready-to-test
   - test-npm-module-on-minimum-node-version:
       context: publish-binary
       requires:
@@ -486,6 +424,7 @@ jobs:
         - npm-puppeteer-cypress-tests
         - npm-react
         - npm-angular
+        - npm-angular-zoneless
         - npm-mount-utils
         - npm-grep
         - npm-eslint-plugin-dev
