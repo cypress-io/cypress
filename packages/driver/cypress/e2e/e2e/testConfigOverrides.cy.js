@@ -383,7 +383,6 @@ describe('cannot set override configuration options that', () => {
     Cypress.config('viewportWidth', 200)
   })
 
-  // https://github.com/cypress-io/cypress/issues/31592
   it('throws if mutating viewportHeight with Cypress.config() during test execution', (done) => {
     window.top.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
