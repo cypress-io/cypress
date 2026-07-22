@@ -185,6 +185,27 @@ while IFS= read -r file; do
       app_ui_tests=true
       system_tests=true
       ;;
+    # Shared design tokens: styles, Tailwind, and PostCSS config feed every
+    # consuming app's snapshots. Keep the full fan-out (fail safe). Must precede
+    # the catch-all frontend-shared case below.
+    packages/frontend-shared/src/styles/*|\
+    packages/frontend-shared/tailwind.config.cjs|\
+    packages/frontend-shared/postcss.config.js)
+      frontend_shared_tests=true
+      app_ui_tests=true
+      launchpad_tests=true
+      reporter_tests=true
+      system_tests=true
+      ;;
+    # i18n strings (en-US.json + i18n.ts) are consumed only by app and launchpad;
+    # reporter imports nothing from locales and renders none of these strings, so
+    # a locales-only change cannot affect reporter's Percy snapshots.
+    packages/frontend-shared/src/locales/*)
+      frontend_shared_tests=true
+      app_ui_tests=true
+      launchpad_tests=true
+      system_tests=true
+      ;;
     packages/frontend-shared/*)
       frontend_shared_tests=true
       app_ui_tests=true
