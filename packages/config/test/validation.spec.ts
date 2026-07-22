@@ -69,6 +69,16 @@ describe('config/src/validation', () => {
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot('invalid url')
     })
+
+    it('reports the correct certificate index for an absolute CA filepath', () => {
+      const result = validation.isValidClientCertificatesSet(mockKey, [
+        { url: 'https://a.com', certs: [], ca: ['relative/ca.pem'] },
+        { url: 'https://b.com', certs: [], ca: ['/absolute/ca.pem'] },
+      ])
+
+      expect(result).not.toBe(true)
+      expect((result as any).key).toEqual('clientCertificates[1].ca[0]')
+    })
   })
 
   describe('.isValidBrowser', () => {
@@ -302,6 +312,20 @@ describe('config/src/validation', () => {
 
           expect(result).not.toBe(true)
           expect(result).toMatchSnapshot()
+        })
+
+        it('detect-flake-and-pass-on-threshold: missing passesRequired reports the passesRequired value', () => {
+          const result = validation.isValidRetriesConfig(mockKey, {
+            experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+            experimentalOptions: {
+              maxRetries: 2,
+              stopIfAnyPassed: true,
+            },
+          })
+
+          expect(result).not.toBe(true)
+          expect((result as any).key).toEqual('mockConfigKey.experimentalOptions.passesRequired')
+          expect((result as any).value).toBeUndefined()
         })
 
         ;['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold'].forEach((strategy) => {
