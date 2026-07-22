@@ -181,7 +181,10 @@ describe('SidebarNavigation', () => {
     it('renders failure badge if run status is "RUNNING" with failures', () => {
       mountComponent({ cloudProject: { status: 'RUNNING', numFailedTests: 3 } })
       cy.findByLabelText('Relevant run is failing with 3 test failures').should('be.visible')
-      cy.percySnapshot('Debug Badge:failed:single-digit')
+      // No Percy snapshot here: this badge is structurally identical to the passed/errored
+      // single-digit badges (differing only by color), and the failed (red) color plus the
+      // single-digit layout are already covered by 'Debug Badge:failed:truncated' and
+      // 'Debug Badge:passed:single-digit'.
     })
 
     it('renders no badge if no cloudProject', () => {

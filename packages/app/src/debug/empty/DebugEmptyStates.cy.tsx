@@ -60,7 +60,10 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
 
           cy.contains(title)
           cy.contains(description)
-          if (options.percy) {
+          // Steps 1 and 2 share the same card layout (illustration + "Next" control) and
+          // differ only by illustration/copy, so step 1 is a sufficient representative.
+          // Step 3 is structurally distinct (restart icon + "Reset" control), so keep it.
+          if (options.percy && step !== 2) {
             cy.percySnapshot(`slideshow step ${step}`)
           }
 

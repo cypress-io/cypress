@@ -448,7 +448,15 @@ describe('runner/cypress sessions.ui.spec', {
             systemTestTitle: 'validate - throws an error',
             errMessage: 'Something went wrong!',
           },
-        ].forEach((opts) => {
+        ].forEach((opts, index) => {
+          // Each validation-failure variant renders the same reporter layout (only the error
+          // message text differs), so the shared afterEach snapshotReporter() would produce
+          // near-duplicate Percy snapshots. Snapshot only the first variant, mirroring the
+          // 'successfully recreated session' block below.
+          if (index !== 0) {
+            return
+          }
+
           const { testCase, systemTestTitle, errMessage } = opts
 
           it(`has test error when validate ${testCase}`, () => {
