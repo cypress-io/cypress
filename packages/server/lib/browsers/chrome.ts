@@ -205,6 +205,41 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   return args
 }
 
+const HOST_RESOLVER_RULES = '--host-resolver-rules='
+
+/**
+ * Merge multiple `--host-resolver-rules` arguments into one.
+ *
+ * Cypress pushes its own rules in `_getArgs` (translated from `hosts` when the
+ * MITM proxy is disabled) and users may add their own via
+ * `before:browser:launch`. Chromium only honors the last occurrence of the
+ * switch, so the values must be combined. Within the merged value the first
+ * matching rule wins, so later (user-supplied) arguments are placed first to
+ * let them override the rules derived from `hosts`.
+ */
+const _normalizeHostResolverRules = function (args: string[]): string[] {
+  const ruleArgs = args.filter((arg) => arg.startsWith(HOST_RESOLVER_RULES))
+
+  if (ruleArgs.length <= 1) {
+    return args
+  }
+
+  // Empty values are dropped rather than merged — Chromium only honors the
+  // last occurrence of the switch, so a trailing empty value would otherwise
+  // clear the rules derived from `hosts`.
+  const values = ruleArgs
+  .map((arg) => arg.slice(HOST_RESOLVER_RULES.length))
+  .filter(Boolean)
+
+  const rest = args.filter((arg) => !arg.startsWith(HOST_RESOLVER_RULES))
+
+  if (!values.length) {
+    return rest
+  }
+
+  return rest.concat(`${HOST_RESOLVER_RULES}${values.reverse().join(',')}`)
+}
+
 // we now store the extension in each browser profile
 const _removeRootExtension = () => {
   return fs
@@ -320,6 +355,8 @@ export = {
 
   _normalizeArgExtensions,
 
+  _normalizeHostResolverRules,
+
   _removeRootExtension,
 
   _recordVideo,
@@ -377,6 +414,21 @@ export = {
 
     if (ps) {
       args.push(`--proxy-server=${ps}`)
+    }
+
+    // With the MITM proxy disabled the browser performs origin fetches itself,
+    // so the Node-side DNS remap (evil-dns) can't honor `hosts` — translate it
+    // into Chromium resolver rules at launch instead.
+    if (!_.isEmpty(options.hosts)) {
+      const rules = _.map(options.hosts, (ip, host) => {
+        // Chromium parses the replacement's last `:` as an optional port, so
+        // IPv6 literals must be bracketed.
+        const replacement = ip.includes(':') && !ip.startsWith('[') ? `[${ip}]` : ip
+
+        return `MAP ${host} ${replacement}`
+      }).join(',')
+
+      args.push(`${HOST_RESOLVER_RULES}${rules}`)
     }
 
     if (options.chromeWebSecurity === false) {
@@ -648,8 +700,9 @@ export = {
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
     // normalize the --load-extensions argument by
-    // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+    // massaging what the user passed into our own, and merge any
+    // user-supplied --host-resolver-rules with the ones derived from `hosts`
+    const args = _normalizeHostResolverRules(_normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser))
 
     // this overrides any previous user-data-dir args
     // by being the last one
