@@ -575,7 +575,7 @@ export = {
       await pageCriClient.send('Page.enable')
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await cdpAutomation.seedFrameTree(pageCriClient)
-      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
     }
   },
 
@@ -641,7 +641,7 @@ export = {
 
     if (isProxyDisabled()) {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
-      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 
       await this._navigateUsingCRI(pageCriClient, url)
     } else {

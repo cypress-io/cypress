@@ -39,6 +39,9 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export type CreateCdpFetchRuntimeDeps = {
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  // Protocol-neutral subscription to AUT document navigation commits,
+  // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
+  onAUTFrameNavigated?: (listener: (url: string) => void) => () => void
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
   remoteStates: RemoteStates
@@ -196,6 +199,22 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     isAUTFrame: deps.isAUTFrame,
   })
 
+  // MITM parity: the AUT URL (cookie simulation's simulated top) is recorded
+  // when the visit document is served — after request-cookie attach for that
+  // navigation, so the navigation itself is still evaluated against the
+  // previous top. The automation layer reports AUT navigation commits (which
+  // also fire for cache-served documents that never produce a Fetch pause).
+  // Only http(s) commits become the simulated top: about:blank (test
+  // isolation blanks the AUT frame between tests), data:, and blob: never
+  // transit the proxy and must not be recorded.
+  const onAUTFrameNavigated = (url: string) => {
+    if (/^https?:/.test(url)) {
+      networkProxy.http.setAUTUrl(url)
+    }
+  }
+
+  let unsubscribeAUTFrameNavigated: (() => void) | undefined
+
   return {
     networkProxy,
     netStubbingState: stubbingState,
@@ -203,8 +222,17 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
-    start () {
-      return fetchTransport.start()
+    async start () {
+      unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
+
+      try {
+        await fetchTransport.start()
+      } catch (err) {
+        unsubscribeAUTFrameNavigated?.()
+        unsubscribeAUTFrameNavigated = undefined
+
+        throw err
+      }
     },
     // Transport only — callers (server-base) already own networkProxy.reset so
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
@@ -212,6 +240,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       fetchTransport.reset()
     },
     stop () {
+      unsubscribeAUTFrameNavigated?.()
+      unsubscribeAUTFrameNavigated = undefined
+
       return fetchTransport.stop()
     },
   }

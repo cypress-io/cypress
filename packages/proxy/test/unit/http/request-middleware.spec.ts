@@ -198,6 +198,27 @@ describe('http/request-middleware', () => {
       expect(ctx.req.credentialsLevel).toBeUndefined()
     })
 
+    it('does not set credentialLevel for AUT frame requests without a resourceType', async () => {
+      const ctx = {
+        getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
+        },
+        req: {
+          isAUTFrame: true,
+          proxiedUrl: 'http://localhost:8080',
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([CalculateCredentialLevelIfApplicable], ctx)
+      expect(ctx.req.credentialsLevel).toBeUndefined()
+      expect(resourceTypeAndCredentialManager.get).not.toHaveBeenCalled()
+    })
+
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from prerequest (xhr)', async () => {
       vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({ resourceType: 'xhr', credentialStatus: 'same-origin' })
