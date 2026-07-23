@@ -1,5 +1,6 @@
 import type { FoundSpec } from '@packages/types'
 
+import { posixify } from '../paths'
 import { getAutIframeModel } from '../runner'
 import { useSnapshotStore } from '../runner/snapshot-store'
 import { useAutStore } from '../store'
@@ -46,7 +47,11 @@ export const tapManagerDataSource = {
 
   getActiveSpecRelative (): string | undefined {
     try {
-      return eventManager()?.getCypress()?.spec?.relative
+      const relative = eventManager()?.getCypress()?.spec?.relative
+
+      // POSIX-normalize so status reports the same path shape the specs and run
+      // commands emit; spec.relative is OS-native (backslashes on Windows).
+      return relative !== undefined ? posixify(relative) : undefined
     } catch {
       return undefined
     }
