@@ -1,5 +1,4 @@
-# Reserved for the proxy-disabled (CDP Fetch) bugbash effort — see
-# .circleci/AGENTS.md for the branch-allowlist pattern this mirrors.
+# Reserved for the proxy-disabled (CDP Fetch) bugbash effort.
 #
 # Goal: the proxy-disabled path (CYPRESS_INTERNAL_DISABLE_PROXY=1) green for
 # Chrome + Electron, and the proxy-enabled path green for Firefox/WebKit
@@ -11,10 +10,13 @@
 # the proxy-disabled Chrome/Electron suites (Tier 0 + Tier 1) are green.
 # No binary/publish jobs and no binary-system-tests — this workflow
 # validates source-tree behavior only.
+#
+# Runs for a push to the bugbash base branch itself, or a PR targeting it as
+# the base (any head branch name) — computed by
+# .circleci/scripts/generate-pipeline-parameters.sh via the GitHub API into
+# the run-bugbash pipeline parameter.
 when:
-  matches:
-    pattern: /^bugbash\/.*/
-    value: << pipeline.git.branch >>
+  equal: [ true, << pipeline.parameters.run-bugbash >> ]
 
 jobs:
   # ---- Foundation ----
