@@ -2,7 +2,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Children, cloneElement, MouseEvent, ReactElement, ReactNode, useCallback, useState } from 'react'
 // @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from './tooltip'
 
 interface Props {
   message: string

@@ -11,9 +11,9 @@
 - The default `keystrokeDelay` for `cy.type()` has been changed from `10` to `0` to improve performance of typing-heavy test runs. Users who relied on the implicit 10ms delay can restore it by setting `keystrokeDelay: 10` in their Cypress config or on `Cypress.Keyboard`. Addresses [#33523](https://github.com/cypress-io/cypress/issues/33523).
 - Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
 - The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm when migrating to the modern visibility algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
-- `viewportWidth` and `viewportHeight` can no longer be set via [`Cypress.config()`](https://on.cypress.io/config) during test execution. Mutating them this way affected the *next* test rather than the current one and was not reflected in Test Replay. Use [`cy.viewport()`](https://on.cypress.io/viewport) or set them in the test configuration of a `describe`/`context` or `it` block instead. Addresses [#31592](https://github.com/cypress-io/cypress/issues/31592).
-- [`cy.getCookie()`](https://on.cypress.io/getcookie) and [`cy.getCookies()`](https://on.cypress.io/getcookies) are now query commands. They re-read the cookie(s) from the browser and retry any attached assertions until they pass or the command times out, so `cy.getCookie('token').should('exist')` now waits for a cookie that is set asynchronously (for example, after a login request resolves) instead of failing on the first read. As a result, their timeout now follows `defaultCommandTimeout` (default `4000`) rather than `responseTimeout` (default `30000`), and to overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#4802](https://github.com/cypress-io/cypress/issues/4802).
+- [`cy.getCookie()`](https://on.cypress.io/getcookie), [`cy.getCookies()`](https://on.cypress.io/getcookies) and [`cy.getAllCookies()`](https://on.cypress.io/getallcookies) are now query commands. They re-read the cookie(s) from the browser and retry any attached assertions until they pass or the command times out, so `cy.getCookie('token').should('exist')` now waits for a cookie that is set asynchronously (for example, after a login request resolves) instead of failing on the first read. As a result, their timeout now follows `defaultCommandTimeout` (default `4000`) rather than `responseTimeout` (default `30000`), and to overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#4802](https://github.com/cypress-io/cypress/issues/4802).
 - Removed the `experimentalSourceRewriting` configuration option. The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting, so default behavior is unchanged. You can safely remove this option from your config. Addresses [#34213](https://github.com/cypress-io/cypress/issues/34213).
+- The `cypress info` command no longer prints proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or `CYPRESS_*` environment variables. The command now reports only Cypress-specific details such as file paths, version, and system information. Addresses [#34103](https://github.com/cypress-io/cypress/issues/34103). Fixed in [#34314](https://github.com/cypress-io/cypress/pull/34314).
 
 **Deprecations:**
 
@@ -28,14 +28,31 @@
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
-## 15.18.2
-
-**Performance:**
-
-- Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
+## 15.19.1
 
 **Bugfixes:**
 
+- Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
+- Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
+- Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+
+## 15.19.0
+
+**Performance:**
+
+- Fixed an issue where the browser's renderer process could crash (`We detected that the Chrome Renderer process just crashed`) when the application under test triggered a `ResizeObserver` loop while the command log was visible. Fixes [#33962](https://github.com/cypress-io/cypress/issues/33962) and [#34218](https://github.com/cypress-io/cypress/issues/34218).
+- Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
+- Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
+
+**Features:**
+
+- Added support for TypeScript 7 when preprocessing TypeScript spec and support files. The component testing setup wizard now accepts TypeScript 7 as well. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
+- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#34178](https://github.com/cypress-io/cypress/pull/34178).
+
+**Bugfixes:**
+
+- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`, because the existence assertion replaced the subject with `null`. Chaining further assertions off `.exist` (or its `.exists` alias) for a raw DOM element now works as expected. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
+- Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 
 **Misc:**

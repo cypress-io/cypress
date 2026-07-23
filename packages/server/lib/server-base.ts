@@ -52,6 +52,7 @@ import { GracefulExit } from './util/graceful-exit'
 import { createProxyRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -94,6 +95,13 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
 
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    // Trusted loopback from serve-internal-routes: path-only HTTP to Express
+    // must reach internal route handlers instead of redirecting to clientRoute.
+    // Keep the header so a catch-all re-entry can detect the loop and stop.
+    if (req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]) {
+      return next()
+    }
 
     // if this request is a non-proxied cy-in-cy request,
     // we need to update the proxiedUrl and allow it to pass through

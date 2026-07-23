@@ -49,7 +49,7 @@ for (const project of WEBPACK_ANGULAR) {
         cy.contains('app.component.cy.ts').click()
         cy.waitForSpecToFinish({ passCount: 1 }, 60000)
 
-        cy.get('li.command')
+        cy.reporter().find('li.command')
         .first()
         .within(() => {
           cy.get('.command-method').should('contain', 'mount')
@@ -115,11 +115,9 @@ for (const project of WEBPACK_ANGULAR) {
 
         // The test should fail and the stack trace should appear in the command log
         cy.waitForSpecToFinish({ failCount: 1 }, 60000)
-        cy.contains(
-          'The following error originated from your test code, not from Cypress.',
-        ).should('exist')
+        cy.reporter().contains('The following error originated from your test code, not from Cypress.').should('exist')
 
-        cy.get('.test-err-code-frame').should('be.visible')
+        cy.reporter().find('.test-err-code-frame').should('be.visible')
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455

@@ -383,6 +383,23 @@ describe('Routes', () => {
       })
     })
 
+    it('internal loopback header bypasses forceProxy redirect without a proxy set', function () {
+      // serve-internal-routes hits Express as a path-only request; without this
+      // header _forceProxyMiddleware would 302 to clientRoute (see previous test).
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': '1',
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers['location']).to.be.undefined
+      })
+    })
+
     it('routes when baseUrl is set', function () {
       return this.setup({ baseUrl: 'http://localhost:9999/app' })
       .then(() => {

@@ -82,6 +82,7 @@ chai.use((chai, u) => {
   const lengthProto = (chai.Assertion.prototype as any).__methods.length.method
   const containProto = (chai.Assertion.prototype as any).__methods.contain.method
   const existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist')!.get
+  const existsProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exists')!.get
   const { objDisplay } = chai.util
 
   const getMessage = chai.util.getMessage
@@ -172,8 +173,9 @@ chai.use((chai, u) => {
     (chai.Assertion.prototype as any).match = matchProto;
     (chai.Assertion.prototype as any).__methods.length.method = lengthProto;
     (chai.Assertion.prototype as any).__methods.contain.method = containProto
+    Object.defineProperty(chai.Assertion.prototype, 'exist', { get: existProto })
 
-    return Object.defineProperty(chai.Assertion.prototype, 'exist', { get: existProto })
+    return Object.defineProperty(chai.Assertion.prototype, 'exists', { get: existsProto })
   }
 
   const overrideChaiInspect = () => {
@@ -242,9 +244,7 @@ chai.use((chai, u) => {
       return (flagMsg ? `${flagMsg}: ${msg}` : msg)
     }
 
-    // There are 2 types of getMessage. And we're overriding the second one.
-    // But TypeScript wants us to do both. So we're ignoring this.
-    // @ts-ignore
+    // @ts-expect-error chai's getMessage has two overloads; we only override the (obj, args) one.
     chaiUtils.getMessage = function (assert, args) {
       const obj = assert._obj
 
@@ -312,9 +312,7 @@ chai.use((chai, u) => {
       })
     }
 
-    // `makeMethodChainable` doesn't match any type definition,
-    // but it is necessary to make the method chainable.
-    // @ts-ignore
+    // @ts-expect-error `makeMethodChainable` is necessary to make the method chainable but does not match the type definition.
     chai.Assertion.overwriteChainableMethod('contain', containFn1, makeMethodChainable)
 
     chai.Assertion.overwriteChainableMethod('length',
@@ -382,14 +380,12 @@ chai.use((chai, u) => {
           }
         })
       },
-      // `makeMethodChainable` doesn't match any type definition,
-      // but it is necessary to make the method chainable.
-      // @ts-ignore
+      // @ts-expect-error `makeMethodChainable` is necessary to make the method chainable but does not match the type definition.
       makeMethodChainable)
 
-    // _super is not documented.
-    // @ts-ignore
-    chai.Assertion.overwriteProperty('exist', (_super) => {
+    // chai registers `exist` and its `exists` alias as separate properties, so
+    // overwrite both to keep Cypress's DOM-aware existence behavior consistent.
+    const existAssertion = (_super) => {
       return (function () {
         const obj = this._obj
 
@@ -405,11 +401,15 @@ chai.use((chai, u) => {
           // Cast to JQuery since we've already checked isJquery || isElement above
           const $obj = (obj as JQuery<any>)
 
-          if (!$obj.length) {
+          // Only an empty jQuery collection (length 0) represents a non-existent
+          // subject. A raw DOM element always exists and has no `length`, so nulling
+          // it out here would break chaining further assertions off `should('exist')`.
+          // https://github.com/cypress-io/cypress/issues/25491
+          if ($dom.isJquery($obj) && !$obj.length) {
             this._obj = null
           }
 
-          const node = $obj.length ? $dom.stringify($obj, 'short') : ($obj as any).selector
+          const node = ($dom.isElement($obj) || $obj.length) ? $dom.stringify($obj, 'short') : ($obj as any).selector
 
           try {
             return this.assert(
@@ -441,7 +441,10 @@ chai.use((chai, u) => {
           }
         }
       })
-    })
+    }
+
+    chai.Assertion.overwriteProperty('exist', existAssertion)
+    chai.Assertion.overwriteProperty('exists', existAssertion)
   }
 
   const captureUserInvocationStack = (specWindow: SpecWindow, state: StateFunc, ssfi) => {
