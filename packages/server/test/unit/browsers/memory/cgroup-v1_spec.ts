@@ -1,14 +1,9 @@
 const { expect, sinon } = require('../../../spec_helper')
 
 import fs from 'fs-extra'
+import memory from '../../../../lib/browsers/memory/cgroup-v1'
 
 describe('lib/browsers/memory/cgroup-v1', () => {
-  let memory
-
-  before(async () => {
-    memory = require('../../../../lib/browsers/memory/cgroup-v1').default
-  })
-
   afterEach(() => {
     sinon.restore()
   })

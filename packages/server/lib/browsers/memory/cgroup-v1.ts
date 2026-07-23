@@ -4,7 +4,7 @@ import type { MemoryLog } from './cgroup-util'
 
 // Returns the total memory limit in bytes from the memory cgroup.
 const getTotalMemoryLimit = async () => {
-  return Number(await fs.readFile('/sys/fs/cgroup/memory/memory.limit_in_bytes', 'utf8'))
+  return Number((await fs.readFile('/sys/fs/cgroup/memory/memory.limit_in_bytes', 'utf8')).trim())
 }
 
 // Returns the available memory in bytes from the memory cgroup.
