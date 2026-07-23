@@ -156,7 +156,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
   // restore "Timed out retrying" messages
   .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
-  .replace(/(coffee|js)-\d{3}/g, '$1-456')
+  .replace(/js-\d{3}/g, 'js-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3 (also matches pre-release suffixes like 0.0.0-development)
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+(?:-\S+)?)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)

@@ -76,7 +76,7 @@ FAKE_ERROR: (arg1: string, arg2: Error) => {
   return errTemplate`\
       The fake file is missing or invalid.
 
-      Your \`fakeFile\` is set to ${arg1}, but either the file is missing, it contains a syntax error, or threw an error when required. The \`fakeFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
+      Your \`fakeFile\` is set to ${arg1}, but either the file is missing, it contains a syntax error, or threw an error when required. The \`fakeFile\` must be a \`.js\` or \`.ts\` file.
 
       Or you might have renamed the extension of your \`fakeFile\`. If that's the case, restart the test runner.
 
