@@ -643,12 +643,70 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)
     })
 
-    it('falls back to generic help when no instance is found and help was wanted', async () => {
+    it('falls back to the baked-in CLI command help when no instance is found and help was wanted', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
-      expect(logger.print()).toContain('Usage: cypress tap')
-      expect(logger.print()).toContain('discovered from the running Cypress instance')
+      expect(logger.print()).toMatchInlineSnapshot(`
+        "Usage: cypress tap [command] [args...] [options]
+
+        Interacts with a running Cypress instance
+
+        Options:
+          --instance <pid>                target a specific running Cypress instance by
+                                          its server process id (pid)
+          -h, --help                      display help for command
+
+        Commands:
+          instances [options]             list the running Cypress instances this CLI
+                                          can reach
+          status [options]                report where a running Cypress instance is
+                                          in its lifecycle
+          dom [options] [selector]        read the app-under-test DOM as HTML: the
+                                          whole page, or each element matching a
+                                          selector (with its subtree)
+          aria [options] [selector]       read the accessibility (ARIA) tree of the
+                                          app-under-test frame, or the subtree at a
+                                          selector
+          inspect [options] <selector>    inspect the first element matching a
+                                          selector: its tag, attributes, computed
+                                          styles, box model, and accessibility node
+          specs [options]                 List all runnable specs for the selected
+                                          Cypress instance.
+          run [options] <spec>            run (or rerun) a spec by its
+                                          project-relative path
+          tests [options] [test]          list the tests of the active run and their
+                                          state, or detail one by id
+          commands [options]              list the command log entries of a test of
+                                          the active run
+          pin [options] [test] [command]  pin a command’s DOM snapshot into the live
+                                          app-under-test frame so the dom/aria/inspect
+                                          commands can read it; pass --clear to release
+        "
+      `)
+    })
+
+    it('renders the baked-in per-command help when no instance is found', async () => {
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+
+      expect(await tap.start(['tests', '--help'], {})).toBe(0)
+      expect(logger.print()).toMatchInlineSnapshot(`
+        "Usage: cypress tap tests [options] [test]
+
+        list the tests of the active run and their state, or detail one by id
+
+        Arguments:
+          test                 test id to detail (timings, error, full title); omit to
+                               list every test
+
+        Options:
+          --attempt <attempt>  1-based attempt to detail (attempt 1 = first run);
+                               defaults to the latest, requires a <test> id
+          --instance <pid>     target a specific running Cypress instance by its server
+                               process id (pid)
+          -h, --help           display help for command
+        "
+      `)
     })
 
     it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {

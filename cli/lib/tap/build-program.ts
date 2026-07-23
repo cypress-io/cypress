@@ -122,6 +122,11 @@ const newProgram = (): commander.Command => {
 export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
   const program = newProgram()
 
+  // The outer `tap` command owns --instance and parses it before this program
+  // runs, so it never reaches here — declared only so help lists it. The outer
+  // command disables its own help, making this the sole place it surfaces.
+  program.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
+
   for (const native of tapCliCommands) {
     declareCommand(program, native)
   }

@@ -5,11 +5,12 @@ import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderNativeHelp } from '../tap/output'
+import { renderFailure, renderKnownFailure, renderResult, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
-import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
+import util from '../util'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
@@ -87,6 +88,16 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
   return 0
 }
 
+// With no instance to query, fall back to the schema this CLI ships with so the
+// help listing still reflects every command the CLI knows — the query path stays
+// authoritative when an instance is attached (it may run a different version).
+const renderOfflineHelp = (command: string | undefined, wantsHelp: boolean): number => {
+  const schema = buildTapSchema(util.pkgVersion())
+  const program = buildTapProgram(schema, () => {})
+
+  return renderStaticHelp(program, schema, command, wantsHelp)
+}
+
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
@@ -129,7 +140,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if (wantsHelp || !command) {
-          return renderGenericHelp(wantsHelp)
+          return renderOfflineHelp(command, wantsHelp)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
