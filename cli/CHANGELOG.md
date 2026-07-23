@@ -9,7 +9,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333).
+- Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
 
 ## 15.19.0
 
