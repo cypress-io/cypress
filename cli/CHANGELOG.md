@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.19.1
 
+**Performance:**
+
+- Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
+
 **Bugfixes:**
 
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).

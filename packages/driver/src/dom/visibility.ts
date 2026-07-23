@@ -161,12 +161,13 @@ const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
     transform = 'none'
   }
 
-  const hasTextContent = !!el.textContent?.trim().length
-
   const width = elClientWidth($el)
   const height = elClientHeight($el)
 
-  return (isZeroLengthAndTransformNone(width, height, transform) && !hasTextContent) ||
+  // `el.textContent` serializes the element's entire subtree into a fresh
+  // string, so only read it when the zero-length/transform-none branch is
+  // actually reached, not eagerly on every ancestor visibility check.
+  return (isZeroLengthAndTransformNone(width, height, transform) && !el.textContent?.trim().length) ||
   isZeroLengthAndOverflowHidden(width, height, elHasOverflowHidden($el)) ||
   (el.getClientRects().length <= 0)
 }
