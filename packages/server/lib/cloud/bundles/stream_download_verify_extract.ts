@@ -4,7 +4,7 @@ import { pipeline } from 'stream/promises'
 import { Transform } from 'stream'
 import path from 'path'
 import os from 'os'
-import tar from 'tar'
+import { Parser } from 'tar'
 import fetch from 'cross-fetch'
 import Debug from 'debug'
 import { strictAgent } from '@packages/network'
@@ -151,7 +151,7 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
     },
   })
 
-  const parser = new tar.Parser({ strict: true })
+  const parser = new Parser({ strict: true })
   const entryPromises: Promise<void>[] = []
 
   parser.on('entry', (entry) => {
