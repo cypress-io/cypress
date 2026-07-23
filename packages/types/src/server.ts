@@ -91,7 +91,7 @@ export type BrowserLaunchOpts = {
   onBrowserOpen?: (...args: unknown[]) => void
   relaunchBrowser?: () => Promise<any>
   protocolManager?: ProtocolManagerShape
-  onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>) => Promise<void>
+  onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>, onAUTFrameNavigated?: (listener: (url: string) => void) => () => void) => Promise<void>
   // Only set when the MITM proxy is disabled: `hosts` is translated into
   // browser-level resolver rules instead of the Node-side DNS remap.
   hosts?: { [host: string]: string } | null
