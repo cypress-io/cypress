@@ -1,7 +1,8 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { aggregateResults } from './test-state'
-import type { RunResults } from './test-state'
+import { getPinnedRef, reconcilePin } from './pin'
+import { aggregateResults } from '../test-state'
+import type { RunResults } from '../test-state'
 
 export interface RunStateResult {
   spec: string | null
@@ -9,6 +10,8 @@ export interface RunStateResult {
   state?: 'running' | 'passed' | 'failed'
   totalTests?: number
   results?: RunResults
+  /** The currently pinned command's snapshot, if any — only reported once verified against a live runner (see the pin command). */
+  pinned?: { command: string, at: { index: number, name?: string } }
 }
 
 export const runStateCommand = defineCommand({
@@ -24,6 +27,15 @@ export const runStateCommand = defineCommand({
       return { spec: null, totalSpecs }
     }
 
+    // Release a stale pin (from a previous run) so status never reports one that
+    // no longer exists.
+    const snapshotRunner = tapManagerDataSource.getSnapshotRunner()
+
+    if (snapshotRunner) {
+      reconcilePin(snapshotRunner)
+    }
+
+    const pinned = getPinnedRef()
     const { results, totalTests } = aggregateResults(runner)
     const state = !runner.isRunComplete() ? 'running' : results.failed > 0 ? 'failed' : 'passed'
 
@@ -33,6 +45,7 @@ export const runStateCommand = defineCommand({
       state,
       totalTests,
       results,
+      ...(pinned ? { pinned } : {}),
     }
   },
 })

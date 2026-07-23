@@ -127,7 +127,7 @@ describe('tap/commands/run', () => {
     expect(setHash.firstCall.args[0]).to.eq('/specs/runner?file=cypress/e2e/login.cy.ts&tapRun=8')
   })
 
-  it('matches windows-style entries against posix input and emits the posix form in the URL', async () => {
+  it('matches windows-style entries against posix input and emits the posix form in the result and URL', async () => {
     window.__RUN_MODE_SPECS__ = [{ ...RUN_MODE_SPECS[0], relative: 'cypress\\e2e\\login.cy.ts' }]
 
     const setHash = stubNavigation()
@@ -136,7 +136,7 @@ describe('tap/commands/run', () => {
     const outcome = await manager.exec('run', { spec: 'cypress/e2e/login.cy.ts' })
 
     expect(outcome).to.deep.eq({
-      result: { relativePath: 'cypress\\e2e\\login.cy.ts' },
+      result: { relativePath: 'cypress/e2e/login.cy.ts' },
     })
 
     expect(setHash.firstCall.args[0]).to.contain('file=cypress/e2e/login.cy.ts')
