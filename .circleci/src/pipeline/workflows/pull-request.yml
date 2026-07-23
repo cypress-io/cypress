@@ -16,8 +16,6 @@ when:
     - not:
         equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
-        equal: [ 'davidr/feat/tap-cli/pin-status', << pipeline.git.branch >> ]
-    - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
