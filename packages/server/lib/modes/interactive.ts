@@ -115,7 +115,14 @@ export = {
       },
     }
 
-    return _.extend(common, this.platformArgs())
+    const platformArgs = this.platformArgs()
+
+    // PoC (headless open mode): never show the launchpad/app window
+    if (process.env.CYPRESS_INTERNAL_POC_HIDE_APP_WINDOW === '1' && platformArgs) {
+      platformArgs.show = false
+    }
+
+    return _.extend(common, platformArgs)
   },
 
   platformArgs () {
@@ -141,6 +148,11 @@ export = {
   async ready (options: LaunchArgs, launchpadPort: number) {
     const { projectRoot } = options
     const ctx = getCtx()
+
+    // PoC (headless open mode): no dock icon on macOS
+    if (process.env.CYPRESS_INTERNAL_POC_HIDE_APP_WINDOW === '1') {
+      app.dock?.hide()
+    }
 
     menu.set({
       withInternalDevTools: isDev(),

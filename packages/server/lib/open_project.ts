@@ -103,8 +103,12 @@ export class OpenProject extends EventEmitter {
     // can assume its a headed browser
     // TODO: we should clean this up
     if (!_.has(browser, 'isHeaded')) {
-      browser.isHeaded = true
-      browser.isHeadless = false
+      // PoC (headless open mode): exercise the run-mode headless launch
+      // branches (--headless=new, extension skip) from interactive mode
+      const isHeadless = process.env.CYPRESS_INTERNAL_POC_HEADLESS_BROWSER === '1'
+
+      browser.isHeaded = !isHeadless
+      browser.isHeadless = isHeadless
     }
 
     this.projectBase.setCurrentSpecAndBrowser(spec, browser)

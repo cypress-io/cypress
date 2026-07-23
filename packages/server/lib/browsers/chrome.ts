@@ -303,7 +303,9 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
+  // headless browsers have no extension, so activateMainTab must take the
+  // Page.bringToFront path instead of waiting out the extension timeout
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal || options.browser.isHeadless)
 
   automation.use(cdpAutomation)
 
