@@ -2,7 +2,7 @@ import { Readable } from 'stream'
 import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
-import { createSyntheticExpressContext } from '../../../lib/adapters/synthetic-express-context'
+import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
 
 async function readStream (stream: Readable): Promise<string> {
   const chunks: Buffer[] = []
@@ -38,6 +38,59 @@ describe('createSyntheticExpressContext', () => {
     expect(req.headers['content-type']).to.equal('application/x-www-form-urlencoded')
     expect(req.cookies).to.deep.equal({ a: '1', b: 'two words' })
     expect(await readStream(req)).to.equal('name=value')
+  })
+
+  it('lowercases request header keys like Node IncomingMessage', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+      headers: {
+        Cookie: 'session=abc',
+        'Sec-Fetch-Dest': 'document',
+        'Accept-Encoding': 'gzip',
+      },
+    })
+
+    expect(req.headers).to.deep.equal({
+      cookie: 'session=abc',
+      'sec-fetch-dest': 'document',
+      'accept-encoding': 'gzip',
+    })
+
+    expect(req.cookies).to.deep.equal({ session: 'abc' })
+  })
+
+  it('lowercases synthetic response header keys like Node IncomingMessage', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+      headers: {
+        'Content-Encoding': 'gzip',
+        'Content-Type': 'text/html',
+        'Set-Cookie': 'a=1',
+      },
+    })
+
+    expect(incomingRes.headers).to.deep.equal({
+      'content-encoding': 'gzip',
+      'content-type': 'text/html',
+      'set-cookie': 'a=1',
+    })
+  })
+
+  it('merges multi-value headers that differ only by case when lowercasing', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+      headers: {
+        'Set-Cookie': 'a=1',
+        'set-cookie': 'b=2',
+      },
+    })
+
+    expect(incomingRes.headers['set-cookie']).to.deep.equal(['a=1', 'b=2'])
   })
 
   it('keeps malformed cookie values without throwing', () => {
