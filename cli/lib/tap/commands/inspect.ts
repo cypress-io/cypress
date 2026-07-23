@@ -7,8 +7,8 @@ import { readElementInfo } from '../aut/scripts'
 import type { ElementInfo } from '../aut/scripts'
 import type { TapCliCommand } from '../types'
 
-const INSPECT_DETAILS = `Inspects one element of the app-under-test: its tag, attributes, curated
-computed styles, box model, and accessibility node.`
+const INSPECT_DETAILS = `Inspects the first element matching the selector: its tag, attributes,
+curated computed styles, box model, and accessibility node.`
 
 // A full computed style is ~350 properties; this curated set answers the
 // "why does it look/behave this way" questions (layout, visibility, box).
@@ -125,7 +125,7 @@ export const extractInspect = async (
 
 export const inspectCommand: TapCliCommand = {
   name: 'inspect',
-  description: 'inspect one element: its tag, attributes, computed styles, box model, and accessibility node',
+  description: 'inspect the first element matching a selector: its tag, attributes, computed styles, box model, and accessibility node',
   details: INSPECT_DETAILS,
   params: [{ name: 'selector', type: 'string', required: true, description: 'a CSS selector identifying the element to inspect' }],
   handler: (options, args) => withResolvedAutFrame(options, (session, frame) => {

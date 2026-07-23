@@ -2,9 +2,8 @@ import { listLiveInstances } from '../../cypress-instances'
 import { renderResult } from '../output'
 import type { TapCliCommand, TapCliOptions } from '../types'
 
-const INSTANCES_DETAILS = `Lists the running Cypress instances this CLI can reach (those whose tap
-binding answers a liveness probe), as a JSON array. Pass a instance's pid to
-\`--instance\` to target it with another tap command.`
+const INSTANCES_DETAILS = `Lists the running Cypress instances this CLI can reach, as a JSON array. Pass
+an instance's pid to \`--instance\` to target it with another tap command.`
 
 const listInstances = async (options: TapCliOptions): Promise<number> => {
   const instances = await listLiveInstances({ instance: options.instance })

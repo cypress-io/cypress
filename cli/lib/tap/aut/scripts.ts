@@ -83,12 +83,11 @@ export function readElementInfo (this: Element, reportedStyles: string[]): Eleme
   const computed = getComputedStyle(this)
   const styles: Record<string, string> = {}
 
+  // Report every curated property verbatim rather than filtering: the list is
+  // already hand-picked, and a truthiness guard would drop meaningful values
+  // (a resolved `0`, an empty `content`) and make the output non-deterministic.
   for (const prop of reportedStyles) {
-    const value = computed.getPropertyValue(prop)
-
-    if (value) {
-      styles[prop] = value
-    }
+    styles[prop] = computed.getPropertyValue(prop)
   }
 
   const attributes: Record<string, string> = {}

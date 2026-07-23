@@ -62,17 +62,27 @@ describe('lib/tap/aut/scripts readElementInfo', () => {
     ...overrides,
   })
 
-  it('reports the tag, attributes, rounded box, and only the non-empty reported styles', () => {
+  it('reports the tag, attributes, rounded box, and every reported style verbatim', () => {
+    // Zero-valued (`margin: 0px`, `opacity: 0`) and empty (`content`) styles
+    // must survive — the guard used to be a truthiness check that dropped them.
+    const computed: Record<string, string> = {
+      display: 'block',
+      color: 'rgb(0, 0, 0)',
+      margin: '0px',
+      opacity: '0',
+      content: '',
+    }
+
     vi.stubGlobal('getComputedStyle', () => ({
-      getPropertyValue: (name: string) => ({ display: 'block', color: 'rgb(0, 0, 0)', opacity: '' }[name] ?? ''),
+      getPropertyValue: (name: string) => computed[name] ?? '',
     }))
 
-    const result = readElementInfo.call(fakeElement() as any, ['display', 'color', 'opacity'])
+    const result = readElementInfo.call(fakeElement() as any, ['display', 'color', 'margin', 'opacity', 'content'])
 
     expect(result).to.deep.eq({
       tag: 'input',
       attributes: { 'data-testid': 'username', name: 'username' },
-      styles: { display: 'block', color: 'rgb(0, 0, 0)' },
+      styles: { display: 'block', color: 'rgb(0, 0, 0)', margin: '0px', opacity: '0', content: '' },
       box: { x: 8, y: 41, width: 200, height: 31 },
     })
   })
