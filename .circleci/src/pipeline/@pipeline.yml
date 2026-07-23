@@ -97,6 +97,13 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
+  # Targeting gate for the bugbash workflow (workflows/bugbash.yml) — set by
+  # generate-pipeline-parameters.sh. Unlike the run-*-tests params above,
+  # this defaults to false: it opts a branch IN when it's the bugbash base
+  # branch itself, or has an open PR targeting that base.
+  run-bugbash:
+    type: boolean
+    default: false
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1

@@ -33,9 +33,43 @@ npm_grep_tests=false
 npm_eslint_plugin_tests=false
 npm_schematic_tests=false
 
+# ----- bugbash workflow targeting -----------------------------------------
+# The bugbash workflow (workflows/bugbash.yml) runs for: a direct push to the
+# bugbash base branch itself, or any branch with an open PR targeting it as
+# the base — regardless of the branch's own name. Computed via the GitHub
+# API (rather than a branch-naming convention) so fix branches don't need a
+# special prefix, and computed here (rather than via CircleCI pipeline
+# trigger values) since those differ by GitHub integration type and some are
+# being deprecated.
+BUGBASH_BASE_BRANCH="bugbash/13638-h2"
+run_bugbash=false
+
+detect_run_bugbash() {
+  local branch="${CIRCLE_BRANCH:-}"
+
+  if [[ "$branch" == "$BUGBASH_BASE_BRANCH" ]]; then
+    run_bugbash=true
+    return
+  fi
+
+  local repo_slug="${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}"
+  local open_prs_targeting_base
+  # Tolerate GitHub API hiccups: a failed lookup must not abort parameter
+  # generation for every other branch/PR in the repo, so fall back to false.
+  open_prs_targeting_base=$(curl --silent --max-time 10 \
+    "https://api.github.com/repos/${repo_slug}/pulls?state=open&base=${BUGBASH_BASE_BRANCH}" || echo '[]')
+
+  if echo "$open_prs_targeting_base" | jq -e --arg branch "$branch" \
+      'any(.[]?; .head.ref == $branch)' > /dev/null 2>&1; then
+    run_bugbash=true
+  fi
+}
+
+detect_run_bugbash
+
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests}
+{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "run-bugbash": $run_bugbash}
 EOF
 }
 
