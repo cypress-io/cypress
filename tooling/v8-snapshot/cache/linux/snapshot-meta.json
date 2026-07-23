@@ -3629,6 +3629,7 @@
     "./packages/server/lib/browsers/cdp-protocol/cri-client.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-errors.ts",
     "./packages/server/lib/browsers/cdp-protocol/debug-cdp-connection.ts",
+    "./packages/server/lib/browsers/constants.ts",
     "./packages/server/lib/browsers/electron.ts",
     "./packages/server/lib/browsers/firefox-util.ts",
     "./packages/server/lib/browsers/memory/cgroup-util.ts",
