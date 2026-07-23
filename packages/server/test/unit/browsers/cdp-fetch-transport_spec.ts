@@ -1209,6 +1209,47 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.disable')
     })
 
+    it('does not produce an unhandled rejection when reset fires before the request continues', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+
+      let releaseMiddleware!: () => void
+
+      httpIntercept.use(async (req, next) => {
+        await new Promise<void>((resolve) => {
+          releaseMiddleware = resolve
+        })
+
+        return next(req)
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+      const unhandled = sinon.stub()
+
+      process.on('unhandledRejection', unhandled)
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await tick()
+
+        transport.reset()
+
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(unhandled).not.to.have.been.called
+
+        releaseMiddleware()
+        await handled
+      } finally {
+        process.removeListener('unhandledRejection', unhandled)
+      }
+    })
+
     it('clears in-flight flows on reset without disabling Fetch', async () => {
       const client = createClient()
       const transport = new CdpFetchTransport(client as any)
