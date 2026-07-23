@@ -1,5 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
+import zlib from 'zlib'
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
@@ -762,6 +763,113 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    it('decompresses brotli response bodies before middleware reads them', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: zlib.brotliCompressSync(Buffer.from('<html>origin</html>')).toString('base64'),
+        base64Encoded: true,
+      })
+
+      let seenBody
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        seenBody = await readStream(response.bodyStream!)
+
+        return {
+          ...response,
+          body: `${seenBody}-rewritten`,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [
+        { name: 'Content-Encoding', value: 'br' },
+        { name: 'Content-Type', value: 'text/html' },
+      ]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(seenBody).to.equal('<html>origin</html>')
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-response',
+        responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/html',
+        }],
+        body: Buffer.from('<html>origin</html>-rewritten').toString('base64'),
+      })
+    })
+
+    it('falls back to the delivered body when brotli decompression fails', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const transport = new CdpFetchTransport(client as any, httpIntercept)
+      const onRequestPaused = await startTransport(transport, client)
+
+      // headers claim br but the body is already plaintext (e.g. a newer CDP
+      // that decodes br itself)
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('<html>already decoded</html>').toString('base64'),
+        base64Encoded: true,
+      })
+
+      let seenBody
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        seenBody = await readStream(response.bodyStream!)
+
+        return {
+          ...response,
+          body: seenBody,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [
+        { name: 'Content-Encoding', value: 'br' },
+      ]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(seenBody).to.equal('<html>already decoded</html>')
     })
 
     it('exposes response pause bodies as a stream for middleware rewrites', async () => {
