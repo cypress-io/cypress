@@ -199,6 +199,10 @@ export class CdpFetchTransport {
       })
 
       if (response.fulfilled) {
+        // base64 of the gzip magic bytes starts with 'H4sI' — an encoded body
+        // here with no content-encoding header means mangled rendering
+        debug('fulfilling %s: status %s, content-encoding %s, body prefix %s', event.request.url, response.responseCode, response.responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value, response.body?.slice(0, 8))
+
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
