@@ -94,7 +94,7 @@
     "@npmcli/arborist": "8.0.1",
     "@octokit/auth-app": "6.0.3",
     "@octokit/core": "5.0.2",
-    "@percy/cli": "1.27.4",
+    "@percy/cli": "1.31.14",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "@types/better-sqlite3": "^7.6.13",
