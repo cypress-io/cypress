@@ -1035,6 +1035,110 @@ describe('lib/browsers/chrome', () => {
 
       expect(args).to.include(arg)
     })
+
+    it('translates hosts into host resolver rules', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        hosts: {
+          'foobar.com': '127.0.0.1',
+          '*.foobar.com': '127.0.0.1',
+        },
+      })
+
+      expect(args).to.include('--host-resolver-rules=MAP foobar.com 127.0.0.1,MAP *.foobar.com 127.0.0.1')
+    })
+
+    it('omits host resolver rules when hosts is not set', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {})
+
+      expect(args.find((arg) => arg.startsWith('--host-resolver-rules'))).to.be.undefined
+    })
+
+    it('brackets IPv6 literals in host resolver rules', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        hosts: {
+          'foobar.com': '::1',
+          'baz.com': '[2001:db8::1]',
+        },
+      })
+
+      expect(args).to.include('--host-resolver-rules=MAP foobar.com [::1],MAP baz.com [2001:db8::1]')
+    })
+
+    it('omits host resolver rules when hosts is empty', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        hosts: {},
+      })
+
+      expect(args.find((arg) => arg.startsWith('--host-resolver-rules'))).to.be.undefined
+    })
+  })
+
+  describe('#_normalizeHostResolverRules', () => {
+    it('returns args unchanged when no host resolver rules are present', () => {
+      const args = ['--foo', '--bar=baz']
+
+      expect(chrome._normalizeHostResolverRules(args)).to.deep.eq(args)
+    })
+
+    it('returns args unchanged when a single host resolver rules arg is present', () => {
+      const args = ['--foo', '--host-resolver-rules=MAP foobar.com 127.0.0.1']
+
+      expect(chrome._normalizeHostResolverRules(args)).to.deep.eq(args)
+    })
+
+    it('merges multiple host resolver rules args with later (user-supplied) rules first', () => {
+      const args = [
+        '--host-resolver-rules=MAP foobar.com 127.0.0.1',
+        '--foo',
+        '--host-resolver-rules=MAP example.com 10.0.0.1,MAP foobar.com 10.0.0.2',
+      ]
+
+      expect(chrome._normalizeHostResolverRules(args)).to.deep.eq([
+        '--foo',
+        '--host-resolver-rules=MAP example.com 10.0.0.1,MAP foobar.com 10.0.0.2,MAP foobar.com 127.0.0.1',
+      ])
+    })
+
+    it('drops empty host resolver rules args when merging', () => {
+      const args = [
+        '--host-resolver-rules=',
+        '--host-resolver-rules=MAP foobar.com 127.0.0.1',
+        '--host-resolver-rules=MAP example.com 10.0.0.1',
+      ]
+
+      expect(chrome._normalizeHostResolverRules(args)).to.deep.eq([
+        '--host-resolver-rules=MAP example.com 10.0.0.1,MAP foobar.com 127.0.0.1',
+      ])
+    })
+
+    it('does not let a trailing empty arg clobber a single non-empty rule', () => {
+      const args = [
+        '--host-resolver-rules=MAP foobar.com 127.0.0.1',
+        '--host-resolver-rules=',
+      ]
+
+      expect(chrome._normalizeHostResolverRules(args)).to.deep.eq([
+        '--host-resolver-rules=MAP foobar.com 127.0.0.1',
+      ])
+    })
+
+    it('drops the switch entirely when every value is empty', () => {
+      const args = [
+        '--foo',
+        '--host-resolver-rules=',
+        '--host-resolver-rules=',
+      ]
+
+      expect(chrome._normalizeHostResolverRules(args)).to.deep.eq(['--foo'])
+    })
   })
 
   describe('#_getChromePreferences', () => {
