@@ -224,7 +224,7 @@ describe('streamDownloadVerifyExtract', () => {
     })
 
     it('wraps a non-syscall pipeline error as BundleError(stage=extract, cause preserved) and does NOT retry', async () => {
-      // Body that yields bytes which tar.Parse({ strict: true }) will reject.
+      // Body that yields bytes which tar.Parser({ strict: true }) will reject.
       const makeBody = () => Readable.from([Buffer.from('this is not a tar archive at all')])
       const response = {
         ok: true,

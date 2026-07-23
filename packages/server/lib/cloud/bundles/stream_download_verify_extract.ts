@@ -151,7 +151,7 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
     },
   })
 
-  const parser = new tar.Parse({ strict: true })
+  const parser = new tar.Parser({ strict: true })
   const entryPromises: Promise<void>[] = []
 
   parser.on('entry', (entry) => {
