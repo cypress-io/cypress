@@ -6,7 +6,6 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
 import { proxyHttpCodec } from './adapters/http-codec'
-import type { RequestInterceptionMiddlewareCtx } from './adapters/types'
 
 export class NetworkProxy {
   http: Http
@@ -19,10 +18,9 @@ export class NetworkProxy {
     return proxyHttpCodec
   }
 
-  withIntercept (
-    networkInterception: ForHttpIntercept<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
+  withIntercept <TRequest, TResponse> (
+    networkInterception: ForHttpIntercept<TRequest, TResponse>,
   ) {
-    networkInterception.use(this.http.createLegacyProxyPipeline(this.codec))
     this.http.networkInterception = networkInterception
 
     return this
@@ -83,6 +81,15 @@ export class NetworkProxy {
 
   reset (options: { resetBetweenSpecs: boolean } = { resetBetweenSpecs: false }) {
     this.http.reset(options)
+  }
+
+  /**
+   * Releases long-lived timers owned by this proxy. Used when replacing the
+   * CDP Fetch NetworkProxy so prior PreRequests sweep intervals do not leak.
+   */
+  dispose () {
+    this.http.preRequests.dispose()
+    this.reset({ resetBetweenSpecs: true })
   }
 
   setProtocolManager (protocolManager) {
