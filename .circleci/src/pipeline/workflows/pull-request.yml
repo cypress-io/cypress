@@ -17,6 +17,12 @@ when:
         equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
+    # bugbash/* branches run the dedicated `bugbash` workflow instead (see
+    # workflows/bugbash.yml) so the two don't run redundantly in parallel.
+    - not:
+        matches:
+            pattern: /^bugbash\/.*/
+            value: << pipeline.git.branch >>
 
 jobs:
   # Internal PRs — install and build run immediately

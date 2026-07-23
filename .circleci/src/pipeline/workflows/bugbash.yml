@@ -1,0 +1,155 @@
+# Reserved for the proxy-disabled (CDP Fetch) bugbash effort — see
+# .circleci/AGENTS.md for the branch-allowlist pattern this mirrors.
+#
+# Goal: the proxy-disabled path (CYPRESS_INTERNAL_DISABLE_PROXY=1) green for
+# Chrome + Electron, and the proxy-enabled path green for Firefox/WebKit
+# (regression guard), since the CDP runtime reuses the legacy proxy
+# middleware and fixes can regress it.
+#
+# Tiered to bound CircleCI cost: the expensive cross-browser proxy-enabled
+# regression suite (Tier 2) only runs once the fast unit parity checks and
+# the proxy-disabled Chrome/Electron suites (Tier 0 + Tier 1) are green.
+# No binary/publish jobs and no binary-system-tests — this workflow
+# validates source-tree behavior only.
+when:
+  matches:
+    pattern: /^bugbash\/.*/
+    value: << pipeline.git.branch >>
+
+jobs:
+  # ---- Foundation ----
+  - node_modules_install:
+      build-better-sqlite3: true
+  - build:
+      context: test-runner:env-canary
+      requires:
+        - node_modules_install
+  - system-tests-node-modules-install:
+      context: test-runner:performance-tracking
+      requires:
+        - build
+
+  # ---- Tier 0: fast, always ----
+  - check-ts:
+      requires:
+        - build
+  - health-check:
+      requires:
+        - build
+  - lint:
+      name: linux-lint
+      requires:
+        - build
+  - lint-types:
+      requires:
+        - build
+  - unit-tests:
+      requires:
+        - build
+  - server-unit-tests:
+      requires:
+        - build
+  - server-integration-tests:
+      requires:
+        - build
+  - unit-tests-proxy-disabled:
+      requires:
+        - build
+
+  # ---- Tier 1: proxy-disabled (CDP Fetch), Chrome + Electron ----
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-cdp
+      disable-proxy: true
+      requires:
+        - build
+  - driver-integration-tests-chrome-inject-document-domain:
+      name: driver-integration-tests-chrome-inject-document-domain-cdp
+      disable-proxy: true
+      requires:
+        - build
+  - driver-integration-tests-electron:
+      name: driver-integration-tests-electron-cdp
+      disable-proxy: true
+      requires:
+        - build
+  - driver-integration-memory-tests:
+      name: driver-integration-memory-tests-cdp
+      disable-proxy: true
+      requires:
+        - build
+  - system-tests-chrome:
+      name: system-tests-chrome-cdp
+      disable-proxy: true
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-electron:
+      name: system-tests-electron-cdp
+      disable-proxy: true
+      requires:
+        - system-tests-node-modules-install
+  - run-app-integration-tests-chrome:
+      name: run-app-integration-tests-chrome-cdp
+      disable-proxy: true
+      requires:
+        - build
+  - run-launchpad-integration-tests-chrome:
+      name: run-launchpad-integration-tests-chrome-cdp
+      disable-proxy: true
+      requires:
+        - build
+
+  # ---- Tier 2: proxy-enabled cross-browser regression ----
+  # Gated on Tier 0 + Tier 1 passing — if the proxy-disabled path or fast
+  # unit parity is red, this (expensive, multi-browser) tier never runs.
+  - driver-integration-tests-firefox:
+      requires: &tier-0-and-1
+        - check-ts
+        - health-check
+        - linux-lint
+        - lint-types
+        - unit-tests
+        - server-unit-tests
+        - server-integration-tests
+        - unit-tests-proxy-disabled
+        - driver-integration-tests-chrome-cdp
+        - driver-integration-tests-chrome-inject-document-domain-cdp
+        - driver-integration-tests-electron-cdp
+        - driver-integration-memory-tests-cdp
+        - system-tests-chrome-cdp
+        - system-tests-electron-cdp
+        - run-app-integration-tests-chrome-cdp
+        - run-launchpad-integration-tests-chrome-cdp
+  - driver-integration-tests-webkit:
+      requires: *tier-0-and-1
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-proxy-regression
+      requires: *tier-0-and-1
+  - driver-integration-tests-electron:
+      name: driver-integration-tests-electron-proxy-regression
+      requires: *tier-0-and-1
+  - system-tests-firefox:
+      requires: *tier-0-and-1
+  - system-tests-webkit:
+      requires: *tier-0-and-1
+  - system-tests-chrome:
+      name: system-tests-chrome-proxy-regression
+      requires: *tier-0-and-1
+  - system-tests-electron:
+      name: system-tests-electron-proxy-regression
+      requires: *tier-0-and-1
+  - system-tests-non-root:
+      executor: non-root-docker-user
+      requires: *tier-0-and-1
+
+  # Fan-in aggregator — the only required GitHub status check for this workflow.
+  - bugbash-all-passed:
+      requires:
+        - driver-integration-tests-firefox
+        - driver-integration-tests-webkit
+        - driver-integration-tests-chrome-proxy-regression
+        - driver-integration-tests-electron-proxy-regression
+        - system-tests-firefox
+        - system-tests-webkit
+        - system-tests-chrome-proxy-regression
+        - system-tests-electron-proxy-regression
+        - system-tests-non-root
