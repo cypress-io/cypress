@@ -23,6 +23,7 @@ import memory from './memory'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -512,7 +513,18 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+
+    // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
+    // Fetch must be wired here when the MITM proxy is disabled. The page is
+    // already loaded — enable Page, listen for future frame changes, and seed
+    // the frame tree so isAUTFrame works before any new frameAttached events.
+    if (isProxyDisabled()) {
+      await pageCriClient.send('Page.enable')
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await cdpAutomation.seedFrameTree(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+    }
   },
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
@@ -575,10 +587,16 @@ export = {
       utils.initializeCDP(pageCriClient, automation),
     ])
 
-    await this._navigateUsingCRI(pageCriClient, url)
+    if (isProxyDisabled()) {
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
 
-    await cdpAutomation._handlePausedRequests(pageCriClient)
-    cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await this._navigateUsingCRI(pageCriClient, url)
+    } else {
+      await this._navigateUsingCRI(pageCriClient, url)
+      await cdpAutomation._handlePausedRequests(pageCriClient)
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+    }
 
     return cdpAutomation
   },

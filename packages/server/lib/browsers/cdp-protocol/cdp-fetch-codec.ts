@@ -40,13 +40,16 @@ function toHttpHeaders (headers?: CdpFetchTransportResponse['responseHeaders']):
     return undefined
   }
 
+  // Lowercase while merging so Set-Cookie entries that differ only by case
+  // collapse into one array (Node IncomingMessage behavior).
   return headers.reduce<HttpHeaders>((memo, { name, value }) => {
-    const existing = memo[name]
+    const key = name.toLowerCase()
+    const existing = memo[key]
 
     if (existing) {
-      memo[name] = ([] as string[]).concat(existing, value)
+      memo[key] = ([] as string[]).concat(existing, value)
     } else {
-      memo[name] = value
+      memo[key] = value
     }
 
     return memo
