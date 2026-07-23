@@ -3210,3 +3210,13 @@ jobs:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
+
+  # Fan-in gate: build complete and contributor PR approved (when applicable).
+  ready-to-test:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Ready to test
+          command: echo "✅ Build finished and contributor PR approved"
