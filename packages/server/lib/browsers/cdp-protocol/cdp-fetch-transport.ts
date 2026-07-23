@@ -158,6 +158,13 @@ export class CdpFetchTransport {
 
       const responseDeferred = pDefer<CdpFetchTransportResponse>()
 
+      // reset()/stop() may reject this before the continue callback races on
+      // it (e.g. a between-tests reset while request middleware is still
+      // running); observe it so that never becomes an unhandled rejection.
+      responseDeferred.promise.catch((err: Error) => {
+        debug('in-flight response deferred rejected for %s: %s', event.request.url, err.message)
+      })
+
       deferred = responseDeferred
 
       this.inFlightRequests.set(networkId, deferred)
