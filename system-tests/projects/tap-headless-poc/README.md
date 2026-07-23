@@ -68,13 +68,30 @@ node cli/bin/cypress tap dom h1
 Also watch: no window/dock icon appears (stages 1+), `tap specs` latency after
 the window is hidden (backgroundThrottling symptom), and spec-edit → rerun.
 
-## Findings
+## Findings (validated live 2026-07-23, macOS arm64, external Chrome)
 
-(fill in per stage)
+**Option A works end-to-end. All three stages passed the full checklist.**
 
-- Stage 0:
-- Stage 1:
-- Stage 2:
+- Stage 0 (`--headless=new` via `before:browser:launch`, extension loaded):
+  instance record + probe live, `cdpBrowserWsUrl` populated, `tap
+  specs/run/status/tests/commands/dom` all correct. `be.visible` assertions
+  pass headless. Cross-superdomain origin-swap spec passed and `tap dom`
+  followed the runner to the new origin.
+- Stages 1+2 combined (hidden app window + dock, real
+  `browser.isHeadless = true`, extension skipped): identical checklist all
+  green; `osascript` confirms zero visible Cypress/Electron process. Spec
+  edit after boot → rerun picked up the new test (2 → 3) headlessly. No
+  observable latency from the hidden launchpad window (backgroundThrottling
+  non-issue in these runs).
+
+Dev-env yak-shaves hit on the way (not PoC blockers, worktree hygiene):
+missing dev Electron binary (`node ./bin/cypress-electron --install`, rm the
+partial `dist/Cypress` first), missing dev V8 snapshot
+(`yarn build-v8-snapshot-dev`), stale `network-tools` /
+`network-interception` / `net-stubbing` compiled output (rebuild), stray tsc
+`.js` emits shadowing `packages/data-context/src` (delete), and after
+rebuilding net-stubbing the dev snapshot went stale again — ran with
+`DISABLE_SNAPSHOT_REQUIRE=1` instead of rebuilding it a second time.
 
 ## Eventual real implementation (if validated)
 
