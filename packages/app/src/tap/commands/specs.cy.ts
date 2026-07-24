@@ -7,7 +7,6 @@ const CYPRESS_VERSION = '15.0.0'
 
 interface StubSpec {
   relative: string
-  specType: 'integration' | 'component'
   gitInfo?: { lastModifiedHumanReadable: string | null } | null
 }
 
@@ -49,8 +48,8 @@ describe('tap/commands/specs', () => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
 
     const gqlClient = stubGqlClient([
-      { relative: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration', gitInfo: { lastModifiedHumanReadable: '2 hours ago' } },
-      { relative: 'cypress/e2e/no-git.cy.ts', specType: 'integration', gitInfo: null },
+      { relative: 'cypress/e2e/added-while-open.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago' } },
+      { relative: 'cypress/e2e/no-git.cy.ts', gitInfo: null },
     ])
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -58,8 +57,8 @@ describe('tap/commands/specs', () => {
 
     expect(await manager.exec('specs')).to.deep.eq({
       result: [
-        { relativePath: 'cypress/e2e/added-while-open.cy.ts', specType: 'integration', lastModified: '2 hours ago' },
-        { relativePath: 'cypress/e2e/no-git.cy.ts', specType: 'integration' },
+        { relativePath: 'cypress/e2e/added-while-open.cy.ts', lastModified: '2 hours ago' },
+        { relativePath: 'cypress/e2e/no-git.cy.ts' },
       ],
     })
   })
@@ -71,8 +70,8 @@ describe('tap/commands/specs', () => {
 
     expect(await manager.exec('specs')).to.deep.eq({
       result: [
-        { relativePath: 'cypress/e2e/login.cy.ts', specType: 'integration' },
-        { relativePath: 'src/Button.cy.tsx', specType: 'component' },
+        { relativePath: 'cypress/e2e/login.cy.ts' },
+        { relativePath: 'src/Button.cy.tsx' },
       ],
     })
   })

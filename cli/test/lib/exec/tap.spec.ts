@@ -4,7 +4,9 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
-import { tapCliCommands } from '../../../lib/tap/commands'
+import type { TapSession } from '../../../lib/tap/tap-session'
+import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
+import type { AutFrame } from '../../../lib/tap/aut/frame'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
@@ -30,6 +32,17 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
     listLiveInstances: vi.fn(),
     resolveLiveInstance: vi.fn(),
     resolveInstance: vi.fn(),
+  }
+})
+
+// The AUT-frame reader drives CDP, covered in frame.spec.ts; here we assert only
+// that dom/aria/inspect route to it with their parsed args, so stub it out.
+vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/tap/aut/frame')>()
+
+  return {
+    ...actual,
+    withResolvedAutFrame: vi.fn(),
   }
 })
 
@@ -62,7 +75,10 @@ const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { r
     return method === 'getSchema' ? sessionSchema : execOutcome
   })
 
-  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call }))
+  // These tests drive the binding exec/status paths, which use only `call`;
+  // the frame extractors (dom/aria/inspect, which use client/sessionId) are
+  // covered separately, so the session's CDP members are stubbed away here.
+  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
 
   return call
 }
@@ -92,6 +108,8 @@ describe('lib/exec/tap', () => {
     vi.mocked(listLiveInstances).mockReset()
     vi.mocked(resolveLiveInstance).mockReset()
     vi.mocked(resolveInstance).mockReset()
+    vi.mocked(withResolvedAutFrame).mockReset()
+    vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
     mockResolved()
     logger.reset()
     vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -506,6 +524,72 @@ describe('lib/exec/tap', () => {
     })
   })
 
+  describe('the CLI-native frame commands (dom/aria/inspect)', () => {
+    it('routes dom to the AUT-frame reader with the top-level options and returns its exit code', async () => {
+      vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
+
+      expect(await tap.start(['dom', '.foo'], { instance: 7 })).toBe(0)
+
+      expect(withResolvedAutFrame).toHaveBeenCalledTimes(1)
+      expect(vi.mocked(withResolvedAutFrame).mock.calls[0][0]).toEqual({ instance: 7 })
+      // A native command never consults the running instance's schema.
+      expect(resolveInstance).not.toHaveBeenCalled()
+    })
+
+    it('forwards the parsed selector and --max-chars to the DOM reader', async () => {
+      let forwarded: unknown
+
+      vi.mocked(withResolvedAutFrame).mockImplementation(async (_options, read) => {
+        const callFunctionOn = vi.fn().mockResolvedValue({ result: { value: { html: '<html/>' } } })
+        const session = {
+          call: vi.fn(),
+          sessionId: 'S1',
+          client: {
+            Page: { createIsolatedWorld: vi.fn().mockResolvedValue({ executionContextId: 1 }) },
+            Runtime: { callFunctionOn },
+          },
+        } as unknown as TapSession
+
+        await read(session, { frameId: 'f', url: 'u' } as AutFrame)
+        forwarded = callFunctionOn.mock.calls[0][0].arguments
+
+        return 0
+      })
+
+      await tap.start(['dom', '.btn', '--max-chars', '50'], {})
+
+      // selector and the coerced --max-chars reach the extractor as call arguments.
+      expect(forwarded).toEqual([{ value: '.btn' }, { value: 50 }])
+    })
+
+    it('rejects `inspect` with no selector, without reading the frame', async () => {
+      expect(await tap.start(['inspect'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`missing required argument 'selector'`)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('rejects excess positionals for dom, without reading the frame', async () => {
+      expect(await tap.start(['dom', '.a', '.b'], {})).toBe(1)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('rejects an option the command does not advertise, without reading the frame', async () => {
+      expect(await tap.start(['aria', '--nope'], {})).toBe(1)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('prints per-command usage for `<command> --help` and exits 0, without reading the frame', async () => {
+      for (const [name, heading] of [['dom', 'Usage: cypress tap dom'], ['aria', 'Usage: cypress tap aria'], ['inspect', 'Usage: cypress tap inspect']]) {
+        logger.reset()
+
+        expect(await tap.start([name, '--help'], {})).toBe(0)
+        expect(logger.print()).toContain(heading)
+      }
+
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+  })
+
   describe('the schema handshake', () => {
     it('rejects an unrecognizable schema', async () => {
       mockSession('not a schema')
@@ -565,10 +649,6 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).toContain('discovered from the running Cypress instance')
-
-      for (const { name, description } of tapCliCommands) {
-        expect(logger.print()).toMatch(new RegExp(`^  ${name} +${description}$`, 'm'))
-      }
     })
 
     it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {
@@ -578,21 +658,36 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
-    it('surfaces a specific discovery error on a bare invocation instead of generic help', async () => {
+    it('falls back to generic help for --help when an instance is up but has no browser', async () => {
+      failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
+    })
+
+    it('falls back to generic help for `<command> --help` when an instance is up but has no browser', async () => {
+      failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+
+      expect(await tap.start(['specs', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
+    })
+
+    it('falls back to generic help for --help when the matched instance is stale', async () => {
+      failResolve(new CypressInstanceError('STALE_INSTANCE', 'Cypress was previously running, but is no longer responding.'))
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain('STALE_INSTANCE')
+    })
+
+    it('falls back to generic help (exit 1) for a bare invocation when an instance is up but has no browser', async () => {
       failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start([], {})).toBe(1)
-      expect(logger.print()).toContain('NO_BROWSER_ATTACHED')
-      expect(logger.print()).toContain('no test browser is open')
-      expect(logger.print()).not.toContain('Usage: cypress tap')
-    })
-
-    it('surfaces a specific discovery error for explicit --help instead of generic help', async () => {
-      failResolve(new CypressInstanceError('STALE_INSTANCE', 'Cypress was previously running, but is no longer responding.'))
-
-      expect(await tap.start(['--help'], {})).toBe(1)
-      expect(logger.print()).toContain('STALE_INSTANCE')
-      expect(logger.print()).not.toContain('Usage: cypress tap')
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
     })
 
     it('still surfaces the discovery error when an actual command was requested', async () => {

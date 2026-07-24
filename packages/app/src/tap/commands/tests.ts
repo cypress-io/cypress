@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, selectTestAttempt, serializeTestDetail, serializeTestsState } from './test-state'
+import { attemptSelectionError, selectTestAttempt, serializeTestDetail, serializeTestsState } from '../test-state'
 import type { TapTestsRunner, TestDetailEntry, TestStateEntry } from '../types'
 
 const listTests = (runner: TapTestsRunner, attempt?: number): TestStateEntry[] => {

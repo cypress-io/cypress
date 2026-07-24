@@ -1,3 +1,5 @@
+import type { TapCommandOptionSchema, TapCommandParamSchema } from '@packages/cypress-instances'
+
 /** Options `cypress tap` accepts from the top-level CLI. */
 export interface TapCliOptions {
   instance?: number
@@ -5,14 +7,36 @@ export interface TapCliOptions {
 
 /**
  * A tap subcommand implemented entirely in the CLI, as opposed to the
- * commands discovered from the running Cypress instance's schema.
+ * commands discovered from the running Cypress instance's schema. Its
+ * positionals and options are parsed CLI-side with the same commander grammar
+ * the schema commands use, then handed to `handler` as raw strings.
  */
 export interface TapCliCommand {
   name: string
   description: string
-  /** Full usage text rendered for `cypress tap <name> --help`. */
-  usage: string
-  handler: (options: TapCliOptions) => Promise<number>
+  /**
+   * Extended prose shown between the usage line and the generated
+   * Arguments/Options sections in `cypress tap <name> --help`. Everything
+   * else in the help output is derived from `description`, `params`, and
+   * `options` — this carries only what those fields can't express.
+   */
+  details?: string
+  /** Positional arguments, if any; parsed and forwarded keyed by param name. */
+  params?: readonly TapCommandParamSchema[]
+  /** Options, if any; parsed and forwarded keyed by option name. */
+  options?: readonly TapCommandOptionSchema[]
+  handler: (options: TapCliOptions, args: Record<string, string>, commandOptions: Record<string, string>) => Promise<number>
+}
+
+/**
+ * A reference to the currently pinned command, so a pin is always visible in
+ * `status` and a stranded one is recoverable.
+ */
+export interface PinnedRef {
+  /** The pinned command's name. */
+  command: string
+  /** Which test the pinned command belongs to. */
+  at: { index: number, name?: string }
 }
 
 /**
@@ -31,6 +55,8 @@ export interface TapRunState {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** The currently pinned command, if any. */
+  pinned?: PinnedRef
 }
 
 /**
@@ -59,4 +85,6 @@ export interface TapStatus {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** The currently pinned command, if any. */
+  pinned?: PinnedRef
 }

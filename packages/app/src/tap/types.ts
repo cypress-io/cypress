@@ -11,17 +11,45 @@ export interface TapTestsRunner {
 // The fields the tap commands read off a runnable spec, sourced live from
 // GraphQL in open mode or from the served snapshot as a fallback. `lastModified`
 // comes from git and is only available over the live client (open mode).
-export type RunnableSpec = Pick<FoundSpec, 'relative' | 'specType'> & {
+export type RunnableSpec = Pick<FoundSpec, 'relative'> & {
   lastModified?: string
 }
 
 export interface SpecListEntry {
   /** Project-relative spec path — the form `cypress run --spec` accepts. */
   relativePath: string
-  /** Whether the spec is an end-to-end (integration) or component spec. */
-  specType: FoundSpec['specType']
   /** Human-readable last-modified time from git (e.g. "2 hours ago"); absent in run mode. */
   lastModified?: string
+}
+
+/**
+ * One snapshot on a command log, as `getSnapshotPropsForLog` exposes it: the
+ * cloned body sits behind an opaque object that `restoreDom` knows how to
+ * render. We read only the optional `name` (to select/label it) and otherwise
+ * treat the entry as opaque.
+ */
+export interface PinSnapshotEntry {
+  name?: string
+}
+
+export interface PinSnapshotProps {
+  url?: string
+  snapshots?: Array<PinSnapshotEntry | null | undefined> | null
+}
+
+export interface PinSnapshotRunner {
+  getTestState (testId: string): SerializedTest | undefined
+  getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
+}
+
+/**
+ * The slice of the AUT iframe the pin command drives directly. `detachDom`
+ * captures (and detaches) the current body so it can be put back on release —
+ * the reliable restore the app's own unpin can't give a cold pin (see below).
+ */
+export interface PinAutIframe {
+  detachDom (): unknown
+  restoreDom (snapshot: unknown): void
 }
 
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
