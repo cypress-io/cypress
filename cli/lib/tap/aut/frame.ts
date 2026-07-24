@@ -2,10 +2,11 @@ import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
 import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
-import { withTapSession } from '../tap-session'
+import { withTapSession, validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
 import { renderResult, renderFailure, renderKnownFailure } from '../output'
-import type { TapCliOptions } from '../types'
+import type { TapCliOptions, TapRunState } from '../types'
+import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -90,10 +91,38 @@ export const parsePositiveInt = (raw: string | undefined, fallback: number, labe
 }
 
 /**
+ * Gates the AUT-frame reads on the same run lifecycle `status` reports. The
+ * frame is only worth reading once a spec has settled: while a spec is running
+ * the app is in flux — commands are still executing, snapshots are swapping,
+ * the page may still be navigating — so a read captures a transient page; and
+ * with no spec run the resolved frame is the runner shell, not any app under
+ * test. Both are rejected with typed errors a poller can branch on, mirroring
+ * the `status` lifecycle contract (wait until `passed`/`failed`).
+ */
+export const assertFrameReadable = async (session: TapSession): Promise<void> => {
+  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
+
+  if ('error' in outcome) {
+    throw new FrameCommandError(outcome.error.code, outcome.error.message)
+  }
+
+  const { state } = outcome.result as TapRunState
+
+  if (state === undefined) {
+    throw new FrameCommandError('NO_RUN', 'no spec has run — run a spec first, then read the app under test once the run has completed (status passed or failed)')
+  }
+
+  if (state === 'running') {
+    throw new FrameCommandError('RUN_IN_PROGRESS', 'a spec is currently running — the app under test is still in flux; wait for the run to complete (status passed or failed) before reading it')
+  }
+}
+
+/**
  * Shared flow for the AUT-frame commands: resolve a running instance, open a
- * tap session, locate the AUT frame, run `read`, and render the result. Maps
- * the CLI-native `FrameCommandError` and the discovery/transport failures to
- * the same rendered output the schema commands use.
+ * tap session, gate on the run lifecycle, locate the AUT frame, run `read`, and
+ * render the result. Maps the CLI-native `FrameCommandError` and the
+ * discovery/transport failures to the same rendered output the schema commands
+ * use.
  */
 export const withResolvedAutFrame = async (
   options: TapCliOptions,
@@ -103,9 +132,11 @@ export const withResolvedAutFrame = async (
     const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
 
     return await withTapSession(selection.instance, async (session) => {
-      const frame = await resolveAutFrame(session.client, session.sessionId)
-
       try {
+        await assertFrameReadable(session)
+
+        const frame = await resolveAutFrame(session.client, session.sessionId)
+
         renderResult(await read(session, frame))
 
         return 0
