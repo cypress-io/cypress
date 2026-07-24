@@ -1,4 +1,4 @@
-import type { TapCommandOptionSchema, TapCommandParamSchema } from '@packages/cypress-instances'
+import type { TapNativeCommandSchema } from '@packages/cypress-instances'
 
 /** Options `cypress tap` accepts from the top-level CLI. */
 export interface TapCliOptions {
@@ -6,25 +6,14 @@ export interface TapCliOptions {
 }
 
 /**
- * A tap subcommand implemented entirely in the CLI, as opposed to the
- * commands discovered from the running Cypress instance's schema. Its
- * positionals and options are parsed CLI-side with the same commander grammar
- * the schema commands use, then handed to `handler` as raw strings.
+ * A tap subcommand implemented entirely in the CLI, as opposed to the commands
+ * discovered from the running Cypress instance's schema. Its declarative shape
+ * (description, params, options, help prose) comes from `TAP_NATIVE_COMMANDS`;
+ * its positionals and options are parsed CLI-side with the same commander
+ * grammar the schema commands use, then handed to `handler` as raw strings
+ * keyed by name.
  */
-export interface TapCliCommand {
-  name: string
-  description: string
-  /**
-   * Extended prose shown between the usage line and the generated
-   * Arguments/Options sections in `cypress tap <name> --help`. Everything
-   * else in the help output is derived from `description`, `params`, and
-   * `options` — this carries only what those fields can't express.
-   */
-  details?: string
-  /** Positional arguments, if any; parsed and forwarded keyed by param name. */
-  params?: readonly TapCommandParamSchema[]
-  /** Options, if any; parsed and forwarded keyed by option name. */
-  options?: readonly TapCommandOptionSchema[]
+export interface TapCliCommand extends TapNativeCommandSchema {
   handler: (options: TapCliOptions, args: Record<string, string>, commandOptions: Record<string, string>) => Promise<number>
 }
 

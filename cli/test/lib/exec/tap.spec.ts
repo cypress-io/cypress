@@ -696,12 +696,11 @@ describe('lib/exec/tap', () => {
         list the tests of the active run and their state, or detail one by id
 
         Arguments:
-          test                 test id to detail (timings, error, full title); omit to
-                               list every test
+          test                 test id, as listed by the tests command
 
         Options:
-          --attempt <attempt>  1-based attempt to detail (attempt 1 = first run);
-                               defaults to the latest, requires a <test> id
+          --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
+                               latest
           --instance <pid>     target a specific running Cypress instance by its server
                                process id (pid)
           -h, --help           display help for command

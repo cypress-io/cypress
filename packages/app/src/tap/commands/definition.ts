@@ -31,7 +31,7 @@ type OptionsToObject<O extends readonly TapCommandOptionSchema[]> =
   { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? E['name'] : never]: ScalarOf<E['type']> } &
   { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? never : E['name']]?: ScalarOf<E['type']> }
 
-type CommandSchemas = typeof TAP_COMMANDS
+type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[number], { name: N }>
 
 /**
  * Authoring helper for one `cypress tap` subcommand. The command's schema (its
@@ -44,11 +44,13 @@ type CommandSchemas = typeof TAP_COMMANDS
 export const defineCommand = <N extends TapCommandName>(
   name: N,
   handler: (
-    params: ParamsToObject<CommandSchemas[N]['params']>,
-    options: OptionsToObject<CommandSchemas[N]['options']>,
+    params: ParamsToObject<CommandByName<N>['params']>,
+    options: OptionsToObject<CommandByName<N>['options']>,
   ) => Promise<unknown>,
 ): TapCommandDefinition & { name: N } => {
-  return { name, ...TAP_COMMANDS[name], handler }
+  const meta = TAP_COMMANDS.find((command) => command.name === name)!
+
+  return { ...meta, name, handler }
 }
 
 // The erased view the dispatcher reads through: `defineCommand` types each entry
