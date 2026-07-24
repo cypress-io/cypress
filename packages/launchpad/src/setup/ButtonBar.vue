@@ -4,6 +4,7 @@
       <Button
         v-if="nextFn"
         size="40"
+        data-cy="wizard-next-button"
         :disabled="!canNavigateForward"
         :variant="mainVariant === 'pending' ? 'disabled' : mainVariant"
         @click="nextFn"
@@ -18,6 +19,7 @@
         v-if="backFn"
         size="40"
         variant="outline-light"
+        data-cy="wizard-back-button"
         @click="backFn"
       >
         {{ back }}
@@ -46,6 +48,7 @@
         size="40"
         variant="link"
         class="text-gray-500"
+        data-cy="wizard-skip-button"
         @click="skipFn"
       >
         {{ skip }}

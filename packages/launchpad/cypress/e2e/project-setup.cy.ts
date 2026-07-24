@@ -568,32 +568,26 @@ describe('Launchpad: Setup Project', () => {
   })
 
   describe('Command for package managers', () => {
-    it('makes the right command for yarn', () => {
-      scaffoldAndOpenProject('pristine-yarn')
+    const packageManagerScenarios = [
+      { project: 'pristine-yarn', bundler: 'Webpack', command: 'yarn add -D webpack react react-dom' },
+      { project: 'pristine-pnpm', bundler: 'Vite', command: 'pnpm add -D vite react react-dom' },
+      { project: 'pristine-npm', bundler: 'Webpack', command: 'npm install -D webpack react react-dom' },
+    ] as const
 
-      cy.visitLaunchpad()
+    it('builds the dependency install command for each package manager', () => {
+      for (const { project, bundler, command } of packageManagerScenarios) {
+        scaffoldAndOpenProject(project)
 
-      cy.get('[data-cy-testingtype="component"]').click()
-      cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('React.js').click()
-      cy.contains('Pick a bundler').click()
-      cy.findByRole('option', { name: 'Webpack' }).click()
-      cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('yarn add -D webpack react react-dom').should('be.visible')
-    })
+        cy.visitLaunchpad()
 
-    it('makes the right command for pnpm', () => {
-      scaffoldAndOpenProject('pristine-pnpm')
-
-      cy.visitLaunchpad()
-
-      cy.get('[data-cy-testingtype="component"]').click()
-      cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('React.js').click()
-      cy.contains('Pick a bundler').click()
-      cy.findByRole('option', { name: 'Vite' }).click()
-      cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('pnpm add -D vite react react-dom')
+        cy.get('[data-cy-testingtype="component"]').click()
+        cy.get('[data-testid="select-framework"]').click()
+        cy.findByText('React.js').click()
+        cy.contains('Pick a bundler').click()
+        cy.findByRole('option', { name: bundler }).click()
+        cy.get('[data-cy="wizard-next-button"]').should('not.be.disabled').click()
+        cy.findByDisplayValue(command).should('be.visible')
+      }
     })
 
     // TODO: Had to revert due to regression: https://github.com/cypress-io/cypress/pull/26452
@@ -607,22 +601,8 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.contains('button', 'Vue.js 3(detected)').should('be.visible')
       cy.contains('button', 'Vite(detected)').should('be.visible')
-      cy.contains('button', 'Next step').should('not.be.disabled').click()
+      cy.get('[data-cy="wizard-next-button"]').should('not.be.disabled').click()
       cy.findByTestId('alert').contains(`You've successfully installed all required dependencies.`)
-    })
-
-    it('makes the right command for npm', () => {
-      scaffoldAndOpenProject('pristine-npm')
-
-      cy.visitLaunchpad()
-
-      cy.get('[data-cy-testingtype="component"]').click()
-      cy.get('[data-testid="select-framework"]').click()
-      cy.findByText('React.js').click()
-      cy.contains('Pick a bundler').click()
-      cy.findByRole('option', { name: 'Webpack' }).click()
-      cy.contains('button', 'Next step').should('not.be.disabled').click()
-      cy.findByDisplayValue('npm install -D webpack react react-dom')
     })
   })
 
