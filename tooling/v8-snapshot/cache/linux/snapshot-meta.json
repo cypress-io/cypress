@@ -620,7 +620,6 @@
     "./node_modules/systeminformation/lib/dockerSocket.js",
     "./node_modules/systeminformation/lib/filesystem.js",
     "./node_modules/systeminformation/lib/system.js",
-    "./node_modules/tar/dist/commonjs/index.min.js",
     "./node_modules/throttle/throttle.js",
     "./node_modules/trash/node_modules/glob/glob.js",
     "./node_modules/trash/node_modules/glob/sync.js",
