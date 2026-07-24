@@ -9,11 +9,13 @@ import type { TapSchema, TapExecResult } from '@packages/cypress-instances/lib/t
 
 export {
   TAP_SCHEMA_VERSION,
+  TAP_COMMANDS,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 export type {
   TapCommandParamSchema,
   TapCommandOptionSchema,
+  TapCommandName,
   TapSchema,
   TapExecResult,
 } from '@packages/cypress-instances/lib/tap-contract'
