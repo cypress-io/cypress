@@ -20,8 +20,10 @@ export const renderNativeHelp = (program: commander.Command, command: string): v
   logger.always(program.commands.find((subcommand) => subcommand.name() === command)!.helpInformation())
 }
 
-const unknownCommandMessage = (schema: TapSchema, command: string): string => {
-  return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${schema.commands.filter(({ hidden }) => !hidden).map(({ name }) => name).join(', ')}.`
+const unknownCommandMessage = (program: commander.Command, schema: TapSchema, command: string): string => {
+  const available = program.commands.map((subcommand) => subcommand.name()).join(', ')
+
+  return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${available}.`
 }
 
 const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string => {
@@ -43,15 +45,15 @@ const renderHelp = (program: commander.Command, schema: TapSchema, command: stri
   const prefix = banner ? `${banner}\n\n` : ''
 
   if (command) {
-    const entry = schema.commands.find(({ name }) => name === command)
+    const subcommand = program.commands.find((sub) => sub.name() === command)
 
-    if (!entry || entry.hidden) {
-      renderFailure({ code: 'UNKNOWN_COMMAND', message: unknownCommandMessage(schema, command) })
+    if (!subcommand) {
+      renderFailure({ code: 'UNKNOWN_COMMAND', message: unknownCommandMessage(program, schema, command) })
 
       return 1
     }
 
-    logger.always(`${prefix}${program.commands.find((subcommand) => subcommand.name() === command)!.helpInformation()}`)
+    logger.always(`${prefix}${subcommand.helpInformation()}`)
 
     return 0
   }

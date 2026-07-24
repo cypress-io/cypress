@@ -686,6 +686,19 @@ describe('lib/exec/tap', () => {
       `)
     })
 
+    it('lists both native and schema commands when an unknown command is requested offline', async () => {
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+
+      expect(await tap.start(['instancs', '--help'], {})).toBe(1)
+
+      const help = logger.print()
+
+      expect(help).toContain('UNKNOWN_COMMAND')
+      expect(help).toContain('"instancs" is not a command')
+      expect(help).toContain('instances')
+      expect(help).toContain('specs')
+    })
+
     it('renders the baked-in per-command help when no instance is found', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
