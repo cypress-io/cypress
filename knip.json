@@ -783,6 +783,9 @@
       "exports",
       "types"
     ],
+    "cli/lib/tap/types.ts": [
+      "types"
+    ],
     "packages/server/lib/cypress-instances.ts": [
       "types"
     ],
