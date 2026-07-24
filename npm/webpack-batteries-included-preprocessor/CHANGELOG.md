@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.1.1...@cypress/webpack-batteries-included-preprocessor-v4.2.0) (2026-07-15)
+
+
+### Features
+
+* support TypeScript 7 for spec preprocessing ([#34277](https://github.com/cypress-io/cypress/issues/34277)) ([4904db4](https://github.com/cypress-io/cypress/commit/4904db4de535d26c8c9e21d561aa0b65a5628a7a))
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.1.0...@cypress/webpack-batteries-included-preprocessor-v4.1.1) (2026-05-09)
 
 

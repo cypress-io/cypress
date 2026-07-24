@@ -1,7 +1,6 @@
 /// <reference types='chrome'/>
 
 import _ from 'lodash'
-import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { isLocalhost as isLocalhostNetworkTools } from '@packages/network-tools'
@@ -13,9 +12,10 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
-import { normalizeGetCookies, normalizeSetCookieProps } from '../../automation/cookie/converters/cdp'
+import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../../automation/commands/key_press'
+import { AUT_FRAME_HEADER } from '../constants'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
@@ -43,11 +43,7 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
     return resourceType as ResourceType
   }
 
-  if (resourceType === 'img') {
-    return 'image'
-  }
-
-  return ffToStandardResourceTypeMap[resourceType] || 'other'
+  return 'other'
 }
 
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
@@ -59,17 +55,13 @@ export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
+  childFrames?: HasFrame[]
 }
 
-// the intersection of what's valid in CDP and what's valid in FFCDP
-// Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
+// the resource types passed through to request middleware / cy.intercept matching; any
+// other type reported by the protocol (e.g. 'document', 'media', 'preflight') normalizes to 'other'
 // CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
 const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
-const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
-  'img': 'image',
-  'csp': 'cspviolationreport',
-  'webmanifest': 'manifest',
-}
 
 export class CdpAutomation implements CDPClient, AutomationMiddleware {
   on: OnFn
@@ -171,10 +163,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
 
-    let url = params.request.url
-
-    // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
-    if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
+    const url = params.request.url
 
     // Filter out "data:" urls from being cached - fixes: https://github.com/cypress-io/cypress/issues/17853
     // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
@@ -262,52 +251,49 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
   }
 
-  private getAllCookies = (filter: CyCookieFilter) => {
-    return this.sendDebuggerCommandFn('Network.getAllCookies')
-    .then((result: Protocol.Network.GetAllCookiesResponse) => {
-      return normalizeGetCookies(result.cookies)
-      .filter((cookie: CyCookie) => {
-        const matches = cookieMatches(cookie, filter)
+  private getAllCookies = async (filter: CyCookieFilter) => {
+    const result: Protocol.Network.GetAllCookiesResponse = await this.sendDebuggerCommandFn('Network.getAllCookies')
 
-        debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
+    return convertCdpCookiesToCyCookies(result.cookies)
+    .filter((cookie: CyCookie) => {
+      const matches = cookieMatches(cookie, filter)
 
-        return matches
-      })
+      debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
+
+      return matches
     })
   }
 
-  private getCookiesByUrl = (url): Promise<CyCookie[]> => {
-    return this.sendDebuggerCommandFn('Network.getCookies', {
+  private getCookiesByUrl = async (url): Promise<CyCookie[]> => {
+    const result: Protocol.Network.GetCookiesResponse = await this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
-    .then((result: Protocol.Network.GetCookiesResponse) => {
-      const isLocalhost = isLocalhostNetworkTools(new URL(url))
 
-      return normalizeGetCookies(result.cookies)
-      .filter((cookie) => {
-        // Chrome returns all cookies for a URL, even if they wouldn't normally
-        // be sent with a request. This standardizes it by filtering out ones
-        // that are secure but not on a secure context
+    const isLocalhost = isLocalhostNetworkTools(new URL(url))
 
-        // localhost is considered a secure context (even when http:)
-        // and it's required for cross origin support when visiting a secondary
-        // origin so that all its cookies are sent.
-        return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
-      })
+    return convertCdpCookiesToCyCookies(result.cookies)
+    .filter((cookie) => {
+      // Chrome returns all cookies for a URL, even if they wouldn't normally
+      // be sent with a request. This standardizes it by filtering out ones
+      // that are secure but not on a secure context
+
+      // localhost is considered a secure context (even when http:)
+      // and it's required for cross origin support when visiting a secondary
+      // origin so that all its cookies are sent.
+      return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
-    return this.getAllCookies(filter)
-    .then((cookies) => {
-      return _.get(cookies, 0, null)
-    })
+  private getCookie = async (filter: CyCookieFilter): Promise<CyCookie | null> => {
+    const cookies = await this.getAllCookies(filter)
+
+    return _.get(cookies, 0, null)
   }
 
   private _updateFrameTree = (client: CriClient, eventName) => async () => {
     debugVerbose(`update frame tree for ${eventName}`)
 
-    this.gettingFrameTree = new Promise<void>(async (resolve) => {
+    this.gettingFrameTree = (async () => {
       try {
         this.frameTree = (await client.send('Page.getFrameTree')).frameTree
         debugVerbose('frame tree updated')
@@ -315,10 +301,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         debugVerbose('failed to update frame tree:', err.stack)
       } finally {
         this.gettingFrameTree = null
-
-        resolve()
       }
-    })
+    })()
   }
 
   private _continueRequest = (client, params, header?) => {
@@ -361,15 +345,26 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       await this.gettingFrameTree
     }
 
-    const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
+    let frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
       return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
     }) as HasFrame | undefined
+
+    // Cy-in-cy nests the real AUT under the outer AUT frame — match _getAutFrame.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
+      frame = _.find(frame.childFrames || [], (item: HasFrame) => {
+        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+      }) as HasFrame | undefined
+    }
 
     if (frame) {
       return frame.frame.id === frameId
     }
 
     return false
+  }
+
+  isAUTFrame = (frameId: string) => {
+    return this._isAUTFrame(frameId)
   }
 
   private _getAutFrame = async () => {
@@ -388,8 +383,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
       // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
-        // @ts-expect-error
-        frame = _.find(frame?.childFrames || [], (item: HasFrame) => {
+        frame = _.find(frame.childFrames || [], (item: HasFrame) => {
           return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
         }) as HasFrame | undefined
       }
@@ -428,7 +422,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
         return this._continueRequest(client, params, {
-          name: 'X-Cypress-Is-AUT-Frame',
+          name: AUT_FRAME_HEADER,
           value: 'true',
         })
       }
@@ -447,6 +441,15 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
   }
 
+  /**
+   * Fetch and cache the current frame tree. Needed when attaching to an
+   * already-loaded page (e.g. cy-in-cy connectToExisting) where frameAttached
+   * will not fire for existing frames.
+   */
+  seedFrameTree = async (client: CriClient) => {
+    await this._updateFrameTree(client, 'seedFrameTree')()
+  }
+
   onRequest = async <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
     let setCookie
 
@@ -459,68 +462,74 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return this.getAllCookies(data)
       case 'get:cookie':
         return this.getCookie(data)
-      case 'set:cookie':
-        setCookie = normalizeSetCookieProps(data)
+      case 'set:cookie': {
+        setCookie = convertCyCookieToCdpCookie(data)
 
-        return this.sendDebuggerCommandFn('Network.setCookie', setCookie)
-        .then((result: Protocol.Network.SetCookieResponse) => {
-          if (!result.success) {
-            // i wish CDP provided some more detail here, but this is really it in v1.3
-            // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
-            throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
-          }
+        const result: Protocol.Network.SetCookieResponse = await this.sendDebuggerCommandFn('Network.setCookie', setCookie)
 
-          return this.getCookie(data)
-        })
+        if (!result.success) {
+          // i wish CDP provided some more detail here, but this is really it in v1.3
+          // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
+          throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
+        }
+
+        return this.getCookie(data)
+      }
 
       case 'add:cookies':
-        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+        setCookie = data.map((cookie) => convertCyCookieToCdpCookie(cookie)) as Protocol.Network.SetCookieRequest[]
 
         return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
 
       case 'set:cookies':
-        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+        setCookie = data.map((cookie) => convertCyCookieToCdpCookie(cookie))
 
-        return this.sendDebuggerCommandFn('Network.clearBrowserCookies')
-        .then(() => {
-          return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
-        })
+        await this.sendDebuggerCommandFn('Network.clearBrowserCookies')
 
-      case 'clear:cookie':
-        return this.getCookie(data)
+        return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+
+      case 'clear:cookie': {
         // always resolve with the value of the removed cookie. also, getting
         // the cookie via CDP first will ensure that we send a cookie `domain`
         // to CDP that matches the cookie domain that is really stored
-        .then((cookieToBeCleared) => {
-          if (!cookieToBeCleared) {
-            return cookieToBeCleared
-          }
+        const cookieToBeCleared = await this.getCookie(data)
 
-          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
-          .then(() => {
-            return cookieToBeCleared
-          })
-        })
+        if (!cookieToBeCleared) {
+          return cookieToBeCleared
+        }
 
-      case 'clear:cookies':
-        return Bluebird.mapSeries(data as CyCookieFilter[], async (cookie) => {
+        await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+
+        return cookieToBeCleared
+      }
+
+      case 'clear:cookies': {
+        const clearedCookies: CyCookie[] = []
+
+        for (const cookie of data as CyCookieFilter[]) {
           // resolve with the value of the removed cookie
           // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
           // that matches the cookie domain that is really stored
           const cookieToBeCleared = await this.getCookie(cookie)
 
-          if (!cookieToBeCleared) return
+          // if the cookie no longer exists, there is nothing to clear or report back
+          if (!cookieToBeCleared) {
+            continue
+          }
 
           await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
 
-          return cookieToBeCleared
-        })
+          clearedCookies.push(cookieToBeCleared)
+        }
+
+        return clearedCookies
+      }
 
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':
         return this.sendDebuggerCommandFn(data.command, data.params, data.sessionId)
-      case 'take:screenshot':
+      case 'take:screenshot': {
         debugVerbose('capturing screenshot')
 
         if (this.focusTabOnScreenshot) {
@@ -531,13 +540,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
           }
         }
 
-        return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
-        .catch((err) => {
+        let screenshot: Protocol.Page.CaptureScreenshotResponse
+
+        try {
+          screenshot = await this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
+        } catch (err) {
           throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
-        })
-        .then(({ data }) => {
-          return `data:image/png;base64,${data}`
-        })
+        }
+
+        return `data:image/png;base64,${screenshot.data}`
+      }
       case 'reset:browser:state':
         return Promise.all([
           // Note that we are omitting `file_systems` as it is very non-performant to clear:

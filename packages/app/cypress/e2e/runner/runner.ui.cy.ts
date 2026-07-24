@@ -35,7 +35,7 @@ describe('src/cypress/runner', () => {
       })
 
       // render exactly one error
-      cy.get('.runnable-err:contains(AssertionError)').should('have.length', 1)
+      cy.reporter().find('.runnable-err:contains(AssertionError)').should('have.length', 1)
     })
 
     it('pass fail pass fail', () => {
@@ -61,8 +61,8 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.contains('No tests found.').should('be.visible')
-      cy.contains('p', 'Cypress could not detect tests in this file.').should('be.visible')
+      cy.reporter().contains('No tests found.').should('be.visible')
+      cy.reporter().contains('p', 'Cypress could not detect tests in this file.').should('be.visible')
     })
 
     it('executes nested suite', () => {
@@ -88,7 +88,7 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.contains('li.command-name-assert', 'assert')
+      cy.reporter().contains('li.command-name-assert', 'assert')
       .find('.command-wrapper')
       .should('not.have.class', 'command-is-pinned')
       .click()
@@ -102,10 +102,10 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.findByText('clicks button').click()
+      cy.reporter().contains('clicks button').click()
 
       // pin command that features highlights
-      cy.contains('li.command-name-click', 'click')
+      cy.reporter().contains('li.command-name-click', 'click')
       .find('.command-wrapper')
       .should('not.have.class', 'command-is-pinned')
       .click()
@@ -120,7 +120,7 @@ describe('src/cypress/runner', () => {
       .should('have.attr', 'aria-checked', 'false')
 
       // pin another command, expect highlights be enabled for new snapshot
-      cy.contains('li.command-name-get', 'get')
+      cy.reporter().contains('li.command-name-get', 'get')
       .find('.command-wrapper')
       .should('not.have.class', 'command-is-pinned')
       .click()
@@ -137,10 +137,10 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.findByText('clicks button').click()
+      cy.reporter().contains('clicks button').click()
 
       // pin command that features multiple snapshots
-      cy.contains('li.command-name-click', 'click')
+      cy.reporter().contains('li.command-name-click', 'click')
       .find('.command-wrapper')
       .click()
       .should('have.class', 'command-is-pinned')
@@ -151,7 +151,7 @@ describe('src/cypress/runner', () => {
       cy.get('[data-cy-active-snapshot-toggle="true"').should('contain', 'after')
 
       // pin another command, expect active snapshot index to be reset
-      cy.contains('li.command-name-type', 'type')
+      cy.reporter().contains('li.command-name-type', 'type')
       .find('.command-wrapper')
       .click()
       .should('have.class', 'command-is-pinned')
@@ -171,15 +171,15 @@ describe('src/cypress/runner', () => {
         o.sinon.stub(ctx.actions.file, 'openFile')
       })
 
-      cy.get('[data-cy="runnable-options-button"]').click()
-      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
-      cy.get('[data-cy="runnable-popover-open-ide"]').click()
+      cy.reporter().find('[data-cy="runnable-options-button"]').click()
+      cy.reporter().find('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-popover-open-ide"]').click()
 
       cy.withCtx((ctx, o) => {
         expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`simple-cy-assert\.runner\.cy\.js$`)), 1, 1)
       })
 
-      cy.get('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')
+      cy.reporter().find('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')
     })
 
     describe('hook failures', () => {
@@ -237,23 +237,23 @@ describe('src/cypress/runner', () => {
         pendingCount: 1,
       })
 
-      cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
-      cy.contains('.command', 'beforeEach').find('.command-state-failed')
-      cy.contains('.runnable-err', 'beforeEach').scrollIntoView().should('be.visible')
+      cy.reporter().contains('.test', 'never gets here').should('have.class', 'runnable-failed')
+      cy.reporter().contains('.command', 'beforeEach').find('.command-state-failed')
+      cy.reporter().contains('.runnable-err', 'beforeEach').scrollIntoView().should('be.visible')
 
-      cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
+      cy.reporter().contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
-      cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
-      cy.contains('.command', 'afterEach').find('.command-state-failed')
-      cy.contains('.runnable-err', 'afterEach').scrollIntoView().should('be.visible')
+      cy.reporter().contains('.test', 'fails this').should('have.class', 'runnable-failed')
+      cy.reporter().contains('.command', 'afterEach').find('.command-state-failed')
+      cy.reporter().contains('.runnable-err', 'afterEach').scrollIntoView().should('be.visible')
 
-      cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
+      cy.reporter().contains('.test', 'does not run this').should('have.class', 'runnable-processing')
 
-      cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
+      cy.reporter().contains('.test', 'runs this').should('have.class', 'runnable-passed')
 
-      cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
-      cy.contains('.command', 'after').find('.command-state-failed')
-      cy.contains('.runnable-err', 'after').scrollIntoView().should('be.visible')
+      cy.reporter().contains('.test', 'fails on this').should('have.class', 'runnable-failed')
+      cy.reporter().contains('.command', 'after').find('.command-state-failed')
+      cy.reporter().contains('.runnable-err', 'after').scrollIntoView().should('be.visible')
     })
 
     it('async timeout spec', () => {
@@ -271,7 +271,7 @@ describe('src/cypress/runner', () => {
         failCount: 1,
       })
 
-      cy.get('.command-number-column:contains(25)').should('be.visible')
+      cy.reporter().find('.command-number-column:contains(25)').should('be.visible')
     })
 
     it('file with empty suites only displays no tests found', () => {
@@ -281,7 +281,7 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.get('.reporter').contains('No tests found')
+      cy.reporter().contains('No tests found')
     })
   })
 
@@ -294,17 +294,17 @@ describe('src/cypress/runner', () => {
 
       // Wait for the command to start running (ensure it's in retry mode)
       // The command will be retrying cy.get('.not-exist')
-      cy.get('.command-state-pending, .command-state-running', { timeout: 5000 })
+      cy.reporter().find('.command-state-pending, .command-state-running', { timeout: 5000 })
 
       // Click the stop button to stop execution
-      cy.get('.stop').click()
+      cy.reporter().find('.stop').click()
 
       // Verify the UI updates immediately - stop button disappears, restart appears
-      cy.get('.stop', { timeout: 100 }).should('not.exist')
-      cy.get('.restart', { timeout: 100 }).should('be.visible')
+      cy.reporter().find('.stop', { timeout: 100 }).should('not.exist')
+      cy.reporter().find('.restart', { timeout: 100 }).should('be.visible')
 
       // Wait for the error message to appear - it may take time to propagate
-      cy.get('.runnable-err-message', { timeout: 5000 })
+      cy.reporter().find('.runnable-err-message', { timeout: 5000 })
       .should('not.contain', 'ran afterEach even though specs were stopped')
       .and('contain', 'Cypress test was stopped while running this command.')
     })

@@ -2,7 +2,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Button from '@cypress-design/react-button'
 // @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 
 import defaultEvents, { Events } from '../lib/events'
 import type { AppState } from '../lib/app-state'
