@@ -1,9 +1,15 @@
-type InternalRouteConfig = {
-  clientRoute: string
-  namespace: string
-  port: number | null
+import { id as randomId } from '../util/random'
+
+// Fields are optional at the type level because RuntimeConfigOptions extends
+// Partial<...>. At runtime, `port` is required before loopback (toLoopbackUrl
+// throws without it); `clientRoute` / `namespace` / `socketIoRoute` should be
+// present whenever Express-owned internals are expected to match.
+export type InternalRouteConfig = {
+  clientRoute?: string
+  namespace?: string
+  port?: number | null
   proxyUrl?: string
-  socketIoRoute: string
+  socketIoRoute?: string
   // CT Vite/webpack assets live under this prefix (default /__cypress/src).
   // They must not be treated as Express-owned internal routes.
   devServerPublicPathRoute?: string
@@ -12,6 +18,39 @@ type InternalRouteConfig = {
 // Marks trusted Express loopbacks from serve-internal-routes so
 // _forceProxyMiddleware does not 302 path-only requests to clientRoute.
 export const CYPRESS_INTERNAL_LOOPBACK_HEADER = 'x-cypress-internal-loopback'
+
+// Shared-secret companion to the loopback URL header. AUT content can set
+// arbitrary request headers on same-origin fetch, so presence of the URL
+// header alone must not control proxiedUrl or forceProxy bypass.
+export const CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER = 'x-cypress-internal-loopback-token'
+
+// Per-process secret known only to serve-internal-routes (same idea as the
+// file-server authorization token).
+export const cypressInternalLoopbackToken = randomId(64)
+
+export function isTrustedInternalLoopback (
+  headers: Record<string, string | string[] | undefined> | undefined,
+): boolean {
+  if (!headers) {
+    return false
+  }
+
+  const token = headers[CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]
+
+  return typeof token === 'string' && token === cypressInternalLoopbackToken
+}
+
+export function getTrustedLoopbackUrl (
+  headers: Record<string, string | string[] | undefined> | undefined,
+): string | undefined {
+  if (!isTrustedInternalLoopback(headers) || !headers) {
+    return undefined
+  }
+
+  const loopbackUrl = headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
+
+  return typeof loopbackUrl === 'string' ? loopbackUrl : undefined
+}
 
 const LOCALHOST_NAMES = new Set([
   'localhost',

@@ -1,12 +1,9 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
-import type CyServer from '../../index.d.ts'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, isInternalCypressRoute, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
+import type { InternalRouteConfig } from './internal-routes'
 
-type ServeInternalRoutesConfig = Pick<
-  CyServer.Config & Cypress.Config,
-  'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'port' | 'proxyUrl' | 'socketIoRoute'
->
+type ServeInternalRoutesConfig = InternalRouteConfig
 
 type CreateServeInternalRoutesMiddlewareOptions = {
   config: ServeInternalRoutesConfig
@@ -26,6 +23,7 @@ const HOP_BY_HOP_HEADERS = new Set([
   'transfer-encoding',
   'upgrade',
   CYPRESS_INTERNAL_LOOPBACK_HEADER,
+  CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER,
 ])
 
 function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
@@ -36,10 +34,6 @@ function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
 
     return memo
   }, {})
-}
-
-function hasLoopbackHeader (headers: HttpHeaders = {}): boolean {
-  return Object.keys(headers).some((key) => key.toLowerCase() === CYPRESS_INTERNAL_LOOPBACK_HEADER)
 }
 
 function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
@@ -80,7 +74,8 @@ export function createServeInternalRoutesMiddleware ({
 
     // Re-entry after our own Express loopback: no route handler owned this path,
     // so the catch-all proxy saw it again. Stop instead of looping forever.
-    if (hasLoopbackHeader(request.headers)) {
+    // Require the process token — AUT content can forge the URL header alone.
+    if (isTrustedInternalLoopback(request.headers)) {
       return {
         id: request.id,
         url: request.url,
@@ -96,12 +91,17 @@ export function createServeInternalRoutesMiddleware ({
     // a synthesized response for fulfillRequest. This skips later intercept
     // layers (including CorrelateBrowserPreRequest in MITM mode); pending
     // pre-requests for these internals are swept by the normal timeout path.
+    // The loopback request line is path-only, but Express consumers (e.g. the
+    // spec-bridge iframe controller) derive the request origin from
+    // req.proxiedUrl, so carry the browser's original absolute URL in the
+    // loopback header for setProxiedUrl to restore.
     const response = await serverRequest.create({
       url: toLoopbackUrl(request.url, config),
       method: request.method ?? 'GET',
       headers: {
         ...filterHeaders(request.headers),
-        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: '1',
+        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
+        [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
       },
       ...(shouldSendBody(request) ? { body: request.body } : {}),
       encoding: null,
