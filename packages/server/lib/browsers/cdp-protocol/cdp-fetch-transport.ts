@@ -2,6 +2,8 @@ import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
 import pDefer from 'p-defer'
 import { Readable } from 'stream'
+import { promisify } from 'util'
+import zlib from 'zlib'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
@@ -14,6 +16,7 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
+const brotliDecompress = promisify(zlib.brotliDecompress)
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
@@ -196,6 +199,10 @@ export class CdpFetchTransport {
       })
 
       if (response.fulfilled) {
+        // base64 of the gzip magic bytes starts with 'H4sI' — an encoded body
+        // here with no content-encoding header means mangled rendering
+        debug('fulfilling %s: status %s, content-encoding %s, body prefix %s', event.request.url, response.responseCode, response.responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value, response.body?.slice(0, 8))
+
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
@@ -283,7 +290,7 @@ export class CdpFetchTransport {
       return
     }
 
-    const bodyStream = this.createResponseBodyStream(event.requestId, sessionId)
+    const bodyStream = this.createResponseBodyStream(event.requestId, event.responseHeaders, sessionId)
 
     deferred.resolve({
       ...event.request,
@@ -296,7 +303,7 @@ export class CdpFetchTransport {
     })
   }
 
-  private createResponseBodyStream = (requestId: string, sessionId?: string): Readable => {
+  private createResponseBodyStream = (requestId: string, responseHeaders?: Protocol.Fetch.HeaderEntry[], sessionId?: string): Readable => {
     let reading = false
     let bodyStream: Readable
 
@@ -314,7 +321,8 @@ export class CdpFetchTransport {
               requestId,
             }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-            const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
+            const raw = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
+            const body = await this.decodeUndeliveredEncodings(raw, responseHeaders)
 
             if (body.length) {
               bodyStream.push(body)
@@ -329,6 +337,42 @@ export class CdpFetchTransport {
     })
 
     return bodyStream
+  }
+
+  /**
+   * Fetch.getResponseBody delivers gzip/deflate content-decoded, but brotli
+   * arrives still encoded (and continueRequest cannot constrain
+   * accept-encoding — the network stack owns that header). Decode br here so
+   * the middleware's decoded-body premise holds. Falls back to the raw bytes
+   * if decompression fails, in case a newer CDP starts decoding br itself.
+   */
+  private decodeUndeliveredEncodings = async (body: Buffer, responseHeaders?: Protocol.Fetch.HeaderEntry[]): Promise<Buffer> => {
+    const contentEncoding = responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
+
+    if (!contentEncoding || !body.length) {
+      return body
+    }
+
+    // encodings are listed in the order applied, so decode in reverse;
+    // gzip/deflate layers were already decoded by CDP
+    const encodings = contentEncoding.split(',').map((token) => token.trim().toLowerCase()).reverse()
+    let decoded = body
+
+    for (const encoding of encodings) {
+      if (encoding !== 'br') {
+        continue
+      }
+
+      try {
+        decoded = await brotliDecompress(decoded)
+      } catch (err) {
+        debug('brotli decompression failed, using body as delivered: %s', (err as Error).message)
+
+        return body
+      }
+    }
+
+    return decoded
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
