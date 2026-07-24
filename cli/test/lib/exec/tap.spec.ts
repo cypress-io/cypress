@@ -556,12 +556,17 @@ describe('lib/exec/tap', () => {
     it('renders the live spec list as JSON and exits 0, without opening a session', async () => {
       mockLiveResolved(liveInstance())
       vi.mocked(queryInstanceGraphql).mockResolvedValue({
-        currentProject: { specs: [{ relative: 'cypress/e2e/a.cy.ts' }, { relative: 'cypress/e2e/b.cy.ts' }] },
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/a.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/b.cy.ts', gitInfo: null },
+        ] },
       })
 
       expect(await tap.start(['specs'], {})).toBe(0)
+      // git's last-modified (human-readable + raw timestamp) rides along when
+      // present, omitted when the spec has none.
       expect(JSON.parse(logger.print())).toEqual([
-        { relativePath: 'cypress/e2e/a.cy.ts' },
+        { relativePath: 'cypress/e2e/a.cy.ts', lastModified: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' },
         { relativePath: 'cypress/e2e/b.cy.ts' },
       ])
 
@@ -609,11 +614,21 @@ describe('lib/exec/tap', () => {
     it('drops malformed spec entries rather than rendering junk', async () => {
       mockLiveResolved(liveInstance())
       vi.mocked(queryInstanceGraphql).mockResolvedValue({
-        currentProject: { specs: [null, { relative: 42 }, {}, { relative: 'cypress/e2e/ok.cy.ts' }] },
+        currentProject: { specs: [
+          null,
+          { relative: 42 },
+          {},
+          { relative: 'cypress/e2e/no-git.cy.ts', gitInfo: { lastModifiedHumanReadable: 42, lastModifiedTimestamp: 42 } },
+          { relative: 'cypress/e2e/ok.cy.ts', gitInfo: { lastModifiedHumanReadable: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' } },
+        ] },
       })
 
       expect(await tap.start(['specs'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/ok.cy.ts' }])
+      // Non-string git fields are dropped, not rendered as junk.
+      expect(JSON.parse(logger.print())).toEqual([
+        { relativePath: 'cypress/e2e/no-git.cy.ts' },
+        { relativePath: 'cypress/e2e/ok.cy.ts', lastModified: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' },
+      ])
     })
 
     it('renders the discovery failure and exits 1 when no instance is live', async () => {

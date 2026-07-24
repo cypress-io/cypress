@@ -6,20 +6,47 @@ import type { TapCliOptions } from '../types'
 
 const TAP_SPECS_OPERATION = {
   operationName: 'TapSpecs',
-  query: 'query TapSpecs { currentProject { specs { relative } } }',
+  query: 'query TapSpecs { currentProject { specs { relative gitInfo { lastModifiedHumanReadable lastModifiedTimestamp } } } }',
+}
+
+interface TapSpecEntry {
+  relativePath: string
+  lastModified?: string
+  lastModifiedTimestamp?: string
+}
+
+interface SpecGitInfo {
+  lastModifiedHumanReadable?: unknown
+  lastModifiedTimestamp?: unknown
 }
 
 interface TapSpecsData {
-  currentProject?: { specs?: Array<{ relative?: unknown } | null> } | null
+  currentProject?: {
+    specs?: Array<{
+      relative?: unknown
+      gitInfo?: SpecGitInfo | null
+    } | null>
+  } | null
 }
 
-const toSpecList = (data: TapSpecsData): Array<{ relativePath: string }> => {
+const toSpecList = (data: TapSpecsData): TapSpecEntry[] => {
   const specs = Array.isArray(data.currentProject?.specs) ? data.currentProject.specs : []
 
   return specs
-    .map((spec) => spec?.relative)
-    .filter((relative): relative is string => typeof relative === 'string')
-    .map((relative) => ({ relativePath: relative }))
+    .filter((spec): spec is { relative: string, gitInfo?: SpecGitInfo | null } => typeof spec?.relative === 'string')
+    .map((spec) => {
+      // `lastModified` is git's human-readable time (e.g. "3 days ago");
+      // `lastModifiedTimestamp` is the raw commit time. Both absent for
+      // untracked specs.
+      const lastModified = spec.gitInfo?.lastModifiedHumanReadable
+      const lastModifiedTimestamp = spec.gitInfo?.lastModifiedTimestamp
+
+      return {
+        relativePath: spec.relative,
+        ...(typeof lastModified === 'string' ? { lastModified } : {}),
+        ...(typeof lastModifiedTimestamp === 'string' ? { lastModifiedTimestamp } : {}),
+      }
+    })
 }
 
 const listSpecs = async (options: TapCliOptions): Promise<number> => {
