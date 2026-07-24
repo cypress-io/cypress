@@ -1,0 +1,101 @@
+name: Rate Issue Complexity
+ 
+# Manually triggered from the Actions tab: pick this workflow, click "Run workflow",
+# and enter the issue number you want rated.
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to rate"
+        required: true
+        type: number
+ 
+permissions:
+  issues: write
+  contents: read
+ 
+jobs:
+  rate-complexity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch issue details
+        id: issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue view "${{ inputs.issue_number }}" \
+            --repo "${{ github.repository }}" \
+            --json title,body,url > issue.json
+ 
+          {
+            echo 'title<<EOF'
+            jq -r '.title' issue.json
+            echo EOF
+            echo 'body<<EOF'
+            jq -r '.body // "(no description provided)"' issue.json
+            echo EOF
+            echo 'url<<EOF'
+            jq -r '.url' issue.json
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+ 
+      - name: Ask Claude to rate complexity
+        id: claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY: ${{ steps.issue.outputs.body }}
+        run: |
+          jq -n \
+            --arg title "$ISSUE_TITLE" \
+            --arg body "$ISSUE_BODY" \
+            '{
+              model: "claude-sonnet-5",
+              max_tokens: 300,
+              system: "You rate the implementation complexity of software engineering tickets on a scale of 1 to 5. 1 is a trivial change requiring no logic change (typo, copy, config tweak). 5 is a complex change a developer would need a week or more to complete. Use \"?\" only if the ticket has too little information to judge. Respond with ONLY a JSON object: {\"weight\": \"1-5 or ?\", \"explanation\": \"one or two sentence explanation\"}. No other text.",
+              messages: [{
+                role: "user",
+                content: ("Title: " + $title + "\n\nDescription:\n" + $body)
+              }]
+            }' > payload.json
+ 
+          curl -sS https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d @payload.json > response.json
+ 
+          # Extract Claude's text reply, then pull the JSON object out of it.
+          RAW_TEXT=$(jq -r '.content[0].text' response.json)
+          WEIGHT=$(echo "$RAW_TEXT" | jq -r '.weight // "?"' 2>/dev/null || echo "?")
+          EXPLANATION=$(echo "$RAW_TEXT" | jq -r '.explanation // "Could not parse a rating from the model response."' 2>/dev/null || echo "Could not parse a rating from the model response.")
+ 
+          {
+            echo "weight=$WEIGHT"
+            echo 'explanation<<EOF'
+            echo "$EXPLANATION"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+ 
+      - name: Post comment with the rating
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WEIGHT: ${{ steps.claude.outputs.weight }}
+          EXPLANATION: ${{ steps.claude.outputs.explanation }}
+        run: |
+          gh issue comment "${{ inputs.issue_number }}" \
+            --repo "${{ github.repository }}" \
+            --body "**Complexity rating (via Claude): ${WEIGHT}/5**
+ 
+          ${EXPLANATION}
+ 
+          _Automated rating, use judgment before relying on it._"
+ 
+      - name: Apply complexity label
+        if: steps.claude.outputs.weight != '?'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LABEL="complexity: ${{ steps.claude.outputs.weight }}"
+          gh label create "$LABEL" --repo "${{ github.repository }}" --color BFD4F2 2>/dev/null || true
+          gh issue edit "${{ inputs.issue_number }}" --repo "${{ github.repository }}" --add-label "$LABEL
