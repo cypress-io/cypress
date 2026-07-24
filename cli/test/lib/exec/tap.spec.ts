@@ -333,24 +333,43 @@ describe('lib/exec/tap', () => {
 
     it('renders the live instances as a JSON summary and exits 0, without opening a session', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([
-        liveInstance({ pid: 111, projectRoot: '/projects/app', serverPort: 49200, cdpBrowserWsUrl: 'ws://x' }),
-        liveInstance({ pid: 222, projectRoot: '/projects/other', serverPort: 49201, cdpBrowserWsUrl: null }),
+        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null }),
       ])
 
       expect(await tap.start(['instances'], {})).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([
-        { pid: 111, projectRoot: '/projects/app', serverPort: 49200, browserAttached: true },
-        { pid: 222, projectRoot: '/projects/other', serverPort: 49201, browserAttached: false },
+        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true },
+        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false },
       ])
 
       expect(withTapSession).not.toHaveBeenCalled()
     })
 
-    it('renders an empty array when no instance is live', async () => {
+    it('reports the testing type as null for an instance that has not chosen one', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, testingType: null })])
+
+      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(JSON.parse(logger.print())[0].testingType).toBeNull()
+    })
+
+    it('never exposes the internal serverPort', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, serverPort: 49200 })])
+
+      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(JSON.parse(logger.print())[0]).not.toHaveProperty('serverPort')
+    })
+
+    it('prints guidance instead of an empty array when no instance is live', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([])
 
       expect(await tap.start(['instances'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual([])
+
+      const output = logger.print()
+
+      expect(() => JSON.parse(output)).toThrow()
+      expect(output).toContain('No running Cypress instance found')
+      expect(output).toContain('select a testing type')
     })
 
     it('forwards --instance as the discovery filter', async () => {
