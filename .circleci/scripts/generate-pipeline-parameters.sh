@@ -100,13 +100,14 @@ emit_all_true() {
   emit_json
 }
 
-# ----- branch override --------------------------------------------------------
-# On develop/release branches all jobs must run.
+# ----- workflow/branch override -----------------------------------------------
+# The bugbash workflow and develop/release branches must run all selected jobs.
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" == "develop" ]] || \
+if [[ "$run_bugbash" == "true" ]] || \
+   [[ "$BRANCH" == "develop" ]] || \
    [[ "$BRANCH" =~ ^release/ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
-  echo "Branch '$BRANCH' — running all tests" >&2
+  echo "Branch '$BRANCH' — running all workflow tests" >&2
   emit_all_true
   exit 0
 fi
