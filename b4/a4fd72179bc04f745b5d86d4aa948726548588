@@ -1,0 +1,25 @@
+packages/server/lib/cloud/bundles/stream_download_verify_extract.ts
+  s_6354b035599744::t_d3a256496bcaae 154-158
+  s_6354b035599744::t_8e14b280108cef 159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "b4a4fd72179bc04f745b5d86d4aa948726548588",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_6354b035599744": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37b09f7a-f147-4146-aa97-8ee7867d0f09",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
