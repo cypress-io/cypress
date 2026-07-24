@@ -4,7 +4,7 @@ import { pipeline } from 'stream/promises'
 import { Transform } from 'stream'
 import path from 'path'
 import os from 'os'
-import { Parser } from 'tar'
+import type { Parser as TarParser } from 'tar'
 import fetch from 'cross-fetch'
 import Debug from 'debug'
 import { strictAgent } from '@packages/network'
@@ -151,6 +151,11 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
     },
   })
 
+  // tar 7 ships as ES2022 classes under `dist/commonjs`. A static top-level
+  // import pulls those into the V8 snapshot, where the class definitions don't
+  // survive and downstream cloud-bundle evaluation fails. Require it lazily so
+  // tar is loaded at runtime, outside the snapshot.
+  const { Parser } = require('tar') as { Parser: typeof TarParser }
   const parser = new Parser({ strict: true })
   const entryPromises: Promise<void>[] = []
 
