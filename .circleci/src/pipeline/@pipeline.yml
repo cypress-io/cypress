@@ -97,13 +97,6 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
-  # Targeting gate for the bugbash workflow (workflows/bugbash.yml) — set by
-  # generate-pipeline-parameters.sh. Unlike the run-*-tests params above,
-  # this defaults to false: it opts a branch IN when it's the bugbash base
-  # branch itself, or has an open PR targeting that base.
-  run-bugbash:
-    type: boolean
-    default: false
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1
@@ -3337,16 +3330,6 @@ jobs:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
-
-  # Fan-in gate for the bugbash workflow — see workflows/bugbash.yml.
-  bugbash-all-passed:
-    docker:
-      - image: cimg/base:stable
-    resource_class: small.gen2
-    steps:
-      - run:
-          name: Bugbash - all required jobs passed
-          command: echo "✅ All required bugbash jobs passed"
 
   # Fan-in gate: build complete and contributor PR approved (when applicable).
   ready-to-test:

@@ -17,11 +17,6 @@ when:
         equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-    # The bugbash base branch, and any branch with a PR targeting it, run the
-    # dedicated `bugbash` workflow instead (see workflows/bugbash.yml) so the
-    # two don't run redundantly in parallel.
-    - not:
-        equal: [ true, << pipeline.parameters.run-bugbash >> ]
 
 jobs:
   # Internal PRs — install and build run immediately
@@ -273,7 +268,7 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Proxy-disabled (CDP Fetch) advisory coverage — same surface as bugbash Tier 0/1.
+  # Proxy-disabled (CDP Fetch) advisory coverage.
   # Intentionally omitted from all-jobs-passed so failures are visible on develop PRs
   # without blocking merge. Root-cause PRs can opt individual jobs into that gate.
   - unit-tests-proxy-disabled:
