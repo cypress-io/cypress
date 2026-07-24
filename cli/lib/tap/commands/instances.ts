@@ -3,9 +3,7 @@ import { renderResult } from '../output'
 import type { TapCliCommand, TapCliOptions } from '../types'
 
 const INSTANCES_DETAILS = `Lists the running Cypress instances this CLI can reach, as a JSON array. Pass
-an instance's pid to \`--instance\` to target it with another tap command. When
-none are reachable, prints guidance on how to start one instead of an empty
-array.`
+an instance's pid to \`--instance\` to target it with another tap command.`
 
 const NO_INSTANCES_GUIDANCE = 'No running Cypress instance found. Start Cypress in open mode (e.g. `cypress open`) and select a testing type to get started.'
 
