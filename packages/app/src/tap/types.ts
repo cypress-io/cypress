@@ -13,6 +13,36 @@ export interface SpecListEntry {
   relativePath: string
 }
 
+/**
+ * One snapshot on a command log, as `getSnapshotPropsForLog` exposes it: the
+ * cloned body sits behind an opaque object that `restoreDom` knows how to
+ * render. We read only the optional `name` (to select/label it) and otherwise
+ * treat the entry as opaque.
+ */
+export interface PinSnapshotEntry {
+  name?: string
+}
+
+export interface PinSnapshotProps {
+  url?: string
+  snapshots?: Array<PinSnapshotEntry | null | undefined> | null
+}
+
+export interface PinSnapshotRunner {
+  getTestState (testId: string): SerializedTest | undefined
+  getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
+}
+
+/**
+ * The slice of the AUT iframe the pin command drives directly. `detachDom`
+ * captures (and detaches) the current body so it can be put back on release —
+ * the reliable restore the app's own unpin can't give a cold pin (see below).
+ */
+export interface PinAutIframe {
+  detachDom (): unknown
+  restoreDom (snapshot: unknown): void
+}
+
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
 
 export interface TestStateEntry {

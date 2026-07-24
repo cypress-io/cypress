@@ -28,7 +28,7 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests', 'commands'])
+      expect(schema.commands.map((command) => command.name)).to.include.members(['run', 'tests', 'commands'])
 
       const unknown = await binding.exec('not-a-command')
 
@@ -43,17 +43,11 @@ describe('tap binding', () => {
 
       expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      const outcome = await binding.exec('specs')
+      // specs is a CLI-native command now — the CLI reads the spec list directly
+      // over the instance's GraphQL — so the binding no longer serves it.
+      const specsOutcome = await binding.exec('specs')
 
-      expect('result' in outcome).to.eq(true)
-
-      const specs = (outcome as { result: Array<{ relativePath: string }> }).result
-
-      expect(specs).to.deep.include({ relativePath: 'cypress/e2e/dom-content.spec.js' })
-
-      for (const spec of specs) {
-        expect(Object.keys(spec), `entry ${spec.relativePath}`).to.deep.eq(['relativePath'])
-      }
+      expect((specsOutcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
 
       // With no run yet there is no runner to read, so run-state omits the run-only fields.
       const runStateBeforeRun = await binding.exec('run-state')
@@ -64,7 +58,7 @@ describe('tap binding', () => {
 
       expect(Object.keys(beforeRun)).to.deep.eq(['spec', 'totalSpecs'])
       expect(beforeRun.spec).to.eq(null)
-      expect(beforeRun.totalSpecs).to.eq(specs.length)
+      expect(beforeRun.totalSpecs).to.be.a('number').and.to.be.greaterThan(0)
     })
   })
 
@@ -247,5 +241,172 @@ describe('tap binding with a retrying spec', () => {
 
       expect((commandsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     })
+  })
+})
+
+// The pin fixture also lives in the dedicated tap project (see above): its click
+// mutates the page, so a pinned "before" snapshot is visibly different from the
+// live DOM — the only way to prove the pin really swaps the AUT frame.
+describe('tap binding pin lifecycle', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  const runPinTargetSpec = () => {
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/pin-target.cy.js' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+  }
+
+  // Re-reads the live document on every retry: pinning restores the snapshot
+  // asynchronously and replaces the AUT body, so a body reference captured once
+  // would go stale and keep reporting the pre-swap DOM.
+  const expectAutStatus = (text: string) => {
+    cy.get('iframe.aut-iframe').should(($autIframe) => {
+      expect($autIframe.contents().find('#status').text()).to.eq(text)
+    })
+  }
+
+  // Resolves the run's real test and click-command ids and pins the click's
+  // "before" snapshot — the pre-click DOM, distinguishable from the live page.
+  const pinClickAtBefore = () => {
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
+      const click = commands.find((command) => command.name === 'click')
+
+      expect(click, 'the click command').to.exist
+
+      const outcome = await binding.exec('pin', { test: testId, command: click!.id as string }, { at: 'before' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    expectAutStatus('ready')
+  }
+
+  it('pins, moves, and releases a command snapshot against the real runner', () => {
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      // Guards that need no run: a target is required before anything else, a
+      // clear with nothing pinned is a no-op, and a pin needs a run to read.
+      const noTarget = await binding.exec('pin')
+
+      expect((noTarget as { error: { code: string } }).error.code).to.eq('PIN_TARGET_REQUIRED')
+
+      const clearNoop = await binding.exec('pin', {}, { clear: 'true' })
+
+      expect(clearNoop).to.deep.eq({ result: { cleared: false } })
+
+      const beforeRun = await binding.exec('pin', { test: 'r2', command: 'log-1' })
+
+      expect((beforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+    })
+
+    runPinTargetSpec()
+
+    // The live page ends in its clicked state.
+    expectAutStatus('clicked')
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
+      const click = commands.find((command) => command.name === 'click')
+
+      expect(click, 'the click command').to.exist
+
+      const commandId = click!.id as string
+
+      const missingTest = await binding.exec('pin', { test: 'not-a-test', command: commandId })
+
+      expect((missingTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const missingCommand = await binding.exec('pin', { test: testId, command: 'not-a-command' })
+
+      expect((missingCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
+
+      const missingSnapshot = await binding.exec('pin', { test: testId, command: commandId }, { at: 'during' })
+
+      expect((missingSnapshot as { error: { code: string } }).error.code).to.eq('SNAPSHOT_NOT_FOUND')
+      expect((missingSnapshot as { error: { message: string } }).error.message).to.contain('"before" (1)')
+
+      // The default pin lands on the click's final snapshot.
+      const pinOutcome = (await binding.exec('pin', { test: testId, command: commandId })) as { result: Record<string, any> }
+
+      expect(Object.keys(pinOutcome.result)).to.satisfy((keys: string[]) => keys.every((key) => ['pinned', 'url'].includes(key)))
+      expect(Object.keys(pinOutcome.result.pinned)).to.deep.eq(['test', 'command', 'at'])
+      expect(pinOutcome.result.pinned.test).to.eq(testId)
+      expect(pinOutcome.result.pinned.command).to.eq(commandId)
+      expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, name: 'after' })
+
+      // Re-running pin on the pinned command moves it in place.
+      const moved = (await binding.exec('pin', { test: testId, command: commandId }, { at: 'before' })) as { result: Record<string, any> }
+
+      expect(moved.result.pinned.at).to.deep.eq({ index: 1, name: 'before' })
+
+      // run-state reports the pin while it is live.
+      const runState = (await binding.exec('run-state')) as { result: Record<string, any> }
+
+      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results', 'pinned'])
+      expect(runState.result.pinned).to.deep.eq({ command: commandId, at: { index: 1, name: 'before' } })
+    })
+
+    // The pinned "before" snapshot is really rendered into the AUT frame.
+    cy.get('[data-testid=snapshot-controls]').should('be.visible')
+    expectAutStatus('ready')
+
+    cy.window().then(async (win) => {
+      const cleared = await getBinding(win).exec('pin', {}, { clear: 'true' })
+
+      expect(cleared).to.deep.eq({ result: { cleared: true } })
+
+      const runState = (await getBinding(win).exec('run-state')) as { result: Record<string, unknown> }
+
+      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results'])
+    })
+
+    // Clear restores the live DOM and the pin UI is gone.
+    cy.get('[data-testid=snapshot-controls]').should('not.exist')
+    expectAutStatus('clicked')
+  })
+
+  it('restores the captured DOM when the pin is released from the app UI', () => {
+    runPinTargetSpec()
+
+    const expectReleased = () => {
+      expectAutStatus('clicked')
+
+      cy.window().then(async (win) => {
+        const runState = (await getBinding(win).exec('run-state')) as { result: Record<string, unknown> }
+
+        expect(Object.keys(runState.result)).to.not.include('pinned')
+      })
+    }
+
+    // The unpin control over the AUT.
+    pinClickAtBefore()
+    cy.get('[data-testid=unpin]').click()
+    expectReleased()
+
+    // Clicking the pinned command in the reporter unpins through a different
+    // event path than the control above — it must restore the DOM all the same.
+    pinClickAtBefore()
+    cy.contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
+    expectReleased()
   })
 })

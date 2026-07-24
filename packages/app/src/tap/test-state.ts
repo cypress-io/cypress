@@ -1,7 +1,7 @@
 import type { SerializedTest } from '@packages/types'
-import { TapCommandError } from './definition'
+import { TapCommandError } from './commands/definition'
 
-import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from '../types'
+import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's

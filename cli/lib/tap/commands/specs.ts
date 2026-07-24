@@ -1,16 +1,8 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
 import { renderFailure, renderKnownFailure, renderResult } from '../output'
-import type { TapCliCommand, TapCliOptions } from '../types'
-
-const SPECS_USAGE = `Usage: cypress tap specs [options]
-
-Lists the specs the running Cypress instance can run, as a JSON array. Reads
-the live spec list from the instance's data layer, so it works before a
-browser is open.
-
-Options:
-  --instance <pid>  target the instance with this pid`
+import { defineNativeCommand } from './definition'
+import type { TapCliOptions } from '../types'
 
 const TAP_SPECS_OPERATION = {
   operationName: 'TapSpecs',
@@ -55,9 +47,4 @@ const listSpecs = async (options: TapCliOptions): Promise<number> => {
   }
 }
 
-export const specsCommand: TapCliCommand = {
-  name: 'specs',
-  description: 'list the specs the running Cypress instance can run',
-  usage: SPECS_USAGE,
-  handler: listSpecs,
-}
+export const specsCommand = defineNativeCommand('specs', listSpecs)

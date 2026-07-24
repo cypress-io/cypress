@@ -6,6 +6,9 @@ import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, Inst
 import { withTapSession } from '../../../lib/tap/tap-session'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import { tapCliCommands } from '../../../lib/tap/commands'
+import type { TapSession } from '../../../lib/tap/tap-session'
+import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
+import type { AutFrame } from '../../../lib/tap/aut/frame'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
@@ -40,6 +43,17 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
   }
 })
 
+// The AUT-frame reader drives CDP, covered in frame.spec.ts; here we assert only
+// that dom/aria/inspect route to it with their parsed args, so stub it out.
+vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/tap/aut/frame')>()
+
+  return {
+    ...actual,
+    withResolvedAutFrame: vi.fn(),
+  }
+})
+
 const schema: TapSchema = {
   schemaVersion: 1,
   cypressVersion: '15.0.0',
@@ -69,7 +83,10 @@ const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { r
     return method === 'getSchema' ? sessionSchema : execOutcome
   })
 
-  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call }))
+  // These tests drive the binding exec/status paths, which use only `call`;
+  // the frame extractors (dom/aria/inspect, which use client/sessionId) are
+  // covered separately, so the session's CDP members are stubbed away here.
+  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
 
   return call
 }
@@ -100,6 +117,8 @@ describe('lib/exec/tap', () => {
     vi.mocked(listLiveInstances).mockReset()
     vi.mocked(resolveLiveInstance).mockReset()
     vi.mocked(resolveInstance).mockReset()
+    vi.mocked(withResolvedAutFrame).mockReset()
+    vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
     mockResolved()
     logger.reset()
     vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -291,19 +310,6 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['bogus', '--help'], {})).toBe(1)
       expect(logger.print()).toContain('UNKNOWN_COMMAND')
       expect(logger.print()).toContain('is not a command')
-    })
-
-    it('lists a schema command shadowed by a CLI-native one only once', async () => {
-      mockSession({
-        ...schema,
-        commands: [
-          ...schema.commands,
-          { name: 'specs', description: 'binding-side spec listing', params: [], options: [] },
-        ],
-      } satisfies TapSchema)
-
-      expect(await tap.start(['--help'], {})).toBe(0)
-      expect(logger.print().match(/^\s*specs\b/gm)).toHaveLength(1)
     })
 
     it('treats a hidden command as unknown for `<command> --help` and omits it from the listing', async () => {
@@ -650,6 +656,72 @@ describe('lib/exec/tap', () => {
     })
   })
 
+  describe('the CLI-native frame commands (dom/aria/inspect)', () => {
+    it('routes dom to the AUT-frame reader with the top-level options and returns its exit code', async () => {
+      vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
+
+      expect(await tap.start(['dom', '.foo'], { instance: 7 })).toBe(0)
+
+      expect(withResolvedAutFrame).toHaveBeenCalledTimes(1)
+      expect(vi.mocked(withResolvedAutFrame).mock.calls[0][0]).toEqual({ instance: 7 })
+      // A native command never consults the running instance's schema.
+      expect(resolveInstance).not.toHaveBeenCalled()
+    })
+
+    it('forwards the parsed selector and --max-chars to the DOM reader', async () => {
+      let forwarded: unknown
+
+      vi.mocked(withResolvedAutFrame).mockImplementation(async (_options, read) => {
+        const callFunctionOn = vi.fn().mockResolvedValue({ result: { value: { html: '<html/>' } } })
+        const session = {
+          call: vi.fn(),
+          sessionId: 'S1',
+          client: {
+            Page: { createIsolatedWorld: vi.fn().mockResolvedValue({ executionContextId: 1 }) },
+            Runtime: { callFunctionOn },
+          },
+        } as unknown as TapSession
+
+        await read(session, { frameId: 'f', url: 'u' } as AutFrame)
+        forwarded = callFunctionOn.mock.calls[0][0].arguments
+
+        return 0
+      })
+
+      await tap.start(['dom', '.btn', '--max-chars', '50'], {})
+
+      // selector and the coerced --max-chars reach the extractor as call arguments.
+      expect(forwarded).toEqual([{ value: '.btn' }, { value: 50 }])
+    })
+
+    it('rejects `inspect` with no selector, without reading the frame', async () => {
+      expect(await tap.start(['inspect'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`missing required argument 'selector'`)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('rejects excess positionals for dom, without reading the frame', async () => {
+      expect(await tap.start(['dom', '.a', '.b'], {})).toBe(1)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('rejects an option the command does not advertise, without reading the frame', async () => {
+      expect(await tap.start(['aria', '--nope'], {})).toBe(1)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('prints per-command usage for `<command> --help` and exits 0, without reading the frame', async () => {
+      for (const [name, heading] of [['dom', 'Usage: cypress tap dom'], ['aria', 'Usage: cypress tap aria'], ['inspect', 'Usage: cypress tap inspect']]) {
+        logger.reset()
+
+        expect(await tap.start([name, '--help'], {})).toBe(0)
+        expect(logger.print()).toContain(heading)
+      }
+
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+  })
+
   describe('the schema handshake', () => {
     it('rejects an unrecognizable schema', async () => {
       mockSession('not a schema')
@@ -703,16 +775,82 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)
     })
 
-    it('falls back to generic help when no instance is found and help was wanted', async () => {
+    it('falls back to the baked-in CLI command help when no instance is found and help was wanted', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
-      expect(logger.print()).toContain('Usage: cypress tap')
-      expect(logger.print()).toContain('discovered from the running Cypress instance')
+      expect(logger.print()).toMatchInlineSnapshot(`
+        "Usage: cypress tap [command] [args...] [options]
 
-      for (const { name, description } of tapCliCommands) {
-        expect(logger.print()).toMatch(new RegExp(`^  ${name} +${description}$`, 'm'))
-      }
+        Interacts with a running Cypress instance
+
+        Options:
+          --instance <pid>                target a specific running Cypress instance by
+                                          its server process id (pid)
+          -h, --help                      display help for command
+
+        Commands:
+          instances [options]             list the running Cypress instances this CLI
+                                          can reach
+          status [options]                report where a running Cypress instance is
+                                          in its lifecycle
+          specs [options]                 list the specs the running Cypress instance
+                                          can run
+          dom [options] [selector]        read the app-under-test DOM as HTML: the
+                                          whole page, or each element matching a
+                                          selector (with its subtree)
+          aria [options] [selector]       read the accessibility (ARIA) tree of the
+                                          app-under-test frame, or the subtree at a
+                                          selector
+          inspect [options] <selector>    inspect the first element matching a
+                                          selector: its tag, attributes, computed
+                                          styles, box model, and accessibility node
+          run [options] <spec>            run (or rerun) a spec by its
+                                          project-relative path
+          tests [options] [test]          list the tests of the active run and their
+                                          state, or detail one by id
+          commands [options]              list the command log entries of a test of
+                                          the active run
+          pin [options] [test] [command]  pin a command’s DOM snapshot into the live
+                                          app-under-test frame so the dom/aria/inspect
+                                          commands can read it; pass --clear to release
+        "
+      `)
+    })
+
+    it('lists both native and schema commands when an unknown command is requested offline', async () => {
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+
+      expect(await tap.start(['instancs', '--help'], {})).toBe(1)
+
+      const help = logger.print()
+
+      expect(help).toContain('UNKNOWN_COMMAND')
+      expect(help).toContain('"instancs" is not a command')
+      expect(help).toContain('instances')
+      expect(help).toContain('specs')
+    })
+
+    it('renders the baked-in per-command help when no instance is found', async () => {
+      failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+
+      expect(await tap.start(['tests', '--help'], {})).toBe(0)
+      expect(logger.print()).toMatchInlineSnapshot(`
+        "Usage: cypress tap tests [options] [test]
+
+        list the tests of the active run and their state, or detail one by id
+
+        Arguments:
+          test                 test id, as listed by the tests command
+
+        Options:
+          --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
+                               latest
+          --instance <pid>     target a specific running Cypress instance by its server
+                               process id (pid)
+          -h, --help           display help for command
+        "
+      `)
     })
 
     it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {

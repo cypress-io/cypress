@@ -1,18 +1,31 @@
+import type { TapNativeCommandSchema } from '@packages/cypress-instances'
+
 /** Options `cypress tap` accepts from the top-level CLI. */
 export interface TapCliOptions {
   instance?: number
 }
 
 /**
- * A tap subcommand implemented entirely in the CLI, as opposed to the
- * commands discovered from the running Cypress instance's schema.
+ * A tap subcommand implemented entirely in the CLI, as opposed to the commands
+ * discovered from the running Cypress instance's schema. Its declarative shape
+ * (description, params, options, help prose) comes from `TAP_NATIVE_COMMANDS`;
+ * its positionals and options are parsed CLI-side with the same commander
+ * grammar the schema commands use, then handed to `handler` as raw strings
+ * keyed by name.
  */
-export interface TapCliCommand {
-  name: string
-  description: string
-  /** Full usage text rendered for `cypress tap <name> --help`. */
-  usage: string
-  handler: (options: TapCliOptions) => Promise<number>
+export interface TapCliCommand extends TapNativeCommandSchema {
+  handler: (options: TapCliOptions, args: Record<string, string>, commandOptions: Record<string, string>) => Promise<number>
+}
+
+/**
+ * A reference to the currently pinned command, so a pin is always visible in
+ * `status` and a stranded one is recoverable.
+ */
+export interface PinnedRef {
+  /** The pinned command's name. */
+  command: string
+  /** Which test the pinned command belongs to. */
+  at: { index: number, name?: string }
 }
 
 /**
@@ -31,6 +44,8 @@ export interface TapRunState {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** The currently pinned command, if any. */
+  pinned?: PinnedRef
 }
 
 /**
@@ -59,4 +74,6 @@ export interface TapStatus {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** The currently pinned command, if any. */
+  pinned?: PinnedRef
 }

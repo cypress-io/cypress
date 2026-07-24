@@ -4,12 +4,13 @@ import commander from 'commander'
 import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
-import { buildTapProgram, rejectExcessArguments } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderResult, renderGenericHelp, renderSchemaHelp, renderUsage } from '../tap/output'
+import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
+import { renderFailure, renderKnownFailure, renderResult, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
-import type { TapCliOptions } from '../tap/types'
-import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
+import type { TapCliCommand, TapCliOptions } from '../tap/types'
+import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
+import util from '../util'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
@@ -48,6 +49,31 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
   return { wantsHelp, positionals, command }
 }
 
+const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
+  let dispatchCode: number | undefined
+  const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
+    dispatchCode = await native.handler(options, args, commandOptions)
+  })
+
+  if (wantsHelp) {
+    renderNativeHelp(program, native.name)
+
+    return 0
+  }
+
+  try {
+    await program.parseAsync(positionals, { from: 'user' })
+  } catch (err: any) {
+    if (err instanceof commander.CommanderError) {
+      return 1
+    }
+
+    throw err
+  }
+
+  return dispatchCode ?? 1
+}
+
 const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
@@ -62,6 +88,16 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
   return 0
 }
 
+// With no instance to query, fall back to the schema this CLI ships with so the
+// help listing still reflects every command the CLI knows — the query path stays
+// authoritative when an instance is attached (it may run a different version).
+const renderKnownSchema = (command: string | undefined, wantsHelp: boolean): number => {
+  const schema = buildTapSchema(util.pkgVersion())
+  const program = buildTapProgram(schema, () => {})
+
+  return renderStaticHelp(program, schema, command, wantsHelp)
+}
+
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
@@ -71,25 +107,7 @@ const tapModule = {
     const native = tapCliCommands.find(({ name }) => name === command)
 
     if (native) {
-      if (wantsHelp) {
-        renderUsage(native.usage)
-
-        return 0
-      }
-
-      // Native commands take no positionals, so anything past the name is excess.
-      // The schema path validates through commander; this path must do it itself.
-      try {
-        rejectExcessArguments(native.name, [], positionals.slice(1))
-      } catch (err: any) {
-        if (err instanceof commander.CommanderError) {
-          return 1
-        }
-
-        throw err
-      }
-
-      return native.handler(options)
+      return runNativeCommand(native, positionals, options, wantsHelp)
     }
 
     try {
@@ -122,7 +140,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if (wantsHelp || !command) {
-          return renderGenericHelp(wantsHelp, tapCliCommands)
+          return renderKnownSchema(command, wantsHelp)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
