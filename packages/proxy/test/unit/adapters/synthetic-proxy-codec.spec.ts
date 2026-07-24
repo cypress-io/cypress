@@ -126,6 +126,16 @@ describe('createSyntheticExpressContext', () => {
     expect(res.getCapturedBody().toString()).to.equal('created')
   })
 
+  it('leaves the injection level undecided so SetInjectionLevel determines it', () => {
+    const { res } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+    })
+
+    expect(res.wantsInjection).to.be.null
+    expect(res.wantsSecurityRemoved).to.be.null
+  })
+
   it('exposes a Node-compatible kOutHeaders symbol for header patching', () => {
     const { res } = createSyntheticExpressContext({
       id: 'network-1',
