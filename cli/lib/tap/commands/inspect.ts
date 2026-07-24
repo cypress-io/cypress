@@ -5,10 +5,7 @@ import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXValue } from '../aut/cdp'
 import { readElementInfo } from '../aut/scripts'
 import type { ElementInfo } from '../aut/scripts'
-import type { TapCliCommand } from '../types'
-
-const INSPECT_DETAILS = `Inspects the first element matching the selector: its tag, attributes,
-curated computed styles, box model, and accessibility node.`
+import { defineNativeCommand } from './definition'
 
 // A full computed style is ~350 properties; this curated set answers the
 // "why does it look/behave this way" questions (layout, visibility, box).
@@ -123,12 +120,6 @@ export const extractInspect = async (
   }
 }
 
-export const inspectCommand: TapCliCommand = {
-  name: 'inspect',
-  description: 'inspect the first element matching a selector: its tag, attributes, computed styles, box model, and accessibility node',
-  details: INSPECT_DETAILS,
-  params: [{ name: 'selector', type: 'string', required: true, description: 'a CSS selector identifying the element to inspect' }],
-  handler: (options, args) => withResolvedAutFrame(options, (session, frame) => {
-    return extractInspect(session, frame, args.selector)
-  }),
-}
+export const inspectCommand = defineNativeCommand('inspect', (options, args) => withResolvedAutFrame(options, (session, frame) => {
+  return extractInspect(session, frame, args.selector)
+}))

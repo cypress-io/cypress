@@ -4,13 +4,9 @@ import { FrameCommandError, parsePositiveInt, withResolvedAutFrame } from '../au
 import { createFrameIsolatedWorld } from '../aut/cdp'
 import { readDom } from '../aut/scripts'
 import type { DomReadResult } from '../aut/scripts'
-import type { TapCliCommand } from '../types'
+import { defineNativeCommand } from './definition'
 
 const DEFAULT_MAX_CHARS = 30000
-
-const DOM_DETAILS = `Reads the app-under-test DOM as HTML: the whole page, or the outerHTML of
-each element matching a CSS selector (each match includes its full subtree).
-Output is capped browser-side so a heavy page never ships megabytes at once.`
 
 interface FrameDomResult {
   url?: string
@@ -53,13 +49,6 @@ export const extractDom = async (
   }
 }
 
-export const domCommand: TapCliCommand = {
-  name: 'dom',
-  description: 'read the app-under-test DOM as HTML: the whole page, or each element matching a selector (with its subtree)',
-  details: DOM_DETAILS,
-  params: [{ name: 'selector', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' }],
-  options: [{ name: 'max-chars', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' }],
-  handler: (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-    return extractDom(session, frame, args.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'))
-  }),
-}
+export const domCommand = defineNativeCommand('dom', (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
+  return extractDom(session, frame, args.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'))
+}))

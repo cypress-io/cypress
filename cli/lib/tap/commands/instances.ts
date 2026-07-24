@@ -1,9 +1,7 @@
 import { listLiveInstances } from '../../cypress-instances'
 import { renderResult } from '../output'
-import type { TapCliCommand, TapCliOptions } from '../types'
-
-const INSTANCES_DETAILS = `Lists the running Cypress instances this CLI can reach, as a JSON array. Pass
-an instance's pid to \`--instance\` to target it with another tap command.`
+import { defineNativeCommand } from './definition'
+import type { TapCliOptions } from '../types'
 
 const NO_INSTANCES_GUIDANCE = 'No running Cypress instance found. Start Cypress in open mode (e.g. `cypress open`) and select a testing type to get started.'
 
@@ -26,9 +24,4 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
   return 0
 }
 
-export const instancesCommand: TapCliCommand = {
-  name: 'instances',
-  description: 'list the running Cypress instances this CLI can reach',
-  details: INSTANCES_DETAILS,
-  handler: listInstances,
-}
+export const instancesCommand = defineNativeCommand('instances', listInstances)

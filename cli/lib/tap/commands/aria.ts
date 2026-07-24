@@ -3,15 +3,11 @@ import type { AutFrame } from '../aut/frame'
 import { parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXProperty, AXValue } from '../aut/cdp'
-import type { TapCliCommand } from '../types'
+import { defineNativeCommand } from './definition'
 
 // The accessibility tree of a real app is deep; cap the projection so it stays
 // affordable for an LLM. A selector roots it at a subtree for finer reads.
 const DEFAULT_MAX_NODES = 200
-
-const ARIA_DETAILS = `Reads the accessibility (ARIA) tree of the app-under-test frame, or the
-subtree rooted at a CSS selector. Structural and text-only roles are dropped,
-leaving the compact role/name/state tree DevTools shows.`
 
 // Structural/text roles carry no semantic signal on their own — dropping them
 // yields the compact role/name tree DevTools shows, not the raw render tree.
@@ -193,13 +189,6 @@ export const extractAria = async (
   }
 }
 
-export const ariaCommand: TapCliCommand = {
-  name: 'aria',
-  description: 'read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector',
-  details: ARIA_DETAILS,
-  params: [{ name: 'selector', type: 'string', required: false, description: 'a CSS selector to root the tree at; omit for the whole frame' }],
-  options: [{ name: 'max-nodes', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' }],
-  handler: (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-    return extractAria(session, frame, args.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'))
-  }),
-}
+export const ariaCommand = defineNativeCommand('aria', (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
+  return extractAria(session, frame, args.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'))
+}))

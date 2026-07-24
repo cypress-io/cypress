@@ -1,4 +1,5 @@
-import type { TapCommandOptionSchema, TapCommandParamSchema } from '../contract'
+import { TAP_COMMANDS } from '../contract'
+import type { TapCommandName, TapCommandOptionSchema, TapCommandParamSchema } from '../contract'
 
 /**
  * Thrown by a handler to report a domain failure (no run mounted, no such test
@@ -30,28 +31,33 @@ type OptionsToObject<O extends readonly TapCommandOptionSchema[]> =
   { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? E['name'] : never]: ScalarOf<E['type']> } &
   { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? never : E['name']]?: ScalarOf<E['type']> }
 
+type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[number], { name: N }>
+
 /**
- * Authoring helper for one `cypress tap` subcommand. Capturing `params`/`options`
- * as literal types (via `const` type params) types the handler against its own
- * schema with no annotations — `handler: async ({ spec }, { headed }) => …`.
- * Everything a handler takes or returns must be JSON-serializable per `../contract`.
+ * Authoring helper for one `cypress tap` subcommand. The command's schema (its
+ * params/options metadata) lives in the shared `TAP_COMMANDS` contract so the CLI
+ * can list it without an instance attached; this pairs that metadata with the
+ * app-side handler and types the handler against the named entry — no annotations,
+ * `handler: async ({ spec }, { headed }) => …`. Everything a handler takes or
+ * returns must be JSON-serializable per `../contract`.
  */
-export const defineCommand = <
-  const P extends readonly TapCommandParamSchema[],
-  const O extends readonly TapCommandOptionSchema[] = [],
->(definition: {
-  description: string
-  params: P
-  options?: O
-  hidden?: boolean
-  handler: (params: ParamsToObject<P>, options: OptionsToObject<O>) => Promise<unknown>
-}) => {
-  return definition
+export const defineCommand = <N extends TapCommandName>(
+  name: N,
+  handler: (
+    params: ParamsToObject<CommandByName<N>['params']>,
+    options: OptionsToObject<CommandByName<N>['options']>,
+  ) => Promise<unknown>,
+): TapCommandDefinition & { name: N } => {
+  const meta = TAP_COMMANDS.find((command) => command.name === name)!
+
+  return { ...meta, name, handler }
 }
 
 // The erased view the dispatcher reads through: `defineCommand` types each entry
 // precisely for authoring, but `TapManager` looks them up through this opaque shape.
+// `name` is recorded so the registry can be keyed by it and the two can't drift.
 export interface TapCommandDefinition {
+  name: TapCommandName
   description: string
   params: readonly TapCommandParamSchema[]
   options?: readonly TapCommandOptionSchema[]

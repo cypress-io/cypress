@@ -15,6 +15,6 @@ dom  read the app-under-test DOM over CDP, whole-page or by selector
 dom  read the app-under-test DOM as HTML, whole-page or by selector
 ```
 
-This text lives in the `description` / `details` fields in `commands/*.ts` and `GENERIC_TAP_USAGE` in `output.ts` — audit those when adding or editing a command.
+This text lives in the `description` / `details` fields in `commands/*.ts` and, for binding commands, the shared `TAP_COMMANDS` contract in `@packages/cypress-instances` — audit those when adding or editing a command.
 
 Internal mechanism belongs in code comments explaining *why*, not in help text.
