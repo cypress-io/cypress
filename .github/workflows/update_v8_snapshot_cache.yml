@@ -112,9 +112,6 @@ jobs:
       - name: Stage snapshot artifact
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         # Tag the file with its platform so the artifact is self-identifying.
-        # download-artifact@v5+ drops the per-artifact subdirectory whenever a
-        # run resolves to a single artifact, so a directory-based layout would
-        # lose the platform when only one platform's cache changed.
         run: cp "${SNAPSHOT_FILE}" "snapshot-meta-${PLATFORM}.json"
         shell: bash
       - name: Upload snapshot artifact
