@@ -109,12 +109,20 @@ jobs:
         run: |
           echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILE }})" && echo 'true')" >> $GITHUB_OUTPUT
         shell: bash
+      - name: Stage snapshot artifact
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        # Tag the file with its platform so the artifact is self-identifying.
+        # download-artifact@v5+ drops the per-artifact subdirectory whenever a
+        # run resolves to a single artifact, so a directory-based layout would
+        # lose the platform when only one platform's cache changed.
+        run: cp "${SNAPSHOT_FILE}" "snapshot-meta-${PLATFORM}.json"
+        shell: bash
       - name: Upload snapshot artifact
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: v8-snapshot-cache-${{ env.PLATFORM }}
-          path: ${{ env.SNAPSHOT_FILE }}
+          path: snapshot-meta-${{ env.PLATFORM }}.json
           if-no-files-found: error
           retention-days: 1
   consolidate-and-create-pr:
@@ -151,18 +159,17 @@ jobs:
         with:
           pattern: v8-snapshot-cache-*
           path: artifacts/
-          merge-multiple: false
+          merge-multiple: true
       - name: Stage updated snapshots
         id: stage
         run: |
           set -e
           changed_files=()
           for platform in linux darwin win32; do
-            # upload-artifact uses the parent directory of a single-file
-            # `path:` as the artifact root, so only the bare filename is
-            # stored. With merge-multiple: false, download-artifact places it
-            # at artifacts/<artifact-name>/snapshot-meta.json.
-            artifact_file="artifacts/v8-snapshot-cache-${platform}/snapshot-meta.json"
+            # Each artifact holds a platform-tagged snapshot-meta file and
+            # merge-multiple flattens them all into artifacts/, so the layout
+            # is stable whether one or all platforms changed.
+            artifact_file="artifacts/snapshot-meta-${platform}.json"
             target_file="tooling/v8-snapshot/cache/${platform}/snapshot-meta.json"
             if [[ -f "${artifact_file}" ]]; then
               mkdir -p "$(dirname "${target_file}")"
