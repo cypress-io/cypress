@@ -199,14 +199,11 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     isAUTFrame: deps.isAUTFrame,
   })
 
-  // MITM parity: the AUT URL (cookie simulation's simulated top) is recorded
-  // when the visit document is served — after request-cookie attach for that
-  // navigation, so the navigation itself is still evaluated against the
-  // previous top. The automation layer reports AUT navigation commits (which
-  // also fire for cache-served documents that never produce a Fetch pause).
-  // Only http(s) commits become the simulated top: about:blank (test
-  // isolation blanks the AUT frame between tests), data:, and blob: never
-  // transit the proxy and must not be recorded.
+  // Proxy parity: cookie simulation's simulated top, which nothing else
+  // updates when the proxy is off. Sourced from navigation commits because
+  // cache-served documents never produce a Fetch pause. Only http(s) commits
+  // count — about:blank (test isolation), data:, and blob: never transit
+  // the proxy.
   const onAUTFrameNavigated = (url: string) => {
     if (/^https?:/.test(url)) {
       networkProxy.http.setAUTUrl(url)
