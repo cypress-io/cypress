@@ -285,6 +285,34 @@ describe('CDPNetworkExtraInfo', () => {
       expect(entries().size).to.equal(0)
     })
 
+    it('cannot clobber a payload the consumer is already awaiting', async () => {
+      sinon.useFakeTimers()
+      const { layer, entries, requestExtraInfo, responseExtraInfo, loadingFailed } = createLayer()
+
+      requestExtraInfo({ requestId: 'request-1' })
+
+      const held = track(layer.responseExtraInfo('request-1'))
+
+      await tick()
+
+      responseExtraInfo({
+        requestId: 'request-1',
+        headers: {
+          'set-cookie': 'foo1=bar1',
+        },
+      })
+
+      // an aborted stream terminates the request in the same turn the payload
+      // landed — resolving an already-settled deferred is a no-op, so the
+      // consumer keeps the cookies while the entry is still swept
+      loadingFailed({ requestId: 'request-1', errorText: 'net::ERR_ABORTED' })
+
+      await tick()
+
+      expect(held.event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
+      expect(entries().size).to.equal(0)
+    })
+
     it('ignores terminal events for requests it never tracked', () => {
       const { entries, loadingFinished, loadingFailed } = createLayer()
 
@@ -516,6 +544,49 @@ describe('CDPNetworkExtraInfo', () => {
       expect(finalEvent?.headers).to.deep.equal({ 'set-cookie': 'final=1' })
 
       // responseReceived fires once, for the final response of the chain
+      responseReceived({ requestId: 'request-1', hasExtraInfo: true })
+
+      expect(entries().size).to.equal(0)
+    })
+  })
+
+  describe('late extraInfo across redirect hops', () => {
+    it('does not merge a previous hop\'s cookies when its extraInfo arrived after the timeout', async () => {
+      const clock = sinon.useFakeTimers()
+      const { layer, entries, requestExtraInfo, responseExtraInfo, responseReceived } = createLayer()
+
+      // hop 1: the twin promises an extraInfo that misses the backstop window
+      requestExtraInfo({ requestId: 'request-1' })
+
+      const firstHeld = track(layer.responseExtraInfo('request-1'))
+
+      await clock.tickAsync(100)
+
+      expect(firstHeld.resolved).to.be.true
+      expect(firstHeld.event).to.be.undefined
+
+      // …and lands afterwards, settling an entry nothing consumed
+      responseExtraInfo({
+        requestId: 'request-1',
+        headers: {
+          'set-cookie': 'hop=1',
+        },
+      })
+
+      // hop 2 starts a new response cycle under the same request id: its own
+      // extraInfo must win, not the straggler from hop 1
+      requestExtraInfo({ requestId: 'request-1' })
+      responseExtraInfo({
+        requestId: 'request-1',
+        headers: {
+          'set-cookie': 'final=1',
+        },
+      })
+
+      const finalEvent = await layer.responseExtraInfo('request-1')
+
+      expect(finalEvent?.headers).to.deep.equal({ 'set-cookie': 'final=1' })
+
       responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
       expect(entries().size).to.equal(0)

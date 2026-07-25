@@ -233,6 +233,17 @@ export class CDPNetworkExtraInfo {
     const key = this.getExtraInfoDeferredKey(event.requestId, sessionId)
 
     debug('request extraInfo twin arrived — response extraInfo expected: %s', key)
+
+    // Every hop of a redirect chain emits its own twin, so this marks a new
+    // response cycle for the request id. A settled entry here holds a previous
+    // hop's payload — one whose extraInfo landed after its pause gave up —
+    // and adopting it would make this hop's own extraInfo a no-op on a spent
+    // deferred, merging the wrong hop's Set-Cookie.
+    if (this.extraInfo.get(key)?.settled) {
+      debug('replacing a settled entry from a previous response: %s', key)
+      this.extraInfo.delete(key)
+    }
+
     this.ensureExtraInfoDeferred(key).expectsExtraInfo = true
   }
 
