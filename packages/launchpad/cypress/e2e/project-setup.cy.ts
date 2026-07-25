@@ -263,8 +263,12 @@ describe('Launchpad: Setup Project', () => {
       })
 
       it('moves to "Choose a browser" page after clicking "Continue" button in first step in configuration page', () => {
-        scaffoldAndOpenProject('pristine', ['--e2e'])
+        scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
+
+        verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
+
+        cy.get('[data-cy-testingtype="e2e"]').click()
 
         cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
