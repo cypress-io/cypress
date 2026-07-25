@@ -523,12 +523,9 @@ export class CdpFetchTransport {
     return this.toContinueRequestHeaders(outboundWithoutAut)
   }
 
-  // Successful completion must NOT clear extraInfo tracking: redirect hops
-  // share the network id, and the next hop's Network events can arrive
-  // between this flow's continueResponse and its cleanup — wiping here would
-  // drop that hop's Set-Cookie. The consume path already removed what this
-  // flow used; errored flows clear their tracking at the catch site, and
-  // unmatched pauses clear their own at the pause site.
+  // Must NOT clear extraInfo tracking on success — the next response under a
+  // reused network id may already be tracked, and CDPNetworkExtraInfo manages
+  // its own lifecycle. Errored and unmatched flows clear at their own sites.
   private cleanup (networkId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {
     if (deferred && this.inFlightRequests.get(networkId) !== deferred) {
       return
