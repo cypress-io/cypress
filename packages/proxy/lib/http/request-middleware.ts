@@ -96,12 +96,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
-  // AUT-frame requests are document navigations, never xhr/fetch. Without a
-  // browser pre-request supplying resourceType (e.g. the CDP Fetch transport,
-  // where correlation is disabled), the credential manager's lookup default
-  // would misclassify them as xhr and poison cookie attach/set decisions.
   if (!doesTopNeedToBeSimulated(this) ||
-    this.req.isAUTFrame ||
     (this.req.resourceType !== undefined && this.req.resourceType !== 'xhr' && this.req.resourceType !== 'fetch')) {
     this.next()
 
