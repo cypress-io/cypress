@@ -18,10 +18,6 @@ const RESPONSE_EXTRA_INFO_TIMEOUT_MS = 100
  *
  * Per flow, keyed by session + request id (`key`):
  *
- * - request time: Network.requestWillBeSentExtraInfo → `extraInfoExpected`.
- *   The only signal that reliably precedes the pause. Also absent for
- *   cache and service worker responses — which is exactly what lets them
- *   skip the hold.
  * - response time: Network.responseReceived → `hasExtraInfoByRequest`.
  *   Authoritative when present, but a paused response has not been
  *   delivered yet, so this often lands only after the pause is released.
@@ -30,16 +26,19 @@ const RESPONSE_EXTRA_INFO_TIMEOUT_MS = 100
  *   the request id, so the buffer is a list and entries are matched to a
  *   pause by status code.
  * - pause time (`responseExtraInfo`): buffered match → merge immediately.
- *   Otherwise gate on `hasExtraInfoByRequest ?? extraInfoExpected`:
- *   false → resolve with no hold; true → park a waiter for up to
+ *   Otherwise gate on `hasExtraInfoByRequest ?? true`: false → resolve with
+ *   no hold; anything else → park a waiter for up to
  *   RESPONSE_EXTRA_INFO_TIMEOUT_MS, then resolve without the merge — a
  *   response can lose a cookie to the timeout, but can never hang on it.
+ *   The default is to hold: any request can come back with Set-Cookie, so
+ *   only an authoritative "no extraInfo" skips the wait. Responses that
+ *   never produce extraInfo (cache hits, service workers) pay the full
+ *   bounded wait when responseReceived has not landed by pause time.
  *
  * Tracking dies with its flow (`clear`, driven by the transport's pause
  * handling) and `flush` releases parked waiters immediately on reset/stop.
  */
 export class CDPNetworkExtraInfo {
-  private readonly extraInfoExpected = new Set<string>()
   private readonly hasExtraInfoByRequest = new Map<string, boolean>()
   private readonly responseExtraInfos = new Map<string, Protocol.Network.ResponseReceivedExtraInfoEvent[]>()
   private readonly responseExtraInfoWaiters = new Map<string, { statusCode: number, resolve: (event?: Protocol.Network.ResponseReceivedExtraInfoEvent) => void }>()
@@ -48,26 +47,21 @@ export class CDPNetworkExtraInfo {
 
   /**
    * Relies on the Network domain already being enabled on this client
-   * (initializeCDP). The request-side twin marks which requests will produce
-   * a response extraInfo, so pauses without one never wait for it.
-   * responseReceived's hasExtraInfo is the authoritative flag when it
-   * arrives in time.
+   * (initializeCDP). responseReceived's hasExtraInfo is the authoritative
+   * flag when it arrives in time.
    */
   start (): void {
-    this.client.on('Network.requestWillBeSentExtraInfo', this.onRequestWillBeSentExtraInfo)
     this.client.on('Network.responseReceived', this.onResponseReceived)
     this.client.on('Network.responseReceivedExtraInfo', this.onResponseReceivedExtraInfo)
   }
 
   stop (): void {
-    this.client.off('Network.requestWillBeSentExtraInfo', this.onRequestWillBeSentExtraInfo)
     this.client.off('Network.responseReceived', this.onResponseReceived)
     this.client.off('Network.responseReceivedExtraInfo', this.onResponseReceivedExtraInfo)
     this.flush()
   }
 
   flush (): void {
-    this.extraInfoExpected.clear()
     this.hasExtraInfoByRequest.clear()
     this.responseExtraInfos.clear()
 
@@ -79,7 +73,6 @@ export class CDPNetworkExtraInfo {
   clear (requestId: string, sessionId?: string): void {
     const key = this.key(requestId, sessionId)
 
-    this.extraInfoExpected.delete(key)
     this.hasExtraInfoByRequest.delete(key)
     this.responseExtraInfos.delete(key)
     // a parked waiter holds a live timeout whose deferred delete could remove
@@ -96,19 +89,17 @@ export class CDPNetworkExtraInfo {
     const buffered = this.takeBuffered(key, statusCode)
 
     if (buffered) {
-      this.extraInfoExpected.delete(key)
       this.hasExtraInfoByRequest.delete(key)
 
       return Promise.resolve(buffered)
     }
 
     // responseReceived.hasExtraInfo is authoritative when it has arrived by
-    // pause time; otherwise infer from the request-side extraInfo (no
-    // request-side event → response-side never comes: cached / service
-    // worker / no network hop) — don't hold the response.
-    const hasExtraInfo = this.hasExtraInfoByRequest.get(key) ?? this.extraInfoExpected.has(key)
+    // pause time. Absent that, hold: any request can come back with a
+    // Set-Cookie, so nothing short of an authoritative "no extraInfo" can
+    // safely skip the bounded wait.
+    const hasExtraInfo = this.hasExtraInfoByRequest.get(key) ?? true
 
-    this.extraInfoExpected.delete(key)
     this.hasExtraInfoByRequest.delete(key)
 
     if (!hasExtraInfo) {
@@ -151,10 +142,6 @@ export class CDPNetworkExtraInfo {
   // payloads without a statusCode match any pause.
   private matchesStatus (event: Protocol.Network.ResponseReceivedExtraInfoEvent, statusCode: number): boolean {
     return event.statusCode == null || event.statusCode === statusCode
-  }
-
-  private onRequestWillBeSentExtraInfo = (event: Protocol.Network.RequestWillBeSentExtraInfoEvent, sessionId?: string): void => {
-    this.extraInfoExpected.add(this.key(event.requestId, sessionId))
   }
 
   private onResponseReceived = (event: Protocol.Network.ResponseReceivedEvent, sessionId?: string): void => {

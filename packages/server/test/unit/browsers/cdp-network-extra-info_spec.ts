@@ -21,7 +21,6 @@ function createLayer () {
   return {
     client,
     layer,
-    requestExtraInfo: handler('Network.requestWillBeSentExtraInfo') as (event: Partial<Protocol.Network.RequestWillBeSentExtraInfoEvent>, sessionId?: string) => void,
     responseReceived: handler('Network.responseReceived') as (event: Partial<Protocol.Network.ResponseReceivedEvent>, sessionId?: string) => void,
     responseExtraInfo: handler('Network.responseReceivedExtraInfo') as (event: Partial<Protocol.Network.ResponseReceivedExtraInfoEvent>, sessionId?: string) => void,
   }
@@ -53,7 +52,6 @@ describe('CDPNetworkExtraInfo', () => {
       layer.start()
 
       expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
-        'Network.requestWillBeSentExtraInfo',
         'Network.responseReceived',
         'Network.responseReceivedExtraInfo',
       ])
@@ -61,7 +59,6 @@ describe('CDPNetworkExtraInfo', () => {
       layer.stop()
 
       expect(client.off.getCalls().map((call) => call.args[0])).to.deep.equal([
-        'Network.requestWillBeSentExtraInfo',
         'Network.responseReceived',
         'Network.responseReceivedExtraInfo',
       ])
@@ -69,9 +66,7 @@ describe('CDPNetworkExtraInfo', () => {
 
     it('releases parked waiters on stop', async () => {
       sinon.useFakeTimers()
-      const { layer, requestExtraInfo } = createLayer()
-
-      requestExtraInfo({ requestId: 'request-1' })
+      const { layer } = createLayer()
 
       const held = track(layer.responseExtraInfo('request-1', 200))
 
@@ -88,20 +83,6 @@ describe('CDPNetworkExtraInfo', () => {
   })
 
   describe('responseExtraInfo', () => {
-    it('resolves without holding when no extraInfo signals were seen', async () => {
-      sinon.useFakeTimers()
-      const { layer } = createLayer()
-
-      // cache hits and service worker responses produce no extraInfo events —
-      // holding would only delay every such response
-      const held = track(layer.responseExtraInfo('request-1', 200))
-
-      await tick()
-
-      expect(held.resolved).to.be.true
-      expect(held.event).to.be.undefined
-    })
-
     it('resolves an extraInfo event buffered before the pause asks for it', async () => {
       const { layer, responseExtraInfo } = createLayer()
 
@@ -117,13 +98,12 @@ describe('CDPNetworkExtraInfo', () => {
       expect(event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
     })
 
-    it('holds the pause for an expected extraInfo event and resolves when it lands', async () => {
+    it('holds the pause by default and resolves when the extraInfo event lands', async () => {
       sinon.useFakeTimers()
-      const { layer, requestExtraInfo, responseExtraInfo } = createLayer()
+      const { layer, responseExtraInfo } = createLayer()
 
-      // the request-side twin is the only signal that reliably precedes the pause
-      requestExtraInfo({ requestId: 'request-1' })
-
+      // any request can come back with Set-Cookie — with no authoritative
+      // signal either way, the pause holds for the bounded window
       const held = track(layer.responseExtraInfo('request-1', 200))
 
       await tick()
@@ -143,11 +123,9 @@ describe('CDPNetworkExtraInfo', () => {
       expect(held.event?.headers).to.deep.equal({ 'set-cookie': 'foo1=bar1' })
     })
 
-    it('resolves without the event at the timeout when the expected extraInfo never arrives', async () => {
+    it('resolves without the event at the timeout when no extraInfo arrives', async () => {
       const clock = sinon.useFakeTimers()
-      const { layer, requestExtraInfo } = createLayer()
-
-      requestExtraInfo({ requestId: 'request-1' })
+      const { layer } = createLayer()
 
       const held = track(layer.responseExtraInfo('request-1', 200))
 
@@ -163,11 +141,9 @@ describe('CDPNetworkExtraInfo', () => {
 
     it('does not hold when responseReceived reports hasExtraInfo false', async () => {
       sinon.useFakeTimers()
-      const { layer, requestExtraInfo, responseReceived } = createLayer()
+      const { layer, responseReceived } = createLayer()
 
-      // request-side extraInfo fired, but the authoritative flag says the
-      // response-side one is not coming — the pause must not hold
-      requestExtraInfo({ requestId: 'request-1' })
+      // the authoritative flag says no extraInfo is coming — skip the hold
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
 
       const held = track(layer.responseExtraInfo('request-1', 200))
@@ -178,7 +154,7 @@ describe('CDPNetworkExtraInfo', () => {
       expect(held.event).to.be.undefined
     })
 
-    it('holds when responseReceived reports hasExtraInfo true without a request-side event', async () => {
+    it('holds when responseReceived reports hasExtraInfo true', async () => {
       sinon.useFakeTimers()
       const { layer, responseReceived, responseExtraInfo } = createLayer()
 
@@ -203,14 +179,12 @@ describe('CDPNetworkExtraInfo', () => {
     })
 
     it('consumes per-request tracking when the pause resolves', async () => {
-      const { layer, requestExtraInfo, responseReceived } = createLayer()
+      const { layer, responseReceived } = createLayer()
 
-      requestExtraInfo({ requestId: 'request-1' })
       responseReceived({ requestId: 'request-1', hasExtraInfo: false })
 
       await layer.responseExtraInfo('request-1', 200)
 
-      expect((layer as any).extraInfoExpected.size).to.equal(0)
       expect((layer as any).hasExtraInfoByRequest.size).to.equal(0)
       expect((layer as any).responseExtraInfos.size).to.equal(0)
     })
@@ -266,9 +240,7 @@ describe('CDPNetworkExtraInfo', () => {
 
     it('does not let a parked waiter accept a different hop\'s event', async () => {
       sinon.useFakeTimers()
-      const { layer, requestExtraInfo, responseExtraInfo } = createLayer()
-
-      requestExtraInfo({ requestId: 'request-1' })
+      const { layer, responseExtraInfo } = createLayer()
 
       const held = track(layer.responseExtraInfo('request-1', 200))
 
@@ -303,9 +275,7 @@ describe('CDPNetworkExtraInfo', () => {
 
     it('falls back to a lone status-skewed buffered event at the waiter timeout', async () => {
       const clock = sinon.useFakeTimers()
-      const { layer, requestExtraInfo, responseExtraInfo } = createLayer()
-
-      requestExtraInfo({ requestId: 'request-1' })
+      const { layer, responseExtraInfo } = createLayer()
 
       const held = track(layer.responseExtraInfo('request-1', 200))
 
@@ -330,7 +300,7 @@ describe('CDPNetworkExtraInfo', () => {
 
   describe('session scoping', () => {
     it('does not surface an event from a different session with a colliding request id', async () => {
-      sinon.useFakeTimers()
+      const clock = sinon.useFakeTimers()
       const { layer, responseExtraInfo } = createLayer()
 
       // a service-worker session reuses the page flow's request id
@@ -343,9 +313,9 @@ describe('CDPNetworkExtraInfo', () => {
 
       const held = track(layer.responseExtraInfo('request-1', 200))
 
-      await tick()
+      // the other session's event must not satisfy the root session's hold
+      await clock.tickAsync(100)
 
-      // no signals on the root session — resolves without the other session's event
       expect(held.resolved).to.be.true
       expect(held.event).to.be.undefined
 
@@ -358,9 +328,9 @@ describe('CDPNetworkExtraInfo', () => {
   describe('clear', () => {
     it('releases a parked waiter and drops the request\'s tracking', async () => {
       sinon.useFakeTimers()
-      const { layer, requestExtraInfo } = createLayer()
+      const { layer, responseReceived } = createLayer()
 
-      requestExtraInfo({ requestId: 'request-1' })
+      responseReceived({ requestId: 'request-1', hasExtraInfo: true })
 
       const held = track(layer.responseExtraInfo('request-1', 200))
 
@@ -373,15 +343,13 @@ describe('CDPNetworkExtraInfo', () => {
 
       expect(held.resolved).to.be.true
       expect(held.event).to.be.undefined
-      expect((layer as any).extraInfoExpected.size).to.equal(0)
+      expect((layer as any).hasExtraInfoByRequest.size).to.equal(0)
       expect((layer as any).responseExtraInfoWaiters.size).to.equal(0)
     })
 
     it('cancels the cleared waiter\'s timer so it cannot remove a newer waiter under a reused request id', async () => {
       const clock = sinon.useFakeTimers()
-      const { layer, requestExtraInfo, responseExtraInfo } = createLayer()
-
-      requestExtraInfo({ requestId: 'request-1' })
+      const { layer, responseExtraInfo } = createLayer()
 
       const first = track(layer.responseExtraInfo('request-1', 200))
 
@@ -393,8 +361,6 @@ describe('CDPNetworkExtraInfo', () => {
       expect(first.resolved).to.be.true
 
       // the next hop reuses the request id and parks its own waiter
-      requestExtraInfo({ requestId: 'request-1' })
-
       const second = track(layer.responseExtraInfo('request-1', 200))
 
       // move past the cleared waiter's original deadline — a stale timer
@@ -418,11 +384,8 @@ describe('CDPNetworkExtraInfo', () => {
 
   describe('flush', () => {
     it('clears all tracking and releases every parked waiter', async () => {
-      sinon.useFakeTimers()
-      const { layer, requestExtraInfo, responseExtraInfo } = createLayer()
-
-      requestExtraInfo({ requestId: 'request-1' })
-      requestExtraInfo({ requestId: 'request-2' })
+      const clock = sinon.useFakeTimers()
+      const { layer, responseExtraInfo } = createLayer()
 
       const firstHeld = track(layer.responseExtraInfo('request-1', 200))
       const secondHeld = track(layer.responseExtraInfo('request-2', 200))
@@ -444,10 +407,11 @@ describe('CDPNetworkExtraInfo', () => {
       expect(secondHeld.resolved).to.be.true
       expect(secondHeld.event).to.be.undefined
 
-      // the buffered event is gone too — a later pause resolves without it
+      // the buffered event is gone too — a later pause holds and then
+      // resolves without it at the timeout
       const held = track(layer.responseExtraInfo('request-3', 200))
 
-      await tick()
+      await clock.tickAsync(100)
 
       expect(held.resolved).to.be.true
       expect(held.event).to.be.undefined
