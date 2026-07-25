@@ -14,10 +14,11 @@ type ExtraInfoDeferred = {
   expectsExtraInfo: boolean
   // the deferred has been resolved (extraInfo event, or authoritative none)
   settled: boolean
-  // the pause consumed this entry; dropped when responseReceived arrives,
+  // the pause consumed this entry; dropped when responseReceived sweeps it,
   // or replaced by the next response's events under a reused request id
   consumed: boolean
-  // responseReceived arrived; dropped when the pause consumes the entry
+  // responseReceived arrived — the sweep signal, which for a paused request
+  // can only follow the consume
   responseReceived: boolean
 }
 
@@ -51,50 +52,60 @@ const RESPONSE_EXTRA_INFO_TIMEOUT_MS = 100
  * extraInfo — which is exactly what RESPONSE_EXTRA_INFO_TIMEOUT_MS
  * backstops.
  *
- * The three Network events act on the entry:
+ * The Network events act on the entry:
  *
- * - Network.requestWillBeSentExtraInfo → marks the entry as expecting a
- *   response extraInfo (the invariant above). Emitted at wire-send time,
- *   it is the only signal that precedes the response pause.
- * - Network.responseReceivedExtraInfo → resolves the deferred with the
- *   event. When it beats everything else, the entry starts life already
- *   resolved.
- * - Network.responseReceived → hasExtraInfo is the source of truth: true
- *   guarantees an extraInfo event is coming (the deferred stays pending
- *   for it), false guarantees it is not (resolve empty so the pause never
- *   holds). For an entry the pause already consumed, this is the flow's
- *   last signal — it deletes the entry instead.
+ * - Network.requestWillBeSentExtraInfo → the wait decision. Emitted at
+ *   wire-send time, it is the only signal that precedes the response pause,
+ *   so it alone decides whether a pause holds: present means a response
+ *   extraInfo is coming (per the invariant above), absent means the pause
+ *   can be answered immediately.
+ * - Network.responseReceivedExtraInfo → the payload. Resolves the deferred
+ *   with the event, which in practice lands within a millisecond of the
+ *   pause, so the entry is usually already resolved when the pause asks.
+ * - Network.responseReceived → the prompt sweeper. It fires when the response
+ *   is delivered to the renderer, and delivery is exactly what a held pause
+ *   blocks, so for any request the transport pauses it arrives only after
+ *   that pause has been answered — it can never gate a hold. Its job is
+ *   dropping the consumed entry. It never opens one: a request that never
+ *   paused has nothing to correlate. Its hasExtraInfo branches are kept
+ *   because hasExtraInfo is the only documented authority (the pairing
+ *   invariant is empirical), and apply only to an entry already open.
+ * - Network.loadingFinished / loadingFailed → the terminal sweep, covering
+ *   what responseReceived cannot: requests that never produce a response at
+ *   all (aborted, connection failure), whose entry its request twin already
+ *   opened. Neither sweep subsumes the other — a streaming response
+ *   (SSE, long poll) reports responseReceived immediately but has no
+ *   terminal event until the stream closes.
  *
- * `responseExtraInfo` resolves immediately with nothing when the entry is
- * unsettled and no signal promised an extraInfo (no request twin, no
- * responseReceived): that transaction never hit the instrumented wire path.
- * Otherwise it awaits the entry, backstopped by
+ * `responseExtraInfo` answers the pause immediately when the entry is
+ * unsettled and nothing promised an extraInfo — that transaction never hit
+ * the instrumented wire path. Otherwise it awaits the entry, backstopped by
  * RESPONSE_EXTRA_INFO_TIMEOUT_MS. A held pause blocks the browser from
  * advancing only that request, so later events for the same request id
  * (e.g. the next response in its redirect chain) cannot arrive while an
  * earlier response is parked. Unrelated requests flow through concurrently.
  *
- * An entry is dropped once both signals land: the pause consumed it and
- * its responseReceived arrived (usually only after the pause is released).
- * Only the consume sets `consumed` — the extraInfo event just resolves the
- * deferred. By arrival order:
+ * An entry is dropped once the pause consumed it and its responseReceived
+ * arrived — in that order, for anything the transport pauses. Only the
+ * consume sets `consumed`; the extraInfo event just resolves the deferred.
+ * The paths:
  *
- * - extraInfo first: created already resolved; the consume returns the
- *   event and marks `consumed`; the post-release responseReceived carries
- *   nothing new and deletes the entry.
- * - responseReceived first, hasExtraInfo true: marks `responseReceived`
- *   and waits; extraInfo resolves the deferred; the consume deletes with
- *   both signals present.
- * - responseReceived first, hasExtraInfo false: marks `responseReceived`
- *   and resolves empty; the consume returns without holding and deletes.
- * - consume first, no signals: returns empty immediately — no request twin
- *   means no extraInfo is coming (cache / service worker) — and the
- *   post-release responseReceived sweeps the consumed entry.
+ * - twin → extraInfo → consume (network-served, the common case): the
+ *   consume returns an already-resolved event, marks `consumed`, and the
+ *   post-release responseReceived sweeps the entry.
+ * - twin → consume → extraInfo: the consume holds, the event resolves it,
+ *   and the post-release responseReceived sweeps.
+ * - consume with no twin (cache / service worker): returns empty with no
+ *   hold, and the post-release responseReceived sweeps.
+ * - twin → consume → no extraInfo (the request died on the wire): the
+ *   timeout answers the pause, then the terminal sweep drops the entry.
+ * - twin → no pause at all (aborted, or a session without Fetch enabled):
+ *   nothing consumes the entry, and loadingFinished / loadingFailed drops it.
  *
- * The next response under a reused request id replaces a consumed entry,
- * so a redirect's intermediate responses — which never get their own
- * responseReceived — cannot strand one. `clear` (errored flows) and
- * `flush` (reset/stop) drop whatever remains.
+ * The next response under a reused request id replaces a consumed entry, so
+ * a redirect's intermediate responses — which never get their own
+ * responseReceived — cannot strand one. `clear` (errored flows) and `flush`
+ * (reset/stop) are the backstops for anything the sweeps never reach.
  */
 export class CDPNetworkExtraInfo {
   private readonly extraInfo = new Map<string, ExtraInfoDeferred>()
@@ -109,12 +120,16 @@ export class CDPNetworkExtraInfo {
     this.client.on('Network.requestWillBeSentExtraInfo', this.onRequestWillBeSentExtraInfo)
     this.client.on('Network.responseReceived', this.onResponseReceived)
     this.client.on('Network.responseReceivedExtraInfo', this.onResponseReceivedExtraInfo)
+    this.client.on('Network.loadingFinished', this.onLoadingEnded)
+    this.client.on('Network.loadingFailed', this.onLoadingEnded)
   }
 
   stop (): void {
     this.client.off('Network.requestWillBeSentExtraInfo', this.onRequestWillBeSentExtraInfo)
     this.client.off('Network.responseReceived', this.onResponseReceived)
     this.client.off('Network.responseReceivedExtraInfo', this.onResponseReceivedExtraInfo)
+    this.client.off('Network.loadingFinished', this.onLoadingEnded)
+    this.client.off('Network.loadingFailed', this.onLoadingEnded)
     this.flush()
   }
 
@@ -176,9 +191,9 @@ export class CDPNetworkExtraInfo {
 
       entry.consumed = true
 
-      // drop only once responseReceived has also arrived — it usually fires
-      // after the pause is released, and deleting here would let it recreate
-      // a stray entry. The identity check keeps a replacement entry (a later
+      // drop only once responseReceived has also arrived — it fires after
+      // this pause is answered, and deleting here would let it recreate a
+      // stray entry. The identity check keeps a replacement entry (a later
       // response under a reused request id) intact.
       if (entry.responseReceived && this.extraInfo.get(key) === entry) {
         this.extraInfo.delete(key)
@@ -221,13 +236,21 @@ export class CDPNetworkExtraInfo {
     this.ensureExtraInfoDeferred(key).expectsExtraInfo = true
   }
 
+  /**
+   * A sweeper: this fires after the response is released, so the only thing
+   * to do is clean up an entry still sitting in the map.
+   */
   private onResponseReceived = (event: Protocol.Network.ResponseReceivedEvent, sessionId?: string): void => {
     const key = this.getExtraInfoDeferredKey(event.requestId, sessionId)
-    const existing = this.extraInfo.get(key)
+    const entry = this.extraInfo.get(key)
 
-    // the pause already consumed this response's entry — responseReceived is
-    // the flow's last signal, so drop the entry instead of recreating one
-    if (existing?.consumed) {
+    // Never open an entry here: a request that never paused (memory cache) has
+    // nothing to correlate, and an entry nothing consumes would leak.
+    if (!entry) {
+      return
+    }
+
+    if (entry.consumed) {
       debug('responseReceived swept the consumed entry: %s', key)
       this.extraInfo.delete(key)
 
@@ -236,14 +259,33 @@ export class CDPNetworkExtraInfo {
 
     debug('responseReceived (hasExtraInfo: %s): %s', event.hasExtraInfo, key)
 
-    const entry = this.ensureExtraInfoDeferred(key)
-
     entry.responseReceived = true
 
     if (!event.hasExtraInfo) {
       entry.settled = true
       entry.deferred.resolve(undefined)
     }
+  }
+
+  /**
+   * Network.loadingFinished / loadingFailed are a request's terminal signals.
+   * They fire after delivery — so after any pause the transport held has been
+   * answered — and, unlike responseReceived, they also fire for requests that
+   * never produce a response pause (an aborted request, or traffic on a
+   * session where Fetch is not enabled). Dropping here keeps an entry opened
+   * by a request twin from surviving to the next flush.
+   */
+  private onLoadingEnded = (event: Protocol.Network.LoadingFinishedEvent | Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
+    const key = this.getExtraInfoDeferredKey(event.requestId, sessionId)
+    const entry = this.extraInfo.get(key)
+
+    if (!entry) {
+      return
+    }
+
+    debug('loading ended — dropping the extraInfo entry: %s', key)
+    entry.deferred.resolve(undefined)
+    this.extraInfo.delete(key)
   }
 
   private onResponseReceivedExtraInfo = (event: Protocol.Network.ResponseReceivedExtraInfoEvent, sessionId?: string): void => {
