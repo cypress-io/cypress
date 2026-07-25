@@ -775,7 +775,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response, 'session-1')
       await handled
 
-      expect(networkExtraInfo.responseExtraInfo).to.have.been.calledOnceWith('network-1', 200, 'session-1')
+      expect(networkExtraInfo.responseExtraInfo).to.have.been.calledOnceWith('network-1', 'session-1')
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-response',

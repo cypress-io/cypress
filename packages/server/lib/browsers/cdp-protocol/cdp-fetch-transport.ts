@@ -344,8 +344,8 @@ export class CdpFetchTransport {
   }
 
   private withSetCookieHeaders = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const extraInfo = event.networkId && typeof event.responseStatusCode === 'number'
-      ? await this.networkExtraInfo.responseExtraInfo(event.networkId, event.responseStatusCode, sessionId)
+    const extraInfo = event.networkId
+      ? await this.networkExtraInfo.responseExtraInfo(event.networkId, sessionId)
       : undefined
     const setCookieValues = Object.entries(extraInfo?.headers ?? {})
     .filter(([name]) => name.toLowerCase() === 'set-cookie')
