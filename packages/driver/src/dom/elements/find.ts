@@ -289,6 +289,12 @@ $.expr[':']['cy-contains-regex'] = $.expr.createPseudo((text) => {
 
   // taken from jquery's normal contains method
   return function (elem) {
+    // regex is shared across every candidate element in the selector match,
+    // so global/sticky flags leave `lastIndex` set after a previous test call.
+    // Reset it before each use or matches can be skipped depending on
+    // element iteration order. https://github.com/cypress-io/cypress/issues/34303
+    regex.lastIndex = 0
+
     if (isSubmit(elem)) {
       return regex.test(elem.value)
     }
