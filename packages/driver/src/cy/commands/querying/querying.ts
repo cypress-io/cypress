@@ -266,8 +266,8 @@ export default (Commands, Cypress, cy, state) => {
 
     validateTimeoutFromOpts(userOptions, 'contains')
 
-    // find elements by the :cy-contains pseudo selector
-    // and any submit inputs with the attributeContainsWord selector
+    // find elements by the :cy-contains pseudo selector, which also
+    // matches submit inputs against their value attribute
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
     const log = Cypress.log({

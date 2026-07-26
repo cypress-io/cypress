@@ -1153,6 +1153,24 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34305
+    it('can find input type=submits by a partial, non-whitespace-bounded substring of value', () => {
+      cy.contains('User').then(($el) => {
+        expect(($el as unknown as JQuery<HTMLInputElement>)?.length).to.eq(1)
+        expect($el).to.match('input[type=submit]')
+        expect($el.val()).to.eq('Username')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34305
+    it('can find input type=submits by a partial substring of value, case-insensitively', () => {
+      cy.contains('user', { matchCase: false }).then(($el) => {
+        expect(($el as unknown as JQuery<HTMLInputElement>)?.length).to.eq(1)
+        expect($el).to.match('input[type=submit]')
+        expect($el.val()).to.eq('Username')
+      })
+    })
+
     it('has an optional filter argument', () => {
       cy.contains('ul', 'li 0').then(($el) => {
         expect(($el as unknown as JQuery<HTMLUListElement>)?.length).to.eq(1)

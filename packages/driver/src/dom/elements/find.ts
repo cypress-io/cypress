@@ -250,13 +250,17 @@ export const getElements = ($el) => {
  * `getContainsSelector` below.
  */
 
+function isSubmit (elem: Element): elem is HTMLInputElement {
+  return elem.tagName === 'INPUT' && (elem as HTMLInputElement).type === 'submit'
+}
+
 // Example:
 // button:cy-contains("Login")
 $.expr[':']['cy-contains'] = $.expr.createPseudo((text) => {
   text = JSON.parse(`"${ text }"`)
 
   return function (elem) {
-    let testText = normalizeWhitespaces(elem)
+    let testText = isSubmit(elem) ? elem.value : normalizeWhitespaces(elem)
 
     return testText.includes(text)
   }
@@ -268,7 +272,7 @@ $.expr[':']['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
   text = JSON.parse(`"${ text }"`)
 
   return function (elem) {
-    let testText = normalizeWhitespaces(elem)
+    let testText = isSubmit(elem) ? elem.value : normalizeWhitespaces(elem)
 
     testText = testText.toLowerCase()
     text = text.toLowerCase()
@@ -276,10 +280,6 @@ $.expr[':']['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
     return testText.includes(text)
   }
 })
-
-function isSubmit (elem: Element): elem is HTMLInputElement {
-  return elem.tagName === 'INPUT' && (elem as HTMLInputElement).type === 'submit'
-}
 
 // Example:
 // #login>li:first:cy-contains-regex('/asdf 1/i')
@@ -317,12 +317,12 @@ export const getContainsSelector = (text, filter = '', options: {
 
   const selectors = _.map(filters, (filter) => {
     // https://github.com/cypress-io/cypress/issues/8626
-    // Sizzle cannot parse when \' is used inside [attribute~='value'] selector.
+    // Sizzle cannot parse when \' is used inside a pseudo-selector call.
     // We need to use other type of quote characters.
     const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
 
     // use custom cy-contains selector that is registered above
-    return `${filter}:${expr}(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
+    return `${filter}:${expr}(${textToFind})`
   })
 
   return selectors.join()
