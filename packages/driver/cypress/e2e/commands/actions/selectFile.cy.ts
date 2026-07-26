@@ -116,6 +116,19 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    it('selects files with an input from a label whose "for" attribute contains CSS-special characters', () => {
+      // https://github.com/cypress-io/cypress/issues/34304
+      // Ids like this are common with frameworks (Angular Material, Radix UI, etc)
+      // that generate ids containing `:`, `.`, `[`, and `]`.
+      cy.get('[id="css-escape-label"]').selectFile({ contents: '@foo' })
+
+      cy.get('[id="userForm:file[0].upload"]')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+    })
+
     it('invokes change and input events on the input', (done) => {
       const $input = cy.$$('#basic')
 

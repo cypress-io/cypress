@@ -339,7 +339,9 @@ export const getInputFromLabel = ($el: JQuery<HTMLElement>) => {
   if ($el.attr('for')) {
     // The parent().last() is the current document, which is where we want to
     // search from.
-    return $(`#${$el.attr('for')}`, $el.parents().last())
+    // CSS.escape the id since it can legally contain characters (e.g. `.`, `:`, `[`, spaces)
+    // that are otherwise special in a CSS selector.
+    return $(`#${CSS.escape($el.attr('for') as string)}`, $el.parents().last())
   }
 
   // Alternately, if a label contains inputs, clicking it focuses / activates
