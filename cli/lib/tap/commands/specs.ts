@@ -24,7 +24,9 @@ const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
       const lastModifiedTimestamp = spec.gitInfo?.lastModifiedTimestamp
 
       return {
-        relativePath: spec.relative,
+        // The tap contract speaks POSIX paths (`run` accepts and echoes them);
+        // `relative` is OS-native, so posixify it so Windows agrees with `run`/`status`.
+        relativePath: spec.relative.replace(/\\/g, '/'),
         ...(typeof lastModified === 'string' ? { lastModified } : {}),
         ...(typeof lastModifiedTimestamp === 'string' ? { lastModifiedTimestamp } : {}),
       }

@@ -428,7 +428,12 @@ describe('lib/cypress-instances', () => {
       mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
       stubKill({ alive: [111] })
 
-      await expect(resolveLiveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+      const err = await resolveLiveInstance({ instance: 999, cwd: PROJECT }).catch((e) => e)
+
+      expect(err.code).toBe('NO_INSTANCE')
+      // resolveLiveInstance serves pre-browser commands (specs/status), so the
+      // guidance must not tell the user to open a browser.
+      expect(err.message).not.toMatch(/browser/i)
     })
 
     it('reaps the leftover record and throws NO_INSTANCE when the only match’s process is dead', async () => {

@@ -584,6 +584,16 @@ describe('lib/exec/tap', () => {
       expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/a.cy.ts' }])
     })
 
+    it('normalizes OS-native (Windows) spec paths to POSIX so they match run/status', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [{ relative: 'cypress\\e2e\\win.cy.ts', gitInfo: null }] },
+      })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/win.cy.ts' }])
+    })
+
     it('queries the resolved instance with the TapSpecs operation', async () => {
       const { instance } = mockLiveResolved(liveInstance())
 
