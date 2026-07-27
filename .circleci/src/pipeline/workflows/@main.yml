@@ -147,7 +147,7 @@ linux-x64:
             test-runner:launchpad-tests,
             test-runner:percy
           ]
-        percy: true
+        percy: << pipeline.parameters.run-percy >>
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
@@ -157,7 +157,7 @@ linux-x64:
             test-runner:launchpad-tests,
             test-runner:percy
           ]
-        percy: true
+        percy: << pipeline.parameters.run-percy >>
         requires:
           - build
     - run-launchpad-component-tests-chrome:
@@ -167,7 +167,7 @@ linux-x64:
             test-runner:launchpad-tests,
             test-runner:percy
           ]
-        percy: true
+        percy: << pipeline.parameters.run-percy >>
         requires:
           - build
     - run-app-integration-tests-chrome:
@@ -177,7 +177,7 @@ linux-x64:
             test-runner:launchpad-tests,
             test-runner:percy
           ]
-        percy: true
+        percy: << pipeline.parameters.run-percy >>
         requires:
           - build
     - run-webpack-dev-server-integration-tests:
@@ -195,12 +195,12 @@ linux-x64:
             test-runner:launchpad-tests,
             test-runner:percy
           ]
-        percy: true
+        percy: << pipeline.parameters.run-percy >>
         requires:
           - build
     - run-reporter-component-tests-chrome:
         context: [ test-runner:cypress-record-key, test-runner:percy ]
-        percy: true
+        percy: << pipeline.parameters.run-percy >>
         requires:
           - build
     - reporter-integration-tests:

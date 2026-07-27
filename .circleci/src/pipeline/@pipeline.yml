@@ -97,6 +97,13 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
+  # Gates Percy visual snapshotting independently of the functional UI test
+  # jobs. Set true by generate-pipeline-parameters.sh only when a change
+  # touches front-end/UI code (see that script). Defaults true so
+  # develop/release branches and API-triggered pipelines always snapshot.
+  run-percy:
+    type: boolean
+    default: true
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1
@@ -1768,22 +1775,11 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
-      # Uses an inline when: not: or: instead of halt-if-skipped because this
-      # job depends on multiple parameters. CircleCI boolean parameters cannot
-      # express or: logic, so a multi-condition inline step is required here.
-      - when:
-          condition:
-            not:
-              or:
-                - << pipeline.parameters.run-cli-tests >>
-                - << pipeline.parameters.run-reporter-tests >>
-                - << pipeline.parameters.run-app-ui-tests >>
-                - << pipeline.parameters.run-frontend-shared-tests >>
-                - << pipeline.parameters.run-launchpad-tests >>
-          steps:
-            - run:
-                name: Skipping job — not relevant to changed files
-                command: circleci-agent step halt
+      # A Percy build only exists when run-percy is true (that is the single
+      # switch gating every job that runs `percy exec` / `percy snapshot`), so
+      # halt here otherwise — there is nothing to finalize.
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-percy >>
       - restore_cached_workspace
       - run:
           # if this is an external pull request, the environment variables
