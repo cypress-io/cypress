@@ -26,6 +26,11 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
+  # Opt-in proxy-disabled (CDP Fetch) coverage. Default false; set true via
+  # Trigger Pipeline (or by forwarding the setup-pipeline parameter).
+  run-proxy-disabled-tests:
+    type: boolean
+    default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
   # Default true so develop/release branches run everything without explicit params.
   run-driver-tests:
@@ -765,6 +770,8 @@ commands:
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
+      - halt-unless-proxy-disabled-enabled:
+          disable-proxy: << parameters.disable-proxy >>
       - restore_cached_workspace
       - when:
           condition:
@@ -904,6 +911,8 @@ commands:
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
+      - halt-unless-proxy-disabled-enabled:
+          disable-proxy: << parameters.disable-proxy >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -1007,6 +1016,8 @@ commands:
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
+      - halt-unless-proxy-disabled-enabled:
+          disable-proxy: << parameters.disable-proxy >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - when:
@@ -1689,6 +1700,24 @@ commands:
                 name: Skipping job — not relevant to changed files
                 command: circleci-agent step halt
 
+  # When a job is invoked with disable-proxy: true, skip unless the opt-in
+  # pipeline parameter was set (Trigger Pipeline → run-proxy-disabled-tests).
+  halt-unless-proxy-disabled-enabled:
+    parameters:
+      disable-proxy:
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition:
+            and:
+              - equal: [ true, << parameters.disable-proxy >> ]
+              - equal: [ false, << pipeline.parameters.run-proxy-disabled-tests >> ]
+          steps:
+            - run:
+                name: Skipping proxy-disabled coverage — set run-proxy-disabled-tests=true to enable
+                command: circleci-agent step halt
+
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
@@ -1979,6 +2008,8 @@ jobs:
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-driver-tests >>
+      - halt-unless-proxy-disabled-enabled:
+          disable-proxy: << parameters.disable-proxy >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -2178,14 +2209,14 @@ jobs:
 
   # Fast, Node-only parity check for the CDP Fetch (proxy-disabled) network
   # interception path — mirrors run_unit_suite() in
-  # scripts/validate-proxy-middleware-transport.sh so the onion/middleware
-  # composition is validated under CYPRESS_INTERNAL_DISABLE_PROXY=1 on every push.
+  # scripts/validate-proxy-middleware-transport.sh. Opt-in via
+  # run-proxy-disabled-tests (Trigger Pipeline); off by default.
   unit-tests-proxy-disabled:
     <<: *defaults
     parallelism: 1
     steps:
       - halt-if-skipped:
-          guard: << pipeline.parameters.run-server-tests >>
+          guard: << pipeline.parameters.run-proxy-disabled-tests >>
       - restore_cached_workspace
       - run:
           name: Proxy middleware parity unit tests (CDP Fetch path)

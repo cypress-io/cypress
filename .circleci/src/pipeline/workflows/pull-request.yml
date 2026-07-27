@@ -268,9 +268,9 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Proxy-disabled (CDP Fetch) advisory coverage.
-  # Intentionally omitted from all-jobs-passed so failures are visible on develop PRs
-  # without blocking merge. Root-cause PRs can opt individual jobs into that gate.
+  # Proxy-disabled (CDP Fetch) coverage — off by default.
+  # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
+  # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
@@ -438,7 +438,7 @@ jobs:
   # Fan-in aggregator — the only required GitHub status check for PRs.
   # Required jobs fan into this one. Jobs that halt early (pipeline parameter
   # false) still complete successfully. Proxy-disabled *-cdp jobs above are
-  # intentionally omitted so they stay advisory until opted in.
+  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate.
   - all-jobs-passed:
       requires:
         # Always-run jobs
