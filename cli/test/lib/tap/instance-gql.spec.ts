@@ -68,6 +68,16 @@ describe('lib/tap/instance-gql', () => {
     })
   })
 
+  it('reports an unsupported instance when the request is redirected away from GraphQL', async () => {
+    fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
+
+    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
+      known: true,
+      details: errors.tapOutdatedProtocol,
+      message: expect.stringContaining('redirected'),
+    })
+  })
+
   it('surfaces a GraphQL error payload with its message', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ errors: [{ message: 'resolver exploded' }] }))
 

@@ -49,7 +49,7 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
   const { operationName, query, variables } = operation
   const url = `http://${GRAPHQL_HOST}:${instance.serverPort}${GRAPHQL_PATH}/${operationName}`
 
-  let response: { status: number, json (): Promise<unknown> }
+  let response: { status: number, redirected: boolean, json (): Promise<unknown> }
 
   try {
     response = await fetch(url, {
@@ -62,6 +62,14 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
     debug('graphql request %s to pid %d failed: %o', operationName, instance.pid, err)
 
     return throwTapError(errors.tapGraphqlUnreachable, `Could not reach the instance to run ${operationName}: ${err.message}`, err)
+  }
+
+  // A valid request passes the server's force-proxy guard untouched; a redirect
+  // means the guard sent us to the runner page because the instance doesn't allow
+  // direct tap GraphQL — an older Cypress that predates it (or one that rejected
+  // our instance-id). Report that instead of the runner HTML as a data error.
+  if (response.redirected) {
+    return throwTapError(errors.tapOutdatedProtocol, `The instance redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
   }
 
   if (response.status !== 200) {
