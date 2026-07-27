@@ -29,10 +29,15 @@ describe('tap binding', () => {
 
       expect(schema.schemaVersion).to.eq(1)
       expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests', 'commands'])
+      expect(schema.commands.map((command) => command.name)).not.to.include('console-props')
 
       const unknown = await binding.exec('not-a-command')
 
       expect((unknown as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
+
+      const consolePropsWithoutCommand = await binding.exec('commands', {}, { test: 'r1', props: 'true' })
+
+      expect((consolePropsWithoutCommand as { error: { code: string } }).error.code).to.eq('COMMAND_REQUIRED')
 
       // No spec has run yet, so there is no run to read — a domain failure.
       const testsBeforeRun = await binding.exec('tests')
@@ -42,6 +47,10 @@ describe('tap binding', () => {
       const commandsBeforeRun = await binding.exec('commands', {}, { test: 'r1' })
 
       expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+
+      const consolePropsBeforeRun = await binding.exec('commands', {}, { test: 'r1', command: 'log-1', props: 'true' })
+
+      expect((consolePropsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
       const outcome = await binding.exec('specs')
 
@@ -134,6 +143,18 @@ describe('tap binding', () => {
       const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
 
       expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const missingConsolePropsTest = await getBinding(win).exec('commands', {}, { test: 'not-a-test', command: commands[0].id as string, props: 'true' })
+
+      expect((missingConsolePropsTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const missingConsolePropsCommand = await getBinding(win).exec('commands', {}, { test: testId, command: 'not-a-command', props: 'true' })
+
+      expect((missingConsolePropsCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
+
+      const missingSelectedCommand = await getBinding(win).exec('commands', {}, { test: testId, command: 'not-a-command' })
+
+      expect((missingSelectedCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
 
       const runStateOutcome = await getBinding(win).exec('run-state')
 
@@ -243,9 +264,103 @@ describe('tap binding with a retrying spec', () => {
       expect(firstCommands.result.some((command) => command.state === 'failed')).to.eq(true)
       expect(latestCommands.result.every((command) => command.state !== 'failed')).to.eq(true)
 
+      const failedCommand = firstCommands.result.find((command) => command.state === 'failed')
+
+      expect(failedCommand, 'failed command from attempt 1').to.exist
+
+      const firstAttemptCommand = await binding.exec('commands', {}, {
+        test: testId,
+        command: failedCommand!.id as string,
+        attempt: '1',
+      })
+
+      expect((firstAttemptCommand as { result: Record<string, unknown> }).result).to.deep.eq(failedCommand)
+
+      const firstAttemptConsoleProps = await binding.exec('commands', {}, {
+        test: testId,
+        command: failedCommand!.id as string,
+        props: 'true',
+        attempt: '1',
+      })
+
+      expect('result' in firstAttemptConsoleProps).to.eq(true)
+      expect((firstAttemptConsoleProps as { result: Record<string, unknown> }).result).to.include({
+        name: failedCommand!.name,
+        type: 'command',
+      })
+
       const commandsOutOfRange = await binding.exec('commands', {}, { test: testId, attempt: '3' })
 
       expect((commandsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+
+      const consolePropsOutOfRange = await binding.exec('commands', {}, { test: testId, command: failedCommand!.id as string, props: 'true', attempt: '3' })
+
+      expect((consolePropsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+    })
+  })
+})
+
+describe('tap binding console properties', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  it('returns JSON-safe command details and reports unavailable details', () => {
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/console-props.cy.js' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
+      const getToggle = commands.find((command) => command.name === 'get' && command.message === '#toggle')
+      const emptyConsoleProps = commands.find((command) => command.name === 'empty-console-props')
+
+      expect(getToggle, 'the get #toggle command').to.exist
+      expect(emptyConsoleProps, 'the empty console props log').to.exist
+
+      const selectedCommand = await binding.exec('commands', {}, { test: testId, command: getToggle!.id as string })
+
+      const selected = (selectedCommand as { result: Record<string, unknown> }).result
+
+      expect(Object.keys(selected)).to.deep.eq(['id', 'name', 'message', 'state', 'type'])
+      expect(selected).to.deep.eq(getToggle)
+
+      const missingCommand = await binding.exec('commands', {}, { test: testId, props: 'true' })
+
+      expect((missingCommand as { error: { code: string } }).error.code).to.eq('COMMAND_REQUIRED')
+
+      const consolePropsOutcome = await binding.exec('commands', {}, { test: testId, command: getToggle!.id as string, props: 'true' })
+
+      expect('result' in consolePropsOutcome).to.eq(true)
+
+      const consoleProps = (consolePropsOutcome as { result: Record<string, any> }).result
+
+      expect(Object.keys(consoleProps)).to.deep.eq(['name', 'type', 'props'])
+      expect(consoleProps.name).to.eq('get')
+      expect(consoleProps.type).to.eq('command')
+      expect(Object.keys(consoleProps.props)).to.deep.eq(['Selector', 'Yielded', 'Elements'])
+      expect(consoleProps.props).to.deep.eq({
+        Selector: '#toggle',
+        Yielded: '<button#toggle>',
+        Elements: 1,
+      })
+
+      expect(JSON.parse(JSON.stringify(consoleProps))).to.deep.eq(consoleProps)
+
+      const unavailable = await binding.exec('commands', {}, { test: testId, command: emptyConsoleProps!.id as string, props: 'true' })
+
+      expect((unavailable as { error: { code: string } }).error.code).to.eq('CONSOLE_PROPS_UNAVAILABLE')
     })
   })
 })

@@ -77,10 +77,12 @@ const testsMeta = {
 
 const commandsMeta = {
   name: 'commands',
-  description: 'list the command log entries of a test of the active run',
+  description: 'list the command log entries of a test, detail one by id, or show its console properties with --props',
   params: [],
   options: [
     { ...testIdField, required: true },
+    { name: 'command', type: 'string', required: false, description: 'command id, as listed by this command without --command' },
+    { name: 'props', type: 'boolean', required: false, description: 'show the selected command’s console properties; requires --command' },
     attemptField,
   ],
 } as const satisfies TapCommandSchema

@@ -22,6 +22,152 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
 
+const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<object>, invokeFunction = false): any => {
+  if (BLACKLIST_PROPS.includes(key)) {
+    return null
+  }
+
+  if ($dom.isDom(value)) {
+    return $dom.stringify(value, 'short')
+  }
+
+  if (_.isFunction(value)) {
+    if (invokeFunction || groupsOrTableRe.test(key)) {
+      try {
+        return serializeConsolePropsValue(value(), key, ancestors)
+      } catch {
+        return null
+      }
+    }
+
+    try {
+      return value.toString()
+    } catch {
+      return null
+    }
+  }
+
+  if (_.isSymbol(value)) {
+    return value.toString()
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString()
+  }
+
+  if (typeof value === 'number' && !Number.isFinite(value)) {
+    return null
+  }
+
+  if (!_.isObject(value)) {
+    return value
+  }
+
+  if (ancestors.has(value)) {
+    return null
+  }
+
+  ancestors.add(value)
+
+  let toJSON
+
+  try {
+    toJSON = (value as any).toJSON
+  } catch {
+    toJSON = undefined
+  }
+
+  // `Date` and anything else that opts into a JSON form would otherwise
+  // serialize as `{}`, since their state lives in internal slots.
+  if (_.isFunction(toJSON)) {
+    let serialized
+
+    try {
+      serialized = serializeConsolePropsValue(toJSON.call(value), key, ancestors)
+    } catch {
+      serialized = null
+    }
+
+    ancestors.delete(value)
+
+    return serialized
+  }
+
+  if (_.isMap(value) || _.isSet(value)) {
+    let entries
+
+    try {
+      entries = _.isMap(value) ? [...value.entries()] : [...value.values()]
+    } catch {
+      entries = undefined
+    }
+
+    const serialized = entries ? serializeConsolePropsValue(entries, '', ancestors) : null
+
+    ancestors.delete(value)
+
+    return serialized
+  }
+
+  if (_.isArray(value)) {
+    const serialized: any[] = []
+    let length: number
+
+    try {
+      length = value.length
+    } catch {
+      ancestors.delete(value)
+
+      return null
+    }
+
+    for (let index = 0; index < length; index++) {
+      try {
+        serialized.push(serializeConsolePropsValue(value[index], '', ancestors) ?? null)
+      } catch {
+        serialized.push(null)
+      }
+    }
+
+    ancestors.delete(value)
+
+    return serialized
+  }
+
+  const serialized: Record<string, any> = {}
+  const invokeChildren = key === 'table'
+  let childKeys: string[]
+
+  try {
+    childKeys = Object.keys(value)
+  } catch {
+    ancestors.delete(value)
+
+    return null
+  }
+
+  for (const childKey of childKeys) {
+    let childValue
+
+    try {
+      childValue = value[childKey]
+    } catch {
+      Object.defineProperty(serialized, childKey, { value: null, enumerable: true, configurable: true, writable: true })
+      continue
+    }
+
+    const child = serializeConsolePropsValue(childValue, childKey, ancestors, invokeChildren)
+
+    if (child !== undefined) {
+      Object.defineProperty(serialized, childKey, { value: child, enumerable: true, configurable: true, writable: true })
+    }
+  }
+
+  ancestors.delete(value)
+
+  return serialized
+}
+
 // Log attrs on `test.routes` / `agents` / `commands` / `hooks` retain payloads
 // (stringified args, URLs, `consoleProps`, custom `Cypress.log` fields, etc.) after a
 // test falls out of `numTestsKeptInMemory`. Everything not in this allowlist is set to
@@ -123,6 +269,10 @@ export const LogUtils = {
     }
 
     return _.mapValues(attrs, stringify)
+  },
+
+  toSerializedConsoleProps (consoleProps) {
+    return serializeConsolePropsValue(consoleProps, '', new WeakSet())
   },
 
   getDisplayProps: (attrs) => {

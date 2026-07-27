@@ -166,6 +166,120 @@ describe('tap/commands/commands', () => {
     })
   })
 
+  it('returns one lean command entry when --command is passed without --props', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', command: 'log-2' })).to.deep.eq({
+      result: { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+    })
+  })
+
+  it('requires --command when --props is passed', async () => {
+    const getRunner = stubRunner(undefined)
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', props: 'true' })).to.deep.eq({
+      error: {
+        code: 'COMMAND_REQUIRED',
+        message: 'pass --command <id> with --props — omit both options to list this test’s commands',
+      },
+    })
+
+    expect(getRunner).not.to.have.been.called
+  })
+
+  it('returns JSON-safe console properties for the command selected by --props', async () => {
+    const consoleProps = {
+      name: 'get',
+      type: 'command',
+      props: {
+        Selector: '#user',
+        Elements: 1,
+        Yielded: '<input#user>',
+        Handler: 'function handler () {}',
+        cycle: null,
+      },
+      table: {
+        1: {
+          name: 'Elements',
+          data: [{ Element: '<input#user>' }],
+          columns: ['Element'],
+        },
+      },
+    }
+    const getSerializedConsolePropsForLog = cy.stub().returns(consoleProps)
+
+    stubRunner({
+      getTestState: (id: string) => TESTS_STATE[id],
+      getSerializedConsolePropsForLog,
+    })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', command: 'log-2', props: 'true' })
+
+    expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2')
+    expect(outcome).to.deep.eq({ result: consoleProps })
+    expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
+  })
+
+  it('selects console properties from the requested retry attempt', async () => {
+    const consoleProps = { name: 'get', type: 'command', props: { Yielded: null } }
+    const getSerializedConsolePropsForLog = cy.stub().returns(consoleProps)
+
+    stubRunner({
+      getTestState: (id: string) => TESTS_STATE[id],
+      getSerializedConsolePropsForLog,
+    })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', command: 'log-b', props: 'true', attempt: '1' })
+
+    expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-b')
+    expect(outcome).to.deep.eq({ result: consoleProps })
+  })
+
+  it('preserves the driver’s memory-cleanup message', async () => {
+    const cleanup = { Message: 'The command details and snapshot has been cleaned up to reduce the number of tests in memory.' }
+
+    stubRunner({
+      getTestState: (id: string) => TESTS_STATE[id],
+      getSerializedConsolePropsForLog: () => cleanup,
+    })
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r4', command: 'log-c', props: 'true' })).to.deep.eq({
+      result: cleanup,
+    })
+  })
+
+  it('fails with COMMAND_NOT_FOUND when --props does not identify a command in the selected attempt', async () => {
+    const getSerializedConsolePropsForLog = cy.stub()
+
+    stubRunner({
+      getTestState: (id: string) => TESTS_STATE[id],
+      getSerializedConsolePropsForLog,
+    })
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', command: 'log-2', props: 'true', attempt: '1' })).to.deep.eq({
+      error: {
+        code: 'COMMAND_NOT_FOUND',
+        message: 'no command of this test matches the id "log-2" — omit --command to list this test’s commands',
+      },
+    })
+
+    expect(getSerializedConsolePropsForLog).not.to.have.been.called
+  })
+
+  it('fails with CONSOLE_PROPS_UNAVAILABLE when the driver has no details for a listed command', async () => {
+    stubRunner({
+      getTestState: (id: string) => TESTS_STATE[id],
+      getSerializedConsolePropsForLog: () => undefined,
+    })
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', command: 'log-2', props: 'true' })).to.deep.eq({
+      error: {
+        code: 'CONSOLE_PROPS_UNAVAILABLE',
+        message: 'this command has no console properties available — command details are captured in open mode and kept only for the most recent tests (numTestsKeptInMemory)',
+      },
+    })
+  })
+
   it('returns an empty command list for a known test that has not run yet, and round-trips through JSON', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
 

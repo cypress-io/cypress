@@ -67,6 +67,158 @@ describe('LogUtils.reduceMemory', () => {
   })
 })
 
+describe('LogUtils.toSerializedConsoleProps', () => {
+  it('projects DOM, tables, functions, cycles, and throwing values into JSON-safe data', () => {
+    const button = document.createElement('button')
+    const cycle: Record<string, unknown> = { label: 'cycle' }
+    const throwing = {}
+    const unreadable = new Proxy({}, {
+      ownKeys () {
+        throw new Error('nope')
+      },
+    })
+    const protoValue = JSON.parse('{"__proto__":{"polluted":true}}')
+    const throwingArray = [1, 2]
+
+    Object.defineProperty(throwingArray, 1, {
+      get () {
+        throw new Error('nope')
+      },
+    })
+
+    throwingArray[Symbol.iterator] = () => {
+      throw new Error('nope')
+    }
+
+    button.id = 'submit'
+    button.className = 'primary'
+    cycle.self = cycle
+    Object.defineProperty(throwing, 'value', {
+      enumerable: true,
+      get () {
+        throw new Error('nope')
+      },
+    })
+
+    const result = LogUtils.toSerializedConsoleProps({
+      name: 'click',
+      type: 'command',
+      props: {
+        Yielded: button,
+        Handler: function handler () {},
+        cycle,
+        throwing,
+        unreadable,
+        sparse: new Array(2),
+        throwingArray,
+        protoValue,
+        count: 1n,
+      },
+      table: {
+        1: () => {
+          return {
+            name: 'Mouse Events',
+            data: [{ Target: button }],
+            columns: ['Target'],
+          }
+        },
+        2: () => {
+          throw new Error('nope')
+        },
+      },
+    })
+
+    expect(result).toEqual({
+      name: 'click',
+      type: 'command',
+      props: {
+        Yielded: '<button#submit.primary>',
+        Handler: result.props.Handler,
+        cycle: { label: 'cycle', self: null },
+        throwing: { value: null },
+        unreadable: null,
+        sparse: [null, null],
+        throwingArray: [1, null],
+        protoValue,
+        count: '1',
+      },
+      table: {
+        1: {
+          name: 'Mouse Events',
+          data: [{ Target: '<button#submit.primary>' }],
+          columns: ['Target'],
+        },
+        2: null,
+      },
+    })
+
+    expect(result.props.Handler).toContain('function handler')
+    expect(Object.prototype.hasOwnProperty.call(result.props.protoValue, '__proto__')).toBe(true)
+    expect(result.props.protoValue.__proto__).toEqual({ polluted: true })
+    expect((Object.prototype as any).polluted).toBeUndefined()
+    expect(() => JSON.stringify(result)).not.toThrow()
+  })
+
+  it('keeps the contents of values whose state is not enumerable', () => {
+    const throwingToJSON = {
+      toJSON () {
+        throw new Error('nope')
+      },
+    }
+
+    const uniterable = new Set([1])
+
+    uniterable.values = () => {
+      throw new Error('nope')
+    }
+
+    const result = LogUtils.toSerializedConsoleProps({
+      name: 'request',
+      props: {
+        date: new Date('2026-07-27T12:00:00.000Z'),
+        map: new Map<any, any>([['token', 'abc'], [1, { nested: true }]]),
+        set: new Set(['a', 'b']),
+        serializable: { toJSON: () => ({ shape: 'custom' }) },
+        throwingToJSON,
+        uniterable,
+      },
+    })
+
+    expect(result).toEqual({
+      name: 'request',
+      props: {
+        date: '2026-07-27T12:00:00.000Z',
+        map: [['token', 'abc'], [1, { nested: true }]],
+        set: ['a', 'b'],
+        serializable: { shape: 'custom' },
+        throwingToJSON: null,
+        uniterable: null,
+      },
+    })
+
+    expect(() => JSON.stringify(result)).not.toThrow()
+  })
+
+  it('does not recurse when a value serializes to itself', () => {
+    const selfJSON: Record<string, unknown> = { label: 'self' }
+
+    selfJSON.toJSON = () => selfJSON
+
+    const cyclicMap = new Map<string, unknown>()
+
+    cyclicMap.set('self', cyclicMap)
+
+    const result = LogUtils.toSerializedConsoleProps({ props: { selfJSON, cyclicMap } })
+
+    expect(result).toEqual({
+      props: {
+        selfJSON: null,
+        cyclicMap: [['self', null]],
+      },
+    })
+  })
+})
+
 describe('Log#snapshot gating', () => {
   afterEach(() => {
     delete (globalThis as any).Cypress

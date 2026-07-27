@@ -5,6 +5,8 @@ export interface TapTestsRunner {
   getAllTestsState (): Record<string, SerializedTest>
   /** Serializes one test by id lookup, skipping the whole-run serialization cost. */
   getTestState (testId: string): SerializedTest | undefined
+  /** Returns one command's console properties projected for the JSON-only tap transport. */
+  getSerializedConsolePropsForLog (testId: string, logId: string): ConsolePropsResult | undefined
   isRunComplete (): boolean
 }
 
@@ -32,6 +34,10 @@ export interface PinSnapshotRunner {
   getTestState (testId: string): SerializedTest | undefined
   getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
 }
+
+export type TapJsonValue = null | boolean | number | string | TapJsonValue[] | { [key: string]: TapJsonValue }
+
+export type ConsolePropsResult = { [key: string]: TapJsonValue }
 
 /**
  * The slice of the AUT iframe the pin command drives directly. `detachDom`

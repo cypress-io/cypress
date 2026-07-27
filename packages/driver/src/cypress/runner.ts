@@ -1999,6 +1999,25 @@ export default {
         return
       },
 
+      getSerializedConsolePropsForLog (testId, logId) {
+        if (_skipCollectingLogs) return
+
+        const test = getTestById(testId)
+
+        if (!test) return
+
+        const attempts = [test, ...(test.prevAttempts || [])]
+        const logAttrs = _.find(_.flatMap(attempts, (attempt) => attempt.commands || []), (log) => log.id === logId)
+
+        if (!logAttrs) return
+
+        if (logAttrs._hasBeenCleanedUp) {
+          return { Message: `The command details and snapshot has been cleaned up to reduce the number of tests in memory.` }
+        }
+
+        return LogUtils.toSerializedConsoleProps(LogUtils.getConsoleProps(logAttrs))
+      },
+
       getSnapshotPropsForLog (testId, logId) {
         if (_skipCollectingLogs) return
 

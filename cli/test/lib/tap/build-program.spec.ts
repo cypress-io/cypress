@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import commander from 'commander'
 
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import type { TapSchema } from '@packages/cypress-instances'
+import { buildTapSchema, type TapSchema } from '@packages/cypress-instances'
 
 const schema: TapSchema = {
   schemaVersion: 1,
@@ -173,6 +173,21 @@ describe('lib/tap/build-program', () => {
     program.parse(['run', 'a.cy.js', '--browser', 'chrome', '--port', '8080', '--headed'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith('run', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' })
+  })
+
+  it('declares and forwards commands --command with the --props output mode from the shared contract', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
+    const help = subcommand(program, 'commands').helpInformation()
+
+    expect(help).toContain('--test <test>')
+    expect(help).toContain('--command <command>')
+    expect(help).toContain('--props')
+    expect(help).toContain('--attempt <attempt>')
+
+    program.parse(['commands', '--test', 'r2', '--command', 'log-3', '--props', '--attempt', '1'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('commands', {}, { test: 'r2', command: 'log-3', props: 'true', attempt: '1' })
   })
 
   it('resolves a short alias to its option name', () => {
