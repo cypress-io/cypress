@@ -102,9 +102,19 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
     const [mechanism, credentials] = authHeader.split(' ', 2)
 
     if (mechanism && credentials && mechanism.toLowerCase() === 'basic') {
-      const [username, password] = Buffer.from(credentials, 'base64').toString().split(':', 2)
+      const decoded = Buffer.from(credentials, 'base64').toString()
+      // Basic credentials must contain a colon separating the userid from the
+      // password; only the first colon is the separator, so the password may
+      // itself contain colons (RFC 7617). Ignore malformed credentials with no
+      // separator rather than fabricating an auth matchable.
+      const separatorIndex = decoded.indexOf(':')
 
-      matchable.auth = { username, password }
+      if (separatorIndex !== -1) {
+        matchable.auth = {
+          username: decoded.slice(0, separatorIndex),
+          password: decoded.slice(separatorIndex + 1),
+        }
+      }
     }
   }
 
