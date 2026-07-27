@@ -4,7 +4,7 @@ export * from './tap-contract'
 
 export * from './tap-operations'
 
-export type { TapSpecsQuery, TapSpecsQueryVariables } from './generated/graphql'
+export type { TapSpecsQuery, TapSpecsQueryVariables, TapRunSpecMutation, TapRunSpecMutationVariables } from './generated/graphql'
 
 export const SCHEMA_VERSION = 1
 

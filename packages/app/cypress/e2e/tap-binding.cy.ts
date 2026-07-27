@@ -28,7 +28,7 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['run', 'tests', 'commands'])
+      expect(schema.commands.map((command) => command.name)).to.include.members(['tests', 'commands'])
 
       const unknown = await binding.exec('not-a-command')
 
@@ -43,11 +43,15 @@ describe('tap binding', () => {
 
       expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      // specs is a CLI-native command now — the CLI reads the spec list directly
-      // over the instance's GraphQL — so the binding no longer serves it.
+      // specs and run are CLI-native commands now — the CLI reads the spec list and
+      // triggers runs directly over the instance's GraphQL — so the binding no longer serves them.
       const specsOutcome = await binding.exec('specs')
 
       expect((specsOutcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
+
+      const runOutcome = await binding.exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })
+
+      expect((runOutcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
 
       // With no run yet there is no runner to read, so run-state omits the run-only fields.
       const runStateBeforeRun = await binding.exec('run-state')
@@ -62,18 +66,8 @@ describe('tap binding', () => {
     })
   })
 
-  it('runs and reruns a spec via the run command', () => {
-    cy.window().then(async (win) => {
-      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })
-
-      expect(outcome).to.deep.eq({
-        result: { relativePath: 'cypress/e2e/dom-content.spec.js' },
-      })
-    })
-
-    cy.location('hash')
-    .should('contain', '/specs/runner?file=cypress/e2e/dom-content.spec.js')
-    .and('match', /tapRun=\d+/)
+  it('reads tests, commands, and run-state for a completed run', () => {
+    cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js')
 
     cy.waitForSpecToFinish({ passCount: 1 })
     cy.contains('Dom Content').should('be.visible')
@@ -143,30 +137,6 @@ describe('tap binding', () => {
       expect(runState.results.passed).to.eq(tests.length)
       expect(runState.results.failed).to.eq(0)
     })
-
-    // Rerunning advances the nonce, so the query changes even though the spec is unchanged.
-    cy.location('hash').then((hashBefore) => {
-      cy.window().then(async (win) => {
-        const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })
-
-        expect('result' in outcome).to.eq(true)
-      })
-
-      cy.location('hash').should('not.eq', hashBefore)
-      cy.waitForSpecToFinish({ passCount: 1 })
-    })
-
-    cy.location('hash').then((hashBefore) => {
-      cy.window().then(async (win) => {
-        const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/does-not-exist.cy.js' })
-
-        expect((outcome as { error: { code: string } }).error.code).to.eq('SPEC_NOT_FOUND')
-        expect((outcome as { error: { message: string } }).error.message).to.contain('cypress/e2e/does-not-exist.cy.js')
-      })
-
-      // A domain failure never navigates.
-      cy.location('hash').should('eq', hashBefore)
-    })
   })
 })
 
@@ -183,11 +153,7 @@ describe('tap binding with a retrying spec', () => {
   })
 
   it('selects a retried test’s attempt via --attempt on tests and commands', () => {
-    cy.window().then(async (win) => {
-      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/retries.cy.js' })
-
-      expect('result' in outcome).to.eq(true)
-    })
+    cy.visitApp('/specs/runner?file=cypress/e2e/retries.cy.js')
 
     // The test fails on its first attempt, then passes on the retry.
     cy.waitForSpecToFinish({ passCount: 1 })
@@ -257,11 +223,7 @@ describe('tap binding pin lifecycle', () => {
   })
 
   const runPinTargetSpec = () => {
-    cy.window().then(async (win) => {
-      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/pin-target.cy.js' })
-
-      expect('result' in outcome).to.eq(true)
-    })
+    cy.visitApp('/specs/runner?file=cypress/e2e/pin-target.cy.js')
 
     cy.waitForSpecToFinish({ passCount: 1 })
   }

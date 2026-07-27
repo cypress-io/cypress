@@ -48,15 +48,6 @@ export type TapExecResult =
 const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the tests command' } as const
 const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
 
-const runMeta = {
-  name: 'run',
-  description: 'run (or rerun) a spec by its project-relative path',
-  params: [
-    { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
-  ],
-  options: [],
-} as const satisfies TapCommandSchema
-
 const testsMeta = {
   name: 'tests',
   description: 'list the tests of the active run and their state, or detail one by id',
@@ -104,7 +95,6 @@ const runStateMeta = {
 // TapManager), and the CLI stamps it with its own version to render help with no
 // instance attached. Order here is the order commands list in help.
 export const TAP_COMMANDS = [
-  runMeta,
   testsMeta,
   commandsMeta,
   pinMeta,
@@ -138,6 +128,18 @@ export interface TapNativeCommandSchema {
   params?: readonly TapCommandParamSchema[]
   options?: readonly TapCommandOptionSchema[]
 }
+
+const runMeta = {
+  name: 'run',
+  description: 'run (or rerun) a spec by its project-relative path',
+  details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
+command. If no browser is open it launches one, switching to the spec's testing
+type when needed, then starts the run and returns immediately — it does not wait
+for the run to finish. Poll the status command for run progress.`,
+  params: [
+    { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
+  ],
+} as const satisfies TapNativeCommandSchema
 
 const instancesMeta = {
   name: 'instances',
@@ -199,6 +201,7 @@ export const TAP_NATIVE_COMMANDS = [
   instancesMeta,
   statusMeta,
   specsMeta,
+  runMeta,
   domMeta,
   ariaMeta,
   inspectMeta,

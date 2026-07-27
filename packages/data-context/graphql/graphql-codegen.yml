@@ -121,13 +121,14 @@ generates:
       - '../cypress-instances/lib/**/*.ts'
     config:
       <<: *documentFilters
+      # Emit the scalar map, and only the enums/inputs the tap operations use,
+      # so a mutation referencing e.g. RunSpecErrorCode resolves without pulling
+      # in the whole schema's types.
+      onlyOperationTypes: true
     plugins:
       - add:
-          content: |
-            /* eslint-disable */
-            type Maybe<T> = T | null;
-            type InputMaybe<T> = Maybe<T>;
-            type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+          content: '/* eslint-disable */'
+      - 'typescript'
       - 'typescript-operations'
   ###
   # All GraphQL documents imported into the .spec.tsx files for component testing.
