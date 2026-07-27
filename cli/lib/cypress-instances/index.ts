@@ -105,10 +105,6 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   const matches = records.filter((record) => matchesInstance(record, instance))
 
   if (matches.length === 0) {
-    // NO_INSTANCE means nothing is running, so the guidance stops at starting
-    // Cypress — commands that also need a browser raise NO_BROWSER_ATTACHED once
-    // an instance is found. Naming a browser here would misguide `specs`/`status`,
-    // which work before a browser is attached.
     throw new CypressInstanceError(
       'NO_INSTANCE',
       `No Cypress instance found${describeFilter(instance)}. This command requires Cypress running in open mode. Start Cypress in open mode and try again.`,
