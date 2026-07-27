@@ -90,7 +90,9 @@ export class OpenProject extends EventEmitter {
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
       ...(isProxyEnabled() ? { proxyServer: ensureProxyServer(cfg) } : {
-        ...translateEgressPolicyToLaunchOpts(),
+        // Chromium-family only: Firefox/WebKit parse proxyServer differently and
+        // do not honor Chromium bypass / scheme-map syntax yet (#34351).
+        ...(browser.family === 'chromium' ? translateEgressPolicyToLaunchOpts() : {}),
         hosts: cfg.hosts,
         onPageCriClientReady: (client, isAUTFrame) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame)

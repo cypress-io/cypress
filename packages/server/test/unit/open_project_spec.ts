@@ -63,7 +63,7 @@ describe('lib/open_project', () => {
         relative: 'path/to/spec',
       }
 
-      this.browser = { name: 'chrome' }
+      this.browser = { name: 'chrome', family: 'chromium' }
     })
 
     it('tells preprocessor to remove file on browser close', function () {
@@ -219,12 +219,18 @@ describe('lib/open_project', () => {
             HTTP_PROXY: process.env.HTTP_PROXY,
             HTTPS_PROXY: process.env.HTTPS_PROXY,
             NO_PROXY: process.env.NO_PROXY,
+            http_proxy: process.env.http_proxy,
+            https_proxy: process.env.https_proxy,
+            no_proxy: process.env.no_proxy,
           }
 
           process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
           delete process.env.HTTP_PROXY
           delete process.env.HTTPS_PROXY
           delete process.env.NO_PROXY
+          delete process.env.http_proxy
+          delete process.env.https_proxy
+          delete process.env.no_proxy
           delete this.config.proxyServer
         })
 
@@ -246,7 +252,7 @@ describe('lib/open_project', () => {
           expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
         })
 
-        it('passes the upstream proxy and bypass list to the browser', async function () {
+        it('passes the upstream proxy and bypass list to chromium browsers', async function () {
           process.env.HTTP_PROXY = 'http://proxy.example:8080'
           process.env.NO_PROXY = '<-loopback>,localhost,example.com'
 
@@ -256,6 +262,16 @@ describe('lib/open_project', () => {
             proxyServer: 'http://proxy.example:8080',
             proxyBypassList: '<-loopback>,localhost,example.com',
           })
+        })
+
+        it('does not pass upstream proxy opts to non-chromium browsers', async function () {
+          process.env.HTTP_PROXY = 'http://proxy.example:8080'
+          process.env.NO_PROXY = '<-loopback>,localhost,example.com'
+
+          await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
+          expect(browsers.open.lastCall.args[1].proxyBypassList).to.be.undefined
         })
       })
     })
