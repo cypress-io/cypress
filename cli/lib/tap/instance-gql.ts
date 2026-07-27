@@ -65,15 +65,11 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
   }
 
   if (response.status !== 200) {
-    // A non-200 can still carry a GraphQL error envelope — express-graphql answers
-    // parse/validation failures (e.g. schema skew) with 400 + { errors: [...] }.
-    // Surface that message rather than a misleading "unreachable".
-    const envelope = await response.json().catch(() => null) as GraphqlEnvelope | null
-    const errorMessage = envelope ? firstErrorMessage(envelope.errors) : null
+    // express-graphql answers parse/validation failures with 400 + { errors: [...] };
+    // log it for debugging, but still report unreachable to the user.
+    const envelope = await response.json().catch(() => null)
 
-    if (errorMessage !== null) {
-      return throwTapError(errors.tapGraphqlFailed, `The instance failed to run ${operationName}: ${errorMessage}`)
-    }
+    debug('graphql request %s to pid %d answered %d: %o', operationName, instance.pid, response.status, envelope)
 
     return throwTapError(errors.tapGraphqlUnreachable, `The instance answered ${operationName} with status ${response.status}.`)
   }

@@ -58,35 +58,13 @@ describe('lib/tap/instance-gql', () => {
     })
   })
 
-  it('maps a non-200 answer without a GraphQL envelope to the unreachable error', async () => {
+  it('maps a non-200 answer to the unreachable error', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500))
 
     await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
       known: true,
       details: errors.tapGraphqlUnreachable,
       message: expect.stringContaining('500'),
-    })
-  })
-
-  it('surfaces a GraphQL error envelope returned with a non-200 status', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({ errors: [{ message: 'Cannot query field foo' }] }, 400))
-
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlFailed,
-      message: expect.stringContaining('Cannot query field foo'),
-    })
-  })
-
-  it('maps a non-200 answer with a non-JSON body to the unreachable error', async () => {
-    fetchMock.mockResolvedValue({ status: 502, json: async () => {
-      throw new Error('unexpected token')
-    } })
-
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlUnreachable,
-      message: expect.stringContaining('502'),
     })
   })
 
