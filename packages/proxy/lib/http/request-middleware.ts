@@ -123,7 +123,7 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
     const bidiStyleCookie = /;\S/gm
 
     if (cookies.match(bidiStyleCookie)) {
-      this.req.headers.cookie = cookies.replaceAll(';', '; ')
+      this.req.headers.cookie = cookies.replace(/;\s*/g, '; ')
     }
   }
 
