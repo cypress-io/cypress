@@ -76,6 +76,7 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
       name: 'FrameCommandError',
       code: 'RUN_IN_PROGRESS',
+      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
     })
   })
 

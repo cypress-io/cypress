@@ -2,6 +2,7 @@ import { defineCommand, TapCommandError } from './definition'
 import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner } from '../types'
+import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
 
 export interface SnapshotRef {
   index: number
@@ -168,7 +169,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
   }
 
   if (tapManagerDataSource.isRunning()) {
-    throw new TapCommandError('RUN_IN_PROGRESS', 'a spec is currently running — wait for it to finish before pinning a snapshot')
+    throw new TapCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
   }
 
   if (pinned && pinned.test === test && pinned.command === command) {

@@ -10,6 +10,7 @@ import type { TapSchema, TapExecResult } from '@packages/cypress-instances/lib/t
 export {
   TAP_SCHEMA_VERSION,
   TAP_COMMANDS,
+  TAP_RUN_IN_PROGRESS_MESSAGE,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 export type {

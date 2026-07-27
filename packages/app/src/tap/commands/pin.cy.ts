@@ -397,7 +397,10 @@ describe('tap/commands/pin', () => {
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', { test: 'r2', command: 'log-1' })
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('RUN_IN_PROGRESS')
+    expect((outcome as { error: { code: string, message: string } }).error).to.deep.eq({
+      code: 'RUN_IN_PROGRESS',
+      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
+    })
   })
 
   it('fails with TEST_NOT_FOUND and COMMAND_NOT_FOUND for unknown ids', async () => {

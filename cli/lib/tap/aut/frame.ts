@@ -6,7 +6,7 @@ import { withTapSession, validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
 import { renderResult, renderFailure, renderKnownFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
-import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -113,7 +113,7 @@ export const assertFrameReadable = async (session: TapSession): Promise<void> =>
   }
 
   if (state === 'running') {
-    throw new FrameCommandError('RUN_IN_PROGRESS', 'a spec is currently running — the app under test is still in flux; wait for the run to complete (status passed or failed) before reading it')
+    throw new FrameCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
   }
 }
 
