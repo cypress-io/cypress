@@ -46,7 +46,10 @@ const makeRecord = (overrides: Record<string, any> = {}) => {
   })
 }
 
-const CDP_WS_URL = 'ws://127.0.0.1:9222/devtools/browser/abc'
+// Set per-test to a reachable fake DevTools endpoint so the liveness probe's
+// CDP reachability check passes; tests that need an unreachable endpoint build
+// their own url from a closed port.
+let CDP_WS_URL!: string
 
 const stubKill = ({ alive = [], eperm = [] }: { alive?: number[], eperm?: number[] }) => {
   vi.spyOn(process, 'kill').mockImplementation(((pid: number) => {
@@ -88,6 +91,27 @@ describe('lib/cypress-instances', () => {
     return (server.address() as AddressInfo).port
   }
 
+  // A browser's DevTools HTTP endpoint answering /json/version, so the liveness
+  // probe's CDP reachability check treats CDP_WS_URL as a live browser.
+  const startFakeCdpEndpoint = async (): Promise<number> => {
+    const server = http.createServer((req, res) => {
+      if (req.url === '/json/version') {
+        res.setHeader('content-type', 'application/json')
+        res.end(JSON.stringify({ webSocketDebuggerUrl: 'ws://127.0.0.1/devtools/browser/abc' }))
+
+        return
+      }
+
+      res.statusCode = 404
+      res.end()
+    })
+
+    servers.push(server)
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()))
+
+    return (server.address() as AddressInfo).port
+  }
+
   const getClosedPort = async (): Promise<number> => {
     const server = http.createServer()
 
@@ -100,9 +124,11 @@ describe('lib/cypress-instances', () => {
     return port
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.restoreAllMocks()
     vi.mocked(state.getCacheDir).mockReturnValue(CACHE_DIR)
+
+    CDP_WS_URL = `ws://127.0.0.1:${await startFakeCdpEndpoint()}/devtools/browser/abc`
   })
 
   afterEach(async () => {
@@ -151,6 +177,19 @@ describe('lib/cypress-instances', () => {
 
     it('normalizes a missing or junk cdpBrowserWsUrl in the probe response to null', async () => {
       const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: 42 } })
+
+      expect((await verifyInstanceRecord(recordFor(port)))!.cdpBrowserWsUrl).toBeNull()
+    })
+
+    it('nulls the CDP endpoint when the browser is gone, even though the probe still echoes a url', async () => {
+      const deadCdpPort = await getClosedPort()
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: `ws://127.0.0.1:${deadCdpPort}/devtools/browser/abc` } })
+
+      expect((await verifyInstanceRecord(recordFor(port)))!.cdpBrowserWsUrl).toBeNull()
+    })
+
+    it('nulls a malformed cdpBrowserWsUrl that has no reachable endpoint to derive', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: 'not-a-ws-url' } })
 
       expect((await verifyInstanceRecord(recordFor(port)))!.cdpBrowserWsUrl).toBeNull()
     })
