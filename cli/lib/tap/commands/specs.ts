@@ -1,13 +1,10 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
+import { TapSpecsOperation } from '@packages/cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
 import { renderFailure, renderKnownFailure, renderResult } from '../output'
 import { defineNativeCommand } from './definition'
+import type { TapSpecsQuery } from '@packages/cypress-instances'
 import type { TapCliOptions } from '../types'
-
-const TAP_SPECS_OPERATION = {
-  operationName: 'TapSpecs',
-  query: 'query TapSpecs { currentProject { specs { relative gitInfo { lastModifiedHumanReadable lastModifiedTimestamp } } } }',
-}
 
 interface TapSpecEntry {
   relativePath: string
@@ -15,29 +12,14 @@ interface TapSpecEntry {
   lastModifiedTimestamp?: string
 }
 
-interface SpecGitInfo {
-  lastModifiedHumanReadable?: unknown
-  lastModifiedTimestamp?: unknown
-}
-
-interface TapSpecsData {
-  currentProject?: {
-    specs?: Array<{
-      relative?: unknown
-      gitInfo?: SpecGitInfo | null
-    } | null>
-  } | null
-}
-
-const toSpecList = (data: TapSpecsData): TapSpecEntry[] => {
-  const specs = Array.isArray(data.currentProject?.specs) ? data.currentProject.specs : []
+// `TapSpecsQuery` is the schema shape, but the value crosses the wire unvalidated,
+// so entries are guarded against nulls and non-string fields before rendering.
+const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
+  const specs = data.currentProject?.specs ?? []
 
   return specs
-    .filter((spec): spec is { relative: string, gitInfo?: SpecGitInfo | null } => typeof spec?.relative === 'string')
+    .filter((spec) => typeof spec?.relative === 'string')
     .map((spec) => {
-      // `lastModified` is git's human-readable time (e.g. "3 days ago");
-      // `lastModifiedTimestamp` is the raw commit time. Both absent for
-      // untracked specs.
       const lastModified = spec.gitInfo?.lastModifiedHumanReadable
       const lastModifiedTimestamp = spec.gitInfo?.lastModifiedTimestamp
 
@@ -52,7 +34,7 @@ const toSpecList = (data: TapSpecsData): TapSpecEntry[] => {
 const listSpecs = async (options: TapCliOptions): Promise<number> => {
   try {
     const { instance } = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
-    const data = await queryInstanceGraphql<TapSpecsData>(instance, TAP_SPECS_OPERATION)
+    const data = await queryInstanceGraphql(instance, TapSpecsOperation)
 
     renderResult(toSpecList(data))
 

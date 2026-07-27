@@ -108,6 +108,27 @@ generates:
   '../frontend-shared/src/generated/graphql.ts':
     documents: '../frontend-shared/src/{gql-components,graphql,composables}/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueOperations
+
+  ###
+  # Operation result types for the tap CLI's direct GraphQL transport. The queries
+  # live as plain strings in @packages/cypress-instances (plucked via the /* GraphQL */
+  # magic comment) so the CLI can send them without a graphql runtime; codegen
+  # validates them against the schema and emits their result/variable types.
+  ###
+  '../cypress-instances/lib/generated/graphql.ts':
+    schema: './schemas/schema.graphql'
+    documents:
+      - '../cypress-instances/lib/**/*.ts'
+    config:
+      <<: *documentFilters
+    plugins:
+      - add:
+          content: |
+            /* eslint-disable */
+            type Maybe<T> = T | null;
+            type InputMaybe<T> = Maybe<T>;
+            type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+      - 'typescript-operations'
   ###
   # All GraphQL documents imported into the .spec.tsx files for component testing.
   # Similar to generated/graphql.ts, except it doesn't include the flattening for the document nodes,

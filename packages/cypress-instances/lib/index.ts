@@ -2,6 +2,10 @@ import path from 'path'
 
 export * from './tap-contract'
 
+export * from './tap-operations'
+
+export type { TapSpecsQuery, TapSpecsQueryVariables } from './generated/graphql'
+
 export const SCHEMA_VERSION = 1
 
 export const MIN_SCHEMA_VERSION = 1

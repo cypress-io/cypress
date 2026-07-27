@@ -3,21 +3,13 @@ import Debug from 'debug'
 import { errors } from '../errors'
 import { throwTapError } from './tap-session'
 import type { LiveInstanceState } from '../cypress-instances'
+import type { TapGraphqlOperation } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
 const GRAPHQL_HOST = '127.0.0.1'
-// The app server mounts the full GraphQL schema under its reserved namespace
-// (packages/server/lib/routes.ts), on the same port the discovery record
-// already carries — no separate port handshake is needed.
 const GRAPHQL_PATH = '/__cypress/graphql'
 const DEFAULT_QUERY_TIMEOUT_MS = 4000
-
-interface InstanceGraphqlQuery {
-  operationName: string
-  query: string
-  variables?: Record<string, unknown>
-}
 
 interface GraphqlEnvelope {
   data?: unknown
@@ -52,8 +44,9 @@ const validateEnvelope = <T>(operationName: string, envelope: GraphqlEnvelope | 
   return envelope.data as T
 }
 
-export const queryInstanceGraphql = async <T = unknown>(instance: LiveInstanceState, request: InstanceGraphqlQuery, timeoutMs: number = DEFAULT_QUERY_TIMEOUT_MS): Promise<T> => {
-  const url = `http://${GRAPHQL_HOST}:${instance.serverPort}${GRAPHQL_PATH}/${request.operationName}`
+export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState, operation: TapGraphqlOperation<TResult>, timeoutMs: number = DEFAULT_QUERY_TIMEOUT_MS): Promise<TResult> => {
+  const { operationName, query, variables } = operation
+  const url = `http://${GRAPHQL_HOST}:${instance.serverPort}${GRAPHQL_PATH}/${operationName}`
 
   let response: { status: number, json (): Promise<unknown> }
 
@@ -61,22 +54,22 @@ export const queryInstanceGraphql = async <T = unknown>(instance: LiveInstanceSt
     response = await fetch(url, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ variables: {}, ...request }),
+      body: JSON.stringify({ operationName, query, variables: variables ?? {} }),
       signal: AbortSignal.timeout(timeoutMs),
     })
   } catch (err: any) {
-    debug('graphql request %s to pid %d failed: %o', request.operationName, instance.pid, err)
+    debug('graphql request %s to pid %d failed: %o', operationName, instance.pid, err)
 
-    return throwTapError(errors.tapGraphqlUnreachable, `Could not reach the instance to run ${request.operationName}: ${err.message}`, err)
+    return throwTapError(errors.tapGraphqlUnreachable, `Could not reach the instance to run ${operationName}: ${err.message}`, err)
   }
 
   if (response.status !== 200) {
-    return throwTapError(errors.tapGraphqlUnreachable, `The instance answered ${request.operationName} with status ${response.status}.`)
+    return throwTapError(errors.tapGraphqlUnreachable, `The instance answered ${operationName} with status ${response.status}.`)
   }
 
   const envelope = await response.json().catch((err) => {
-    return throwTapError(errors.tapGraphqlFailed, `The instance answered ${request.operationName} with a non-JSON response.`, err)
+    return throwTapError(errors.tapGraphqlFailed, `The instance answered ${operationName} with a non-JSON response.`, err)
   })
 
-  return validateEnvelope<T>(request.operationName, envelope as GraphqlEnvelope | null)
+  return validateEnvelope<TResult>(operationName, envelope as GraphqlEnvelope | null)
 }
