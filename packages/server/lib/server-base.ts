@@ -31,7 +31,8 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import { INSTANCES_ROUTE_PREFIX } from '@packages/cypress-instances'
+import { INSTANCES_ROUTE_PREFIX, INSTANCE_ID_HEADER } from '@packages/cypress-instances'
+import { cypressInstances } from './cypress-instances'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
@@ -83,7 +84,14 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+const _hasValidInstanceIdHeader = (req): boolean => {
+  const provided = req.headers[INSTANCE_ID_HEADER]
+  const current = cypressInstances.getCurrent()?.instanceId
+
+  return Boolean(current) && typeof provided === 'string' && provided === current
+}
+
+export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const ALLOWED_PROXY_BYPASS_URLS = [
     '/',
     `/${namespace}/runner/cypress_runner.css`,
@@ -91,12 +99,14 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/favicon.ico`,
   ]
 
-  const isAllowedProxyBypass = (trimmedUrl: string) => {
+  const isCliTapRequest = (trimmedUrl: string, req) => {
+    return trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidInstanceIdHeader(req)
+  }
+
+  const isAllowedProxyBypass = (trimmedUrl: string, req) => {
     return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) ||
       trimmedUrl.startsWith(INSTANCES_ROUTE_PREFIX) ||
-      // The tap CLI queries GraphQL directly over HTTP; like the instances
-      // probe, those requests arrive non-proxied.
-      trimmedUrl.startsWith(`/${namespace}/graphql/`)
+      isCliTapRequest(trimmedUrl, req)
   }
 
   // normalize clientRoute to help with comparison
@@ -115,7 +125,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
       return next()
     }
 
-    if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl, req) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }

@@ -16,6 +16,8 @@ const RECORD_EXTENSION = '.json'
 
 export const INSTANCES_ROUTE_PREFIX = '/__cypress/instances/'
 
+export const INSTANCE_ID_HEADER = 'x-cypress-instance-id'
+
 export type InstanceTestingType = 'e2e' | 'component' | null
 
 export interface CypressInstance {

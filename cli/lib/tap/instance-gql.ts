@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { errors } from '../errors'
 import { throwTapError } from './tap-session'
 import type { LiveInstanceState } from '../cypress-instances'
+import { INSTANCE_ID_HEADER } from '@packages/cypress-instances'
 import type { TapGraphqlOperation } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
@@ -53,7 +54,7 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
   try {
     response = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', [INSTANCE_ID_HEADER]: instance.instanceId },
       body: JSON.stringify({ operationName, query, variables: variables ?? {} }),
       signal: AbortSignal.timeout(timeoutMs),
     })

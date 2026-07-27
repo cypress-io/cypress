@@ -44,7 +44,7 @@ describe('lib/tap/instance-gql', () => {
 
     expect(url).toBe('http://127.0.0.1:49200/__cypress/graphql/TapSpecs')
     expect(init.method).toBe('POST')
-    expect(init.headers).toEqual({ 'content-type': 'application/json' })
+    expect(init.headers).toEqual({ 'content-type': 'application/json', 'x-cypress-instance-id': 'inst-1' })
     expect(JSON.parse(init.body)).toEqual({ ...request, variables: {} })
   })
 
