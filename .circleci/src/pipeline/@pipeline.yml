@@ -813,11 +813,17 @@ commands:
 
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
-              PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
+              GROUP="5x-driver-inject-document-domain-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
-              PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
+              GROUP="5x-driver-<<parameters.browser>>"
             fi
+
+            if << parameters.disable-proxy >> ; then
+              GROUP="${GROUP}-cdp"
+            fi
+
+            PARALLEL="--parallel --group ${GROUP}"
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
@@ -947,6 +953,10 @@ commands:
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              GROUP="<<parameters.package>>-<<parameters.type>>"
+              if << parameters.disable-proxy >> ; then
+                GROUP="${GROUP}-cdp"
+              fi
 
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
@@ -955,7 +965,7 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group "$GROUP"
             else
               # external PR
 
