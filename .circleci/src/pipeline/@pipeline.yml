@@ -1780,8 +1780,6 @@ jobs:
                 - << pipeline.parameters.run-app-ui-tests >>
                 - << pipeline.parameters.run-frontend-shared-tests >>
                 - << pipeline.parameters.run-launchpad-tests >>
-                - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-                - << pipeline.parameters.run-npm-vite-dev-server-tests >>
           steps:
             - run:
                 name: Skipping job — not relevant to changed files
@@ -2514,10 +2512,6 @@ jobs:
           command: |
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
       - sanitize-verify-and-store-mocha-results
@@ -2536,10 +2530,6 @@ jobs:
           command: |
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
       - sanitize-verify-and-store-mocha-results

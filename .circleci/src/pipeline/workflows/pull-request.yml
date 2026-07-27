@@ -193,11 +193,11 @@ jobs:
       requires:
         - ready-to-test
   - run-webpack-dev-server-integration-tests:
-      context: [ test-runner:cypress-record-key, test-runner:percy ]
+      context: [ test-runner:cypress-record-key ]
       requires:
         - system-tests-node-modules-install
   - run-vite-dev-server-integration-tests:
-      context: [ test-runner:cypress-record-key, test-runner:percy ]
+      context: [ test-runner:cypress-record-key ]
       requires:
         - system-tests-node-modules-install
   - run-app-component-tests-chrome:
@@ -348,8 +348,6 @@ jobs:
         - run-launchpad-component-tests-chrome
         - run-launchpad-integration-tests-chrome
         - run-reporter-component-tests-chrome
-        - run-webpack-dev-server-integration-tests
-        - run-vite-dev-server-integration-tests
   # Cypress run must be completed to fetch Accessibility report
   - verify-accessibility-results:
       context: test-runner:cypress-record-key
