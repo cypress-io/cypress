@@ -64,16 +64,22 @@ const readCompatibleRecord = async (filePath: string): Promise<CypressInstance |
   return record
 }
 
-const maybePruneRecord = async (file: { path: string, pid: number }): Promise<boolean> => {
+// Reaps a record whose writer process is gone, returning whether it was dead.
+// Removal is best-effort: a file we can't delete (permissions, a Windows lock)
+// must not abort discovery of the other, live instances, so the failure is
+// swallowed and the record is still reported dead.
+const reapIfDead = async (file: { path: string, pid: number }): Promise<boolean> => {
   const { path, pid } = file
 
-  if (!isPidAlive(pid)) {
-    await fs.remove(path)
-
-    return true
+  if (isPidAlive(pid)) {
+    return false
   }
 
-  return false
+  await fs.remove(path).catch((err) => {
+    debug('failed to reap dead cypress instances record %s: %o', path, err)
+  })
+
+  return true
 }
 
 /**
@@ -101,7 +107,7 @@ export const readLiveInstances = async (): Promise<CypressInstance[]> => {
       return null
     }
 
-    if (await maybePruneRecord(file)) {
+    if (await reapIfDead(file)) {
       return null
     }
 
@@ -115,9 +121,7 @@ export const pruneDeadInstanceRecords = async (probeTimeoutMs?: number): Promise
   const files = await listRecordFiles(getInstancesDir())
 
   const pruned = await Promise.all(files.map(async (file): Promise<boolean> => {
-    const didRecordPrune = await maybePruneRecord(file)
-
-    if (didRecordPrune) {
+    if (await reapIfDead(file)) {
       return true
     }
 

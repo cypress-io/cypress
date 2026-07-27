@@ -487,6 +487,25 @@ describe('lib/cypress-instances', () => {
       expect((await listLiveInstances()).map((instance) => instance.pid)).toEqual([111])
     })
 
+    it('still lists live instances when a dead record cannot be reaped', async () => {
+      const livePort = await startFakeInstance()
+
+      mockfs({
+        [INSTANCES_DIR]: {
+          '111.json': makeRecord({ pid: 111, serverPort: livePort }),
+          '222.json': makeRecord({ pid: 222, serverPort: livePort }),
+        },
+      })
+
+      stubKill({ alive: [111] })
+      // Reaping the dead 222 record fails (e.g. a Windows file lock); discovery of
+      // the live instance must not be aborted by an undeletable leftover.
+      const remove = vi.spyOn(fs, 'remove').mockRejectedValue(Object.assign(new Error('EPERM'), { code: 'EPERM' }))
+
+      expect((await listLiveInstances()).map((instance) => instance.pid)).toEqual([111])
+      expect(remove).toHaveBeenCalled()
+    })
+
     it('filters by pid', async () => {
       const port = await startFakeInstance()
 
