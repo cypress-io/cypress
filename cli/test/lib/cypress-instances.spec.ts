@@ -259,14 +259,17 @@ describe('lib/cypress-instances', () => {
       await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
     })
 
-    it('throws STALE_INSTANCE when a match exists but its process is dead', async () => {
+    it('reaps the leftover record and throws NO_INSTANCE when the only match’s process is dead', async () => {
       mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [] })
 
       const err = await resolveInstance({ cwd: PROJECT }).catch((e) => e)
 
       expect(err).toBeInstanceOf(CypressInstanceError)
-      expect(err.code).toBe('STALE_INSTANCE')
+      expect(err.code).toBe('NO_INSTANCE')
+      // The dead-process leftover is reaped, so it stops masquerading as a
+      // still-running-but-unresponsive (stale) instance on later commands.
+      expect(fs.existsSync(`${INSTANCES_DIR}/111.json`)).toBe(false)
     })
 
     it('throws STALE_INSTANCE when the pid is taken but nothing answers the probe (recycled pid)', async () => {
@@ -276,6 +279,9 @@ describe('lib/cypress-instances', () => {
       stubKill({ alive: [111] })
 
       await expect(resolveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'STALE_INSTANCE' })
+      // An alive-but-unresponsive process is genuinely stale, not gone — its
+      // record is kept (only dead-pid leftovers are reaped).
+      expect(fs.existsSync(`${INSTANCES_DIR}/111.json`)).toBe(true)
     })
 
     it('throws NO_BROWSER_ATTACHED when the chosen instance is live but has no browser', async () => {
@@ -425,11 +431,12 @@ describe('lib/cypress-instances', () => {
       await expect(resolveLiveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
     })
 
-    it('throws STALE_INSTANCE when a match exists but its process is dead', async () => {
+    it('reaps the leftover record and throws NO_INSTANCE when the only match’s process is dead', async () => {
       mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [] })
 
-      await expect(resolveLiveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'STALE_INSTANCE' })
+      await expect(resolveLiveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+      expect(fs.existsSync(`${INSTANCES_DIR}/111.json`)).toBe(false)
     })
   })
 
