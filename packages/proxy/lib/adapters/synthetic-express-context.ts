@@ -118,7 +118,10 @@ export type SyntheticCypressResponse = CypressOutgoingResponseLike & {
 class SyntheticResponse extends Writable {
   private readonly kOutHeaders = Symbol('kOutHeaders')
   isInitial: null | boolean = null
-  wantsInjection: CypressOutgoingResponseLike['wantsInjection'] = false
+  // null = undecided. SetInjectionLevel skips its determination for any
+  // non-null value, so defaulting to false silently disables injection for
+  // every synthetic response.
+  wantsInjection: CypressOutgoingResponseLike['wantsInjection'] = null
   wantsSecurityRemoved: null | boolean = null
   body?: string | Readable
   statusCode = 200
