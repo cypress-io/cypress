@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where informational (1xx) HTTP responses were not treated as having an empty message body, contrary to RFC 7230. Such responses are now handled correctly during network processing. Fixed in [#34208](https://github.com/cypress-io/cypress/pull/34208).
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
 - Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 - Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
