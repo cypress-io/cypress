@@ -487,9 +487,13 @@ describe('lib/browsers/electron', () => {
         expect(electron._setProxy).not.to.be.called
       }).then(() => {
         // @ts-expect-error
-        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, {
+          proxyServer: 'foo',
+          proxyBypassList: '<-loopback>,example.com',
+          onError: () => {},
+        }, undefined, undefined, { attachCDPClient: sinon.stub() })
       }).then(() => {
-        expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
+        expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo', '<-loopback>,example.com')
       })
     })
 
@@ -1328,6 +1332,22 @@ describe('lib/browsers/electron', () => {
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: 'proxy rules',
           proxyBypassRules: '<-loopback>',
+        })
+      })
+    })
+
+    it('sets configured proxy bypass rules for webContents', () => {
+      const webContents = {
+        session: {
+          setProxy: sinon.stub().resolves(),
+        },
+      }
+
+      return electron._setProxy(webContents, 'proxy rules', '<-loopback>,localhost,example.com')
+      .then(() => {
+        expect(webContents.session.setProxy).to.be.calledWith({
+          proxyRules: 'proxy rules',
+          proxyBypassRules: '<-loopback>,localhost,example.com',
         })
       })
     })

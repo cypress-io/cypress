@@ -1036,6 +1036,18 @@ describe('lib/browsers/chrome', () => {
       expect(args).to.include(arg)
     })
 
+    it('adds the configured proxy server and bypass list', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        proxyServer: 'http://proxy.example:8080',
+        proxyBypassList: '<-loopback>,localhost,example.com',
+      })
+
+      expect(args).to.include('--proxy-server=http://proxy.example:8080')
+      expect(args).to.include('--proxy-bypass-list=<-loopback>,localhost,example.com')
+    })
+
     it('translates hosts into host resolver rules', () => {
       const args = chrome._getArgs({
         majorVersion: '89',

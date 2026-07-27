@@ -16,6 +16,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
 import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -89,6 +90,7 @@ export class OpenProject extends EventEmitter {
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
       ...(isProxyEnabled() ? { proxyServer: ensureProxyServer(cfg) } : {
+        ...translateEgressPolicyToLaunchOpts(),
         hosts: cfg.hosts,
         onPageCriClientReady: (client, isAUTFrame) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame)

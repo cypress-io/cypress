@@ -86,6 +86,7 @@ export type BrowserLaunchOpts = {
   browser: FoundBrowser & { isHeadless: boolean }
   url: string | undefined
   proxyServer?: string
+  proxyBypassList?: string
   isTextTerminal: boolean
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void

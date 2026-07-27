@@ -213,16 +213,49 @@ describe('lib/open_project', () => {
         expect(browsers.open).to.have.been.calledOnce
       })
 
-      it('does not pass proxyServer to browser when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-        delete this.config.proxyServer
+      context('when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
+        beforeEach(function () {
+          this.proxyEnv = {
+            HTTP_PROXY: process.env.HTTP_PROXY,
+            HTTPS_PROXY: process.env.HTTPS_PROXY,
+            NO_PROXY: process.env.NO_PROXY,
+          }
 
-        return openProject.launch(this.browser, this.spec)
-        .then(() => {
+          process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+          delete process.env.HTTP_PROXY
+          delete process.env.HTTPS_PROXY
+          delete process.env.NO_PROXY
+          delete this.config.proxyServer
+        })
+
+        afterEach(function () {
+          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+
+          Object.entries(this.proxyEnv).forEach(([name, value]) => {
+            if (value === undefined) {
+              delete process.env[name]
+            } else {
+              process.env[name] = value
+            }
+          })
+        })
+
+        it('does not pass proxyServer to browser without an upstream proxy', async function () {
+          await openProject.launch(this.browser, this.spec)
+
           expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
         })
-        .finally(() => {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+
+        it('passes the upstream proxy and bypass list to the browser', async function () {
+          process.env.HTTP_PROXY = 'http://proxy.example:8080'
+          process.env.NO_PROXY = '<-loopback>,localhost,example.com'
+
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1]).to.include({
+            proxyServer: 'http://proxy.example:8080',
+            proxyBypassList: '<-loopback>,localhost,example.com',
+          })
         })
       })
     })

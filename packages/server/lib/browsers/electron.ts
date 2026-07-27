@@ -343,7 +343,7 @@ export = {
       ps = options.proxyServer
 
       if (ps) {
-        return this._setProxy(win.webContents, ps)
+        return this._setProxy(win.webContents, ps, options.proxyBypassList)
       }
     }
 
@@ -488,12 +488,12 @@ export = {
     return webContents.session.setUserAgent(userAgent)
   },
 
-  _setProxy (webContents, proxyServer) {
+  _setProxy (webContents, proxyServer, proxyBypassList = '<-loopback>') {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
       // bypass the proxy for loopback addresses
       // https://github.com/cypress-io/cypress/issues/1872
-      proxyBypassRules: '<-loopback>',
+      proxyBypassRules: proxyBypassList,
     })
   },
 
