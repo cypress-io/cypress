@@ -405,7 +405,7 @@ export interface WizardUpdateInput {
 export type TapSpecsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TapSpecsQuery = { readonly __typename?: 'Query', readonly currentProject: { readonly __typename?: 'CurrentProject', readonly specs: ReadonlyArray<{ readonly __typename?: 'Spec', readonly relative: string, readonly gitInfo: { readonly __typename?: 'GitInfo', readonly lastModifiedHumanReadable: string | null, readonly lastModifiedTimestamp: string | null } | null }> } | null };
+export type TapSpecsQuery = { readonly __typename?: 'Query', readonly currentProject: { readonly __typename?: 'CurrentProject', readonly specs: ReadonlyArray<{ readonly __typename?: 'Spec', readonly relative: string, readonly absolute: string, readonly gitInfo: { readonly __typename?: 'GitInfo', readonly lastModifiedHumanReadable: string | null, readonly lastModifiedTimestamp: string | null } | null }> } | null };
 
 export type TapRunSpecMutationVariables = Exact<{
   specPath: Scalars['String'];

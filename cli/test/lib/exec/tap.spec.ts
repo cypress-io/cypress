@@ -720,11 +720,21 @@ describe('lib/exec/tap', () => {
       return selection
     }
 
+    // The absolute path deliberately disagrees with projectRoot + relative, proving
+    // the CLI sends the instance's own absolute path rather than resolving one.
+    const loginSpec = { relative: 'cypress/e2e/login.cy.ts', absolute: '/disk/real-project/cypress/e2e/login.cy.ts' }
+
+    const launched = { __typename: 'RunSpecResponse', testingType: 'e2e', browser: { displayName: 'Chrome' }, spec: { relative: 'cypress/e2e/login.cy.ts' } }
+
+    const mockInstanceGraphql = ({ specs = [loginSpec], runSpec = launched }: { specs?: unknown[], runSpec?: unknown } = {}) => {
+      vi.mocked(queryInstanceGraphql).mockImplementation(async (_instance, operation) => {
+        return operation.operationName === 'TapSpecs' ? { currentProject: { specs } } : { runSpec }
+      })
+    }
+
     it('triggers the run and renders the launch outcome as JSON, without opening a session', async () => {
       mockLiveResolved(liveInstance())
-      vi.mocked(queryInstanceGraphql).mockResolvedValue({
-        runSpec: { __typename: 'RunSpecResponse', testingType: 'e2e', browser: { displayName: 'Chrome' }, spec: { relative: 'cypress/e2e/login.cy.ts' } },
-      })
+      mockInstanceGraphql()
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ spec: 'cypress/e2e/login.cy.ts', testingType: 'e2e', browser: 'Chrome' })
@@ -733,24 +743,52 @@ describe('lib/exec/tap', () => {
       expect(withTapSession).not.toHaveBeenCalled()
     })
 
-    it('resolves the project-relative spec to an absolute path for the TapRunSpec operation', async () => {
+    it('sends the matched spec\'s instance-reported absolute path to the TapRunSpec operation', async () => {
       const { instance } = mockLiveResolved(liveInstance())
 
-      vi.mocked(queryInstanceGraphql).mockResolvedValue({
-        runSpec: { __typename: 'RunSpecResponse', testingType: 'e2e', browser: { displayName: 'Chrome' }, spec: { relative: 'cypress/e2e/login.cy.ts' } },
-      })
+      mockInstanceGraphql()
 
       await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})
 
       expect(queryInstanceGraphql).toHaveBeenCalledWith(instance, expect.objectContaining({
         operationName: 'TapRunSpec',
-        variables: { specPath: '/projects/app/cypress/e2e/login.cy.ts' },
+        variables: { specPath: '/disk/real-project/cypress/e2e/login.cy.ts' },
       }))
+    })
+
+    it('matches an OS-native (Windows) relative path from the instance against the POSIX input', async () => {
+      const { instance } = mockLiveResolved(liveInstance())
+
+      mockInstanceGraphql({ specs: [{ relative: 'cypress\\e2e\\login.cy.ts', absolute: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' }] })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
+      expect(queryInstanceGraphql).toHaveBeenCalledWith(instance, expect.objectContaining({
+        operationName: 'TapRunSpec',
+        variables: { specPath: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' },
+      }))
+    })
+
+    it('fails with SPEC_NOT_FOUND when the spec is not in the instance\'s list, without triggering a run', async () => {
+      mockLiveResolved(liveInstance())
+      mockInstanceGraphql({ specs: [{ relative: 'cypress/e2e/other.cy.ts', absolute: '/disk/real-project/cypress/e2e/other.cy.ts' }] })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toBe('SPEC_NOT_FOUND: No spec matches the path "cypress/e2e/login.cy.ts" — use the specs command to list runnable specs.')
+      expect(queryInstanceGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }))
+    })
+
+    it('skips malformed spec entries rather than running with a junk path', async () => {
+      mockLiveResolved(liveInstance())
+      mockInstanceGraphql({ specs: [null, { relative: 42 }, { relative: 'cypress/e2e/login.cy.ts', absolute: 42 }] })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toContain('SPEC_NOT_FOUND')
+      expect(queryInstanceGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }))
     })
 
     it('surfaces a RunSpecError with the instance\'s own code and message, exiting 1', async () => {
       mockLiveResolved(liveInstance())
-      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+      mockInstanceGraphql({
         runSpec: { __typename: 'RunSpecError', code: 'NO_SPEC_PATTERN_MATCH', detailMessage: 'Unable to determine testing type, spec does not match any configured specPattern' },
       })
 
@@ -760,7 +798,7 @@ describe('lib/exec/tap', () => {
 
     it('exits 1 when the instance returns no run result', async () => {
       mockLiveResolved(liveInstance())
-      vi.mocked(queryInstanceGraphql).mockResolvedValue({ runSpec: null })
+      mockInstanceGraphql({ runSpec: null })
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
       expect(logger.print()).toContain('RUN_FAILED')
@@ -768,9 +806,7 @@ describe('lib/exec/tap', () => {
 
     it('forwards --instance plus the cwd to discovery', async () => {
       mockLiveResolved(liveInstance())
-      vi.mocked(queryInstanceGraphql).mockResolvedValue({
-        runSpec: { __typename: 'RunSpecResponse', testingType: 'e2e', browser: { displayName: 'Chrome' }, spec: { relative: 'cypress/e2e/login.cy.ts' } },
-      })
+      mockInstanceGraphql()
 
       await tap.start(['run', 'cypress/e2e/login.cy.ts'], { instance: 1234 })
 

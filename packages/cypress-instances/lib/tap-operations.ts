@@ -25,6 +25,7 @@ export const TapSpecsOperation: TapGraphqlOperation<TapSpecsQuery> = {
       currentProject {
         specs {
           relative
+          absolute
           gitInfo {
             lastModifiedHumanReadable
             lastModifiedTimestamp

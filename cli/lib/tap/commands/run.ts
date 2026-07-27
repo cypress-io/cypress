@@ -1,20 +1,33 @@
-import path from 'path'
-
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
-import { tapRunSpecOperation } from '@packages/cypress-instances'
+import { TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
 import { renderFailure, renderKnownFailure, renderResult } from '../output'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
+const posixify = (specPath: string) => specPath.replace(/\\/g, '/')
+
 // `runSpec` resolves the spec against the project's specPattern and reads it off
-// disk, so it needs an absolute path; the CLI takes the project-relative path the
-// specs command lists and resolves it against the instance's project root.
+// disk, so it needs an absolute path; the CLI matches the project-relative path
+// the specs command lists against the instance's own spec list and sends that
+// spec's absolute path, so it never does path math against the project root.
 const runSpec = async (options: TapCliOptions, args: Record<string, string>): Promise<number> => {
   try {
     const { instance } = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
-    const specPath = path.resolve(instance.projectRoot, args.spec)
-    const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(specPath))
+    const specsData = await queryInstanceGraphql(instance, TapSpecsOperation)
+    const wanted = posixify(args.spec)
+    // The spec list crosses the wire unvalidated, so fields are guarded as strings.
+    const match = (specsData.currentProject?.specs ?? []).find((spec) => {
+      return typeof spec?.relative === 'string' && typeof spec.absolute === 'string' && posixify(spec.relative) === wanted
+    })
+
+    if (!match) {
+      renderFailure({ code: 'SPEC_NOT_FOUND', message: `No spec matches the path "${args.spec}" — use the specs command to list runnable specs.` })
+
+      return 1
+    }
+
+    const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute))
 
     if (result?.__typename === 'RunSpecResponse') {
       renderResult({
