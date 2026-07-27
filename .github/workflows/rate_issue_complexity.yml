@@ -98,4 +98,5 @@ jobs:
         run: |
           LABEL="complexity: ${{ steps.claude.outputs.weight }}"
           gh label create "$LABEL" --repo "${{ github.repository }}" --color BFD4F2 2>/dev/null || true
-          gh issue edit "${{ inputs.issue_number }}" --repo "${{ github.repository }}" --add-label "$LABEL
+          gh issue edit "${{ inputs.issue_number }}" --repo "${{ github.repository }}" --add-label "$LABEL"
+          
