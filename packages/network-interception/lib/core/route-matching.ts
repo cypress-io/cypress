@@ -116,9 +116,9 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
 
   matchable.https = proxiedUrl.protocol && (proxiedUrl.protocol.indexOf('https') === 0)
 
-  if (!matchable.port) {
-    matchable.port = matchable.https ? 443 : 80
-  }
+  // `url.parse` yields the port as a string; coerce it so it compares against
+  // the numeric `port` route matcher. Fall back to the protocol default.
+  matchable.port = matchable.port ? Number(matchable.port) : (matchable.https ? 443 : 80)
 
   return matchable
 }

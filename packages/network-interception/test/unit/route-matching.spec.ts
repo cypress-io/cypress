@@ -105,6 +105,30 @@ describe('core/route-matching', function () {
       }, false)
     })
 
+    it('matches on a numeric port', function () {
+      tryMatch({
+        proxiedUrl: 'http://localhost:8080/foo',
+      }, {
+        port: 8080,
+      })
+    })
+
+    it('matches when the port is one of an array of ports', function () {
+      tryMatch({
+        proxiedUrl: 'http://localhost:8080/foo',
+      }, {
+        port: [3000, 8080],
+      })
+    })
+
+    it(`doesn't match a different port`, function () {
+      tryMatch({
+        proxiedUrl: 'http://localhost:8080/foo',
+      }, {
+        port: 9090,
+      }, false)
+    })
+
     it('handles querystrings as expected', function () {
       const req = {
         proxiedUrl: '/abc?foo=bar&baz=quux',
