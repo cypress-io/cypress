@@ -518,12 +518,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   async createCdpFetchNetworkRuntime (
     client: Pick<ICriClient, 'send' | 'on' | 'off'>,
     isAUTFrame?: (frameId: string) => Promise<boolean>,
+    onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
   ) {
     await this.stopCdpFetchRuntime()
 
     const runtime = createCdpFetchRuntime({
       client,
       isAUTFrame,
+      onAUTFrameNavigated,
       config: this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config'],
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       remoteStates: this._remoteStates,
