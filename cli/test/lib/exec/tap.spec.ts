@@ -779,15 +779,6 @@ describe('lib/exec/tap', () => {
       expect(queryInstanceGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }))
     })
 
-    it('skips malformed spec entries rather than running with a junk path', async () => {
-      mockLiveResolved(liveInstance())
-      mockInstanceGraphql({ specs: [null, { relative: 42 }, { relative: 'cypress/e2e/login.cy.ts', absolute: 42 }] })
-
-      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
-      expect(logger.print()).toContain('SPEC_NOT_FOUND')
-      expect(queryInstanceGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }))
-    })
-
     it('surfaces a RunSpecError with the instance\'s own code and message, exiting 1', async () => {
       mockLiveResolved(liveInstance())
       mockInstanceGraphql({

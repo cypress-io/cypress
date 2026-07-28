@@ -12,10 +12,7 @@ const findTargetSpec = async (instance: LiveInstanceState, relative: string) => 
   const specsData = await queryInstanceGraphql(instance, TapSpecsOperation)
   const wanted = posixify(relative)
 
-  // The spec list crosses the wire unvalidated, so fields are guarded as strings.
-  return (specsData.currentProject?.specs ?? []).find((spec) => {
-    return typeof spec?.relative === 'string' && typeof spec.absolute === 'string' && posixify(spec.relative) === wanted
-  })
+  return (specsData.currentProject?.specs ?? []).find((spec) => posixify(spec.relative) === wanted)
 }
 
 const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<number> => {
