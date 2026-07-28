@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
       "entry": [
@@ -306,6 +306,10 @@
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-codegen/documents",
+        "@graphql-codegen/<<"
       ]
     },
     "packages/launcher": {
@@ -746,8 +750,15 @@
     "zone.js"
   ],
   "ignoreBinaries": [
+    "arch",
+    "awk",
     "circleci",
     "cypress",
+    "ditto",
+    "iconutil",
+    "lipo",
+    "openssl",
+    "pgrep",
     "rm",
     "tar",
     "tslint",
@@ -756,7 +767,6 @@
   "rules": {
     "binaries": "error",
     "catalog": "error",
-    "classMembers": "error",
     "dependencies": "error",
     "duplicates": "error",
     "enumMembers": "error",
