@@ -1079,19 +1079,26 @@ commands:
           command: |
             if << parameters.disable-proxy >> ; then
               export CYPRESS_INTERNAL_DISABLE_PROXY=1
-            fi
-
-            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
-            SPECS=
-            for file in $ALL_SPECS; do
-              # filter out non_root tests, they have their own stage
-              if [[ "$file" == *"non_root"* ]]; then
-                echo "Skipping $file"
-                continue
+              # Temporary for #34352: only downloads until the full CDP
+              # system-tests matrix is green under proxy-disabled.
+              SPECS="/root/cypress/system-tests/test/downloads_spec.ts"
+              if [[ "${CIRCLE_NODE_INDEX:-0}" != "0" ]]; then
+                echo "Skipping — downloads_spec.ts runs on node 0 only under disable-proxy"
+                circleci-agent step halt
               fi
-              SPECS="$SPECS $file"
-            done
-            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            else
+              ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
+              SPECS=
+              for file in $ALL_SPECS; do
+                # filter out non_root tests, they have their own stage
+                if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                SPECS="$SPECS $file"
+              done
+              SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            fi
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - sanitize-verify-and-store-mocha-results

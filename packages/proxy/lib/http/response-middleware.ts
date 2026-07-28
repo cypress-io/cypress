@@ -612,6 +612,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
     pt.end()
 
     this.incomingResStream = pt
+    this.res.bodyModified = true
 
     this.next()
   })).on('error', this.onError).once('close', () => {

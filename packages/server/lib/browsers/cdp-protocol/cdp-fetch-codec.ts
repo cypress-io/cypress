@@ -188,16 +188,6 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     return request as CdpFetchTransportRequest & { requestId: string }
   }
 
-  const requireResponse = (id: string): CdpFetchTransportResponse => {
-    const response = inFlightResponses.get(id)
-
-    if (!response) {
-      throw new Error(`No CDP Fetch response pause found for ${id}. HttpIntercept middleware must call next() before returning a response.`)
-    }
-
-    return response
-  }
-
   return {
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
       inFlightRequests.set(transportRequest.id, transportRequest)
@@ -259,13 +249,28 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
           ? stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
           : stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS)
       }
+      // continueResponse delivers the origin's untouched wire bytes, so any
+      // header edits the middleware made (CSP/cookie/cache-control, etc.) must
+      // ride alongside the original wire framing headers — middleware never
+      // sees those, since they're stripped when the pause is decoded.
+      const continueHeaders = (headers?: HttpHeaders, pauseHeaders?: CdpFetchTransportResponse['responseHeaders']) => {
+        const middlewareHeaders = toResponseHeaders(headers)
+
+        if (!middlewareHeaders) {
+          return pauseHeaders
+        }
+
+        const wireHeaders = pauseHeaders?.filter(({ name }) => WIRE_ENCODING_HEADERS.has(name.toLowerCase()))
+
+        return [...middlewareHeaders, ...(wireHeaders ?? [])]
+      }
       const transportResponse = pausedResponse ? {
         ...pausedResponse,
         fulfilled,
         responseCode: response.statusCode ?? pausedResponse.responseCode,
         responseHeaders: fulfilled
           ? fulfilledHeaders(response.headers, pausedResponse.responseHeaders)
-          : pausedResponse.responseHeaders,
+          : continueHeaders(response.headers, pausedResponse.responseHeaders),
         ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
       } : {
         ...requireRequestPause(httpResponse.id),

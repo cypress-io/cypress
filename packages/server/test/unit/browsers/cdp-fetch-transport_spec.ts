@@ -573,11 +573,11 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-response',
         responseCode: 200,
         responseHeaders: [{
+          name: 'content-type',
+          value: 'text/html',
+        }, {
           name: 'Content-Encoding',
           value: 'gzip',
-        }, {
-          name: 'Content-Type',
-          value: 'text/html',
         }],
       })
     })
@@ -781,7 +781,7 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-response',
         responseCode: 200,
         responseHeaders: [{
-          name: 'Content-Type',
+          name: 'content-type',
           value: 'text/plain',
         }, {
           name: 'set-cookie',
@@ -874,7 +874,7 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-response',
         responseCode: 200,
         responseHeaders: [{
-          name: 'Content-Type',
+          name: 'content-type',
           value: 'text/plain',
         }],
       })

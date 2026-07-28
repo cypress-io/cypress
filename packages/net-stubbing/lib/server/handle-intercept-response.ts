@@ -78,6 +78,18 @@ export async function handleInterceptResponse (mw: InterceptResponseMiddleware):
 
   mergeChanges(request.res as any, modifiedRes)
 
+  // The CDP Fetch transport can only Fetch.continueResponse (native) when the
+  // body is byte-identical to what the origin sent — throttling/delay require
+  // rewriting the stream's timing, so those force a fulfill too. Only ever
+  // latch this on: an earlier stage may have replaced the body with one that
+  // happens to match the origin's bytes.
+  const originalBuffer = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+  const modifiedBuffer = Buffer.isBuffer(modifiedRes.body) ? modifiedRes.body : Buffer.from(modifiedRes.body ?? '')
+
+  if (!originalBuffer.equals(modifiedBuffer) || modifiedRes.throttleKbps || modifiedRes.delay) {
+    mw.res.bodyModified = true
+  }
+
   const bodyStream = await getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
 
   return request.continueResponse!(bodyStream)

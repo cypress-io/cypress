@@ -35,7 +35,9 @@ npm_schematic_tests=false
 
 # Opt-in only — never enabled by path filtering or emit_all_true. Set via
 # Trigger Pipeline → run-proxy-disabled-tests=true (setup config forwards it).
-run_proxy_disabled_tests=false
+# Temporary for #34352: force on so the narrowed downloads *-cdp system-tests
+# jobs run on this branch without a manual Trigger Pipeline flag.
+run_proxy_disabled_tests=true
 if [[ "${RUN_PROXY_DISABLED_TESTS:-false}" == "true" || "${RUN_PROXY_DISABLED_TESTS:-}" == "1" ]]; then
   run_proxy_disabled_tests=true
 fi

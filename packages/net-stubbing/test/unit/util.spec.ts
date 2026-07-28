@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect, vi } from 'vitest'
-import { getBodyEncoding, getBodyStream, parseContentType } from '../../lib/server/util'
+import { getBodyEncoding, getBodyStream, parseContentType, sendStaticResponse } from '../../lib/server/util'
 import { Readable } from 'stream'
 import { join } from 'path'
 import { readFileSync } from 'fs'
@@ -153,6 +153,48 @@ describe('net-stubbing util', () => {
 
       await vi.advanceTimersByTimeAsync(1)
       expect(await bodyPromise).toEqual(payload)
+    })
+  })
+
+  describe('sendStaticResponse', () => {
+    // A stub never reaches the origin, so the CDP Fetch transport has no wire
+    // bytes to continueResponse with — it must fulfill with the stubbed body.
+    it('marks the body as modified so the response is fulfilled, not continued', async () => {
+      const res: any = {}
+
+      await sendStaticResponse({
+        res,
+        onError: vi.fn(),
+        onResponse: vi.fn(),
+      } as any, { body: 'stubbed' })
+
+      expect(res.bodyModified).toBe(true)
+    })
+
+    it('marks an empty stubbed body as modified', async () => {
+      const res: any = {}
+
+      await sendStaticResponse({
+        res,
+        onError: vi.fn(),
+        onResponse: vi.fn(),
+      } as any, { statusCode: 204 })
+
+      expect(res.bodyModified).toBe(true)
+    })
+
+    it('does not mark the body when forcing a network error', async () => {
+      const res: any = {}
+      const onResponse = vi.fn()
+
+      await sendStaticResponse({
+        res,
+        onError: vi.fn(),
+        onResponse,
+      } as any, { forceNetworkError: true })
+
+      expect(res.bodyModified).toBeUndefined()
+      expect(onResponse).not.toHaveBeenCalled()
     })
   })
 })

@@ -40,6 +40,8 @@ export async function removeSecurity (mw: ResponseInterceptionMiddlewareCtx): Pr
     streamSpan?.end()
   })
 
+  mw.res.bodyModified = true
+
   span?.end()
   mw.next()
 }

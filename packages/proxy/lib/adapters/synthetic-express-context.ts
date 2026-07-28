@@ -123,6 +123,7 @@ class SyntheticResponse extends Writable {
   // every synthetic response.
   wantsInjection: CypressOutgoingResponseLike['wantsInjection'] = null
   wantsSecurityRemoved: null | boolean = null
+  bodyModified?: boolean
   body?: string | Readable
   statusCode = 200
   statusMessage = ''

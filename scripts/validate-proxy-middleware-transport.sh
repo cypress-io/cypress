@@ -46,7 +46,7 @@ run_unit_suite() {
 }
 
 run_driver_suite() {
-  local specs="cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/csp_headers.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/issues/3890.cy.js,cypress/e2e/cy/snapshot.cy.js"
+  local specs="cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/csp_headers.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/issues/3890.cy.js,cypress/e2e/cy/snapshot.cy.js"
 
   yarn workspace @packages/driver cypress:run -- \
     --browser "$BROWSER" --headless --spec "$specs"

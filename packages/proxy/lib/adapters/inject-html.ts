@@ -62,6 +62,7 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
     pt.end()
 
     mw.incomingResStream = pt
+    mw.res.bodyModified = true
 
     streamSpan?.end()
     mw.next()
