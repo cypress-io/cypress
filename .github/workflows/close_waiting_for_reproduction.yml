@@ -1,0 +1,102 @@
+name: 'Close issues waiting for reproduction'
+# Issues in the "Waiting for Reproduction" status column on the App project board
+# (project 10) are automatically closed after 2 days of no activity. The issue's
+# updatedAt timestamp is used, so any comment or edit by the reporter postpones the close.
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # daily at 10:00 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  close-stale-waiting:
+    runs-on: ubuntu-latest
+    if: github.repository == 'cypress-io/cypress'
+    steps:
+      - name: Close stale Waiting for Reproduction issues
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          PROJECT_NUMBER: '10'
+          STALE_DAYS: '2'
+        with:
+          github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          script: |
+            const projectNumber = parseInt(process.env.PROJECT_NUMBER)
+            const staleDays = parseInt(process.env.STALE_DAYS)
+            const staleMs = staleDays * 24 * 60 * 60 * 1000
+            const now = Date.now()
+            const org = context.repo.owner
+            const repo = context.repo.repo
+
+            let cursor = null
+            const staleIssues = []
+
+            do {
+              const result = await github.graphql(`
+                query($org: String!, $number: Int!, $cursor: String) {
+                  organization(login: $org) {
+                    projectV2(number: $number) {
+                      items(first: 100, after: $cursor) {
+                        pageInfo { hasNextPage endCursor }
+                        nodes {
+                          fieldValueByName(name: "Status") {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                            }
+                          }
+                          content {
+                            ... on Issue {
+                              number
+                              title
+                              state
+                              updatedAt
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `, { org, number: projectNumber, cursor })
+
+              const items = result.organization.projectV2.items
+              cursor = items.pageInfo.hasNextPage ? items.pageInfo.endCursor : null
+
+              for (const item of items.nodes) {
+                const status = item.fieldValueByName?.name
+                const content = item.content
+                if (
+                  status !== 'Waiting for Reproduction' ||
+                  !content ||
+                  content.state !== 'OPEN'
+                ) {
+                  continue
+                }
+
+                const updatedAt = new Date(content.updatedAt).getTime()
+                if (now - updatedAt > staleMs) {
+                  staleIssues.push({ number: content.number, title: content.title })
+                }
+              }
+            } while (cursor)
+
+            core.info(`Found ${staleIssues.length} stale issue(s) to close.`)
+
+            for (const issue of staleIssues) {
+              core.info(`Closing #${issue.number}: ${issue.title}`)
+              await github.rest.issues.createComment({
+                owner: org,
+                repo,
+                issue_number: issue.number,
+                body: 'This issue has been automatically closed because it has been waiting for a reproduction for more than 2 days without any activity. If you can provide a reproduction, please reopen the issue and include it.',
+              })
+              await github.rest.issues.update({
+                owner: org,
+                repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'not_planned',
+              })
+            }
