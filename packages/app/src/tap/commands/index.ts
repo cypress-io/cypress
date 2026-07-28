@@ -1,6 +1,7 @@
 import { commandsCommand } from './commands'
 import type { TapCommandDefinition } from './definition'
 import { pinCommand } from './pin'
+import { reporterCommand } from './reporter'
 import { runStateCommand } from './run-state'
 import { testsCommand } from './tests'
 import type { TapCommandName } from '../contract'
@@ -13,6 +14,7 @@ import type { TapCommandName } from '../contract'
 export const tapCommands: { [K in TapCommandName]: TapCommandDefinition & { name: K } } = {
   tests: testsCommand,
   commands: commandsCommand,
+  reporter: reporterCommand,
   pin: pinCommand,
   'run-state': runStateCommand,
 }

@@ -2,7 +2,8 @@ import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
-import type { CommandEntry, NetworkCommandInfo, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
+import type { TapNetworkInfo, TapReporterView } from './contract'
+import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
@@ -108,7 +109,7 @@ export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTes
 // serializes) is where request/xhr/`cy.request` rows carry their display detail.
 interface NetworkRenderProps {
   message?: string
-  indicator?: NetworkCommandInfo['indicator']
+  indicator?: TapNetworkInfo['indicator']
   status?: string | number
   wentToOrigin?: boolean
   interceptions?: unknown[]
@@ -133,7 +134,7 @@ interface NetworkLog {
 // and request commands attach (a status `indicator`, or the `interceptions`
 // list) — rather than by name, since `cy.request` and proxy requests both log
 // as `request`.
-const serializeNetworkInfo = (command: SerializedCommandLog): NetworkCommandInfo | undefined => {
+const serializeNetworkInfo = (command: SerializedCommandLog): TapNetworkInfo | undefined => {
   const { instrument, method, url, isStubbed, numResponses, alias, status, renderProps } = command as NetworkLog
   const isRouteRow = instrument === 'route'
   const isRequestRow = renderProps?.indicator != null || Array.isArray(renderProps?.interceptions)
@@ -146,7 +147,7 @@ const serializeNetworkInfo = (command: SerializedCommandLog): NetworkCommandInfo
   // stubbed-vs-real fact as `wentToOrigin` on its renderProps.
   const stubbed = isStubbed ?? (renderProps?.wentToOrigin != null ? !renderProps.wentToOrigin : undefined)
 
-  const info = omitNullish<NetworkCommandInfo>({
+  const info = omitNullish<TapNetworkInfo>({
     method,
     // The base log defaults `url` to the page URL, so only a route matcher or a
     // real request's URL is a trustworthy request URL — `cy.request` never
@@ -204,6 +205,108 @@ export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] =
   .sort((a, b) => createdAt(a) - createdAt(b))
 
   return logs.map(serializeCommandEntry)
+}
+
+// The display-level slice of a log's attrs the reporter panel reads beyond the
+// lean CommandEntry fields.
+interface ReporterLog {
+  displayName?: string
+  hookId?: string
+  event?: boolean
+  group?: string
+  groupLevel?: number
+}
+
+const serializeReporterCommand = (command: SerializedCommandLog): TapReporterView['commands'][number] => {
+  const { id, name, message, state, type, _hasBeenCleanedUp } = command
+  const { displayName, hookId, event, group, groupLevel } = command as ReporterLog
+
+  const displayMessage = (command.renderProps as NetworkRenderProps | undefined)?.message ?? message
+
+  return omitNullish({
+    id,
+    name,
+    displayName,
+    message: displayMessage,
+    state,
+    type,
+    hookId,
+    // The driver defaults `event` to false on every command log; only true is signal.
+    event: event === true ? true : undefined,
+    group,
+    groupLevel,
+    network: serializeNetworkInfo(command),
+    cleanedUp: _hasBeenCleanedUp === true ? true : undefined,
+  })
+}
+
+const serializeReporterRoute = (log: SerializedCommandLog): TapReporterView['routes'][number] => {
+  const { id } = log
+  const { method, url, isStubbed, numResponses, alias, status } = log as NetworkLog
+
+  return omitNullish({
+    id,
+    method,
+    url,
+    stubbed: isStubbed,
+    status,
+    numResponses,
+    alias,
+  })
+}
+
+const serializeReporterHooks = (test: SerializedTest, attempt: SerializedTest): TapReporterView['hooks'] => {
+  // Suite-level hooks never serialize onto a test (the reporter unions them in
+  // from the runnables tree), but every hook that ran left its hookId under its
+  // hook name in the test's timings — derive the sections from there, in run
+  // order. Non-hook timings (`lifecycle`, `test`) aren't arrays, so they drop out.
+  const hooks = Object.entries(attempt.timings ?? {}).flatMap(([hookName, entries]) => {
+    return Array.isArray(entries)
+      ? (entries as Array<{ hookId: string }>).map(({ hookId }) => ({ hookId, hookName }))
+      : []
+  })
+
+  return [
+    ...hooks,
+    // The test's own commands carry its id as their hookId; the reporter
+    // synthesizes this same pseudo-hook to render them as the "test body".
+    { hookId: test.id, hookName: 'test body' },
+  ]
+}
+
+const serializeReporterError = (err: Record<string, unknown>): TapReporterView['error'] => {
+  const { codeFrame } = err as { codeFrame?: { relativeFile?: string, line?: number, column?: number, frame?: string } }
+
+  return omitNullish({
+    ...serializeTestError(err),
+    codeFrame: codeFrame != null
+      ? omitNullish({ file: codeFrame.relativeFile, line: codeFrame.line, column: codeFrame.column, frame: codeFrame.frame })
+      : undefined,
+  })
+}
+
+/**
+ * Everything the open-mode reporter renders for one test attempt: the ROUTES
+ * table (`cy.intercept` registrations, which the driver buckets under `routes`),
+ * the hook sections, the command log with its display-level fields
+ * (hook membership, event flag, grouping, network detail), and — when the
+ * attempt failed — the error panel with its code frame.
+ */
+export const serializeReporterView = (test: SerializedTest, attempt: SerializedTest, runComplete: boolean): TapReporterView => {
+  const titlePath = test._titlePath
+
+  return omitNullish({
+    test: {
+      id: test.id,
+      title: test.title,
+      fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : test.title,
+      state: attempt.state ?? unreachedState(runComplete),
+    },
+    hooks: serializeReporterHooks(test, attempt),
+    routes: asCommandLogs(attempt.routes).map(serializeReporterRoute),
+    commands: asCommandLogs(attempt.commands).map(serializeReporterCommand),
+    error: attempt.err != null ? serializeReporterError(attempt.err) : undefined,
+  })
 }
 
 export interface RunResults {

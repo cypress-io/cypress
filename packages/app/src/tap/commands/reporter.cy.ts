@@ -1,0 +1,172 @@
+import { tapManagerDataSource } from '../tap-manager-data-source'
+import { TapManager } from '../tap-manager'
+
+const CYPRESS_VERSION = '15.0.0'
+
+describe('tap/commands/reporter', () => {
+  // Mirrors the serialized shapes the driver emits: hook runs recorded under
+  // their hook name in `timings`, cy.intercept registrations bucketed under
+  // `routes`, and commands carrying the display-level attrs the reporter panel
+  // reads (hookId, displayName, event, group/groupLevel, renderProps). Extra
+  // attrs (chainerId, timeout) prove the serializer keeps only the typed fields.
+  const TESTS_STATE = {
+    r2: {
+      id: 'r2',
+      title: 'loads users',
+      _titlePath: ['Users', 'loads users'],
+      state: 'passed',
+      timings: {
+        lifecycle: 30,
+        'before each': [{ hookId: 'h1', fnDuration: 5, afterFnDuration: 1 }],
+        test: { fnDuration: 20, afterFnDuration: 1 },
+      },
+      routes: [
+        {
+          id: 'log-int', name: 'route', state: 'pending', instrument: 'route',
+          method: 'GET', url: '**/api/users', isStubbed: true, status: 200,
+          numResponses: 1, alias: 'getUsers', chainerId: 'ch1',
+        },
+      ],
+      commands: [
+        { id: 'log-1', name: 'visit', message: '/users', state: 'passed', type: 'parent', hookId: 'h1', event: false, timeout: 4000 },
+        { id: 'log-2', name: 'get', message: '#list', state: 'passed', type: 'parent', hookId: 'r2', event: false },
+        {
+          id: 'log-3', name: 'request', displayName: 'xhr', state: 'passed', type: 'parent', hookId: 'r2',
+          event: true, message: '',
+          renderProps: {
+            indicator: 'successful', message: 'GET 200 /api/users', wentToOrigin: false,
+            interceptions: [{ command: 'intercept', alias: 'getUsers', type: 'stub' }],
+          },
+          method: 'GET', url: 'http://localhost:2121/api/users', alias: 'getUsers',
+        },
+        { id: 'log-4', name: 'session-group', message: 'user', state: 'passed', type: 'parent', hookId: 'r2', group: 'log-2', groupLevel: 1 },
+      ],
+    },
+    r3: {
+      id: 'r3',
+      title: 'never ran',
+    },
+    // A failed test: err carries messaging fields plus a code frame; extras on
+    // both (parsedStack, absoluteFile, language) prove the error serializes down
+    // to the typed panel fields.
+    r4: {
+      id: 'r4',
+      title: 'fails',
+      state: 'failed',
+      commands: [
+        { id: 'log-f', name: 'assert', message: 'expected **1** to eq **2**', state: 'failed', type: 'child', hookId: 'r4' },
+      ],
+      err: {
+        name: 'AssertionError',
+        message: 'expected 1 to eq 2',
+        stack: 'AssertionError: expected 1 to eq 2\n  at <anonymous>',
+        parsedStack: [{ line: 3 }],
+        codeFrame: {
+          line: 12,
+          column: 8,
+          relativeFile: 'cypress/e2e/fails.cy.js',
+          absoluteFile: '/projects/app/cypress/e2e/fails.cy.js',
+          frame: '> 12 |   expect(1).to.eq(2)\n',
+          language: 'js',
+        },
+      },
+    },
+  }
+
+  // The spec's own window.Cypress is the instance running this test, so stub
+  // the runner seam rather than replace it.
+  const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
+
+  it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
+    stubRunner(undefined)
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r2' })
+
+    expect(outcome).to.deep.eq({
+      error: {
+        code: 'NO_RUN',
+        message: 'no spec has been run yet — use the run command to run a spec first',
+      },
+    })
+  })
+
+  it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
+    stubRunner({ getTestState: () => undefined, isRunComplete: () => false })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'nope' })
+
+    expect((outcome as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+  })
+
+  it('fails dispatch without reading the runner when the required test option is missing', async () => {
+    const getRunner = stubRunner({ getTestState: () => undefined, isRunComplete: () => false })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
+
+    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
+    expect(getRunner).not.to.have.been.called
+  })
+
+  it('returns the full reporter view: test header, hooks with a synthesized test body, routes, and enriched commands', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => false })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r2' })
+
+    expect(outcome).to.deep.eq({
+      result: {
+        test: { id: 'r2', title: 'loads users', fullTitle: 'Users > loads users', state: 'passed' },
+        hooks: [
+          { hookId: 'h1', hookName: 'before each' },
+          { hookId: 'r2', hookName: 'test body' },
+        ],
+        routes: [
+          { id: 'log-int', method: 'GET', url: '**/api/users', stubbed: true, status: 200, numResponses: 1, alias: 'getUsers' },
+        ],
+        commands: [
+          { id: 'log-1', name: 'visit', message: '/users', state: 'passed', type: 'parent', hookId: 'h1' },
+          { id: 'log-2', name: 'get', message: '#list', state: 'passed', type: 'parent', hookId: 'r2' },
+          {
+            id: 'log-3', name: 'request', displayName: 'xhr', message: 'GET 200 /api/users', state: 'passed', type: 'parent', hookId: 'r2', event: true,
+            network: { method: 'GET', url: 'http://localhost:2121/api/users', indicator: 'successful', stubbed: true, alias: 'getUsers' },
+          },
+          { id: 'log-4', name: 'session-group', message: 'user', state: 'passed', type: 'parent', hookId: 'r2', group: 'log-2', groupLevel: 1 },
+        ],
+      },
+    })
+
+    expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
+  })
+
+  it('carries a failed attempt’s error panel — messaging fields and code frame, extras trimmed', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r4' })
+
+    expect((outcome as { result: Record<string, unknown> }).result.error).to.deep.eq({
+      name: 'AssertionError',
+      message: 'expected 1 to eq 2',
+      stack: 'AssertionError: expected 1 to eq 2\n  at <anonymous>',
+      codeFrame: {
+        file: 'cypress/e2e/fails.cy.js',
+        line: 12,
+        column: 8,
+        frame: '> 12 |   expect(1).to.eq(2)\n',
+      },
+    })
+  })
+
+  it('reports an unreached test with empty collections and just the test-body pseudo-hook', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r3' })
+
+    expect(outcome).to.deep.eq({
+      result: {
+        test: { id: 'r3', title: 'never ran', fullTitle: 'never ran', state: 'skipped' },
+        hooks: [{ hookId: 'r3', hookName: 'test body' }],
+        routes: [],
+        commands: [],
+      },
+    })
+  })
+})
