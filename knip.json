@@ -86,6 +86,9 @@
         "src/**/*.{ts,tsx,js,jsx,vue}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-typed-document-node/core"
       ]
     },
     "packages/frontend-shared": {
@@ -153,6 +156,9 @@
         "src/**/*.{ts,tsx,js,jsx,vue}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-typed-document-node/core"
       ]
     },
     "packages/example": {
