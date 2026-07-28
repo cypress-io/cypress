@@ -1,7 +1,8 @@
-import type { SerializedTest } from '@packages/types'
+import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 import { TapCommandError } from './commands/definition'
+import { omitNullish } from './utils'
 
-import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
+import type { CommandEntry, NetworkCommandInfo, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
@@ -15,13 +16,13 @@ export const serializeTestsState = (runner: TapTestsRunner): TestStateEntry[] =>
   const runComplete = runner.isRunComplete()
 
   return tests.map(({ id, title, duration, state, currentRetry }): TestStateEntry => {
-    return {
+    return omitNullish({
       id,
       title,
-      ...(duration !== undefined ? { duration } : {}),
+      duration,
       state: state ?? unreachedState(runComplete),
-      ...(currentRetry !== undefined ? { retries: currentRetry } : {}),
-    }
+      retries: currentRetry,
+    })
   })
 }
 
@@ -33,13 +34,9 @@ const cloneReferenceObject = <T>(value: T): T => {
 }
 
 const serializeTestError = (err: Record<string, unknown>): TestError => {
-  const { name, message, stack } = err
+  const { name, message, stack } = err as TestError
 
-  return {
-    ...(typeof name === 'string' ? { name } : {}),
-    ...(typeof message === 'string' ? { message } : {}),
-    ...(typeof stack === 'string' ? { stack } : {}),
-  }
+  return omitNullish({ name, message, stack })
 }
 
 const attemptsOf = (test: SerializedTest): SerializedTest[] => {
@@ -95,36 +92,118 @@ export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTes
   const titlePath = test._titlePath
   const { duration, state, currentRetry, timings, err } = attempt
 
-  return {
+  return omitNullish({
     id: test.id,
     title: test.title,
     fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : test.title,
-    ...(duration !== undefined ? { duration } : {}),
+    duration,
     state: state ?? unreachedState(runComplete),
-    ...(currentRetry !== undefined ? { retries: currentRetry } : {}),
-    ...(timings != null ? { timings: cloneReferenceObject(timings) } : {}),
-    ...(err != null ? { error: serializeTestError(err) } : {}),
+    retries: currentRetry,
+    timings: timings != null ? cloneReferenceObject(timings) : undefined,
+    error: err != null ? serializeTestError(err) : undefined,
+  })
+}
+
+// The reporter's `renderProps` (resolved to an object by the time a log
+// serializes) is where request/xhr/`cy.request` rows carry their display detail.
+interface NetworkRenderProps {
+  message?: string
+  indicator?: NetworkCommandInfo['indicator']
+  status?: string | number
+  wentToOrigin?: boolean
+  interceptions?: unknown[]
+}
+
+// The network-relevant slice of a log's attrs. The driver types these behind an
+// index signature, so name the shape we read rather than narrow each access.
+interface NetworkLog {
+  instrument?: string
+  method?: string
+  url?: string
+  isStubbed?: boolean
+  numResponses?: number
+  alias?: string
+  status?: string | number
+  renderProps?: NetworkRenderProps
+}
+
+// A row is network-instrumented when it is a `cy.intercept` registration
+// (instrument `route`) or a request/xhr/fetch/`cy.request` log. The latter is
+// identified the way the reporter does — by the `renderProps` the proxy-logging
+// and request commands attach (a status `indicator`, or the `interceptions`
+// list) — rather than by name, since `cy.request` and proxy requests both log
+// as `request`.
+const serializeNetworkInfo = (command: SerializedCommandLog): NetworkCommandInfo | undefined => {
+  const { instrument, method, url, isStubbed, numResponses, alias, status, renderProps } = command as NetworkLog
+  const isRouteRow = instrument === 'route'
+  const isRequestRow = renderProps?.indicator != null || Array.isArray(renderProps?.interceptions)
+
+  if (!isRouteRow && !isRequestRow) {
+    return undefined
   }
+
+  // A route row carries `isStubbed`; a request row reports the same
+  // stubbed-vs-real fact as `wentToOrigin` on its renderProps.
+  const stubbed = isStubbed ?? (renderProps?.wentToOrigin != null ? !renderProps.wentToOrigin : undefined)
+
+  const info = omitNullish<NetworkCommandInfo>({
+    method,
+    // The base log defaults `url` to the page URL, so only a route matcher or a
+    // real request's URL is a trustworthy request URL — `cy.request` never
+    // overrides it, keeping its URL in `message` instead.
+    url: isRouteRow || Array.isArray(renderProps?.interceptions) ? url : undefined,
+    indicator: renderProps?.indicator,
+    status: status ?? renderProps?.status,
+    stubbed,
+    numResponses,
+    alias,
+  })
+
+  // A memory-evicted row can trip the route/request check while every detail
+  // field was nulled; drop the empty object so the contract stays absent-not-empty.
+  return Object.keys(info).length ? info : undefined
+}
+
+// The driver's reduceMemory nulls (not deletes) non-preserved command attrs
+// once a test falls out of numTestsKeptInMemory; omitNullish then keeps the
+// wire contract's optional fields absent-not-null. Its _hasBeenCleanedUp marker
+// is surfaced as `cleanedUp` so consumers can tell eviction apart from fields
+// that were never set.
+const serializeCommandEntry = (command: SerializedCommandLog): CommandEntry => {
+  const { id, name, message, state, type, _hasBeenCleanedUp } = command
+
+  // Mirror the reporter's displayed row text: network rows leave the base
+  // message empty and carry their summary (e.g. `GET 200 /api`) on renderProps.
+  const displayMessage = (command.renderProps as NetworkRenderProps | undefined)?.message ?? message
+
+  return omitNullish<CommandEntry>({
+    id,
+    name,
+    message: displayMessage,
+    state,
+    type,
+    network: serializeNetworkInfo(command),
+    cleanedUp: _hasBeenCleanedUp === true ? true : undefined,
+  })
+}
+
+const asCommandLogs = (value: unknown): SerializedCommandLog[] => {
+  return Array.isArray(value) ? value as SerializedCommandLog[] : []
+}
+
+const createdAt = (log: SerializedCommandLog): number => {
+  return typeof log.createdAtTimestamp === 'number' ? log.createdAtTimestamp : 0
 }
 
 export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
-  const commands = attempt.commands ?? []
+  // The driver buckets cy.intercept registrations under `routes`, apart from
+  // `commands`, but the reporter shows both interleaved in one command log.
+  // Merge them back into the order the developer sees, keyed on each log's
+  // creation timestamp (stable for the timestamp-less rows in synthetic input).
+  const logs = [...asCommandLogs(attempt.commands), ...asCommandLogs(attempt.routes)]
+  .sort((a, b) => createdAt(a) - createdAt(b))
 
-  // The driver's reduceMemory nulls (not deletes) non-preserved command attrs
-  // once a test falls out of numTestsKeptInMemory, so treat null as absent to
-  // keep the wire contract's optional fields absent-not-null. Its
-  // _hasBeenCleanedUp marker is surfaced as `cleanedUp` so consumers can tell
-  // eviction apart from fields that were never set.
-  return commands.map(({ id, name, message, state, type, _hasBeenCleanedUp }): CommandEntry => {
-    return {
-      id,
-      ...(name != null ? { name } : {}),
-      ...(message != null ? { message } : {}),
-      ...(state != null ? { state } : {}),
-      ...(type != null ? { type } : {}),
-      ...(_hasBeenCleanedUp === true ? { cleanedUp: true } : {}),
-    }
-  })
+  return logs.map(serializeCommandEntry)
 }
 
 export interface RunResults {

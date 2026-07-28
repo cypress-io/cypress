@@ -116,7 +116,9 @@ describe('tap binding', () => {
 
       for (const command of commands) {
         expect(Object.keys(command), `command ${command.id}`).to.include.members(['id', 'name'])
-        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type'].includes(key)))
+        // cy.visit's document load logs a request row, so `network` is part of
+        // the contract even here; the dedicated network spec below asserts its shape.
+        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp'].includes(key)))
       }
 
       const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
@@ -370,5 +372,93 @@ describe('tap binding pin lifecycle', () => {
     pinClickAtBefore()
     cy.contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
     expectReleased()
+  })
+})
+
+// The network fixture lives in the dedicated tap project too (see above): it
+// needs a served page and an intercept, which would perturb the shared
+// cypress-in-cypress project's exact spec/command counts.
+describe('tap binding with network activity', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  const ENTRY_KEYS = ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp']
+  const NETWORK_KEYS = ['method', 'url', 'indicator', 'status', 'stubbed', 'numResponses', 'alias']
+
+  const withinKeys = (allowed: string[]) => {
+    return (keys: string[]) => keys.every((key) => allowed.includes(key))
+  }
+
+  it('surfaces high-level network detail on request, intercept, and cy.request rows', () => {
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/network.cy.js' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+
+      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, any>> }).result
+
+      // Nothing internal leaks: every row stays within the wire contract, and
+      // every network object stays within its typed field set.
+      for (const command of commands) {
+        expect(Object.keys(command), `row ${command.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
+
+        if (command.network) {
+          expect(Object.keys(command.network), `network ${command.id}`).to.satisfy(withinKeys(NETWORK_KEYS))
+        }
+      }
+
+      expect(commands.filter((command) => command.network), 'rows carrying network detail').to.have.length.greaterThan(0)
+
+      // The cy.intercept registration is bucketed under routes; it merges into
+      // the command log as a route row with the stubbed flag, matcher, alias,
+      // and match count.
+      const route = commands.find((command) => command.name === 'route')
+
+      expect(route, 'the intercept route row').to.exist
+      expect(route!.network.method).to.eq('GET')
+      expect(route!.network.url).to.contain('/api/users')
+      expect(route!.network.stubbed).to.eq(true)
+      expect(route!.network.alias).to.eq('getUsers')
+      expect(route!.network.numResponses).to.be.greaterThan(0)
+
+      // The stubbed request itself: served by the stub, so it did not go to
+      // origin. Carries method, URL, the reporter's status indicator, and alias.
+      const stubbed = commands.find((command) => command.name === 'request' && command.network?.stubbed === true && command.network?.alias === 'getUsers')
+
+      expect(stubbed, 'the stubbed request row').to.exist
+      expect(stubbed!.network.method).to.eq('GET')
+      expect(stubbed!.network.url).to.contain('/api/users')
+      expect(stubbed!.network.indicator).to.eq('successful')
+      expect(stubbed!.message, 'the reporter display message').to.contain('/api/users')
+
+      // A real request that went to origin (the page fetching itself).
+      const real = commands.find((command) => command.name === 'request' && command.network?.stubbed === false)
+
+      expect(real, 'a real request row').to.exist
+      expect(real!.network.method).to.be.a('string')
+      expect(real!.network.indicator).to.be.a('string')
+
+      // cy.request keeps its method/URL in the display message, exposing only
+      // the status indicator as a structured field (no request URL on the log).
+      const cyRequest = commands.find((command) => command.name === 'request' && command.network && !command.network.url && !command.network.method && command.network.indicator)
+
+      expect(cyRequest, 'the cy.request row').to.exist
+      expect(cyRequest!.network.indicator).to.eq('successful')
+      expect(cyRequest!.message, 'the cy.request display message').to.match(/^GET \d+ /)
+    })
   })
 })

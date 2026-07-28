@@ -81,17 +81,53 @@ export interface TestDetailEntry {
   error?: TestError
 }
 
+/**
+ * The high-level network detail the reporter renders inline on a
+ * request / xhr / fetch / `cy.intercept` row. Present on `CommandEntry` only
+ * for network-instrumented commands, so its very presence is how a consumer
+ * tells a network row from an ordinary command row — that is why the row does
+ * not also serialize the driver's raw `instrument`. Each field stays absent
+ * when the underlying row doesn't carry it, matching the serializer's
+ * absent-not-null discipline.
+ */
+export interface NetworkCommandInfo {
+  /** HTTP method, or `*` for a wildcard `cy.intercept` matcher. Absent on `cy.request` rows, where the method lives in `message`. */
+  method?: string
+  /** The request URL, or a `cy.intercept`'s display matcher. Absent on `cy.request` rows, where the URL lives in `message`. */
+  url?: string
+  /** The reporter's status-dot semantics for a request. Absent on the `cy.intercept` registration row. */
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
+  /** A stubbed route's response code, or the reporter's `req`/`res modified` label. */
+  status?: string | number
+  /** Whether a stub served the request instead of hitting origin (`isStubbed` on intercept rows, `!wentToOrigin` on request rows). */
+  stubbed?: boolean
+  /** How many requests a `cy.intercept` has matched — the reporter's count badge. */
+  numResponses?: number
+  /** The route alias set via `.as()`, e.g. `getUsers`. */
+  alias?: string
+}
+
 export interface CommandEntry {
   /** The driver's command log id, e.g. `log-<origin>-3`. */
   id: string
   /** The command name as logged, e.g. `visit`, `get`, `assert`. */
   name?: string
-  /** The command log's display message — arguments/assertion text, not output. */
+  /**
+   * The reporter's display text for the row: the command arguments/assertion
+   * text, or — for a network row whose base message is empty — the request
+   * summary the reporter shows in its place (e.g. `GET 200 /api/users`).
+   */
   message?: string
   /** `pending` while the command runs, then `passed` or `failed`. */
   state?: SerializedCommandLog['state']
   /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */
   type?: SerializedCommandLog['type']
+  /**
+   * High-level network detail — method, URL, status/indicator, stubbed flag,
+   * response count, alias — matching what the reporter renders inline on
+   * request / xhr / `cy.intercept` rows. Absent on ordinary command rows.
+   */
+  network?: NetworkCommandInfo
   /**
    * Present (always `true`) only when the driver evicted this test's command
    * details from memory (numTestsKeptInMemory), so scrubbed fields like
