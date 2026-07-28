@@ -7,6 +7,10 @@ import type { TapCliOptions } from '../types'
 
 const posixify = (specPath: string) => specPath.replace(/\\/g, '/')
 
+// The runSpec mutation can launch a browser and switch testing types before it
+// answers, so it needs far longer than the transport's default query timeout.
+const RUN_SPEC_TIMEOUT_MS = 60_000
+
 // `runSpec` resolves the spec against the project's specPattern and reads it off
 // disk, so it needs an absolute path; the CLI matches the project-relative path
 // the specs command lists against the instance's own spec list and sends that
@@ -27,7 +31,7 @@ const runSpec = async (options: TapCliOptions, args: Record<string, string>): Pr
       return 1
     }
 
-    const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute))
+    const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute), RUN_SPEC_TIMEOUT_MS)
 
     if (result?.__typename === 'RunSpecResponse') {
       renderResult({

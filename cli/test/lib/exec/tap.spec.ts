@@ -750,10 +750,12 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})
 
+      // The mutation gets a launch-sized timeout: it can wait on a browser
+      // launch and a testing-type switch, unlike ordinary data queries.
       expect(queryInstanceGraphql).toHaveBeenCalledWith(instance, expect.objectContaining({
         operationName: 'TapRunSpec',
         variables: { specPath: '/disk/real-project/cypress/e2e/login.cy.ts' },
-      }))
+      }), 60_000)
     })
 
     it('matches an OS-native (Windows) relative path from the instance against the POSIX input', async () => {
@@ -765,7 +767,7 @@ describe('lib/exec/tap', () => {
       expect(queryInstanceGraphql).toHaveBeenCalledWith(instance, expect.objectContaining({
         operationName: 'TapRunSpec',
         variables: { specPath: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' },
-      }))
+      }), 60_000)
     })
 
     it('fails with SPEC_NOT_FOUND when the spec is not in the instance\'s list, without triggering a run', async () => {
