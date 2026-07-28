@@ -302,9 +302,13 @@
       ]
     },
     "packages/data-context": {
+      "entry": [
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
@@ -722,6 +726,7 @@
     "**/*.gen.js",
     "**/project-fixtures/**",
     "**/projects/**",
+    "packages/data-context/test/unit/codegen/files/**",
     "system-tests/lib/validations/**"
   ],
   "ignoreDependencies": [
