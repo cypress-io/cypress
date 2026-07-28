@@ -90,8 +90,8 @@ export class OpenProject extends EventEmitter {
       proxyUrl: cfg.proxyUrl,
       ...(isProxyEnabled() ? { proxyServer: ensureProxyServer(cfg) } : {
         hosts: cfg.hosts,
-        onPageCriClientReady: (client, isAUTFrame) => {
-          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame)
+        onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
+          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
       }),
       socketIoRoute: cfg.socketIoRoute,

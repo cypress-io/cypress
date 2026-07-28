@@ -39,6 +39,9 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export type CreateCdpFetchRuntimeDeps = {
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  // Protocol-neutral subscription to AUT document navigation commits,
+  // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
+  onAUTFrameNavigated?: (listener: (url: string) => void) => () => void
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
   remoteStates: RemoteStates
@@ -196,6 +199,19 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     isAUTFrame: deps.isAUTFrame,
   })
 
+  // Proxy parity: cookie simulation's simulated top, which nothing else
+  // updates when the proxy is off. Sourced from navigation commits because
+  // cache-served documents never produce a Fetch pause. Only http(s) commits
+  // count — about:blank (test isolation), data:, and blob: never transit
+  // the proxy.
+  const onAUTFrameNavigated = (url: string) => {
+    if (/^https?:/.test(url)) {
+      networkProxy.http.setAUTUrl(url)
+    }
+  }
+
+  let unsubscribeAUTFrameNavigated: (() => void) | undefined
+
   return {
     networkProxy,
     netStubbingState: stubbingState,
@@ -203,8 +219,17 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
-    start () {
-      return fetchTransport.start()
+    async start () {
+      unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
+
+      try {
+        await fetchTransport.start()
+      } catch (err) {
+        unsubscribeAUTFrameNavigated?.()
+        unsubscribeAUTFrameNavigated = undefined
+
+        throw err
+      }
     },
     // Transport only — callers (server-base) already own networkProxy.reset so
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
@@ -212,6 +237,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       fetchTransport.reset()
     },
     stop () {
+      unsubscribeAUTFrameNavigated?.()
+      unsubscribeAUTFrameNavigated = undefined
+
       return fetchTransport.stop()
     },
   }

@@ -3717,6 +3717,7 @@
     "./packages/server/lib/browsers/cdp-protocol/cdp-connection.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-fetch-codec.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-fetch-transport.ts",
+    "./packages/server/lib/browsers/cdp-protocol/cdp-network-extra-info.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp_automation.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-client.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-errors.ts",
