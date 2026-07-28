@@ -2260,6 +2260,28 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 4
 
+  h2-dual-stack-tests:
+    <<: *defaults
+    resource_class: medium+.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
+      - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Start dual-stack h2 origin
+          background: true
+          command: node system-tests/projects/http2-dual-stack/server.mjs
+      - run:
+          name: Verify browser h2 with the MITM proxy disabled
+          command: |
+            CYPRESS_INTERNAL_DISABLE_PROXY=1 yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome
+      - run:
+          name: Verify HTTP/1.1 downgrade with the MITM proxy enabled
+          command: |
+            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --expose expectedBrowserProtocol=1.1
+
   system-tests-node-modules-install:
     <<: *defaults
     steps:

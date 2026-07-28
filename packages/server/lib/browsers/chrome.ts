@@ -431,6 +431,21 @@ export = {
       args.push(`${HOST_RESOLVER_RULES}${rules}`)
     }
 
+    // Blink's cache-aware font loading hard-fails uncached @font-face loads
+    // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
+    // which the proxy-disabled transport always enables (crbug.com/1196004).
+    // Web fonts do not load at all with the proxy disabled unless this flag
+    // stays — do not remove it.
+    if (isProxyDisabled()) {
+      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
+
+      if (disableFeaturesIndex === -1) {
+        args.push('--disable-features=WebFontsCacheAwareTimeoutAdaption')
+      } else {
+        args[disableFeaturesIndex] += ',WebFontsCacheAwareTimeoutAdaption'
+      }
+    }
+
     if (options.chromeWebSecurity === false) {
       args.push('--disable-web-security')
       args.push('--allow-running-insecure-content')
@@ -575,7 +590,7 @@ export = {
       await pageCriClient.send('Page.enable')
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await cdpAutomation.seedFrameTree(pageCriClient)
-      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
     }
   },
 
@@ -641,7 +656,7 @@ export = {
 
     if (isProxyDisabled()) {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
-      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 
       await this._navigateUsingCRI(pageCriClient, url)
     } else {

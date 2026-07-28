@@ -125,6 +125,10 @@ jobs:
       context: test-runner:cypress-record-key
       requires:
         - ready-to-test
+  - h2-dual-stack-tests:
+      context: test-runner:performance-tracking
+      requires:
+        - ready-to-test
   - driver-integration-tests-chrome-inject-document-domain:
       context: test-runner:cypress-record-key
       requires:
@@ -458,6 +462,7 @@ jobs:
         - system-tests-firefox
         - system-tests-webkit
         - system-tests-non-root
+        - h2-dual-stack-tests
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta
