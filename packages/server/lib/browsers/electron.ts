@@ -388,7 +388,7 @@ export = {
 
         // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
         cdpAutomation._listenForFrameTreeChanges(pageCriClient)
-        await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+        await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
       } else if (pageCriClient) {
         // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
         await cdpAutomation._handlePausedRequests(pageCriClient)

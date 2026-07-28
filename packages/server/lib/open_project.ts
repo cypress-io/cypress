@@ -112,8 +112,8 @@ export class OpenProject extends EventEmitter {
         // do not honor Chromium bypass / scheme-map syntax yet (#34351).
         ...(browser.family === 'chromium' ? translateEgressPolicyToLaunchOpts(cfg.hosts) : {}),
         hosts: cfg.hosts,
-        onPageCriClientReady: (client, isAUTFrame) => {
-          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame)
+        onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
+          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
       }),
     }

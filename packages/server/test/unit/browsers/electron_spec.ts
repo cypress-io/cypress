@@ -732,6 +732,14 @@ describe('lib/browsers/electron', () => {
         }, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         expect(onPageCriClientReady).to.have.been.calledOnce
+
+        // the runtime needs the isAUTFrame lookup and the protocol-neutral
+        // AUT-navigation subscription, same as the chrome launch paths
+        const [, isAUTFrame, onAUTFrameNavigated] = onPageCriClientReady.firstCall.args
+
+        expect(isAUTFrame).to.be.a('function')
+        expect(onAUTFrameNavigated).to.be.a('function')
+
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
           patterns: [{
             resourceType: 'Document',

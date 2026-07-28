@@ -465,6 +465,14 @@ describe('lib/browsers/chrome', () => {
         }, this.automation)
 
         expect(onPageCriClientReady).to.have.been.calledOnce
+
+        // the runtime needs the isAUTFrame lookup and the protocol-neutral
+        // AUT-navigation subscription
+        const [, isAUTFrame, onAUTFrameNavigated] = onPageCriClientReady.firstCall.args
+
+        expect(isAUTFrame).to.be.a('function')
+        expect(onAUTFrameNavigated).to.be.a('function')
+
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
           patterns: [{
             resourceType: 'Document',
@@ -1090,6 +1098,28 @@ describe('lib/browsers/chrome', () => {
       })
 
       expect(args.find((arg) => arg.startsWith('--host-resolver-rules'))).to.be.undefined
+    })
+
+    context('cache-aware font loading', () => {
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
+      it('disables it when the proxy is disabled', () => {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        const args = chrome._getArgs({}, {})
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.include('WebFontsCacheAwareTimeoutAdaption')
+        expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
+      })
+
+      it('keeps it when the proxy is enabled', () => {
+        const args = chrome._getArgs({}, {})
+
+        expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('WebFontsCacheAwareTimeoutAdaption')
+      })
     })
   })
 

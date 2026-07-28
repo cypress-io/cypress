@@ -69,6 +69,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   send: SendDebuggerCommand
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
+  private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
@@ -367,6 +368,38 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     return this._isAUTFrame(frameId)
   }
 
+  /**
+   * Notifies the listener with the committed URL when the AUT frame
+   * navigates. Protocol-neutral surface: the consumer (the CDP Fetch network
+   * runtime's simulated-top tracking) gets the fact of an AUT document
+   * commit without referencing CDP events or frame ids.
+   */
+  onAUTFrameNavigated = (listener: (url: string) => void): (() => void) => {
+    this.autFrameNavigatedListener = listener
+
+    return () => {
+      // only clear our own subscription — a stale unsubscribe (e.g. a
+      // stopped runtime) must not wipe a successor's
+      if (this.autFrameNavigatedListener === listener) {
+        this.autFrameNavigatedListener = undefined
+      }
+    }
+  }
+
+  private _onFrameNavigated = async (params: Protocol.Page.FrameNavigatedEvent) => {
+    if (!this.autFrameNavigatedListener) {
+      return
+    }
+
+    try {
+      if (await this._isAUTFrame(params.frame.id)) {
+        this.autFrameNavigatedListener?.(params.frame.url)
+      }
+    } catch (err) {
+      debugVerbose('frameNavigated AUT lookup failed: %s', err?.message)
+    }
+  }
+
   private _getAutFrame = async () => {
     try {
       if (this.gettingFrameTree) {
@@ -439,6 +472,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     client.on('Page.frameAttached', this._updateFrameTree(client, 'Page.frameAttached'))
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
+    client.on('Page.frameNavigated', this._onFrameNavigated)
   }
 
   /**
