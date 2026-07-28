@@ -2317,11 +2317,16 @@ jobs:
           command: |
             yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --expose expectedBrowserProtocol=1.1
 
-  # Focused CDP coverage for upstream HTTP_PROXY / NO_PROXY translation (#34351).
+  # Focused CDP coverage for suites that are green under proxy-disabled.
   # Runs always when system tests are selected — not gated on run-proxy-disabled-tests.
-  system-tests-upstream-proxy-cdp:
+  system-tests-focused-cdp:
     <<: *defaults
     resource_class: medium+.gen2
+    parameters:
+      <<: *defaultsParameters
+      spec:
+        description: system-tests spec to run with the MITM proxy disabled
+        type: string
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-system-tests >>
@@ -2330,21 +2335,21 @@ jobs:
       - install-browsers:
           install-chrome: true
       - run:
-          name: Upstream proxy system tests with MITM disabled (chrome)
+          name: System tests with MITM disabled (chrome)
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
             CYPRESS_INTERNAL_DISABLE_PROXY: '1'
           command: |
             yarn workspace @tooling/system-tests test:ci \
-              test/network_error_handling_spec.js --browser chrome
+              << parameters.spec >> --browser chrome
       - run:
-          name: Upstream proxy system tests with MITM disabled (electron)
+          name: System tests with MITM disabled (electron)
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
             CYPRESS_INTERNAL_DISABLE_PROXY: '1'
           command: |
             yarn workspace @tooling/system-tests test:ci \
-              test/network_error_handling_spec.js --browser electron
+              << parameters.spec >> --browser electron
       - sanitize-verify-and-store-mocha-results
 
   system-tests-node-modules-install:

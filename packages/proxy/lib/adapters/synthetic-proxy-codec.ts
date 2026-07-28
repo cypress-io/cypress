@@ -56,7 +56,10 @@ export function createSyntheticProxyCodec (
 
       return {
         ...response,
-        body: res.getCapturedBody(),
+        // Only attach a body when middleware actually rewrote it — an
+        // unmodified body lets the CDP Fetch transport continueResponse
+        // natively (downloads, native decoders) instead of fulfilling.
+        ...(res.bodyModified ? { body: res.getCapturedBody() } : {}),
         headers: res.getCapturedHeaders(),
         statusCode: res.getCapturedStatusCode(),
       }

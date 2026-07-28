@@ -168,6 +168,10 @@ export async function sendStaticResponse (backendRequest: Pick<InterceptedReques
   const headers = staticResponse.headers || {}
   const body = backendRequest.res.body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
 
+  // A static response replaces the body outright, so there are never origin
+  // bytes for the CDP Fetch transport to continue — it must fulfill with these.
+  backendRequest.res.bodyModified = true
+
   const incomingRes = _getFakeClientResponse({
     statusCode,
     headers,

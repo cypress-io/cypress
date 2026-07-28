@@ -43,6 +43,10 @@ export interface CypressOutgoingResponseLike extends Writable {
   // null = undecided; SetInjectionLevel only determines a level when unset
   wantsInjection: CypressWantsInjection | null
   wantsSecurityRemoved: null | boolean
+  // Set by middleware that rewrites the response body. The CDP Fetch transport
+  // can only Fetch.continueResponse (native, browser-decoded) when unset —
+  // otherwise it must Fetch.fulfillRequest with the rewritten bytes.
+  bodyModified?: boolean
   body?: string | Readable
   destroyed: boolean
   writableFinished: boolean

@@ -235,6 +235,7 @@ describe('createSyntheticProxyCodec', () => {
 
     ctx.res.status(203)
     ctx.res.set('x-result', 'synthetic')
+    ctx.res.bodyModified = true
     ctx.res.end('final')
 
     await finished
@@ -244,5 +245,50 @@ describe('createSyntheticProxyCodec', () => {
     expect(response.statusCode).to.equal(203)
     expect(response.headers).to.deep.equal({ 'x-result': 'synthetic' })
     expect(response.body?.toString()).to.equal('final')
+  })
+
+  it('omits the response body when nothing marked it modified', async () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => ({ req, res } as any),
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-1',
+      url: 'https://example.test/',
+    })
+
+    const finished = onceFinish(ctx.res)
+
+    // Real requests always reach here via SendResponseBodyToClient piping
+    // incomingResStream into res, whether or not any middleware rewrote it.
+    ctx.res.end('untouched')
+
+    await finished
+
+    const response = codec.decodeResponse(ctx)
+
+    expect(response.body).to.be.undefined
+  })
+
+  it('includes the response body when middleware marked it modified', async () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => ({ req, res } as any),
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-1',
+      url: 'https://example.test/',
+    })
+
+    const finished = onceFinish(ctx.res)
+
+    ctx.res.bodyModified = true
+    ctx.res.end('rewritten')
+
+    await finished
+
+    const response = codec.decodeResponse(ctx)
+
+    expect(response.body?.toString()).to.equal('rewritten')
   })
 })
