@@ -28,7 +28,6 @@ jobs:
             const staleMs = staleDays * 24 * 60 * 60 * 1000
             const now = Date.now()
             const org = context.repo.owner
-            const repo = context.repo.repo
 
             let cursor = null
             const staleIssues = []
@@ -52,6 +51,10 @@ jobs:
                               title
                               state
                               updatedAt
+                              repository { nameWithOwner }
+                              labels(first: 20) {
+                                nodes { name }
+                              }
                             }
                           }
                         }
@@ -70,14 +73,16 @@ jobs:
                 if (
                   status !== 'Waiting for Reproduction' ||
                   !content ||
-                  content.state !== 'OPEN'
+                  content.state !== 'OPEN' ||
+                  content.labels.nodes.some((l) => l.name === 'prevent-stale')
                 ) {
                   continue
                 }
 
                 const updatedAt = new Date(content.updatedAt).getTime()
                 if (now - updatedAt > staleMs) {
-                  staleIssues.push({ number: content.number, title: content.title })
+                  const [owner, repo] = content.repository.nameWithOwner.split('/')
+                  staleIssues.push({ number: content.number, title: content.title, owner, repo })
                 }
               }
             } while (cursor)
@@ -85,16 +90,16 @@ jobs:
             core.info(`Found ${staleIssues.length} stale issue(s) to close.`)
 
             for (const issue of staleIssues) {
-              core.info(`Closing #${issue.number}: ${issue.title}`)
+              core.info(`Closing ${issue.owner}/${issue.repo}#${issue.number}: ${issue.title}`)
               await github.rest.issues.createComment({
-                owner: org,
-                repo,
+                owner: issue.owner,
+                repo: issue.repo,
                 issue_number: issue.number,
                 body: 'This issue has been automatically closed because it has been waiting for a reproduction for more than 2 days without any activity. If you can provide a reproduction, please reopen the issue and include it.',
               })
               await github.rest.issues.update({
-                owner: org,
-                repo,
+                owner: issue.owner,
+                repo: issue.repo,
                 issue_number: issue.number,
                 state: 'closed',
                 state_reason: 'not_planned',

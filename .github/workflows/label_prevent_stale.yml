@@ -1,0 +1,47 @@
+name: 'Label collaborator issues with prevent-stale'
+# When a collaborator opens an issue, apply the prevent-stale label so it is
+# never subject to the Waiting for Reproduction auto-close timeout.
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  issues: write
+
+jobs:
+  label-prevent-stale:
+    runs-on: ubuntu-latest
+    if: github.repository == 'cypress-io/cypress'
+    steps:
+      - name: Apply prevent-stale to collaborator-authored issues
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}
+          script: |
+            const issue = context.payload.issue
+
+            // Already labelled — nothing to do
+            if (issue.labels.some((l) => l.name === 'prevent-stale')) return
+
+            const { owner, repo } = context.repo
+
+            // Only label if the issue author is a collaborator
+            const permResult = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner,
+              repo,
+              username: issue.user.login,
+            }).catch(() => null)
+
+            const permission = permResult?.data?.permission
+            if (!['admin', 'write', 'triage', 'read'].includes(permission)) return
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: issue.number,
+              labels: ['prevent-stale'],
+            })
+
+            core.info(`Added prevent-stale to #${issue.number} (author: ${issue.user.login})`)
