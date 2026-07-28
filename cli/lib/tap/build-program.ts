@@ -131,7 +131,12 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     declareCommand(program, native)
   }
 
-  for (const command of schema.commands.filter(({ hidden }) => !hidden)) {
+  // An older instance may still advertise a command the CLI has since made
+  // native; start() dispatches natives before ever consulting the schema, so
+  // skip the shadowed advertisement rather than registering a duplicate.
+  const nativeNames = new Set(tapCliCommands.map(({ name }) => name))
+
+  for (const command of schema.commands.filter(({ name, hidden }) => !hidden && !nativeNames.has(name))) {
     declareCommand(program, command, dispatch)
   }
 
