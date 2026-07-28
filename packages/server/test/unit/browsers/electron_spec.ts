@@ -1331,7 +1331,6 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: 'proxy rules',
-          proxyBypassRules: '<-loopback>',
         })
       })
     })
@@ -1343,11 +1342,11 @@ describe('lib/browsers/electron', () => {
         },
       }
 
-      return electron._setProxy(webContents, 'proxy rules', '<-loopback>,localhost,example.com')
+      return electron._setProxy(webContents, 'proxy rules', 'localhost,example.com')
       .then(() => {
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: 'proxy rules',
-          proxyBypassRules: '<-loopback>,localhost,example.com',
+          proxyBypassRules: 'localhost,example.com',
         })
       })
     })

@@ -438,9 +438,9 @@ export = {
 
     const { isHeadless } = browser
 
-    // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
-    // https://github.com/cypress-io/cypress/issues/1872
-    args.push(`--proxy-bypass-list=${options.proxyBypassList ?? '<-loopback>'}`)
+    if (options.proxyBypassList) {
+      args.push(`--proxy-bypass-list=${options.proxyBypassList}`)
+    }
 
     if (isHeadless) {
       args.push('--headless=new')
