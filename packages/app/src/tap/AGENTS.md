@@ -13,9 +13,9 @@ async, JSON-only methods — `getSchema()` and `exec(command, args?, options?)`.
 - `exec-args.ts` — app-side coercion of raw wire strings into typed params/options.
 - `commands/index.ts` — the command registry, the single source of truth for available subcommands.
 - `commands/definition.ts` — `defineCommand` authoring helper and `TapCommandError` (domain failures).
-- `commands/*.ts` — one module per subcommand (`specs`, `run`, `tests`, …); nothing but commands lives here.
+- `commands/*.ts` — one module per subcommand (`run`, `tests`, `commands`, …); nothing but commands lives here.
 - `test-state.ts` — serialization of runner test state, shared by the `tests`, `commands`, `run-state`, and `pin` commands.
-- `specs-list.ts` — serialization of a `FoundSpec` into the wire spec entry, shared by `specs` and `run`.
+- `specs-list.ts` — serialization of a `FoundSpec` into the wire spec entry, used by the `run` command.
 
 ## Contracts MUST be validated in the e2e tests, without mocking
 

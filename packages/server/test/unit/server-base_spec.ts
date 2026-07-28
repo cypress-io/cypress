@@ -6,7 +6,8 @@ import os from 'os'
 import express from 'express'
 import { connect } from '@packages/network'
 import { setupFullConfigWithDefaults } from '@packages/config'
-import { ServerBase } from '../../lib/server-base'
+import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { cypressInstances } from '../../lib/cypress-instances'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as fileServer from '../../lib/file_server'
 import * as ensureUrl from '../../lib/util/ensure-url'
@@ -539,6 +540,93 @@ describe('lib/server-base', () => {
       this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(this.socket.end).to.be.called
+    })
+  })
+
+  describe('#_forceProxyMiddleware', () => {
+    const clientRoute = '/__/'
+    let getCurrent
+
+    beforeEach(() => {
+      getCurrent = sinon.stub(cypressInstances, 'getCurrent')
+    })
+
+    afterEach(() => {
+      getCurrent.restore()
+    })
+
+    const run = (req) => {
+      const res = { redirect: sinon.spy() }
+      const next = sinon.spy()
+
+      _forceProxyMiddleware(clientRoute)(req, res, next)
+
+      return { res, next }
+    }
+
+    const nonProxied = (proxiedUrl, headers = {}) => ({ proxiedUrl, headers })
+
+    it('lets a non-proxied graphql request through when the instance id header matches', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': 'abc' }))
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
+    })
+
+    it('redirects a non-proxied graphql request whose instance id header is missing', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs'))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('redirects when the instance id header does not match the current instance', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': 'nope' }))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('redirects when the instance id header is duplicated (array-valued)', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': ['abc', 'abc'] }))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('redirects a graphql request when no instance is running', () => {
+      getCurrent.returns(null)
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': 'abc' }))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('lets a proxied graphql request through without an instance id header', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run({ proxiedUrl: 'http://localhost:2020/__cypress/graphql/TapSpecs', headers: {} })
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
+    })
+
+    it('still lets the read-only instances probe bypass without a header', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/instances/whatever'))
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
     })
   })
 

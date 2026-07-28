@@ -281,6 +281,14 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/cypress-instances": {
+      "entry": [
+        "lib/generated/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/net-stubbing": {
       "entry": [
         "lib/server/index.ts"

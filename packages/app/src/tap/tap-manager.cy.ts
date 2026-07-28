@@ -8,7 +8,7 @@ const CYPRESS_VERSION = '15.0.0'
 describe('tap/tap-manager', () => {
   // NOTE: the registry ships empty, so exec's dispatch, payload, per-command
   // arg/option, and domain-failure (TapCommandError) paths can only be
-  // exercised once the first real command lands (see the `specs` command spec).
+  // exercised once the first real command lands (see the `run` command spec).
   // Until then these cover the command-lookup failure and the wire envelope.
   describe('exec', () => {
     it('returns UNKNOWN_COMMAND listing the available commands', async () => {

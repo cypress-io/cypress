@@ -48,13 +48,6 @@ export type TapExecResult =
 const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the tests command' } as const
 const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
 
-const specsMeta = {
-  name: 'specs',
-  description: 'List all runnable specs for the selected Cypress instance.',
-  params: [],
-  options: [],
-} as const satisfies TapCommandSchema
-
 const runMeta = {
   name: 'run',
   description: 'run (or rerun) a spec by its project-relative path',
@@ -111,7 +104,6 @@ const runStateMeta = {
 // TapManager), and the CLI stamps it with its own version to render help with no
 // instance attached. Order here is the order commands list in help.
 export const TAP_COMMANDS = [
-  specsMeta,
   runMeta,
   testsMeta,
   commandsMeta,
@@ -165,6 +157,12 @@ Stages: not connected, browser not selected, spec not selected, running,
 passed, failed.`,
 } as const satisfies TapNativeCommandSchema
 
+const specsMeta = {
+  name: 'specs',
+  description: 'list the specs the running Cypress instance can run',
+  details: `Lists the specs the running Cypress instance can run. To find other testing types you must open a new cypress instance with that testing type specified.`,
+} as const satisfies TapNativeCommandSchema
+
 const domMeta = {
   name: 'dom',
   description: 'read the app-under-test DOM as HTML: the whole page, or each element matching a selector (with its subtree)',
@@ -200,6 +198,7 @@ curated computed styles, box model, and accessibility node.`,
 export const TAP_NATIVE_COMMANDS = [
   instancesMeta,
   statusMeta,
+  specsMeta,
   domMeta,
   ariaMeta,
   inspectMeta,

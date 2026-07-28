@@ -3,7 +3,7 @@ import path from 'path'
 import { CypressInstanceError } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
-import { readInstanceRecords } from './store'
+import { readLiveInstances } from './store'
 
 export { CypressInstanceError, INSTANCES_DIRNAME } from './record'
 
@@ -40,7 +40,7 @@ const probeMatches = async (matches: CypressInstance[], probeTimeoutMs?: number)
 }
 
 export const listLiveInstances = async (options: ListInstanceOptions = {}): Promise<LiveInstanceState[]> => {
-  const records = await readInstanceRecords()
+  const records = await readLiveInstances()
 
   const matches = records.filter((record) => matchesInstance(record, options.instance))
 
@@ -100,14 +100,14 @@ const selectInstance = <T extends LiveInstanceState>(candidates: T[], options: R
 // nothing matches and STALE_INSTANCE when matches exist but none responds.
 const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanceState[]> => {
   const { instance, probeTimeoutMs } = options
-  const records = await readInstanceRecords()
+  const records = await readLiveInstances()
 
   const matches = records.filter((record) => matchesInstance(record, instance))
 
   if (matches.length === 0) {
     throw new CypressInstanceError(
       'NO_INSTANCE',
-      `No Cypress instance found${describeFilter(instance)}. This command requires Cypress running in open mode. Start Cypress in open mode, open a browser, and try again.`,
+      `No Cypress instance found${describeFilter(instance)}. This command requires Cypress running in open mode. Start Cypress in open mode and try again.`,
     )
   }
 
@@ -116,7 +116,7 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   if (live.length === 0) {
     throw new CypressInstanceError(
       'STALE_INSTANCE',
-      `Cypress was previously running${describeFilter(instance)}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode, open a browser, and try again.`,
+      `Cypress was previously running${describeFilter(instance)}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode and try again.`,
     )
   }
 

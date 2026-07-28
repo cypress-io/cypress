@@ -28,7 +28,7 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests', 'commands'])
+      expect(schema.commands.map((command) => command.name)).to.include.members(['run', 'tests', 'commands'])
 
       const unknown = await binding.exec('not-a-command')
 
@@ -43,17 +43,11 @@ describe('tap binding', () => {
 
       expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      const outcome = await binding.exec('specs')
+      // specs is a CLI-native command now — the CLI reads the spec list directly
+      // over the instance's GraphQL — so the binding no longer serves it.
+      const specsOutcome = await binding.exec('specs')
 
-      expect('result' in outcome).to.eq(true)
-
-      const specs = (outcome as { result: Array<{ relativePath: string }> }).result
-
-      expect(specs).to.deep.include({ relativePath: 'cypress/e2e/dom-content.spec.js' })
-
-      for (const spec of specs) {
-        expect(Object.keys(spec), `entry ${spec.relativePath}`).to.deep.eq(['relativePath'])
-      }
+      expect((specsOutcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
 
       // With no run yet there is no runner to read, so run-state omits the run-only fields.
       const runStateBeforeRun = await binding.exec('run-state')
@@ -64,7 +58,7 @@ describe('tap binding', () => {
 
       expect(Object.keys(beforeRun)).to.deep.eq(['spec', 'totalSpecs'])
       expect(beforeRun.spec).to.eq(null)
-      expect(beforeRun.totalSpecs).to.eq(specs.length)
+      expect(beforeRun.totalSpecs).to.be.a('number').and.to.be.greaterThan(0)
     })
   })
 

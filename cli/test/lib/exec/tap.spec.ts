@@ -4,6 +4,8 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
+import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
+import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapSession } from '../../../lib/tap/tap-session'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
@@ -21,6 +23,12 @@ vi.mock('../../../lib/tap/tap-session', async (importActual) => {
   return {
     ...actual,
     withTapSession: vi.fn(),
+  }
+})
+
+vi.mock('../../../lib/tap/instance-gql', () => {
+  return {
+    queryInstanceGraphql: vi.fn(),
   }
 })
 
@@ -105,6 +113,7 @@ const mockResolved = (overrides: Partial<InstanceSelection> = {}): InstanceSelec
 describe('lib/exec/tap', () => {
   beforeEach(() => {
     vi.mocked(withTapSession).mockReset()
+    vi.mocked(queryInstanceGraphql).mockReset()
     vi.mocked(listLiveInstances).mockReset()
     vi.mocked(resolveLiveInstance).mockReset()
     vi.mocked(resolveInstance).mockReset()
@@ -543,6 +552,154 @@ describe('lib/exec/tap', () => {
     })
   })
 
+  describe('the CLI-native specs command', () => {
+    const liveInstance = (overrides: Partial<LiveInstanceState> = {}): LiveInstanceState => ({
+      schemaVersion: 1,
+      pid: 4242,
+      projectRoot: '/projects/app',
+      serverPort: 49200,
+      instanceId: 'inst-1',
+      testingType: 'e2e',
+      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      ...overrides,
+    })
+
+    const mockLiveResolved = (instance: LiveInstanceState): LiveInstanceSelection => {
+      const selection: LiveInstanceSelection = { instance, reason: 'only', candidateCount: 1 }
+
+      vi.mocked(resolveLiveInstance).mockResolvedValue(selection)
+
+      return selection
+    }
+
+    it('renders the live spec list as JSON and exits 0, without opening a session', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/a.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/b.cy.ts', gitInfo: null },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+      // git's last-modified (human-readable + raw timestamp) rides along when
+      // present, omitted when the spec has none.
+      expect(JSON.parse(logger.print())).toEqual([
+        { relativePath: 'cypress/e2e/a.cy.ts', lastModified: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' },
+        { relativePath: 'cypress/e2e/b.cy.ts' },
+      ])
+
+      // The spec list comes from the instance's data layer, not the browser.
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('lists specs even when the instance has no browser attached', async () => {
+      mockLiveResolved(liveInstance({ cdpBrowserWsUrl: null }))
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [{ relative: 'cypress/e2e/a.cy.ts' }] },
+      })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/a.cy.ts' }])
+    })
+
+    it('normalizes OS-native (Windows) spec paths to POSIX so they match run/status', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [{ relative: 'cypress\\e2e\\win.cy.ts', gitInfo: null }] },
+      })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/win.cy.ts' }])
+    })
+
+    it('queries the resolved instance with the TapSpecs operation', async () => {
+      const { instance } = mockLiveResolved(liveInstance())
+
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({ currentProject: { specs: [] } })
+
+      await tap.start(['specs'], {})
+
+      expect(queryInstanceGraphql).toHaveBeenCalledWith(instance, expect.objectContaining({ operationName: 'TapSpecs' }))
+    })
+
+    it('forwards --instance plus the cwd to discovery', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({ currentProject: { specs: [] } })
+
+      await tap.start(['specs'], { instance: 1234 })
+
+      expect(resolveLiveInstance).toHaveBeenCalledWith({ instance: 1234, cwd: process.cwd() })
+    })
+
+    it('renders an empty list when the instance has no project open', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({ currentProject: null })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([])
+    })
+
+    it('drops malformed spec entries rather than rendering junk', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          null,
+          { relative: 42 },
+          {},
+          { relative: 'cypress/e2e/no-git.cy.ts', gitInfo: { lastModifiedHumanReadable: 42, lastModifiedTimestamp: 42 } },
+          { relative: 'cypress/e2e/ok.cy.ts', gitInfo: { lastModifiedHumanReadable: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' } },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+      // Non-string git fields are dropped, not rendered as junk.
+      expect(JSON.parse(logger.print())).toEqual([
+        { relativePath: 'cypress/e2e/no-git.cy.ts' },
+        { relativePath: 'cypress/e2e/ok.cy.ts', lastModified: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' },
+      ])
+    })
+
+    it('renders the discovery failure and exits 1 when no instance is live', async () => {
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+
+      expect(await tap.start(['specs'], {})).toBe(1)
+      expect(logger.print()).toBe('NO_INSTANCE: No running Cypress was found.')
+      expect(queryInstanceGraphql).not.toHaveBeenCalled()
+    })
+
+    it('renders a known data-layer failure and exits 1', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockRejectedValue(tapError(errors.tapGraphqlUnreachable, 'Could not reach the instance to run TapSpecs: socket hang up'))
+
+      expect(await tap.start(['specs'], {})).toBe(1)
+      expect(logger.print()).toContain(errors.tapGraphqlUnreachable.description)
+      expect(logger.print()).toContain(errors.tapGraphqlUnreachable.solution)
+    })
+
+    it('prints specs usage for `specs --help` and exits 0, without resolving', async () => {
+      expect(await tap.start(['specs', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap specs')
+      expect(resolveLiveInstance).not.toHaveBeenCalled()
+      expect(queryInstanceGraphql).not.toHaveBeenCalled()
+    })
+
+    it('exits 1 on an excess positional and never resolves an instance', async () => {
+      expect(await tap.start(['specs', 'extra'], {})).toBe(1)
+      expect(resolveLiveInstance).not.toHaveBeenCalled()
+      expect(queryInstanceGraphql).not.toHaveBeenCalled()
+    })
+
+    it('rethrows unexpected errors for the generic CLI error path', async () => {
+      const unexpected = new Error('boom')
+
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockRejectedValue(unexpected)
+
+      await expect(tap.start(['specs'], {})).rejects.toBe(unexpected)
+    })
+  })
+
   describe('the CLI-native frame commands (dom/aria/inspect)', () => {
     it('routes dom to the AUT-frame reader with the top-level options and returns its exit code', async () => {
       vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
@@ -681,6 +838,8 @@ describe('lib/exec/tap', () => {
                                           can reach
           status [options]                report where a running Cypress instance is
                                           in its lifecycle
+          specs [options]                 list the specs the running Cypress instance
+                                          can run
           dom [options] [selector]        read the app-under-test DOM as HTML: the
                                           whole page, or each element matching a
                                           selector (with its subtree)
@@ -690,8 +849,6 @@ describe('lib/exec/tap', () => {
           inspect [options] <selector>    inspect the first element matching a
                                           selector: its tag, attributes, computed
                                           styles, box model, and accessibility node
-          specs [options]                 List all runnable specs for the selected
-                                          Cypress instance.
           run [options] <spec>            run (or rerun) a spec by its
                                           project-relative path
           tests [options] [test]          list the tests of the active run and their
@@ -758,7 +915,7 @@ describe('lib/exec/tap', () => {
     it('falls back to generic help for `<command> --help` when an instance is up but has no browser', async () => {
       failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
-      expect(await tap.start(['specs', '--help'], {})).toBe(0)
+      expect(await tap.start(['run', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
     })
