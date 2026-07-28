@@ -41,6 +41,40 @@ export type TapExecResult =
   | { result: unknown }
   | { error: { code: string, message: string } }
 
+// How a command's declared params/options surface to its handler, derived once
+// here so the app's defineCommand and the CLI's defineNativeCommand type handlers
+// the same way: entries matching `Present` are keys the handler can rely on, the
+// rest may be absent, and each wire `type` maps through `Scalars`.
+type SchemaObject<
+  Entries extends readonly { name: string, type: TapCommandParamSchema['type'] }[],
+  Present,
+  Scalars extends Record<TapCommandParamSchema['type'], unknown>,
+> =
+  { [E in Entries[number] as E extends Present ? E['name'] : never]: Scalars[E['type']] } &
+  { [E in Entries[number] as E extends Present ? never : E['name']]?: Scalars[E['type']] }
+
+// App-side handlers see coerced values (the binding's exec coerces each wire
+// string to its declared scalar before dispatch): required params are present,
+// and boolean options default to false when the flag is absent.
+type CoercedScalars = { string: string, number: number, boolean: boolean }
+
+export type TapCoercedParams<P extends readonly TapCommandParamSchema[]> =
+  SchemaObject<P, { required: true }, CoercedScalars>
+
+export type TapCoercedOptions<O extends readonly TapCommandOptionSchema[]> =
+  SchemaObject<O, { required: true } | { type: 'boolean' }, CoercedScalars>
+
+// CLI-side handlers see commander's values forwarded as raw strings (a set
+// boolean flag arrives as the string 'true'). Only required value options are
+// commander-enforced, so everything else may be absent.
+type RawScalars = { string: string, number: string, boolean: string }
+
+export type TapRawParams<P extends readonly TapCommandParamSchema[]> =
+  SchemaObject<P, { required: true }, RawScalars>
+
+export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
+  SchemaObject<O, { required: true, type: 'string' | 'number' }, RawScalars>
+
 // Params/options that recur across commands, defined once so their name, type,
 // and help text can't drift between the commands that expose them. `test` is
 // required in some commands and optional in others, so each use spreads it and

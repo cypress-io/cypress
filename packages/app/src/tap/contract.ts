@@ -16,6 +16,8 @@ export type {
   TapCommandParamSchema,
   TapCommandOptionSchema,
   TapCommandName,
+  TapCoercedParams,
+  TapCoercedOptions,
   TapSchema,
   TapExecResult,
 } from '@packages/cypress-instances/lib/tap-contract'

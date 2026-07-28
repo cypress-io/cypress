@@ -11,10 +11,11 @@ export interface TapCliOptions {
  * (description, params, options, help prose) comes from `TAP_NATIVE_COMMANDS`;
  * its positionals and options are parsed CLI-side with the same commander
  * grammar the schema commands use, then handed to `handler` as raw strings
- * keyed by name.
+ * keyed by name. `handler` is the erased view the dispatcher calls through —
+ * `defineNativeCommand` types each command's handler precisely for authoring.
  */
 export interface TapCliCommand extends TapNativeCommandSchema {
-  handler: (options: TapCliOptions, args: Record<string, string>, commandOptions: Record<string, string>) => Promise<number>
+  handler: (...args: any[]) => Promise<number>
 }
 
 /**

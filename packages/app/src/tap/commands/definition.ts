@@ -1,5 +1,5 @@
 import { TAP_COMMANDS } from '../contract'
-import type { TapCommandName, TapCommandOptionSchema, TapCommandParamSchema } from '../contract'
+import type { TapCoercedOptions, TapCoercedParams, TapCommandName, TapCommandOptionSchema, TapCommandParamSchema } from '../contract'
 
 /**
  * Thrown by a handler to report a domain failure (no run mounted, no such test
@@ -17,20 +17,6 @@ export class TapCommandError extends Error {
   }
 }
 
-// The TS type one wire `type` coerces to (see `../exec-args`).
-type ScalarOf<T> = T extends 'string' ? string : T extends 'number' ? number : boolean
-
-// Params keyed by name: required present, non-required optional (handler sees `undefined`).
-type ParamsToObject<P extends readonly TapCommandParamSchema[]> =
-  { [E in P[number] as E extends { required: true } ? E['name'] : never]: ScalarOf<E['type']> } &
-  { [E in P[number] as E extends { required: true } ? never : E['name']]?: ScalarOf<E['type']> }
-
-// Options keyed by name: required and boolean always present (absent flag ⇒ false);
-// non-required value options optional.
-type OptionsToObject<O extends readonly TapCommandOptionSchema[]> =
-  { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? E['name'] : never]: ScalarOf<E['type']> } &
-  { [E in O[number] as E extends { required: true } | { type: 'boolean' } ? never : E['name']]?: ScalarOf<E['type']> }
-
 type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[number], { name: N }>
 
 /**
@@ -44,8 +30,8 @@ type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[numbe
 export const defineCommand = <N extends TapCommandName>(
   name: N,
   handler: (
-    params: ParamsToObject<CommandByName<N>['params']>,
-    options: OptionsToObject<CommandByName<N>['options']>,
+    params: TapCoercedParams<CommandByName<N>['params']>,
+    options: TapCoercedOptions<CommandByName<N>['options']>,
   ) => Promise<unknown>,
 ): TapCommandDefinition & { name: N } => {
   const meta = TAP_COMMANDS.find((command) => command.name === name)!
