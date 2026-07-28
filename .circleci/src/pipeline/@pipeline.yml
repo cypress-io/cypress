@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "150.0.7871.114"
-chrome-beta-version: &chrome-beta-version "151.0.7922.19"
+chrome-stable-version: &chrome-stable-version "150.0.7871.186"
+chrome-beta-version: &chrome-beta-version "151.0.7922.47"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.115"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "151.0.7922.47"
 firefox-stable-version: &firefox-stable-version "152.0.5"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -2144,6 +2144,28 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
+  h2-dual-stack-tests:
+    <<: *defaults
+    resource_class: medium+.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
+      - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Start dual-stack h2 origin
+          background: true
+          command: node system-tests/projects/http2-dual-stack/server.mjs
+      - run:
+          name: Verify browser h2 with the MITM proxy disabled
+          command: |
+            CYPRESS_INTERNAL_DISABLE_PROXY=1 yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome
+      - run:
+          name: Verify HTTP/1.1 downgrade with the MITM proxy enabled
+          command: |
+            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --expose expectedBrowserProtocol=1.1
+
   system-tests-node-modules-install:
     <<: *defaults
     steps:
@@ -3210,3 +3232,13 @@ jobs:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
+
+  # Fan-in gate: build complete and contributor PR approved (when applicable).
+  ready-to-test:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Ready to test
+          command: echo "✅ Build finished and contributor PR approved"

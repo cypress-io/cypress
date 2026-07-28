@@ -127,17 +127,17 @@ describe('linux browser detection', () => {
       name: 'firefox',
       family: 'firefox',
       displayName: 'Firefox',
-      majorVersion: '135',
+      majorVersion: '140',
       path: 'firefox',
       profilePath: '/home/foo/snap/firefox/current',
-      version: '135.0.1',
+      version: '140.0.1',
     }
 
     beforeEach(() => {
       cpSpawnCallback = (cmd, args, opts, cpSpawnMock) => {
         if (cmd === 'firefox') {
           setTimeout(() => {
-            cpSpawnMock.stdout.emit('data', 'Mozilla Firefox 135.0.1')
+            cpSpawnMock.stdout.emit('data', 'Mozilla Firefox 140.0.1')
           }, 0)
         }
       }

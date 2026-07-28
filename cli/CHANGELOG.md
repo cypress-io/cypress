@@ -1,12 +1,37 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.18.2
+## 15.19.1
 
 **Performance:**
 
-- Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
+- Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
+- Reduced the sampling overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) when Cypress runs inside a memory-limited container using cgroup v1. Memory readings no longer spawn helper subprocesses on every sampling interval, which lowers CPU usage that previously competed with the tests, most noticeably on constrained CI machines. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105). Fixed in [#34331](https://github.com/cypress-io/cypress/pull/34331).
 
 **Bugfixes:**
 
+- Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
+- Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
+- Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+
+**Dependency Updates:**
+
+- Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
+
+## 15.19.0
+
+**Performance:**
+
+- Fixed an issue where the browser's renderer process could crash (`We detected that the Chrome Renderer process just crashed`) when the application under test triggered a `ResizeObserver` loop while the command log was visible. Fixes [#33962](https://github.com/cypress-io/cypress/issues/33962) and [#34218](https://github.com/cypress-io/cypress/issues/34218).
+- Fixed a regression in [14.0.0](#14-0-0) where each message sent from the Cypress server to a Chromium-based browser (including Electron) leaked a small amount of browser memory until the end of the spec. During long, command- or network-heavy specs, this buildup could crash the browser (`We detected that the Chrome Renderer process just crashed`). Fixes [#34226](https://github.com/cypress-io/cypress/issues/34226).
+- Fixed an issue where each [`cy.press()`](https://on.cypress.io/press) call in Chromium-based browsers retained a small amount of renderer memory for the remainder of the spec file, which could contribute to memory growth in specs with many `cy.press()` calls. Addressed in [#34240](https://github.com/cypress-io/cypress/pull/34240).
+
+**Features:**
+
+- Added support for TypeScript 7 when preprocessing TypeScript spec and support files. The component testing setup wizard now accepts TypeScript 7 as well. Addresses [#34258](https://github.com/cypress-io/cypress/issues/34258). Addressed in [#34277](https://github.com/cypress-io/cypress/pull/34277).
+- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#34178](https://github.com/cypress-io/cypress/pull/34178).
+
+**Bugfixes:**
+
+- Fixed an issue where chaining an assertion after [`.should('exist')`](https://on.cypress.io/should) on a raw DOM element (rather than a jQuery object) failed with `expected null to exist`, because the existence assertion replaced the subject with `null`. Chaining further assertions off `.exist` (or its `.exists` alias) for a raw DOM element now works as expected. Fixes [#25491](https://github.com/cypress-io/cypress/issues/25491).
 - Fixed an issue where, on Windows, enhancing a test failure stack could throw a secondary `TypeError: Cannot read properties of undefined (reading 'replaceAll')` and mask the original error. Fixed in [#34252](https://github.com/cypress-io/cypress/pull/34252).
 - Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 
