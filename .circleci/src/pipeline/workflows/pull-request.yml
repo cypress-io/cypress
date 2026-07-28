@@ -272,7 +272,18 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Proxy-disabled (CDP Fetch) coverage — off by default.
+  # Focused proxy-disabled jobs that are known green for specific fixes.
+  # Always run when their path filters match (not gated on run-proxy-disabled-tests).
+  - driver-integration-tests-external-hosts-cdp:
+      context: test-runner:cypress-record-key
+      requires:
+        - ready-to-test
+  - system-tests-upstream-proxy-cdp:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
+
+  # Full proxy-disabled (CDP Fetch) coverage — off by default.
   # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
   # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
   - unit-tests-proxy-disabled:
@@ -441,8 +452,9 @@ jobs:
 
   # Fan-in aggregator — the only required GitHub status check for PRs.
   # Required jobs fan into this one. Jobs that halt early (pipeline parameter
-  # false) still complete successfully. Proxy-disabled *-cdp jobs above are
-  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate.
+  # false) still complete successfully. Full proxy-disabled *-cdp jobs above are
+  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate;
+  # focused CDP jobs for known-green fixes are included.
   - all-jobs-passed:
       requires:
         # Always-run jobs
@@ -463,6 +475,7 @@ jobs:
         - system-tests-webkit
         - system-tests-non-root
         - h2-dual-stack-tests
+        - system-tests-upstream-proxy-cdp
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta
@@ -471,6 +484,7 @@ jobs:
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests
+        - driver-integration-tests-external-hosts-cdp
         - run-frontend-shared-component-tests-chrome
         - run-launchpad-integration-tests-chrome
         - run-launchpad-component-tests-chrome
