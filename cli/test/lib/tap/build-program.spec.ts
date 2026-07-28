@@ -15,8 +15,8 @@ const schema: TapSchema = {
       options: [],
     },
     {
-      name: 'run',
-      description: 'run a spec by its project-relative path',
+      name: 'launch',
+      description: 'launch a spec by its project-relative path',
       params: [
         { name: 'spec', type: 'string', required: true, description: 'project-relative spec path' },
       ],
@@ -57,7 +57,7 @@ describe('lib/tap/build-program', () => {
   it('registers the CLI-native commands first, then one subcommand per advertised command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'specs', 'dom', 'aria', 'inspect', 'health', 'run', 'open'])
+    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'health', 'launch', 'open'])
   })
 
   it('omits commands flagged hidden from the program (still exec-able, just not advertised)', () => {
@@ -66,10 +66,28 @@ describe('lib/tap/build-program', () => {
     expect(program.commands.map((command) => command.name())).not.toContain('run-state')
   })
 
+  it('shadows a schema-advertised command that collides with a CLI-native one', () => {
+    // An older instance still advertises `run` over the binding; the CLI-native
+    // command wins, so only one `run` registers and it carries the native grammar.
+    const program = buildTapProgram({
+      schemaVersion: 1,
+      cypressVersion: '14.0.0',
+      commands: [{
+        name: 'run',
+        description: 'run a spec by its project-relative path',
+        params: [{ name: 'spec', type: 'string', required: true, description: 'project-relative spec path' }],
+        options: [{ name: 'browser', alias: 'b', type: 'string', required: false, description: 'which browser to run in' }],
+      }],
+    }, vi.fn())
+
+    expect(program.commands.filter((command) => command.name() === 'run')).toHaveLength(1)
+    expect(subcommand(program, 'run').helpInformation()).not.toContain('--browser')
+  })
+
   it('names the program so generated usage reads `cypress tap <command>`', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(subcommand(program, 'run').helpInformation()).toContain('Usage: cypress tap run [options] <spec>')
+    expect(subcommand(program, 'launch').helpInformation()).toContain('Usage: cypress tap launch [options] <spec>')
   })
 
   it('sets a top-level usage reflecting that options follow the command, not precede it', () => {
@@ -83,7 +101,7 @@ describe('lib/tap/build-program', () => {
   it('derives positional grammar from each param schema (required <>, optional [])', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(program.helpInformation()).toContain('run [options] <spec>')
+    expect(program.helpInformation()).toContain('launch [options] <spec>')
     expect(subcommand(program, 'open').usage()).toBe('[options] <spec> [line]')
   })
 
@@ -127,7 +145,7 @@ describe('lib/tap/build-program', () => {
   it('throws a catchable missingArgument error when a required positional is absent', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(() => program.parse(['run'], { from: 'user' })).toThrowError(
+    expect(() => program.parse(['launch'], { from: 'user' })).toThrowError(
       expect.objectContaining({ code: 'commander.missingArgument' }),
     )
   })
@@ -135,7 +153,7 @@ describe('lib/tap/build-program', () => {
   it('throws a catchable excessArguments error for operands beyond the declared params', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(() => program.parse(['run', 'a.cy.js', 'extra'], { from: 'user' })).toThrowError(
+    expect(() => program.parse(['launch', 'a.cy.js', 'extra'], { from: 'user' })).toThrowError(
       expect.objectContaining({ code: 'commander.excessArguments' }),
     )
   })
@@ -158,7 +176,7 @@ describe('lib/tap/build-program', () => {
 
   it('declares each schema option (with its alias) in the per-command help', () => {
     const program = buildTapProgram(schema, vi.fn())
-    const help = subcommand(program, 'run').helpInformation()
+    const help = subcommand(program, 'launch').helpInformation()
 
     expect(help).toContain('Options:')
     expect(help).toContain('-b, --browser <browser>')
@@ -170,33 +188,33 @@ describe('lib/tap/build-program', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(schema, dispatch)
 
-    program.parse(['run', 'a.cy.js', '--browser', 'chrome', '--port', '8080', '--headed'], { from: 'user' })
+    program.parse(['launch', 'a.cy.js', '--browser', 'chrome', '--port', '8080', '--headed'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('run', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' })
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' })
   })
 
   it('resolves a short alias to its option name', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(schema, dispatch)
 
-    program.parse(['run', 'a.cy.js', '-b', 'firefox'], { from: 'user' })
+    program.parse(['launch', 'a.cy.js', '-b', 'firefox'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('run', { spec: 'a.cy.js' }, { browser: 'firefox' })
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'firefox' })
   })
 
   it('omits options the user did not supply', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(schema, dispatch)
 
-    program.parse(['run', 'a.cy.js'], { from: 'user' })
+    program.parse(['launch', 'a.cy.js'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('run', { spec: 'a.cy.js' }, {})
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, {})
   })
 
   it('throws a catchable unknownOption error for a flag not in the schema', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(() => program.parse(['run', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
+    expect(() => program.parse(['launch', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
       expect.objectContaining({ code: 'commander.unknownOption' }),
     )
   })

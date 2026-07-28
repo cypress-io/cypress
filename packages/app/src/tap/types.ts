@@ -8,11 +8,6 @@ export interface TapTestsRunner {
   isRunComplete (): boolean
 }
 
-export interface SpecListEntry {
-  /** Project-relative spec path — the form `cypress run --spec` accepts. */
-  relativePath: string
-}
-
 /**
  * One snapshot on a command log, as `getSnapshotPropsForLog` exposes it: the
  * cloned body sits behind an opaque object that `restoreDom` knows how to

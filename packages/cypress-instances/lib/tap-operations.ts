@@ -1,4 +1,4 @@
-import type { TapSpecsQuery } from './generated/graphql'
+import type { TapSpecsQuery, TapRunSpecMutation } from './generated/graphql'
 
 /**
  * A tap GraphQL operation paired with the result type generated from the same
@@ -25,6 +25,7 @@ export const TapSpecsOperation: TapGraphqlOperation<TapSpecsQuery> = {
       currentProject {
         specs {
           relative
+          absolute
           gitInfo {
             lastModifiedHumanReadable
             lastModifiedTimestamp
@@ -33,4 +34,33 @@ export const TapSpecsOperation: TapGraphqlOperation<TapSpecsQuery> = {
       }
     }
   `,
+}
+
+const TAP_RUN_SPEC_QUERY = /* GraphQL */ `
+  mutation TapRunSpec($specPath: String!) {
+    runSpec(specPath: $specPath) {
+      __typename
+      ... on RunSpecResponse {
+        testingType
+        browser {
+          displayName
+        }
+        spec {
+          relative
+        }
+      }
+      ... on RunSpecError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+export const tapRunSpecOperation = (specPath: string): TapGraphqlOperation<TapRunSpecMutation> => {
+  return {
+    operationName: 'TapRunSpec',
+    query: TAP_RUN_SPEC_QUERY,
+    variables: { specPath },
+  }
 }

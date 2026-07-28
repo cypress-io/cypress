@@ -41,21 +41,46 @@ export type TapExecResult =
   | { result: unknown }
   | { error: { code: string, message: string } }
 
+// How a command's declared params/options surface to its handler, derived once
+// here so the app's defineCommand and the CLI's defineNativeCommand type handlers
+// the same way: entries matching `Present` are keys the handler can rely on, the
+// rest may be absent, and each wire `type` maps through `Scalars`.
+type SchemaObject<
+  Entries extends readonly { name: string, type: TapCommandParamSchema['type'] }[],
+  Present,
+  Scalars extends Record<TapCommandParamSchema['type'], unknown>,
+> =
+  { [E in Entries[number] as E extends Present ? E['name'] : never]: Scalars[E['type']] } &
+  { [E in Entries[number] as E extends Present ? never : E['name']]?: Scalars[E['type']] }
+
+// App-side handlers see coerced values (the binding's exec coerces each wire
+// string to its declared scalar before dispatch): required params are present,
+// and boolean options default to false when the flag is absent.
+type CoercedScalars = { string: string, number: number, boolean: boolean }
+
+export type TapCoercedParams<P extends readonly TapCommandParamSchema[]> =
+  SchemaObject<P, { required: true }, CoercedScalars>
+
+export type TapCoercedOptions<O extends readonly TapCommandOptionSchema[]> =
+  SchemaObject<O, { required: true } | { type: 'boolean' }, CoercedScalars>
+
+// CLI-side handlers see commander's values forwarded as raw strings (a set
+// boolean flag arrives as the string 'true'). Only required value options are
+// commander-enforced, so everything else may be absent.
+type RawScalars = { string: string, number: string, boolean: string }
+
+export type TapRawParams<P extends readonly TapCommandParamSchema[]> =
+  SchemaObject<P, { required: true }, RawScalars>
+
+export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
+  SchemaObject<O, { required: true, type: 'string' | 'number' }, RawScalars>
+
 // Params/options that recur across commands, defined once so their name, type,
 // and help text can't drift between the commands that expose them. `test` is
 // required in some commands and optional in others, so each use spreads it and
 // sets `required`; `attempt` is identical everywhere and used directly.
 const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the tests command' } as const
 const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
-
-const runMeta = {
-  name: 'run',
-  description: 'run (or rerun) a spec by its project-relative path',
-  params: [
-    { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
-  ],
-  options: [],
-} as const satisfies TapCommandSchema
 
 const testsMeta = {
   name: 'tests',
@@ -104,7 +129,6 @@ const runStateMeta = {
 // TapManager), and the CLI stamps it with its own version to render help with no
 // instance attached. Order here is the order commands list in help.
 export const TAP_COMMANDS = [
-  runMeta,
   testsMeta,
   commandsMeta,
   pinMeta,
@@ -138,6 +162,18 @@ export interface TapNativeCommandSchema {
   params?: readonly TapCommandParamSchema[]
   options?: readonly TapCommandOptionSchema[]
 }
+
+const runMeta = {
+  name: 'run',
+  description: 'run (or rerun) a spec by its project-relative path',
+  details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
+command. If no browser is open it launches one, switching to the spec's testing
+type when needed, then starts the run and returns immediately — it does not wait
+for the run to finish. Poll the status command for run progress.`,
+  params: [
+    { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
+  ],
+} as const satisfies TapNativeCommandSchema
 
 const instancesMeta = {
   name: 'instances',
@@ -199,6 +235,7 @@ export const TAP_NATIVE_COMMANDS = [
   instancesMeta,
   statusMeta,
   specsMeta,
+  runMeta,
   domMeta,
   ariaMeta,
   inspectMeta,

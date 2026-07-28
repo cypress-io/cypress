@@ -61,14 +61,6 @@ export const tapManagerDataSource = {
     return (window.__RUN_MODE_SPECS__ ?? []) as FoundSpec[]
   },
 
-  getHash () {
-    return window.location.hash
-  },
-
-  setHash (hash: string) {
-    window.location.hash = hash
-  },
-
   getAutIframe (): PinAutIframe | undefined {
     try {
       return getAutIframeModel() as unknown as PinAutIframe

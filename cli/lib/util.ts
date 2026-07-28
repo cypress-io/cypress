@@ -259,7 +259,12 @@ const getApplicationDataFolder = (...paths: string[]): string => {
   return p
 }
 
+export function posixify (path: string): string {
+  return path.replace(/\\/g, '/')
+}
+
 const util = {
+  posixify,
   normalizeModuleOptions,
   parseOpts,
   isValidCypressInternalEnvValue,
