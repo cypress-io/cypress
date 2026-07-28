@@ -38,6 +38,14 @@ export function createWebsocket (config: Cypress.Config) {
   })
 
   ws.on('change:to:url', (url) => {
+    // Assigning an identical hash URL fires no hashchange, so targeting the spec
+    // that is already active would silently no-op — restart it instead.
+    if (url && url === window.location.hash && _eventManager) {
+      _eventManager.rerunSpec()
+
+      return
+    }
+
     window.location.href = url
   })
 
