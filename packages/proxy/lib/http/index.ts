@@ -9,6 +9,7 @@ import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { createFetchOrigin } from '../adapters/http-codec'
+import { ProxyContentEncodingAdapter } from '../adapters/content-encoding'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -24,7 +25,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
+import type { ForContentEncoding, ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -97,6 +98,7 @@ export type HttpMiddlewareCtx<T> = {
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
   protocolManager?: ProtocolManagerShape
+  contentEncoding: ForContentEncoding
 } & T
 
 export const defaultMiddleware = {
@@ -135,6 +137,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'onError',
   'skipMiddleware',
   'onlyRunMiddleware',
+  'contentEncoding',
 ]
 
 export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
@@ -388,10 +391,14 @@ export class Http {
     return onError
   }
 
-  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
+  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>, options: { contentEncoding?: ForContentEncoding } = {}): InterceptMiddleware {
     return async (request, next): Promise<HttpResponse> => {
       try {
         const ctx = codec.encodeRequest(request)
+
+        if (options.contentEncoding) {
+          ctx.contentEncoding = options.contentEncoding
+        }
 
         const onError = this.buildOnError(ctx)
 
@@ -528,6 +535,9 @@ export class Http {
       },
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
+      // Node-performs-the-transfer is the safe default; only the CDP Fetch
+      // pipeline opts out, and it does so explicitly in createLegacyProxyPipeline.
+      contentEncoding: new ProxyContentEncodingAdapter(),
     }
 
     return ctx

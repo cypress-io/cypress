@@ -18,6 +18,15 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 const brotliDecompress = promisify(zlib.brotliDecompress)
+const zstdDecompress = promisify(zlib.zstdDecompress)
+
+// Arrow wrappers keep this table free of module-init evaluation: the v8
+// snapshot rewriter defers `promisify(...)` behind lazy getters, and touching
+// them while the snapshot is being created fails the build.
+const UNDELIVERED_DECODERS: Record<string, (body: Buffer) => Promise<Buffer>> = {
+  br: (body) => brotliDecompress(body),
+  zstd: (body) => zstdDecompress(body),
+}
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
@@ -399,11 +408,10 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Fetch.getResponseBody delivers gzip/deflate content-decoded, but brotli
-   * arrives still encoded (and continueRequest cannot constrain
-   * accept-encoding — the network stack owns that header). Decode br here so
-   * the middleware's decoded-body premise holds. Falls back to the raw bytes
-   * if decompression fails, in case a newer CDP starts decoding br itself.
+   * Fetch.getResponseBody delivers gzip/deflate content-decoded, but brotli and
+   * zstd arrive still encoded. Decode them here so the middleware's
+   * decoded-body premise holds. Falls back to the raw bytes if decompression
+   * fails, in case a newer CDP starts decoding them itself.
    */
   private decodeUndeliveredEncodings = async (body: Buffer, responseHeaders?: Protocol.Fetch.HeaderEntry[]): Promise<Buffer> => {
     const contentEncoding = responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
@@ -418,14 +426,16 @@ export class CdpFetchTransport {
     let decoded = body
 
     for (const encoding of encodings) {
-      if (encoding !== 'br') {
+      const decode = UNDELIVERED_DECODERS[encoding]
+
+      if (!decode) {
         continue
       }
 
       try {
-        decoded = await brotliDecompress(decoded)
+        decoded = await decode(decoded)
       } catch (err) {
-        debug('brotli decompression failed, using body as delivered: %s', (err as Error).message)
+        debug('%s decompression failed, using body as delivered: %s', encoding, (err as Error).message)
 
         return body
       }

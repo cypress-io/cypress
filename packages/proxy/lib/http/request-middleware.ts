@@ -5,7 +5,7 @@ import { isVerboseTelemetry as isVerbose } from '.'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
-import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import { urlMatchesOriginProtectionSpace } from '@packages/network-tools'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -217,30 +217,11 @@ const EndRequestsToBlockedHosts: RequestMiddleware = async function () {
   return this.networkInterceptionCore.endRequestIfBlocked(this)
 }
 
+// Constraining accept-encoding only makes sense when Node decodes the response;
+// the CDP Fetch pipeline binds a no-op implementation.
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
+  this.contentEncoding.constrainAcceptEncoding(this)
 
-  const acceptEncoding = this.req.headers['accept-encoding']
-
-  if (acceptEncoding && !this.req.originalAcceptEncoding) {
-    this.req.originalAcceptEncoding = acceptEncoding
-  }
-
-  const supported = getSupportedAcceptEncoding(acceptEncoding)
-
-  span?.setAttributes({
-    acceptEncodingHeaderPresent: !!acceptEncoding,
-    doesAcceptHeadingIncludeGzip: !!acceptEncoding?.includes('gzip'),
-    doesAcceptHeadingIncludeBr: !!acceptEncoding?.includes('br'),
-  })
-
-  this.req.headers['accept-encoding'] = supported
-  this.debug(
-    acceptEncoding ? 'accept-encoding header present, setting to %s' : 'no accept-encoding header, setting to %s',
-    supported,
-  )
-
-  span?.end()
   this.next()
 }
 

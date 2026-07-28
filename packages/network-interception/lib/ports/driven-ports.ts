@@ -37,6 +37,19 @@ export interface ForDocumentPreparation {
 }
 
 /**
+ * Driven port: content-encoding negotiation. Only meaningful when Node performs
+ * the transfer — the browser negotiates and decodes on the CDP Fetch pipeline,
+ * and `Fetch.fulfillRequest` requires identity bodies, so that pipeline no-ops
+ * both sides. Bound per pipeline, not per runtime: a proxy-disabled runtime
+ * still serves express traffic that needs real encoding.
+ */
+export interface ForContentEncoding {
+  constrainAcceptEncoding (ctx: unknown): void
+
+  compressBody (ctx: unknown): Promise<void>
+}
+
+/**
  * Driven port: Test Replay / protocol capture at the proxy boundary.
  */
 export interface ForNetworkCapture {

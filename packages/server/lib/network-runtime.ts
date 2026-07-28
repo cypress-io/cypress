@@ -1,8 +1,8 @@
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
+import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware, ProxyContentEncodingAdapter, NoopContentEncodingAdapter } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
+import type { NetworkInterceptionRuntime, ForContentEncoding, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
@@ -171,12 +171,15 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     request: deps.request,
   })
 
+  // Content-encoding is bound per pipeline, not per runtime: express traffic
+  // still goes back over a real socket while CDP responses must stay identity.
   const attachStages = <TRequest, TResponse>(
     intercept: HttpIntercept<TRequest, TResponse>,
     pipelineCodec: TransportCodecPort<any, any>,
+    contentEncoding: ForContentEncoding,
   ) => {
     intercept.use(serveInternalRoutes)
-    intercept.use(networkProxy.http.createLegacyProxyPipeline(pipelineCodec))
+    intercept.use(networkProxy.http.createLegacyProxyPipeline(pipelineCodec, { contentEncoding }))
 
     return intercept
   }
@@ -184,6 +187,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   const expressInterception = attachStages(
     new HttpIntercept(networkProxy.codec),
     networkProxy.codec,
+    new ProxyContentEncodingAdapter(),
   )
 
   networkProxy.withIntercept(expressInterception)
@@ -193,6 +197,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
     }),
+    new NoopContentEncodingAdapter(),
   )
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {

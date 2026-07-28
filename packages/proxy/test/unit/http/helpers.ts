@@ -1,6 +1,7 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
+import { ProxyContentEncodingAdapter } from '../../../lib/adapters/content-encoding'
 
 export function createTestNetworkInterceptionCore () {
   return createProxyNetworkInterception({
@@ -19,6 +20,8 @@ export function testMiddleware (middleware: TestMiddlewareStack, ctx: Record<str
     res: {},
     config: {},
     networkInterceptionCore: createTestNetworkInterceptionCore(),
+    // mirrors createMiddlewareContext: Node-performs-the-transfer by default
+    contentEncoding: new ProxyContentEncodingAdapter(),
 
     middleware: {
       0: middleware,
