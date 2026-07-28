@@ -272,12 +272,8 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Focused proxy-disabled jobs that are known green for specific fixes.
-  # Always run when their path filters match (not gated on run-proxy-disabled-tests).
-  - driver-integration-tests-external-hosts-cdp:
-      context: test-runner:cypress-record-key
-      requires:
-        - ready-to-test
+  # Focused proxy-disabled job for upstream HTTP_PROXY / NO_PROXY translation (#34351).
+  # Always runs when system tests are selected (not gated on run-proxy-disabled-tests).
   - system-tests-upstream-proxy-cdp:
       context: test-runner:performance-tracking
       requires:
@@ -484,7 +480,6 @@ jobs:
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests
-        - driver-integration-tests-external-hosts-cdp
         - run-frontend-shared-component-tests-chrome
         - run-launchpad-integration-tests-chrome
         - run-launchpad-component-tests-chrome

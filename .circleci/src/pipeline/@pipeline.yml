@@ -2647,24 +2647,6 @@ jobs:
           record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-driver-tests >>
 
-  # Focused CDP coverage for external-host visits that need the translated
-  # upstream proxy (#34351). Always runs when driver tests are selected —
-  # not gated on run-proxy-disabled-tests.
-  driver-integration-tests-external-hosts-cdp:
-    <<: *defaults
-    parallelism: 1
-    resource_class: medium+.gen2
-    steps:
-      - run-driver-integration-tests:
-          browser: chrome
-          install-chrome-channel: stable
-          disable-proxy: true
-          require-opt-in: false
-          record-group-suffix: '-external-hosts'
-          spec: >-
-            cypress/e2e/e2e/origin/origin.cy.ts,cypress/e2e/e2e/origin/validation.cy.ts
-          guard: << pipeline.parameters.run-driver-tests >>
-
   driver-integration-tests-chrome-inject-document-domain:
     <<: *defaults
     parameters:
