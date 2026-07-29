@@ -200,7 +200,7 @@
     "typescript": "5.3.3",
     "vitest": "^3.2.4",
     "yaml": "2.8.0",
-    "yarn-deduplicate": "3.1.0"
+    "yarn-deduplicate": "6.0.2"
   },
   "engines": {
     "node": ">=22.19.0",
