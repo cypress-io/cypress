@@ -403,32 +403,49 @@ describe('lib/exec/tap', () => {
       ...overrides,
     })
 
-    it('renders the live instances as a JSON summary and exits 0, without opening a session', async () => {
+    it('renders the live instances as a table and exits 0, without opening a session', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([
         liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x' }),
         liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null }),
       ])
 
       expect(await tap.start(['instances'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('INSTANCES (2)')
+      expect(output).toContain('111')
+      expect(output).toContain('/projects/app')
+      expect(output).toContain('attached')
+      expect(() => JSON.parse(output)).toThrow()
+
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw instance summaries with --json', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([
+        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null }),
+      ])
+
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([
         { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true },
         { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false },
       ])
-
-      expect(withTapSession).not.toHaveBeenCalled()
     })
 
     it('reports the testing type as null for an instance that has not chosen one', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, testingType: null })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0].testingType).toBeNull()
     })
 
     it('never exposes the internal serverPort', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, serverPort: 49200 })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0]).not.toHaveProperty('serverPort')
     })
 
