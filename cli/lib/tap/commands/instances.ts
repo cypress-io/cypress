@@ -15,6 +15,8 @@ export interface TapInstanceSummary {
   testingType: 'e2e' | 'component' | null
   /** Whether the instance has a browser attached over CDP. */
   browserAttached: boolean
+  /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
+  browserName: string | null
 }
 
 const listInstances = async (options: TapCliOptions): Promise<number> => {
@@ -31,6 +33,7 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     projectRoot: instance.projectRoot,
     testingType: instance.testingType,
     browserAttached: instance.cdpBrowserWsUrl !== null,
+    browserName: instance.browserName,
   }))
 
   renderOutcome('instances', summaries, options.json)

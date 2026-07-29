@@ -31,6 +31,8 @@ export interface CypressInstance {
 
 export interface LiveInstanceState extends CypressInstance {
   cdpBrowserWsUrl: string | null
+  /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
+  browserName: string | null
 }
 
 export interface ReadyInstanceState extends LiveInstanceState {
