@@ -299,6 +299,60 @@ describe('lib/network-runtime', () => {
     expect(client.send).to.have.been.calledWith('Fetch.disable')
   })
 
+  it('createCdpFetchRuntime records the AUT URL when the automation layer reports an AUT navigation commit', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    let notifyAUTFrameNavigated!: (url: string) => void
+    const unsubscribe = sinon.stub()
+    const onAUTFrameNavigated = sinon.stub().callsFake((listener: (url: string) => void) => {
+      notifyAUTFrameNavigated = listener
+
+      return unsubscribe
+    })
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      onAUTFrameNavigated,
+    })
+
+    await runtime.start()
+
+    const setAUTUrl = sinon.spy(runtime.networkProxy.http, 'setAUTUrl')
+
+    // test isolation blanks the AUT frame between tests; about:blank must
+    // never become the simulated top
+    notifyAUTFrameNavigated('about:blank')
+    notifyAUTFrameNavigated('data:text/html,<p>hi</p>')
+    notifyAUTFrameNavigated('https://app.test/dashboard')
+
+    expect(setAUTUrl).to.have.been.calledOnceWith('https://app.test/dashboard')
+
+    await runtime.stop()
+
+    expect(unsubscribe).to.have.been.calledOnce
+  })
+
+  it('createCdpFetchRuntime unsubscribes from AUT navigation commits when Fetch.enable fails', async () => {
+    const client = {
+      send: sinon.stub().rejects(new Error('enable failed')),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const unsubscribe = sinon.stub()
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      onAUTFrameNavigated: sinon.stub().returns(unsubscribe),
+    })
+
+    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+
+    expect(unsubscribe).to.have.been.calledOnce
+  })
+
   it('createCdpFetchRuntime starts Fetch interception and continues requests by default', async () => {
     const client = {
       send: sinon.stub().callsFake(async (method: string) => {

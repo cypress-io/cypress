@@ -8,6 +8,7 @@ import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
+import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
 import { AUT_FRAME_HEADER } from '../constants'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
@@ -46,6 +47,7 @@ export class CdpFetchTransport {
     private readonly client: CdpFetchClient,
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
     private readonly options: CdpFetchTransportOptions = {},
+    private readonly networkExtraInfo: CDPNetworkExtraInfo = new CDPNetworkExtraInfo(client),
   ) {}
 
   /**
@@ -67,6 +69,9 @@ export class CdpFetchTransport {
 
     this.client.on('Fetch.requestPaused', this.interceptRequest)
     this.client.on('Fetch.requestPaused', this.resolveResponse)
+    // Set-Cookie never appears on Fetch response pauses — the raw cookie
+    // headers only arrive on the Network extraInfo events tracked here.
+    this.networkExtraInfo.start()
     this.isStarted = true
 
     try {
@@ -80,6 +85,7 @@ export class CdpFetchTransport {
     } catch (err) {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.networkExtraInfo.stop()
       this.isStarted = false
 
       throw err
@@ -92,6 +98,7 @@ export class CdpFetchTransport {
    */
   reset (): void {
     this.rejectAll(new Error('CDP Fetch transport reset'))
+    this.networkExtraInfo.flush()
   }
 
   async stop (): Promise<void> {
@@ -105,6 +112,7 @@ export class CdpFetchTransport {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
+      this.networkExtraInfo.stop()
       this.isStarted = false
     }
   }
@@ -157,6 +165,13 @@ export class CdpFetchTransport {
       }
 
       const responseDeferred = pDefer<CdpFetchTransportResponse>()
+
+      // reset()/stop() may reject this before the continue callback races on
+      // it (e.g. a between-tests reset while request middleware is still
+      // running); observe it so that never becomes an unhandled rejection.
+      responseDeferred.promise.catch((err: Error) => {
+        debug('in-flight response deferred rejected for %s: %s', event.request.url, err.message)
+      })
 
       deferred = responseDeferred
 
@@ -225,6 +240,9 @@ export class CdpFetchTransport {
         }
 
         this.cleanup(networkId, deferred)
+        // an errored flow gets no more pauses, so nothing will consume its
+        // extraInfo tracking — clear it here
+        this.networkExtraInfo.clear(networkId, sessionId)
       }
 
       if (!requestContinued) {
@@ -253,6 +271,12 @@ export class CdpFetchTransport {
     const deferred = event.networkId ? this.inFlightRequests.get(event.networkId) : undefined
 
     if (!deferred) {
+      // No flow ever consumes extraInfo tracking for an unmatched pause —
+      // drop it here or it lingers until the next reset/stop.
+      if (event.networkId) {
+        this.networkExtraInfo.clear(event.networkId, sessionId)
+      }
+
       if (event.responseErrorReason) {
         debug('failing unmatched response error pause: %s', event.request.url)
         await this.safeSend('Fetch.failRequest', {
@@ -290,6 +314,22 @@ export class CdpFetchTransport {
       return
     }
 
+    debug('response pause for %s: status %s, header names %o', event.request.url, event.responseStatusCode, event.responseHeaders?.map(({ name }) => name))
+
+    const responseHeaders = await this.withSetCookieHeaders(event, sessionId)
+
+    // reset() may have rejected this flow while the merge awaited extraInfo.
+    // The resolve below would be a no-op and nothing else owns this pause —
+    // release it, or the browser stays paused (reset keeps Fetch enabled).
+    if (this.inFlightRequests.get(event.networkId!) !== deferred) {
+      debug('releasing response pause rejected during set-cookie merge: %s', event.request.url)
+      await this.safeSend('Fetch.continueResponse', {
+        requestId: event.requestId,
+      }, sessionId)
+
+      return
+    }
+
     const bodyStream = this.createResponseBodyStream(event.requestId, event.responseHeaders, sessionId)
 
     deferred.resolve({
@@ -297,10 +337,29 @@ export class CdpFetchTransport {
       id: event.networkId!,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
-      responseHeaders: event.responseHeaders,
+      responseHeaders,
       bodyStream,
       sessionId,
     })
+  }
+
+  private withSetCookieHeaders = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
+    const extraInfo = event.networkId
+      ? await this.networkExtraInfo.responseExtraInfo(event.networkId, sessionId)
+      : undefined
+    const setCookieValues = Object.entries(extraInfo?.headers ?? {})
+    .filter(([name]) => name.toLowerCase() === 'set-cookie')
+    // devtools folds multiple Set-Cookie values into one newline-separated string
+    .flatMap(([, value]) => value.split('\n'))
+
+    if (!setCookieValues.length) {
+      return event.responseHeaders
+    }
+
+    return [
+      ...(event.responseHeaders ?? []).filter(({ name }) => name.toLowerCase() !== 'set-cookie'),
+      ...setCookieValues.map((value) => ({ name: 'set-cookie', value })),
+    ]
   }
 
   private createResponseBodyStream = (requestId: string, responseHeaders?: Protocol.Fetch.HeaderEntry[], sessionId?: string): Readable => {
@@ -464,6 +523,9 @@ export class CdpFetchTransport {
     return this.toContinueRequestHeaders(outboundWithoutAut)
   }
 
+  // Must NOT clear extraInfo tracking on success — the next response under a
+  // reused network id may already be tracked, and CDPNetworkExtraInfo manages
+  // its own lifecycle. Errored and unmatched flows clear at their own sites.
   private cleanup (networkId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {
     if (deferred && this.inFlightRequests.get(networkId) !== deferred) {
       return
