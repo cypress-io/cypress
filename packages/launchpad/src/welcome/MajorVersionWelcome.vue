@@ -164,6 +164,7 @@
         <Button
           class="group"
           size="40"
+          data-cy="major-version-welcome-continue"
           @click="handleClick"
         >
           {{ t('majorVersionWelcome.actionContinue') }}
