@@ -36,10 +36,11 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
     }
   }
 
-  // Every tap command accepts `--instance`; it is consumed by the top-level
-  // `cypress tap` command before a subprogram parses, so declaring it here is
-  // purely so it renders in each command's generated help.
+  // Every tap command accepts `--instance` and `--json`; both are consumed by
+  // the top-level `cypress tap` command before a subprogram parses, so declaring
+  // them here is purely so they render in each command's generated help.
   command.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
+  command.option('--json', 'print the raw JSON result instead of the human-readable rendering')
 }
 
 const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly string[]): Record<string, string> => {
@@ -122,10 +123,12 @@ const newProgram = (): commander.Command => {
 export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
   const program = newProgram()
 
-  // The outer `tap` command owns --instance and parses it before this program
-  // runs, so it never reaches here — declared only so help lists it. The outer
-  // command disables its own help, making this the sole place it surfaces.
+  // The outer `tap` command owns --instance/--json and parses them before this
+  // program runs, so they never reach here — declared only so help lists them.
+  // The outer command disables its own help, making this the sole place they
+  // surface.
   program.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
+  program.option('--json', 'print the raw JSON result instead of the human-readable rendering')
 
   for (const native of tapCliCommands) {
     declareCommand(program, native)

@@ -43,6 +43,10 @@ describe('tap binding', () => {
 
       expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
+      const reporterBeforeRun = await binding.exec('reporter', {}, { test: 'r1' })
+
+      expect((reporterBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+
       // specs and run are CLI-native commands now — the CLI reads the spec list and
       // triggers runs directly over the instance's GraphQL — so the binding no longer serves them.
       const specsOutcome = await binding.exec('specs')
@@ -116,7 +120,9 @@ describe('tap binding', () => {
 
       for (const command of commands) {
         expect(Object.keys(command), `command ${command.id}`).to.include.members(['id', 'name'])
-        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type'].includes(key)))
+        // cy.visit's document load logs a request row, so `network` is part of
+        // the contract even here; the dedicated network spec below asserts its shape.
+        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp'].includes(key)))
       }
 
       const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
@@ -206,6 +212,25 @@ describe('tap binding with a retrying spec', () => {
       const commandsOutOfRange = await binding.exec('commands', {}, { test: testId, attempt: '3' })
 
       expect((commandsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+
+      // reporter selects attempts through the same machinery: the first
+      // attempt's view carries its failed state, its error panel, and
+      // out-of-range still fails.
+      const firstReporter = (await binding.exec('reporter', {}, { test: testId, attempt: '1' })) as { result: Record<string, any> }
+
+      expect(firstReporter.result.test.state).to.eq('failed')
+      expect(firstReporter.result.commands.some((command: Record<string, unknown>) => command.state === 'failed')).to.eq(true)
+      expect(Object.keys(firstReporter.result.error)).to.satisfy((keys: string[]) => keys.every((key) => ['name', 'message', 'stack', 'codeFrame'].includes(key)))
+      expect(firstReporter.result.error.message).to.be.a('string')
+
+      // The passing latest attempt has no error panel.
+      const latestReporter = (await binding.exec('reporter', {}, { test: testId })) as { result: Record<string, unknown> }
+
+      expect(latestReporter.result.error).to.be.undefined
+
+      const reporterOutOfRange = await binding.exec('reporter', {}, { test: testId, attempt: '3' })
+
+      expect((reporterOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     })
   })
 })
@@ -272,7 +297,7 @@ describe('tap binding pin lifecycle', () => {
 
       expect(clearNoop).to.deep.eq({ result: { cleared: false } })
 
-      const beforeRun = await binding.exec('pin', { test: 'r2', command: 'log-1' })
+      const beforeRun = await binding.exec('pin', { test: 'r2', command: '1' })
 
       expect((beforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
     })
@@ -370,5 +395,156 @@ describe('tap binding pin lifecycle', () => {
     pinClickAtBefore()
     cy.contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
     expectReleased()
+  })
+})
+
+// The network fixture lives in the dedicated tap project too (see above): it
+// needs a served page and an intercept, which would perturb the shared
+// cypress-in-cypress project's exact spec/command counts.
+describe('tap binding with network activity', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  const ENTRY_KEYS = ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp']
+  const NETWORK_KEYS = ['method', 'url', 'indicator', 'status', 'stubbed', 'numResponses', 'alias']
+
+  const withinKeys = (allowed: string[]) => {
+    return (keys: string[]) => keys.every((key) => allowed.includes(key))
+  }
+
+  it('surfaces high-level network detail on request, intercept, and cy.request rows', () => {
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/network.cy.js' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+
+      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, any>> }).result
+
+      // Nothing internal leaks: every row stays within the wire contract, and
+      // every network object stays within its typed field set.
+      for (const command of commands) {
+        expect(Object.keys(command), `row ${command.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
+
+        if (command.network) {
+          expect(Object.keys(command.network), `network ${command.id}`).to.satisfy(withinKeys(NETWORK_KEYS))
+        }
+      }
+
+      expect(commands.filter((command) => command.network), 'rows carrying network detail').to.have.length.greaterThan(0)
+
+      // The cy.intercept registration is bucketed under routes; it merges into
+      // the command log as a route row with the stubbed flag, matcher, alias,
+      // and match count.
+      const route = commands.find((command) => command.name === 'route')
+
+      expect(route, 'the intercept route row').to.exist
+      expect(route!.network.method).to.eq('GET')
+      expect(route!.network.url).to.contain('/api/users')
+      expect(route!.network.stubbed).to.eq(true)
+      expect(route!.network.alias).to.eq('getUsers')
+      expect(route!.network.numResponses).to.be.greaterThan(0)
+
+      // The stubbed request itself: served by the stub, so it did not go to
+      // origin. Carries method, URL, the reporter's status indicator, and alias.
+      const stubbed = commands.find((command) => command.name === 'request' && command.network?.stubbed === true && command.network?.alias === 'getUsers')
+
+      expect(stubbed, 'the stubbed request row').to.exist
+      expect(stubbed!.network.method).to.eq('GET')
+      expect(stubbed!.network.url).to.contain('/api/users')
+      expect(stubbed!.network.indicator).to.eq('successful')
+      expect(stubbed!.message, 'the reporter display message').to.contain('/api/users')
+
+      // A real request that went to origin (the page fetching itself).
+      const real = commands.find((command) => command.name === 'request' && command.network?.stubbed === false)
+
+      expect(real, 'a real request row').to.exist
+      expect(real!.network.method).to.be.a('string')
+      expect(real!.network.indicator).to.be.a('string')
+
+      // cy.request keeps its method/URL in the display message, exposing only
+      // the status indicator as a structured field (no request URL on the log).
+      const cyRequest = commands.find((command) => command.name === 'request' && command.network && !command.network.url && !command.network.method && command.network.indicator)
+
+      expect(cyRequest, 'the cy.request row').to.exist
+      expect(cyRequest!.network.indicator).to.eq('successful')
+      expect(cyRequest!.message, 'the cy.request display message').to.match(/^GET \d+ /)
+    })
+  })
+
+  const REPORTER_COMMAND_KEYS = ['id', 'name', 'displayName', 'message', 'state', 'type', 'hookId', 'event', 'group', 'groupLevel', 'aliases', 'aliasType', 'referencedAliases', 'network', 'cleanedUp']
+  const REPORTER_ROUTE_KEYS = ['id', 'method', 'url', 'stubbed', 'status', 'numResponses', 'alias']
+
+  it('renders the full reporter view for a test: header, hooks, routes, and enriched commands', () => {
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run', { spec: 'cypress/e2e/network.cy.js' })
+
+      expect('result' in outcome).to.eq(true)
+    })
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      const missing = await binding.exec('reporter', {}, { test: 'not-a-test' })
+
+      expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const testId = tests[0].id as string
+
+      const outcome = (await binding.exec('reporter', {}, { test: testId })) as { result: Record<string, any> }
+      const view = outcome.result
+
+      expect(Object.keys(view)).to.deep.eq(['test', 'hooks', 'sessions', 'agents', 'routes', 'commands'])
+      expect(view.test).to.deep.eq({
+        id: testId,
+        title: 'records intercept, real request, and cy.request detail',
+        fullTitle: 'Network > records intercept, real request, and cy.request detail',
+        state: 'passed',
+      })
+
+      // The fixture has no before/after hooks, so the sections are just the
+      // synthesized test body — the reporter's bucket for the test's own commands.
+      expect(view.hooks).to.deep.eq([{ hookId: testId, hookName: 'test body' }])
+
+      // The cy.intercept registration lives in the ROUTES table, not the log.
+      expect(view.routes).to.have.length(1)
+      expect(Object.keys(view.routes[0])).to.satisfy((keys: string[]) => keys.every((key) => REPORTER_ROUTE_KEYS.includes(key)))
+      expect(view.routes[0].method).to.eq('GET')
+      expect(view.routes[0].url).to.contain('/api/users')
+      expect(view.routes[0].stubbed).to.eq(true)
+      expect(view.routes[0].alias).to.eq('getUsers')
+      expect(view.routes[0].numResponses).to.be.greaterThan(0)
+      expect(view.commands.some((command: Record<string, unknown>) => command.name === 'route')).to.eq(false)
+
+      for (const command of view.commands as Array<Record<string, any>>) {
+        expect(Object.keys(command), `row ${command.id}`).to.satisfy((keys: string[]) => keys.every((key) => REPORTER_COMMAND_KEYS.includes(key)))
+        expect(command.hookId, `hookId of ${command.id}`).to.eq(testId)
+      }
+
+      // The stubbed fetch surfaces as an event row labeled by its displayName,
+      // carrying the same network detail the commands command reports.
+      const eventRow = (view.commands as Array<Record<string, any>>).find((command) => command.event === true && command.network?.stubbed === true)
+
+      expect(eventRow, 'the stubbed request event row').to.exist
+      expect(eventRow!.displayName).to.be.a('string')
+      expect(eventRow!.network.indicator).to.eq('successful')
+      expect(eventRow!.network.alias).to.eq('getUsers')
+    })
   })
 })

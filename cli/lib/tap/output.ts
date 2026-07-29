@@ -1,6 +1,7 @@
 import commander from 'commander'
 
 import logger from '../logger'
+import { renderingFor } from './render'
 import type { InstanceSelection } from '../cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 
@@ -14,6 +15,23 @@ export const renderKnownFailure = (err: { details: { description: string, soluti
 
 export const renderResult = (result: unknown): void => {
   logger.always(typeof result === 'string' ? result : JSON.stringify(result, null, 2))
+}
+
+/**
+ * Print a command's result: its human-readable rendering when the command
+ * defines one (see `./render`), the raw JSON otherwise or when `--json` asks
+ * for it explicitly.
+ */
+export const renderOutcome = (command: string, result: unknown, json: boolean | undefined): void => {
+  const rendering = json ? undefined : renderingFor(command)
+
+  if (rendering) {
+    logger.always(rendering.renderHuman(result))
+
+    return
+  }
+
+  renderResult(result)
 }
 
 export const renderNativeHelp = (program: commander.Command, command: string): void => {

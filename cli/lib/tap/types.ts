@@ -3,6 +3,8 @@ import type { TapNativeCommandSchema } from '@packages/cypress-instances'
 /** Options `cypress tap` accepts from the top-level CLI. */
 export interface TapCliOptions {
   instance?: number
+  /** Print the raw JSON result even when the command has a human-readable rendering. */
+  json?: boolean
 }
 
 /**

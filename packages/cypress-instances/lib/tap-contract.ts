@@ -103,14 +103,25 @@ const commandsMeta = {
   ],
 } as const satisfies TapCommandSchema
 
+const reporterMeta = {
+  name: 'reporter',
+  description: 'render a test’s full reporter view: its routes, hooks, and command log',
+  params: [],
+  options: [
+    { ...testIdField, required: true },
+    attemptField,
+  ],
+} as const satisfies TapCommandSchema
+
 const pinMeta = {
   name: 'pin',
   description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
   params: [
     { ...testIdField, required: false },
-    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command' },
+    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
   ],
   options: [
+    attemptField,
     { name: 'at', type: 'string', required: false, description: 'which snapshot to pin: a name like "before"/"after" or a 1-based index; defaults to the last (the command’s final state). Re-run on the pinned command to switch snapshots without releasing the pin' },
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },
   ],
@@ -131,6 +142,7 @@ const runStateMeta = {
 export const TAP_COMMANDS = [
   testsMeta,
   commandsMeta,
+  reporterMeta,
   pinMeta,
   runStateMeta,
 ] as const satisfies readonly TapCommandSchema[]
@@ -242,3 +254,7 @@ export const TAP_NATIVE_COMMANDS = [
 ] as const satisfies readonly TapNativeCommandSchema[]
 
 export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
+
+// Per-command result contracts live in `./contracts/`; re-exported here so the
+// app's deep import of this module and the package barrel both reach them.
+export * from './contracts/reporter'

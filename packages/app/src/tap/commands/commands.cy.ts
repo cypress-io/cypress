@@ -14,7 +14,7 @@ describe('tap/commands/commands', () => {
       state: 'passed',
       commands: [
         { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent', displayName: 'visit', hookId: 'h1' },
-        { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+        { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent', hookId: 'r2' },
       ],
       prevAttempts: [
         {
@@ -94,12 +94,101 @@ describe('tap/commands/commands', () => {
 
     expect(getTestState).to.have.been.calledOnceWith('r2')
 
+    // Ids are the reporter's own numbers, counted per hook section — the visit
+    // (before-each) and the get (test body) are each row 1 of their section.
     expect(outcome).to.deep.eq({
       result: [
-        { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
-        { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+        { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
+        { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent' },
       ],
     })
+  })
+
+  // Mirrors the serialized log shapes the driver emits for network commands:
+  // a cy.intercept registration is bucketed under `routes` (instrument 'route'),
+  // while the stubbed request, real request, and cy.request are `commands`. Each
+  // carries its display detail on renderProps the way the reporter reads it, and
+  // createdAtTimestamp drives the merge back into the run order the reporter
+  // shows. r5 also holds an ordinary get to prove network fields stay absent on
+  // non-network rows.
+  const NETWORK_STATE = {
+    r5: {
+      id: 'r5',
+      title: 'exercises the network',
+      state: 'passed',
+      routes: [
+        {
+          id: 'log-int', name: 'route', state: 'passed', type: 'parent', createdAtTimestamp: 1,
+          instrument: 'route', method: 'GET', url: '/api/users',
+          isStubbed: true, numResponses: 1, alias: 'getUsers', status: 200,
+          message: undefined, renderProps: {},
+        },
+      ],
+      commands: [
+        {
+          id: 'log-real', name: 'request', state: 'passed', type: 'parent', createdAtTimestamp: 3, event: true,
+          displayName: 'xhr', message: '', method: 'POST', url: 'http://localhost:2121/track',
+          renderProps: {
+            indicator: 'bad', message: 'POST 500 /track', wentToOrigin: true, interceptions: [],
+          },
+        },
+        {
+          id: 'log-stub', name: 'request', state: 'passed', type: 'parent', createdAtTimestamp: 4, event: true,
+          displayName: 'fetch', message: '', method: 'GET',
+          url: 'http://localhost:2121/api/users', alias: 'getUsers', aliasType: 'route',
+          renderProps: {
+            indicator: 'successful', message: 'GET 200 /api/users',
+            wentToOrigin: false,
+            interceptions: [{ command: 'intercept', alias: 'getUsers', type: 'stub' }],
+          },
+        },
+        { id: 'log-get', name: 'get', message: '#user', state: 'passed', type: 'parent', createdAtTimestamp: 5, url: 'http://localhost:2121/' },
+        {
+          id: 'log-req', name: 'request', state: 'passed', type: 'parent', createdAtTimestamp: 6,
+          message: '', url: 'http://localhost:2121/',
+          renderProps: { indicator: 'successful', message: 'GET 200 /api/data' },
+        },
+      ],
+    },
+  }
+
+  it('merges intercept routes into the command log and surfaces high-level network info, leaving ordinary rows unchanged', async () => {
+    stubRunner({ getTestState: (id: string) => NETWORK_STATE[id] })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    const outcome = await manager.exec('commands', {}, { test: 'r5' })
+
+    // The route registration (from `routes`) sorts to the front by timestamp,
+    // ahead of the request rows it later matches — but routes aren't commands,
+    // so it carries no id. The proxy request rows are events, taking `e` ids;
+    // the ordinary get and the cy.request are the numbered rows.
+    expect(outcome).to.deep.eq({
+      result: [
+        {
+          name: 'route', state: 'passed', type: 'parent',
+          network: { method: 'GET', url: '/api/users', status: 200, stubbed: true, numResponses: 1, alias: 'getUsers' },
+        },
+        {
+          id: 'e1', name: 'request', message: 'POST 500 /track', state: 'passed', type: 'parent',
+          network: { method: 'POST', url: 'http://localhost:2121/track', indicator: 'bad', stubbed: false },
+        },
+        {
+          id: 'e2', name: 'request', message: 'GET 200 /api/users', state: 'passed', type: 'parent',
+          network: { method: 'GET', url: 'http://localhost:2121/api/users', indicator: 'successful', stubbed: true, alias: 'getUsers' },
+        },
+        // The page URL on an ordinary get is not a request URL, so no network object.
+        { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+        // cy.request never sets a top-level method/request URL, so those stay in
+        // the display message; only the status indicator is a structured field.
+        {
+          id: '2', name: 'request', message: 'GET 200 /api/data', state: 'passed', type: 'parent',
+          network: { indicator: 'successful' },
+        },
+      ],
+    })
+
+    expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
   })
 
   it('drops command fields nulled by the driver’s memory cleanup and marks the entry cleanedUp', async () => {
@@ -111,7 +200,7 @@ describe('tap/commands/commands', () => {
 
     expect(outcome).to.deep.eq({
       result: [
-        { id: 'log-c', name: 'visit', state: 'passed', type: 'parent', cleanedUp: true },
+        { id: '1', name: 'visit', state: 'passed', type: 'parent', cleanedUp: true },
       ],
     })
   })
@@ -121,10 +210,12 @@ describe('tap/commands/commands', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
+    // Ids are per attempt, so the failed first attempt numbers from 1 again
+    // (its two rows share a section, unlike the latest attempt's).
     expect(await manager.exec('commands', {}, { test: 'r2', attempt: '1' })).to.deep.eq({
       result: [
-        { id: 'log-a', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
-        { id: 'log-b', name: 'get', message: '#user', state: 'failed', type: 'parent' },
+        { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
+        { id: '2', name: 'get', message: '#user', state: 'failed', type: 'parent' },
       ],
     })
 

@@ -173,6 +173,49 @@ describe('lib/exec/tap', () => {
       expect(JSON.parse(logger.print())).toEqual({ status: 'ok', browsers: 2 })
     })
 
+    const reporterSchema: TapSchema = {
+      ...schema,
+      commands: [
+        ...schema.commands,
+        {
+          name: 'reporter',
+          description: 'render a test’s full reporter view',
+          params: [],
+          options: [{ name: 'test', type: 'string', required: true, description: 'test id' }],
+        },
+      ],
+    }
+
+    const reporterView = {
+      test: { id: 'r2', title: 'loads', fullTitle: 'App > loads', state: 'passed' },
+      hooks: [{ hookId: 'r2', hookName: 'test body' }],
+      sessions: [],
+      agents: [],
+      routes: [],
+      commands: [{ id: 'log-1', name: 'visit', message: '/', state: 'passed', type: 'parent', hookId: 'r2' }],
+    }
+
+    it('prints a command’s human-readable rendering by default when it defines one', async () => {
+      const call = mockSession(reporterSchema, { result: reporterView })
+
+      expect(await tap.start(['reporter', '--test', 'r2'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['reporter', {}, { test: 'r2' }])
+
+      const output = logger.print()
+
+      expect(output).toContain('App > loads')
+      expect(output).toContain('TEST BODY')
+      expect(output).toContain('visit')
+      expect(() => JSON.parse(output)).toThrow()
+    })
+
+    it('prints the raw JSON result when --json is passed', async () => {
+      mockSession(reporterSchema, { result: reporterView })
+
+      expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual(reporterView)
+    })
+
     it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
       mockSession()
       const { instance } = mockResolved()
@@ -946,6 +989,8 @@ describe('lib/exec/tap', () => {
         Options:
           --instance <pid>                target a specific running Cypress instance by
                                           its server process id (pid)
+          --json                          print the raw JSON result instead of the
+                                          human-readable rendering
           -h, --help                      display help for command
 
         Commands:
@@ -970,6 +1015,8 @@ describe('lib/exec/tap', () => {
                                           state, or detail one by id
           commands [options]              list the command log entries of a test of
                                           the active run
+          reporter [options]              render a test’s full reporter view: its
+                                          routes, hooks, and command log
           pin [options] [test] [command]  pin a command’s DOM snapshot into the live
                                           app-under-test frame so the dom/aria/inspect
                                           commands can read it; pass --clear to release
@@ -1007,6 +1054,8 @@ describe('lib/exec/tap', () => {
                                latest
           --instance <pid>     target a specific running Cypress instance by its server
                                process id (pid)
+          --json               print the raw JSON result instead of the human-readable
+                               rendering
           -h, --help           display help for command
         "
       `)
