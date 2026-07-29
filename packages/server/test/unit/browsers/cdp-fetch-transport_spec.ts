@@ -608,6 +608,45 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    it('correlates request and response pauses by request id when network id is absent', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenIds: string[] = []
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        seenIds.push(req.id)
+
+        return next(req)
+      })
+
+      // Downloads omit networkId; the Fetch requestId is stable across both pauses.
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'download-pause-id',
+      }))
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'download-pause-id',
+      })
+
+      expect(seenIds).to.deep.equal(['download-pause-id'])
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'download-pause-id',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'download-pause-id',
+        responseCode: 200,
+      })
+    })
+
     it('keeps concurrent requests isolated by network id', async () => {
       const client = createClient()
       const { transport } = createTransport(client)

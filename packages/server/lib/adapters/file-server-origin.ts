@@ -1,4 +1,4 @@
-import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
+import type { HttpHeaders, InterceptMiddleware } from '@packages/network-interception'
 import type { RemoteStates } from '@packages/network-tools'
 import { toFileServerUrl } from '@packages/network-tools'
 import type { Request as ServerRequest } from '../request'
@@ -33,16 +33,10 @@ function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
   }, {})
 }
 
-function shouldSendBody (request: HttpRequest): boolean {
-  return typeof request.body !== 'undefined' && !['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
-}
-
 /**
- * CDP Fetch terminal is Fetch.continueRequest, so the browser fetches the origin
- * itself and never reaches sendRequestOutgoing's file-server rewrite. This
- * middleware sits after the legacy pipeline as the Node-side origin for
- * strategy: 'file' URLs — rewrite to the file server, authorize, and return a
- * synthesized HttpResponse for Fetch.fulfillRequest.
+ * Node-side origin for strategy: 'file' URLs on the CDP Fetch path. The Fetch
+ * terminal is continueRequest, so the browser never hits sendRequestOutgoing's
+ * file-server rewrite — fulfill those URLs here instead.
  */
 export function createFileServerOriginMiddleware ({
   remoteStates,
@@ -50,13 +44,13 @@ export function createFileServerOriginMiddleware ({
   request: serverRequest,
 }: CreateFileServerOriginMiddlewareOptions): InterceptMiddleware {
   return async (request, next) => {
-    const remoteState = remoteStates.current()
-    const fileServerUrl = toFileServerUrl(request.url, remoteState)
+    const fileServerUrl = toFileServerUrl(request.url, remoteStates.current())
 
     if (!fileServerUrl) {
       return next(request)
     }
 
+    const method = (request.method ?? 'GET').toUpperCase()
     const response = await serverRequest.create({
       url: fileServerUrl,
       method: request.method ?? 'GET',
@@ -64,7 +58,7 @@ export function createFileServerOriginMiddleware ({
         ...filterHeaders(request.headers),
         'x-cypress-authorization': getFileServerToken(),
       },
-      ...(shouldSendBody(request) ? { body: request.body } : {}),
+      ...(request.body !== undefined && method !== 'GET' && method !== 'HEAD' ? { body: request.body } : {}),
       encoding: null,
       followRedirect: false,
       gzip: false,

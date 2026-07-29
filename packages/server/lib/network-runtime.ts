@@ -196,9 +196,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     }),
   )
 
-  // The CDP terminal is Fetch.continueRequest, so the browser fetches the origin
-  // itself and never reaches sendRequestOutgoing's file-server rewrite. Registering
-  // after the legacy pipeline makes this its origin.
+  // CDP Fetch continues to the browser origin, so strategy:file URLs need a
+  // Node-side file-server origin after the legacy pipeline (see file-server-origin).
   networkInterception.use(createFileServerOriginMiddleware({
     remoteStates: deps.remoteStates,
     getFileServerToken: deps.getFileServerToken,

@@ -102,9 +102,7 @@ export class CdpFetchTransport {
    * Used between tests so the next test still receives paused traffic.
    */
   reset (): void {
-    const inFlightCount = this.inFlightRequests.size
-
-    debug('resetting CDP Fetch transport (%d in-flight request(s))', inFlightCount)
+    debug('resetting CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
     this.rejectAll(new Error('CDP Fetch transport reset'))
     this.networkExtraInfo.flush()
   }
@@ -192,29 +190,24 @@ export class CdpFetchTransport {
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
         const headers = await this.continueRequestHeaders(event, outbound)
-        const continueRequest: Protocol.Fetch.ContinueRequestRequest = {
+
+        debug('continuing request %s %s %o',
+          outbound.method ?? event.request.method,
+          outbound.url,
+          {
+            urlChanged: outbound.url !== event.request.url,
+            methodChanged: outbound.method !== event.request.method,
+            postDataChanged: outbound.postData !== event.request.postData,
+            headersChanged: !!headers,
+          })
+
+        await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
           ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
           ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
           ...(headers ? { headers } : {}),
-        }
-
-        if (continueRequest.url || continueRequest.method || continueRequest.postData || continueRequest.headers) {
-          debug('continuing request with mutations %s %s %o',
-            outbound.method ?? event.request.method,
-            outbound.url,
-            {
-              urlChanged: outbound.url !== event.request.url,
-              methodChanged: outbound.method !== event.request.method,
-              postDataChanged: outbound.postData !== event.request.postData,
-              headersChanged: !!headers,
-            })
-        } else {
-          debug('continuing request unchanged %s %s', event.request.method, event.request.url)
-        }
-
-        await this.client.send('Fetch.continueRequest', continueRequest, outbound.sessionId)
+        }, outbound.sessionId)
 
         requestContinued = true
 

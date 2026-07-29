@@ -35,17 +35,15 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
   const requestBodyBuffered = !!mw.req.body
 
   const remoteState = mw.remoteStates.current()
-  const { strategy } = remoteState
   const fileServerUrl = toFileServerUrl(requestOptions.url, remoteState)
 
   span?.setAttributes({
     requestBodyBuffered,
-    strategy,
+    strategy: remoteState.strategy,
   })
 
   if (fileServerUrl) {
     mw.req.headers['x-cypress-authorization'] = mw.getFileServerToken()
-
     requestOptions.url = fileServerUrl
   }
 
