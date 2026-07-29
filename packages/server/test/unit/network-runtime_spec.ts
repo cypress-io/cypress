@@ -390,4 +390,115 @@ describe('lib/network-runtime', () => {
     await flush()
     await handled
   })
+
+  it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+    const fileBody = Buffer.from('"Joe","Smith"')
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    deps.request = {
+      rp: sinon.stub(),
+      create: sinon.stub().resolves({
+        statusCode: 200,
+        headers: {
+          'content-type': 'text/csv',
+          'content-disposition': 'attachment; filename="records.csv"',
+        },
+        body: fileBody,
+      }),
+    } as any
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+    }))
+
+    await flush()
+
+    expect(deps.request.create).to.have.been.calledWithMatch({
+      url: 'http://localhost:2021/cypress/fixtures/records.csv',
+      headers: {
+        'x-cypress-authorization': 'token',
+      },
+    }, true)
+
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueCall, 'expected no Fetch.continueRequest').to.not.exist
+    expect(fulfillCall, 'expected Fetch.fulfillRequest').to.exist
+    expect(fulfillCall!.args[1]).to.include({
+      requestId: 'file-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall!.args[1].body).to.equal(fileBody.toString('base64'))
+  })
+
+  it('createCdpFetchRuntime continues http-strategy requests without hitting the file server', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.request = {
+      rp: sinon.stub(),
+      create: sinon.stub().resolves({
+        statusCode: 200,
+        headers: {},
+        body: 'should-not-be-used',
+      }),
+    } as any
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'http-request',
+      networkId: 'network-http-1',
+      url: 'https://example.test/app',
+    }))
+
+    await flush()
+
+    expect(deps.request.create).not.to.have.been.called
+
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'http-response',
+      networkId: 'network-http-1',
+      url: 'https://example.test/app',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+    await handled
+  })
 })

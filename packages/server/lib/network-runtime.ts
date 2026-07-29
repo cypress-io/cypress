@@ -15,6 +15,7 @@ import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { createFileServerOriginMiddleware } from './adapters/file-server-origin'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 
 export type CreateProxyRuntimeDeps = {
@@ -194,6 +195,15 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
     }),
   )
+
+  // The CDP terminal is Fetch.continueRequest, so the browser fetches the origin
+  // itself and never reaches sendRequestOutgoing's file-server rewrite. Registering
+  // after the legacy pipeline makes this its origin.
+  networkInterception.use(createFileServerOriginMiddleware({
+    remoteStates: deps.remoteStates,
+    getFileServerToken: deps.getFileServerToken,
+    request: deps.request,
+  }))
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,

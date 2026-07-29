@@ -23,6 +23,21 @@ export interface RemoteState {
   props: ParsedHostWithProtocolAndHost | null
 }
 
+/**
+ * When remote state is strategy 'file', rewrite a request URL from the synthetic
+ * AUT origin to the dedicated file server. Returns undefined when the URL should
+ * not be rewritten (http strategy, missing fileServer, or different origin).
+ */
+export function toFileServerUrl (url: string, state: RemoteState): string | undefined {
+  const { strategy, origin, fileServer } = state
+
+  if (strategy !== 'file' || !fileServer || !url.startsWith(origin)) {
+    return undefined
+  }
+
+  return url.replace(origin, fileServer)
+}
+
 interface RemoteStatesServerPorts {
   server: number
   fileServer?: number

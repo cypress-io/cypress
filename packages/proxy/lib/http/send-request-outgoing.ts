@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { toFileServerUrl } from '@packages/network-tools'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
 import type { RequestInterceptionMiddlewareCtx } from '../adapters/types'
@@ -33,17 +34,19 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
 
   const requestBodyBuffered = !!mw.req.body
 
-  const { strategy, origin, fileServer } = mw.remoteStates.current()
+  const remoteState = mw.remoteStates.current()
+  const { strategy } = remoteState
+  const fileServerUrl = toFileServerUrl(requestOptions.url, remoteState)
 
   span?.setAttributes({
     requestBodyBuffered,
     strategy,
   })
 
-  if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
+  if (fileServerUrl) {
     mw.req.headers['x-cypress-authorization'] = mw.getFileServerToken()
 
-    requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
+    requestOptions.url = fileServerUrl
   }
 
   // Always forward method/headers from the (possibly intercepted) proxied request.
