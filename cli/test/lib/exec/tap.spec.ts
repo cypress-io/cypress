@@ -518,22 +518,33 @@ describe('lib/exec/tap', () => {
       vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'none'))
 
       expect(await tap.start(['status'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+
+      const output = logger.print()
+
+      expect(output).toContain('not connected')
+      expect(() => JSON.parse(output)).toThrow()
       // Nothing live means nothing to connect to.
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw status object with --json', async () => {
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'none'))
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
     it('reports "not connected" for a stale discovery record too', async () => {
       vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('STALE_INSTANCE', 'stale'))
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
     it('reports "browser not selected" without opening a session when no browser is attached', async () => {
       mockLiveResolved(liveInstance({ pid: 111, cdpBrowserWsUrl: null }))
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'browser not selected',
         pid: 111,
@@ -550,7 +561,7 @@ describe('lib/exec/tap', () => {
       mockLiveResolved(liveInstance())
       mockSession(schema, { result: { spec: null, totalSpecs: 3 } } satisfies TapExecResult)
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'spec not selected',
         pid: 4242,
@@ -573,7 +584,7 @@ describe('lib/exec/tap', () => {
         },
       } satisfies TapExecResult)
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'running',
         pid: 4242,

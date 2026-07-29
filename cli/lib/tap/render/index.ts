@@ -2,10 +2,12 @@ import type { TapCommandName, TapNativeCommandName, TapReporterSpecView, TapRepo
 import type { TapRunResult } from '../commands/run'
 import type { TapInstanceSummary } from '../commands/instances'
 import type { TapSpecEntry } from '../commands/specs'
+import type { TapStatus } from '../types'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
 import { renderRunHuman } from './run'
 import { renderInstancesHuman } from './instances'
 import { renderSpecsHuman } from './specs'
+import { renderStatusHuman } from './status'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
@@ -30,6 +32,7 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
   run: { renderHuman: (result) => renderRunHuman(result as TapRunResult) },
   instances: { renderHuman: (result) => renderInstancesHuman(result as TapInstanceSummary[]) },
   specs: { renderHuman: (result) => renderSpecsHuman(result as TapSpecEntry[]) },
+  status: { renderHuman: (result) => renderStatusHuman(result as TapStatus) },
 }
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {
