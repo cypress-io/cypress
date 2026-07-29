@@ -551,6 +551,9 @@
       ]
     },
     "npm/puppeteer": {
+      "entry": [
+        "src/support/index.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ],
@@ -652,6 +655,9 @@
       ]
     },
     "tooling/electron-mksnapshot": {
+      "entry": [
+        "src/mksnapshot-bin.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ]
