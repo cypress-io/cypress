@@ -2074,7 +2074,7 @@ jobs:
             # until these are fixed, run the tests that are working.
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts scripts/**/*spec.js
+            - run: yarn test-scripts
             - sanitize-verify-and-store-mocha-results
       - unless:
           condition:
