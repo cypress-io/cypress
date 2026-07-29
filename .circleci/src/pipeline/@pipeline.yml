@@ -1933,6 +1933,14 @@ jobs:
             echo "skipping for contributor PRs since we don't record to the cloud"
             circleci-agent step halt
           fi
+
+          # Contributor PRs from forks run with $CIRCLE_BRANCH set to the PR ref
+          # (e.g. pull/34282/head), which is not a real branch and cannot be
+          # cloned below. There is no cloud run to verify for these anyway, so skip.
+          if [[ "$CIRCLE_BRANCH" =~ ^pull\/[0-9]+ ]]; then
+            echo "skipping for contributor PRs — $CIRCLE_BRANCH is an external PR ref that cannot be checked out"
+            circleci-agent step halt
+          fi
       - update_known_hosts
       - run:
           name: checkout
