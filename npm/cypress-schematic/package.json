@@ -12,7 +12,7 @@
   "dependencies": {
     "jsonc-parser": "^3.3.1",
     "rxjs": "~7.8.2",
-    "semver": "^7.7.3"
+    "semver": "^7.8.5"
   },
   "devDependencies": {
     "@angular-devkit/architect": "^0.2100.5",

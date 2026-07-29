@@ -21,7 +21,7 @@
     "fs-extra": "9.1.0",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
     "local-pkg": "0.4.1",
-    "semver": "^7.7.3",
+    "semver": "^7.8.5",
     "tslib": "^2.3.1",
     "tsx": "^4.22.4",
     "webpack-bundle-analyzer": "4.10.2",
