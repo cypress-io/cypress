@@ -23,7 +23,7 @@
     "@types/node": "22.18.7",
     "axios": "^1.15.1",
     "better-sqlite3": "12.4.1",
-    "devtools-protocol": "0.0.1575685",
+    "devtools-protocol": "0.0.1669207",
     "express": "4.21.0",
     "rimraf": "^6.1.1",
     "socket.io": "4.8.3",

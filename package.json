@@ -288,7 +288,7 @@
     "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.5",
-    "devtools-protocol": "0.0.1575685",
+    "devtools-protocol": "0.0.1669207",
     "eslint-plugin-import": "2.29.1",
     "node-abi": "4.9.0",
     "vue-template-compiler": "2.6.12",
