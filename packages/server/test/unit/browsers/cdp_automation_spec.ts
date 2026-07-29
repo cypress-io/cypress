@@ -843,5 +843,106 @@ context('lib/browsers/cdp_automation', () => {
         expect(this.onRequest('get:aut:title')).to.be.rejectedWith('Could not find AUT frame')
       })
     })
+
+    describe('isAUTFrame', function () {
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+      })
+
+      it('matches the top-level AUT child frame', async function () {
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [
+            {
+              frame: {
+                id: 'aut-outer',
+                name: 'Your project: foobar',
+                url: 'http://localhost:3500/',
+              },
+            },
+          ],
+        }
+
+        expect(await cdpAutomation.isAUTFrame('aut-outer')).to.be.true
+        expect(await cdpAutomation.isAUTFrame('other')).to.be.false
+      })
+
+      it('matches the nested AUT frame under cy-in-cy', async function () {
+        process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = '1'
+
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [
+            {
+              frame: {
+                id: 'aut-outer',
+                name: 'Your project: outer',
+                url: 'http://localhost:3000/__/',
+              },
+              childFrames: [
+                {
+                  frame: {
+                    id: 'aut-inner',
+                    name: 'Your project: inner',
+                    url: 'http://localhost:3500/',
+                  },
+                },
+              ],
+            },
+          ],
+        }
+
+        expect(await cdpAutomation.isAUTFrame('aut-inner')).to.be.true
+        expect(await cdpAutomation.isAUTFrame('aut-outer')).to.be.false
+      })
+    })
+
+    describe('onAUTFrameNavigated', function () {
+      it('notifies subscribers with the committed URL for AUT frame navigations only', async function () {
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [
+            {
+              frame: {
+                id: 'aut-outer',
+                name: 'Your project: foobar',
+                url: 'http://localhost:3500/',
+              },
+            },
+          ],
+        }
+
+        const client = {
+          send: sinon.stub().resolves({}),
+          on: sinon.stub(),
+          off: sinon.stub(),
+        }
+
+        cdpAutomation._listenForFrameTreeChanges(client as any)
+
+        const onFrameNavigated = client.on.withArgs('Page.frameNavigated').firstCall.args[1]
+        const listener = sinon.stub()
+        const unsubscribe = cdpAutomation.onAUTFrameNavigated(listener)
+
+        onFrameNavigated({ frame: { id: 'other-frame', url: 'https://other.test/' } })
+        onFrameNavigated({ frame: { id: 'aut-outer', url: 'https://app.test/dashboard' } })
+
+        await Promise.resolve()
+        await Promise.resolve()
+
+        expect(listener).to.have.been.calledOnceWith('https://app.test/dashboard')
+
+        unsubscribe()
+        onFrameNavigated({ frame: { id: 'aut-outer', url: 'https://app.test/next' } })
+
+        await Promise.resolve()
+        await Promise.resolve()
+
+        expect(listener).to.have.been.calledOnce
+      })
+    })
   })
 })

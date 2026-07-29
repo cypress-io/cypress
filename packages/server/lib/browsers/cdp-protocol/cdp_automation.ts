@@ -15,6 +15,7 @@ import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie
 import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../../automation/commands/key_press'
+import { AUT_FRAME_HEADER } from '../constants'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
@@ -54,6 +55,7 @@ export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
+  childFrames?: HasFrame[]
 }
 
 // the resource types passed through to request middleware / cy.intercept matching; any
@@ -67,6 +69,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   send: SendDebuggerCommand
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
+  private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
@@ -343,15 +346,58 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       await this.gettingFrameTree
     }
 
-    const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
+    let frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
       return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
     }) as HasFrame | undefined
+
+    // Cy-in-cy nests the real AUT under the outer AUT frame — match _getAutFrame.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
+      frame = _.find(frame.childFrames || [], (item: HasFrame) => {
+        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+      }) as HasFrame | undefined
+    }
 
     if (frame) {
       return frame.frame.id === frameId
     }
 
     return false
+  }
+
+  isAUTFrame = (frameId: string) => {
+    return this._isAUTFrame(frameId)
+  }
+
+  /**
+   * Notifies the listener with the committed URL when the AUT frame
+   * navigates. Protocol-neutral surface: the consumer (the CDP Fetch network
+   * runtime's simulated-top tracking) gets the fact of an AUT document
+   * commit without referencing CDP events or frame ids.
+   */
+  onAUTFrameNavigated = (listener: (url: string) => void): (() => void) => {
+    this.autFrameNavigatedListener = listener
+
+    return () => {
+      // only clear our own subscription — a stale unsubscribe (e.g. a
+      // stopped runtime) must not wipe a successor's
+      if (this.autFrameNavigatedListener === listener) {
+        this.autFrameNavigatedListener = undefined
+      }
+    }
+  }
+
+  private _onFrameNavigated = async (params: Protocol.Page.FrameNavigatedEvent) => {
+    if (!this.autFrameNavigatedListener) {
+      return
+    }
+
+    try {
+      if (await this._isAUTFrame(params.frame.id)) {
+        this.autFrameNavigatedListener?.(params.frame.url)
+      }
+    } catch (err) {
+      debugVerbose('frameNavigated AUT lookup failed: %s', err?.message)
+    }
   }
 
   private _getAutFrame = async () => {
@@ -370,8 +416,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
       // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
-        // @ts-expect-error
-        frame = _.find(frame?.childFrames || [], (item: HasFrame) => {
+        frame = _.find(frame.childFrames || [], (item: HasFrame) => {
           return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
         }) as HasFrame | undefined
       }
@@ -410,7 +455,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
         return this._continueRequest(client, params, {
-          name: 'X-Cypress-Is-AUT-Frame',
+          name: AUT_FRAME_HEADER,
           value: 'true',
         })
       }
@@ -427,6 +472,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     client.on('Page.frameAttached', this._updateFrameTree(client, 'Page.frameAttached'))
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
+    client.on('Page.frameNavigated', this._onFrameNavigated)
+  }
+
+  /**
+   * Fetch and cache the current frame tree. Needed when attaching to an
+   * already-loaded page (e.g. cy-in-cy connectToExisting) where frameAttached
+   * will not fire for existing frames.
+   */
+  seedFrameTree = async (client: CriClient) => {
+    await this._updateFrameTree(client, 'seedFrameTree')()
   }
 
   onRequest = async <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {

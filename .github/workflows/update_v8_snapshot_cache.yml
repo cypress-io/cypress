@@ -77,7 +77,7 @@ jobs:
         run: sudo -H pip install setuptools
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
@@ -109,12 +109,17 @@ jobs:
         run: |
           echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILE }})" && echo 'true')" >> $GITHUB_OUTPUT
         shell: bash
+      - name: Stage snapshot artifact
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        # Tag the file with its platform so the artifact is self-identifying.
+        run: cp "${SNAPSHOT_FILE}" "snapshot-meta-${PLATFORM}.json"
+        shell: bash
       - name: Upload snapshot artifact
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: v8-snapshot-cache-${{ env.PLATFORM }}
-          path: ${{ env.SNAPSHOT_FILE }}
+          path: snapshot-meta-${{ env.PLATFORM }}.json
           if-no-files-found: error
           retention-days: 1
   consolidate-and-create-pr:
@@ -126,7 +131,7 @@ jobs:
     steps:
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
@@ -143,26 +148,25 @@ jobs:
       - name: Download snapshot artifacts
         id: download
         # If no matrix job uploaded an artifact (i.e. no platform's cache
-        # changed), download-artifact@v4 fails the step. Allow the workflow
+        # changed), download-artifact fails the step. Allow the workflow
         # to continue so the stage step below can exit cleanly with
         # has_changes=false.
         continue-on-error: true
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           pattern: v8-snapshot-cache-*
           path: artifacts/
-          merge-multiple: false
+          merge-multiple: true
       - name: Stage updated snapshots
         id: stage
         run: |
           set -e
           changed_files=()
           for platform in linux darwin win32; do
-            # upload-artifact@v4 uses the parent directory of a single-file
-            # `path:` as the artifact root, so only the bare filename is
-            # stored. With merge-multiple: false, download-artifact places it
-            # at artifacts/<artifact-name>/snapshot-meta.json.
-            artifact_file="artifacts/v8-snapshot-cache-${platform}/snapshot-meta.json"
+            # Each artifact holds a platform-tagged snapshot-meta file and
+            # merge-multiple flattens them all into artifacts/, so the layout
+            # is stable whether one or all platforms changed.
+            artifact_file="artifacts/snapshot-meta-${platform}.json"
             target_file="tooling/v8-snapshot/cache/${platform}/snapshot-meta.json"
             if [[ -f "${artifact_file}" ]]; then
               mkdir -p "$(dirname "${target_file}")"

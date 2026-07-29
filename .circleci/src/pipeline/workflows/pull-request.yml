@@ -128,6 +128,10 @@ jobs:
       context: test-runner:cypress-record-key
       requires:
         - ready-to-test
+  - h2-dual-stack-tests:
+      context: test-runner:performance-tracking
+      requires:
+        - ready-to-test
   - driver-integration-tests-chrome-inject-document-domain:
       context: test-runner:cypress-record-key
       requires:
@@ -268,6 +272,70 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
+  # Proxy-disabled (CDP Fetch) coverage — off by default.
+  # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
+  # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
+  - unit-tests-proxy-disabled:
+      requires:
+        - ready-to-test
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-cdp
+      context: test-runner:cypress-record-key
+      disable-proxy: true
+      requires:
+        - ready-to-test
+  - driver-integration-tests-chrome-inject-document-domain:
+      name: driver-integration-tests-chrome-inject-document-domain-cdp
+      context: test-runner:cypress-record-key
+      disable-proxy: true
+      requires:
+        - ready-to-test
+  - driver-integration-tests-electron:
+      name: driver-integration-tests-electron-cdp
+      context: test-runner:cypress-record-key
+      disable-proxy: true
+      requires:
+        - ready-to-test
+  - driver-integration-memory-tests:
+      name: driver-integration-memory-tests-cdp
+      disable-proxy: true
+      requires:
+        - ready-to-test
+  - system-tests-chrome:
+      name: system-tests-chrome-cdp
+      context: test-runner:performance-tracking
+      disable-proxy: true
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-electron:
+      name: system-tests-electron-cdp
+      context: test-runner:performance-tracking
+      disable-proxy: true
+      requires:
+        - system-tests-node-modules-install
+  - run-app-integration-tests-chrome:
+      name: run-app-integration-tests-chrome-cdp
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      disable-proxy: true
+      requires:
+        - ready-to-test
+  - run-launchpad-integration-tests-chrome:
+      name: run-launchpad-integration-tests-chrome-cdp
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      disable-proxy: true
+      requires:
+        - ready-to-test
+
   - create-and-trigger-packaging-artifacts:
       context:
         - test-runner:upload
@@ -372,9 +440,9 @@ jobs:
         - driver-integration-memory-tests
 
   # Fan-in aggregator — the only required GitHub status check for PRs.
-  # All jobs in this workflow fan into this one. Jobs that halt early
-  # (because their pipeline parameter is false) still complete successfully,
-  # so this job runs once all included jobs finish.
+  # Required jobs fan into this one. Jobs that halt early (pipeline parameter
+  # false) still complete successfully. Proxy-disabled *-cdp jobs above are
+  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate.
   - all-jobs-passed:
       requires:
         # Always-run jobs
@@ -394,6 +462,7 @@ jobs:
         - system-tests-firefox
         - system-tests-webkit
         - system-tests-non-root
+        - h2-dual-stack-tests
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta

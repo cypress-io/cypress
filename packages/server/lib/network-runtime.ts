@@ -1,8 +1,8 @@
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware, createSyntheticProxyCodec } from '@packages/proxy'
+import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
@@ -36,8 +36,23 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkInterceptionCore: NetworkInterceptionCore
 }
 
-export type CreateCdpFetchRuntimeDeps = CreateProxyRuntimeDeps & {
+export type CreateCdpFetchRuntimeDeps = {
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
+  isAUTFrame?: (frameId: string) => Promise<boolean>
+  // Protocol-neutral subscription to AUT document navigation commits,
+  // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
+  onAUTFrameNavigated?: (listener: (url: string) => void) => () => void
+  config: CyServer.Config & Cypress.Config
+  shouldCorrelatePreRequests?: () => boolean
+  remoteStates: RemoteStates
+  getFileServerToken: () => string | undefined
+  getCookieJar: () => CookieJar
+  socket: SocketBroadcaster
+  request: ServerRequest
+  serverBus: EventEmitter
+  getCurrentBrowser: () => FoundBrowser
+  // Prefer the state already bound to the driver socket (created at open()).
+  netStubbingState?: NetStubbingState
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -48,7 +63,8 @@ export type CdpFetchNetworkRuntime = {
   networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
   fetchTransport: CdpFetchTransport
   start (): Promise<void>
-  reset (): Promise<void>
+  reset (): void
+  stop (): Promise<void>
 }
 
 /**
@@ -88,6 +104,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     request: deps.request,
   }))
 
+  networkInterception.use(networkProxy.http.createLegacyProxyPipeline(networkProxy.codec))
   networkProxy.withIntercept(networkInterception)
 
   return {
@@ -114,14 +131,13 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
 }
 
 /**
- * Composition-root factory for the CDP Fetch network runtime.
- *
- * This is intentionally not wired into the default proxy runtime yet. The
- * HTTP/2 migration can opt into it with an existing cri-client while preserving
- * the minimal HttpRequest/HttpResponse transport-neutral contract.
+ * Composition-root factory for the CDP Fetch network runtime used when the
+ * MITM proxy is disabled. Reuses NetworkProxy so the legacy middleware
+ * pipeline (cookies, hosts, blockHosts, rewriter, net-stubbing) runs through
+ * a synthetic Express ctx via createSyntheticProxyCodec.
  */
 export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
-  const stubbingState = netStubbingState()
+  const stubbingState = deps.netStubbingState ?? netStubbingState()
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -131,6 +147,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   const networkInterceptionCore = createProxyNetworkInterception({
     policyRegistration: networkPolicyRegistration,
   })
+
   const networkProxy = new NetworkProxy({
     config: deps.config,
     shouldCorrelatePreRequests: deps.shouldCorrelatePreRequests,
@@ -146,22 +163,54 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
   })
-  const networkInterception = new HttpIntercept(createCdpFetchCodec())
-  const syntheticCodec = createSyntheticProxyCodec({
-    createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
-  })
 
-  networkInterception.use(createServeInternalRoutesMiddleware({
+  // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;
+  // CDP Fetch needs its own codec. Share middleware stages, keep intercepts distinct.
+  const serveInternalRoutes = createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
-  }))
+  })
 
-  networkInterception.use(networkProxy.http.createLegacyProxyPipeline(syntheticCodec))
-  // Keep the proxy-codec intercept for NetworkProxy.handleHttpRequest; the CDP
-  // codec intercept is owned by CdpFetchTransport and must not be shared.
-  networkProxy.withIntercept(new HttpIntercept(networkProxy.codec))
+  const attachStages = <TRequest, TResponse>(
+    intercept: HttpIntercept<TRequest, TResponse>,
+    pipelineCodec: TransportCodecPort<any, any>,
+  ) => {
+    intercept.use(serveInternalRoutes)
+    intercept.use(networkProxy.http.createLegacyProxyPipeline(pipelineCodec))
 
-  const fetchTransport = new CdpFetchTransport(deps.client, networkInterception)
+    return intercept
+  }
+
+  const expressInterception = attachStages(
+    new HttpIntercept(networkProxy.codec),
+    networkProxy.codec,
+  )
+
+  networkProxy.withIntercept(expressInterception)
+
+  const networkInterception = attachStages(
+    new HttpIntercept(createCdpFetchCodec()),
+    createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
+    }),
+  )
+
+  const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
+    isAUTFrame: deps.isAUTFrame,
+  })
+
+  // Proxy parity: cookie simulation's simulated top, which nothing else
+  // updates when the proxy is off. Sourced from navigation commits because
+  // cache-served documents never produce a Fetch pause. Only http(s) commits
+  // count — about:blank (test isolation), data:, and blob: never transit
+  // the proxy.
+  const onAUTFrameNavigated = (url: string) => {
+    if (/^https?:/.test(url)) {
+      networkProxy.http.setAUTUrl(url)
+    }
+  }
+
+  let unsubscribeAUTFrameNavigated: (() => void) | undefined
 
   return {
     networkProxy,
@@ -170,10 +219,27 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
-    start () {
-      return fetchTransport.start()
+    async start () {
+      unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
+
+      try {
+        await fetchTransport.start()
+      } catch (err) {
+        unsubscribeAUTFrameNavigated?.()
+        unsubscribeAUTFrameNavigated = undefined
+
+        throw err
+      }
     },
+    // Transport only — callers (server-base) already own networkProxy.reset so
+    // we do not double-reset with a conflicting resetBetweenSpecs flag.
     reset () {
+      fetchTransport.reset()
+    },
+    stop () {
+      unsubscribeAUTFrameNavigated?.()
+      unsubscribeAUTFrameNavigated = undefined
+
       return fetchTransport.stop()
     },
   }
