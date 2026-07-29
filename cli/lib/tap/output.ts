@@ -71,6 +71,15 @@ const renderHelp = (program: commander.Command, schema: TapSchema, command: stri
       return 1
     }
 
+    // Standalone help is the only place a schema command's full `details` prose
+    // renders, so it stands in for the one-line `description` — the same swap
+    // buildNativeProgram does for CLI-native commands.
+    const details = schema.commands.find(({ name }) => name === command)?.details
+
+    if (details) {
+      subcommand.description(details)
+    }
+
     logger.always(`${prefix}${subcommand.helpInformation()}`)
 
     return 0
