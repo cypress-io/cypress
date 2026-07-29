@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import Promise from 'bluebird'
 
 import { LogUtils } from './log'
+import type { SerializeConsolePropsOptions } from './log'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
@@ -1999,7 +2000,7 @@ export default {
         return
       },
 
-      getSerializedConsolePropsForLog (testId, logId) {
+      getSerializedConsolePropsForLog (testId, logId, options?: SerializeConsolePropsOptions) {
         if (_skipCollectingLogs) return
 
         const test = getTestById(testId)
@@ -2015,7 +2016,7 @@ export default {
           return { Message: `The command details and snapshot has been cleaned up to reduce the number of tests in memory.` }
         }
 
-        return LogUtils.toSerializedConsoleProps(LogUtils.getConsoleProps(logAttrs))
+        return LogUtils.toSerializedConsoleProps(LogUtils.getConsoleProps(logAttrs), options)
       },
 
       getSnapshotPropsForLog (testId, logId) {

@@ -217,6 +217,119 @@ describe('LogUtils.toSerializedConsoleProps', () => {
       },
     })
   })
+
+  // The payload asserting on a `cy.request` response produces: the response body
+  // twice over — once yielded, once per request/response pair under the keys
+  // `@packages/server`'s `request.ts` writes — each dwarfing the rest of it.
+  const responseConsoleProps = () => {
+    const body = Array.from({ length: 500 }, (_value, index) => ({ id: index, tags: ['a', 'b'] }))
+
+    return {
+      name: 'assert',
+      type: 'command',
+      props: {
+        actual: {
+          body,
+          headers: { 'content-type': 'application/json' },
+          status: 200,
+          allRequestResponses: [{
+            'Request Body': null,
+            'Request Headers': { host: 'localhost' },
+            'Request URL': 'http://localhost:3000/comments',
+            'Response Body': JSON.stringify(body),
+            'Response Headers': { 'content-type': 'application/json' },
+            'Response Status': 200,
+          }],
+        },
+        expected: 'duration',
+      },
+      Message: 'expected { Object (body, headers, ...) } to have property duration',
+    }
+  }
+
+  const withheld = (length: number): string => {
+    return `[${length.toLocaleString('en-US')} characters withheld — pass --full-report to include it]`
+  }
+
+  // 23,891 characters serialized: individually trivial entries that together
+  // clear the container bound.
+  const manyEntries = () => Array.from({ length: 5000 }, (_value, index) => index)
+
+  it('names a long value by its length, leaving the structure around it readable', () => {
+    const consoleProps = responseConsoleProps()
+    const pair = consoleProps.props.actual.allRequestResponses[0]
+    const result = LogUtils.toSerializedConsoleProps(consoleProps)
+
+    expect(result).toEqual({
+      name: 'assert',
+      type: 'command',
+      props: {
+        actual: {
+          body: withheld(JSON.stringify(consoleProps.props.actual.body).length),
+          headers: { 'content-type': 'application/json' },
+          status: 200,
+          // The pair stays expanded even though it held the largest value in the
+          // payload: only the value itself was over its bound, not the structure.
+          allRequestResponses: [{
+            'Request Body': null,
+            'Request Headers': { host: 'localhost' },
+            'Request URL': 'http://localhost:3000/comments',
+            'Response Body': withheld(pair['Response Body'].length),
+            'Response Headers': { 'content-type': 'application/json' },
+            'Response Status': 200,
+          }],
+        },
+        expected: 'duration',
+      },
+      Message: 'expected { Object (body, headers, ...) } to have property duration',
+    })
+  })
+
+  it('returns every value in full for a full report', () => {
+    const consoleProps = responseConsoleProps()
+    const result = LogUtils.toSerializedConsoleProps(consoleProps, { fullReport: true })
+
+    expect(result).toEqual(consoleProps)
+  })
+
+  it('bounds a string by its own length and a container by what would ship', () => {
+    const result = LogUtils.toSerializedConsoleProps({
+      props: {
+        text: 'x'.repeat(1001),
+        atBound: 'x'.repeat(1000),
+        one: 'x',
+        many: manyEntries(),
+      },
+    })
+
+    expect(result.props.text).toEqual(withheld(1001))
+    expect(result.props.atBound).toEqual('x'.repeat(1000))
+    expect(result.props.one).toEqual('x')
+    expect(result.props.many).toEqual(withheld(JSON.stringify(manyEntries()).length))
+  })
+
+  it('never names the payload root by its length, however long it is', () => {
+    const result = LogUtils.toSerializedConsoleProps({
+      first: 'x'.repeat(900),
+      second: 'y'.repeat(900),
+      third: manyEntries(),
+    })
+
+    // Collapsing the root would leave the caller with no payload to read at all.
+    expect(Object.keys(result)).toEqual(['first', 'second', 'third'])
+    expect(result.first).toEqual('x'.repeat(900))
+    expect(result.third).toEqual(withheld(JSON.stringify(manyEntries()).length))
+  })
+
+  it('measures a container after its own children were bounded, not before', () => {
+    // Two long strings, each named by its length, leave the object that holds
+    // them small — so it survives rather than collapsing on their raw size.
+    const result = LogUtils.toSerializedConsoleProps({
+      props: { pair: { left: 'x'.repeat(9000), right: 'y'.repeat(9000) } },
+    })
+
+    expect(result.props.pair).toEqual({ left: withheld(9000), right: withheld(9000) })
+  })
 })
 
 describe('Log#snapshot gating', () => {

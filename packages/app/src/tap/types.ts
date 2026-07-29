@@ -5,8 +5,12 @@ export interface TapTestsRunner {
   getAllTestsState (): Record<string, SerializedTest>
   /** Serializes one test by id lookup, skipping the whole-run serialization cost. */
   getTestState (testId: string): SerializedTest | undefined
-  /** Returns one command's console properties projected for the JSON-only tap transport. */
-  getSerializedConsolePropsForLog (testId: string, logId: string): ConsolePropsResult | undefined
+  /**
+   * Returns one command's console properties projected for the JSON-only tap
+   * transport. A value long enough to bury the rest of the payload is named by
+   * its length unless `fullReport` asks for every value in full.
+   */
+  getSerializedConsolePropsForLog (testId: string, logId: string, options?: { fullReport?: boolean }): ConsolePropsResult | undefined
   isRunComplete (): boolean
 }
 

@@ -696,9 +696,9 @@ describe('lib/exec/tap', () => {
                                           project-relative path
           tests [options] [test]          list the tests of the active run and their
                                           state, or detail one by id
-          commands [options]              list the command log entries of a test,
-                                          detail one by id, or show its console
-                                          properties with --props
+          commands [options]              list the command log entries of a test
+          command [options]               detail one command log entry of a test, or
+                                          show its console properties with --props
           pin [options] [test] [command]  pin a command’s DOM snapshot into the live
                                           app-under-test frame so the dom/aria/inspect
                                           commands can read it; pass --clear to release
