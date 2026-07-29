@@ -18,7 +18,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
     "eslint": "^9.31.0",
-    "jiti": "^2.4.2",
+    "jiti": "^2.7.0",
     "@vitejs/plugin-vue": "6.0.3",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",

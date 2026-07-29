@@ -78,7 +78,7 @@
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "resolutions": {
-    "jiti": "^2.4.2"
+    "jiti": "^2.7.0"
   },
   "publishConfig": {
     "access": "public"

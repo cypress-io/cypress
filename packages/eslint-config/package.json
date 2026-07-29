@@ -7,7 +7,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "jiti": "^2.4.2"
+    "jiti": "^2.7.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.0",

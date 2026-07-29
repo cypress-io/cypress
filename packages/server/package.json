@@ -176,7 +176,7 @@
     "eventsource": "2.0.2",
     "globals": "^15.12.0",
     "https-proxy-agent": "3.0.1",
-    "jiti": "^2.4.2",
+    "jiti": "^2.7.0",
     "mocha": "7.1.0",
     "mocha-banner": "1.1.2",
     "mock-fs": "5.4.0",

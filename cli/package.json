@@ -93,7 +93,7 @@
     "dtslint": "4.2.1",
     "eslint": "^9.31.0",
     "execa-wrap": "1.4.0",
-    "jiti": "^2.4.2",
+    "jiti": "^2.7.0",
     "mock-fs": "5.4.0",
     "nock": "13.2.9",
     "resolve-pkg": "2.0.0",
