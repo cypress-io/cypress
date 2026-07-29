@@ -97,8 +97,7 @@
     "vanilla-text-mask": "5.1.1",
     "vite": "^6.3.5",
     "vitest": "^3.2.4",
-    "webpack": "^5.88.2",
-    "zone.js": "0.15.1"
+    "webpack": "^5.88.2"
   },
   "files": [
     "patches"

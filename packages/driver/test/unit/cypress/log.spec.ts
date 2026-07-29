@@ -67,6 +67,56 @@ describe('LogUtils.reduceMemory', () => {
   })
 })
 
+describe('LogUtils.toSerializedJSON', () => {
+  // Reproduces the shape zone.js gives a patched XMLHttpRequest: task
+  // properties that reference the request back (cycles) and getters that
+  // throw when read. Serializing one used to recurse until the call stack
+  // blew out (cypress-io/cypress#741); toSerializedJSON must clone the
+  // cycles away and swallow throwing props so the result crosses the wire.
+  const buildZonePatchedXhr = () => {
+    const xhr: Record<string, any> = {
+      readyState: 4,
+      status: 200,
+      responseType: '',
+    }
+
+    const zoneTask: Record<string, any> = {
+      type: 'macroTask',
+      source: 'XMLHttpRequest.send',
+      zone: { name: 'ProxyZone' },
+      callback () {},
+    }
+
+    zoneTask.data = { target: xhr, args: [] }
+    xhr.__zone_symbol__xhrTask = zoneTask
+    xhr.__zone_symbol__xhrSync = xhr
+
+    Object.defineProperty(xhr, '__zone_symbol__ONERROR', {
+      enumerable: true,
+      get () {
+        throw new Error('property is not accessible')
+      },
+    })
+
+    return xhr
+  }
+
+  it('serializes a zone.js-patched XHR without blowing out the call stack', () => {
+    const xhr = buildZonePatchedXhr()
+
+    let serialized: any
+
+    expect(() => {
+      serialized = LogUtils.toSerializedJSON(xhr)
+    }).not.toThrow()
+
+    // the cycles must be gone so the payload can be sent as JSON
+    expect(() => JSON.stringify(serialized)).not.toThrow()
+    expect(serialized.readyState).toBe(4)
+    expect(serialized.status).toBe(200)
+  })
+})
+
 describe('Log#snapshot gating', () => {
   afterEach(() => {
     delete (globalThis as any).Cypress
