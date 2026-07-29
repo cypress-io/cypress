@@ -500,10 +500,6 @@ const suitePathOf = (test: SerializedTest): string[] => {
   return Array.isArray(test._titlePath) ? test._titlePath.slice(0, -1) : []
 }
 
-const isPathPrefix = (prefix: string[], path: string[]): boolean => {
-  return prefix.every((title, index) => path[index] === title)
-}
-
 // The driver stores no run end time (the reporter freezes its own clock), so a
 // completed run's wall clock ends at the last test's recorded end.
 const testEndMs = (test: SerializedTest): number | undefined => {
@@ -559,33 +555,31 @@ const serializeSpecTest = (test: SerializedTest, runComplete: boolean): TapRepor
 
 /**
  * The spec-level overview the app reporter shows above any single test: the
- * header stats and the suite tree. The driver does not retain its normalized
- * runnables tree, so the tree is rebuilt from the flat test list via each
- * test's `_titlePath`; the flat list is in document order, so a stack of open
- * suites reproduces the nesting. Direct tests precede nested suites within a
- * node, matching the reporter's child ordering.
+ * header stats, the root-level tests, and one flattened suite section per
+ * suite path with direct tests — nesting lives in the joined title, matching
+ * how the CLI displays the sections. Each test's `_titlePath` names its suite
+ * path; the flat test list is in document order, so grouping by first
+ * appearance reproduces the reporter's section order.
  */
 export const serializeReporterSpecView = (runner: TapTestsRunner, spec: string | undefined): TapReporterSpecView => {
   const tests = Object.values(runner.getAllTestsState())
   const runComplete = runner.isRunComplete()
-  const root: TapReporterSuite = { title: '', tests: [], suites: [] }
-  const stack: Array<{ path: string[], node: TapReporterSuite }> = [{ path: [], node: root }]
+  const rootTests: TapReporterSpecTest[] = []
+  const suites = new Map<string, TapReporterSuite>()
 
   for (const test of tests) {
     const path = suitePathOf(test)
 
-    while (stack.length > 1 && !isPathPrefix(stack[stack.length - 1].path, path)) {
-      stack.pop()
+    if (!path.length) {
+      rootTests.push(serializeSpecTest(test, runComplete))
+      continue
     }
 
-    for (let depth = stack[stack.length - 1].path.length; depth < path.length; depth++) {
-      const node: TapReporterSuite = { title: path[depth], tests: [], suites: [] }
+    const title = path.join(' > ')
+    const suite = suites.get(title) ?? { title, tests: [] }
 
-      stack[stack.length - 1].node.suites.push(node)
-      stack.push({ path: path.slice(0, depth + 1), node })
-    }
-
-    stack[stack.length - 1].node.tests.push(serializeSpecTest(test, runComplete))
+    suites.set(title, suite)
+    suite.tests.push(serializeSpecTest(test, runComplete))
   }
 
   const { results } = aggregateResults(runner)
@@ -593,7 +587,7 @@ export const serializeReporterSpecView = (runner: TapTestsRunner, spec: string |
   return omitNullish({
     spec,
     stats: omitNullish({ ...results, duration: runDuration(runner, tests) }),
-    tests: root.tests,
-    suites: root.suites,
+    tests: rootTests,
+    suites: [...suites.values()],
   })
 }

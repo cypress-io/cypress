@@ -108,7 +108,7 @@ const commandsMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and the suite tree',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and every suite’s tests',
   details: `Shows test results the way the Cypress app's reporter panel does, right in
 your terminal. Pass --test <id> (ids come from the tests command) to see one
 test's full story: its network routes, the hooks that ran, the complete
@@ -116,7 +116,7 @@ command log, and the failure output when something went wrong. Add --attempt
 to view an earlier retry.
 
 Leave --test off to get the spec-level overview instead: the run's pass/fail
-stats and the whole suite tree at a glance.`,
+stats and every suite's tests at a glance.`,
   params: [],
   options: [
     { ...testIdField, required: false },

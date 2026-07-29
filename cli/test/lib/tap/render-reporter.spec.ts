@@ -171,7 +171,7 @@ describe('lib/tap/render/reporter spec overview', () => {
 
   const emptyStats = { passed: 0, failed: 0, pending: 0, skipped: 0 }
 
-  it('renders the spec header, stats, and the suite tree with per-state icons', () => {
+  it('renders the spec header, stats, and the suite sections with per-state icons', () => {
     const view: TapReporterSpecView = {
       spec: 'cypress/e2e/actions.cy.js',
       stats: { passed: 2, failed: 1, pending: 1, skipped: 1, duration: 17400 },
@@ -183,26 +183,23 @@ describe('lib/tap/render/reporter spec overview', () => {
             { id: 't2', title: 'a1', state: 'passed', duration: 10 },
             { id: 't4', title: 'a2', state: 'pending' },
           ],
-          suites: [
-            {
-              title: 'B',
-              tests: [{
-                id: 't3',
-                title: 'b1',
-                state: 'failed',
-                duration: 30,
-                retries: 2,
-                attempts: [
-                  { attempt: 1, state: 'failed', duration: 4476 },
-                  { attempt: 2, state: 'failed', duration: 4400 },
-                  { attempt: 3, state: 'failed', duration: 30 },
-                ],
-              }],
-              suites: [],
-            },
-          ],
         },
-        { title: 'C', tests: [{ id: 't5', title: 'c1', state: 'skipped' }], suites: [] },
+        {
+          title: 'A > B',
+          tests: [{
+            id: 't3',
+            title: 'b1',
+            state: 'failed',
+            duration: 30,
+            retries: 2,
+            attempts: [
+              { attempt: 1, state: 'failed', duration: 4476 },
+              { attempt: 2, state: 'failed', duration: 4400 },
+              { attempt: 3, state: 'failed', duration: 30 },
+            ],
+          }],
+        },
+        { title: 'C', tests: [{ id: 't5', title: 'c1', state: 'skipped' }] },
       ],
     }
 

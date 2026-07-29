@@ -185,13 +185,15 @@ export interface TapReporterSpecTest {
 }
 
 /**
- * One suite of the spec overview's tree. Direct tests render before nested
- * suites, the way the app reporter orders a suite's children.
+ * One suite section of the spec overview, flattened the way the CLI displays
+ * it: nesting is expressed in the joined title, not by recursion, and a suite
+ * whose tests all live in deeper suites gets no entry of its own.
  */
 export interface TapReporterSuite {
+  /** The full suite path, joined with ` > `, e.g. `A > B`. */
   title: string
+  /** The suite's direct tests, in document order. */
   tests: TapReporterSpecTest[]
-  suites: TapReporterSuite[]
 }
 
 /**
@@ -209,8 +211,8 @@ export interface TapReporterStats {
 
 /**
  * The `reporter` command's result when no test is given: the spec-level
- * overview the app reporter shows — header stats and the suite tree.
- * `tests` and `suites` are the root-level runnables.
+ * overview the app reporter shows — header stats, the root-level tests, and
+ * one flattened section per suite with direct tests, in document order.
  */
 export interface TapReporterSpecView {
   /** Project-relative spec path; absent only if the active spec can't be read. */

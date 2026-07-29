@@ -1038,7 +1038,7 @@ describe('lib/exec/tap', () => {
           reporter [options]              render a test’s full reporter view — its
                                           routes, hooks, and command log — or, without
                                           --test, the spec-level overview: run stats
-                                          and the suite tree
+                                          and every suite’s tests
           pin [options] [test] [command]  pin a command’s DOM snapshot into the live
                                           app-under-test frame so the dom/aria/inspect
                                           commands can read it; pass --clear to release

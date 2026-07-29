@@ -252,8 +252,8 @@ describe('tap/commands/reporter', () => {
   })
 
   describe('without a test id (spec overview)', () => {
-    // Document order exercising the tree rebuild: a root-level test, a return
-    // to suite A after nested B closes, and an unreached test in C.
+    // Document order exercising the suite flattening: a root-level test, a
+    // return to suite A after nested B closes, and an unreached test in C.
     const TREE_STATE = {
       t1: { id: 't1', title: 'root test', _titlePath: ['root test'], state: 'passed', duration: 20 },
       t2: { id: 't2', title: 'a1', _titlePath: ['A', 'a1'], state: 'passed', duration: 10 },
@@ -279,7 +279,7 @@ describe('tap/commands/reporter', () => {
       }
     }
 
-    it('returns the spec overview mid-run: stats, the suite tree, and unreached tests as pending', async () => {
+    it('returns the spec overview mid-run: stats, the flattened suites, and unreached tests as pending', async () => {
       stubRunner(treeRunner())
       stubSpec('cypress/e2e/actions.cy.js')
 
@@ -299,29 +299,25 @@ describe('tap/commands/reporter', () => {
                 { id: 't2', title: 'a1', state: 'passed', duration: 10 },
                 { id: 't4', title: 'a2', state: 'pending' },
               ],
-              suites: [
-                {
-                  title: 'B',
-                  tests: [{
-                    id: 't3',
-                    title: 'b1',
-                    state: 'failed',
-                    duration: 30,
-                    retries: 2,
-                    attempts: [
-                      { attempt: 1, state: 'failed', duration: 12 },
-                      { attempt: 2, state: 'failed', duration: 18 },
-                      { attempt: 3, state: 'failed', duration: 30 },
-                    ],
-                  }],
-                  suites: [],
-                },
-              ],
+            },
+            {
+              title: 'A > B',
+              tests: [{
+                id: 't3',
+                title: 'b1',
+                state: 'failed',
+                duration: 30,
+                retries: 2,
+                attempts: [
+                  { attempt: 1, state: 'failed', duration: 12 },
+                  { attempt: 2, state: 'failed', duration: 18 },
+                  { attempt: 3, state: 'failed', duration: 30 },
+                ],
+              }],
             },
             {
               title: 'C',
               tests: [{ id: 't5', title: 'c1', state: 'pending' }],
-              suites: [],
             },
           ],
         },
@@ -338,7 +334,7 @@ describe('tap/commands/reporter', () => {
       const { stats, suites } = (outcome as { result: { stats: unknown, suites: Array<{ tests: Array<{ state: string }> }> } }).result
 
       expect(stats).to.deep.eq({ passed: 2, failed: 1, pending: 1, skipped: 1 })
-      expect(suites[1].tests[0].state).to.eq('skipped')
+      expect(suites[2].tests[0].state).to.eq('skipped')
     })
 
     it('measures a running spec’s duration from the run start to now', async () => {

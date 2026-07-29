@@ -395,17 +395,10 @@ const renderSpecTests = (tests: TapReporterSpecTest[], indent: string): string[]
 
 // The app reporter renders each suite as its own section headed by the full
 // suite path — depth shows in the breadcrumb, not in indentation — styled here
-// like the single-test view's hook section titles. A suite whose tests all
-// live in child suites gets no section of its own.
-const specSuiteSections = (suites: TapReporterSuite[], path: string[]): string[][] => {
-  return suites.flatMap((suite) => {
-    const fullPath = [...path, suite.title]
-    const section = suite.tests.length
-      ? [[chalk.dim(fullPath.join(' > ').toUpperCase()), ...renderSpecTests(suite.tests, '  ')]]
-      : []
-
-    return [...section, ...specSuiteSections(suite.suites, fullPath)]
-  })
+// like the single-test view's hook section titles. The wire shape is already
+// flattened that way: one entry per suite with direct tests, title pre-joined.
+const specSuiteSections = (suites: TapReporterSuite[]): string[][] => {
+  return suites.map((suite) => [chalk.dim(suite.title.toUpperCase()), ...renderSpecTests(suite.tests, '  ')])
 }
 
 export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {
@@ -416,7 +409,7 @@ export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {
 
   const sections = [
     ...(view.tests.length ? [renderSpecTests(view.tests, '  ')] : []),
-    ...specSuiteSections(view.suites, []),
+    ...specSuiteSections(view.suites),
   ]
 
   const blocks: string[][] = [
