@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import stripAnsi from 'strip-ansi'
 
 import { renderReporterHuman } from '../../../lib/tap/render/reporter'
 import type { TapReporterView } from '@packages/cypress-instances'
 
 // chalk's color level depends on where the suite runs, so strip any escape
 // codes before snapshotting — the assertions target the layout, not the colors.
-// eslint-disable-next-line no-control-regex
-const stripAnsi = (text: string): string => text.replace(/\[\d+m/g, '')
-
 const renderPlain = (input: TapReporterView): string => stripAnsi(renderReporterHuman(input))
 
 // Modeled on a real `reporter` result for the kitchensink network_requests

@@ -93,6 +93,21 @@ describe('tap/commands/reporter', () => {
         },
       },
     },
+    // Ran the full hook lifecycle: the driver records each hook under its name
+    // in `timings` in run order, so the test body belongs between the `before`
+    // and `after` hooks.
+    r5: {
+      id: 'r5',
+      title: 'full lifecycle',
+      state: 'passed',
+      timings: {
+        'before all': [{ hookId: 'h-ba', fnDuration: 3, afterFnDuration: 1 }],
+        'before each': [{ hookId: 'h-be', fnDuration: 3, afterFnDuration: 1 }],
+        test: { fnDuration: 20, afterFnDuration: 1 },
+        'after each': [{ hookId: 'h-ae', fnDuration: 3, afterFnDuration: 1 }],
+        'after all': [{ hookId: 'h-aa', fnDuration: 3, afterFnDuration: 1 }],
+      },
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -212,5 +227,19 @@ describe('tap/commands/reporter', () => {
         commands: [],
       },
     })
+  })
+
+  it('orders the synthesized test body between the before and after hooks', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r5' })
+
+    expect((outcome as { result: { hooks: unknown } }).result.hooks).to.deep.eq([
+      { hookId: 'h-ba', hookName: 'before all' },
+      { hookId: 'h-be', hookName: 'before each' },
+      { hookId: 'r5', hookName: 'test body' },
+      { hookId: 'h-ae', hookName: 'after each' },
+      { hookId: 'h-aa', hookName: 'after all' },
+    ])
   })
 })

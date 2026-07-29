@@ -406,11 +406,18 @@ const attemptHooks = (attempt: SerializedTest): TapReporterView['hooks'] => {
 }
 
 const serializeReporterHooks = (test: SerializedTest, attempt: SerializedTest): TapReporterView['hooks'] => {
+  const hooks = attemptHooks(attempt)
+  // The test body runs after the `before` hooks and before the `after` hooks,
+  // so splice it into that slot to keep `hooks` in run order. The test's own
+  // commands carry its id as their hookId; the reporter synthesizes this same
+  // pseudo-hook to render them as the "test body".
+  const firstAfter = hooks.findIndex(({ hookName }) => hookName.startsWith('after'))
+  const at = firstAfter === -1 ? hooks.length : firstAfter
+
   return [
-    ...attemptHooks(attempt),
-    // The test's own commands carry its id as their hookId; the reporter
-    // synthesizes this same pseudo-hook to render them as the "test body".
+    ...hooks.slice(0, at),
     { hookId: test.id, hookName: 'test body' },
+    ...hooks.slice(at),
   ]
 }
 
