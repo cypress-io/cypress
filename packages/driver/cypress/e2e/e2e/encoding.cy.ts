@@ -171,9 +171,19 @@ describe('encoding', () => {
       // The request will be successful but since the content-encoding is br,
       // the browser will fail to decode
       cy.wait('@brJs').then((interception) => {
-        expect(interception.response?.statusCode).to.eq(200)
-        expect(interception.response?.headers?.['content-encoding']).to.eq('br')
-        expect(interception.request.headers['accept-encoding']).to.eq('gzip, deflate')
+        if (Cypress.expose('PROXY_DISABLED')) {
+          // NOTE: documented MITM → CDP behavior drift: the netstack rejects
+          // this br response before CDP emits any metadata-bearing event (no
+          // responseReceived / responseReceivedExtraInfo), so cy.intercept
+          // cannot observe a response for netstack-rejected loads. Only the
+          // request phase is captured.
+          expect(interception.request).to.exist
+          expect(interception.response).to.be.undefined
+        } else {
+          expect(interception.response?.statusCode).to.eq(200)
+          expect(interception.response?.headers?.['content-encoding']).to.eq('br')
+          expect(interception.request.headers['accept-encoding']).to.eq('gzip, deflate')
+        }
       })
 
       // Assert that the encoding-js element is still gzip since br failed to decode
