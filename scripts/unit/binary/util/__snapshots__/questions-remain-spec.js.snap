@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`questions-remain > asks questions for missing options 1`] = `
+{
+  "bar": "bar user answer",
+  "foo": "foo is specified",
+}
+`;
+
+exports[`questions-remain > returns object if all questions have been answered 1`] = `
+{
+  "bar": "so is bar",
+  "foo": "foo is specified",
+}
+`;

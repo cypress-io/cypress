@@ -3,7 +3,7 @@ const la = require('lazy-ass')
 /* eslint-env mocha */
 describe('s3-api', () => {
   context('hasOnlyStringValues', () => {
-    const { hasOnlyStringValues } = require('../../binary/s3-api')
+    const { hasOnlyStringValues } = require('../../binary/s3-api.ts')
 
     it('returns true if object has only string values', () => {
       const o = {

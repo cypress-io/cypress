@@ -7,7 +7,7 @@ const _ = require('lodash')
 
 const upload = require('./upload')
 const uploadUtils = require('./util/upload')
-const { s3helpers } = require('./s3-api')
+const { s3helpers } = require('./s3-api.ts')
 
 const uploadTypes = uploadUtils.S3Configuration.betaUploadTypes
 
@@ -135,6 +135,6 @@ module.exports = {
   uploadArtifactToS3,
 }
 
-if (!module.parent) {
+if (require.main === module) {
   uploadArtifactToS3(process.argv)
 }

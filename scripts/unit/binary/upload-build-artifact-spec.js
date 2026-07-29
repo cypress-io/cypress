@@ -11,7 +11,7 @@ const {
 } = require('../../binary/upload-build-artifact')
 const upload = require('../../binary/upload')
 const uploadUtils = require('../../binary/util/upload')
-const { s3helpers } = require('../../binary/s3-api')
+const { s3helpers } = require('../../binary/s3-api.ts')
 
 /* eslint-env mocha */
 describe('upload-release-artifact', () => {

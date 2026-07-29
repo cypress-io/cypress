@@ -1,7 +1,10 @@
-const debug = require('debug')('cypress:binary')
+import debugLib from 'debug'
 import la from 'lazy-ass'
 import is from 'check-more-types'
-import { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL, S3 } from '@aws-sdk/client-s3'
+import { S3 } from '@aws-sdk/client-s3'
+import type { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL } from '@aws-sdk/client-s3'
+
+const debug = debugLib('cypress:binary')
 
 export const hasOnlyStringValues = (o) => {
   return Object.values(o).every((v) => is.unemptyString(v))

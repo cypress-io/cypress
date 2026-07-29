@@ -1,7 +1,6 @@
 /* global sinon */
 const questionsRemain = require('../../../binary/util/questions-remain')
 const la = require('lazy-ass')
-const snapshot = require('snap-shot-it')
 
 describe('questions-remain', () => {
   const dontAsk = () => {

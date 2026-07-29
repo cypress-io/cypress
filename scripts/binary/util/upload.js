@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
 const _ = require('lodash')
 
-const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
+const { purgeCloudflareCache } = require('./purge-cloudflare-cache.ts')
 
 const CDN_URL = 'https://cdn.cypress.io'
 

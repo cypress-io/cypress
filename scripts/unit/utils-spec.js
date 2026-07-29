@@ -1,5 +1,3 @@
-const snapshot = require('snap-shot-it')
-
 /* eslint-env mocha */
 describe('getJustVersion', () => {
   const { getJustVersion } = require('../utils')

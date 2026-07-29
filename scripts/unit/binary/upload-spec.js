@@ -1,6 +1,5 @@
 require('../../spec-helper')
 
-const snapshot = require('snap-shot-it')
 const la = require('lazy-ass')
 
 /* eslint-env mocha */

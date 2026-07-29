@@ -4,7 +4,6 @@ const _ = require('lodash')
 const path = require('path')
 const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
-const _snapshot = require('snap-shot-it')
 const chai = require('chai')
 const debug = require('debug')('test')
 
@@ -12,7 +11,7 @@ chai.use(require('chai-as-promised'))
 
 const { expect } = chai
 
-const packages = require('../../../binary/util/packages')
+const packages = require('../../../binary/util/packages.ts')
 const { transformRequires, rewritePackageNames } = require('../../../binary/util/transform-requires')
 const { testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
 
@@ -20,10 +19,12 @@ global.beforeEach(() => {
   mockfs.restore()
 })
 
+// mockfs must be torn down before snapshotting so Vitest can read/write its
+// own snapshot files from the real filesystem.
 const snapshot = (...args) => {
   mockfs.restore()
 
-  return _snapshot(...args)
+  return globalThis.snapshot(...args)
 }
 
 describe('packages', () => {

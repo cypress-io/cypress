@@ -1,0 +1,127 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`packages > can copy files from package.json 1`] = `
+{
+  "[cwd]": {
+    "packages": {
+      "coffee": {
+        "lib": {
+          "foo.js": "{}",
+        },
+        "package.json": "{"main":"src/main.js", "name": "foo", "files": ["lib"]}",
+        "src": {
+          "main.js": "console.log()",
+        },
+      },
+    },
+  },
+  "tmp": {
+    "packages": {
+      "coffee": {
+        "lib": {
+          "foo.js": "{}",
+        },
+        "package.json": "{
+  "main": "src/main.js",
+  "name": "foo",
+  "files": [
+    "lib"
+  ]
+}
+",
+        "src": {
+          "main.js": "console.log()",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`transformRequires > can find and replace symlink requires 1`] = `
+{
+  "[cwd]": {
+    "build": {
+      "linux": {
+        "Cypress": {
+          "resources": {
+            "app": {
+              "packages": {
+                "bar": {
+                  "dist": {
+                    "no-search.js": "",
+                  },
+                  "lib": {
+                    "foo.js": "require("../../foo/lib/somefoo")",
+                  },
+                  "node_modules": {
+                    "no-search.js": "",
+                  },
+                  "package.json": "{"main":"src/main.js", "name": "foo", "files": ["lib"]}",
+                  "src": {
+                    "main.js": "console.log()",
+                  },
+                },
+                "foo": {
+                  "lib": {
+                    "foo.js": "require("../../bar/src/main")",
+                  },
+                  "package.json": "{"main":"src/main.js", "name": "foo", "files": ["lib"]}",
+                  "src": {
+                    "main.js": "console.log()",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "tmp": {},
+}
+`;
+
+exports[`transformRequires > can find and replace symlink requires on win32 1`] = `
+{
+  "[cwd]": {
+    "build": {
+      "linux": {
+        "Cypress": {
+          "resources": {
+            "app": {
+              "packages": {
+                "bar": {
+                  "dist": {
+                    "no-search.js": "",
+                  },
+                  "lib": {
+                    "foo.js": "require("../../foo/lib/somefoo")",
+                  },
+                  "node_modules": {
+                    "no-search.js": "",
+                  },
+                  "package.json": "{"main":"src/main.js", "name": "foo", "files": ["lib"]}",
+                  "src": {
+                    "main.js": "console.log()",
+                  },
+                },
+                "foo": {
+                  "lib": {
+                    "foo.js": "require("../../bar/src/main")",
+                  },
+                  "package.json": "{"main":"src/main.js", "name": "foo", "files": ["lib"]}",
+                  "src": {
+                    "main.js": "console.log()",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "tmp": {},
+}
+`;
