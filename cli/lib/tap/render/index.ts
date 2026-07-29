@@ -1,5 +1,7 @@
 import type { TapCommandName, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import type { TapRunResult } from '../commands/run'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
+import { renderRunHuman } from './run'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
@@ -21,6 +23,7 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
       return 'stats' in view ? renderReporterSpecHuman(view) : renderReporterHuman(view)
     },
   },
+  run: { renderHuman: (result) => renderRunHuman(result as TapRunResult) },
 }
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {
