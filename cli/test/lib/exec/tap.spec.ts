@@ -189,6 +189,8 @@ describe('lib/exec/tap', () => {
     const reporterView = {
       test: { id: 'r2', title: 'loads', fullTitle: 'App > loads', state: 'passed' },
       hooks: [{ hookId: 'r2', hookName: 'test body' }],
+      sessions: [],
+      agents: [],
       routes: [],
       commands: [{ id: 'log-1', name: 'visit', message: '/', state: 'passed', type: 'parent', hookId: 'r2' }],
     }
