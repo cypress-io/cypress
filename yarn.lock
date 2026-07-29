@@ -13164,10 +13164,10 @@ chownr@^3.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-3.0.0.tgz#9855e64ecd240a9cc4267ce8a4aa5d24a1da15e4"
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
-chrome-har-capturer@0.14.2:
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/chrome-har-capturer/-/chrome-har-capturer-0.14.2.tgz#b52c832becf8c1f6efb8e4b247d231318d2b9f41"
-  integrity sha512-0Qja9JLmG14hr/+8SvS/TZLcEdE2YmLHfrWas/g73aRnP/ulBeZW+YPfCQRHEU+bjXv1WBuGVcAK9qFOVJAt5A==
+chrome-har-capturer@0.14.4:
+  version "0.14.4"
+  resolved "https://registry.yarnpkg.com/chrome-har-capturer/-/chrome-har-capturer-0.14.4.tgz#cade9a1946886b86ce196f182f2ecd7eecb7f76f"
+  integrity sha512-esK1XQIN9S0499IsmMYarWdWyMCRBorJfq07nZY8VpS0YCH4FcOP4LuJO+VEkKX0UN8ITr5C4W6jyme5O2OqZA==
   dependencies:
     chalk "1.x.x"
     chrome-remote-interface "^0.31.2"

@@ -169,7 +169,7 @@
     "chai-as-promised": "7.1.2",
     "chai-subset": "1.6.0",
     "chai-uuid": "1.0.6",
-    "chrome-har-capturer": "0.14.2",
+    "chrome-har-capturer": "0.14.4",
     "devtools-protocol": "0.0.1575685",
     "esbuild": "^0.28.1",
     "eslint": "^9.31.0",
