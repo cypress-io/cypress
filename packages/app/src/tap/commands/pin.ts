@@ -20,6 +20,10 @@ export interface ClearResult {
 interface PinnedState {
   test: string
   command: string
+  // The attempt the command id was resolved against — part of the pin's
+  // identity, since per-attempt ids restart from 1 and the same number names
+  // a different command on another attempt.
+  attempt: number | undefined
   // The driver's log id behind the tap command id — what the runner's
   // snapshot APIs key on.
   logId: string
@@ -145,7 +149,7 @@ const clearPin = (): ClearResult => {
   return { cleared: true }
 }
 
-export const pinCommand = defineCommand('pin', async ({ test, command }, { at, clear }): Promise<PinResult | ClearResult> => {
+export const pinCommand = defineCommand('pin', async ({ test, command }, { at, clear, attempt }): Promise<PinResult | ClearResult> => {
   const runner = tapManagerDataSource.getSnapshotRunner()
 
   if (runner) {
@@ -174,11 +178,11 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
     throw new TapCommandError('RUN_IN_PROGRESS', 'a spec is currently running — wait for it to finish before pinning a snapshot')
   }
 
-  if (pinned && pinned.test === test && pinned.command === command) {
+  if (pinned && pinned.test === test && pinned.command === command && pinned.attempt === attempt) {
     return movePin(runner, at)
   }
 
-  const selection = selectTestAttempt(runner, test)
+  const selection = selectTestAttempt(runner, test, attempt)
 
   if ('error' in selection) {
     throw attemptSelectionError(selection, test)
@@ -215,7 +219,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
 
   const at_ = toRef(snapshots[index], index)
 
-  pinned = { test, command, logId, at: at_, original, snapshot: snapshots[index] }
+  pinned = { test, command, attempt, logId, at: at_, original, snapshot: snapshots[index] }
 
   return {
     pinned: { test, command, at: at_ },

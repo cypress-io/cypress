@@ -121,6 +121,7 @@ const pinMeta = {
     { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
   ],
   options: [
+    attemptField,
     { name: 'at', type: 'string', required: false, description: 'which snapshot to pin: a name like "before"/"after" or a 1-based index; defaults to the last (the command’s final state). Re-run on the pinned command to switch snapshots without releasing the pin' },
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },
   ],

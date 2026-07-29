@@ -486,4 +486,66 @@ describe('tap/commands/pin', () => {
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('SNAPSHOT_UNAVAILABLE')
   })
+
+  // Per-attempt ids restart from 1, so command `1` names a different log on each
+  // attempt; --attempt must pick the right one (defaulting to the latest) rather
+  // than always resolving against the latest and pinning the wrong snapshot.
+  const RETRIED_STATE = {
+    r6: {
+      id: 'r6',
+      title: 'flakes then passes',
+      state: 'passed',
+      prevAttempts: [
+        { id: 'r6', state: 'failed', commands: [{ id: 'log-a1', name: 'get', message: '#first-try', state: 'failed', type: 'parent', hookId: 'r6' }] },
+      ],
+      commands: [{ id: 'log-a2', name: 'get', message: '#retry', state: 'passed', type: 'parent', hookId: 'r6' }],
+    },
+  }
+
+  const stubRetriedSource = () => {
+    return stubSource({ runner: {
+      getTestState: (id: string) => RETRIED_STATE[id as keyof typeof RETRIED_STATE],
+      getSnapshotPropsForLog: () => SNAPSHOT_PROPS,
+    } })
+  }
+
+  it('resolves command ids against the latest attempt by default', async () => {
+    const { pinSnapshot } = stubRetriedSource()
+
+    await new TapManager(CYPRESS_VERSION).exec('pin', { test: 'r6', command: '1' })
+
+    expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r6', 'log-a2')
+  })
+
+  it('resolves command ids against the attempt named by --attempt', async () => {
+    const { pinSnapshot } = stubRetriedSource()
+
+    await new TapManager(CYPRESS_VERSION).exec('pin', { test: 'r6', command: '1' }, { attempt: '1' })
+
+    expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r6', 'log-a1')
+  })
+
+  it('fails with ATTEMPT_NOT_FOUND when --attempt is out of range', async () => {
+    const { pinSnapshot } = stubRetriedSource()
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', { test: 'r6', command: '1' }, { attempt: '5' })
+
+    expect((outcome as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+    expect(pinSnapshot).not.to.have.been.called
+  })
+
+  it('re-pinning the same command id on a different attempt starts a fresh pin, not a move', async () => {
+    const { pinSnapshot, changeSnapshotState, detachDom } = stubRetriedSource()
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('pin', { test: 'r6', command: '1' }, { attempt: '1' })
+    await manager.exec('pin', { test: 'r6', command: '1' }, { attempt: '2' })
+
+    expect(detachDom).to.have.been.calledOnce
+    expect(changeSnapshotState).not.to.have.been.called
+    expect(pinSnapshot).to.have.been.calledTwice
+    expect(pinSnapshot.firstCall.args[3]).to.eq('log-a1')
+    expect(pinSnapshot.secondCall.args[3]).to.eq('log-a2')
+  })
 })
