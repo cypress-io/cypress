@@ -176,7 +176,7 @@
     "mock-fs": "5.4.0",
     "npm-packlist": "9.0.0",
     "p-defer": "^3.0.0",
-    "patch-package": "8.0.0",
+    "patch-package": "8.0.1",
     "playwright-webkit": "1.61.0",
     "pluralize": "8.0.0",
     "proxyquire": "2.1.3",
