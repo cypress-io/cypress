@@ -23,6 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { isProxyDisabled } from './util/is-proxy-disabled'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -335,10 +336,15 @@ export const createCommonRoutes = ({
     })
   }
 
-  // MITM catch-all: only when the proxy is enabled. CDP Fetch owns browser
-  // traffic when disabled; registering this after createCdpFetchNetworkRuntime
-  // would incorrectly send Express fall-through through createFetchOrigin.
-  if (!isProxyDisabled() && (getNetworkProxy || networkProxy)) {
+  // CDP Fetch owns browser traffic when the MITM proxy is disabled — Express
+  // fall-through must not reach createFetchOrigin. The one legitimate
+  // proxy-form client left is our own resolve:url loopback (intercept-matched
+  // cy.visit), which authenticates with the per-process loopback token.
+  const isTrustedResolveUrlLoopback = (headers: Request['headers']) => {
+    return headers['x-cypress-resolving-url'] === '1' && isTrustedInternalLoopback(headers)
+  }
+
+  if (getNetworkProxy || networkProxy) {
     router.all('*', async (req, res) => {
       const proxy = resolveNetworkProxy()
 
@@ -348,6 +354,15 @@ export const createCommonRoutes = ({
         return
       }
 
+      if (isProxyDisabled() && !isTrustedResolveUrlLoopback(req.headers)) {
+        res.sendStatus(404)
+
+        return
+      }
+
+      // The token authenticated this hop; never let it travel further.
+      delete req.headers[CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]
+
       await proxy.handleHttpRequest(req, res)
     })
   }
@@ -356,7 +371,7 @@ export const createCommonRoutes = ({
   // during routing just log them out to
   // the console and send 500 status
   // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
+  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)

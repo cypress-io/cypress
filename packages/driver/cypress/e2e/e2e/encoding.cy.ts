@@ -18,7 +18,15 @@ function waitAndAssertInterceptions (alias: string, contentEncoding: string) {
   cy.wait([`@${alias}`, `@${alias}`, `@${alias}`]).then((interceptions) => {
     interceptions.forEach((interception) => {
       expect(interception.response?.statusCode).to.eq(200)
-      expect(interception.response?.headers?.['content-encoding']).to.eq(contentEncoding)
+
+      // NOTE: documented MITM → CDP behavior drift: with the proxy disabled,
+      // cy.intercept reports the decoded view (identity body, no
+      // content-encoding header). MITM reports a decoded body while keeping
+      // the wire content-encoding header — a lie the CDP pipeline does not
+      // reproduce.
+      if (!Cypress.expose('PROXY_DISABLED')) {
+        expect(interception.response?.headers?.['content-encoding']).to.eq(contentEncoding)
+      }
     })
   })
 }

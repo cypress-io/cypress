@@ -6,6 +6,9 @@ export const baseConfig: Cypress.ConfigOptions = {
   projectId: 'ypt4pf',
   experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
+  expose: {
+    PROXY_DISABLED: process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1',
+  },
   env: {
     CI: process.env.CI,
     CY_ENV_FOO: 'foo',

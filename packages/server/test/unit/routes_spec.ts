@@ -8,6 +8,7 @@ import proxyquire from 'proxyquire'
 import { Cfg } from '../../lib/project-base'
 import '../spec_helper'
 import { getCtx } from '@packages/data-context'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -361,6 +362,125 @@ describe('lib/routes', () => {
       }, res)
 
       expect(appHtml).to.have.been.calledWith(false)
+    })
+  })
+
+  describe('proxy-form catch-all guard', () => {
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      sinon.restore()
+    })
+
+    function getCatchAllHandler () {
+      const router = {
+        get: sinon.stub(),
+        post: sinon.stub(),
+        all: sinon.stub(),
+        use: sinon.spy(),
+      }
+      const Router = sinon.stub().returns(router)
+      const { createCommonRoutes } = proxyquire('../../lib/routes', {
+        'express': { Router },
+      })
+      const handleHttpRequest = sinon.stub()
+
+      createCommonRoutes({
+        config: {
+          clientRoute: '/__/',
+          namespace: '__cypress',
+        } as Cfg,
+        getSpec: sinon.stub().returns({}),
+        // @ts-expect-error
+        networkProxy: {
+          handleHttpRequest,
+        } as NetworkProxy,
+        nodeProxy: {} as HttpProxy,
+        onError: () => {},
+        // @ts-expect-error
+        remoteStates: {
+          hasPrimary: sinon.stub().returns(false),
+        } as RemoteStates,
+        testingType: 'e2e',
+      })
+
+      const catchAll = router.all.args.find((args) => args[0] === '*')
+
+      return { handler: catchAll?.[1], handleHttpRequest }
+    }
+
+    function makeRes () {
+      return { sendStatus: sinon.stub() }
+    }
+
+    it('forwards every proxy-form request when the HTTP proxy is enabled', async () => {
+      const { handler, handleHttpRequest } = getCatchAllHandler()
+      const res = makeRes()
+      const req = { headers: {} }
+
+      await handler(req, res)
+
+      expect(handleHttpRequest).to.have.been.calledWith(req, res)
+      expect(res.sendStatus).not.to.have.been.called
+    })
+
+    it('404s fall-through requests when the HTTP proxy is disabled', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const { handler, handleHttpRequest } = getCatchAllHandler()
+      const res = makeRes()
+
+      await handler({ headers: {} }, res)
+
+      expect(res.sendStatus).to.have.been.calledWith(404)
+      expect(handleHttpRequest).not.to.have.been.called
+    })
+
+    it('404s a forged resolve-url marker without the loopback token', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const { handler, handleHttpRequest } = getCatchAllHandler()
+      const res = makeRes()
+
+      await handler({ headers: { 'x-cypress-resolving-url': '1' } }, res)
+
+      expect(res.sendStatus).to.have.been.calledWith(404)
+      expect(handleHttpRequest).not.to.have.been.called
+    })
+
+    it('404s a resolve-url marker with a wrong loopback token', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const { handler, handleHttpRequest } = getCatchAllHandler()
+      const res = makeRes()
+
+      await handler({
+        headers: {
+          'x-cypress-resolving-url': '1',
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: 'not-the-token',
+        },
+      }, res)
+
+      expect(res.sendStatus).to.have.been.calledWith(404)
+      expect(handleHttpRequest).not.to.have.been.called
+    })
+
+    it('forwards a token-bearing resolve-url loopback and strips the token', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const { handler, handleHttpRequest } = getCatchAllHandler()
+      const res = makeRes()
+      const req = {
+        headers: {
+          'x-cypress-resolving-url': '1',
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+        },
+      }
+
+      await handler(req, res)
+
+      expect(handleHttpRequest).to.have.been.calledWith(req, res)
+      expect(req.headers[CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]).to.be.undefined
+      expect(res.sendStatus).not.to.have.been.called
     })
   })
 })

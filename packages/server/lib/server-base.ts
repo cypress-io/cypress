@@ -55,7 +55,7 @@ import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-r
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -1186,11 +1186,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obfuscated by the proxying so this is not an ideal solution
+        // With the MITM proxy disabled, the catch-all only admits loopbacks
+        // carrying the per-process token — anything can forge the marker header.
         _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
           headers: {
             'x-cypress-resolving-url': '1',
+            [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
           },
         })
       }
