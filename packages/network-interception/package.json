@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/minimatch": "^3.0.3",
-    "rimraf": "6.1.1",
+    "rimraf": "6.1.3",
     "vitest": "^3.2.4"
   },
   "files": [
