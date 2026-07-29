@@ -656,7 +656,7 @@ describe('lib/exec/tap', () => {
       return selection
     }
 
-    it('renders the live spec list as JSON and exits 0, without opening a session', async () => {
+    it('renders the live spec list as a headed list and exits 0, without opening a session', async () => {
       mockLiveResolved(liveInstance())
       vi.mocked(queryInstanceGraphql).mockResolvedValue({
         currentProject: { specs: [
@@ -666,15 +666,34 @@ describe('lib/exec/tap', () => {
       })
 
       expect(await tap.start(['specs'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('SPECS (2)')
+      expect(output).toContain('cypress/e2e/a.cy.ts')
+      expect(output).toContain('2 hours ago')
+      expect(() => JSON.parse(output)).toThrow()
+
+      // The spec list comes from the instance's data layer, not the browser.
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw spec entries (with git timestamps) via --json', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/a.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/b.cy.ts', gitInfo: null },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       // git's last-modified (human-readable + raw timestamp) rides along when
       // present, omitted when the spec has none.
       expect(JSON.parse(logger.print())).toEqual([
         { relativePath: 'cypress/e2e/a.cy.ts', lastModified: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' },
         { relativePath: 'cypress/e2e/b.cy.ts' },
       ])
-
-      // The spec list comes from the instance's data layer, not the browser.
-      expect(withTapSession).not.toHaveBeenCalled()
     })
 
     it('lists specs even when the instance has no browser attached', async () => {
@@ -683,7 +702,7 @@ describe('lib/exec/tap', () => {
         currentProject: { specs: [{ relative: 'cypress/e2e/a.cy.ts' }] },
       })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/a.cy.ts' }])
     })
 
@@ -693,7 +712,7 @@ describe('lib/exec/tap', () => {
         currentProject: { specs: [{ relative: 'cypress\\e2e\\win.cy.ts', gitInfo: null }] },
       })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/win.cy.ts' }])
     })
 
@@ -720,7 +739,7 @@ describe('lib/exec/tap', () => {
       mockLiveResolved(liveInstance())
       vi.mocked(queryInstanceGraphql).mockResolvedValue({ currentProject: null })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([])
     })
 
@@ -736,7 +755,7 @@ describe('lib/exec/tap', () => {
         ] },
       })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       // Non-string git fields are dropped, not rendered as junk.
       expect(JSON.parse(logger.print())).toEqual([
         { relativePath: 'cypress/e2e/no-git.cy.ts' },
