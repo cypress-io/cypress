@@ -625,7 +625,11 @@ export class SnapshotDoctor {
     warnings: Warning[]
   }> {
     const deferredArg = deferred == null ? undefined : Array.from(deferred)
-    const norewriteArg = norewrite == null ? undefined : Array.from(norewrite)
+    // forceNorewrite modules are ones the bundler cannot rewrite at all (it
+    // panics trying). They must be excluded from rewriting in every bundle we
+    // produce -- including the initial one -- not just once the doctor has
+    // folded them into its norewrite set.
+    const norewriteArg = Array.from(new Set([...(norewrite ?? []), ...this.forceNorewrite]))
 
     try {
       const { warnings, meta, bundle } = await createBundleAsync({

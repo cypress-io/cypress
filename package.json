@@ -285,7 +285,6 @@
     "**/ua-parser-js": "0.7.33",
     "**/uuid": "11.1.1",
     "**/watchpack": "^2.5.1",
-    "**/ws": "8.18.3",
     "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.5",

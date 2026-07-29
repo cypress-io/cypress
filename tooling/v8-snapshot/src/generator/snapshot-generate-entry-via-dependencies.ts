@@ -21,6 +21,7 @@ class SnapshotEntryGeneratorViaWalk {
     readonly nodeModulesOnly: boolean,
     readonly pathsMapper: PathsMapper,
     readonly integrityCheckSource: string | undefined,
+    readonly forceNorewrite: string[] = [],
   ) {
     this.bundlerPath = getBundlerPath()
   }
@@ -53,6 +54,14 @@ class SnapshotEntryGeneratorViaWalk {
   }
 
   async getMetadata (): Promise<Metadata> {
+    // The metadata pass runs the same rewriting bundler as the snapshot pass,
+    // so a module the bundler can't rewrite (see force-no-rewrite) crashes it
+    // here too -- before the doctor ever gets to apply that list. Honor it now.
+    // Mirrors the nodeModulesOnly filtering in determineDeferred.
+    const norewrite = this.nodeModulesOnly
+      ? this.forceNorewrite.filter((x) => x.startsWith('node_modules') || x.startsWith('*'))
+      : this.forceNorewrite
+
     const opts: CreateBundleOpts = {
       bundlerPath: this.bundlerPath,
       baseDirPath: this.projectBaseDir,
@@ -61,6 +70,7 @@ class SnapshotEntryGeneratorViaWalk {
       sourcemap: false,
       supportTypeScript: this.nodeModulesOnly,
       integrityCheckSource: this.integrityCheckSource,
+      norewrite,
     }
     const { meta } = await createBundleAsync(opts)
 
@@ -81,6 +91,7 @@ type GenerateDepsDataOpts = {
   nodeModulesOnly?: boolean
   pathsMapper?: PathsMapper
   integrityCheckSource: string | undefined
+  forceNorewrite?: string[]
 }
 
 export type BundlerMetadata = Metadata & { projectBaseDir: string }
@@ -98,6 +109,7 @@ export async function generateBundlerMetadata (
     fullConf.nodeModulesOnly,
     fullConf.pathsMapper,
     config.integrityCheckSource,
+    config.forceNorewrite,
   )
   const meta = await generator.getMetadata()
 
@@ -125,6 +137,7 @@ export async function generateSnapshotEntryFromEntryDependencies (
     fullConf.nodeModulesOnly,
     fullConf.pathsMapper,
     config.integrityCheckSource,
+    config.forceNorewrite,
   )
 
   try {

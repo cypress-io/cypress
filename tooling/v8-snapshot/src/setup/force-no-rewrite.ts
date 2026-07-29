@@ -19,6 +19,10 @@ export default [
   // `address instanceof (__get_URL2__())` -- right hand side not an object
   // even though function is in scope
   '*/node_modules/ws/lib/websocket.js',
+  // `const { types: { isUint8Array } } = require('util')` -- the bundler's
+  // require rewriter can't emit a lazy accessor for a nested destructuring
+  // binding on an external/builtin require, so it panics. Skip rewriting it.
+  '*/node_modules/ws/lib/sender.js',
   // defers PassThroughStream which is then not accepted as a constructor
   '*/node_modules/get-stream/buffer-stream.js',
   // deferring should be fine as it just reexports `process` which in the
