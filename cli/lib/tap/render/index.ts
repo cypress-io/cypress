@@ -1,5 +1,5 @@
-import type { TapCommandName, TapReporterView } from '@packages/cypress-instances'
-import { renderReporterHuman } from './reporter'
+import type { TapCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
@@ -13,7 +13,14 @@ export interface TapCommandRendering {
 }
 
 const renderings: Partial<Record<TapCommandName, TapCommandRendering>> = {
-  reporter: { renderHuman: (result) => renderReporterHuman(result as TapReporterView) },
+  reporter: {
+    renderHuman: (result) => {
+      // Only the no-test spec overview carries `stats`; the single-test view never does.
+      const view = result as TapReporterView | TapReporterSpecView
+
+      return 'stats' in view ? renderReporterSpecHuman(view) : renderReporterHuman(view)
+    },
+  },
 }
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {

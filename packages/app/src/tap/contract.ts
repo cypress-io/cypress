@@ -22,6 +22,10 @@ export type {
   TapExecResult,
   TapNetworkInfo,
   TapReporterView,
+  TapReporterSpecView,
+  TapReporterSpecTest,
+  TapReporterSpecAttempt,
+  TapReporterSuite,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 // Reserved dispatch-level failure codes `exec` itself produces; domain failures

@@ -2,7 +2,7 @@ import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
-import type { TapNetworkInfo, TapReporterView } from './contract'
+import type { TapNetworkInfo, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
 import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
@@ -494,4 +494,106 @@ export const aggregateResults = (runner: TapTestsRunner): { results: RunResults,
   }
 
   return { results, totalTests: tests.length }
+}
+
+const suitePathOf = (test: SerializedTest): string[] => {
+  return Array.isArray(test._titlePath) ? test._titlePath.slice(0, -1) : []
+}
+
+const isPathPrefix = (prefix: string[], path: string[]): boolean => {
+  return prefix.every((title, index) => path[index] === title)
+}
+
+// The driver stores no run end time (the reporter freezes its own clock), so a
+// completed run's wall clock ends at the last test's recorded end.
+const testEndMs = (test: SerializedTest): number | undefined => {
+  const { wallClockStartedAt, wallClockDuration } = test as { wallClockStartedAt?: string, wallClockDuration?: number }
+
+  return wallClockStartedAt != null ? new Date(wallClockStartedAt).getTime() + (wallClockDuration ?? 0) : undefined
+}
+
+const runDuration = (runner: TapTestsRunner, tests: SerializedTest[]): number | undefined => {
+  const startTime = runner.getStartTime()
+
+  if (startTime == null) {
+    return undefined
+  }
+
+  const start = new Date(startTime).getTime()
+
+  if (!runner.isRunComplete()) {
+    return Date.now() - start
+  }
+
+  const ends = tests.map(testEndMs).filter((end): end is number => end != null)
+
+  return ends.length ? Math.max(...ends) - start : undefined
+}
+
+const serializeSpecAttempts = (test: SerializedTest, runComplete: boolean): TapReporterSpecAttempt[] | undefined => {
+  const attempts = attemptsOf(test)
+
+  if (attempts.length < 2) {
+    return undefined
+  }
+
+  return attempts.map((attempt, index) => {
+    return omitNullish({
+      attempt: index + 1,
+      state: attempt.state ?? unreachedState(runComplete),
+      duration: attempt.duration,
+    })
+  })
+}
+
+const serializeSpecTest = (test: SerializedTest, runComplete: boolean): TapReporterSpecTest => {
+  return omitNullish({
+    id: test.id,
+    title: test.title,
+    state: test.state ?? unreachedState(runComplete),
+    duration: test.duration,
+    retries: test.currentRetry,
+    attempts: serializeSpecAttempts(test, runComplete),
+  })
+}
+
+/**
+ * The spec-level overview the app reporter shows above any single test: the
+ * header stats and the suite tree. The driver does not retain its normalized
+ * runnables tree, so the tree is rebuilt from the flat test list via each
+ * test's `_titlePath`; the flat list is in document order, so a stack of open
+ * suites reproduces the nesting. Direct tests precede nested suites within a
+ * node, matching the reporter's child ordering.
+ */
+export const serializeReporterSpecView = (runner: TapTestsRunner, spec: string | undefined): TapReporterSpecView => {
+  const tests = Object.values(runner.getAllTestsState())
+  const runComplete = runner.isRunComplete()
+  const root: TapReporterSuite = { title: '', tests: [], suites: [] }
+  const stack: Array<{ path: string[], node: TapReporterSuite }> = [{ path: [], node: root }]
+
+  for (const test of tests) {
+    const path = suitePathOf(test)
+
+    while (stack.length > 1 && !isPathPrefix(stack[stack.length - 1].path, path)) {
+      stack.pop()
+    }
+
+    for (let depth = stack[stack.length - 1].path.length; depth < path.length; depth++) {
+      const node: TapReporterSuite = { title: path[depth], tests: [], suites: [] }
+
+      stack[stack.length - 1].node.suites.push(node)
+      stack.push({ path: path.slice(0, depth + 1), node })
+    }
+
+    stack[stack.length - 1].node.tests.push(serializeSpecTest(test, runComplete))
+  }
+
+  const { results } = aggregateResults(runner)
+
+  return omitNullish({
+    spec,
+    stats: omitNullish({ ...results, duration: runDuration(runner, tests) }),
+    tests: root.tests,
+    suites: root.suites,
+  })
 }

@@ -105,10 +105,10 @@ const commandsMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view: its routes, hooks, and command log',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and the suite tree',
   params: [],
   options: [
-    { ...testIdField, required: true },
+    { ...testIdField, required: false },
     attemptField,
   ],
 } as const satisfies TapCommandSchema

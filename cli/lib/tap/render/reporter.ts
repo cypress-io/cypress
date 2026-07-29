@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapNetworkInfo, TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterView } from '@packages/cypress-instances'
+import type { TapNetworkInfo, TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
 
 // The reporter's own palette (packages/reporter/src/lib/variables.scss and
 // commands.scss), so the CLI rendering matches the app: $pass/$fail map to
@@ -331,6 +331,98 @@ export const renderReporterHuman = (view: TapReporterView): string => {
   if (view.error) {
     blocks.push(renderError(view.error))
   }
+
+  return blocks.map((block) => block.map((line) => line.trimEnd()).join('\n')).join('\n\n')
+}
+
+// The reporter header's clock format (packages/reporter/src/lib/util.ts
+// formatDuration, inlined — the CLI can't import the reporter bundle).
+const formatDuration = (duration: number | undefined): string => {
+  if (!duration) {
+    return '--'
+  }
+
+  if (duration < 1000) {
+    return `${duration}ms`
+  }
+
+  const seconds = Math.round(duration / 1000)
+  const displaySeconds = String(seconds % 60).padStart(2, '0')
+  const displayMinutes = String(Math.floor((seconds / 60) % 60)).padStart(2, '0')
+  const displayHours = String(Math.floor(seconds / (60 * 60)))
+
+  return displayHours === '0' ? `${displayMinutes}:${displaySeconds}` : `${displayHours}:${displayMinutes}:${displaySeconds}`
+}
+
+// The app header renders a zero count as `--` (its stats strip's `count`
+// helper); skipped has no strip slot there, so it only appears when non-zero.
+const count = (num: number): string => (num > 0 ? String(num) : '--')
+
+const statsLine = (stats: TapReporterStats): string => {
+  return [
+    `${TEST_STATE.passed.icon} ${count(stats.passed)}`,
+    `${TEST_STATE.failed.icon} ${count(stats.failed)}`,
+    `${TEST_STATE.pending.icon} ${count(stats.pending)}`,
+    ...(stats.skipped > 0 ? [`${TEST_STATE.skipped.icon} ${stats.skipped}`] : []),
+    chalk.dim(formatDuration(stats.duration)),
+  ].join('  ')
+}
+
+// Sub-second durations keep their ms precision; longer ones read as seconds,
+// the way the run-mode spec output reports test times.
+const testDuration = (duration: number | undefined): string => {
+  if (duration == null) {
+    return ''
+  }
+
+  return `  ${chalk.dim(duration < 1000 ? `${duration}ms` : `${+(duration / 1000).toFixed(1)}s`)}`
+}
+
+const renderSpecTests = (tests: TapReporterSpecTest[], indent: string): string[] => {
+  return tests.flatMap((test) => {
+    const retries = test.retries ? `  ${color.aborted(`(${test.retries} ${test.retries === 1 ? 'retry' : 'retries'})`)}` : ''
+
+    return [
+      `${indent}${chalk.dim(test.id.padStart(3))}  ${TEST_STATE[test.state].icon} ${test.title}${testDuration(test.duration)}${retries}`,
+      // Nested under the title, the way the app reporter lists a retried
+      // test's attempts; the id column stays empty so the rows read as one test.
+      ...(test.attempts ?? []).map((attempt) => {
+        return `${indent}       ${TEST_STATE[attempt.state].icon} ${chalk.dim(`attempt ${attempt.attempt}`)}${testDuration(attempt.duration)}`
+      }),
+    ]
+  })
+}
+
+// The app reporter renders each suite as its own section headed by the full
+// suite path — depth shows in the breadcrumb, not in indentation — styled here
+// like the single-test view's hook section titles. A suite whose tests all
+// live in child suites gets no section of its own.
+const specSuiteSections = (suites: TapReporterSuite[], path: string[]): string[][] => {
+  return suites.flatMap((suite) => {
+    const fullPath = [...path, suite.title]
+    const section = suite.tests.length
+      ? [[chalk.dim(fullPath.join(' > ').toUpperCase()), ...renderSpecTests(suite.tests, '  ')]]
+      : []
+
+    return [...section, ...specSuiteSections(suite.suites, fullPath)]
+  })
+}
+
+export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {
+  const header = [
+    ...(view.spec ? [chalk.bold(view.spec)] : []),
+    statsLine(view.stats),
+  ]
+
+  const sections = [
+    ...(view.tests.length ? [renderSpecTests(view.tests, '  ')] : []),
+    ...specSuiteSections(view.suites, []),
+  ]
+
+  const blocks: string[][] = [
+    header,
+    ...(sections.length ? sections : [[chalk.dim('No tests were found in this spec.')]]),
+  ]
 
   return blocks.map((block) => block.map((line) => line.trimEnd()).join('\n')).join('\n\n')
 }

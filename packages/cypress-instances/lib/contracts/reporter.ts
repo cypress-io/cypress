@@ -158,3 +158,64 @@ export interface TapReporterView {
   /** Present only when the attempt failed. */
   error?: TapReporterError
 }
+
+/** One attempt of a retried test. */
+export interface TapReporterSpecAttempt {
+  /** 1-based attempt number (attempt 1 = first run) — the value the `--attempt` option accepts. */
+  attempt: number
+  state: 'passed' | 'failed' | 'pending' | 'skipped'
+  /** Wall-clock run time in ms; absent until the attempt has run. */
+  duration?: number
+}
+
+/** One test row of the spec overview. */
+export interface TapReporterSpecTest {
+  /** The runner's test id, e.g. `r2` — the handle other tap commands accept. */
+  id: string
+  /** The test's own title, without its suite path. */
+  title: string
+  /** Final status, or the unreached placeholder (`pending` mid-run, `skipped` after). */
+  state: 'passed' | 'failed' | 'pending' | 'skipped'
+  /** Wall-clock run time in ms; absent until the test has run. */
+  duration?: number
+  /** Retries actually taken this run, not the configured maximum. */
+  retries?: number
+  /** Every attempt in run order, last one final; present only when the test was retried. */
+  attempts?: TapReporterSpecAttempt[]
+}
+
+/**
+ * One suite of the spec overview's tree. Direct tests render before nested
+ * suites, the way the app reporter orders a suite's children.
+ */
+export interface TapReporterSuite {
+  title: string
+  tests: TapReporterSpecTest[]
+  suites: TapReporterSuite[]
+}
+
+/**
+ * The app reporter's header stats. Unreached tests count as `pending` mid-run
+ * and `skipped` once the run completes.
+ */
+export interface TapReporterStats {
+  passed: number
+  failed: number
+  pending: number
+  skipped: number
+  /** Wall-clock run duration in ms, frozen at the last test's end once the run completes; absent before the run starts. */
+  duration?: number
+}
+
+/**
+ * The `reporter` command's result when no test is given: the spec-level
+ * overview the app reporter shows — header stats and the suite tree.
+ * `tests` and `suites` are the root-level runnables.
+ */
+export interface TapReporterSpecView {
+  /** Project-relative spec path; absent only if the active spec can't be read. */
+  spec?: string
+  stats: TapReporterStats
+  tests: TapReporterSpecTest[]
+  suites: TapReporterSuite[]
+}

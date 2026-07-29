@@ -31,6 +31,7 @@ export const tapManagerDataSource = {
         getAllTestsState: runner.getAllTestsState,
         getTestState: runner.getTestState,
         isRunComplete: () => em.runComplete,
+        getStartTime: runner.getStartTime,
       }
     } catch {
       return undefined
