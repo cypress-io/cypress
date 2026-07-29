@@ -87,7 +87,10 @@ export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => 
   const test = state('test')
 
   if (!state('duringUserTestExecution') && test && !Object.keys(test?._fired || {}).length) {
-    return test._testConfig.applied
+    // In a cy.origin spec bridge the `test` in state is a placeholder object
+    // that never has `_testConfig` assigned, so guard against dereferencing it
+    // when config is synced to the secondary origin outside of test execution.
+    return test._testConfig?.applied
   }
 
   return undefined
