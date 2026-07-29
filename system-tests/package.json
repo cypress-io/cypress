@@ -49,7 +49,7 @@
     "chokidar": "3.5.1",
     "ci-info": "^4.1.0",
     "compression": "1.8.0",
-    "cookie-parser": "1.4.5",
+    "cookie-parser": "1.4.7",
     "cors": "2.8.5",
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",

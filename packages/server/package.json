@@ -53,7 +53,7 @@
     "common-tags": "1.8.0",
     "compression": "1.8.0",
     "content-type": "1.0.4",
-    "cookie-parser": "1.4.5",
+    "cookie-parser": "1.4.7",
     "cross-fetch": "^4.1.0",
     "data-uri-to-buffer": "2.0.1",
     "dayjs": "^1.9.3",
