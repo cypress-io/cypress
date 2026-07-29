@@ -32,7 +32,7 @@
     "@types/node": "22.18.7",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "cross-env": "7.0.3",
-    "dedent": "^0.7.0",
+    "dedent": "^1.7.2",
     "vitest": "^3.2.4",
     "webpack": "npm:webpack@^5"
   },

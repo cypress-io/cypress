@@ -132,7 +132,7 @@
     "conventional-recommended-bump": "6.1.0",
     "cross-env": "7.0.3",
     "debug": "^4.3.4",
-    "dedent": "^0.7.0",
+    "dedent": "^1.7.2",
     "del": "3.0.0",
     "detect-port": "^2.1.0",
     "electron": "37.6.0",

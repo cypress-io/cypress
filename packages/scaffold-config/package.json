@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "dedent": "^0.7.0",
+    "dedent": "^1.7.2",
     "find-up": "^5.0.0",
     "fs-extra": "^9.1.0",
     "globby": "^11.0.1",

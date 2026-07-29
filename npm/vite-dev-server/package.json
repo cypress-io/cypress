@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "cross-env": "7.0.3",
-    "dedent": "^0.7.0",
+    "dedent": "^1.7.2",
     "esbuild": "^0.28.1",
     "vite-5": "npm:vite@^5.4.20",
     "vite-6": "npm:vite@^6.4.0",

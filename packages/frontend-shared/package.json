@@ -73,7 +73,7 @@
     "cypress-plugin-tab": "1.0.5",
     "cypress-real-events": "1.15.0",
     "dayjs": "^1.9.3",
-    "dedent": "^0.7.0",
+    "dedent": "^1.7.2",
     "execa": "4.1.0",
     "floating-vue": "5.2.2",
     "fs-extra": "9.1.0",
