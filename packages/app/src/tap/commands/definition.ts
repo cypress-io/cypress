@@ -45,6 +45,7 @@ export const defineCommand = <N extends TapCommandName>(
 export interface TapCommandDefinition {
   name: TapCommandName
   description: string
+  details?: string
   params: readonly TapCommandParamSchema[]
   options?: readonly TapCommandOptionSchema[]
   hidden?: boolean

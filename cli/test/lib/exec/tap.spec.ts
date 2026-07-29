@@ -347,6 +347,26 @@ describe('lib/exec/tap', () => {
       expect(call.mock.calls).toEqual([['getSchema']])
     })
 
+    it('renders a schema command’s details prose in place of its one-liner for `<command> --help`', async () => {
+      mockSession({
+        ...schema,
+        commands: [
+          ...schema.commands,
+          {
+            name: 'detailed-command',
+            description: 'a one-line summary for the listing',
+            details: 'A longer, friendlier block of prose\nthat only standalone help shows.',
+            params: [],
+            options: [],
+          },
+        ],
+      } satisfies TapSchema)
+
+      expect(await tap.start(['detailed-command', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('A longer, friendlier block of prose\nthat only standalone help shows.')
+      expect(logger.print()).not.toContain('a one-line summary for the listing')
+    })
+
     it('fails when help is requested for a command the instance does not advertise', async () => {
       mockSession()
 
@@ -1015,8 +1035,10 @@ describe('lib/exec/tap', () => {
                                           state, or detail one by id
           commands [options]              list the command log entries of a test of
                                           the active run
-          reporter [options]              render a test’s full reporter view: its
-                                          routes, hooks, and command log
+          reporter [options]              render a test’s full reporter view — its
+                                          routes, hooks, and command log — or, without
+                                          --test, the spec-level overview: run stats
+                                          and every suite’s tests
           pin [options] [test] [command]  pin a command’s DOM snapshot into the live
                                           app-under-test frame so the dom/aria/inspect
                                           commands can read it; pass --clear to release

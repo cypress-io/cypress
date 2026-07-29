@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
-import { renderReporterHuman } from '../../../lib/tap/render/reporter'
-import type { TapReporterView } from '@packages/cypress-instances'
+import { renderReporterHuman, renderReporterSpecHuman } from '../../../lib/tap/render/reporter'
+import type { TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
 
 // chalk's color level depends on where the suite runs, so strip any escape
 // codes before snapshotting — the assertions target the layout, not the colors.
@@ -162,6 +162,97 @@ describe('lib/tap/render/reporter', () => {
       "- never ran  skipped
 
       No commands were logged for this test."
+    `)
+  })
+})
+
+describe('lib/tap/render/reporter spec overview', () => {
+  const renderSpecPlain = (input: TapReporterSpecView): string => stripAnsi(renderReporterSpecHuman(input))
+
+  const emptyStats = { passed: 0, failed: 0, pending: 0, skipped: 0 }
+
+  it('renders the spec header, stats, and the suite sections with per-state icons', () => {
+    const view: TapReporterSpecView = {
+      spec: 'cypress/e2e/actions.cy.js',
+      stats: { passed: 2, failed: 1, pending: 1, skipped: 1, duration: 17400 },
+      tests: [{ id: 't1', title: 'root test', state: 'passed', duration: 20 }],
+      suites: [
+        {
+          title: 'A',
+          tests: [
+            { id: 't2', title: 'a1', state: 'passed', duration: 10 },
+            { id: 't4', title: 'a2', state: 'pending' },
+          ],
+        },
+        {
+          title: 'A > B',
+          tests: [{
+            id: 't3',
+            title: 'b1',
+            state: 'failed',
+            duration: 30,
+            retries: 2,
+            attempts: [
+              { attempt: 1, state: 'failed', duration: 4476 },
+              { attempt: 2, state: 'failed', duration: 4400 },
+              { attempt: 3, state: 'failed', duration: 30 },
+            ],
+          }],
+        },
+        { title: 'C', tests: [{ id: 't5', title: 'c1', state: 'skipped' }] },
+      ],
+    }
+
+    expect(renderSpecPlain(view)).toMatchInlineSnapshot(`
+      "cypress/e2e/actions.cy.js
+      ✓ 2  ✖ 1  ○ 1  - 1  00:17
+
+         t1  ✓ root test  20ms
+
+      A
+         t2  ✓ a1  10ms
+         t4  ○ a2
+
+      A > B
+         t3  ✖ b1  30ms  (2 retries)
+               ✖ attempt 1  4.5s
+               ✖ attempt 2  4.4s
+               ✖ attempt 3  30ms
+
+      C
+         t5  - c1"
+    `)
+  })
+
+  it('renders zero counts as -- the way the app header does', () => {
+    const view: TapReporterSpecView = {
+      stats: { ...emptyStats, passed: 3, duration: 900 },
+      tests: [{ id: 'r1', title: 'only test', state: 'passed', duration: 4476 }],
+      suites: [],
+    }
+
+    expect(renderSpecPlain(view)).toMatchInlineSnapshot(`
+      "✓ 3  ✖ --  ○ --  900ms
+
+         r1  ✓ only test  4.5s"
+    `)
+  })
+
+  it('renders the run clock across the duration formats', () => {
+    const clockLine = (duration?: number) => renderSpecPlain({ stats: { ...emptyStats, duration }, tests: [], suites: [] }).split('\n')[0]
+
+    expect(clockLine(undefined)).toMatchInlineSnapshot(`"✓ --  ✖ --  ○ --  --"`)
+    expect(clockLine(817)).toMatchInlineSnapshot(`"✓ --  ✖ --  ○ --  817ms"`)
+    expect(clockLine(17400)).toMatchInlineSnapshot(`"✓ --  ✖ --  ○ --  00:17"`)
+    expect(clockLine(3723000)).toMatchInlineSnapshot(`"✓ --  ✖ --  ○ --  1:02:03"`)
+  })
+
+  it('renders an empty spec as its header and a no-tests note', () => {
+    expect(renderSpecPlain({ spec: 'cypress/e2e/empty.cy.js', stats: emptyStats, tests: [], suites: [] })).toMatchInlineSnapshot(`
+      "cypress/e2e/empty.cy.js
+      ✓ --  ✖ --  ○ --  --
+
+      No tests were found in this spec."
     `)
   })
 })

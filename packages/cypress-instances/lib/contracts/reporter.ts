@@ -158,3 +158,66 @@ export interface TapReporterView {
   /** Present only when the attempt failed. */
   error?: TapReporterError
 }
+
+/** One attempt of a retried test. */
+export interface TapReporterSpecAttempt {
+  /** 1-based attempt number (attempt 1 = first run) — the value the `--attempt` option accepts. */
+  attempt: number
+  state: 'passed' | 'failed' | 'pending' | 'skipped'
+  /** Wall-clock run time in ms; absent until the attempt has run. */
+  duration?: number
+}
+
+/** One test row of the spec overview. */
+export interface TapReporterSpecTest {
+  /** The runner's test id, e.g. `r2` — the handle other tap commands accept. */
+  id: string
+  /** The test's own title, without its suite path. */
+  title: string
+  /** Final status, or the unreached placeholder (`pending` mid-run, `skipped` after). */
+  state: 'passed' | 'failed' | 'pending' | 'skipped'
+  /** Wall-clock run time in ms; absent until the test has run. */
+  duration?: number
+  /** Retries actually taken this run, not the configured maximum. */
+  retries?: number
+  /** Every attempt in run order, last one final; present only when the test was retried. */
+  attempts?: TapReporterSpecAttempt[]
+}
+
+/**
+ * One suite section of the spec overview, flattened the way the CLI displays
+ * it: nesting is expressed in the joined title, not by recursion, and a suite
+ * whose tests all live in deeper suites gets no entry of its own.
+ */
+export interface TapReporterSuite {
+  /** The full suite path, joined with ` > `, e.g. `A > B`. */
+  title: string
+  /** The suite's direct tests, in document order. */
+  tests: TapReporterSpecTest[]
+}
+
+/**
+ * The app reporter's header stats. Unreached tests count as `pending` mid-run
+ * and `skipped` once the run completes.
+ */
+export interface TapReporterStats {
+  passed: number
+  failed: number
+  pending: number
+  skipped: number
+  /** Wall-clock run duration in ms, frozen at the last test's end once the run completes; absent before the run starts. */
+  duration?: number
+}
+
+/**
+ * The `reporter` command's result when no test is given: the spec-level
+ * overview the app reporter shows — header stats, the root-level tests, and
+ * one flattened section per suite with direct tests, in document order.
+ */
+export interface TapReporterSpecView {
+  /** Project-relative spec path; absent only if the active spec can't be read. */
+  spec?: string
+  stats: TapReporterStats
+  tests: TapReporterSpecTest[]
+  suites: TapReporterSuite[]
+}

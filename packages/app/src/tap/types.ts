@@ -7,6 +7,8 @@ export interface TapTestsRunner {
   /** Serializes one test by id lookup, skipping the whole-run serialization cost. */
   getTestState (testId: string): SerializedTest | undefined
   isRunComplete (): boolean
+  /** ISO start time of the run; null before the first test runs. */
+  getStartTime (): string | null
 }
 
 /**

@@ -144,15 +144,6 @@ describe('tap/commands/reporter', () => {
     expect((outcome as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
   })
 
-  it('fails dispatch without reading the runner when the required test option is missing', async () => {
-    const getRunner = stubRunner({ getTestState: () => undefined, isRunComplete: () => false })
-
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
-
-    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
-    expect(getRunner).not.to.have.been.called
-  })
-
   it('returns the full reporter view: test header, hooks with a synthesized test body, routes, and enriched commands', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => false })
 
@@ -258,5 +249,136 @@ describe('tap/commands/reporter', () => {
       { hookId: 'h-ae', hookName: 'after each' },
       { hookId: 'h-aa', hookName: 'after all' },
     ])
+  })
+
+  describe('without a test id (spec overview)', () => {
+    // Document order exercising the suite flattening: a root-level test, a
+    // return to suite A after nested B closes, and an unreached test in C.
+    const TREE_STATE = {
+      t1: { id: 't1', title: 'root test', _titlePath: ['root test'], state: 'passed', duration: 20 },
+      t2: { id: 't2', title: 'a1', _titlePath: ['A', 'a1'], state: 'passed', duration: 10 },
+      t3: {
+        id: 't3', title: 'b1', _titlePath: ['A', 'B', 'b1'], state: 'failed', duration: 30, currentRetry: 2,
+        prevAttempts: [
+          { id: 't3', title: 'b1', state: 'failed', duration: 12 },
+          { id: 't3', title: 'b1', state: 'failed', duration: 18 },
+        ],
+      },
+      t4: { id: 't4', title: 'a2', _titlePath: ['A', 'a2'], state: 'pending' },
+      t5: { id: 't5', title: 'c1', _titlePath: ['C', 'c1'] },
+    }
+
+    const stubSpec = (relative: string | undefined) => cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns(relative)
+
+    const treeRunner = (overrides: Record<string, unknown> = {}) => {
+      return {
+        getAllTestsState: () => TREE_STATE,
+        isRunComplete: () => false,
+        getStartTime: () => null,
+        ...overrides,
+      }
+    }
+
+    it('returns the spec overview mid-run: stats, the flattened suites, and unreached tests as pending', async () => {
+      stubRunner(treeRunner())
+      stubSpec('cypress/e2e/actions.cy.js')
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
+
+      expect(outcome).to.deep.eq({
+        result: {
+          spec: 'cypress/e2e/actions.cy.js',
+          stats: { passed: 2, failed: 1, pending: 2, skipped: 0 },
+          tests: [
+            { id: 't1', title: 'root test', state: 'passed', duration: 20 },
+          ],
+          suites: [
+            {
+              title: 'A',
+              tests: [
+                { id: 't2', title: 'a1', state: 'passed', duration: 10 },
+                { id: 't4', title: 'a2', state: 'pending' },
+              ],
+            },
+            {
+              title: 'A > B',
+              tests: [{
+                id: 't3',
+                title: 'b1',
+                state: 'failed',
+                duration: 30,
+                retries: 2,
+                attempts: [
+                  { attempt: 1, state: 'failed', duration: 12 },
+                  { attempt: 2, state: 'failed', duration: 18 },
+                  { attempt: 3, state: 'failed', duration: 30 },
+                ],
+              }],
+            },
+            {
+              title: 'C',
+              tests: [{ id: 't5', title: 'c1', state: 'pending' }],
+            },
+          ],
+        },
+      })
+
+      expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
+    })
+
+    it('reports unreached tests as skipped once the run is complete', async () => {
+      stubRunner(treeRunner({ isRunComplete: () => true }))
+      stubSpec(undefined)
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
+      const { stats, suites } = (outcome as { result: { stats: unknown, suites: Array<{ tests: Array<{ state: string }> }> } }).result
+
+      expect(stats).to.deep.eq({ passed: 2, failed: 1, pending: 1, skipped: 1 })
+      expect(suites[2].tests[0].state).to.eq('skipped')
+    })
+
+    it('measures a running spec’s duration from the run start to now', async () => {
+      const start = new Date('2026-01-01T00:00:00.000Z')
+
+      stubRunner(treeRunner({ getStartTime: () => start.toISOString() }))
+      stubSpec(undefined)
+      cy.stub(Date, 'now').returns(start.getTime() + 17400)
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
+
+      expect((outcome as { result: { stats: { duration: number } } }).result.stats.duration).to.eq(17400)
+    })
+
+    it('freezes a completed spec’s duration at the last test’s recorded end', async () => {
+      stubRunner(treeRunner({
+        isRunComplete: () => true,
+        getStartTime: () => '2026-01-01T00:00:00.000Z',
+        getAllTestsState: () => {
+          return {
+            t1: { ...TREE_STATE.t1, wallClockStartedAt: '2026-01-01T00:00:05.000Z', wallClockDuration: 1000 },
+            t2: { ...TREE_STATE.t2, wallClockStartedAt: '2026-01-01T00:00:10.000Z', wallClockDuration: 400 },
+          }
+        },
+      }))
+
+      stubSpec(undefined)
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
+
+      expect((outcome as { result: { stats: { duration: number } } }).result.stats.duration).to.eq(10400)
+    })
+
+    it('rejects --attempt without --test', async () => {
+      stubRunner(treeRunner())
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { attempt: '1' })
+
+      expect(outcome).to.deep.eq({
+        error: {
+          code: 'ATTEMPT_NOT_FOUND',
+          message: 'the --attempt option applies only when rendering a single test; pass --test <id>',
+        },
+      })
+    })
   })
 })

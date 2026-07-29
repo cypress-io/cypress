@@ -51,6 +51,7 @@ describe('tap/tap-manager', () => {
         const definition = tapCommands[command.name as keyof typeof tapCommands]
 
         expect(command.description).to.eq(definition.description)
+        expect(command.details).to.eq((definition as TapCommandDefinition).details)
         expect(command.params).to.deep.eq(definition.params)
         expect(command.options).to.deep.eq((definition as TapCommandDefinition).options ?? [])
       }

@@ -24,6 +24,9 @@ export interface TapCommandOptionSchema {
 export interface TapCommandSchema {
   name: string
   description: string
+  // Longer prose for the command's standalone `--help`; the one-line
+  // `description` still renders in the command listing.
+  details?: string
   params: readonly TapCommandParamSchema[]
   options: readonly TapCommandOptionSchema[]
   // Absent ⇒ visible. A hidden command stays exec-able but the CLI omits it from
@@ -105,10 +108,18 @@ const commandsMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view: its routes, hooks, and command log',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and every suite’s tests',
+  details: `Shows test results the way the Cypress app's reporter panel does, right in
+your terminal. Pass --test <id> (ids come from the tests command) to see one
+test's full story: its network routes, the hooks that ran, the complete
+command log, and the failure output when something went wrong. Add --attempt
+to view an earlier retry.
+
+Leave --test off to get the spec-level overview instead: the run's pass/fail
+stats and every suite's tests at a glance.`,
   params: [],
   options: [
-    { ...testIdField, required: true },
+    { ...testIdField, required: false },
     attemptField,
   ],
 } as const satisfies TapCommandSchema
@@ -154,6 +165,7 @@ export const buildTapSchema = (cypressVersion: string): TapSchema => {
     return {
       name: command.name,
       description: command.description,
+      ...('details' in command ? { details: command.details } : {}),
       params: command.params.map((param) => ({ ...param })),
       options: command.options.map((option) => ({ ...option })),
       ...('hidden' in command && command.hidden ? { hidden: true } : {}),

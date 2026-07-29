@@ -70,11 +70,14 @@ describe('cypress-instances contract', () => {
 
       expect(reporter.params).toEqual([])
       expect(reporter.options.map(({ name, required }) => ({ name, required }))).toEqual([
-        { name: 'test', required: true },
+        { name: 'test', required: false },
         { name: 'attempt', required: false },
       ])
 
-      expect(buildTapSchema('15.0.0').commands.map(({ name }) => name)).toContain('reporter')
+      const advertised = buildTapSchema('15.0.0').commands.find(({ name }) => name === 'reporter')
+
+      expect(advertised).toBeDefined()
+      expect(advertised!.details).toBe(reporter.details)
     })
   })
 })
