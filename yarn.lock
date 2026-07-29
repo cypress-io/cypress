@@ -20512,10 +20512,10 @@ is-valid-glob@^1.0.0:
   resolved "https://registry.yarnpkg.com/is-valid-glob/-/is-valid-glob-1.0.0.tgz#29bf3eff701be2d4d315dbacc39bc39fe8f601aa"
   integrity sha1-Kb8+/3Ab4tTTFdusw5vDn+j2Aao=
 
-is-valid-hostname@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/is-valid-hostname/-/is-valid-hostname-1.0.1.tgz#4001a549e908bcc6a6d5347d8781779d8fedd9ce"
-  integrity sha512-GuMwWwBVh+TiH/DzzcITaCJ3aMijgCwE+/Sa4Zh13PyslxaTX0xmWxnwkNOoXcCTCd3z/Dw8Pe5Brsgp+bULtA==
+is-valid-hostname@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/is-valid-hostname/-/is-valid-hostname-1.0.2.tgz#23fdc84e86cb793a43207686e7edb2f796e82406"
+  integrity sha512-X/kiF3Xndj6WI7l/yLyzR7V1IbQd6L4S4cewSL0fRciemPmHbaXIKR2qtf+zseH+lbMG0vFp4HvCUe7amGZVhw==
 
 is-weakmap@^2.0.2:
   version "2.0.2"
