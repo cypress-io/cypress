@@ -39,9 +39,6 @@ describe('src/util/config', () => {
       expect(getMochaOverrideLevel(state)).toBeUndefined()
     })
 
-    // Reproduces the cross-origin flake where config is synced to a secondary
-    // origin spec bridge whose `test` is a placeholder object without `_testConfig`.
-    // Previously this threw `Cannot read properties of undefined (reading 'applied')`.
     it('does not throw when the test object has no _testConfig (secondary origin)', () => {
       const state = makeState({
         duringUserTestExecution: false,
