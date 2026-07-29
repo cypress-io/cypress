@@ -22,7 +22,7 @@
     "eslint-plugin-mocha": "^11.1.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-vue": "^10.3.0",
-    "globals": "^15.14.0",
+    "globals": "^17.8.0",
     "typescript-eslint": "^8.37.0"
   },
   "peerDependencies": {
