@@ -3,6 +3,7 @@ import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy
 
 export default defineConfig({
   projectId: 'ypt4pf',
+  experimentalMemoryManagement: true,
   e2e: {
     defaultCommandTimeout: 20000, // these take a bit longer b/c they're e2e open mode test
     async setupNodeEvents (on, config) {

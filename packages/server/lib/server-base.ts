@@ -49,10 +49,12 @@ import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookie/automation'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
-import { createProxyRuntime } from './network-runtime'
+import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
+import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER } from './adapters/internal-routes'
+import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -94,22 +96,30 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
   return function (req, res, next) {
-    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
-
-    // Trusted loopback from serve-internal-routes: path-only HTTP to Express
-    // must reach internal route handlers instead of redirecting to clientRoute.
-    // Keep the header so a catch-all re-entry can detect the loop and stop.
-    if (req.headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]) {
-      return next()
-    }
-
     // if this request is a non-proxied cy-in-cy request,
     // we need to update the proxiedUrl and allow it to pass through
+    // (runs even when the MITM proxy is disabled — cy-in-cy self tests may use that path)
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && _isNonProxiedRequest(req) && req.headers.referer) {
       const referrerUrl = new URL(req.headers.referer)
 
       req.proxiedUrl = `${referrerUrl.origin}${req.proxiedUrl}`
 
+      return next()
+    }
+
+    // CDP Fetch owns browser traffic when the MITM proxy is disabled, so
+    // path-only requests to the Cypress server are expected — not a sign the
+    // browser was launched outside Cypress.
+    if (isProxyDisabled()) {
+      return next()
+    }
+
+    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    // Trusted loopback from serve-internal-routes: path-only HTTP to Express
+    // must reach internal route handlers instead of redirecting to clientRoute.
+    // Require the per-process token — AUT content can forge the URL header alone.
+    if (isTrustedInternalLoopback(req.headers)) {
       return next()
     }
 
@@ -131,6 +141,20 @@ const setProxiedUrl = function (req) {
 
   // bail if we've already proxied the url
   if (req.proxiedUrl) {
+    return
+  }
+
+  // Loopback requests from serve-internal-routes arrive path-only, but carry
+  // the browser's original absolute URL in the loopback header so consumers
+  // like the spec-bridge iframe controller can still derive the origin.
+  // Only honor the URL when accompanied by the per-process loopback token.
+  const loopbackUrl = getTrustedLoopbackUrl(req.headers)
+
+  if (typeof loopbackUrl === 'string' && fullyQualifiedRe.test(loopbackUrl)) {
+    req.proxiedUrl = removeDefaultPort(loopbackUrl)
+
+    req.url = getPath(req.url)
+
     return
   }
 
@@ -174,6 +198,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   protected _networkInterceptionCore?: NetworkInterceptionCore
+  protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
+  protected _openConfig?: Cfg
+  // Retained so late-bound CDP Fetch NetworkProxy (created after open when the
+  // MITM proxy is disabled) still receives protocol / pre-request settings.
+  private _protocolManager?: ProtocolManagerShape
+  private _preRequestTimeout?: number
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -181,6 +211,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
+  private shouldCorrelatePreRequests: () => boolean = () => false
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
   private _documentDomainInjection: DocumentDomainInjection
@@ -245,11 +276,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
+    this._protocolManager = protocolManager
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
   }
 
   setPreRequestTimeout (timeout: number) {
+    this._preRequestTimeout = timeout
     this._networkProxy?.setPreRequestTimeout(timeout)
   }
 
@@ -342,6 +375,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }: OpenServerOptions) {
     debug('server open')
     this.testingType = testingType
+    this._openConfig = config
+    this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
@@ -360,6 +395,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     clientCertificates.loadClientCertificateConfig(config)
 
     if (isProxyDisabled()) {
+      // CDP Fetch runtime attaches NetworkProxy later in createCdpFetchNetworkRuntime.
+      // Create netStubbingState now so startWebsockets can bind driver intercept registration.
       this._netStubbingState = netStubbingState()
     } else {
       this.createNetworkProxy({
@@ -377,6 +414,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
       networkProxy: this._networkProxy,
+      getNetworkProxy: () => this._networkProxy,
       onError,
       getSpec,
       testingType,
@@ -477,6 +515,92 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkInterceptionCore = runtime.networkInterceptionCore
   }
 
+  async createCdpFetchNetworkRuntime (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+    isAUTFrame?: (frameId: string) => Promise<boolean>,
+    onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
+  ) {
+    await this.stopCdpFetchRuntime()
+
+    const runtime = createCdpFetchRuntime({
+      client,
+      isAUTFrame,
+      onAUTFrameNavigated,
+      config: this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config'],
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      remoteStates: this._remoteStates,
+      getFileServerToken: () => this._fileServer?.token,
+      getCookieJar: () => cookieJar,
+      socket: this.socket,
+      request: this.request,
+      serverBus: this._eventBus,
+      getCurrentBrowser: this.getCurrentBrowser ?? (() => {
+        throw new Error('getCurrentBrowser is not available')
+      }),
+      netStubbingState: this._netStubbingState,
+    })
+
+    this._cdpFetchRuntime = runtime
+    this._networkProxy = runtime.networkProxy
+    this._netStubbingState = runtime.netStubbingState
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
+    this._networkInterceptionCore = runtime.networkInterceptionCore
+
+    // NetworkProxy was created after open(); re-apply settings that may have
+    // been stored while _networkProxy was still undefined.
+    if (this._protocolManager) {
+      this._networkProxy.setProtocolManager(this._protocolManager)
+    }
+
+    if (this._preRequestTimeout != null) {
+      this._networkProxy.setPreRequestTimeout(this._preRequestTimeout)
+    }
+
+    await runtime.start()
+  }
+
+  private resetCdpFetchRuntime () {
+    try {
+      this._cdpFetchRuntime?.reset()
+    } catch (err) {
+      debug('CDP Fetch runtime reset failed: %s', err?.stack || err)
+    }
+  }
+
+  private stopCdpFetchRuntime () {
+    // Stopping sends Fetch.disable to the previous page client, which may
+    // already be gone (spec change, browser relaunch); failing to stop the
+    // old runtime must not fail the next launch.
+    const previous = this._cdpFetchRuntime
+
+    this._cdpFetchRuntime = undefined
+
+    // Drop the shared pointer before dispose so concurrent getNetworkProxy /
+    // addBrowserPreRequest callers cannot use a NetworkProxy whose sweep
+    // timer has already been cleared.
+    if (previous && this._networkProxy === previous.networkProxy) {
+      this._networkProxy = undefined
+    }
+
+    if (!previous) {
+      return
+    }
+
+    // Disable Fetch and drop handlers before dispose so paused requests cannot
+    // enter the legacy pipeline against a NetworkProxy whose PreRequests
+    // sweep/buffers are already cleared. Then dispose so replaced runtimes do
+    // not leave sweep timers accumulating across specs.
+    return previous.stop().catch((err) => {
+      debug('CDP Fetch runtime stop failed: %s', err?.stack || err)
+    }).finally(() => {
+      try {
+        previous.networkProxy.dispose()
+      } catch (err) {
+        debug('CDP Fetch NetworkProxy dispose failed: %s', err?.stack || err)
+      }
+    })
+  }
+
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
     // e2e only?
     options.onResolveUrl = this._onResolveUrl.bind(this)
@@ -488,11 +612,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
     })
 
-    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
+    // Lazy lookup: under proxy-disabled mode NetworkProxy is created later in
+    // createCdpFetchNetworkRuntime, after websockets start. The legacy HTML
+    // injection pipeline populates this map once that runtime exists.
+    options.getRenderedHTMLOrigins = () => {
+      return this._networkProxy?.http.getRenderedHTMLOrigins() ?? {}
+    }
+
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
+      this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
@@ -669,6 +800,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
+    this.resetCdpFetchRuntime()
     this._networkProxy?.clearCredentials()
     const baseUrl = this._baseUrl ?? '<root>'
 
@@ -686,7 +818,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     evilDns.clear()
 
-    return this._server.destroyAsync()
+    // Fully tear down CDP Fetch (Fetch.disable + NetworkProxy.dispose). reset()
+    // only clears in-flight state so the next test can keep using Fetch.
+    return Promise.resolve(this.stopCdpFetchRuntime())
+    .then(() => this._server!.destroyAsync())
     .then(() => {
       this.isListening = false
     })

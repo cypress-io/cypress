@@ -68,7 +68,7 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 describe('exec info', () => {
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
+
     const originalOut = process.stdout.write
 
     vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
@@ -96,8 +96,6 @@ describe('exec info', () => {
     vi.unstubAllEnvs()
     vi.resetAllMocks()
 
-    vi.stubEnv('NO_PROXY', undefined)
-    vi.stubEnv('CYPRESS_COMMERCIAL_RECOMMENDATIONS', undefined)
     // common stubs
     vi.mocked(spawnStart).mockResolvedValue(null)
     vi.mocked(os.platform).mockReturnValue('linux')
@@ -129,42 +127,40 @@ describe('exec info', () => {
     chalk.level = previousChalkLevel
   })
 
-  it('prints collected info without env vars', async () => {
+  it('prints collected info', async () => {
     const output = createStdoutCapture()
 
     await info.start()
 
-    expect(output()).toMatchSnapshot('cypress info without browsers or vars')
+    expect(output()).toMatchSnapshot('cypress info')
 
     expect(spawnStart).toBeCalledWith(['--mode=info'], { dev: undefined })
   })
 
-  it('prints proxy and cypress env vars', async () => {
-    vi.stubEnv('HTTP_PROXY', 'some proxy variable')
-    vi.stubEnv('HTTPS_PROXY', 'another proxy variable')
+  it('does not print proxy or cypress env vars', async () => {
+    vi.stubEnv('HTTP_PROXY', 'http://username:password@proxy.example.com:8080')
+    vi.stubEnv('HTTPS_PROXY', 'https://token@secure-proxy.example.com')
     vi.stubEnv('NO_PROXY', 'no proxy variable')
 
-    vi.stubEnv('CYPRESS_ENV_VAR1', 'my Cypress variable')
-    vi.stubEnv('CYPRESS_ENV_VAR2', 'my other Cypress variable')
+    vi.stubEnv('CYPRESS_AUTH_TOKEN', 'example-token')
+    vi.stubEnv('CYPRESS_PASSWORD', 'example-password')
+    vi.stubEnv('CYPRESS_PROJECT_ID', 'abc123')
+    vi.stubEnv('CYPRESS_RECORD_KEY', 'really really secret stuff')
 
     const output = createStdoutCapture()
 
     await info.start()
 
-    expect(output()).toMatchSnapshot('cypress info with proxy and vars')
-  })
+    const result = output()
 
-  it('redacts sensitive cypress variables', async () => {
-    vi.stubEnv('CYPRESS_ENV_VAR1', 'my Cypress variable')
-    vi.stubEnv('CYPRESS_ENV_VAR2', 'my other Cypress variable')
-    vi.stubEnv('CYPRESS_PROJECT_ID', 'abc123') // not sensitive
-    vi.stubEnv('CYPRESS_RECORD_KEY', 'really really secret stuff') // should not be printed
-
-    const output = createStdoutCapture()
-
-    await info.start()
-
-    expect(output()).toMatchSnapshot('cypress redacts sensitive vars')
+    expect(result).not.toContain('proxy.example.com')
+    expect(result).not.toContain('secure-proxy.example.com')
+    expect(result).not.toContain('example-token')
+    expect(result).not.toContain('example-password')
+    expect(result).not.toContain('abc123')
+    expect(result).not.toContain('really really secret stuff')
+    expect(result).not.toContain('Proxy Settings')
+    expect(result).not.toContain('Environment Variables')
   })
 
   it('logs additional info about pre-releases', async () => {

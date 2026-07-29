@@ -11,8 +11,11 @@
 - The default `keystrokeDelay` for `cy.type()` has been changed from `10` to `0` to improve performance of typing-heavy test runs. Users who relied on the implicit 10ms delay can restore it by setting `keystrokeDelay: 10` in their Cypress config or on `Cypress.Keyboard`. Addresses [#33523](https://github.com/cypress-io/cypress/issues/33523).
 - Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
 - The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm when migrating to the modern visibility algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
+- [`cy.getCookie()`](https://on.cypress.io/getcookie), [`cy.getCookies()`](https://on.cypress.io/getcookies) and [`cy.getAllCookies()`](https://on.cypress.io/getallcookies) are now query commands. They re-read the cookie(s) from the browser and retry any attached assertions until they pass or the command times out, so `cy.getCookie('token').should('exist')` now waits for a cookie that is set asynchronously (for example, after a login request resolves) instead of failing on the first read. As a result, their timeout now follows `defaultCommandTimeout` (default `4000`) rather than `responseTimeout` (default `30000`), and to overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#4802](https://github.com/cypress-io/cypress/issues/4802).
+- `viewportWidth` and `viewportHeight` can no longer be set via [`Cypress.config()`](https://on.cypress.io/config) during test execution. Mutating them this way affected the *next* test rather than the current one and was not reflected in Test Replay. Use [`cy.viewport()`](https://on.cypress.io/viewport) or set them in the test configuration of a `describe`/`context` or `it` block instead. Addresses [#31592](https://github.com/cypress-io/cypress/issues/31592). Addressed in [#34262](https://github.com/cypress-io/cypress/pull/34262).
 - [`cy.getCookie()`](https://on.cypress.io/getcookie) and [`cy.getCookies()`](https://on.cypress.io/getcookies) are now query commands. They re-read the cookie(s) from the browser and retry any attached assertions until they pass or the command times out, so `cy.getCookie('token').should('exist')` now waits for a cookie that is set asynchronously (for example, after a login request resolves) instead of failing on the first read. As a result, their timeout now follows `defaultCommandTimeout` (default `4000`) rather than `responseTimeout` (default `30000`), and to overwrite these commands you must now use [`Cypress.Commands.overwriteQuery()`](https://on.cypress.io/api/cypress-api/custom-queries) instead of `Cypress.Commands.overwrite()`. Addresses [#4802](https://github.com/cypress-io/cypress/issues/4802).
 - Removed the `experimentalSourceRewriting` configuration option. The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting, so default behavior is unchanged. You can safely remove this option from your config. Addresses [#34213](https://github.com/cypress-io/cypress/issues/34213).
+- The `cypress info` command no longer prints proxy environment variables (`HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`) or `CYPRESS_*` environment variables. The command now reports only Cypress-specific details such as file paths, version, and system information. Addresses [#34103](https://github.com/cypress-io/cypress/issues/34103). Fixed in [#34314](https://github.com/cypress-io/cypress/pull/34314).
 
 **Deprecations:**
 
@@ -27,7 +30,24 @@
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
-## 15.18.2
+## 15.19.1
+
+**Performance:**
+
+- Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
+- Reduced the sampling overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) when Cypress runs inside a memory-limited container using cgroup v1. Memory readings no longer spawn helper subprocesses on every sampling interval, which lowers CPU usage that previously competed with the tests, most noticeably on constrained CI machines. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105). Fixed in [#34331](https://github.com/cypress-io/cypress/pull/34331).
+
+**Bugfixes:**
+
+- Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) block could intermittently fail with `TypeError: Cannot read properties of undefined (reading 'applied')`, incorrectly reported as originating from your test code. Addressed in [#34376](https://github.com/cypress-io/cypress/pull/34376).
+- Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
+- Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
+- Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+
+**Dependency Updates:**
+
+- Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
+
 ## 15.19.0
 
 **Performance:**
