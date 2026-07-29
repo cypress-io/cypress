@@ -8,7 +8,9 @@ import path from 'path'
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8').toString())
 
 function external (id, parent, resolved) {
-  // Bundle tslib so that we include ts helpers (Windows resolves to absolute path with backslashes)
+  // tslib is only a devDependency: @rollup/plugin-typescript force-enables importHelpers, so we
+  // must bundle the helpers here or the published package would require tslib at runtime
+  // (Windows resolves tslib to an absolute path with backslashes)
   const idNorm = id.replace(/\\/g, '/')
 
   if (id === 'tslib' || idNorm.startsWith('tslib') || idNorm.includes('tslib/tslib.es6.js')) {
