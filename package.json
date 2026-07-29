@@ -58,7 +58,6 @@
     "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{config,data-context,driver,electron,errors,extension,https-proxy,icons,launcher,net-stubbing,network-interception,network,packherd-require,proxy,rewriter,scaffold-config,socket,v8-snapshot-require,telemetry,stderr-filtering,types} --scope=@tooling/{electron-mksnapshot,v8-snapshot}",
     "test-debug": "lerna exec yarn test-debug --ignore=@packages/{driver,root,static,web-config}",
     "test-integration": "lerna exec yarn test-integration --ignore=@packages/{driver,root,static,web-config}",
-    "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-npm-package-release-script": "npx lerna exec --scope=@cypress/* -- npx --no-install semantic-release --dry-run",
     "test-scripts": "mocha -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "yarn test-scripts --watch --extension ts,js",
