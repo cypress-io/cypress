@@ -83,8 +83,14 @@ export interface TestDetailEntry {
 }
 
 export interface CommandEntry {
-  /** The driver's command log id, e.g. `log-<origin>-3`. */
-  id: string
+  /**
+   * The command id the pin command accepts. Numbered rows carry the exact
+   * number the app reporter shows (a per-hook-section counter, qualifiable as
+   * `<hookId>:<number>` when duplicated); event and system rows carry an
+   * attempt-wide `e1`..`eN` instead. Absent on `cy.intercept` registration
+   * rows — routes aren't commands.
+   */
+  id?: string
   /** The command name as logged, e.g. `visit`, `get`, `assert`. */
   name?: string
   /**

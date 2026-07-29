@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapNetworkInfo, TapReporterCommand, TapReporterError, TapReporterView } from '@packages/cypress-instances'
+import type { TapNetworkInfo, TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterView } from '@packages/cypress-instances'
 
 // The reporter's own palette (packages/reporter/src/lib/variables.scss and
 // commands.scss), so the CLI rendering matches the app: $pass/$fail map to
@@ -19,7 +19,9 @@ const color = {
   bad: chalk.hex('#c62b49'), // $red-500
   pending: chalk.hex('#6470f3'), // $indigo-400
   alias: chalk.hex('#c8a7f5'), // $purple-300
+  aliasDom: chalk.hex('#9aa2fc'), // $indigo-300 — the reporter colors dom aliases indigo
   muted: chalk.hex('#9095ad'), // $gray-500
+  fadedId: chalk.hex('#5a5f7a'), // $gray-700 — event ids sit back from the command numbers
 }
 
 const TEST_STATE = {
@@ -37,7 +39,11 @@ const INDICATORS: Record<NonNullable<TapNetworkInfo['indicator']>, string> = {
   bad: color.bad('●'),
 }
 
-const aliasBadge = (alias: string): string => color.alias(`@${alias}`)
+// The reporter's tag palette: dom aliases indigo, everything else
+// (route/agent/primitive) purple.
+const aliasColor = (aliasType: string | undefined) => (aliasType === 'dom' ? color.aliasDom : color.alias)
+
+const aliasBadge = (alias: string, aliasType?: string): string => aliasColor(aliasType)(`@${alias}`)
 
 // Driver messages emphasize with markdown-style `**`; render the emphasis
 // instead of the markers, on one line.
@@ -46,6 +52,20 @@ const emphasize = (message: string, strong: (part: string) => string): string =>
   .replace(/\s+/g, ' ')
   .trim()
   .replace(/\*\*([^*]+)\*\*/g, (_, part) => strong(part))
+}
+
+// The `@name`s a row references (cy.get('@x') / cy.wait('@x')) appear verbatim
+// in its message — give them the alias badge color in place.
+const colorizeAliasReferences = (message: string, command: TapReporterCommand): string => {
+  const { referencedAliases, aliasType } = command
+
+  if (!referencedAliases?.length) {
+    return message
+  }
+
+  const names = new Set(referencedAliases)
+
+  return message.replace(/@([\w-]+)/g, (match, name) => (names.has(name) ? aliasColor(aliasType)(match) : match))
 }
 
 // Asserts take the reporter's state colors — passing green, failing red —
@@ -67,12 +87,67 @@ const formatMessage = (command: TapReporterCommand): string => {
     }
   }
 
-  return emphasize(message, (part) => chalk.bold(part))
+  return colorizeAliasReferences(emphasize(message, (part) => chalk.bold(part)), command)
+}
+
+// Pad before coloring: the escape codes chalk adds would otherwise count
+// toward the column width.
+const panelTable = (title: string, header: string[], rows: string[][], colorize: (cells: string[]) => string[]): string[] => {
+  const widths = header.map((cell, column) => Math.max(cell.length, ...rows.map((row) => row[column].length)))
+  const pad = (cells: string[]) => cells.map((cell, column) => cell.padEnd(widths[column]))
+
+  return [
+    chalk.dim(`${title} (${rows.length})`),
+    `  ${pad(header).map((cell) => chalk.dim(cell)).join('  ')}`,
+    ...rows.map((row) => `  ${colorize(pad(row)).join('  ')}`),
+  ]
+}
+
+// The panel's status badge colors: red for a failed session, orange while one
+// is being recreated, the reporter's jade otherwise.
+const sessionStatus = (status: string | undefined): string => {
+  if (status === undefined) {
+    return ''
+  }
+
+  if (status === 'failed') {
+    return color.fail(status)
+  }
+
+  if (status.startsWith('recreat')) {
+    return color.aborted(status)
+  }
+
+  return color.passMessage(status)
+}
+
+const sessionsPanel = (sessions: TapReporterSession[]): string[] => {
+  return [
+    chalk.dim(`SESSIONS (${sessions.length})`),
+    ...sessions.map((session) => {
+      const global = session.global ? `  ${chalk.dim('(global)')}` : ''
+
+      return `  ${session.name}${global}  ${sessionStatus(session.status)}`
+    }),
+  ]
+}
+
+const agentsTable = (agents: TapReporterAgent[]): string[] => {
+  const rows = agents.map((agent) => {
+    return [
+      agent.type ?? '',
+      agent.functionName ?? '',
+      (agent.aliases ?? []).join(', '),
+      agent.callCount ? String(agent.callCount) : '-',
+    ]
+  })
+
+  return panelTable('SPIES / STUBS', ['TYPE', 'FUNCTION', 'ALIAS(ES)', 'CALLS'], rows, (cells) => {
+    return [chalk.bold(cells[0]), cells[1], color.alias(cells[2]), cells[3]]
+  })
 }
 
 const routesTable = (routes: TapReporterView['routes']): string[] => {
-  const header = ['METHOD', 'MATCHER', 'STUBBED', 'ALIAS', '#']
-
   const rows = routes.map((route) => {
     return [
       route.method ?? '',
@@ -83,12 +158,7 @@ const routesTable = (routes: TapReporterView['routes']): string[] => {
     ]
   })
 
-  const widths = header.map((title, column) => Math.max(title.length, ...rows.map((row) => row[column].length)))
-  const pad = (cells: string[]) => cells.map((cell, column) => cell.padEnd(widths[column]))
-
-  // Pad before coloring: the escape codes chalk adds would otherwise count
-  // toward the column width.
-  const colorize = (cells: string[]) => {
+  return panelTable('ROUTES', ['METHOD', 'MATCHER', 'STUBBED', 'ALIAS', '#'], rows, (cells) => {
     return [
       chalk.bold(cells[0]),
       cells[1],
@@ -96,13 +166,7 @@ const routesTable = (routes: TapReporterView['routes']): string[] => {
       color.alias(cells[3]),
       cells[4],
     ]
-  }
-
-  return [
-    chalk.dim('ROUTES') + chalk.dim(` (${routes.length})`),
-    `  ${pad(header).map((cell) => chalk.dim(cell)).join('  ')}`,
-    ...rows.map((row) => `  ${colorize(pad(row)).join('  ')}`),
-  ]
+  })
 }
 
 interface Section {
@@ -128,21 +192,20 @@ const sectionize = (commands: TapReporterCommand[]): Section[] => {
   return sections
 }
 
-const isNumbered = (command: TapReporterCommand): boolean => {
-  return command.event !== true && command.type !== 'system'
+const isEventRow = (command: TapReporterCommand): boolean => {
+  return command.event === true || command.type === 'system'
+}
+
+// A row's alias badge(s): its own aliases (`.as()` definitions, spy/stub call
+// rows) or the alias its request matched.
+const aliasSuffix = (command: TapReporterCommand, network: TapNetworkInfo | undefined): string => {
+  const names = command.aliases ?? (network?.alias != null ? [network.alias] : [])
+
+  return names.length ? `  ${names.map((name) => aliasBadge(name, command.aliasType)).join(' ')}` : ''
 }
 
 const networkSuffix = (network: TapNetworkInfo | undefined): string => {
-  if (!network) {
-    return ''
-  }
-
-  const parts = [
-    ...(network.alias ? [aliasBadge(network.alias)] : []),
-    ...(network.stubbed ? [chalk.dim('(stubbed)')] : []),
-  ]
-
-  return parts.length ? `  ${parts.join(' ')}` : ''
+  return network?.stubbed ? `  ${chalk.dim('(stubbed)')}` : ''
 }
 
 const stateSuffix = (command: TapReporterCommand): string => {
@@ -173,14 +236,19 @@ const rowParts = (command: TapReporterCommand): RowParts => {
   }
 }
 
-// Event logs render the way the reporter shows them: unnumbered, labeled by
-// their display name, as an annotation of the surrounding command.
-const renderEventRow = (command: TapReporterCommand, numberWidth: number): string => {
+// Event logs render the way the reporter shows them: labeled by their display
+// name, as an annotation of the surrounding command — but with their own tap id,
+// so an xhr or uncaught-exception row is referenceable like any command. A
+// failed event (an uncaught exception) takes the failure red, like the reporter.
+const renderEventRow = (command: TapReporterCommand, idWidth: number): string => {
   const { groupIndent, dot, message, cleaned } = rowParts(command)
-  const label = chalk.dim(`(${command.displayName ?? command.name ?? '?'})`)
-  const blank = ' '.repeat(numberWidth)
+  const failed = command.state === 'failed'
+  const labelColor = failed ? color.fail : chalk.dim
+  const label = labelColor(`(${command.displayName ?? command.name ?? '?'})`)
+  const id = color.fadedId(command.id.padStart(idWidth))
+  const text = failed ? color.fail(chalk.italic(message)) : chalk.italic(message)
 
-  return `  ${blank}  ${groupIndent}  ${label} ${dot}${chalk.italic(message)}${networkSuffix(command.network)}${cleaned}`
+  return `  ${id}  ${groupIndent}  ${label} ${dot}${text}${aliasSuffix(command, command.network)}${networkSuffix(command.network)}${stateSuffix(command)}${cleaned}`
 }
 
 // Child commands render dash-prefixed, the way the reporter marks a command
@@ -189,36 +257,31 @@ const commandLabel = (command: TapReporterCommand): string => {
   return `${command.type === 'child' ? '-' : ''}${command.name ?? ''}`
 }
 
-const renderCommandRow = (command: TapReporterCommand, number: number, numberWidth: number, nameWidth: number): string => {
+const renderCommandRow = (command: TapReporterCommand, idWidth: number, nameWidth: number): string => {
   const { groupIndent, dot, message, cleaned } = rowParts(command)
-  const num = chalk.dim(String(number).padStart(numberWidth))
+  const id = chalk.dim(command.id.padStart(idWidth))
   const name = commandLabel(command).padEnd(nameWidth)
   const styledName = command.state === 'failed' ? color.fail.bold(name) : chalk.bold(name)
 
-  return `  ${num}  ${groupIndent}${styledName}  ${dot}${message}${networkSuffix(command.network)}${stateSuffix(command)}${cleaned}`
+  return `  ${id}  ${groupIndent}${styledName}  ${dot}${message}${aliasSuffix(command, command.network)}${networkSuffix(command.network)}${stateSuffix(command)}${cleaned}`
 }
 
-const renderRow = (command: TapReporterCommand, number: number, numberWidth: number, nameWidth: number): string => {
-  return isNumbered(command)
-    ? renderCommandRow(command, number, numberWidth, nameWidth)
-    : renderEventRow(command, numberWidth)
+const renderRow = (command: TapReporterCommand, idWidth: number, nameWidth: number): string => {
+  return isEventRow(command)
+    ? renderEventRow(command, idWidth)
+    : renderCommandRow(command, idWidth, nameWidth)
 }
 
-const renderSection = (section: Section, hookName: string, numberWidth: number): string[] => {
-  const numbered = section.rows.filter(isNumbered)
-  const nameWidth = Math.max(0, ...numbered.map((command) => commandLabel(command).length))
-
-  let number = 0
+// The hook id in the title is the qualifier a duplicated row number needs
+// (`pin r8 h1:1`), since numbers restart per section.
+const renderSection = (section: Section, hookName: string, idWidth: number): string[] => {
+  const commandRows = section.rows.filter((command) => !isEventRow(command))
+  const nameWidth = Math.max(0, ...commandRows.map((command) => commandLabel(command).length))
+  const qualifier = section.hookId ? ` · ${section.hookId}` : ''
 
   return [
-    chalk.dim(hookName.toUpperCase()),
-    ...section.rows.map((command) => {
-      if (isNumbered(command)) {
-        number += 1
-      }
-
-      return renderRow(command, number, numberWidth, nameWidth)
-    }),
+    chalk.dim(`${hookName.toUpperCase()}${qualifier}`),
+    ...section.rows.map((command) => renderRow(command, idWidth, nameWidth)),
   ]
 }
 
@@ -251,12 +314,14 @@ export const renderReporterHuman = (view: TapReporterView): string => {
   const hookNames = new Map(view.hooks.map(({ hookId, hookName }) => [hookId, hookName]))
   const sections = sectionize(view.commands)
 
-  const numberWidth = Math.max(1, ...sections.map((section) => String(section.rows.filter(isNumbered).length).length))
+  const idWidth = Math.max(2, ...view.commands.map((command) => command.id.length))
 
   const blocks: string[][] = [
     [`${icon} ${chalk.bold(view.test.fullTitle)}  ${word}`],
+    ...(view.sessions.length ? [sessionsPanel(view.sessions)] : []),
+    ...(view.agents.length ? [agentsTable(view.agents)] : []),
     ...(view.routes.length ? [routesTable(view.routes)] : []),
-    ...sections.map((section) => renderSection(section, hookNames.get(section.hookId ?? '') ?? 'commands', numberWidth)),
+    ...sections.map((section) => renderSection(section, hookNames.get(section.hookId ?? '') ?? 'commands', idWidth)),
   ]
 
   if (!view.commands.length) {

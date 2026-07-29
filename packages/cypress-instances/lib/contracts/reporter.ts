@@ -44,9 +44,30 @@ export interface TapReporterHook {
   hookName: string
 }
 
+/** One row of the reporter's SESSIONS panel — a `cy.session` this attempt used. */
+export interface TapReporterSession {
+  /** The session id passed to `cy.session()`, e.g. `all-commands-user`. */
+  name: string
+  /** The reporter's status badge: `created`, `restored`, `recreated`, `failed`, or an in-flight `-ing` form. */
+  status?: string
+  /** Present (always `true`) only for a global session (`cacheAcrossSpecs`). */
+  global?: true
+}
+
+/** One row of the reporter's SPIES / STUBS panel — a `cy.spy` / `cy.stub` agent. */
+export interface TapReporterAgent {
+  /** The agent's log name, e.g. `spy-1` or `stub-2` — the reporter's Type column. */
+  type?: string
+  /** The wrapped method's name. */
+  functionName?: string
+  /** Aliases set via `.as()`. */
+  aliases?: string[]
+  /** How many times the agent was invoked. */
+  callCount?: number
+}
+
 /** One row of the reporter's ROUTES table — a `cy.intercept` registration. */
 export interface TapReporterRoute {
-  id: string
   /** HTTP method, or `*` for a wildcard matcher. */
   method?: string
   /** The route's display matcher, e.g. `**\/comments/*`. */
@@ -62,7 +83,15 @@ export interface TapReporterRoute {
 }
 
 export interface TapReporterCommand {
-  /** The driver's command log id, e.g. `log-<origin>-3`. */
+  /**
+   * The command id the pin command accepts. Numbered rows carry the exact
+   * number the app reporter shows (a per-hook-section counter, so it restarts
+   * each section); event and system rows, which the reporter leaves
+   * unnumbered, carry an attempt-wide `e1`..`eN` instead. A duplicated number
+   * resolves to the test body first, then a unique match; qualify it with the
+   * section's hookId (`h1:3`) to target a hook row directly. Route
+   * registrations aren't commands and have no id.
+   */
   id: string
   /** The command name as logged, e.g. `visit`, `get`, `assert`. */
   name?: string
@@ -78,10 +107,16 @@ export interface TapReporterCommand {
   hookId?: string
   /** Event log — the reporter renders these unnumbered, as annotations of the surrounding command. */
   event?: true
-  /** Id of the enclosing log group's command, when nested (e.g. inside cy.session). */
+  /** Tap command id of the enclosing log group's command, when nested (e.g. inside cy.session). */
   group?: string
   /** Nesting depth within log groups. */
   groupLevel?: number
+  /** Aliases this row defines via `.as()` — the reporter's badge on the row. Also set on spy/stub call rows. */
+  aliases?: string[]
+  /** What the alias points at: `route`, `agent`, `primitive`, `dom`, or `intercept` — the reporter colors `dom` indigo, the rest purple. */
+  aliasType?: string
+  /** Alias names this row references, e.g. `cy.get('@x')` / `cy.wait('@x')` — the `@name`s in `message`. */
+  referencedAliases?: string[]
   /** High-level network detail; absent on ordinary command rows. */
   network?: TapNetworkInfo
   /** Present (always `true`) only when the driver evicted this test's command details from memory. */
@@ -116,6 +151,8 @@ export interface TapReporterError {
 export interface TapReporterView {
   test: TapReporterTest
   hooks: TapReporterHook[]
+  sessions: TapReporterSession[]
+  agents: TapReporterAgent[]
   routes: TapReporterRoute[]
   commands: TapReporterCommand[]
   /** Present only when the attempt failed. */

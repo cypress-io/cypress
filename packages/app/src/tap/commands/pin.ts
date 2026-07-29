@@ -1,5 +1,5 @@
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from '../test-state'
+import { attemptSelectionError, resolveCommandLogId, selectTestAttempt } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner } from '../types'
 
@@ -20,6 +20,9 @@ export interface ClearResult {
 interface PinnedState {
   test: string
   command: string
+  // The driver's log id behind the tap command id — what the runner's
+  // snapshot APIs key on.
+  logId: string
   at: SnapshotRef
   original: unknown
   snapshot: PinSnapshotEntry
@@ -73,7 +76,7 @@ export const reconcilePin = (runner: PinSnapshotRunner): void => {
     return
   }
 
-  const stillLive = liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.command)).includes(pinned.snapshot)
+  const stillLive = liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.logId)).includes(pinned.snapshot)
 
   if (!stillLive) {
     releasePin()
@@ -112,7 +115,7 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
 
 const movePin = (runner: PinSnapshotRunner, at: string | undefined): PinResult => {
   const current = pinned!
-  const props = runner.getSnapshotPropsForLog(current.test, current.command)
+  const props = runner.getSnapshotPropsForLog(current.test, current.logId)
   const snapshots = liveSnapshots(props)
   const index = resolveAt(snapshots, at)
 
@@ -181,13 +184,13 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
     throw attemptSelectionError(selection, test)
   }
 
-  const commands = serializeTestCommands(selection.attempt)
+  const logId = resolveCommandLogId(selection.attempt, command, test)
 
-  if (!commands.some((entry) => entry.id === command)) {
+  if (logId === undefined) {
     throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the commands command to list this test’s commands`)
   }
 
-  const props = runner.getSnapshotPropsForLog(test, command)
+  const props = runner.getSnapshotPropsForLog(test, logId)
   const snapshots = liveSnapshots(props)
 
   if (snapshots.length === 0) {
@@ -204,7 +207,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
 
   const original = pinned ? pinned.original : autIframe.detachDom()
 
-  tapManagerDataSource.pinSnapshot({ ...props, snapshots }, index, test, command)
+  tapManagerDataSource.pinSnapshot({ ...props, snapshots }, index, test, logId)
 
   if (!pinned) {
     stopListeningForUnpin = tapManagerDataSource.onSnapshotUnpinned(onExternalUnpin)
@@ -212,7 +215,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
 
   const at_ = toRef(snapshots[index], index)
 
-  pinned = { test, command, at: at_, original, snapshot: snapshots[index] }
+  pinned = { test, command, logId, at: at_, original, snapshot: snapshots[index] }
 
   return {
     pinned: { test, command, at: at_ },

@@ -297,7 +297,7 @@ describe('tap binding pin lifecycle', () => {
 
       expect(clearNoop).to.deep.eq({ result: { cleared: false } })
 
-      const beforeRun = await binding.exec('pin', { test: 'r2', command: 'log-1' })
+      const beforeRun = await binding.exec('pin', { test: 'r2', command: '1' })
 
       expect((beforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
     })
@@ -485,7 +485,7 @@ describe('tap binding with network activity', () => {
     })
   })
 
-  const REPORTER_COMMAND_KEYS = ['id', 'name', 'displayName', 'message', 'state', 'type', 'hookId', 'event', 'group', 'groupLevel', 'network', 'cleanedUp']
+  const REPORTER_COMMAND_KEYS = ['id', 'name', 'displayName', 'message', 'state', 'type', 'hookId', 'event', 'group', 'groupLevel', 'aliases', 'aliasType', 'referencedAliases', 'network', 'cleanedUp']
   const REPORTER_ROUTE_KEYS = ['id', 'method', 'url', 'stubbed', 'status', 'numResponses', 'alias']
 
   it('renders the full reporter view for a test: header, hooks, routes, and enriched commands', () => {
@@ -510,7 +510,7 @@ describe('tap binding with network activity', () => {
       const outcome = (await binding.exec('reporter', {}, { test: testId })) as { result: Record<string, any> }
       const view = outcome.result
 
-      expect(Object.keys(view)).to.deep.eq(['test', 'hooks', 'routes', 'commands'])
+      expect(Object.keys(view)).to.deep.eq(['test', 'hooks', 'sessions', 'agents', 'routes', 'commands'])
       expect(view.test).to.deep.eq({
         id: testId,
         title: 'records intercept, real request, and cy.request detail',

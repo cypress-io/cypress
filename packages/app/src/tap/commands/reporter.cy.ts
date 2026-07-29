@@ -22,24 +22,46 @@ describe('tap/commands/reporter', () => {
       },
       routes: [
         {
-          id: 'log-int', name: 'route', state: 'pending', instrument: 'route',
+          id: 'log-int', name: 'route', state: 'pending', instrument: 'route', createdAtTimestamp: 2,
           method: 'GET', url: '**/api/users', isStubbed: true, status: 200,
           numResponses: 1, alias: 'getUsers', chainerId: 'ch1',
         },
       ],
+      // The agents bucket mirrors the driver's serialized `instrument: 'agent'`
+      // logs — the SPIES / STUBS panel, apart from the command log.
+      agents: [
+        {
+          id: 'log-agent', name: 'spy-1', instrument: 'agent', functionName: 'beep',
+          alias: 'beep', aliasType: 'agent', callCount: 2, count: 1,
+        },
+      ],
       commands: [
-        { id: 'log-1', name: 'visit', message: '/users', state: 'passed', type: 'parent', hookId: 'h1', event: false, timeout: 4000 },
-        { id: 'log-2', name: 'get', message: '#list', state: 'passed', type: 'parent', hookId: 'r2', event: false },
+        { id: 'log-1', name: 'visit', message: '/users', state: 'passed', type: 'parent', hookId: 'h1', event: false, timeout: 4000, createdAtTimestamp: 1 },
+        { id: 'log-2', name: 'get', message: '#list', state: 'passed', type: 'parent', hookId: 'r2', event: false, createdAtTimestamp: 3 },
         {
           id: 'log-3', name: 'request', displayName: 'xhr', state: 'passed', type: 'parent', hookId: 'r2',
-          event: true, message: '',
+          event: true, message: '', createdAtTimestamp: 4,
           renderProps: {
             indicator: 'successful', message: 'GET 200 /api/users', wentToOrigin: false,
             interceptions: [{ command: 'intercept', alias: 'getUsers', type: 'stub' }],
           },
           method: 'GET', url: 'http://localhost:2121/api/users', alias: 'getUsers',
         },
-        { id: 'log-4', name: 'session-group', message: 'user', state: 'passed', type: 'parent', hookId: 'r2', group: 'log-2', groupLevel: 1 },
+        { id: 'log-4', name: 'session-group', message: 'user', state: 'passed', type: 'parent', hookId: 'r2', group: 'log-2', groupLevel: 1, createdAtTimestamp: 5 },
+        // A cy.session group log: an ordinary command carrying sessionInfo — the
+        // driver has no session instrument, this is what feeds the SESSIONS panel.
+        {
+          id: 'log-5', name: 'session', message: 'user-1', state: 'passed', type: 'parent', hookId: 'r2', createdAtTimestamp: 6,
+          sessionInfo: { id: 'user-1', isGlobalSession: true, status: 'restored' },
+        },
+        {
+          id: 'log-6', name: 'spy-1', displayName: 'spy-1', message: 'beep()', state: 'passed', type: 'parent', hookId: 'r2',
+          event: true, createdAtTimestamp: 7, alias: ['beep'], aliasType: 'agent',
+        },
+        {
+          id: 'log-7', name: 'wait', message: '@getUsers', state: 'passed', type: 'parent', hookId: 'r2', createdAtTimestamp: 8,
+          referencesAlias: [{ name: 'getUsers', cardinal: 1, ordinal: '1st' }], aliasType: 'route',
+        },
       ],
     },
     r3: {
@@ -119,17 +141,37 @@ describe('tap/commands/reporter', () => {
           { hookId: 'h1', hookName: 'before each' },
           { hookId: 'r2', hookName: 'test body' },
         ],
+        // Ids are the reporter's own numbers, counted per hook section, while
+        // event rows take the attempt-wide `e` sequence; the route registration
+        // isn't a command, so it carries no id, and the group reference is
+        // remapped into the same id space.
+        sessions: [
+          { name: 'user-1', status: 'restored', global: true },
+        ],
+        agents: [
+          { type: 'spy-1', functionName: 'beep', aliases: ['beep'], callCount: 2 },
+        ],
         routes: [
-          { id: 'log-int', method: 'GET', url: '**/api/users', stubbed: true, status: 200, numResponses: 1, alias: 'getUsers' },
+          { method: 'GET', url: '**/api/users', stubbed: true, status: 200, numResponses: 1, alias: 'getUsers' },
         ],
         commands: [
-          { id: 'log-1', name: 'visit', message: '/users', state: 'passed', type: 'parent', hookId: 'h1' },
-          { id: 'log-2', name: 'get', message: '#list', state: 'passed', type: 'parent', hookId: 'r2' },
+          { id: '1', name: 'visit', message: '/users', state: 'passed', type: 'parent', hookId: 'h1' },
+          { id: '1', name: 'get', message: '#list', state: 'passed', type: 'parent', hookId: 'r2' },
           {
-            id: 'log-3', name: 'request', displayName: 'xhr', message: 'GET 200 /api/users', state: 'passed', type: 'parent', hookId: 'r2', event: true,
+            id: 'e1', name: 'request', displayName: 'xhr', message: 'GET 200 /api/users', state: 'passed', type: 'parent', hookId: 'r2', event: true,
+            aliases: ['getUsers'],
             network: { method: 'GET', url: 'http://localhost:2121/api/users', indicator: 'successful', stubbed: true, alias: 'getUsers' },
           },
-          { id: 'log-4', name: 'session-group', message: 'user', state: 'passed', type: 'parent', hookId: 'r2', group: 'log-2', groupLevel: 1 },
+          { id: '2', name: 'session-group', message: 'user', state: 'passed', type: 'parent', hookId: 'r2', group: '1', groupLevel: 1 },
+          { id: '3', name: 'session', message: 'user-1', state: 'passed', type: 'parent', hookId: 'r2' },
+          {
+            id: 'e2', name: 'spy-1', displayName: 'spy-1', message: 'beep()', state: 'passed', type: 'parent', hookId: 'r2', event: true,
+            aliases: ['beep'], aliasType: 'agent',
+          },
+          {
+            id: '4', name: 'wait', message: '@getUsers', state: 'passed', type: 'parent', hookId: 'r2',
+            referencedAliases: ['getUsers'], aliasType: 'route',
+          },
         ],
       },
     })
@@ -164,6 +206,8 @@ describe('tap/commands/reporter', () => {
       result: {
         test: { id: 'r3', title: 'never ran', fullTitle: 'never ran', state: 'skipped' },
         hooks: [{ hookId: 'r3', hookName: 'test body' }],
+        sessions: [],
+        agents: [],
         routes: [],
         commands: [],
       },

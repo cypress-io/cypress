@@ -118,7 +118,7 @@ const pinMeta = {
   description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
   params: [
     { ...testIdField, required: false },
-    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command' },
+    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
   ],
   options: [
     { name: 'at', type: 'string', required: false, description: 'which snapshot to pin: a name like "before"/"after" or a 1-based index; defaults to the last (the command’s final state). Re-run on the pinned command to switch snapshots without releasing the pin' },
