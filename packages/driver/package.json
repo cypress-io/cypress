@@ -98,7 +98,7 @@
     "vite": "^6.3.5",
     "vitest": "^3.2.4",
     "webpack": "^5.88.2",
-    "zone.js": "0.15.0"
+    "zone.js": "0.15.1"
   },
   "files": [
     "patches"
