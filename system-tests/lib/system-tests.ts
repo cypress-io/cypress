@@ -653,7 +653,13 @@ const startServer = function (obj) {
 
   const app = Express()
 
-  const srv = https ? createHttpsServer(app) : new http.Server(app)
+  let srv
+
+  if (https) {
+    srv = createHttpsServer(app)
+  } else {
+    srv = new http.Server(app)
+  }
 
   allowDestroy(srv)
 

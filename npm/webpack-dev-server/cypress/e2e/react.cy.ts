@@ -38,7 +38,7 @@ for (const project of WEBPACK_REACT) {
       cy.specsPageIsVisible()
       cy.contains('MissingReact.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.get('.test-err-code-frame').should('be.visible')
+      cy.reporter().find('.test-err-code-frame').should('be.visible')
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReact.jsx`,
         `import React from 'react';
@@ -58,7 +58,7 @@ for (const project of WEBPACK_REACT) {
       cy.specsPageIsVisible()
       cy.contains('MissingReactInSpec.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.get('.test-err-code-frame').should('be.visible')
+      cy.reporter().find('.test-err-code-frame').should('be.visible')
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
           await ctx.file.readFileInProject('src/App.cy.jsx'))
@@ -77,8 +77,8 @@ for (const project of WEBPACK_REACT) {
       cy.specsPageIsVisible()
       cy.contains('AppCompilationError.cy.jsx').click()
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.contains('An uncaught error was detected outside of a test')
-      cy.contains('The following error originated from your test code, not from Cypress.')
+      cy.reporter().contains('An uncaught error was detected outside of a test')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.')
 
       // Correct the problem
       cy.withCtx(async (ctx) => {
@@ -111,8 +111,8 @@ for (const project of WEBPACK_REACT) {
       }, { appCompilationErrorSpec })
 
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.contains('An uncaught error was detected outside of a test')
-      cy.contains('The following error originated from your test code, not from Cypress.')
+      cy.reporter().contains('An uncaught error was detected outside of a test')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.')
     })
 
     // https://cypress-io.atlassian.net/browse/UNIFY-1697
