@@ -156,7 +156,7 @@ yarn clean-deps && yarn
 - **`@packages/v8-snapshot-require`** — Module loading utilities for V8 snapshots in Electron.
 - **`@packages/packherd-require`** — Module loader for dependencies bundled by `@tooling/packherd`.
 - **`@packages/web-config`** — Webpack/PostCSS configuration for the Vue frontend bundles.
-- **`@packages/ts`** — Shared TypeScript configuration and `ts-node` register helper.
+- **`@packages/ts`** — Shared TypeScript configuration and `tsx` require-time register helper.
 - **`@packages/eslint-config`** — Shared ESLint configuration preset used across packages.
 - **`@packages/resolve-dist`** — Resolves paths to compiled distribution artifacts.
 - **`@tooling/v8-snapshot`** — V8 snapshot creation tooling for Electron startup optimization.

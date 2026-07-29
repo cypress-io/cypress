@@ -1,3 +1,4 @@
-// gives anyone access to ts-node
-// https://github.com/TypeStrong/ts-node#programmatic-usage
-module.exports = require('ts-node')
+// gives anyone programmatic access to the TypeScript transpiler (tsx) used by the
+// require-time hook. `@packages/ts/register` is the primary entry point.
+// https://tsx.is/dev-api/register-cjs
+module.exports = require('tsx/cjs/api')

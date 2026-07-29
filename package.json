@@ -196,7 +196,6 @@
     "through": "2.3.8",
     "through2": "^4.0.2",
     "tree-kill": "1.2.2",
-    "ts-node": "^10.9.2",
     "typescript": "5.3.3",
     "vitest": "^3.2.4",
     "yaml": "2.8.0",
