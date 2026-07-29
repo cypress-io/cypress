@@ -63,7 +63,7 @@
     "cypress-multi-reporters": "1.4.0",
     "dayjs": "^1.10.3",
     "debug": "^4.3.4",
-    "error-stack-parser": "2.0.6",
+    "error-stack-parser": "2.1.4",
     "errorhandler": "1.5.1",
     "eventemitter2": "6.4.7",
     "express": "4.21.0",
