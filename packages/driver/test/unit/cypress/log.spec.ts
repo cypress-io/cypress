@@ -87,14 +87,16 @@ describe('LogUtils.toSerializedJSON', () => {
       callback () {},
     }
 
+    // zone links the task and the request back to each other, so walking the
+    // graph naively recurses forever
     zoneTask.data = { target: xhr, args: [] }
     xhr.__zone_symbol__xhrTask = zoneTask
-    xhr.__zone_symbol__xhrSync = xhr
 
-    Object.defineProperty(xhr, '__zone_symbol__ONERROR', {
+    // like a native XHR accessor that throws in the current readyState
+    Object.defineProperty(zoneTask.data, 'response', {
       enumerable: true,
       get () {
-        throw new Error('property is not accessible')
+        throw new Error('InvalidStateError')
       },
     })
 
