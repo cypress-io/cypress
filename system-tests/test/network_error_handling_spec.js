@@ -376,6 +376,15 @@ describe('e2e network error handling', function () {
     })
 
     it('does not connect to the upstream proxy for the SNI server request', function () {
+      // NOTE: the Cypress SNI/MITM server only exists when the internal proxy is
+      // enabled. With CYPRESS_INTERNAL_DISABLE_PROXY=1 the browser reaches the AUT
+      // directly (or via the translated upstream proxy), so this assertion does
+      // not apply — covered by system-tests-upstream-proxy-cdp for the rest of
+      // this file's disable-proxy behavior (#34351).
+      if (process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1') {
+        this.skip()
+      }
+
       const onConnect = sinon.spy(() => {
         return true
       })
