@@ -108,6 +108,15 @@ describe('tap/commands/reporter', () => {
         'after all': [{ hookId: 'h-aa', fnDuration: 3, afterFnDuration: 1 }],
       },
     },
+    // A non-Error throw (`throw { message: 42 }`): the error fields aren't
+    // strings, so they must not reach the wire — the CLI renderer treats them
+    // as strings (e.g. message.split).
+    r6: {
+      id: 'r6',
+      title: 'throws a non-error',
+      state: 'failed',
+      err: { name: 500, message: 42, stack: { frames: [] } },
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -210,6 +219,14 @@ describe('tap/commands/reporter', () => {
         frame: '> 12 |   expect(1).to.eq(2)\n',
       },
     })
+  })
+
+  it('drops non-string error fields from a non-Error throw', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r6' })
+
+    expect((outcome as { result: { error: Record<string, unknown> } }).result.error).to.deep.eq({})
   })
 
   it('reports an unreached test with empty collections and just the test-body pseudo-hook', async () => {

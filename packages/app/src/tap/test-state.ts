@@ -34,10 +34,15 @@ const cloneReferenceObject = <T>(value: T): T => {
   return typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value))
 }
 
-const serializeTestError = (err: Record<string, unknown>): TestError => {
-  const { name, message, stack } = err as TestError
+const asString = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined)
 
-  return omitNullish({ name, message, stack })
+// A test can throw a non-Error (`throw { message: 42 }`), so keep name/message/
+// stack only when they're actually strings — the CLI renderer treats them as
+// such (e.g. `message.split('\n')`).
+const serializeTestError = (err: Record<string, unknown>): TestError => {
+  const { name, message, stack } = err
+
+  return omitNullish({ name: asString(name), message: asString(message), stack: asString(stack) })
 }
 
 const attemptsOf = (test: SerializedTest): SerializedTest[] => {

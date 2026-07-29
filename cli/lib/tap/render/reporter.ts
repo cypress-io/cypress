@@ -154,7 +154,7 @@ const routesTable = (routes: TapReporterView['routes']): string[] => {
       route.url ?? '',
       route.stubbed ? 'yes' : 'no',
       route.alias ? `@${route.alias}` : '',
-      String(route.numResponses ?? 0),
+      route.numResponses ? String(route.numResponses) : '-',
     ]
   })
 

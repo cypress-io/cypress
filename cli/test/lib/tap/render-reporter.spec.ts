@@ -34,7 +34,7 @@ const view: TapReporterView = {
   // carry the reporter's own per-section numbers, and event rows take the
   // attempt-wide `e` sequence.
   routes: [
-    { method: 'GET', url: '**/comments/*', stubbed: false, numResponses: 1, alias: 'getComment' },
+    { method: 'GET', url: '**/comments/*', stubbed: false, alias: 'getComment' },
     { method: 'PUT', url: '**/comments/*', stubbed: true, status: 404, numResponses: 1, alias: 'putComment' },
   ],
   commands: [
@@ -82,7 +82,7 @@ describe('lib/tap/render/reporter', () => {
 
       ROUTES (2)
         METHOD  MATCHER        STUBBED  ALIAS        #
-        GET     **/comments/*  no       @getComment  1
+        GET     **/comments/*  no       @getComment  -
         PUT     **/comments/*  yes      @putComment  1
 
       BEFORE EACH · h1
