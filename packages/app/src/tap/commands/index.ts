@@ -2,9 +2,8 @@ import { commandCommand } from './command'
 import { commandsCommand } from './commands'
 import type { TapCommandDefinition } from './definition'
 import { pinCommand } from './pin'
-import { runCommand } from './run'
+import { reporterCommand } from './reporter'
 import { runStateCommand } from './run-state'
-import { specsCommand } from './specs'
 import { testsCommand } from './tests'
 import type { TapCommandName } from '../contract'
 
@@ -14,11 +13,10 @@ import type { TapCommandName } from '../contract'
 // name, so the registry, the contract, and each `defineCommand` call can't
 // drift: a missing command or a key/name mismatch fails to compile.
 export const tapCommands: { [K in TapCommandName]: TapCommandDefinition & { name: K } } = {
-  specs: specsCommand,
-  run: runCommand,
   tests: testsCommand,
   commands: commandsCommand,
   command: commandCommand,
+  reporter: reporterCommand,
   pin: pinCommand,
   'run-state': runStateCommand,
 }

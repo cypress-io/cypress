@@ -4,9 +4,11 @@ import {
   recordFileName,
   parseRecordPid,
   instancesProbePath,
+  buildTapSchema,
   INSTANCES_ROUTE_PREFIX,
   INSTANCES_DIRNAME,
   SCHEMA_VERSION,
+  TAP_COMMANDS,
 } from '../index'
 
 const validRecord = {
@@ -60,5 +62,22 @@ describe('cypress-instances contract', () => {
 
   it('exposes the instances dir name', () => {
     expect(INSTANCES_DIRNAME).toBe('instances')
+  })
+
+  describe('tap command contract', () => {
+    it('lists reporter as a command taking --test and --attempt, advertised on the wire schema', () => {
+      const reporter = TAP_COMMANDS.find(({ name }) => name === 'reporter')!
+
+      expect(reporter.params).toEqual([])
+      expect(reporter.options.map(({ name, required }) => ({ name, required }))).toEqual([
+        { name: 'test', required: false },
+        { name: 'attempt', required: false },
+      ])
+
+      const advertised = buildTapSchema('15.0.0').commands.find(({ name }) => name === 'reporter')
+
+      expect(advertised).toBeDefined()
+      expect(advertised!.details).toBe(reporter.details)
+    })
   })
 })

@@ -1,4 +1,5 @@
 import type { SerializedCommandLog, SerializedTest } from '@packages/types'
+import type { TapNetworkInfo } from './contract'
 
 export interface TapTestsRunner {
   /** Serializes every test of the run, keyed by id. */
@@ -12,11 +13,8 @@ export interface TapTestsRunner {
    */
   getSerializedConsolePropsForLog (testId: string, logId: string, options?: { fullReport?: boolean }): ConsolePropsResult | undefined
   isRunComplete (): boolean
-}
-
-export interface SpecListEntry {
-  /** Project-relative spec path — the form `cypress run --spec` accepts. */
-  relativePath: string
+  /** ISO start time of the run; null before the first test runs. */
+  getStartTime (): string | null
 }
 
 /**
@@ -97,16 +95,32 @@ export interface TestDetailEntry {
 }
 
 export interface CommandEntry {
-  /** The driver's command log id, e.g. `log-<origin>-3`. */
-  id: string
+  /**
+   * The command id the pin command accepts. Numbered rows carry the exact
+   * number the app reporter shows (a per-hook-section counter, qualifiable as
+   * `<hookId>:<number>` when duplicated); event and system rows carry an
+   * attempt-wide `e1`..`eN` instead. Absent on `cy.intercept` registration
+   * rows — routes aren't commands.
+   */
+  id?: string
   /** The command name as logged, e.g. `visit`, `get`, `assert`. */
   name?: string
-  /** The command log's display message — arguments/assertion text, not output. */
+  /**
+   * The reporter's display text for the row: the command arguments/assertion
+   * text, or — for a network row whose base message is empty — the request
+   * summary the reporter shows in its place (e.g. `GET 200 /api/users`).
+   */
   message?: string
   /** `pending` while the command runs, then `passed` or `failed`. */
   state?: SerializedCommandLog['state']
   /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */
   type?: SerializedCommandLog['type']
+  /**
+   * High-level network detail — method, URL, status/indicator, stubbed flag,
+   * response count, alias — matching what the reporter renders inline on
+   * request / xhr / `cy.intercept` rows. Absent on ordinary command rows.
+   */
+  network?: TapNetworkInfo
   /**
    * Present (always `true`) only when the driver evicted this test's command
    * details from memory (numTestsKeptInMemory), so scrubbed fields like

@@ -6,7 +6,8 @@ import os from 'os'
 import express from 'express'
 import { connect } from '@packages/network'
 import { setupFullConfigWithDefaults } from '@packages/config'
-import { ServerBase } from '../../lib/server-base'
+import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { cypressInstances } from '../../lib/cypress-instances'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as fileServer from '../../lib/file_server'
 import * as ensureUrl from '../../lib/util/ensure-url'
@@ -176,6 +177,183 @@ describe('lib/server-base', () => {
       .finally(() => {
         delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
       })
+    })
+  })
+
+  describe('#createCdpFetchNetworkRuntime', () => {
+    function createClient () {
+      return {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+    }
+
+    beforeEach(function () {
+      this.server._openConfig = this.config
+      this.server._socket = {
+        toDriver: sinon.stub(),
+        close: sinon.stub(),
+        setProtocolManager: sinon.stub(),
+      }
+
+      this.server.getCurrentBrowser = () => null
+      this.server._netStubbingState = {
+        routes: [],
+        requests: {},
+        reset: sinon.stub(),
+      }
+    })
+
+    it('starts the CDP Fetch runtime and exposes its network context', async function () {
+      const client = createClient()
+      const isAUTFrame = sinon.stub().resolves(false)
+
+      await this.server.createCdpFetchNetworkRuntime(client, isAUTFrame)
+
+      expect(client.on).to.have.been.calledWith('Fetch.requestPaused')
+      expect(client.send).to.have.been.calledWith('Fetch.enable', {
+        patterns: [{
+          requestStage: 'Request',
+        }, {
+          requestStage: 'Response',
+        }],
+      })
+
+      expect(this.server._cdpFetchRuntime).to.exist
+      expect(this.server._networkProxy).to.exist
+      expect(this.server._netStubbingState).to.exist
+      expect(this.server._networkPolicyRegistration).to.exist
+      expect(this.server._networkInterceptionCore).to.exist
+    })
+
+    it('reuses the existing netStubbingState when attaching NetworkProxy', async function () {
+      const client = createClient()
+      const existingState = this.server._netStubbingState
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      expect(this.server._netStubbingState).to.equal(existingState)
+      expect(this.server._networkProxy.http.netStubbingState).to.equal(existingState)
+    })
+
+    it('applies a previously stored protocol manager to the late-bound CDP NetworkProxy', async function () {
+      const client = createClient()
+      const protocolManager = { isProtocolEnabled: true } as any
+
+      this.server.setProtocolManager(protocolManager)
+      this.server.setPreRequestTimeout(1234)
+
+      expect(this.server._networkProxy).to.be.undefined
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      expect(this.server._networkProxy.http.preRequests.protocolManager).to.equal(protocolManager)
+      expect(this.server._networkProxy.http.preRequests.requestTimeout).to.equal(1234)
+    })
+
+    it('clears _networkProxy before disposing the previous CDP runtime', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      const firstProxy = this.server._networkProxy
+      let networkProxyDuringDispose: NetworkProxy | undefined | null = null
+
+      sinon.stub(firstProxy, 'dispose').callsFake(() => {
+        networkProxyDuringDispose = this.server._networkProxy
+      })
+
+      await this.server['stopCdpFetchRuntime']()
+
+      expect(networkProxyDuringDispose).to.be.undefined
+      expect(this.server._networkProxy).to.be.undefined
+    })
+
+    it('stops the previous CDP Fetch runtime before replacing it', async function () {
+      const firstClient = createClient()
+      const secondClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(firstClient)
+
+      const firstProxy = this.server._networkProxy
+      const disposeSpy = sinon.spy(firstProxy, 'dispose')
+
+      await this.server.createCdpFetchNetworkRuntime(secondClient)
+
+      expect(firstClient.send).to.have.been.calledWith('Fetch.disable')
+      expect(disposeSpy).to.have.been.calledOnce
+      expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
+      expect(this.server._networkProxy).to.not.equal(firstProxy)
+    })
+
+    it('disposes NetworkProxy only after Fetch.disable completes', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      const proxy = this.server._networkProxy
+      const disposeSpy = sinon.spy(proxy, 'dispose')
+      let disposeDuringFetchDisable = false
+
+      client.send.withArgs('Fetch.disable').callsFake(async () => {
+        disposeDuringFetchDisable = disposeSpy.called
+      })
+
+      await this.server['stopCdpFetchRuntime']()
+
+      expect(disposeDuringFetchDisable).to.be.false
+      expect(client.send).to.have.been.calledWith('Fetch.disable')
+      expect(disposeSpy).to.have.been.calledOnce
+    })
+
+    it('still starts the new runtime when stopping the previous one fails', async function () {
+      const firstClient = createClient()
+      const secondClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(firstClient)
+
+      // the previous page client is typically gone by the time a new spec or
+      // relaunch replaces the runtime
+      firstClient.send.withArgs('Fetch.disable').rejects(new Error('Fetch.disable will not run as the target browser or tab CRI connection has crashed'))
+
+      await this.server.createCdpFetchNetworkRuntime(secondClient)
+
+      expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
+      expect(this.server._cdpFetchRuntime).to.exist
+    })
+
+    it('resets CDP Fetch between tests without disabling Fetch', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+      client.send.resetHistory()
+
+      this.server['resetCdpFetchRuntime']()
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.disable')
+    })
+
+    it('stops and disposes the CDP Fetch runtime on server close', async function () {
+      const client = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(client)
+
+      const proxy = this.server._networkProxy
+      const disposeSpy = sinon.spy(proxy, 'dispose')
+
+      sinon.stub(this.server._remoteStates, 'set')
+      this.server.isListening = true
+      this.server._server = {
+        destroyAsync: sinon.stub().resolves(),
+      }
+
+      await this.server['_close']()
+
+      expect(disposeSpy).to.have.been.calledOnce
+      expect(client.send).to.have.been.calledWith('Fetch.disable')
+      expect(this.server._cdpFetchRuntime).to.be.undefined
+      expect(this.server._networkProxy).to.be.undefined
     })
   })
 
@@ -402,6 +580,23 @@ describe('lib/server-base', () => {
         expect(this.startListening).to.be.calledWith(this.server.getHttpServer(), 1, 2, arg2)
       })
     })
+
+    it('falls back to an empty rendered-HTML-origins map when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      return this.server.open(this.config, getOpenOptions())
+      .then(() => {
+        const options: Record<string, any> = {}
+
+        this.server.startWebsockets(1, 2, options)
+
+        expect(this.server._networkProxy).to.be.undefined
+        expect(options.getRenderedHTMLOrigins()).to.deep.eq({})
+      })
+      .finally(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+    })
   })
 
   describe('#reset', () => {
@@ -539,6 +734,93 @@ describe('lib/server-base', () => {
       this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(this.socket.end).to.be.called
+    })
+  })
+
+  describe('#_forceProxyMiddleware', () => {
+    const clientRoute = '/__/'
+    let getCurrent
+
+    beforeEach(() => {
+      getCurrent = sinon.stub(cypressInstances, 'getCurrent')
+    })
+
+    afterEach(() => {
+      getCurrent.restore()
+    })
+
+    const run = (req) => {
+      const res = { redirect: sinon.spy() }
+      const next = sinon.spy()
+
+      _forceProxyMiddleware(clientRoute)(req, res, next)
+
+      return { res, next }
+    }
+
+    const nonProxied = (proxiedUrl, headers = {}) => ({ proxiedUrl, headers })
+
+    it('lets a non-proxied graphql request through when the instance id header matches', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': 'abc' }))
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
+    })
+
+    it('redirects a non-proxied graphql request whose instance id header is missing', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs'))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('redirects when the instance id header does not match the current instance', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': 'nope' }))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('redirects when the instance id header is duplicated (array-valued)', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': ['abc', 'abc'] }))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('redirects a graphql request when no instance is running', () => {
+      getCurrent.returns(null)
+
+      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-instance-id': 'abc' }))
+
+      expect(res.redirect).to.be.calledWith(clientRoute)
+      expect(next).not.to.be.called
+    })
+
+    it('lets a proxied graphql request through without an instance id header', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run({ proxiedUrl: 'http://localhost:2020/__cypress/graphql/TapSpecs', headers: {} })
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
+    })
+
+    it('still lets the read-only instances probe bypass without a header', () => {
+      getCurrent.returns({ instanceId: 'abc' })
+
+      const { res, next } = run(nonProxied('/__cypress/instances/whatever'))
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
     })
   })
 

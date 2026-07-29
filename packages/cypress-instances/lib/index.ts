@@ -2,6 +2,10 @@ import path from 'path'
 
 export * from './tap-contract'
 
+export * from './tap-operations'
+
+export type { TapSpecsQuery, TapSpecsQueryVariables, TapRunSpecMutation, TapRunSpecMutationVariables } from './generated/graphql'
+
 export const SCHEMA_VERSION = 1
 
 export const MIN_SCHEMA_VERSION = 1
@@ -11,6 +15,8 @@ export const INSTANCES_DIRNAME = 'instances'
 const RECORD_EXTENSION = '.json'
 
 export const INSTANCES_ROUTE_PREFIX = '/__cypress/instances/'
+
+export const INSTANCE_ID_HEADER = 'x-cypress-instance-id'
 
 export type InstanceTestingType = 'e2e' | 'component' | null
 

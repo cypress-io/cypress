@@ -1,12 +1,11 @@
 import { telemetry } from '@packages/telemetry'
 import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
-import type { ForNetworkInterception } from '@packages/network-interception'
+import type { ForHttpIntercept } from '@packages/network-interception'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
 import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
 import { proxyHttpCodec } from './adapters/http-codec'
-import type { RequestInterceptionMiddlewareCtx } from './adapters/types'
 
 export class NetworkProxy {
   http: Http
@@ -19,8 +18,8 @@ export class NetworkProxy {
     return proxyHttpCodec
   }
 
-  withIntercept (
-    networkInterception: ForNetworkInterception<RequestInterceptionMiddlewareCtx, RequestInterceptionMiddlewareCtx>,
+  withIntercept <TRequest, TResponse> (
+    networkInterception: ForHttpIntercept<TRequest, TResponse>,
   ) {
     this.http.networkInterception = networkInterception
 
@@ -86,6 +85,15 @@ export class NetworkProxy {
 
   reset (options: { resetBetweenSpecs: boolean } = { resetBetweenSpecs: false }) {
     this.http.reset(options)
+  }
+
+  /**
+   * Releases long-lived timers owned by this proxy. Used when replacing the
+   * CDP Fetch NetworkProxy so prior PreRequests sweep intervals do not leak.
+   */
+  dispose () {
+    this.http.preRequests.dispose()
+    this.reset({ resetBetweenSpecs: true })
   }
 
   setProtocolManager (protocolManager) {

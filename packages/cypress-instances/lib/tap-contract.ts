@@ -24,6 +24,9 @@ export interface TapCommandOptionSchema {
 export interface TapCommandSchema {
   name: string
   description: string
+  // Longer prose for the command's standalone `--help`; the one-line
+  // `description` still renders in the command listing.
+  details?: string
   params: readonly TapCommandParamSchema[]
   options: readonly TapCommandOptionSchema[]
   // Absent ⇒ visible. A hidden command stays exec-able but the CLI omits it from
@@ -41,28 +44,46 @@ export type TapExecResult =
   | { result: unknown }
   | { error: { code: string, message: string } }
 
+// How a command's declared params/options surface to its handler, derived once
+// here so the app's defineCommand and the CLI's defineNativeCommand type handlers
+// the same way: entries matching `Present` are keys the handler can rely on, the
+// rest may be absent, and each wire `type` maps through `Scalars`.
+type SchemaObject<
+  Entries extends readonly { name: string, type: TapCommandParamSchema['type'] }[],
+  Present,
+  Scalars extends Record<TapCommandParamSchema['type'], unknown>,
+> =
+  { [E in Entries[number] as E extends Present ? E['name'] : never]: Scalars[E['type']] } &
+  { [E in Entries[number] as E extends Present ? never : E['name']]?: Scalars[E['type']] }
+
+// App-side handlers see coerced values (the binding's exec coerces each wire
+// string to its declared scalar before dispatch): required params are present,
+// and boolean options default to false when the flag is absent.
+type CoercedScalars = { string: string, number: number, boolean: boolean }
+
+export type TapCoercedParams<P extends readonly TapCommandParamSchema[]> =
+  SchemaObject<P, { required: true }, CoercedScalars>
+
+export type TapCoercedOptions<O extends readonly TapCommandOptionSchema[]> =
+  SchemaObject<O, { required: true } | { type: 'boolean' }, CoercedScalars>
+
+// CLI-side handlers see commander's values forwarded as raw strings (a set
+// boolean flag arrives as the string 'true'). Only required value options are
+// commander-enforced, so everything else may be absent.
+type RawScalars = { string: string, number: string, boolean: string }
+
+export type TapRawParams<P extends readonly TapCommandParamSchema[]> =
+  SchemaObject<P, { required: true }, RawScalars>
+
+export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
+  SchemaObject<O, { required: true, type: 'string' | 'number' }, RawScalars>
+
 // Params/options that recur across commands, defined once so their name, type,
 // and help text can't drift between the commands that expose them. `test` is
 // required in some commands and optional in others, so each use spreads it and
 // sets `required`; `attempt` is identical everywhere and used directly.
 const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the tests command' } as const
 const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
-
-const specsMeta = {
-  name: 'specs',
-  description: 'List all runnable specs for the selected Cypress instance.',
-  params: [],
-  options: [],
-} as const satisfies TapCommandSchema
-
-const runMeta = {
-  name: 'run',
-  description: 'run (or rerun) a spec by its project-relative path',
-  params: [
-    { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
-  ],
-  options: [],
-} as const satisfies TapCommandSchema
 
 const testsMeta = {
   name: 'tests',
@@ -98,14 +119,33 @@ const commandMeta = {
   ],
 } as const satisfies TapCommandSchema
 
+const reporterMeta = {
+  name: 'reporter',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and every suite’s tests',
+  details: `Shows test results the way the Cypress app's reporter panel does, right in
+your terminal. Pass --test <id> (ids come from the tests command) to see one
+test's full story: its network routes, the hooks that ran, the complete
+command log, and the failure output when something went wrong. Add --attempt
+to view an earlier retry.
+
+Leave --test off to get the spec-level overview instead: the run's pass/fail
+stats and every suite's tests at a glance.`,
+  params: [],
+  options: [
+    { ...testIdField, required: false },
+    attemptField,
+  ],
+} as const satisfies TapCommandSchema
+
 const pinMeta = {
   name: 'pin',
   description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
   params: [
     { ...testIdField, required: false },
-    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command' },
+    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
   ],
   options: [
+    attemptField,
     { name: 'at', type: 'string', required: false, description: 'which snapshot to pin: a name like "before"/"after" or a 1-based index; defaults to the last (the command’s final state). Re-run on the pinned command to switch snapshots without releasing the pin' },
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },
   ],
@@ -124,11 +164,10 @@ const runStateMeta = {
 // TapManager), and the CLI stamps it with its own version to render help with no
 // instance attached. Order here is the order commands list in help.
 export const TAP_COMMANDS = [
-  specsMeta,
-  runMeta,
   testsMeta,
   commandsMeta,
   commandMeta,
+  reporterMeta,
   pinMeta,
   runStateMeta,
 ] as const satisfies readonly TapCommandSchema[]
@@ -140,6 +179,7 @@ export const buildTapSchema = (cypressVersion: string): TapSchema => {
     return {
       name: command.name,
       description: command.description,
+      ...('details' in command ? { details: command.details } : {}),
       params: command.params.map((param) => ({ ...param })),
       options: command.options.map((option) => ({ ...option })),
       ...('hidden' in command && command.hidden ? { hidden: true } : {}),
@@ -161,6 +201,18 @@ export interface TapNativeCommandSchema {
   options?: readonly TapCommandOptionSchema[]
 }
 
+const runMeta = {
+  name: 'run',
+  description: 'run (or rerun) a spec by its project-relative path',
+  details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
+command. If no browser is open it launches one, switching to the spec's testing
+type when needed, then starts the run and returns immediately — it does not wait
+for the run to finish. Poll the status command for run progress.`,
+  params: [
+    { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
+  ],
+} as const satisfies TapNativeCommandSchema
+
 const instancesMeta = {
   name: 'instances',
   description: 'list the running Cypress instances this CLI can reach',
@@ -177,6 +229,12 @@ polling and "where am I?" checks. Always exits 0 for a determinable stage
 
 Stages: not connected, browser not selected, spec not selected, running,
 passed, failed.`,
+} as const satisfies TapNativeCommandSchema
+
+const specsMeta = {
+  name: 'specs',
+  description: 'list the specs the running Cypress instance can run',
+  details: `Lists the specs the running Cypress instance can run. To find other testing types you must open a new cypress instance with that testing type specified.`,
 } as const satisfies TapNativeCommandSchema
 
 const domMeta = {
@@ -214,9 +272,15 @@ curated computed styles, box model, and accessibility node.`,
 export const TAP_NATIVE_COMMANDS = [
   instancesMeta,
   statusMeta,
+  specsMeta,
+  runMeta,
   domMeta,
   ariaMeta,
   inspectMeta,
 ] as const satisfies readonly TapNativeCommandSchema[]
 
 export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
+
+// Per-command result contracts live in `./contracts/`; re-exported here so the
+// app's deep import of this module and the package barrel both reach them.
+export * from './contracts/reporter'

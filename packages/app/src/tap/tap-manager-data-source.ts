@@ -32,6 +32,7 @@ export const tapManagerDataSource = {
         getTestState: runner.getTestState,
         getSerializedConsolePropsForLog: runner.getSerializedConsolePropsForLog,
         isRunComplete: () => em.runComplete,
+        getStartTime: runner.getStartTime,
       }
     } catch {
       return undefined
@@ -60,14 +61,6 @@ export const tapManagerDataSource = {
 
   getRunnableSpecs (): FoundSpec[] {
     return (window.__RUN_MODE_SPECS__ ?? []) as FoundSpec[]
-  },
-
-  getHash () {
-    return window.location.hash
-  },
-
-  setHash (hash: string) {
-    window.location.hash = hash
   },
 
   getAutIframe (): PinAutIframe | undefined {

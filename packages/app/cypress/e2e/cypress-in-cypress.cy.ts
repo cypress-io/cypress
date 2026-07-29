@@ -131,10 +131,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // validate that the width we set in `withCtx` above is the starting point
         cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
 
-        cy.findByTestId('toggle-specs-button').click({ force: true })
+        cy.reporter().find('[data-cy="toggle-specs-button"]').click({ force: true })
 
         // this tooltip text confirms specs list is open
-        cy.contains('Collapse Specs List')
+        cy.reporter().contains('Collapse Specs List')
 
         // we will move the right-hand handle of the Reporter
         // to these positions from the left of the screen
@@ -200,7 +200,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.contains('dom-content.spec').click()
 
       cy.findByTestId('aut-url-input').invoke('val').should('contain', 'http://localhost:4455/cypress/e2e/dom-content.html')
-      cy.findByLabelText('Stats').should('not.exist')
+      cy.get('#reporter-frame').should('not.exist')
       cy.findByTestId('specs-list-panel').should('not.be.visible')
       cy.findByTestId('reporter-panel').should('not.be.visible')
       cy.findByTestId('sidebar').should('be.visible')
@@ -350,12 +350,8 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
   })
 
   describe('runSpec mutation', () => {
-    it('should trigger expected spec from POST', () => {
-      startAtSpecsPage('e2e')
-
-      cy.contains('E2E specs').should('be.visible')
-
-      cy.withCtx(async (ctx) => {
+    const postRunSpecMutation = () => {
+      return cy.withCtx(async (ctx) => {
         const currentProject = ctx.currentProject?.replaceAll('\\', '/')
         const specPath = `${currentProject}/cypress/e2e/dom-content.spec.js`
         const url = `http://127.0.0.1:${ctx.coreData.servers.gqlServerPort}/__launchpad/graphql?`
@@ -379,8 +375,47 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
           },
         )
       })
+    }
+
+    it('should trigger expected spec from POST', () => {
+      startAtSpecsPage('e2e')
+
+      cy.contains('E2E specs').should('be.visible')
+
+      postRunSpecMutation()
+
+      cy.reporter().contains('Dom Content').should('be.visible')
+    })
+
+    it('should restart the spec from POST when it is already active', () => {
+      startAtSpecsPage('e2e')
+
+      cy.contains('E2E specs').should('be.visible')
+
+      postRunSpecMutation()
 
       cy.contains('Dom Content').should('be.visible')
+      cy.waitForSpecToFinish({ passCount: 1 })
+
+      let firstRunStartedAt: number | undefined
+
+      cy.window().then((win) => {
+        const [test] = Object.values((win as any).Cypress.runner.getAllTestsState()) as any[]
+
+        firstRunStartedAt = new Date(test.wallClockStartedAt).getTime()
+        expect(firstRunStartedAt).to.be.greaterThan(0)
+      })
+
+      postRunSpecMutation()
+
+      // The same-spec target leaves the URL hash unchanged, so the app restarts the
+      // runner in place — a fresh start time is the proof the spec actually reran.
+      cy.window({ timeout: 15000 }).should((win) => {
+        const [test] = Object.values((win as any).Cypress.runner.getAllTestsState()) as any[]
+
+        expect(test.state).to.eq('passed')
+        expect(new Date(test.wallClockStartedAt).getTime()).to.be.greaterThan(firstRunStartedAt!)
+      })
     })
   })
 })

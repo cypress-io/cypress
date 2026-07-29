@@ -230,6 +230,18 @@ describe('shouldAttachAndSetCookies', () => {
       expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).toBe(false)
     })
   })
+
+  describe('no AUT URL (first visit)', () => {
+    it('returns true when the request comes from the AUT frame', () => {
+      // the AUT URL isn't set until the first visit's response is sent to the browser,
+      // so cookies set by that response must still be stored in the jar
+      expect(shouldAttachAndSetCookies('http://localhost:3000/login', undefined, undefined, undefined, true)).toBe(true)
+    })
+
+    it('returns false when the request does NOT come from the AUT frame', () => {
+      expect(shouldAttachAndSetCookies('http://localhost:3000/api/data', undefined, 'xhr', false, false)).toBe(false)
+    })
+  })
 })
 
 describe('.calculateSiteContext', () => {

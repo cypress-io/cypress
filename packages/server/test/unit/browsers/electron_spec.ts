@@ -703,10 +703,40 @@ describe('lib/browsers/electron', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
       it('sends Fetch.enable only for Document ResourceType', async function () {
         await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
+      })
+
+      it('delegates Fetch ownership to the CDP runtime when the proxy is disabled', async function () {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        const onPageCriClientReady = sinon.stub().resolves()
+
+        await electron._launch(this.win, this.url, this.automation, {
+          ...this.options,
+          onPageCriClientReady,
+        }, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        expect(onPageCriClientReady).to.have.been.calledOnce
+
+        // the runtime needs the isAUTFrame lookup and the protocol-neutral
+        // AUT-navigation subscription, same as the chrome launch paths
+        const [, isAUTFrame, onAUTFrameNavigated] = onPageCriClientReady.firstCall.args
+
+        expect(isAUTFrame).to.be.a('function')
+        expect(onAUTFrameNavigated).to.be.a('function')
+
+        expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
           patterns: [{
             resourceType: 'Document',
           }],

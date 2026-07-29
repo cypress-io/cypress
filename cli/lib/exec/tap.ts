@@ -5,7 +5,7 @@ import { CypressInstanceError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderResult, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
+import { renderFailure, renderKnownFailure, renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
@@ -74,7 +74,7 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
   return dispatchCode ?? 1
 }
 
-const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>): Promise<number> => {
+const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
@@ -83,7 +83,7 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
     return 1
   }
 
-  renderResult(outcome.result)
+  renderOutcome(command, outcome.result, json)
 
   return 0
 }
@@ -117,8 +117,8 @@ const tapModule = {
         const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
 
         let dispatchCode = 0
-        const program = buildTapProgram(schema, async (name, args, options) => {
-          dispatchCode = await execCommand(session, name, args, options)
+        const program = buildTapProgram(schema, async (name, args, commandOptions) => {
+          dispatchCode = await execCommand(session, name, args, commandOptions, options.json)
         })
 
         if (wantsHelp || !command) {
