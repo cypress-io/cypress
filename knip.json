@@ -639,7 +639,8 @@
         "src/v8-snapshot.ts",
         "src/setup/index.ts",
         "src/generator/blueprint.ts",
-        "src/blueprint/**/*.js"
+        "src/blueprint/**/*.js",
+        "src/doctor/process-script.worker.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
@@ -811,6 +812,12 @@
     "packages/server/lib/video_capture.ts": [
       "exports"
     ],
+    "packages/server/lib/plugins/index.ts": [
+      "exports"
+    ],
+    "packages/server/lib/saved_state.ts": [
+      "exports"
+    ],
     "packages/data-context/graphql/index.ts": [
       "exports",
       "types"
@@ -886,6 +893,9 @@
     "packages/driver/src/cypress/server.ts": [
       "exports"
     ],
+    "packages/driver/src/cy/commands/actions/check.ts": [
+      "exports"
+    ],
     "packages/driver/src/cy/commands/actions/click.ts": [
       "exports"
     ],
@@ -911,6 +921,9 @@
       "exports"
     ],
     "packages/driver/src/cy/commands/actions/trigger.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/type.ts": [
       "exports"
     ],
     "packages/driver/src/cy/commands/querying/focused.ts": [
