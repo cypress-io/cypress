@@ -40,6 +40,7 @@ export function mergeIncomingRequestChanges (
     after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
   }
 
+  const previousUrl = before.url
   const resolvedUrl = options.resolveUrl(options.baseUrl, after.url)
 
   after.url = resolvedUrl
@@ -48,8 +49,8 @@ export function mergeIncomingRequestChanges (
 
   mergeDeletedHeaders(before, after)
 
-  if (resolvedUrl !== before.url) {
-    debug.core('merged incoming request changes %s -> %s', before.url, resolvedUrl)
+  if (resolvedUrl !== previousUrl) {
+    debug.core('merged incoming request changes %s -> %s', previousUrl, resolvedUrl)
   }
 
   return resolvedUrl
