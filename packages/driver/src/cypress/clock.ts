@@ -1,10 +1,20 @@
 import _ from 'lodash'
 import fakeTimers from '@sinonjs/fake-timers'
 
+// @sinonjs/fake-timers 13+ fakes every supported time function by default when
+// `toFake` is omitted. To keep cy.clock()'s behavior unchanged across upgrades,
+// fall back to the historical default set, which leaves `nextTick` and
+// `queueMicrotask` untouched, when the user doesn't pass an explicit list.
 const install = (win, now, methods) => {
-  return fakeTimers.withGlobal(win).install({
+  const { timers, install: installClock } = fakeTimers.withGlobal(win)
+
+  const toFake = methods && methods.length
+    ? methods
+    : Object.keys(timers).filter((name) => name !== 'nextTick' && name !== 'queueMicrotask')
+
+  return installClock({
     now,
-    toFake: methods,
+    toFake,
   })
 }
 
