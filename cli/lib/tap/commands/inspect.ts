@@ -26,10 +26,15 @@ interface AXNode {
   backendDOMNodeId?: number
 }
 
-interface FrameInspectResult {
+/** What `cypress tap inspect` returns for the first element matching a selector. */
+export interface FrameInspectResult {
+  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
   url?: string
+  /** The CSS selector that was inspected. */
   selector: string
+  /** Whether an element matched. */
   found: boolean
+  /** The matched element's tag name. */
   tag?: string
   attributes?: Record<string, string>
   aria?: { role?: string, name?: string, states?: string[] }

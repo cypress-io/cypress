@@ -5,6 +5,7 @@ import type { TapSpecEntry } from '../commands/specs'
 import type { TapStatus } from '../types'
 import type { FrameDomResult } from '../commands/dom'
 import type { FrameAriaResult } from '../commands/aria'
+import type { FrameInspectResult } from '../commands/inspect'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
 import { renderRunHuman } from './run'
 import { renderInstancesHuman } from './instances'
@@ -12,6 +13,7 @@ import { renderSpecsHuman } from './specs'
 import { renderStatusHuman } from './status'
 import { renderDomHuman } from './dom'
 import { renderAriaHuman } from './aria'
+import { renderInspectHuman } from './inspect'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
@@ -39,6 +41,7 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
   status: { renderHuman: (result) => renderStatusHuman(result as TapStatus) },
   dom: { renderHuman: (result) => renderDomHuman(result as FrameDomResult) },
   aria: { renderHuman: (result) => renderAriaHuman(result as FrameAriaResult) },
+  inspect: { renderHuman: (result) => renderInspectHuman(result as FrameInspectResult) },
 }
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {
