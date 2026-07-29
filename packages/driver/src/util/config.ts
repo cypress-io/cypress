@@ -87,7 +87,12 @@ export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => 
   const test = state('test')
 
   if (!state('duringUserTestExecution') && test && !Object.keys(test?._fired || {}).length) {
-    return test._testConfig.applied
+    // A secondary-origin spec bridge sets `state('test')` to a bare placeholder
+    // object (via `cy.reset({})`) rather than a real Mocha test, so `_testConfig`
+    // is absent. That path only runs `Cypress.config()` to sync config from the
+    // primary origin — there is no Mocha override level to report — so optional
+    // chaining yields `undefined` instead of throwing on the missing `_testConfig`.
+    return test._testConfig?.applied
   }
 
   return undefined

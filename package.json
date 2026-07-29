@@ -161,7 +161,7 @@
     "husky": "7.0.2",
     "inquirer": "8.2.4",
     "inquirer-confirm": "2.0.3",
-    "knip": "5.70.1",
+    "knip": "6.29.0",
     "lazy-ass": "1.6.0",
     "lerna": "8.1.9",
     "lint-staged": "^16",
