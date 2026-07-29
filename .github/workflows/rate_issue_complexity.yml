@@ -52,7 +52,7 @@ jobs:
             '{
               model: "claude-sonnet-5",
               max_tokens: 300,
-              system: "You rate the implementation complexity of software engineering tickets on a scale of 1 to 5. 1 is a trivial change requiring no logic change (typo, copy, config tweak). 5 is a complex change a developer would need a week or more to complete. Use \"?\" only if the ticket has too little information to judge. Respond with ONLY a JSON object: {\"weight\": \"1-5 or ?\", \"explanation\": \"one or two sentence explanation\"}. No other text.",
+              system: "You rate the implementation complexity of software engineering tickets on a scale of 1 to 5, based on the nature of the change, not how long it would take. 1 is a trivial change requiring no logic change (typo, copy, config tweak). 2 is a simple, isolated logic change confined to a single function or file with no ambiguity. 3 is a moderate change spanning multiple files or a non-trivial algorithm, with a clear but non-obvious solution. 4 is a complex change touching multiple subsystems or packages, requiring design decisions and careful handling of edge cases. 5 is a highly complex, cross-cutting change affecting core architecture or several packages at once, with significant design uncertainty and broad test coverage implications. Use \"?\" only if the ticket has too little information to judge. Respond with ONLY a JSON object: {\"weight\": \"1-5 or ?\", \"explanation\": \"one or two sentence explanation\"}. No other text.",
               messages: [{
                 role: "user",
                 content: ("Title: " + $title + "\n\nDescription:\n" + $body)
@@ -99,4 +99,23 @@ jobs:
           LABEL="complexity: ${{ steps.claude.outputs.weight }}"
           gh label create "$LABEL" --repo "${{ github.repository }}" --color BFD4F2 2>/dev/null || true
           gh issue edit "${{ inputs.issue_number }}" --repo "${{ github.repository }}" --add-label "$LABEL"
+
+      # Requires a PAT with `project` scope stored as PROJECTS_TOKEN — the default
+      # github.token cannot read or write Projects v2 data.
+      - name: Set Estimate field in the App project
+        if: steps.claude.outputs.weight != '?'
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+        run: |
+          PROJECT_ID="PVT_kwDOAIfu4c4ABf7H"
+          ESTIMATE_FIELD_ID="PVTF_lADOAIfu4c4ABf7HzhY_PGk"
+
+          ITEM_ID=$(gh project item-add 10 --owner cypress-io \
+            --url "${{ steps.issue.outputs.url }}" --format json | jq -r '.id')
+
+          gh project item-edit \
+            --id "$ITEM_ID" \
+            --field-id "$ESTIMATE_FIELD_ID" \
+            --project-id "$PROJECT_ID" \
+            --number "${{ steps.claude.outputs.weight }}"
           
