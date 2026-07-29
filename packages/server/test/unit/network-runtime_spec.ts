@@ -1,38 +1,43 @@
-import { NetworkProxy } from '@packages/proxy'
+import { IdentityContentEncodingAdapter, NetworkProxy, ProxyContentEncodingAdapter } from '@packages/proxy'
+import { Http } from '@packages/proxy/lib/http'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
 import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
 describe('lib/network-runtime', () => {
-  const baseDeps = () => ({
-    config: {
-      clientRoute: '/__/',
-      responseTimeout: 30000,
-    } as Cypress.Config,
-    remoteStates: {
-      hasPrimary: sinon.stub().returns(false),
-      getPrimary: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
-      get: sinon.stub().returns(undefined),
-      current: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
-      isPrimarySuperDomainBasedOrigin: sinon.stub().returns(false),
-      isPrimarySuperDomainOrigin: sinon.stub().returns(false),
-      getByStrategy: sinon.stub(),
-      reset: sinon.stub(),
-    } as any,
-    getFileServerToken: () => 'token',
-    getCookieJar: () => ({
-      getCookies: sinon.stub().returns([]),
-    }) as any,
-    socket: {
-      toDriver: sinon.stub(),
-    } as any,
-    request: {
-      rp: sinon.stub(),
-    } as any,
-    serverBus: { emit: sinon.stub() } as any,
-    getCurrentBrowser: () => ({}) as any,
-  })
+  const baseDeps = () => {
+    return {
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+      } as Cypress.Config,
+      remoteStates: {
+        hasPrimary: sinon.stub().returns(false),
+        getPrimary: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
+        get: sinon.stub().returns(undefined),
+        current: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
+        isPrimarySuperDomainBasedOrigin: sinon.stub().returns(false),
+        isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        getByStrategy: sinon.stub(),
+        reset: sinon.stub(),
+      } as any,
+      getFileServerToken: () => 'token',
+      getCookieJar: () => {
+        return {
+          getCookies: sinon.stub().returns([]),
+        } as any
+      },
+      socket: {
+        toDriver: sinon.stub(),
+      } as any,
+      request: {
+        rp: sinon.stub(),
+      } as any,
+      serverBus: { emit: sinon.stub() } as any,
+      getCurrentBrowser: () => ({}) as any,
+    }
+  }
 
   function createPausedRequest (options: {
     requestId: string
@@ -87,6 +92,40 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
     expect(runtime.netStubbingState.routes).to.deep.equal([])
     expect(runtime.netStubbingState.requests).to.deep.equal({})
+  })
+
+  const contentEncodingOf = (core: any) => core?.options?.contentEncoding
+
+  it('composes both content-encoding implementations into the runtime core', () => {
+    const createLegacyProxyPipeline = sinon.spy(Http.prototype, 'createLegacyProxyPipeline')
+
+    const runtime = createProxyRuntime(baseDeps())
+
+    expect(createLegacyProxyPipeline).to.be.calledOnce
+    // no declaration: the pipeline's requests default to 'wire'
+    expect(createLegacyProxyPipeline.firstCall.args[1]?.bodyEncoding).to.be.undefined
+    expect(contentEncodingOf(runtime.networkInterceptionCore)?.wire).to.be.instanceOf(ProxyContentEncodingAdapter)
+    expect(contentEncodingOf(runtime.networkInterceptionCore)?.identity).to.be.instanceOf(IdentityContentEncodingAdapter)
+  })
+
+  // The proxy-disabled runtime serves express traffic over a real socket
+  // (re-encoded for the wire) alongside CDP responses that must be handed
+  // back fully decoded, so the outgoing body is declared per pipeline.
+  it('createCdpFetchRuntime declares identity bodies only on the CDP pipeline', () => {
+    const createLegacyProxyPipeline = sinon.spy(Http.prototype, 'createLegacyProxyPipeline')
+
+    createCdpFetchRuntime({
+      ...baseDeps(),
+      client: {
+        send: sinon.stub(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      },
+    })
+
+    const declarations = createLegacyProxyPipeline.getCalls().map((call) => call.args[1]?.bodyEncoding)
+
+    expect(declarations).to.deep.equal([undefined, 'identity'])
   })
 
   it('registers default configurator network policies at startup', () => {

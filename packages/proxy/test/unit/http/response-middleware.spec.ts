@@ -51,6 +51,7 @@ describe('http/response-middleware', function () {
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -2727,8 +2728,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('CompressBody', function () {
-    const { CompressBody } = ResponseMiddleware
+  describe('NotifyResponseStreamReceived and CompressBody', function () {
+    const { CompressBody, NotifyResponseStreamReceived } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -2766,7 +2767,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2810,7 +2811,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2843,7 +2844,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2868,7 +2869,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2903,7 +2904,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2946,6 +2947,37 @@ describe('http/response-middleware', function () {
 
       expect(output).toBe(plaintext)
       expect(zlib.gzipSync(Buffer.from(plaintext)).toString()).not.toBe(plaintext)
+    })
+
+    it('does not re-encode a decoded body when the pipeline declares identity bodies', async function () {
+      const plaintext = 'foo'
+      const stream = Readable.from([plaintext])
+      const res = {
+        on: (_e: string, _l: () => void) => {},
+        off: (_e: string, _l: () => void) => {},
+      }
+
+      // the wire implementation would re-gzip this decoded body
+      prepareContext({
+        req: {},
+        res,
+        incomingRes: { headers: {} },
+        isGunzipped: true,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: ['gzip'],
+        incomingResStream: stream,
+        bodyEncoding: 'identity',
+      })
+
+      await testMiddleware([CompressBody], ctx)
+
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+
+      expect(Buffer.concat(chunks).toString()).toBe(plaintext)
     })
 
     it('does not re-compress br when contentEncodingOrder includes br but isBrotliDecompressed is false', async function () {
@@ -3001,6 +3033,7 @@ describe('http/response-middleware', function () {
         contentEncodingOrder: order,
         incomingResStream: props.incomingResStream,
         makeResStreamPlainText: props.makeResStreamPlainText,
+        bodyEncoding: props.bodyEncoding,
       }
     }
   })

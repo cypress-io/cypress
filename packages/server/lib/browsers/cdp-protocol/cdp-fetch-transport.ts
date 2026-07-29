@@ -19,6 +19,21 @@ type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 const brotliDecompress = promisify(zlib.brotliDecompress)
 
+// Encodings Fetch.getResponseBody hands back still encoded — see
+// decodeUndeliveredEncodings. Derived by enumeration: Chrome's netstack
+// accepts gzip/deflate/br/zstd and getResponseBody undoes gzip/deflate, so
+// this is the complement — complete today, but revisit whenever either side
+// grows. Arrow wrappers keep this table free of module-init evaluation: the
+// v8 snapshot rewriter defers `promisify(...)` behind lazy getters, and
+// touching them while the snapshot is being created fails the build.
+// zlib.zstdDecompress landed in Node 22.15 — the binary's Electron always has
+// it, but this module also loads under older host Nodes (system-test
+// harnesses), so it must not be touched until a zstd body actually arrives.
+const UNDELIVERED_DECODERS: Record<string, (body: Buffer) => Promise<Buffer>> = {
+  br: (body) => brotliDecompress(body),
+  zstd: (body) => promisify(zlib.zstdDecompress)(body),
+}
+
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
 }
@@ -399,11 +414,20 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Fetch.getResponseBody delivers gzip/deflate content-decoded, but brotli
-   * arrives still encoded (and continueRequest cannot constrain
-   * accept-encoding — the network stack owns that header). Decode br here so
-   * the middleware's decoded-body premise holds. Falls back to the raw bytes
-   * if decompression fails, in case a newer CDP starts decoding br itself.
+   * Compensates for a CDP inconsistency. At a paused response the buffered
+   * body is still wire-encoded: content decoding normally happens as the
+   * network service streams to the renderer, a point a Fetch pause never
+   * reaches. Fetch.getResponseBody runs DevTools' own decoder over those
+   * buffered bytes instead, and its allowlist only covers gzip/deflate — so
+   * brotli and zstd arrive still encoded and are decoded here, keeping the
+   * pipeline's decoded-body premise intact. Falls back to the raw bytes if
+   * decompression fails, in case a newer CDP starts decoding them itself.
+   *
+   * The allowlist is the `devtools_accepted_stream_types` field DevTools
+   * sends the network service, populated in
+   * https://source.chromium.org/chromium/chromium/src/+/main:content/browser/devtools/devtools_url_loader_interceptor.cc
+   * and declared in
+   * https://source.chromium.org/chromium/chromium/src/+/main:services/network/public/mojom/url_request.mojom
    */
   private decodeUndeliveredEncodings = async (body: Buffer, responseHeaders?: Protocol.Fetch.HeaderEntry[]): Promise<Buffer> => {
     const contentEncoding = responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
@@ -418,14 +442,16 @@ export class CdpFetchTransport {
     let decoded = body
 
     for (const encoding of encodings) {
-      if (encoding !== 'br') {
+      const decode = UNDELIVERED_DECODERS[encoding]
+
+      if (!decode) {
         continue
       }
 
       try {
-        decoded = await brotliDecompress(decoded)
+        decoded = await decode(decoded)
       } catch (err) {
-        debug('brotli decompression failed, using body as delivered: %s', (err as Error).message)
+        debug('%s decompression failed, using body as delivered: %s', encoding, (err as Error).message)
 
         return body
       }

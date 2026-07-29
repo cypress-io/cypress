@@ -753,6 +753,22 @@ describe('http/request-middleware', () => {
       expect(ctx.req.originalAcceptEncoding).toBe('gzip, deflate, br')
     })
 
+    it('leaves accept-encoding untouched when the pipeline declares identity bodies', async () => {
+      const ctx = { ...prepareContext({ 'accept-encoding': 'gzip, deflate, br, zstd' }), bodyEncoding: 'identity' }
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip, deflate, br, zstd')
+    })
+
+    it('does not synthesize a header when the pipeline declares identity bodies', async () => {
+      // the browser appends its own accept-encoding after interception; a
+      // synthesized one would ride out as a continueRequest override
+      const ctx = { ...prepareContext(), bodyEncoding: 'identity' }
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBeUndefined()
+    })
+
     it('strips to br only when client sends only br', async () => {
       const ctx = prepareContext({ 'accept-encoding': 'br' })
 

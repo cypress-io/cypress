@@ -1,6 +1,8 @@
 import type {
+  BodyEncoding,
   ForBrowserNetworkAutomation,
   ForCommandLog,
+  ForContentEncoding,
   ForCookieState,
   ForDocumentPreparation,
   ForNetworkCapture,
@@ -26,6 +28,9 @@ export type NetworkInterceptionCoreOptions = {
   networkCapture?: ForNetworkCapture
   cookieState?: ForCookieState
   commandLog?: ForCommandLog
+  // One implementation per BodyEncoding a pipeline can declare; requests
+  // select by ctx.bodyEncoding (default 'wire').
+  contentEncoding?: Partial<Record<BodyEncoding, ForContentEncoding>>
   browserNetworkAutomation?: ForBrowserNetworkAutomation
 }
 
@@ -199,6 +204,25 @@ export class NetworkInterceptionCore {
     }
 
     return port.notifyResponseStreamReceived(ctx)
+  }
+
+  constrainAcceptEncoding (ctx: unknown): void {
+    return this.contentEncodingFor(ctx).constrainAcceptEncoding(ctx)
+  }
+
+  async compressBody (ctx: unknown): Promise<void> {
+    return this.contentEncodingFor(ctx).compressBody(ctx)
+  }
+
+  private contentEncodingFor (ctx: unknown): ForContentEncoding {
+    const { bodyEncoding = 'wire' } = ctx as { bodyEncoding?: BodyEncoding }
+    const port = this.options.contentEncoding?.[bodyEncoding]
+
+    if (!port) {
+      throw new Error(`NetworkInterceptionCore.contentEncoding.${bodyEncoding} is not configured`)
+    }
+
+    return port
   }
 
   notifyResponseEndedWithEmptyBody (ctx: unknown, options: { isCached: boolean }): void {

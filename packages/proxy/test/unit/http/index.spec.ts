@@ -147,6 +147,38 @@ describe('http', function () {
       return http
     }
 
+    it('stamps the pipeline-declared bodyEncoding on the ctx, defaulting to wire', async function () {
+      const seen: string[] = []
+
+      incomingRequest.mockImplementation(function () {
+        seen.push(this.bodyEncoding)
+        this.incomingRes = {}
+        this.end()
+      })
+
+      incomingResponse.mockImplementation(function () {
+        this.end()
+      })
+
+      const defaultHttp = new Http(httpOpts)
+      const defaultIntercept = new HttpIntercept(proxyHttpCodec)
+
+      defaultIntercept.use(defaultHttp.createLegacyProxyPipeline(proxyHttpCodec))
+      defaultHttp.networkInterception = defaultIntercept
+      // @ts-expect-error
+      await defaultHttp.handleHttpRequest({}, { on, off })
+
+      const identityHttp = new Http(httpOpts)
+      const identityIntercept = new HttpIntercept(proxyHttpCodec)
+
+      identityIntercept.use(identityHttp.createLegacyProxyPipeline(proxyHttpCodec, { bodyEncoding: 'identity' }))
+      identityHttp.networkInterception = identityIntercept
+      // @ts-expect-error
+      await identityHttp.handleHttpRequest({}, { on, off })
+
+      expect(seen).toEqual(['wire', 'identity'])
+    })
+
     it('calls IncomingRequest stack, then IncomingResponse stack', async function () {
       incomingRequest.mockImplementation(function () {
         expect(incomingResponse).not.toHaveBeenCalled()

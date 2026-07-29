@@ -37,9 +37,31 @@ export interface ForDocumentPreparation {
 }
 
 /**
+ * The state the pipeline's outgoing body must be in: `wire` re-encodes the
+ * body to match its content-encoding header (a real socket and a decoding
+ * netstack sit downstream), `identity` hands it back fully decoded (nothing
+ * downstream will decode, e.g. CDP Fetch.fulfillRequest). Declared per
+ * pipeline; a proxy-disabled runtime serves wire (express) and identity (CDP)
+ * pipelines side by side.
+ */
+export type BodyEncoding = 'wire' | 'identity'
+
+/**
+ * Driven port: content-encoding negotiation. The implementation is selected
+ * per request by the pipeline's declared {@link BodyEncoding}.
+ */
+export interface ForContentEncoding {
+  // Implementations advance the middleware stage themselves (ctx.next()).
+  constrainAcceptEncoding (ctx: unknown): void
+
+  compressBody (ctx: unknown): Promise<void>
+}
+
+/**
  * Driven port: Test Replay / protocol capture at the proxy boundary.
  */
 export interface ForNetworkCapture {
+  // Advances the middleware stage itself (ctx.next()).
   notifyResponseStreamReceived (ctx: unknown): Promise<void>
 
   notifyResponseEndedWithEmptyBody (ctx: unknown, options: { isCached: boolean }): void

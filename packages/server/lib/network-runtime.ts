@@ -2,7 +2,7 @@ import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
+import type { BodyEncoding, NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
@@ -105,6 +105,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   }))
 
   networkInterception.use(networkProxy.http.createLegacyProxyPipeline(networkProxy.codec))
+
   networkProxy.withIntercept(networkInterception)
 
   return {
@@ -171,12 +172,19 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     request: deps.request,
   })
 
+  // The outgoing body is a per-pipeline declaration: express traffic still
+  // goes back over a real socket (re-encoded for the wire), while a body
+  // fulfilled over CDP must be handed back fully decoded — Fetch.fulfillRequest
+  // runs no decoders, the browser renders the bytes as-is.
+  // `serveInternalRoutes` short-circuits ahead of the onion and reaches
+  // neither encoding stage — the adapter owns encoding on its own loopback leg.
   const attachStages = <TRequest, TResponse>(
     intercept: HttpIntercept<TRequest, TResponse>,
     pipelineCodec: TransportCodecPort<any, any>,
+    bodyEncoding?: BodyEncoding,
   ) => {
     intercept.use(serveInternalRoutes)
-    intercept.use(networkProxy.http.createLegacyProxyPipeline(pipelineCodec))
+    intercept.use(networkProxy.http.createLegacyProxyPipeline(pipelineCodec, { bodyEncoding }))
 
     return intercept
   }
@@ -193,6 +201,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
     }),
+    'identity',
   )
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {

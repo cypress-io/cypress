@@ -57,14 +57,6 @@ const zlibGzipDecompressOptions = {
   finishFlush: zlib.constants.Z_SYNC_FLUSH,
 }
 
-const zlibGzipCompressOptions = {
-  flush: zlib.constants.Z_SYNC_FLUSH,
-  // Compression must use Z_FINISH so the gzip trailer (CRC + size) is written; otherwise
-  // gunzip fails with "unexpected end of file" when decoding layered encoding (e.g. gzip, br).
-  finishFlush: zlib.constants.Z_FINISH,
-  level: zlib.constants.Z_BEST_SPEED,
-}
-
 // Brotli decompression: use BROTLI_OPERATION_FLUSH for lenient decompression of truncated or
 // slightly invalid brotli from upstream (same rationale as zlibGzipDecompressOptions for createGunzip).
 const zlibBrotliDecompressOptions = {
@@ -72,15 +64,10 @@ const zlibBrotliDecompressOptions = {
   finishFlush: zlib.constants.BROTLI_OPERATION_FLUSH,
 }
 
-const zlibBrotliCompressOptions = {
-  flush: zlib.constants.BROTLI_OPERATION_FLUSH,
-  finishFlush: zlib.constants.BROTLI_OPERATION_FINISH,
-  params: {
-    // Brotli default quality is 11 (slowest). Use quality 1 for fast re-compression in the proxy.
-    [zlib.constants.BROTLI_PARAM_QUALITY]: 1,
-  },
-}
-
+// The encodings makeResStreamPlainText can undo, and so the only ones an
+// encoding adapter can put back. Literal tokens only — x-gzip and deflate are
+// opaque to this pipeline (cypress-io/cypress#34387), though the identity
+// implementation decodes them since it never has to re-encode.
 const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
 
 type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]
@@ -202,6 +189,7 @@ const FilterNonProxiedResponse: ResponseMiddleware = function () {
       'MaybeSendRedirectToClient',
       'CopyResponseStatusCode',
       'MaybeEndWithEmptyBody',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -619,39 +607,16 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   })
 }
 
-const CompressBody: ResponseMiddleware = async function () {
-  await this.networkInterceptionCore.notifyResponseStreamReceived(this)
+// Runs on every pipeline, and must observe the stream before the encoding stage
+// re-encodes it — it may hand back a tee for that stage to pipe.
+const NotifyResponseStreamReceived: ResponseMiddleware = function () {
+  return this.networkInterceptionCore.notifyResponseStreamReceived(this)
+}
 
-  // Re-compress in the same order as the original content-encoding (innermost first).
-  const order = this.contentEncodingOrder ?? []
-
-  for (const enc of order) {
-    if (enc === 'gzip' && this.isGunzipped) {
-      this.debug('regzipping response body')
-
-      const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
-
-      this.incomingResStream = this.incomingResStream
-      .pipe(zlib.createGzip(zlibGzipCompressOptions))
-      .on('error', this.onError)
-      .once('close', () => {
-        span?.end()
-      })
-    } else if (enc === 'br' && this.isBrotliDecompressed) {
-      this.debug('re-compressing Brotli response body')
-
-      const span = telemetry.startSpan({ name: 'brotli:body', parentSpan: this.resMiddlewareSpan, isVerbose })
-
-      this.incomingResStream = this.incomingResStream
-      .pipe(zlib.createBrotliCompress(zlibBrotliCompressOptions))
-      .on('error', this.onError)
-      .once('close', () => {
-        span?.end()
-      })
-    }
-  }
-
-  this.next()
+// What the outgoing body has to be encoded as is the pipeline's declared
+// bodyEncoding, which selects the implementation.
+const CompressBody: ResponseMiddleware = function () {
+  return this.networkInterceptionCore.compressBody(this)
 }
 
 const SendResponseBodyToClient: ResponseMiddleware = function () {
@@ -687,6 +652,7 @@ export default {
   MaybeInjectHtml,
   MaybeRemoveSecurity,
   MaybeInjectServiceWorker,
+  NotifyResponseStreamReceived,
   CompressBody,
   SendResponseBodyToClient,
 }

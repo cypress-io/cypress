@@ -24,7 +24,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
+import type { BodyEncoding, ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -97,6 +97,7 @@ export type HttpMiddlewareCtx<T> = {
   setAUTUrl: Http['setAUTUrl']
   simulatedCookies: SerializableAutomationCookie[]
   protocolManager?: ProtocolManagerShape
+  bodyEncoding: BodyEncoding
 } & T
 
 export const defaultMiddleware = {
@@ -135,6 +136,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'onError',
   'skipMiddleware',
   'onlyRunMiddleware',
+  'bodyEncoding',
 ]
 
 export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
@@ -388,10 +390,14 @@ export class Http {
     return onError
   }
 
-  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
+  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>, options: { bodyEncoding?: BodyEncoding } = {}): InterceptMiddleware {
     return async (request, next): Promise<HttpResponse> => {
       try {
         const ctx = codec.encodeRequest(request)
+
+        if (options.bodyEncoding) {
+          ctx.bodyEncoding = options.bodyEncoding
+        }
 
         const onError = this.buildOnError(ctx)
 
@@ -528,6 +534,9 @@ export class Http {
       },
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
+      // The outgoing body is re-encoded for the wire unless the pipeline the
+      // composition root builds over this ctx declares otherwise.
+      bodyEncoding: 'wire',
     }
 
     return ctx

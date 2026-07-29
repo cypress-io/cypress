@@ -18,6 +18,8 @@ export function testMiddleware (middleware: TestMiddlewareStack, ctx: Record<str
     req: {},
     res: {},
     config: {},
+    // No bodyEncoding declared, so encoding stages default to 'wire',
+    // matching createMiddlewareContext
     networkInterceptionCore: createTestNetworkInterceptionCore(),
 
     middleware: {

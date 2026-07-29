@@ -472,16 +472,15 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('normalizes pipeline re-encoded fulfilled bodies to identity', async () => {
+    // Identity is guaranteed upstream by IdentityContentEncodingAdapter, so the
+    // transport hands the pipeline body to fulfillRequest as-is.
+    it('fulfills pipeline bodies verbatim', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
-      const gzippedBody = zlib.gzipSync(Buffer.from('<html>compressed</html>'))
 
-      // the legacy pipeline (CompressBody) may re-encode the outgoing body;
-      // fulfillRequest delivers bodies as-is, so it must go out as identity
       httpIntercept.use(async (req, next) => {
         const res = await next(req)
 
@@ -489,10 +488,9 @@ describe('CdpFetchTransport', () => {
           ...res,
           headers: {
             'content-type': 'text/html',
-            'content-encoding': 'gzip',
             'content-length': '9999',
           },
-          body: gzippedBody,
+          body: Buffer.from('<html>plain</html>'),
         }
       })
 
@@ -510,44 +508,7 @@ describe('CdpFetchTransport', () => {
           name: 'content-type',
           value: 'text/html',
         }],
-        body: Buffer.from('<html>compressed</html>').toString('base64'),
-      })
-    })
-
-    it('keeps the body and header pair when a fulfilled encoding cannot be decoded', async () => {
-      const client = createClient()
-      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const { transport } = createTransport(client, { httpIntercept })
-      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
-
-      httpIntercept.use(async (req, next) => {
-        const res = await next(req)
-
-        return {
-          ...res,
-          headers: {
-            'content-encoding': 'zstd',
-          },
-          body: Buffer.from('opaque-bytes'),
-        }
-      })
-
-      const onRequestPaused = await startTransport(transport, client)
-      const handled = onRequestPaused(request)
-
-      await tick()
-      await onRequestPaused(response)
-      await handled
-
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
-        responseCode: 200,
-        responseHeaders: [{
-          name: 'content-encoding',
-          value: 'zstd',
-        }],
-        body: Buffer.from('opaque-bytes').toString('base64'),
+        body: Buffer.from('<html>plain</html>').toString('base64'),
       })
     })
 
@@ -1221,6 +1182,64 @@ describe('CdpFetchTransport', () => {
 
       response.responseHeaders = [
         { name: 'Content-Encoding', value: 'br' },
+        { name: 'Content-Type', value: 'text/html' },
+      ]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(seenBody).to.equal('<html>origin</html>')
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-response',
+        responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/html',
+        }],
+        body: Buffer.from('<html>origin</html>-rewritten').toString('base64'),
+      })
+    })
+
+    it('decompresses zstd response bodies before middleware reads them', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: zlib.zstdCompressSync(Buffer.from('<html>origin</html>')).toString('base64'),
+        base64Encoded: true,
+      })
+
+      let seenBody
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        seenBody = await readStream(response.bodyStream!)
+
+        return {
+          ...response,
+          body: `${seenBody}-rewritten`,
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [
+        { name: 'Content-Encoding', value: 'zstd' },
         { name: 'Content-Type', value: 'text/html' },
       ]
 

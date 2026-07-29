@@ -1,4 +1,3 @@
-import zlib from 'zlib'
 import type {
   HttpHeaders,
   HttpRequest,
@@ -71,13 +70,6 @@ function toResponseBody (body?: string | Buffer): string | undefined {
 const WIRE_LENGTH_HEADERS = new Set(['content-length', 'transfer-encoding'])
 const WIRE_ENCODING_HEADERS = new Set(['content-encoding', ...WIRE_LENGTH_HEADERS])
 
-const CONTENT_DECODERS: Record<string, (body: Buffer) => Buffer> = {
-  gzip: (body) => zlib.gunzipSync(body),
-  'x-gzip': (body) => zlib.gunzipSync(body),
-  br: (body) => zlib.brotliDecompressSync(body),
-  deflate: (body) => zlib.inflateSync(body),
-}
-
 function stripWireEncodingHeaders (headers?: HttpHeaders): HttpHeaders | undefined {
   if (!headers) {
     return undefined
@@ -94,51 +86,6 @@ function stripWireEncodingHeaders (headers?: HttpHeaders): HttpHeaders | undefin
 
 function stripHeaderEntries (headers: CdpFetchTransportResponse['responseHeaders'], names: ReadonlySet<string>): CdpFetchTransportResponse['responseHeaders'] {
   return headers?.filter(({ name }) => !names.has(name.toLowerCase()))
-}
-
-// Fetch.fulfillRequest hands the body to the renderer as-is — content
-// decoders do not run for fulfilled responses. The pipeline may emit encoded
-// bodies (CompressBody re-encodes rewritten documents), so decode fulfilled
-// bodies back to identity and drop the encoding headers. If an encoding
-// cannot be decoded, keep the body/header pair intact rather than shipping a
-// body that lies about its encoding.
-function toIdentityResponse (transportResponse: CdpFetchTransportResponse): CdpFetchTransportResponse {
-  const headers = transportResponse.responseHeaders
-  const contentEncoding = headers?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
-  const encodings = (contentEncoding ?? '')
-  .split(',')
-  .map((token) => token.trim().toLowerCase())
-  .filter((token) => token && token !== 'identity')
-
-  if (!transportResponse.body || !encodings.length) {
-    return {
-      ...transportResponse,
-      responseHeaders: stripHeaderEntries(headers, WIRE_ENCODING_HEADERS),
-    }
-  }
-
-  let body = Buffer.from(transportResponse.body, 'base64')
-
-  try {
-    // encodings are listed in the order applied — decode outermost first
-    for (let i = encodings.length - 1; i >= 0; i--) {
-      const decode = CONTENT_DECODERS[encodings[i]]
-
-      if (!decode) {
-        throw new Error(`no decoder for content-encoding ${encodings[i]}`)
-      }
-
-      body = decode(body)
-    }
-  } catch (err) {
-    return transportResponse
-  }
-
-  return {
-    ...transportResponse,
-    body: body.toString('base64'),
-    responseHeaders: stripHeaderEntries(headers, WIRE_ENCODING_HEADERS),
-  }
 }
 
 function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
@@ -186,16 +133,6 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     }
 
     return request as CdpFetchTransportRequest & { requestId: string }
-  }
-
-  const requireResponse = (id: string): CdpFetchTransportResponse => {
-    const response = inFlightResponses.get(id)
-
-    if (!response) {
-      throw new Error(`No CDP Fetch response pause found for ${id}. HttpIntercept middleware must call next() before returning a response.`)
-    }
-
-    return response
   }
 
   return {
@@ -247,11 +184,10 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       const response = httpResponse as CdpFetchHttpResponse
       const pausedResponse = inFlightResponses.get(httpResponse.id)
       const fulfilled = response.body !== undefined
-      // Middleware headers describe the body the pipeline produced — including
-      // any re-encoding by CompressBody — so keep their content-encoding and
-      // only drop stale length headers. The pause-header fallback describes
-      // the wire body, not the decoded body we fulfill with, so its encoding
-      // headers are stripped too.
+      // Middleware headers describe the identity body this pipeline produces,
+      // so only stale length headers need dropping. The pause-header fallback
+      // describes the wire body, not the decoded body we fulfill with, so its
+      // encoding headers are stripped too.
       const fulfilledHeaders = (headers?: HttpHeaders, pauseHeaders?: CdpFetchTransportResponse['responseHeaders']) => {
         const middlewareHeaders = toResponseHeaders(headers)
 
@@ -278,7 +214,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       transportResponse.url = httpResponse.url
       inFlightResponses.delete(httpResponse.id)
 
-      return transportResponse.fulfilled ? toIdentityResponse(transportResponse) : transportResponse
+      return transportResponse
     },
 
     releaseRequest (id: string): void {

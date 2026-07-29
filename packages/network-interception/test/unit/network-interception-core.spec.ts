@@ -318,4 +318,48 @@ describe('NetworkInterceptionCore', () => {
     expect(notifyResponseStreamReceived).toHaveBeenCalledWith(ctx)
     expect(notifyResponseEndedWithEmptyBody).toHaveBeenCalledWith(ctx, { isCached: false })
   })
+
+  describe('content-encoding selection', () => {
+    function encodingPorts () {
+      return {
+        wire: { constrainAcceptEncoding: vi.fn(), compressBody: vi.fn() },
+        identity: { constrainAcceptEncoding: vi.fn(), compressBody: vi.fn() },
+      }
+    }
+
+    it('selects the wire implementation when the ctx declares no bodyEncoding', async () => {
+      const contentEncoding = encodingPorts()
+      const core = new NetworkInterceptionCore({ contentEncoding })
+      const ctx = {}
+
+      core.constrainAcceptEncoding(ctx)
+      await core.compressBody(ctx)
+
+      expect(contentEncoding.wire.constrainAcceptEncoding).toHaveBeenCalledWith(ctx)
+      expect(contentEncoding.wire.compressBody).toHaveBeenCalledWith(ctx)
+      expect(contentEncoding.identity.constrainAcceptEncoding).not.toHaveBeenCalled()
+      expect(contentEncoding.identity.compressBody).not.toHaveBeenCalled()
+    })
+
+    it('selects the implementation the ctx bodyEncoding declares', async () => {
+      const contentEncoding = encodingPorts()
+      const core = new NetworkInterceptionCore({ contentEncoding })
+      const ctx = { bodyEncoding: 'identity' }
+
+      core.constrainAcceptEncoding(ctx)
+      await core.compressBody(ctx)
+
+      expect(contentEncoding.identity.constrainAcceptEncoding).toHaveBeenCalledWith(ctx)
+      expect(contentEncoding.identity.compressBody).toHaveBeenCalledWith(ctx)
+      expect(contentEncoding.wire.constrainAcceptEncoding).not.toHaveBeenCalled()
+      expect(contentEncoding.wire.compressBody).not.toHaveBeenCalled()
+    })
+
+    it('throws when the declared bodyEncoding has no implementation', async () => {
+      const core = new NetworkInterceptionCore({})
+
+      expect(() => core.constrainAcceptEncoding({})).toThrow('NetworkInterceptionCore.contentEncoding.wire is not configured')
+      await expect(core.compressBody({ bodyEncoding: 'identity' })).rejects.toThrow('NetworkInterceptionCore.contentEncoding.identity is not configured')
+    })
+  })
 })
