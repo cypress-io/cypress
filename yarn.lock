@@ -3078,6 +3078,13 @@
     "@emnapi/wasi-threads" "1.2.2"
     tslib "^2.4.0"
 
+"@emnapi/core@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.9.1.tgz#2143069c744ca2442074f8078462e51edd63c7bd"
+  integrity sha512-mukuNALVsoix/w1BJwFzwXBN/dHeejQtuVzcDsfOEsdpCumXb/E9j8w11h5S54tT1xhifGfbbSm/ICrObRb3KA==
+  dependencies:
+    tslib "^2.4.0"
+
 "@emnapi/runtime@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@emnapi/runtime/-/runtime-1.11.1.tgz#58f1f3d5d81a9b12f793ab688c96371901027c24"
@@ -3089,6 +3096,20 @@
   version "1.11.2"
   resolved "https://registry.yarnpkg.com/@emnapi/runtime/-/runtime-1.11.2.tgz#eb22f04d76febfdf4f87fdaff54c8a53f6bf0dbd"
   integrity sha512-kyOl3X0DuTiT1h2ft8r2fYO8JYtU9a9Xis/zBSiGArNaagCOWx90N1k2wxp18czFDH+OgcWGb5ZP/XMt3dcyPA==
+  dependencies:
+    tslib "^2.4.0"
+
+"@emnapi/runtime@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@emnapi/runtime/-/runtime-1.9.1.tgz#115ff2a0d589865be6bd8e9d701e499c473f2a8d"
+  integrity sha512-VYi5+ZVLhpgK4hQ0TAjiQiZ6ol0oe4mBx7mVv7IflsiEp0OWoVsp/+f9Vc1hOhE0TtkORVrI1GvzyreqpgWtkA==
+  dependencies:
+    tslib "^2.4.0"
+
+"@emnapi/wasi-threads@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@emnapi/wasi-threads/-/wasi-threads-1.2.0.tgz#a19d9772cc3d195370bf6e2a805eec40aa75e18e"
+  integrity sha512-N10dEJNSsUx41Z6pZsXU8FjPjpBEplgH24sfkmITrBED1/U2Esum9F3lfLrMjKHHjmi557zQn7kR9R+XWXu5Rg==
   dependencies:
     tslib "^2.4.0"
 
@@ -5344,10 +5365,10 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
 
-"@napi-rs/wasm-runtime@^1.1.6":
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-1.1.6.tgz#ed33806d0f9be98dc76d0c3d4fd872fda701b5d5"
-  integrity sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg==
+"@napi-rs/wasm-runtime@^1.1.2", "@napi-rs/wasm-runtime@^1.1.6":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-1.2.0.tgz#d7aa398845e3ab1c9c8f81ea50f527ed37d16715"
+  integrity sha512-kDoONqMa+VnZ4vvvu/ZUurpJ4gkZU57e7g69qpNgWhYcZFPUHZM2CEMKm+cG6ufDVALbjMvfmMjFVqaK7uEMnA==
   dependencies:
     "@tybys/wasm-util" "^0.10.3"
 
@@ -6598,14 +6619,6 @@
     "@percy/client" "1.31.14"
     "@percy/logger" "1.31.14"
 
-"@percy/client@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/client/-/client-1.27.6.tgz#abc72d477f531201744bf223d5cb6519c223707d"
-  integrity sha512-Q+fv/iYJ2QSMOPXJ69skyWn/ob6w+tVk6gtMXmiBYi5K4EqEehHhJkBCm7oATo+cE3h+/W2Hu9/o18WutD+uCw==
-  dependencies:
-    "@percy/env" "1.27.6"
-    "@percy/logger" "1.27.6"
-
 "@percy/client@1.31.14":
   version "1.31.14"
   resolved "https://registry.yarnpkg.com/@percy/client/-/client-1.31.14.tgz#dc850b8e490118194efa9ef428ef971480674ca9"
@@ -6616,16 +6629,6 @@
     "@percy/logger" "1.31.14"
     pac-proxy-agent "^7.0.2"
     pako "^2.1.0"
-
-"@percy/config@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/config/-/config-1.27.6.tgz#047ba923943058c63fc9a880ac22e8ba5731a170"
-  integrity sha512-2hvGq4FL2m6H/XrnCemQqsOUjNsoCL1sSCfWiKffvY74lfZ/YTtIHKL3qUjgW70a/xXhjy8kfAb9qCppNJ7AmQ==
-  dependencies:
-    "@percy/logger" "1.27.6"
-    ajv "^8.6.2"
-    cosmiconfig "^8.0.0"
-    yaml "^2.0.0"
 
 "@percy/config@1.31.14":
   version "1.31.14"
@@ -6669,22 +6672,10 @@
   dependencies:
     "@percy/sdk-utils" "1.32.3-beta.1"
 
-"@percy/dom@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.27.6.tgz#3cee3af64d5b8fad4e2ddb6bab7097e21412c2f4"
-  integrity sha512-EZi2mGsAdBwb6gfPGI4cupcgFOOP8kaXHZbn/wY+zNyXf2y4AHo7sptp75r1RXfbjgbK+Ubj80KmoAXiw2ytRA==
-
 "@percy/dom@1.31.14":
   version "1.31.14"
   resolved "https://registry.yarnpkg.com/@percy/dom/-/dom-1.31.14.tgz#bb8506014589d1d76d148f31410f259554389757"
   integrity sha512-Ilz9qSf9Z80jHah9b7OfX2M2N9vmY4hkGEhMO953ui3NSQhXZsezr4aIPREYdyZdo11pEWm+JWU1AEZw54CbbA==
-
-"@percy/env@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/env/-/env-1.27.6.tgz#ae952f3bd45e0921c8026d791b0fb32321ca67b9"
-  integrity sha512-JslAEIdyMxEDq+FPxNZyBTUQA0wsjQ9nZi76qg9O75Ypfh69DYc6udzNneTowZMCsO1OwmpW5jpK+H8TH4T8iQ==
-  dependencies:
-    "@percy/logger" "1.27.6"
 
 "@percy/env@1.31.14":
   version "1.31.14"
@@ -6692,11 +6683,6 @@
   integrity sha512-eRW4Ot2Z5WESKPJHcdLc9JFLtjxJaALzRxGa7Z+0R5t5wOlqbEVQytLBzgFWWTVa2XEejR4Sffs5cYqM+ldgEA==
   dependencies:
     "@percy/logger" "1.31.14"
-
-"@percy/logger@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/logger/-/logger-1.27.6.tgz#3dd40a2426db34edeeade29d688c55b35fe270ba"
-  integrity sha512-Thbc9vWc626n+m3+LDKXTUBs3LqtwomI+rA/gajTOegd9ENsLLi8kTVM7AwwIlHp6TqLdBw0vXFlGEi+F2okUA==
 
 "@percy/logger@1.31.14":
   version "1.31.14"
@@ -6713,11 +6699,6 @@
     "@percy/sdk-utils" "1.31.14"
     systeminformation "^5.25.11"
 
-"@percy/sdk-utils@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.27.6.tgz#f6daa7f81fde65d61e7c2817ad1215eda4eed7fe"
-  integrity sha512-oZwd9u+KnFdMbA8HmisiWY5un4qB00kNUJtn/6CsXSpLwMi4qhOiBp8xjex0Aq5dqQc3vklWdlPu7JFxGwQq4Q==
-
 "@percy/sdk-utils@1.31.14":
   version "1.31.14"
   resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.31.14.tgz#f86e0451a5931d5a1d2bf1daa2438f543c70936e"
@@ -6731,14 +6712,6 @@
   integrity sha512-/oD+82slu1tuV3nFkwrdBWUIZ3JdmPuh2ajlcWbumTxu0lu2hhZLKmCTE72Fc5N6UXoHl9tQzJPrkT0/W/aigQ==
   dependencies:
     pac-proxy-agent "^7.0.2"
-
-"@percy/webdriver-utils@1.27.6":
-  version "1.27.6"
-  resolved "https://registry.yarnpkg.com/@percy/webdriver-utils/-/webdriver-utils-1.27.6.tgz#26c5b11de0433a45dd19620f8acc35d2d09f3363"
-  integrity sha512-ol/ESe08UDmMQq9qYMOKPgrQ4g8vjpfQ8/kKpmnkI8JNsHlxfXi85uMA8hmBzSNG9Iis6kQT7CFXdDBaWVhiOA==
-  dependencies:
-    "@percy/config" "1.27.6"
-    "@percy/sdk-utils" "1.27.6"
 
 "@percy/webdriver-utils@1.31.14":
   version "1.31.14"
@@ -30613,7 +30586,7 @@ tinyexec@^0.3.2:
   resolved "https://registry.yarnpkg.com/tinyexec/-/tinyexec-0.3.2.tgz#941794e657a85e496577995c6eef66f53f42b3d2"
   integrity sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==
 
-tinyglobby@^0.2.12, tinyglobby@^0.2.14, tinyglobby@^0.2.17:
+tinyglobby@^0.2.12, tinyglobby@^0.2.13, tinyglobby@^0.2.14, tinyglobby@^0.2.15, tinyglobby@^0.2.17:
   version "0.2.17"
   resolved "https://registry.yarnpkg.com/tinyglobby/-/tinyglobby-0.2.17.tgz#562a9a6c9eb2b3b123d39719f9af5bb44fcd7631"
   integrity sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==

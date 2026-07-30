@@ -14,6 +14,7 @@ linux-x64:
       # temporary branches that can be removed after merging
       - equal: [ 'mschile/electron_41', << pipeline.git.branch >> ]
       - equal: [ 'fix/windows-junction-safe-fixture-cleanup', << pipeline.git.branch >> ]
+      - equal: [ 'v8-snapshot-force-norewrite-all-bundles', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
