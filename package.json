@@ -18,6 +18,7 @@
     "build-v8-snapshot-dev": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js --env=dev",
     "build-v8-snapshot-prod": "node --max-old-space-size=8192 tooling/v8-snapshot/scripts/setup-v8-snapshot-in-cypress.js",
     "check-binary-on-cdn": "node ./scripts/binary.js checkIfBinaryExistsOnCdn",
+    "check-lockfile": "yarn-deduplicate --strategy=highest --list --fail",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "check-ts": "yarn lerna run check-ts",
