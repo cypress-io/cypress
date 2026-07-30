@@ -36,10 +36,10 @@ export const renderStatusHuman = (status: TapStatus): string => {
     browserName: status.browserName ?? null,
   }
 
-  const progress = [`  ${phaseLine(status)}`]
+  const progress = [phaseLine(status)]
 
   if (status.results) {
-    progress.push(`  ${countsLine(status.results)}`)
+    progress.push(countsLine(status.results))
   }
 
   const blocks = [instanceColumns([instance]), progress]

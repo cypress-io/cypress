@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapInstanceSummary } from '../commands/instances'
-import { color, columns, heading, layout } from './format'
+import { color, columns, layout, panel } from './format'
 
 /** The facts an instance row shows — carried by a summary, and by a status. */
 export interface InstanceRow {
@@ -32,5 +32,5 @@ export const instanceColumns = (instances: InstanceRow[]): string[] => {
 
 // The reachable open-mode instances under a counted heading.
 export const renderInstancesHuman = (instances: TapInstanceSummary[]): string => {
-  return layout([[heading('INSTANCES', instances.length), ...instanceColumns(instances)]])
+  return layout([panel('INSTANCES', instances.length, instanceColumns(instances))])
 }

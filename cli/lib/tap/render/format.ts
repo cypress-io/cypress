@@ -86,9 +86,15 @@ export const columns = (
   const pad = (cells: string[]) => cells.map((cell, column) => cell.padEnd(widths[column]))
 
   return [
-    `  ${pad(header).map((cell) => chalk.dim(cell)).join('  ')}`,
-    ...rows.map((row, index) => `  ${colorize(pad(row), index).join('  ')}`),
+    pad(header).map((cell) => chalk.dim(cell)).join('  '),
+    ...rows.map((row, index) => colorize(pad(row), index).join('  ')),
   ]
+}
+
+// A counted panel title with its content indented beneath it. Content rendered
+// on its own — no title to sit under — keeps the left margin.
+export const panel = (title: string, count: number | undefined, lines: string[]): string[] => {
+  return [heading(title, count), ...lines.map((line) => `${indent(1)}${line}`)]
 }
 
 // Columns under a counted panel title.
@@ -98,7 +104,7 @@ export const table = (
   rows: string[][],
   colorize?: (cells: string[], index: number) => string[],
 ): string[] => {
-  return [heading(title, rows.length), ...columns(header, rows, colorize)]
+  return panel(title, rows.length, columns(header, rows, colorize))
 }
 
 // Aligned `label  value` rows. Values arrive already styled — callers color

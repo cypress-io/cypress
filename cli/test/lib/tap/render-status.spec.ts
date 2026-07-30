@@ -28,11 +28,11 @@ describe('lib/tap/render/status', () => {
     })
 
     expect(output).toBe([
-      '  PID   PROJECT        TYPE  BROWSER',
-      '  4242  /projects/app  e2e   Chrome',
+      'PID   PROJECT        TYPE  BROWSER',
+      '4242  /projects/app  e2e   Chrome',
       '',
-      '  ● cypress/e2e/login.cy.ts  running',
-      '  ✓ 1  ✖ 1  ○ 2  - 1',
+      '● cypress/e2e/login.cy.ts  running',
+      '✓ 1  ✖ 1  ○ 2  - 1',
       '',
       '⚲ PINNED - (2/2) after',
       'BEFORE EACH · h2',
@@ -51,10 +51,10 @@ describe('lib/tap/render/status', () => {
     })
 
     expect(output).toBe([
-      '  PID  PROJECT        TYPE  BROWSER',
-      '  111  /projects/app  e2e   —',
+      'PID  PROJECT        TYPE  BROWSER',
+      '111  /projects/app  e2e   —',
       '',
-      '  ● browser not selected',
+      '● browser not selected',
     ].join('\n'))
   })
 
