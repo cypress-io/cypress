@@ -279,6 +279,12 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
+  # Focused proxy-disabled job for the Invalid InterceptionId body-stream crash (#34353).
+  # Always runs when launchpad tests are selected (not gated on run-proxy-disabled-tests).
+  - launchpad-open-mode-cdp:
+      requires:
+        - ready-to-test
+
   # Full proxy-disabled (CDP Fetch) coverage — off by default.
   # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
   # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
@@ -472,6 +478,7 @@ jobs:
         - system-tests-non-root
         - h2-dual-stack-tests
         - system-tests-upstream-proxy-cdp
+        - launchpad-open-mode-cdp
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta
