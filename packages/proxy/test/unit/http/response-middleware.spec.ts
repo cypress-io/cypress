@@ -2407,6 +2407,7 @@ describe('http/response-middleware', function () {
 
           await testMiddleware([MaybeInjectHtml], ctx)
           expect(htmlStub).toHaveBeenCalledOnce()
+          expect(ctx.res.bodyModified).toBe(true)
           expect(htmlStub).toHaveBeenCalledWith('foo', expect.objectContaining({
             'cspNonce': undefined,
             'deferSourceMapRewrite': undefined,
@@ -2479,6 +2480,18 @@ describe('http/response-middleware', function () {
       })
     })
 
+    it('does not set bodyModified when injection is not wanted', async function () {
+      prepareContext({
+        res: {
+          wantsInjection: false,
+        },
+      })
+
+      await testMiddleware([MaybeInjectHtml], ctx)
+      expect(htmlStub).not.toHaveBeenCalled()
+      expect(ctx.res.bodyModified).toBeUndefined()
+    })
+
     function prepareContext (props) {
       const stream = Readable.from(['foo'])
 
@@ -2542,6 +2555,7 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeRemoveSecurity], ctx)
       expect(securityStub).toHaveBeenCalledOnce()
+      expect(ctx.res.bodyModified).toBe(true)
       expect(securityStub).toHaveBeenCalledWith(expect.objectContaining({
         'deferSourceMapRewrite': undefined,
         'isNotJavascript': true,
@@ -2588,6 +2602,18 @@ describe('http/response-middleware', function () {
         'url': 'http://www.foobar.com:3501/primary-origin.html',
         'useAstSourceRewriting': undefined,
       }))
+    })
+
+    it('does not set bodyModified when security removal is not wanted', async function () {
+      prepareContext({
+        res: {
+          wantsSecurityRemoved: false,
+        },
+      })
+
+      await testMiddleware([MaybeRemoveSecurity], ctx)
+      expect(securityStub).not.toHaveBeenCalled()
+      expect(ctx.res.bodyModified).toBeUndefined()
     })
 
     function prepareContext (props) {
@@ -2652,6 +2678,7 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).not.toHaveBeenCalled()
+      expect(ctx.res.bodyModified).toBeUndefined()
     })
 
     it('does not rewrite the service worker if the browser is non-chromium', async function () {
@@ -2671,6 +2698,7 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).not.toHaveBeenCalled()
+      expect(ctx.res.bodyModified).toBeUndefined()
     })
 
     it('rewrites the service worker in chromium based browsers', async function () {
@@ -2686,6 +2714,7 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).toHaveBeenCalledOnce()
       expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo')
+      expect(ctx.res.bodyModified).toBe(true)
     })
 
     function prepareContext (props) {
