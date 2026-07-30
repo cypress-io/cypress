@@ -491,11 +491,13 @@ describe('tap binding pin lifecycle', () => {
       const pinOutcome = (await binding.exec('pin', { test: testId, command: commandId })) as { result: Record<string, any> }
 
       expect(Object.keys(pinOutcome.result)).to.satisfy((keys: string[]) => keys.every((key) => ['pinned', 'url'].includes(key)))
-      expect(Object.keys(pinOutcome.result.pinned)).to.have.members(['test', 'command', 'at'])
+      expect(Object.keys(pinOutcome.result.pinned)).to.satisfy((keys: string[]) => keys.every((key) => ['test', 'command', 'hookName', 'at'].includes(key)))
       expect(pinOutcome.result.pinned.test).to.eq(testId)
-      // The pinned command is reported as its reporter row, the same shape run-state reports.
+      // The pinned command is reported as its reporter row, the same shape run-state
+      // reports, named by the hook section that row renders under.
       expect(pinOutcome.result.pinned.command.id).to.eq(commandId)
       expect(pinOutcome.result.pinned.command.name).to.eq('click')
+      expect(pinOutcome.result.pinned.hookName).to.eq('test body')
       expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, total: 2, name: 'after' })
 
       // Re-running pin on the pinned command moves it in place.
