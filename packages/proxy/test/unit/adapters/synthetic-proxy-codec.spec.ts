@@ -1,4 +1,5 @@
 import { Readable } from 'stream'
+import zlib from 'zlib'
 import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
@@ -244,5 +245,130 @@ describe('createSyntheticProxyCodec', () => {
     expect(response.statusCode).to.equal(203)
     expect(response.headers).to.deep.equal({ 'x-result': 'synthetic' })
     expect(response.body?.toString()).to.equal('final')
+  })
+
+  it('decodes a pipeline re-encoded body back to identity and drops the encoding headers', async () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-3',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const finished = onceFinish(ctx.res)
+
+    // CompressBody re-encodes rewritten documents; the browser runs no
+    // decoders on bodies handed back over this codec's transports
+    ctx.res.status(200)
+    ctx.res.set('content-type', 'text/html')
+    ctx.res.set('content-encoding', 'gzip')
+    ctx.res.set('content-length', '9999')
+    ctx.res.end(zlib.gzipSync(Buffer.from('<html>compressed</html>')))
+
+    await finished
+
+    const response = codec.decodeResponse(ctx)
+
+    expect(response.body?.toString()).to.equal('<html>compressed</html>')
+    expect(response.headers).to.deep.equal({ 'content-type': 'text/html' })
+  })
+
+  it('decodes layered encodings outermost first', async () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-4',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const finished = onceFinish(ctx.res)
+
+    ctx.res.status(200)
+    ctx.res.set('content-encoding', 'br, gzip')
+    ctx.res.end(zlib.gzipSync(zlib.brotliCompressSync(Buffer.from('layered'))))
+
+    await finished
+
+    const response = codec.decodeResponse(ctx)
+
+    expect(response.body?.toString()).to.equal('layered')
+    expect(response.headers).to.deep.equal({})
+  })
+
+  it('keeps the body and header pair when an encoding cannot be decoded', async () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-5',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const finished = onceFinish(ctx.res)
+
+    ctx.res.status(200)
+    ctx.res.set('content-encoding', 'zstd')
+    ctx.res.end(Buffer.from('opaque-bytes'))
+
+    await finished
+
+    const response = codec.decodeResponse(ctx)
+
+    expect(response.body?.toString()).to.equal('opaque-bytes')
+    expect(response.headers).to.deep.equal({ 'content-encoding': 'zstd' })
+  })
+
+  it('strips accept-encoding from the outbound request so the browser keeps its own negotiation', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-2',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    // StripUnsupportedAcceptEncoding synthesizes a narrowed header when the
+    // pause carries none; it must never ride out on Fetch.continueRequest
+    ctx.req.headers['accept-encoding'] = 'gzip,identity'
+
+    const outbound = codec.decodeRequest(ctx)
+
+    expect(outbound.headers).to.not.have.property('accept-encoding')
+    // the middleware's own view stays intact
+    expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
   })
 })
