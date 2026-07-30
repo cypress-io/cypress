@@ -991,11 +991,15 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/launching-browsers`
   },
-  RENAMED_CONFIG_OPTION: (arg1: { name: string, newName: string }) => {
+  RENAMED_CONFIG_OPTION: (arg1: { name: string, newName: string, docsUrl?: string }) => {
+    const migrationDocs = arg1.docsUrl ? errPartial`See the migration guide: ${fmt.url(arg1.docsUrl)}` : null
+
     return errTemplate`\
         The ${fmt.highlight(arg1.name)} configuration option you have supplied has been renamed.
 
-        Please rename ${fmt.highlight(arg1.name)} to ${fmt.highlightSecondary(arg1.newName)}`
+        Please rename ${fmt.highlight(arg1.name)} to ${fmt.highlightSecondary(arg1.newName)}
+
+        ${migrationDocs}`
   },
   CANNOT_CONNECT_BASE_URL: () => {
     return errTemplate`\

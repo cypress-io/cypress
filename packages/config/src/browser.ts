@@ -69,40 +69,62 @@ export function resetIssuedWarnings () {
   issuedWarnings.clear()
 }
 
+const fireBreakingOptionEvent = (opt: BreakingOption, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+  const { name, errorKey, newName, isWarning, value, docsUrl } = opt
+  const args: BreakingErrResult = { name, newName, value, configFile: cfg.configFile, testingType, docsUrl }
+
+  if (isWarning) {
+    if (issuedWarnings.has(errorKey)) {
+      return
+    }
+
+    // avoid re-issuing the same warning more than once
+    issuedWarnings.add(errorKey)
+
+    return onWarning(errorKey, args)
+  }
+
+  return onErr(errorKey, args)
+}
+
 const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
-  breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value, shouldDisplayOrThrow }) => {
+  breakingCfgOptions.forEach((opt) => {
+    const { name, value, shouldDisplayOrThrow } = opt
+
     if (_.has(cfg, name) && (!shouldDisplayOrThrow || shouldDisplayOrThrow(cfg[name]))) {
       if (value && cfg[name] !== value) {
         // Bail if a value is specified but the config does not have that value.
         return
       }
 
-      if (isWarning) {
-        if (issuedWarnings.has(errorKey)) {
-          return
-        }
-
-        // avoid re-issuing the same warning more than once
-        issuedWarnings.add(errorKey)
-
-        return onWarning(errorKey, {
-          name,
-          newName,
-          value,
-          configFile: cfg.configFile,
-          testingType,
-        })
-      }
-
-      return onErr(errorKey, {
-        name,
-        newName,
-        value,
-        configFile: cfg.configFile,
-        testingType,
-      })
+      fireBreakingOptionEvent(opt, cfg, onWarning, onErr, testingType)
     }
   })
+}
+
+// Carries a deprecated option's value onto its replacement (per `newName`) and fires
+// its breaking-option warning/error, for options that keep working as a functional
+// alias rather than being removed outright. This has to run before defaults are
+// deep-merged into `cfg` (see mergeDefaults) - otherwise the deprecated option's own
+// default value would already be present, making every config look like it explicitly
+// set the deprecated option. `validateNoBreakingConfig` excludes these `newName`
+// options from its later pass so they aren't (mis-)evaluated a second time.
+export const applyConfigOptionAliases = (cfg: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+  breakingCfgOptions.forEach((opt) => {
+    const { name, newName } = opt
+
+    if (!newName || !_.has(cfg, name)) {
+      return
+    }
+
+    if (!_.has(cfg, newName)) {
+      cfg[newName] = cfg[name]
+    }
+
+    fireBreakingOptionEvent(opt, cfg, onWarning, onErr, testingType)
+  })
+
+  return cfg
 }
 
 export const allowed = (obj = {}) => {
@@ -191,8 +213,12 @@ export const validateNoBreakingConfigRoot = (cfg: any, onWarning: ErrorHandler, 
   return validateNoBreakingOptions(breakingRootOptions, cfg, onWarning, onErr, testingType)
 }
 
+// `newName` (functional alias) options are excluded here since `applyConfigOptionAliases`
+// already evaluates them, earlier, before defaults are deep-merged into `cfg`.
+const nonAliasedBreakingOptions = breakingOptions.filter((opt) => !opt.newName)
+
 export const validateNoBreakingConfig = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType: TestingType) => {
-  return validateNoBreakingOptions(breakingOptions, cfg, onWarning, onErr, testingType)
+  return validateNoBreakingOptions(nonAliasedBreakingOptions, cfg, onWarning, onErr, testingType)
 }
 
 export const validateNoBreakingConfigLaunchpad = (cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler) => {

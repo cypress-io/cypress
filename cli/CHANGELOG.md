@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.19.1
 
+**Deprecations:**
+
+- Deprecated the `experimentalMemoryManagement` configuration option in favor of a new, stable [`manageBrowserMemory`](https://docs.cypress.io/app/references/configuration#Global) option with identical behavior. Setting `experimentalMemoryManagement` continues to work and now prints a console warning naming `manageBrowserMemory` and linking to the [migration guide](https://on.cypress.io/memory-management-migration); `experimentalMemoryManagement` will be removed in a future major version of Cypress. Addresses [#34385](https://github.com/cypress-io/cypress/issues/34385).
+
 **Performance:**
 
 - Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).

@@ -1278,6 +1278,52 @@ describe('config/src/project/utils', () => {
       })
     })
 
+    describe('experimentalMemoryManagement / manageBrowserMemory alias', () => {
+      it('aliases experimentalMemoryManagement=true onto manageBrowserMemory and warns once', async function () {
+        await defaults('manageBrowserMemory', true, {
+          experimentalMemoryManagement: true,
+        }, { configFile: 'cypress.config.js' })
+
+        expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', {
+          configFile: 'cypress.config.js',
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+          testingType: undefined,
+          value: undefined,
+          docsUrl: 'https://on.cypress.io/memory-management-migration',
+        })
+      })
+
+      it('aliases experimentalMemoryManagement=false onto manageBrowserMemory and still warns', async function () {
+        await defaults('manageBrowserMemory', false, {
+          experimentalMemoryManagement: false,
+        })
+
+        expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+        }))
+      })
+
+      it('lets an explicit manageBrowserMemory win over experimentalMemoryManagement', async function () {
+        await defaults('manageBrowserMemory', true, {
+          experimentalMemoryManagement: false,
+          manageBrowserMemory: true,
+        })
+
+        expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+        }))
+      })
+
+      it('defaults manageBrowserMemory to false and does not warn when neither key is set', async function () {
+        await defaults('manageBrowserMemory', false, {})
+
+        expect(errors.warning).not.toBeCalledWith('RENAMED_CONFIG_OPTION', expect.anything())
+      })
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', async () => {
         const obj = {
@@ -1314,6 +1360,7 @@ describe('config/src/project/utils', () => {
           experimentalFastVisibility: { value: false, from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
+          manageBrowserMemory: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
@@ -1439,6 +1486,7 @@ describe('config/src/project/utils', () => {
           experimentalFastVisibility: { value: false, from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
+          manageBrowserMemory: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },

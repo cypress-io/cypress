@@ -58,7 +58,6 @@ const _summaries: StringValues = {
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
   experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
   experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
-  experimentalMemoryManagement: 'Enables support for improved memory management within Chromium-based browsers.',
 }
 
 /**
@@ -79,7 +78,6 @@ const _names: StringValues = {
   experimentalWebKitSupport: 'WebKit Support',
   experimentalRunAllSpecs: 'Run All Specs',
   experimentalOriginDependencies: 'Origin Dependencies',
-  experimentalMemoryManagement: 'Memory Management',
 }
 
 /**

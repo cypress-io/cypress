@@ -18,7 +18,7 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  experimentalMemoryManagement: true,
+  manageBrowserMemory: true,
   experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
   experimentalRunAllSpecs: true,

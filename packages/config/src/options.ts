@@ -97,6 +97,10 @@ export interface BreakingOption {
    * Whether to display or throw the error message based on the configuration value present.
    */
   shouldDisplayOrThrow?: (value: any) => boolean
+  /**
+   * Migration docs link surfaced alongside the error/warning message, e.g. for a renamed option.
+   */
+  docsUrl?: string
 }
 
 const isValidConfig = (testingType: string, config: any, opts: ValidationOptions) => {
@@ -240,6 +244,10 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+  }, {
+    name: 'manageBrowserMemory',
+    defaultValue: false,
+    validation: validate.isBoolean,
   }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
@@ -675,6 +683,13 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     // Display this warning if the value is not present or is explicitly false
     shouldDisplayOrThrow: (value: any) => value !== false,
     isWarning: true,
+  },
+  {
+    name: 'experimentalMemoryManagement',
+    errorKey: 'RENAMED_CONFIG_OPTION',
+    newName: 'manageBrowserMemory',
+    isWarning: true,
+    docsUrl: 'https://on.cypress.io/memory-management-migration',
   },
 ] as const
 

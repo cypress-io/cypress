@@ -9,6 +9,7 @@ exports[`config/src/index > .getBreakingKeys > returns list of breaking config k
   "experimentalStudio",
   "experimentalPromptCommand",
   "allowCypressEnv",
+  "experimentalMemoryManagement",
 ]
 `;
 
@@ -63,6 +64,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "isTextTerminal": false,
   "justInTimeCompile": true,
   "keystrokeDelay": 0,
+  "manageBrowserMemory": false,
   "modifyObstructiveCode": true,
   "morgan": true,
   "namespace": "__cypress",
@@ -161,6 +163,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "isTextTerminal": false,
   "justInTimeCompile": true,
   "keystrokeDelay": 0,
+  "manageBrowserMemory": false,
   "modifyObstructiveCode": true,
   "morgan": true,
   "namespace": "__cypress",
@@ -229,6 +232,7 @@ exports[`config/src/index > .getPublicConfigKeys > returns list of public config
   "experimentalInteractiveRunEvents",
   "experimentalRunAllSpecs",
   "experimentalMemoryManagement",
+  "manageBrowserMemory",
   "experimentalModifyObstructiveThirdPartyCode",
   "injectDocumentDomain",
   "experimentalOriginDependencies",

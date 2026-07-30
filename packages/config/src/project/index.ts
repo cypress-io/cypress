@@ -11,7 +11,9 @@ import type {
 import {
   validate,
   validateNoBreakingConfig,
+  applyConfigOptionAliases,
 } from '../browser'
+import { breakingOptions } from '../options'
 import {
   setPluginResolvedOn,
   mergeDefaults,
@@ -82,6 +84,22 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
       name: `${testingType}.${options.name}`,
     }))
   }, testingType)
+
+  // Carry a deprecated option's value onto its replacement (and fire its warning) before
+  // diffing against `cfg` below, otherwise a plugin that only sets the deprecated option
+  // would never actually change the replacement's resolved value.
+  applyConfigOptionAliases(modifiedConfig, breakingOptions, errors.warning, (err, options) => {
+    throw makeSetupError(errors.get(err, options))
+  }, testingType)
+
+  if (modifiedConfig[testingType]) {
+    applyConfigOptionAliases(modifiedConfig[testingType], breakingOptions, errors.warning, (err, options) => {
+      throw makeSetupError(errors.get(err, {
+        ...options,
+        name: `${testingType}.${options.name}`,
+      }))
+    }, testingType)
+  }
 
   const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
     value: cfg.browsers,

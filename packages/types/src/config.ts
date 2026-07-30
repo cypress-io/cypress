@@ -74,6 +74,7 @@ export type BreakingErrResult = {
   value?: any
   configFile: string
   testingType?: TestingType
+  docsUrl?: string
 }
 
 // Array format used for displaying resolved configuration in the UI
