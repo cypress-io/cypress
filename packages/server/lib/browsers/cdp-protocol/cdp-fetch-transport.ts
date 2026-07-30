@@ -21,6 +21,13 @@ const brotliDecompress = promisify(zlib.brotliDecompress)
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  /**
+   * Pre-register a URL that will never receive Network.requestWillBeSent
+   * (download-manager pauses omit networkId). Mirrors the MITM download-click
+   * path so CorrelateBrowserPreRequest resolves immediately instead of waiting
+   * the full pre-request timeout.
+   */
+  addPendingUrlWithoutPreRequest?: (url: string) => void
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -150,6 +157,12 @@ export class CdpFetchTransport {
         event.request.url,
         correlationId,
         event.resourceType)
+
+      // Without networkId there will never be a matching browser pre-request.
+      // Register the URL so CorrelateBrowserPreRequest does not burn ~2s waiting.
+      if (!event.networkId) {
+        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
+      }
 
       const request: CdpFetchTransportRequest = {
         ...event.request,

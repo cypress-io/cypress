@@ -52,9 +52,13 @@ function createNetworkExtraInfo () {
 function createTransport (client: ReturnType<typeof createClient>, options: {
   httpIntercept?: HttpIntercept<any, any>
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  addPendingUrlWithoutPreRequest?: (url: string) => void
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
-  const transport = new CdpFetchTransport(client as any, options.httpIntercept, { isAUTFrame: options.isAUTFrame }, networkExtraInfo as any)
+  const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
+    isAUTFrame: options.isAUTFrame,
+    addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
+  }, networkExtraInfo as any)
 
   return { transport, networkExtraInfo }
 }
@@ -612,7 +616,8 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const seenIds: string[] = []
-      const { transport } = createTransport(client, { httpIntercept })
+      const addPendingUrlWithoutPreRequest = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, addPendingUrlWithoutPreRequest })
       const onRequestPaused = await startTransport(transport, client)
 
       httpIntercept.use(async (req, next) => {
@@ -624,9 +629,14 @@ describe('CdpFetchTransport', () => {
       // Downloads omit networkId; the Fetch requestId is stable across both pauses.
       const handled = onRequestPaused(createPausedRequest({
         requestId: 'download-pause-id',
+        url: 'https://example.test/cypress/fixtures/records.csv',
       }))
 
       await tick()
+
+      expect(addPendingUrlWithoutPreRequest).to.have.been.calledOnceWith(
+        'https://example.test/cypress/fixtures/records.csv',
+      )
 
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'download-pause-id',
@@ -636,6 +646,7 @@ describe('CdpFetchTransport', () => {
 
       await onRequestPaused(createPausedRequest({
         requestId: 'download-pause-id',
+        url: 'https://example.test/cypress/fixtures/records.csv',
         responseStatusCode: 200,
       }))
 
@@ -645,6 +656,30 @@ describe('CdpFetchTransport', () => {
         requestId: 'download-pause-id',
         responseCode: 200,
       })
+    })
+
+    it('does not pre-register urls when network id is present', async () => {
+      const client = createClient()
+      const addPendingUrlWithoutPreRequest = sinon.stub()
+      const { transport } = createTransport(client, { addPendingUrlWithoutPreRequest })
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      expect(addPendingUrlWithoutPreRequest).not.to.have.been.called
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
     })
 
     it('keeps concurrent requests isolated by network id', async () => {

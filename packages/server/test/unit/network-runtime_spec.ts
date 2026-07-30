@@ -451,6 +451,79 @@ describe('lib/network-runtime', () => {
     expect(fulfillCall!.args[1].body).to.equal(fileBody.toString('base64'))
   })
 
+  it('createCdpFetchRuntime fulfills download pauses without networkId without waiting for pre-request timeout', async function () {
+    this.timeout(5000)
+
+    const clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout'],
+    })
+
+    try {
+      const client = {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const deps = baseDeps()
+      const fileBody = Buffer.from('"Joe","Smith"')
+      const downloadUrl = 'http://localhost:2020/cypress/fixtures/records.csv'
+
+      deps.remoteStates.current = sinon.stub().returns({
+        origin: 'http://localhost:2020',
+        strategy: 'file',
+        fileServer: 'http://localhost:2021',
+        domainName: 'localhost',
+        props: null,
+      })
+
+      deps.request = {
+        rp: sinon.stub(),
+        create: sinon.stub().resolves({
+          statusCode: 200,
+          headers: {
+            'content-type': 'text/csv',
+            'content-disposition': 'attachment; filename="records.csv"',
+          },
+          body: fileBody,
+        }),
+      } as any
+
+      const runtime = createCdpFetchRuntime({
+        ...deps,
+        client,
+        shouldCorrelatePreRequests: () => true,
+      })
+      const addPendingSpy = sinon.spy(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
+      const onRequestPaused = await startCdpRuntime(runtime, client)
+
+      // Downloads omit networkId — without pre-registration CorrelateBrowserPreRequest
+      // would wait the default 2000ms pre-request timeout before file-server-origin runs.
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'download-file-request',
+        url: downloadUrl,
+      }))
+
+      await flush()
+      await clock.tickAsync(0)
+      await flush()
+
+      expect(addPendingSpy).to.have.been.calledOnceWith(downloadUrl)
+      expect(deps.request.create).to.have.been.calledOnce
+
+      const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+      expect(fulfillCall, 'expected Fetch.fulfillRequest before pre-request timeout').to.exist
+      expect(fulfillCall!.args[1]).to.include({
+        requestId: 'download-file-request',
+        responseCode: 200,
+      })
+
+      await handled
+    } finally {
+      clock.restore()
+    }
+  })
+
   it('createCdpFetchRuntime continues http-strategy requests without hitting the file server', async () => {
     const client = {
       send: sinon.stub().callsFake(async (method: string) => {

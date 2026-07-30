@@ -206,6 +206,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
+    // Download-manager pauses omit networkId and never emit requestWillBeSent;
+    // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
+    addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
   })
 
   // Proxy parity: cookie simulation's simulated top, which nothing else
