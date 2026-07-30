@@ -1,7 +1,7 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
 import { LiveInstanceState, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
-import { renderFailure, renderKnownFailure, renderResult } from '../output'
+import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 import { posixify } from '../../util'
@@ -30,11 +30,11 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
     const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute), RUN_SPEC_TIMEOUT_MS)
 
     if (result?.__typename === 'RunSpecResponse') {
-      renderResult({
+      renderOutcome('run', {
         spec: result.spec.relative.replace(/\\/g, '/'),
         testingType: result.testingType,
         browser: result.browser.displayName,
-      })
+      }, options.json)
 
       return 0
     }

@@ -1,7 +1,7 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
 import { TapSpecsOperation } from '@packages/cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
-import { renderFailure, renderKnownFailure, renderResult } from '../output'
+import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { defineNativeCommand } from './definition'
 import type { TapSpecsQuery } from '@packages/cypress-instances'
 import type { TapCliOptions } from '../types'
@@ -36,7 +36,7 @@ const listSpecs = async (options: TapCliOptions): Promise<number> => {
     const { instance } = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
     const data = await queryInstanceGraphql(instance, TapSpecsOperation)
 
-    renderResult(toSpecList(data))
+    renderOutcome('specs', toSpecList(data), options.json)
 
     return 0
   } catch (err: any) {
