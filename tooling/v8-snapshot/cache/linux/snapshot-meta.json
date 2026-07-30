@@ -3838,6 +3838,7 @@
     "./packages/server/lib/util/commit-info.ts",
     "./packages/server/lib/util/duration.ts",
     "./packages/server/lib/util/editors.ts",
+    "./packages/server/lib/util/egress-policy.ts",
     "./packages/server/lib/util/electron-app.ts",
     "./packages/server/lib/util/ensure-url.ts",
     "./packages/server/lib/util/env-editors.ts",
@@ -4032,5 +4033,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8b1b9bf3a6ffaeb8f577170dcd9b214d7502e200c8d4ca16659f44dedbfc10e0"
+  "deferredHash": "b08769accfbee5da05df3a36d97664c24699f2fd30e3ebb53189a289f2fd8f6a"
 }
