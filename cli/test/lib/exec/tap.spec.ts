@@ -581,6 +581,7 @@ describe('lib/exec/tap', () => {
           spec: 'cypress/e2e/login.cy.ts',
           totalSpecs: 3,
           state: 'running',
+          startedAt: '2026-07-29T10:15:00.000Z',
           totalTests: 5,
           results: { passed: 1, failed: 1, pending: 2, skipped: 1 },
         },
@@ -596,9 +597,41 @@ describe('lib/exec/tap', () => {
         browserName: 'Chrome',
         totalSpecs: 3,
         spec: 'cypress/e2e/login.cy.ts',
+        startedAt: '2026-07-29T10:15:00.000Z',
         totalTests: 5,
         results: { passed: 1, failed: 1, pending: 2, skipped: 1 },
       })
+    })
+
+    it('reports "loading" with no verdict and no run to name while the selected spec is still building', async () => {
+      mockLiveResolved(liveInstance())
+      mockSession(schema, {
+        result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'loading', startedAt: null },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], {})).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'loading',
+        pid: 4242,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: true,
+        totalSpecs: 3,
+        spec: 'cypress/e2e/login.cy.ts',
+        startedAt: null,
+      })
+    })
+
+    it('reports a null startedAt for an instance whose binding does not name the run', async () => {
+      mockLiveResolved(liveInstance())
+      mockSession(schema, {
+        result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'passed', totalTests: 1, results: { passed: 1, failed: 0, pending: 0, skipped: 0 } },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], {})).toBe(0)
+      // An unnamed run is reported as unnamed, so a poller gating on startedAt
+      // never mistakes an older Cypress's verdict for one it can attribute.
+      expect(JSON.parse(logger.print()).startedAt).toBe(null)
     })
 
     it('asks the binding for run-state over the session', async () => {

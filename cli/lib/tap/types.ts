@@ -31,7 +31,9 @@ export interface TapRunState {
   /** Number of specs the instance can run. */
   totalSpecs: number
   /** Where the selected spec is in its run; absent until a spec is selected. */
-  state?: 'running' | 'passed' | 'failed'
+  state?: 'loading' | 'running' | 'passed' | 'failed'
+  /** The run the other fields describe, named by its start time; `null` while loading. */
+  startedAt?: string | null
   /** Number of tests the selected spec declares. */
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
@@ -47,7 +49,8 @@ export interface TapRunState {
 export interface TapStatus {
   /**
    * Lifecycle phase: `not connected`, `browser not selected`,
-   * `spec not selected`, or the run state (`running` | `passed` | `failed`).
+   * `spec not selected`, or the run state (`loading` | `running` | `passed` |
+   * `failed`). Only `passed` and `failed` are verdicts.
    */
   status: string
   /** Process id of the running Cypress instance. */
@@ -64,6 +67,8 @@ export interface TapStatus {
   totalSpecs?: number
   /** Relative path of the selected spec. */
   spec?: string
+  /** The run the other fields describe, named by its start time; `null` while loading. */
+  startedAt?: string | null
   /** Number of tests the selected spec declares. */
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
