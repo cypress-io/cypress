@@ -73,11 +73,21 @@ export const emptyState = (message: string): string => chalk.dim(message)
 
 export const indent = (depth: number): string => '  '.repeat(depth)
 
+// The column count to lay a row out against, falling back to a readable width
+// when the output is piped and the terminal reports none.
+export const terminalWidth = (): number => process.stdout.columns || 120
+
+// Keep a value on its own row: a soft-wrapped line breaks out of the column it
+// was padded into, so anything longer than the room left for it ends in an
+// ellipsis. Clamp before coloring, the way the tables pad before coloring.
+export const clamp = (text: string, width: number): string => {
+  return text.length <= width ? text : `${text.slice(0, Math.max(1, width - 1))}…`
+}
+
 // Pad before coloring: the escape codes chalk adds would otherwise count
 // toward the column width. `colorize` styles the padded cells; it defaults to
 // leaving them plain for the tables that don't tint any column.
-export const table = (
-  title: string,
+export const tableRows = (
   header: string[],
   rows: string[][],
   colorize: (cells: string[]) => string[] = (cells) => cells,
@@ -86,10 +96,20 @@ export const table = (
   const pad = (cells: string[]) => cells.map((cell, column) => cell.padEnd(widths[column]))
 
   return [
-    heading(title, rows.length),
     `  ${pad(header).map((cell) => chalk.dim(cell)).join('  ')}`,
     ...rows.map((row) => `  ${colorize(pad(row)).join('  ')}`),
   ]
+}
+
+// A heading-led table — the usual case. Reach for `tableRows` when the columns
+// sit inside a block that already has a title of its own.
+export const table = (
+  title: string,
+  header: string[],
+  rows: string[][],
+  colorize: (cells: string[]) => string[] = (cells) => cells,
+): string[] => {
+  return [heading(title, rows.length), ...tableRows(header, rows, colorize)]
 }
 
 // Aligned `label  value` rows. Values arrive already styled — callers color

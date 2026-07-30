@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, selectTestAttempt, serializeTestCommands } from '../test-state'
+import { attemptSelectionError, resolveCommand, selectTestAttempt } from '../test-state'
 import type { CommandEntry, ConsolePropsResult } from '../types'
 
 export const commandCommand = defineCommand('command', async (_params, options): Promise<CommandEntry | ConsolePropsResult> => {
@@ -23,17 +23,20 @@ export const commandCommand = defineCommand('command', async (_params, options):
     throw attemptSelectionError(selection, test)
   }
 
-  const selected = serializeTestCommands(selection.attempt).find((entry) => entry.id === command)
+  // The console-props lookup is keyed by the driver's own log id, and the
+  // displayed row number resolves to it under the reporter's numbering rules —
+  // the test body wins a duplicated number, `h1:3` targets a hook's row.
+  const resolved = resolveCommand(selection.attempt, command, test)
 
-  if (!selected) {
+  if (!resolved) {
     throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the commands command to list this test’s commands`)
   }
 
   if (!props) {
-    return selected
+    return resolved.entry
   }
 
-  const consoleProps = runner.getSerializedConsolePropsForLog(test, command, fullReport ? { fullReport } : undefined)
+  const consoleProps = runner.getSerializedConsolePropsForLog(test, resolved.logId, fullReport ? { fullReport } : undefined)
 
   if (!consoleProps || Object.keys(consoleProps).length === 0) {
     throw new TapCommandError('CONSOLE_PROPS_UNAVAILABLE', 'this command has no console properties available — command details are captured in open mode and kept only for the most recent tests (numTestsKeptInMemory)')

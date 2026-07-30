@@ -3,7 +3,7 @@ import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
 import type { TapNetworkInfo, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
-import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
+import type { CommandEntry, CommandHook, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
@@ -298,6 +298,55 @@ export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] =
   const ids = tapCommandIds(logs)
 
   return logs.map((log) => serializeCommandEntry(log, ids.get(log.id)))
+}
+
+export interface ResolvedCommand {
+  /** The driver's log id — the handle its per-log lookups (console props, snapshots) take. */
+  logId: string
+  entry: CommandEntry
+}
+
+// The hook a row ran in, named the way the reporter names its sections. A log
+// carries only its hookId, so the name comes from the attempt's hook timings;
+// the test's own commands carry the test id and belong to no hook.
+const commandHook = (attempt: SerializedTest, log: SerializedCommandLog, testId: string): CommandHook | undefined => {
+  const hookId = hookIdOf(log)
+
+  if (hookId === undefined || hookId === testId) {
+    return undefined
+  }
+
+  return omitNullish<CommandHook>({
+    hookId,
+    hookName: attemptHooks(attempt).find((hook) => hook.hookId === hookId)?.hookName,
+  })
+}
+
+/**
+ * Resolves a command handle to both the driver's log id and the serialized entry,
+ * for a caller that needs the row *and* the driver's own details for it. The
+ * handle follows `resolveCommandLogId`'s rules: the reporter's displayed row
+ * number, hook-qualifiable, test body winning a duplicate. The entry carries the
+ * hook the row ran in, which the numbers alone leave ambiguous.
+ */
+export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: string): ResolvedCommand | undefined => {
+  const logId = resolveCommandLogId(attempt, tapId, testId)
+
+  if (logId === undefined) {
+    return undefined
+  }
+
+  const logs = orderedAttemptLogs(attempt)
+  const log = logs.find((entry) => entry.id === logId)
+
+  if (!log) {
+    return undefined
+  }
+
+  const hook = commandHook(attempt, log, testId)
+  const entry = serializeCommandEntry(log, tapCommandIds(logs).get(log.id))
+
+  return { logId, entry: hook ? { ...entry, hook } : entry }
 }
 
 // The display-level slice of a log's attrs the reporter panel reads beyond the
