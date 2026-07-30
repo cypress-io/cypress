@@ -2,7 +2,8 @@ import type { PinnedView } from '@packages/cypress-instances'
 import { color } from './format'
 import { renderCommandSection } from './reporter'
 
-const PIN_ICON = '⚲'
+/** The pin glyph every pin line leads with — pinned, cleared, or failed to clear. */
+export const PIN_ICON = '⚲'
 
 // A pin reads as its own reporter row: which snapshot of the command is showing,
 // then the row itself under its hook section, exactly as `reporter` prints it.

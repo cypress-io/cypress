@@ -288,3 +288,5 @@ export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
 export * from './contracts/reporter'
 
 export * from './contracts/pinned'
+
+export * from './contracts/pin'
