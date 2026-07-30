@@ -179,7 +179,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
   }
 
   if (test === undefined || command === undefined) {
-    throw new TapCommandError('PIN_TARGET_REQUIRED', 'provide a test id and command id to pin (as listed by the tests and commands commands), or pass --clear to release the current pin')
+    throw new TapCommandError('PIN_TARGET_REQUIRED', 'provide a test id and command id to pin (as listed by the reporter command), or pass --clear to release the current pin')
   }
 
   if (!runner) {
@@ -203,7 +203,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
   const logId = resolveCommandLogId(selection.attempt, command, test)
 
   if (logId === undefined) {
-    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the commands command to list this test’s commands`)
+    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --test) to list this test’s commands`)
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)

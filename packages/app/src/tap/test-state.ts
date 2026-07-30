@@ -3,35 +3,13 @@ import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
 import type { TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
-import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
+import type { CommandEntry, TapTestsRunner, TestError, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
 // end-of-run summary).
 const unreachedState = (runComplete: boolean): TestStateValue => {
   return runComplete ? 'skipped' : 'pending'
-}
-
-export const serializeTestsState = (runner: TapTestsRunner): TestStateEntry[] => {
-  const tests = Object.values(runner.getAllTestsState())
-  const runComplete = runner.isRunComplete()
-
-  return tests.map(({ id, title, duration, state, currentRetry }): TestStateEntry => {
-    return omitNullish({
-      id,
-      title,
-      duration,
-      state: state ?? unreachedState(runComplete),
-      retries: currentRetry,
-    })
-  })
-}
-
-// The driver serializes a runnable by copying own properties, so object values
-// like `timings` are live references into its runner state — snapshot them at
-// read time. The JSON round-trip covers browsers without native structuredClone.
-const cloneReferenceObject = <T>(value: T): T => {
-  return typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value))
 }
 
 const asString = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined)
@@ -82,7 +60,7 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
 
 export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapCommandError => {
   if (selection.error === 'TEST_NOT_FOUND') {
-    return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the tests command to list this run’s tests`)
+    return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the reporter command to list this run’s tests`)
   }
 
   const { attempts } = selection
@@ -92,22 +70,6 @@ export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | {
     : `test "${testId}" has ${attempts} attempts; pass --attempt 1–${attempts} (defaults to the latest)`
 
   return new TapCommandError('ATTEMPT_NOT_FOUND', message)
-}
-
-export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTest, runComplete: boolean): TestDetailEntry => {
-  const titlePath = test._titlePath
-  const { duration, state, currentRetry, timings, err } = attempt
-
-  return omitNullish({
-    id: test.id,
-    title: test.title,
-    fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : test.title,
-    duration,
-    state: state ?? unreachedState(runComplete),
-    retries: currentRetry,
-    timings: timings != null ? cloneReferenceObject(timings) : undefined,
-    error: err != null ? serializeTestError(err) : undefined,
-  })
 }
 
 // The reporter's `renderProps` (resolved to an object by the time a log
@@ -311,13 +273,6 @@ export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: s
 
 export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
   return resolveCommand(attempt, tapId, testId)?.logId
-}
-
-export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
-  const logs = orderedAttemptLogs(attempt)
-  const ids = tapCommandIds(logs)
-
-  return logs.map((log) => serializeCommandEntry(log, ids.get(log.id)))
 }
 
 // The display-level slice of a log's attrs the reporter panel reads beyond the
