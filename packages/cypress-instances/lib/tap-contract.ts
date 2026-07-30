@@ -6,6 +6,8 @@ export const TAP_SCHEMA_METHOD = 'getSchema'
 
 export const TAP_EXEC_METHOD = 'exec'
 
+export const TAP_RUN_IN_PROGRESS_MESSAGE = 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again'
+
 export interface TapCommandParamSchema {
   name: string
   type: 'string' | 'number' | 'boolean'

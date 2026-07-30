@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { resolveAutFrame, parsePositiveInt, FrameCommandError } from '../../../lib/tap/aut/frame'
+import { resolveAutFrame, assertFrameReadable, parsePositiveInt, FrameCommandError } from '../../../lib/tap/aut/frame'
+import type { TapSession } from '../../../lib/tap/tap-session'
 
 const SESSION_ID = 'S1'
 
@@ -46,6 +47,55 @@ describe('lib/tap/aut/frame resolveAutFrame', () => {
     await expect(resolveAutFrame(client as any, SESSION_ID)).rejects.toMatchObject({
       name: 'FrameCommandError',
       code: 'NO_AUT_FRAME',
+    })
+  })
+})
+
+describe('lib/tap/aut/frame assertFrameReadable', () => {
+  const sessionForRunState = (envelope: unknown) => {
+    return { call: vi.fn().mockResolvedValue(envelope) } as unknown as TapSession
+  }
+
+  it('resolves once the run has settled to passed', async () => {
+    const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'passed' } })
+
+    await expect(assertFrameReadable(session)).resolves.toBeUndefined()
+    // Gated on the run-state the status command also reads.
+    expect(session.call).toHaveBeenCalledWith('exec', ['run-state', {}, {}])
+  })
+
+  it('resolves once the run has settled to failed', async () => {
+    const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'failed' } })
+
+    await expect(assertFrameReadable(session)).resolves.toBeUndefined()
+  })
+
+  it('rejects mid-run with RUN_IN_PROGRESS so a poller waits for the app to settle', async () => {
+    const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'running' } })
+
+    await expect(assertFrameReadable(session)).rejects.toMatchObject({
+      name: 'FrameCommandError',
+      code: 'RUN_IN_PROGRESS',
+      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
+    })
+  })
+
+  it('rejects with NO_RUN — distinct from mid-run — when no spec has run', async () => {
+    const session = sessionForRunState({ result: { spec: null, totalSpecs: 3 } })
+
+    await expect(assertFrameReadable(session)).rejects.toMatchObject({
+      name: 'FrameCommandError',
+      code: 'NO_RUN',
+    })
+  })
+
+  it('surfaces an app-side run-state error envelope as a FrameCommandError', async () => {
+    const session = sessionForRunState({ error: { code: 'BOOM', message: 'run-state blew up' } })
+
+    await expect(assertFrameReadable(session)).rejects.toMatchObject({
+      name: 'FrameCommandError',
+      code: 'BOOM',
+      message: 'run-state blew up',
     })
   })
 })
