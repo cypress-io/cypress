@@ -609,13 +609,14 @@ describe('lib/exec/tap', () => {
         result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'loading', startedAt: null },
       } satisfies TapExecResult)
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'loading',
         pid: 4242,
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: true,
+        browserName: 'Chrome',
         totalSpecs: 3,
         spec: 'cypress/e2e/login.cy.ts',
         startedAt: null,
@@ -628,7 +629,7 @@ describe('lib/exec/tap', () => {
         result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'passed', totalTests: 1, results: { passed: 1, failed: 0, pending: 0, skipped: 0 } },
       } satisfies TapExecResult)
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       // An unnamed run is reported as unnamed, so a poller gating on startedAt
       // never mistakes an older Cypress's verdict for one it can attribute.
       expect(JSON.parse(logger.print()).startedAt).toBe(null)
@@ -913,9 +914,14 @@ describe('lib/exec/tap', () => {
       })
     }
 
-    it('triggers the run and renders the launch outcome, without opening a session', async () => {
+    const mockRunState = (startedAt: string | null) => {
+      return mockSession(schema, { result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 1, state: 'passed', startedAt } } satisfies TapExecResult)
+    }
+
+    it('triggers the run and renders the launch outcome', async () => {
       mockLiveResolved(liveInstance())
       mockInstanceGraphql()
+      mockRunState('2026-07-29T10:15:00.000Z')
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
 
@@ -925,23 +931,78 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('e2e')
       expect(output).toContain('Chrome')
       expect(() => JSON.parse(output)).toThrow()
-
-      // The run is driven from the instance's data layer, not over a CDP session.
-      expect(withTapSession).not.toHaveBeenCalled()
     })
 
-    it('prints the raw launch outcome with --json', async () => {
+    it('prints the raw launch outcome, naming the run it displaces, with --json', async () => {
       mockLiveResolved(liveInstance())
+      mockInstanceGraphql()
+      mockRunState('2026-07-29T10:15:00.000Z')
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        relativePath: 'cypress/e2e/login.cy.ts',
+        previousStartedAt: '2026-07-29T10:15:00.000Z',
+        testingType: 'e2e',
+        browser: 'Chrome',
+      })
+    })
+
+    it('reads the run being displaced before triggering, so previousStartedAt can never name the incoming run', async () => {
+      mockLiveResolved(liveInstance())
+
+      const call = mockRunState('2026-07-29T10:15:00.000Z')
+      let readBeforeTrigger = false
+
+      vi.mocked(queryInstanceGraphql).mockImplementation(async (_instance, operation) => {
+        if (operation.operationName === 'TapSpecs') {
+          return { currentProject: { specs: [loginSpec] } }
+        }
+
+        readBeforeTrigger = call.mock.calls.some(([method]) => method === 'exec')
+
+        return { runSpec: launched }
+      })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['run-state', {}, {}])
+      expect(readBeforeTrigger).toBe(true)
+    })
+
+    it('reports no displaced run, without opening a session, when no browser is attached', async () => {
+      mockLiveResolved(liveInstance({ cdpBrowserWsUrl: null }))
       mockInstanceGraphql()
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual({ spec: 'cypress/e2e/login.cy.ts', testingType: 'e2e', browser: 'Chrome' })
+      expect(JSON.parse(logger.print()).previousStartedAt).toBe(null)
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('does not request the run when the instance cannot be read for the run it would replace', async () => {
+      mockLiveResolved(liveInstance())
+      mockInstanceGraphql()
+      vi.mocked(withTapSession).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toContain('RUN_NOT_REQUESTED')
+      // Better a run the caller knows did not happen than a verdict it cannot
+      // tell apart from the previous one.
+      expect(queryInstanceGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }), expect.anything())
+    })
+
+    it('reports no displaced run when the instance has one selected but not started', async () => {
+      mockLiveResolved(liveInstance())
+      mockInstanceGraphql()
+      mockRunState(null)
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print()).previousStartedAt).toBe(null)
     })
 
     it('sends the matched spec\'s instance-reported absolute path to the TapRunSpec operation', async () => {
       const { instance } = mockLiveResolved(liveInstance())
 
       mockInstanceGraphql()
+      mockRunState(null)
 
       await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})
 
@@ -957,6 +1018,7 @@ describe('lib/exec/tap', () => {
       const { instance } = mockLiveResolved(liveInstance())
 
       mockInstanceGraphql({ specs: [{ relative: 'cypress\\e2e\\login.cy.ts', absolute: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' }] })
+      mockRunState(null)
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
       expect(queryInstanceGraphql).toHaveBeenCalledWith(instance, expect.objectContaining({
@@ -980,6 +1042,8 @@ describe('lib/exec/tap', () => {
         runSpec: { __typename: 'RunSpecError', code: 'NO_SPEC_PATTERN_MATCH', detailMessage: 'Unable to determine testing type, spec does not match any configured specPattern' },
       })
 
+      mockRunState(null)
+
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
       expect(logger.print()).toBe('NO_SPEC_PATTERN_MATCH: Unable to determine testing type, spec does not match any configured specPattern')
     })
@@ -987,6 +1051,7 @@ describe('lib/exec/tap', () => {
     it('exits 1 when the instance returns no run result', async () => {
       mockLiveResolved(liveInstance())
       mockInstanceGraphql({ runSpec: null })
+      mockRunState(null)
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
       expect(logger.print()).toContain('RUN_FAILED')
@@ -995,6 +1060,7 @@ describe('lib/exec/tap', () => {
     it('forwards --instance plus the cwd to discovery', async () => {
       mockLiveResolved(liveInstance())
       mockInstanceGraphql()
+      mockRunState(null)
 
       await tap.start(['run', 'cypress/e2e/login.cy.ts'], { instance: 1234 })
 
