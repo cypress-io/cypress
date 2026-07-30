@@ -100,10 +100,23 @@ const testsMeta = {
 
 const commandsMeta = {
   name: 'commands',
-  description: 'list the command log entries of a test of the active run',
+  description: 'list the command log entries of a test',
   params: [],
   options: [
     { ...testIdField, required: true },
+    attemptField,
+  ],
+} as const satisfies TapCommandSchema
+
+const commandMeta = {
+  name: 'command',
+  description: 'detail one command log entry of a test, or show its console properties with --props',
+  params: [],
+  options: [
+    { ...testIdField, required: true },
+    { name: 'command', type: 'string', required: true, description: 'command id, as listed by the commands command' },
+    { name: 'props', type: 'boolean', required: false, description: 'show the command’s console properties instead of its log entry. A value long enough to bury the rest of the payload — a response body, a long string — is named by its length rather than returned; pass --full-report for its content' },
+    { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length; requires --props' },
     attemptField,
   ],
 } as const satisfies TapCommandSchema
@@ -155,6 +168,7 @@ const runStateMeta = {
 export const TAP_COMMANDS = [
   testsMeta,
   commandsMeta,
+  commandMeta,
   reporterMeta,
   pinMeta,
   runStateMeta,

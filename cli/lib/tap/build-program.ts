@@ -91,6 +91,10 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
   const { name, description, params = [], options = [] } = spec
   const command = program.command(name)
 
+  // Keep option values in opts() so schema names such as `command` cannot
+  // collide with Command instance methods.
+  command.storeOptionsAsProperties(false)
+
   if (params.length) {
     command.arguments(argumentsOf(params))
     command.description(description, argumentDescriptions(params))

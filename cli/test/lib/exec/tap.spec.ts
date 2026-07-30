@@ -1033,8 +1033,9 @@ describe('lib/exec/tap', () => {
                                           styles, box model, and accessibility node
           tests [options] [test]          list the tests of the active run and their
                                           state, or detail one by id
-          commands [options]              list the command log entries of a test of
-                                          the active run
+          commands [options]              list the command log entries of a test
+          command [options]               detail one command log entry of a test, or
+                                          show its console properties with --props
           reporter [options]              render a test’s full reporter view — its
                                           routes, hooks, and command log — or, without
                                           --test, the spec-level overview: run stats

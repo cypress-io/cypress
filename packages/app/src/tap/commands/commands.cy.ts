@@ -257,6 +257,15 @@ describe('tap/commands/commands', () => {
     })
   })
 
+  it('rejects the per-command options, which belong to the command command', async () => {
+    const getRunner = stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('commands', {}, { test: 'r2', command: 'log-2' })
+
+    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
+    expect(getRunner).not.to.have.been.called
+  })
+
   it('returns an empty command list for a known test that has not run yet, and round-trips through JSON', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
 

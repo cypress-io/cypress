@@ -30,6 +30,7 @@ export const tapManagerDataSource = {
       return {
         getAllTestsState: runner.getAllTestsState,
         getTestState: runner.getTestState,
+        getSerializedConsolePropsForLog: runner.getSerializedConsolePropsForLog,
         isRunComplete: () => em.runComplete,
         getStartTime: runner.getStartTime,
       }
