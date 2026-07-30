@@ -1,5 +1,5 @@
 import { listLiveInstances } from '../../cypress-instances'
-import { renderResult } from '../output'
+import { renderOutcome, renderResult } from '../output'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
@@ -14,12 +14,12 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     return 0
   }
 
-  renderResult(instances.map((instance) => ({
+  renderOutcome('instances', instances.map((instance) => ({
     pid: instance.pid,
     projectRoot: instance.projectRoot,
     testingType: instance.testingType,
     browserAttached: instance.cdpBrowserWsUrl !== null,
-  })))
+  })), options.json)
 
   return 0
 }

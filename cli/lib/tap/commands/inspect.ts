@@ -122,4 +122,4 @@ export const extractInspect = async (
 
 export const inspectCommand = defineNativeCommand('inspect', (options, args) => withResolvedAutFrame(options, (session, frame) => {
   return extractInspect(session, frame, args.selector)
-}))
+}, 'inspect'))

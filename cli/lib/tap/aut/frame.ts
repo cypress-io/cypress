@@ -4,7 +4,7 @@ import type CRI from 'chrome-remote-interface'
 import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
 import { withTapSession, validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
-import { renderResult, renderFailure, renderKnownFailure } from '../output'
+import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
 import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-instances'
 
@@ -127,6 +127,7 @@ export const assertFrameReadable = async (session: TapSession): Promise<void> =>
 export const withResolvedAutFrame = async (
   options: TapCliOptions,
   read: (session: TapSession, frame: AutFrame) => Promise<unknown>,
+  command: string,
 ): Promise<number> => {
   try {
     const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
@@ -137,7 +138,7 @@ export const withResolvedAutFrame = async (
 
         const frame = await resolveAutFrame(session.client, session.sessionId)
 
-        renderResult(await read(session, frame))
+        renderOutcome(command, await read(session, frame), options.json)
 
         return 0
       } catch (err: any) {

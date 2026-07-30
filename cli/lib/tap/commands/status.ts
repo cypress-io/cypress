@@ -1,7 +1,7 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
 import type { ReadyInstanceState } from '../../cypress-instances'
 import { withTapSession, validateExecResult } from '../tap-session'
-import { renderFailure, renderKnownFailure, renderResult } from '../output'
+import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions, TapRunState, TapStatus } from '../types'
@@ -32,7 +32,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   } catch (err) {
     // No live instance is a status a poller waits on, not a failure.
     if (err instanceof CypressInstanceError) {
-      renderResult({ status: 'not connected' } satisfies TapStatus)
+      renderOutcome('status', { status: 'not connected' } satisfies TapStatus, options.json)
 
       return 0
     }
@@ -52,7 +52,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   }
 
   if (!browserAttached) {
-    renderResult(base)
+    renderOutcome('status', base, options.json)
 
     return 0
   }
@@ -68,7 +68,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
       return 1
     }
 
-    renderResult(mergeRunState(base, outcome.result as TapRunState))
+    renderOutcome('status', mergeRunState(base, outcome.result as TapRunState), options.json)
 
     return 0
   } catch (err: any) {

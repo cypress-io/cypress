@@ -1,4 +1,4 @@
-import type { TapCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import type { TapCommandName, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
 
 /**
@@ -12,7 +12,7 @@ export interface TapCommandRendering {
   renderHuman: (result: unknown) => string
 }
 
-const renderings: Partial<Record<TapCommandName, TapCommandRendering>> = {
+const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapCommandRendering>> = {
   reporter: {
     renderHuman: (result) => {
       // Only the no-test spec overview carries `stats`; the single-test view never does.
@@ -24,5 +24,5 @@ const renderings: Partial<Record<TapCommandName, TapCommandRendering>> = {
 }
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {
-  return renderings[command as TapCommandName]
+  return renderings[command as TapCommandName | TapNativeCommandName]
 }

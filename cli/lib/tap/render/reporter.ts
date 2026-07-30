@@ -1,35 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapNetworkInfo, TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
-
-// The reporter's own palette (packages/reporter/src/lib/variables.scss and
-// commands.scss), so the CLI rendering matches the app: $pass/$fail map to
-// jade-400/red-400, assert messages render jade-300/red-400 with jade-200/
-// red-300 emphasis, the network dots use the command-message-indicator colors,
-// and aliases take the purple badge hue. chalk downsamples the hex values on
-// terminals without truecolor.
-const color = {
-  pass: chalk.hex('#1fa971'), // $jade-400
-  fail: chalk.hex('#e45770'), // $red-400
-  passMessage: chalk.hex('#69d3a7'), // $jade-300
-  passStrong: chalk.hex('#a3e7cb'), // $jade-200
-  failStrong: chalk.hex('#f59aa9'), // $red-300
-  errHeaderText: chalk.hex('#f59aa9'), // $err-header-text = $red-300
-  aborted: chalk.hex('#db7903'), // $orange-400
-  bad: chalk.hex('#c62b49'), // $red-500
-  pending: chalk.hex('#6470f3'), // $indigo-400
-  alias: chalk.hex('#c8a7f5'), // $purple-300
-  aliasDom: chalk.hex('#9aa2fc'), // $indigo-300 — the reporter colors dom aliases indigo
-  muted: chalk.hex('#9095ad'), // $gray-500
-  fadedId: chalk.hex('#5a5f7a'), // $gray-700 — event ids sit back from the command numbers
-}
-
-const TEST_STATE = {
-  passed: { icon: color.pass('✓'), word: color.pass('passed') },
-  failed: { icon: color.fail('✖'), word: color.fail('failed') },
-  pending: { icon: color.pending('○'), word: color.pending('pending') },
-  skipped: { icon: color.muted('-'), word: color.muted('skipped') },
-} as const
+import { color, countsLine, emptyState, heading, layout, stateBadge, table, titleLine } from './format'
 
 // The reporter's status dot for a network row.
 const INDICATORS: Record<NonNullable<TapNetworkInfo['indicator']>, string> = {
@@ -90,19 +62,6 @@ const formatMessage = (command: TapReporterCommand): string => {
   return colorizeAliasReferences(emphasize(message, (part) => chalk.bold(part)), command)
 }
 
-// Pad before coloring: the escape codes chalk adds would otherwise count
-// toward the column width.
-const panelTable = (title: string, header: string[], rows: string[][], colorize: (cells: string[]) => string[]): string[] => {
-  const widths = header.map((cell, column) => Math.max(cell.length, ...rows.map((row) => row[column].length)))
-  const pad = (cells: string[]) => cells.map((cell, column) => cell.padEnd(widths[column]))
-
-  return [
-    chalk.dim(`${title} (${rows.length})`),
-    `  ${pad(header).map((cell) => chalk.dim(cell)).join('  ')}`,
-    ...rows.map((row) => `  ${colorize(pad(row)).join('  ')}`),
-  ]
-}
-
 // The panel's status badge colors: red for a failed session, orange while one
 // is being recreated, the reporter's jade otherwise.
 const sessionStatus = (status: string | undefined): string => {
@@ -123,7 +82,7 @@ const sessionStatus = (status: string | undefined): string => {
 
 const sessionsPanel = (sessions: TapReporterSession[]): string[] => {
   return [
-    chalk.dim(`SESSIONS (${sessions.length})`),
+    heading('SESSIONS', sessions.length),
     ...sessions.map((session) => {
       const global = session.global ? `  ${chalk.dim('(global)')}` : ''
 
@@ -142,7 +101,7 @@ const agentsTable = (agents: TapReporterAgent[]): string[] => {
     ]
   })
 
-  return panelTable('SPIES / STUBS', ['TYPE', 'FUNCTION', 'ALIAS(ES)', 'CALLS'], rows, (cells) => {
+  return table('SPIES / STUBS', ['TYPE', 'FUNCTION', 'ALIAS(ES)', 'CALLS'], rows, (cells) => {
     return [chalk.bold(cells[0]), cells[1], color.alias(cells[2]), cells[3]]
   })
 }
@@ -158,7 +117,7 @@ const routesTable = (routes: TapReporterView['routes']): string[] => {
     ]
   })
 
-  return panelTable('ROUTES', ['METHOD', 'MATCHER', 'STUBBED', 'ALIAS', '#'], rows, (cells) => {
+  return table('ROUTES', ['METHOD', 'MATCHER', 'STUBBED', 'ALIAS', '#'], rows, (cells) => {
     return [
       chalk.bold(cells[0]),
       cells[1],
@@ -280,7 +239,7 @@ const renderSection = (section: Section, hookName: string, idWidth: number): str
   const qualifier = section.hookId ? ` · ${section.hookId}` : ''
 
   return [
-    chalk.dim(`${hookName.toUpperCase()}${qualifier}`),
+    heading(`${hookName.toUpperCase()}${qualifier}`),
     ...section.rows.map((command) => renderRow(command, idWidth, nameWidth)),
   ]
 }
@@ -310,14 +269,14 @@ const renderError = (error: TapReporterError): string[] => {
 }
 
 export const renderReporterHuman = (view: TapReporterView): string => {
-  const { icon, word } = TEST_STATE[view.test.state]
+  const { icon, word } = stateBadge[view.test.state]
   const hookNames = new Map(view.hooks.map(({ hookId, hookName }) => [hookId, hookName]))
   const sections = sectionize(view.commands)
 
   const idWidth = Math.max(2, ...view.commands.map((command) => command.id.length))
 
   const blocks: string[][] = [
-    [`${icon} ${chalk.bold(view.test.fullTitle)}  ${word}`],
+    [titleLine(icon, view.test.fullTitle, word)],
     ...(view.sessions.length ? [sessionsPanel(view.sessions)] : []),
     ...(view.agents.length ? [agentsTable(view.agents)] : []),
     ...(view.routes.length ? [routesTable(view.routes)] : []),
@@ -325,14 +284,14 @@ export const renderReporterHuman = (view: TapReporterView): string => {
   ]
 
   if (!view.commands.length) {
-    blocks.push([chalk.dim('No commands were logged for this test.')])
+    blocks.push([emptyState('No commands were logged for this test.')])
   }
 
   if (view.error) {
     blocks.push(renderError(view.error))
   }
 
-  return blocks.map((block) => block.map((line) => line.trimEnd()).join('\n')).join('\n\n')
+  return layout(blocks)
 }
 
 // The reporter header's clock format (packages/reporter/src/lib/util.ts
@@ -354,18 +313,8 @@ const formatDuration = (duration: number | undefined): string => {
   return displayHours === '0' ? `${displayMinutes}:${displaySeconds}` : `${displayHours}:${displayMinutes}:${displaySeconds}`
 }
 
-// The app header renders a zero count as `--` (its stats strip's `count`
-// helper); skipped has no strip slot there, so it only appears when non-zero.
-const count = (num: number): string => (num > 0 ? String(num) : '--')
-
 const statsLine = (stats: TapReporterStats): string => {
-  return [
-    `${TEST_STATE.passed.icon} ${count(stats.passed)}`,
-    `${TEST_STATE.failed.icon} ${count(stats.failed)}`,
-    `${TEST_STATE.pending.icon} ${count(stats.pending)}`,
-    ...(stats.skipped > 0 ? [`${TEST_STATE.skipped.icon} ${stats.skipped}`] : []),
-    chalk.dim(formatDuration(stats.duration)),
-  ].join('  ')
+  return `${countsLine(stats)}  ${chalk.dim(formatDuration(stats.duration))}`
 }
 
 // Sub-second durations keep their ms precision; longer ones read as seconds,
@@ -383,11 +332,11 @@ const renderSpecTests = (tests: TapReporterSpecTest[], indent: string): string[]
     const retries = test.retries ? `  ${color.aborted(`(${test.retries} ${test.retries === 1 ? 'retry' : 'retries'})`)}` : ''
 
     return [
-      `${indent}${chalk.dim(test.id.padStart(3))}  ${TEST_STATE[test.state].icon} ${test.title}${testDuration(test.duration)}${retries}`,
+      `${indent}${chalk.dim(test.id.padStart(3))}  ${stateBadge[test.state].icon} ${test.title}${testDuration(test.duration)}${retries}`,
       // Nested under the title, the way the app reporter lists a retried
       // test's attempts; the id column stays empty so the rows read as one test.
       ...(test.attempts ?? []).map((attempt) => {
-        return `${indent}       ${TEST_STATE[attempt.state].icon} ${chalk.dim(`attempt ${attempt.attempt}`)}${testDuration(attempt.duration)}`
+        return `${indent}       ${stateBadge[attempt.state].icon} ${chalk.dim(`attempt ${attempt.attempt}`)}${testDuration(attempt.duration)}`
       }),
     ]
   })
@@ -398,7 +347,7 @@ const renderSpecTests = (tests: TapReporterSpecTest[], indent: string): string[]
 // like the single-test view's hook section titles. The wire shape is already
 // flattened that way: one entry per suite with direct tests, title pre-joined.
 const specSuiteSections = (suites: TapReporterSuite[]): string[][] => {
-  return suites.map((suite) => [chalk.dim(suite.title.toUpperCase()), ...renderSpecTests(suite.tests, '  ')])
+  return suites.map((suite) => [heading(suite.title.toUpperCase()), ...renderSpecTests(suite.tests, '  ')])
 }
 
 export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {
@@ -414,8 +363,8 @@ export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {
 
   const blocks: string[][] = [
     header,
-    ...(sections.length ? sections : [[chalk.dim('No tests were found in this spec.')]]),
+    ...(sections.length ? sections : [[emptyState('No tests were found in this spec.')]]),
   ]
 
-  return blocks.map((block) => block.map((line) => line.trimEnd()).join('\n')).join('\n\n')
+  return layout(blocks)
 }
