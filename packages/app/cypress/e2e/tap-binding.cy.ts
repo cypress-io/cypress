@@ -228,7 +228,7 @@ describe('tap binding', () => {
 
       const runState = (runStateOutcome as { result: Record<string, any> }).result
 
-      expect(Object.keys(runState)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results'])
+      expect(Object.keys(runState)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'totalTests', 'results'])
       expect(runState.spec).to.eq('cypress/e2e/dom-content.spec.js')
       expect(runState.state).to.eq('passed')
       expect(runState.totalTests).to.eq(tests.length)
@@ -546,7 +546,7 @@ describe('tap binding pin lifecycle', () => {
       // run-state reports the pin while it is live, as the row the reporter shows.
       const runState = (await binding.exec('run-state')) as { result: Record<string, any> }
 
-      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results', 'pinned'])
+      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'totalTests', 'results', 'pinned'])
       expect(runState.result.pinned.test).to.eq(testId)
       expect(runState.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
       expect(runState.result.pinned.command.id).to.eq(commandId)
@@ -564,7 +564,7 @@ describe('tap binding pin lifecycle', () => {
 
       const runState = (await getBinding(win).exec('run-state')) as { result: Record<string, unknown> }
 
-      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results'])
+      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'totalTests', 'results'])
     })
 
     // Clear restores the live DOM and the pin UI is gone.
@@ -719,6 +719,205 @@ describe('tap binding with network activity', () => {
       expect(eventRow!.displayName).to.be.a('string')
       expect(eventRow!.network.indicator).to.eq('successful')
       expect(eventRow!.network.alias).to.eq('getUsers')
+    })
+  })
+})
+
+// The run lifecycle: what status answers between the moment a run is requested
+// and the moment it starts. Everything here drives the real watcher — a spec
+// rewritten on disk, rebuilt by the real preprocessor — because that window is
+// made of build time, and stubbing it away would stub away the defect.
+describe('tap binding run lifecycle', () => {
+  const SPEC = 'cypress/e2e/lifecycle.cy.js'
+  const SPEC_BUILD_HOLD_MS = 2000
+  const POLL_MS = 20
+  // The sampler gives up before the command it runs under does, so a run that
+  // never settles fails with the last sample it saw rather than a bare command
+  // timeout — and its loop is never left running past its own test.
+  const SETTLE_TIMEOUT_MS = 20000
+  const COMMAND_TIMEOUT_MS = 30000
+
+  interface RunStateSample {
+    spec: string | null
+    totalSpecs: number
+    state?: 'loading' | 'running' | 'passed' | 'failed'
+    startedAt?: string | null
+    totalTests?: number
+    results?: { passed: number, failed: number, pending: number, skipped: number }
+  }
+
+  const readRunState = async (win: Cypress.AUTWindow): Promise<RunStateSample> => {
+    const outcome = await getBinding(win).exec('run-state')
+
+    expect('result' in outcome, `run-state answered ${JSON.stringify(outcome)}`).to.eq(true)
+
+    return (outcome as { result: RunStateSample }).result
+  }
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+  // Samples run-state from inside the runner page until `settled` accepts one,
+  // keeping every sample. The endpoints of a rerun have always been right; it is
+  // the samples in between that used to answer with the wrong run's verdict.
+  const sampleUntil = async (win: Cypress.AUTWindow, settled: (sample: RunStateSample) => boolean): Promise<RunStateSample[]> => {
+    const samples: RunStateSample[] = []
+    const deadline = Date.now() + SETTLE_TIMEOUT_MS
+
+    while (Date.now() < deadline) {
+      const sample = await readRunState(win)
+
+      samples.push(sample)
+
+      if (settled(sample)) {
+        return samples
+      }
+
+      await sleep(POLL_MS)
+    }
+
+    throw new Error(`run-state never settled; last sample was ${JSON.stringify(samples[samples.length - 1])}`)
+  }
+
+  // Holds the spec frame open on the server so the build window is wide enough
+  // to sample deterministically; a warm rebuild is otherwise milliseconds wide.
+  // The scaffolded project keeps the default `__cypress` namespace, so this
+  // never matches the outer runner's own `__cypress-app` requests.
+  const holdTheSpecBuild = () => {
+    cy.intercept({ method: 'GET', url: /\/__cypress\/iframes\// }, (req) => {
+      req.continue((res) => {
+        res.setDelay(SPEC_BUILD_HOLD_MS)
+      })
+    })
+  }
+
+  const rewriteSpec = (body: string) => {
+    cy.withCtx(async (ctx, options) => {
+      await ctx.actions.file.writeFileInProject(options.spec, options.body)
+    }, { spec: SPEC, body })
+  }
+
+  const runFirstVersion = () => {
+    cy.visitApp(`/specs/runner?file=${SPEC}`)
+    cy.waitForSpecToFinish({ passCount: 2 })
+  }
+
+  beforeEach(() => {
+    cy.scaffoldProject('tap-retries')
+    cy.openProject('tap-retries')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  it('reports a spec waiting on its build as loading, and refuses the reads that need a run', () => {
+    runFirstVersion()
+
+    cy.window().then(async (win) => {
+      const settled = await readRunState(win)
+
+      expect(Object.keys(settled)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'totalTests', 'results'])
+      expect(settled.state).to.eq('passed')
+      expect(settled.startedAt, 'the run this verdict describes').to.be.a('string')
+    })
+
+    holdTheSpecBuild()
+
+    // Touching the spec is enough for the watcher to rerun it — no tap call is
+    // involved, which is exactly how an agent editing a spec meets this window.
+    rewriteSpec(`describe('Lifecycle', () => {
+  it('is the first test', () => {
+    expect(true).to.eq(true)
+  })
+
+  it('is the second test', () => {
+    expect(true).to.eq(true)
+  })
+})
+`)
+
+    cy.window().then({ timeout: COMMAND_TIMEOUT_MS }, async (win) => {
+      const untilLoading = await sampleUntil(win, (sample) => sample.state === 'loading')
+      const loading = untilLoading[untilLoading.length - 1]
+
+      // A run that has not started reports no results at all, rather than the
+      // all-zero aggregate that used to read as a clean sweep.
+      expect(Object.keys(loading)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt'])
+      expect(loading.spec).to.eq(SPEC)
+      expect(loading.startedAt, 'startedAt while loading').to.eq(null)
+
+      // The per-test reads answer for the run status names, so while there is no
+      // run they refuse outright instead of answering for the one being replaced.
+      const binding = getBinding(win)
+      const refused = await Promise.all([
+        binding.exec('tests'),
+        binding.exec('commands', {}, { test: 'r1' }),
+        binding.exec('reporter'),
+      ])
+
+      for (const outcome of refused) {
+        expect((outcome as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      }
+    })
+
+    cy.waitForSpecToFinish({ passCount: 2 })
+  })
+
+  it('names every verdict with the run it describes across a watcher rerun', () => {
+    const firstRun: { startedAt?: string } = {}
+
+    runFirstVersion()
+
+    cy.window().then(async (win) => {
+      const settled = await readRunState(win)
+
+      expect(settled.state).to.eq('passed')
+      expect(settled.totalTests).to.eq(2)
+      firstRun.startedAt = settled.startedAt as string
+    })
+
+    holdTheSpecBuild()
+
+    // A third test makes the two runs tell themselves apart by their own
+    // contents, independently of the identity the payload claims.
+    rewriteSpec(`describe('Lifecycle', () => {
+  it('is the first test', () => {
+    expect(true).to.eq(true)
+  })
+
+  it('is the second test', () => {
+    expect(true).to.eq(true)
+  })
+
+  it('is the third test', () => {
+    expect(true).to.eq(true)
+  })
+})
+`)
+
+    cy.window().then({ timeout: COMMAND_TIMEOUT_MS }, async (win) => {
+      const isSecondRunVerdict = (sample: RunStateSample) => {
+        return (sample.state === 'passed' || sample.state === 'failed') && sample.startedAt !== firstRun.startedAt
+      }
+
+      const samples = await sampleUntil(win, isSecondRunVerdict)
+
+      for (const sample of samples) {
+        if (sample.state !== 'passed' && sample.state !== 'failed') {
+          continue
+        }
+
+        // Every verdict carries the run it belongs to, and describes that run:
+        // the superseded one keeps naming the first run and keeps its two tests.
+        expect(sample.startedAt, `startedAt of the ${sample.state} sample`).to.be.a('string')
+        expect(sample.totalTests, `totalTests reported for run ${sample.startedAt}`)
+        .to.eq(sample.startedAt === firstRun.startedAt ? 2 : 3)
+      }
+
+      const settled = samples[samples.length - 1]
+
+      expect(settled.startedAt, 'the reruns share a start time').to.not.eq(firstRun.startedAt)
+      expect(settled.totalTests).to.eq(3)
+      expect(settled.results).to.deep.eq({ passed: 3, failed: 0, pending: 0, skipped: 0 })
     })
   })
 })
