@@ -37,7 +37,7 @@ export interface PinSnapshotRunner {
   getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
 }
 
-export type TapJsonValue = null | boolean | number | string | TapJsonValue[] | { [key: string]: TapJsonValue }
+type TapJsonValue = null | boolean | number | string | TapJsonValue[] | { [key: string]: TapJsonValue }
 
 export type ConsolePropsResult = { [key: string]: TapJsonValue }
 
