@@ -1100,9 +1100,6 @@ describe('lib/exec/tap', () => {
           inspect [options] <selector>    inspect the first element matching a
                                           selector: its tag, attributes, computed
                                           styles, box model, and accessibility node
-          tests [options] [test]          list the tests of the active run and their
-                                          state, or detail one by id
-          commands [options]              list the command log entries of a test
           command [options]               detail one command log entry of a test, or
                                           show its console properties with --props
           reporter [options]              render a test’s full reporter view — its
@@ -1132,16 +1129,23 @@ describe('lib/exec/tap', () => {
     it('renders the baked-in per-command help when no instance is found', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
-      expect(await tap.start(['tests', '--help'], {})).toBe(0)
+      expect(await tap.start(['command', '--help'], {})).toBe(0)
       expect(logger.print()).toMatchInlineSnapshot(`
-        "Usage: cypress tap tests [options] [test]
+        "Usage: cypress tap command [options]
 
-        list the tests of the active run and their state, or detail one by id
-
-        Arguments:
-          test                 test id, as listed by the tests command
+        detail one command log entry of a test, or show its console properties with --props
 
         Options:
+          --test <test>        test id, as listed by the reporter command
+          --command <command>  command id, as listed by the reporter command
+          --props              show the command’s console properties instead of its log
+                               entry. A value long enough to bury the rest of the
+                               payload — a response body, a long string — is named by
+                               its length rather than returned; pass --full-report for
+                               its content
+          --full-report        return every console property in full, however long,
+                               instead of naming the long ones by their length;
+                               requires --props
           --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
                                latest
           --instance <pid>     target a specific running Cypress instance by its server
