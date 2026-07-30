@@ -1,10 +1,11 @@
 import commander from 'commander'
 
 import { tapCliCommands } from './commands'
+import { renderOptionsFor } from './render'
 import type { TapCliCommand } from './types'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
-type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
+type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>, renderOptions: Record<string, string>) => Promise<void> | void
 
 interface CommandSpec {
   name: string
@@ -102,13 +103,18 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
     command.description(description)
   }
 
-  declareOptions(command, options)
+  // A command's view-only options are declared alongside the schema's so they
+  // render in the same help, but they are collected apart from them: only the
+  // schema's reach the instance.
+  const renderOptions = renderOptionsFor(name)
+
+  declareOptions(command, [...options, ...renderOptions])
 
   if (dispatch) {
     command.action(() => {
       rejectExcessArguments(name, params, command.args)
 
-      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, options))
+      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, options), forwardedOptions(command, renderOptions))
     })
   }
 }

@@ -1,66 +1,8 @@
 import chalk from 'chalk'
 
-import type { TapNetworkInfo, TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
+import type { TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
 import { color, countsLine, emptyState, heading, layout, stateBadge, table, titleLine } from './format'
-
-// The reporter's status dot for a network row.
-const INDICATORS: Record<NonNullable<TapNetworkInfo['indicator']>, string> = {
-  successful: color.pass('●'),
-  pending: color.pending('○'),
-  aborted: color.aborted('●'),
-  bad: color.bad('●'),
-}
-
-// The reporter's tag palette: dom aliases indigo, everything else
-// (route/agent/primitive) purple.
-const aliasColor = (aliasType: string | undefined) => (aliasType === 'dom' ? color.aliasDom : color.alias)
-
-const aliasBadge = (alias: string, aliasType?: string): string => aliasColor(aliasType)(`@${alias}`)
-
-// Driver messages emphasize with markdown-style `**`; render the emphasis
-// instead of the markers, on one line.
-const emphasize = (message: string, strong: (part: string) => string): string => {
-  return message
-  .replace(/\s+/g, ' ')
-  .trim()
-  .replace(/\*\*([^*]+)\*\*/g, (_, part) => strong(part))
-}
-
-// The `@name`s a row references (cy.get('@x') / cy.wait('@x')) appear verbatim
-// in its message — give them the alias badge color in place.
-const colorizeAliasReferences = (message: string, command: TapReporterCommand): string => {
-  const { referencedAliases, aliasType } = command
-
-  if (!referencedAliases?.length) {
-    return message
-  }
-
-  const names = new Set(referencedAliases)
-
-  return message.replace(/@([\w-]+)/g, (match, name) => (names.has(name) ? aliasColor(aliasType)(match) : match))
-}
-
-// Asserts take the reporter's state colors — passing green, failing red —
-// while other messages keep the default text with bold emphasis.
-const formatMessage = (command: TapReporterCommand): string => {
-  const message = command.message ?? ''
-
-  if (!message) {
-    return ''
-  }
-
-  if (command.name === 'assert') {
-    if (command.state === 'passed') {
-      return color.passMessage(emphasize(message, (part) => color.passStrong.bold(part)))
-    }
-
-    if (command.state === 'failed') {
-      return color.fail(emphasize(message, (part) => color.failStrong.bold(part)))
-    }
-  }
-
-  return colorizeAliasReferences(emphasize(message, (part) => chalk.bold(part)), command)
-}
+import { aliasSuffix, cleanedSuffix, commandLabel, formatMessage, networkDot, networkSuffix } from './command-row'
 
 // The panel's status badge colors: red for a failed session, orange while one
 // is being recreated, the reporter's jade otherwise.
@@ -155,18 +97,6 @@ const isEventRow = (command: TapReporterCommand): boolean => {
   return command.event === true || command.type === 'system'
 }
 
-// A row's alias badge(s): its own aliases (`.as()` definitions, spy/stub call
-// rows) or the alias its request matched.
-const aliasSuffix = (command: TapReporterCommand, network: TapNetworkInfo | undefined): string => {
-  const names = command.aliases ?? (network?.alias != null ? [network.alias] : [])
-
-  return names.length ? `  ${names.map((name) => aliasBadge(name, command.aliasType)).join(' ')}` : ''
-}
-
-const networkSuffix = (network: TapNetworkInfo | undefined): string => {
-  return network?.stubbed ? `  ${chalk.dim('(stubbed)')}` : ''
-}
-
 const stateSuffix = (command: TapReporterCommand): string => {
   if (command.state === 'failed') {
     return ` ${color.fail('✖')}`
@@ -189,9 +119,9 @@ interface RowParts {
 const rowParts = (command: TapReporterCommand): RowParts => {
   return {
     groupIndent: '  '.repeat(command.groupLevel ?? 0),
-    dot: command.network?.indicator ? `${INDICATORS[command.network.indicator]} ` : '',
+    dot: networkDot(command.network),
     message: formatMessage(command),
-    cleaned: command.cleanedUp ? `  ${chalk.dim('(cleaned up)')}` : '',
+    cleaned: cleanedSuffix(command),
   }
 }
 
@@ -208,12 +138,6 @@ const renderEventRow = (command: TapReporterCommand, idWidth: number): string =>
   const text = failed ? color.fail(chalk.italic(message)) : chalk.italic(message)
 
   return `  ${id}  ${groupIndent}  ${label} ${dot}${text}${aliasSuffix(command, command.network)}${networkSuffix(command.network)}${stateSuffix(command)}${cleaned}`
-}
-
-// Child commands render dash-prefixed, the way the reporter marks a command
-// chained off the previous subject.
-const commandLabel = (command: TapReporterCommand): string => {
-  return `${command.type === 'child' ? '-' : ''}${command.name ?? ''}`
 }
 
 const renderCommandRow = (command: TapReporterCommand, idWidth: number, nameWidth: number): string => {
