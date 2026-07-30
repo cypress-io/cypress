@@ -254,16 +254,17 @@ const tapCommandIds = (logs: SerializedCommandLog[]): Map<string, string> => {
 
 const hookIdOf = (log: SerializedCommandLog): string | undefined => (log as ReporterLog).hookId
 
-/**
- * Resolves a command handle to the driver's log id. A handle is the row's id
- * as displayed (`12` or `e3`), optionally qualified with its hook section
- * (`h1:12`) since the reporter's numbers restart per section. A plain number
- * prefers the test body, then a unique match anywhere; a remaining tie is
- * ambiguous rather than silently guessed.
- */
-export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
-  const logs = orderedAttemptLogs(attempt)
-  const ids = tapCommandIds(logs)
+export interface ResolvedCommand {
+  logId: string
+  entry: CommandEntry
+}
+
+// Matches a displayed command id to its underlying log. The id is a row's
+// number as the reporter shows it (`12` or the event rows' `e3`), optionally
+// qualified with its hook section (`h1:12`) since the numbers restart per
+// section. A plain number prefers the test body, then a unique match anywhere;
+// a remaining tie is ambiguous rather than silently guessed.
+const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], ids: Map<string, string>, tapId: string, testId: string): SerializedCommandLog | undefined => {
   const colon = tapId.indexOf(':')
   const hookQualifier = colon === -1 ? undefined : tapId.slice(0, colon)
   const rowId = colon === -1 ? tapId : tapId.slice(colon + 1)
@@ -273,13 +274,13 @@ export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, test
   })
 
   if (candidates.length <= 1) {
-    return candidates[0]?.id
+    return candidates[0]
   }
 
   const testBody = candidates.find((log) => hookIdOf(log) === testId)
 
   if (testBody) {
-    return testBody.id
+    return testBody
   }
 
   const hookNames = new Map(attemptHooks(attempt).map(({ hookId, hookName }) => [hookId, hookName]))
@@ -291,6 +292,25 @@ export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, test
   })
 
   throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
+}
+
+/**
+ * Resolves a command id the way the reporter shows it — a row number, an
+ * e-prefixed event id, or a hook-qualified `h1:3` — to the driver log id the
+ * runner keys on plus the serialized entry to display. The one command-id
+ * lookup the `command` and `pin` commands share, so both accept exactly the
+ * ids the reporter emits.
+ */
+export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: string): ResolvedCommand | undefined => {
+  const logs = orderedAttemptLogs(attempt)
+  const ids = tapCommandIds(logs)
+  const log = findCommandLog(attempt, logs, ids, tapId, testId)
+
+  return log ? { logId: log.id, entry: serializeCommandEntry(log, ids.get(log.id)) } : undefined
+}
+
+export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
+  return resolveCommand(attempt, tapId, testId)?.logId
 }
 
 export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
