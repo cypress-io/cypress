@@ -2254,14 +2254,14 @@ jobs:
 
   # Fast, Node-only parity check for the CDP Fetch (proxy-disabled) network
   # interception path — mirrors run_unit_suite() in
-  # scripts/validate-proxy-middleware-transport.sh. Opt-in via
-  # run-proxy-disabled-tests (Trigger Pipeline); off by default.
+  # scripts/validate-proxy-middleware-transport.sh. Always runs when unit tests
+  # are selected — not gated on run-proxy-disabled-tests.
   unit-tests-proxy-disabled:
     <<: *defaults
     parallelism: 1
     steps:
       - halt-if-skipped:
-          guard: << pipeline.parameters.run-proxy-disabled-tests >>
+          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - run:
           name: Proxy middleware parity unit tests (CDP Fetch path)
@@ -2345,6 +2345,36 @@ jobs:
           command: |
             yarn workspace @tooling/system-tests test:ci \
               test/network_error_handling_spec.js --browser electron
+      - sanitize-verify-and-store-mocha-results
+
+  # Focused CDP coverage for strategy:file / fixture downloads (#34271).
+  # Runs always when system tests are selected — not gated on run-proxy-disabled-tests.
+  system-tests-downloads-cdp:
+    <<: *defaults
+    resource_class: medium+.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Downloads system tests with MITM disabled (chrome)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/downloads_spec.ts --browser chrome
+      - run:
+          name: Downloads system tests with MITM disabled (electron)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/downloads_spec.ts --browser electron
       - sanitize-verify-and-store-mocha-results
 
   system-tests-node-modules-install:
