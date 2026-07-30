@@ -542,7 +542,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('reports "browser not selected" without opening a session when no browser is attached', async () => {
-      mockLiveResolved(liveInstance({ pid: 111, cdpBrowserWsUrl: null }))
+      mockLiveResolved(liveInstance({ pid: 111, cdpBrowserWsUrl: null, browserName: null }))
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
@@ -551,6 +551,7 @@ describe('lib/exec/tap', () => {
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: false,
+        browserName: null,
       })
 
       // The early lifecycle is reported from discovery alone.
@@ -568,6 +569,7 @@ describe('lib/exec/tap', () => {
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: true,
+        browserName: 'Chrome',
         totalSpecs: 3,
       })
     })
@@ -591,6 +593,7 @@ describe('lib/exec/tap', () => {
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: true,
+        browserName: 'Chrome',
         totalSpecs: 3,
         spec: 'cypress/e2e/login.cy.ts',
         totalTests: 5,

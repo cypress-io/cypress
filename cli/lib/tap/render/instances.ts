@@ -1,12 +1,20 @@
 import chalk from 'chalk'
 
 import type { TapInstanceSummary } from '../commands/instances'
-import { color, layout, table } from './format'
+import { color, columns, heading, layout } from './format'
 
-// The reachable open-mode instances, one row each. PID is bold — it's the handle
-// the other tap commands accept via `--instance` — and an attached browser reads
-// green by its name, an absent one (or testing type) as a muted dash.
-export const renderInstancesHuman = (instances: TapInstanceSummary[]): string => {
+/** The facts an instance row shows — carried by a summary, and by a status. */
+export interface InstanceRow {
+  pid: number
+  projectRoot: string
+  testingType: 'e2e' | 'component' | null
+  browserName: string | null
+}
+
+// One row per instance. PID is bold — it's the handle the other tap commands
+// accept via `--instance` — and an attached browser reads green by its name, an
+// absent one (or testing type) as a muted dash.
+export const instanceColumns = (instances: InstanceRow[]): string[] => {
   const rows = instances.map((instance) => [
     String(instance.pid),
     instance.projectRoot,
@@ -14,12 +22,15 @@ export const renderInstancesHuman = (instances: TapInstanceSummary[]): string =>
     instance.browserName ?? '—',
   ])
 
-  return layout([
-    table('INSTANCES', ['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells) => [
-      chalk.bold(cells[0]),
-      cells[1],
-      cells[2],
-      cells[3] === '—' ? color.muted(cells[3]) : color.pass(cells[3]),
-    ]),
+  return columns(['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells, index) => [
+    chalk.bold(cells[0]),
+    cells[1],
+    cells[2],
+    instances[index].browserName === null ? color.muted(cells[3]) : color.pass(cells[3]),
   ])
+}
+
+// The reachable open-mode instances under a counted heading.
+export const renderInstancesHuman = (instances: TapInstanceSummary[]): string => {
+  return layout([[heading('INSTANCES', instances.length), ...instanceColumns(instances)]])
 }

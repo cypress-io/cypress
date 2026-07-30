@@ -69,6 +69,8 @@ export interface TapStatus {
   testingType?: 'e2e' | 'component' | null
   /** Whether the instance has a browser attached over CDP. */
   browserAttached?: boolean
+  /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
+  browserName?: string | null
   /** Number of specs the instance can run. */
   totalSpecs?: number
   /** Relative path of the selected spec. */

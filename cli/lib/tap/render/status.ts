@@ -1,7 +1,8 @@
 import chalk from 'chalk'
 
 import type { PinnedRef, TapStatus } from '../types'
-import { color, countsLine, definitionList, layout, stateBadge } from './format'
+import { color, countsLine, definitionList, layout, stateBadge, titleLine } from './format'
+import { instanceColumns } from './instances'
 
 // The lifecycle phase's dot and tint: a filled green/red check for a finished
 // run, indigo while running, a muted ring for the pre-run "coming up" stages.
@@ -13,6 +14,14 @@ const PHASE = {
 
 const phaseOf = (status: string) => PHASE[status as keyof typeof PHASE] ?? { icon: color.muted('●'), tint: color.muted }
 
+// Where the instance is: the selected spec led by its phase icon, or — before a
+// spec is selected — the phase on its own.
+const phaseLine = (status: TapStatus): string => {
+  const { icon, tint } = phaseOf(status.status)
+
+  return status.spec ? titleLine(icon, status.spec, tint(status.status)) : `${icon} ${tint(status.status)}`
+}
+
 // The pinned command plus the test it belongs to (per-attempt ids restart, so
 // the test locator disambiguates it).
 const pinnedValue = (pinned: PinnedRef): string => {
@@ -22,28 +31,27 @@ const pinnedValue = (pinned: PinnedRef): string => {
 }
 
 export const renderStatusHuman = (status: TapStatus): string => {
-  const { icon, tint } = phaseOf(status.status)
-  const header = `${icon} ${tint(status.status)}${status.spec ? `  ${chalk.bold(status.spec)}` : ''}`
+  const { pid, projectRoot } = status
 
-  const rows: Array<[string, string | undefined]> = [
-    ['pid', status.pid?.toString()],
-    ['project', status.projectRoot],
-    ['testing type', status.testingType === undefined ? undefined : (status.testingType ?? '—')],
-    ['specs', status.totalSpecs?.toString()],
-    ['tests', status.totalTests?.toString()],
-  ]
-
-  const entries = rows.filter((row): row is [string, string] => row[1] !== undefined)
-
-  const blocks: string[][] = [[header]]
-
-  if (entries.length) {
-    blocks.push(definitionList(entries))
+  // Nothing to target — the phase is the whole answer.
+  if (pid === undefined || projectRoot === undefined) {
+    return phaseLine(status)
   }
+
+  const instance = {
+    pid,
+    projectRoot,
+    testingType: status.testingType ?? null,
+    browserName: status.browserName ?? null,
+  }
+
+  const progress = [`  ${phaseLine(status)}`]
 
   if (status.results) {
-    blocks.push([`  ${countsLine(status.results)}`])
+    progress.push(`  ${countsLine(status.results)}`)
   }
+
+  const blocks = [instanceColumns([instance]), progress]
 
   if (status.pinned) {
     blocks.push(definitionList([['pinned', pinnedValue(status.pinned)]]))

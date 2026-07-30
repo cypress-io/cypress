@@ -74,22 +74,31 @@ export const emptyState = (message: string): string => chalk.dim(message)
 export const indent = (depth: number): string => '  '.repeat(depth)
 
 // Pad before coloring: the escape codes chalk adds would otherwise count
-// toward the column width. `colorize` styles the padded cells; it defaults to
-// leaving them plain for the tables that don't tint any column.
-export const table = (
-  title: string,
+// toward the column width. `colorize` styles the padded cells — it also gets the
+// row index, since a padded cell no longer compares equal to the value it holds
+// — and defaults to leaving them plain for the tables that don't tint a column.
+export const columns = (
   header: string[],
   rows: string[][],
-  colorize: (cells: string[]) => string[] = (cells) => cells,
+  colorize: (cells: string[], index: number) => string[] = (cells) => cells,
 ): string[] => {
   const widths = header.map((cell, column) => Math.max(cell.length, ...rows.map((row) => row[column].length)))
   const pad = (cells: string[]) => cells.map((cell, column) => cell.padEnd(widths[column]))
 
   return [
-    heading(title, rows.length),
     `  ${pad(header).map((cell) => chalk.dim(cell)).join('  ')}`,
-    ...rows.map((row) => `  ${colorize(pad(row)).join('  ')}`),
+    ...rows.map((row, index) => `  ${colorize(pad(row), index).join('  ')}`),
   ]
+}
+
+// Columns under a counted panel title.
+export const table = (
+  title: string,
+  header: string[],
+  rows: string[][],
+  colorize?: (cells: string[], index: number) => string[],
+): string[] => {
+  return [heading(title, rows.length), ...columns(header, rows, colorize)]
 }
 
 // Aligned `label  value` rows. Values arrive already styled — callers color

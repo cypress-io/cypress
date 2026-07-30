@@ -7,13 +7,14 @@ import type { TapStatus } from '../../../lib/tap/types'
 const render = (status: TapStatus): string => stripAnsi(renderStatusHuman(status))
 
 describe('lib/tap/render/status', () => {
-  it('renders a mid-run status: phase, spec, fields, counts, and the pin', () => {
+  it('renders a mid-run status: the instance row, the spec and its phase, counts, and the pin', () => {
     const output = render({
       status: 'running',
       pid: 4242,
       projectRoot: '/projects/app',
       testingType: 'e2e',
       browserAttached: true,
+      browserName: 'Chrome',
       totalSpecs: 3,
       spec: 'cypress/e2e/login.cy.ts',
       totalTests: 5,
@@ -22,17 +23,31 @@ describe('lib/tap/render/status', () => {
     })
 
     expect(output).toBe([
-      '● running  cypress/e2e/login.cy.ts',
+      '  PID   PROJECT        TYPE  BROWSER',
+      '  4242  /projects/app  e2e   Chrome',
       '',
-      '  pid           4242',
-      '  project       /projects/app',
-      '  testing type  e2e',
-      '  specs         3',
-      '  tests         5',
-      '',
+      '  ● cypress/e2e/login.cy.ts  running',
       '  ✓ 1  ✖ 1  ○ 2  - 1',
       '',
       '  pinned  c4  test 8 "loads"',
+    ].join('\n'))
+  })
+
+  it('renders a pre-spec phase as the instance row plus the phase on its own', () => {
+    const output = render({
+      status: 'browser not selected',
+      pid: 111,
+      projectRoot: '/projects/app',
+      testingType: 'e2e',
+      browserAttached: false,
+      browserName: null,
+    })
+
+    expect(output).toBe([
+      '  PID  PROJECT        TYPE  BROWSER',
+      '  111  /projects/app  e2e   —',
+      '',
+      '  ● browser not selected',
     ].join('\n'))
   })
 

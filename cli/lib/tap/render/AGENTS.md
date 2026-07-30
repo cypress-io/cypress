@@ -28,9 +28,11 @@ so someone who knows the reporter panel recognizes the terminal output instantly
   whitespace trimmed. Every renderer ends by returning `layout([...])`.
 - `heading(title, count?)` — a dim panel title, optionally carrying its row
   count: `SPECS (26)`, `ROUTES (2)`.
-- `table` / `definitionList` — aligned columns and `label  value` rows. They
-  **pad before coloring** so ANSI escape codes never count toward column width;
-  keep that invariant if you extend them.
+- `columns` / `table` / `definitionList` — aligned columns (bare, or under a
+  counted heading) and `label  value` rows. They **pad before coloring** so ANSI
+  escape codes never count toward column width; keep that invariant if you
+  extend them, and tint from the row's source data (`colorize` gets the row
+  index) rather than comparing the padded cell text.
 - `titleLine`, `countsLine`, `stateBadge` — the reporter's bold icon-led titles
   and the `✓ 2  ✖ 1  ○ 1  - 3` per-outcome strip. Zero counts render as `--`.
 - `color.*` — `pass`/`fail`/`pending`/`muted`/`alias`/… . `color.muted` is the
@@ -52,6 +54,9 @@ so someone who knows the reporter panel recognizes the terminal output instantly
 - **Guard/lifecycle messages are their own thing.** A "no instance / no browser"
   guard is the discovery layer speaking, not the command's empty rendering;
   don't dress it up as data.
+- **One instance, one row.** A command that names the instance it targeted opens
+  with the same PID/PROJECT/TYPE/BROWSER row `instances` prints
+  (`instanceColumns`), so the two surfaces stay recognizable as the same thing.
 
 ## Adding a command renderer
 
