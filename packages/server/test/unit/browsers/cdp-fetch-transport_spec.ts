@@ -1289,6 +1289,88 @@ describe('CdpFetchTransport', () => {
       expect(seenBody).to.equal('<html>already decoded</html>')
     })
 
+    it('attaches a baseline error listener to response body streams', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      let bodyStreamErrorListeners
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        bodyStreamErrorListeners = response.bodyStream!.listenerCount('error')
+
+        return response
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(bodyStreamErrorListeners).to.be.greaterThan(0)
+    })
+
+    it('propagates getResponseBody Invalid InterceptionId to stream consumers without crashing', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').rejects(new Error('Invalid InterceptionId.'))
+
+      let readError: Error | undefined
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        try {
+          await readStream(response.bodyStream!)
+        } catch (err) {
+          readError = err as Error
+
+          throw err
+        }
+
+        return response
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-response',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(readError).to.have.property('message', 'Invalid InterceptionId.')
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-response',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
     it('exposes response pause bodies as a stream for middleware rewrites', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())

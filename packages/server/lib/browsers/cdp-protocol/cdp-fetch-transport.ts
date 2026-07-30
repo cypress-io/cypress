@@ -395,6 +395,14 @@ export class CdpFetchTransport {
       },
     })
 
+    // pipe() attaches error handlers to the destination, not the source, so this
+    // stream can reach destroy() with no listener of its own — Chrome rejects
+    // getResponseBody with `Invalid InterceptionId` once the pause is gone.
+    // Without a baseline listener that emit is an uncaught exception.
+    bodyStream.on('error', (err: Error) => {
+      debug('response body stream error for %s: %s', requestId, err.message)
+    })
+
     return bodyStream
   }
 
