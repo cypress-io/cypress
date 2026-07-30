@@ -1,8 +1,7 @@
-import chalk from 'chalk'
-
-import type { PinnedRef, TapStatus } from '../types'
-import { color, countsLine, definitionList, layout, stateBadge, titleLine } from './format'
+import type { TapStatus } from '../types'
+import { color, countsLine, layout, stateBadge, titleLine } from './format'
 import { instanceColumns } from './instances'
+import { pinnedBlock } from './pinned'
 
 // The lifecycle phase's dot and tint: a filled green/red check for a finished
 // run, indigo while running, a muted ring for the pre-run "coming up" stages.
@@ -20,14 +19,6 @@ const phaseLine = (status: TapStatus): string => {
   const { icon, tint } = phaseOf(status.status)
 
   return status.spec ? titleLine(icon, status.spec, tint(status.status)) : `${icon} ${tint(status.status)}`
-}
-
-// The pinned command plus the test it belongs to (per-attempt ids restart, so
-// the test locator disambiguates it).
-const pinnedValue = (pinned: PinnedRef): string => {
-  const test = pinned.at.name ? `test ${pinned.at.index} "${pinned.at.name}"` : `test ${pinned.at.index}`
-
-  return `${pinned.command}  ${chalk.dim(test)}`
 }
 
 export const renderStatusHuman = (status: TapStatus): string => {
@@ -54,7 +45,7 @@ export const renderStatusHuman = (status: TapStatus): string => {
   const blocks = [instanceColumns([instance]), progress]
 
   if (status.pinned) {
-    blocks.push(definitionList([['pinned', pinnedValue(status.pinned)]]))
+    blocks.push(pinnedBlock(status.pinned))
   }
 
   return layout(blocks)

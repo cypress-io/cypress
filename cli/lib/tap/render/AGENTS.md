@@ -54,6 +54,9 @@ so someone who knows the reporter panel recognizes the terminal output instantly
 - **Guard/lifecycle messages are their own thing.** A "no instance / no browser"
   guard is the discovery layer speaking, not the command's empty rendering;
   don't dress it up as data.
+- **One thing, one rendering.** When two commands report the same thing, they
+  share the block that renders it — the pinned command reads identically from
+  `pin` and from `status` (`pinned.ts`), as its own reporter row.
 - **One instance, one row.** A command that names the instance it targeted opens
   with the same PID/PROJECT/TYPE/BROWSER row `instances` prints
   (`instanceColumns`), so the two surfaces stay recognizable as the same thing.

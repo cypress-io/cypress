@@ -1,13 +1,9 @@
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, resolveCommandLogId, selectTestAttempt } from '../test-state'
+import { attemptSelectionError, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
-import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner } from '../types'
+import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner, TapTestsRunner } from '../types'
 import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
-
-export interface SnapshotRef {
-  index: number
-  name?: string
-}
+import type { PinnedView, SnapshotRef } from '../contract'
 
 export interface PinResult {
   pinned: { test: string, command: string, at: SnapshotRef }
@@ -72,8 +68,23 @@ const onExternalUnpin = (): void => {
   tapManagerDataSource.getAutIframe()?.restoreDom(original)
 }
 
-export const getPinnedRef = (): { command: string, at: SnapshotRef } | undefined => {
-  return pinned ? { command: pinned.command, at: pinned.at } : undefined
+// The pin as both `pin` and `status` report it. The reporter row is rebuilt from
+// the attempt each time rather than captured at pin time, so a row whose state
+// or message moved on (a retried attempt, a settled assertion) reads current.
+export const getPinnedView = (runner: Pick<TapTestsRunner, 'getTestState'>): PinnedView | undefined => {
+  if (!pinned) {
+    return undefined
+  }
+
+  const selection = selectTestAttempt(runner, pinned.test, pinned.attempt)
+
+  if ('error' in selection) {
+    return undefined
+  }
+
+  const row = serializeReporterRow(selection.test, selection.attempt, pinned.logId)
+
+  return row && { test: pinned.test, at: pinned.at, ...row }
 }
 
 export const reconcilePin = (runner: PinSnapshotRunner): void => {
@@ -92,8 +103,10 @@ const liveSnapshots = (props: PinSnapshotProps | undefined): PinSnapshotEntry[] 
   return (props?.snapshots ?? []).filter((entry): entry is PinSnapshotEntry => Boolean(entry))
 }
 
-const toRef = (entry: PinSnapshotEntry, index: number): SnapshotRef => {
-  return { index: index + 1, ...(entry.name !== undefined ? { name: entry.name } : {}) }
+const toRef = (snapshots: PinSnapshotEntry[], index: number): SnapshotRef => {
+  const { name } = snapshots[index]
+
+  return { index: index + 1, total: snapshots.length, ...(name !== undefined ? { name } : {}) }
 }
 
 const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): number => {
@@ -126,7 +139,7 @@ const movePin = (runner: PinSnapshotRunner, at: string | undefined): PinResult =
 
   tapManagerDataSource.changeSnapshotState(index)
 
-  const at_ = toRef(snapshots[index], index)
+  const at_ = toRef(snapshots, index)
 
   pinned = { ...current, at: at_, snapshot: snapshots[index] }
 
@@ -218,7 +231,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
     stopListeningForUnpin = tapManagerDataSource.onSnapshotUnpinned(onExternalUnpin)
   }
 
-  const at_ = toRef(snapshots[index], index)
+  const at_ = toRef(snapshots, index)
 
   pinned = { test, command, attempt, logId, at: at_, original, snapshot: snapshots[index] }
 

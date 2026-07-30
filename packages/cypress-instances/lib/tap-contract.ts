@@ -286,3 +286,5 @@ export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
 // Per-command result contracts live in `./contracts/`; re-exported here so the
 // app's deep import of this module and the package barrel both reach them.
 export * from './contracts/reporter'
+
+export * from './contracts/pinned'

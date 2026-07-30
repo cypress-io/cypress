@@ -64,7 +64,7 @@ describe('tap/commands/pin', () => {
 
     expect(outcome).to.deep.eq({
       result: {
-        pinned: { test: 'r2', command: '1', at: { index: 2, name: 'after' } },
+        pinned: { test: 'r2', command: '1', at: { index: 2, total: 2, name: 'after' } },
         url: 'http://localhost:8080/index.html',
       },
     })
@@ -78,7 +78,7 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', { test: 'r2', command: '1' }, { at: 'before' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 0, 'r2', 'log-1')
-    expect((outcome as { result: any }).result.pinned.at).to.deep.eq({ index: 1, name: 'before' })
+    expect((outcome as { result: any }).result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
   })
 
   it('fails with SNAPSHOT_NOT_FOUND when --at matches nothing, without touching the iframe', async () => {
@@ -150,7 +150,7 @@ describe('tap/commands/pin', () => {
     expect(changeSnapshotState).to.have.been.calledOnceWith(0)
 
     expect((moved as { result: any }).result.pinned).to.deep.eq({
-      test: 'r2', command: '1', at: { index: 1, name: 'before' },
+      test: 'r2', command: '1', at: { index: 1, total: 2, name: 'before' },
     })
   })
 
@@ -271,9 +271,14 @@ describe('tap/commands/pin', () => {
     expect(restoreDom).not.to.have.been.called
   })
 
-  it('run-state reports the pin once verified against a live runner', async () => {
+  it('run-state reports the pin — with its reporter row — once verified against a live runner', async () => {
     stubSource()
-    cy.stub(tapManagerDataSource, 'getRunner').returns({ getAllTestsState: () => ({}), isRunComplete: () => true })
+    cy.stub(tapManagerDataSource, 'getRunner').returns({
+      getAllTestsState: () => ({}),
+      getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
+      isRunComplete: () => true,
+    })
+
     cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -282,7 +287,11 @@ describe('tap/commands/pin', () => {
 
     const outcome = await manager.exec('run-state')
 
-    expect((outcome as { result: any }).result.pinned).to.deep.eq({ command: '1', at: { index: 2, name: 'after' } })
+    expect((outcome as { result: any }).result.pinned).to.deep.eq({
+      test: 'r2',
+      at: { index: 2, total: 2, name: 'after' },
+      command: { id: '1', name: 'get', message: '#status', state: 'passed', type: 'parent' },
+    })
   })
 
   it('run-state omits the pin while there is no runner to verify it against (runner being replaced)', async () => {

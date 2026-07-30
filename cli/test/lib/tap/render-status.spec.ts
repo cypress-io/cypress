@@ -19,7 +19,12 @@ describe('lib/tap/render/status', () => {
       spec: 'cypress/e2e/login.cy.ts',
       totalTests: 5,
       results: { passed: 1, failed: 1, pending: 2, skipped: 1 },
-      pinned: { command: 'c4', at: { index: 8, name: 'loads' } },
+      pinned: {
+        test: 'r3',
+        at: { index: 2, total: 2, name: 'after' },
+        hookName: 'before each',
+        command: { id: '1', name: 'task', message: 'db:seed', hookId: 'h2' },
+      },
     })
 
     expect(output).toBe([
@@ -29,7 +34,9 @@ describe('lib/tap/render/status', () => {
       '  ● cypress/e2e/login.cy.ts  running',
       '  ✓ 1  ✖ 1  ○ 2  - 1',
       '',
-      '  pinned  c4  test 8 "loads"',
+      '⚲ PINNED - (2/2) after',
+      'BEFORE EACH · h2',
+      '   1  task  db:seed',
     ].join('\n'))
   })
 
