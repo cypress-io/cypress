@@ -99,6 +99,7 @@ const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstan
   instanceId: 'inst-1',
   testingType: 'e2e',
   cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+  browserName: 'Chrome',
   ...overrides,
 })
 
@@ -400,35 +401,53 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
-    it('renders the live instances as a JSON summary and exits 0, without opening a session', async () => {
+    it('renders the live instances as a table and exits 0, without opening a session', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([
-        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x' }),
-        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null }),
+        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
       ])
 
       expect(await tap.start(['instances'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual([
-        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true },
-        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false },
-      ])
+
+      const output = logger.print()
+
+      expect(output).toContain('INSTANCES (2)')
+      expect(output).toContain('111')
+      expect(output).toContain('/projects/app')
+      expect(output).toContain('Chrome')
+      expect(() => JSON.parse(output)).toThrow()
 
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw instance summaries with --json', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([
+        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
+      ])
+
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([
+        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome' },
+        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null },
+      ])
     })
 
     it('reports the testing type as null for an instance that has not chosen one', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, testingType: null })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0].testingType).toBeNull()
     })
 
     it('never exposes the internal serverPort', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, serverPort: 49200 })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0]).not.toHaveProperty('serverPort')
     })
 
@@ -483,6 +502,7 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
@@ -624,6 +644,7 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
@@ -772,6 +793,7 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 

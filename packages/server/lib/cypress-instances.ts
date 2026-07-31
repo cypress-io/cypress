@@ -53,7 +53,7 @@ export const cypressInstances = {
       testingType,
     }
 
-    currentState = { ...record, cdpBrowserWsUrl: null }
+    currentState = { ...record, cdpBrowserWsUrl: null, browserName: null }
 
     try {
       await persist(record)
@@ -63,13 +63,15 @@ export const cypressInstances = {
     }
   },
 
-  setCdpBrowserWsUrl (cdpBrowserWsUrl: string | null): void {
+  setCdpBrowserWsUrl (cdpBrowserWsUrl: string | null, browserName: string | null = null): void {
     if (!currentState) {
       return
     }
 
-    currentState = { ...currentState, cdpBrowserWsUrl }
-    debug('cypress instances cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
+    // browserName is only meaningful while a browser is attached; clearing the
+    // url clears the name so the two never disagree.
+    currentState = { ...currentState, cdpBrowserWsUrl, browserName: cdpBrowserWsUrl ? browserName : null }
+    debug('cypress instances cdpBrowserWsUrl is now %o (browser %o)', cdpBrowserWsUrl, currentState.browserName)
   },
 
   getCurrent (): LiveInstanceState | null {
