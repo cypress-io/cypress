@@ -28,6 +28,8 @@ export type {
   TapNetworkInfo,
   TapCommandEntry,
   TapCommandHook,
+  TapCommandResult,
+  TapCommandSnapshot,
   TapConsoleProps,
   TapJsonValue,
   TapReporterCommand,

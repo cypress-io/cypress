@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapCommandOptionSchema, TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
-import { clamp, color, columns, emptyState, heading, layout, terminalWidth } from './format'
+import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth } from './format'
 
 // A command's console properties are the deepest payload the tap returns — a
 // `cy.request` row carries its matcher, request, response and every header of
@@ -35,8 +35,8 @@ const MIN_VALUE_WIDTH = 24
 const MAX_KEY_WIDTH = 32
 
 export const consolePropsOptions: readonly TapCommandOptionSchema[] = [
-  { name: 'depth', type: 'string', required: false, description: 'with --props, how many levels of nested properties to expand before summarizing the rest as "{n keys}": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
-  { name: 'path', type: 'string', required: false, description: 'with --props, show one section of the properties instead of the whole payload, addressed from the top level as "Response>headers" (case-insensitive, ">"-separated)' },
+  { name: 'depth', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
+  { name: 'path', type: 'string', required: false, description: 'show one section of the console properties instead of the whole payload, addressed from the top level as "Response>headers" (case-insensitive, ">"-separated)' },
 ]
 
 export interface ConsolePropsOptions {
@@ -161,8 +161,8 @@ const rowsTable = (values: TapJsonValue[], indent: string): string[] | undefined
 
   // Cells are plain here, so coloring them after padding is a no-op width-wise;
   // the withheld marker still needs its hue.
-  return columns(columnKeys, rows, (cells) => cells.map((text) => (WITHHELD.test(text.trim()) ? color.aborted(text) : text)))
-  .map((line) => `${indent}  ${line}`)
+  return tableRows(columnKeys, rows, (cells) => cells.map((text) => (WITHHELD.test(text.trim()) ? color.aborted(text) : text)))
+  .map((line) => `${indent}${line}`)
 }
 
 type PropsValue = { [key: string]: TapJsonValue } | TapJsonValue[]
@@ -378,31 +378,40 @@ const walkPath = (root: PropsValue, segments: string[]): ResolvedPath | FailedPa
 
 // The driver wraps every log's console properties in a fixed envelope
 // (see wrapConsoleProps): the command's own key/values live under `props`, with
-// `table`/`groups`/`error`/`snapshot`/`args` as siblings. Rendering the envelope
-// rather than the raw payload is what lifts the interesting keys to the top
-// level, the way the browser console panel shows them.
-const ENVELOPE_KEYS = new Set(['name', 'type', 'props', 'table', 'groups', 'error', 'snapshot', 'args'])
+// `table`/`groups`/`error`/`args` as siblings. Rendering the envelope rather
+// than the raw payload is what lifts the interesting keys to the top level, the
+// way the browser console panel shows them.
+const ENVELOPE_KEYS = new Set(['name', 'type', 'props', 'table', 'groups', 'error', 'args'])
 
-const propsHeader = (envelope: TapConsoleProps, trail: string[] = []): string => {
-  const name = typeof envelope.name === 'string' ? envelope.name : undefined
-  const event = envelope.type === 'event' ? `  ${chalk.dim('(event)')}` : ''
-  const subject = name ? ` ${chalk.dim('·')} ${chalk.bold(name)}${event}` : ''
+// The command this payload belongs to is named by the row printed above it, so
+// the title carries only the path drilled into, if any.
+const propsHeader = (trail: string[] = []): string => {
   const breadcrumb = trail.length ? ` ${chalk.dim('›')} ${chalk.bold(trail.join(chalk.dim(' › ')))}` : ''
 
-  return `${heading('CONSOLE PROPS')}${subject}${breadcrumb}`
+  return `${heading('CONSOLE PROPS')}${breadcrumb}`
 }
 
-// An envelope key beside `props`, as its own titled section.
-const extraSection = (title: string, value: TapJsonValue, renderProps: (value: PropsValue, level: number, trail?: string[]) => string[]): string[][] => {
+// The reporter's failure palette (see its error panel): a red title over the
+// lighter hue it prints a failure's own text in.
+const ERROR_TINT = { title: color.fail, line: color.errHeaderText }
+
+// An envelope key beside `props`, as its own titled section. A tinted section
+// colors its title and its lines — the error arrives as a stack, so what carries
+// the color is the block, not a props tree.
+const extraSection = (title: string, value: TapJsonValue, renderProps: (value: PropsValue, level: number, trail?: string[]) => string[], tint?: typeof ERROR_TINT): string[][] => {
   if (value == null) {
     return []
   }
 
+  const sectionTitle = tint ? tint.title(title) : heading(title)
+
   if (isContainer(value)) {
-    return emptyContainerInline(value) ? [] : [[heading(title), ...renderProps(value as PropsValue, 0, [title])]]
+    return emptyContainerInline(value) ? [] : [[sectionTitle, ...renderProps(value as PropsValue, 0, [title])]]
   }
 
-  return [[heading(title), ...blockLines(String(value), '  ')]]
+  const lines = blockLines(String(value), '  ')
+
+  return [[sectionTitle, ...(tint ? lines.map((line) => tint.line(line)) : lines)]]
 }
 
 // Each table the driver logged is a slot in `table`, keyed by the order it
@@ -526,7 +535,7 @@ const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowB
     return [[emptyState(found.error)]]
   }
 
-  const header = propsHeader(envelope, found.trail)
+  const header = propsHeader(found.trail)
 
   if (!isContainer(found.value)) {
     // An explicit path asks for exactly this value, so it prints whole.
@@ -568,16 +577,15 @@ export const renderConsolePropsHuman = (envelope: TapConsoleProps, options: Cons
     return layout([[heading('CONSOLE PROPS'), ...withBody(renderProps(envelope, 0))], ...collapsedFooter(collapsed), ...noteBlock])
   }
 
-  const { table: tables, groups, error, snapshot, args } = envelope
+  const { table: tables, groups, error, args } = envelope
   const unexpected = Object.fromEntries(Object.entries(envelope).filter(([key]) => !ENVELOPE_KEYS.has(key)))
 
   return layout([
-    [propsHeader(envelope), ...withBody(renderProps(props, 0))],
+    [propsHeader(), ...withBody(renderProps(props, 0))],
     ...(tables === undefined ? [] : tableSections(tables, renderProps)),
     ...(groups === undefined ? [] : extraSection('GROUPS', groups, renderProps)),
     ...(args === undefined ? [] : extraSection('ARGS', args, renderProps)),
-    ...(error === undefined ? [] : extraSection('ERROR', error, renderProps)),
-    ...(snapshot === undefined ? [] : extraSection('SNAPSHOT', snapshot, renderProps)),
+    ...(error === undefined ? [] : extraSection('ERROR', error, renderProps, ERROR_TINT)),
     ...(Object.keys(unexpected).length ? extraSection('OTHER', unexpected, renderProps) : []),
     ...collapsedFooter(collapsed),
     ...noteBlock,

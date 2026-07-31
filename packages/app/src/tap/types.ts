@@ -1,10 +1,12 @@
 import type { SerializedTest } from '@packages/types'
-import type { TapCommandEntry, TapCommandHook, TapConsoleProps, TapJsonValue } from './contract'
+import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapConsoleProps, TapJsonValue } from './contract'
 
 // The command-log and console-props result shapes are the cross-process
 // contract, so they live in `@packages/cypress-instances` alongside the CLI-side
 // rendering that consumes them; aliased here to the names the app uses.
 export type CommandEntry = TapCommandEntry
+
+export type CommandResult = TapCommandResult
 
 export type CommandHook = TapCommandHook
 
@@ -36,6 +38,8 @@ export interface TapTestsRunner {
  */
 export interface PinSnapshotEntry {
   name?: string
+  /** Wall-clock capture time in ms, as the driver stamps it (`timeOrigin + now()`, hence fractional). */
+  timestamp?: number
 }
 
 export interface PinSnapshotProps {

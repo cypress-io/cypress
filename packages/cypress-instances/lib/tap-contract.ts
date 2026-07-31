@@ -89,13 +89,12 @@ const attemptField = { name: 'attempt', type: 'number', required: false, descrip
 
 const commandMeta = {
   name: 'command',
-  description: 'detail one command log entry of a test, or show its console properties with --props',
+  description: 'detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties',
   params: [],
   options: [
     { ...testIdField, required: true },
     { name: 'command', type: 'string', required: true, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
-    { name: 'props', type: 'boolean', required: false, description: 'show the command’s console properties instead of its log entry. A value long enough to bury the rest of the payload — a response body, a long string — is named by its length rather than returned; pass --full-report for its content' },
-    { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length, printed as raw JSON; requires --props' },
+    { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length, printed as raw JSON' },
     attemptField,
   ],
 } as const satisfies TapCommandSchema

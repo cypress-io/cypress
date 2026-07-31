@@ -206,20 +206,19 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('reporter', {}, { test: 'r2', attempt: '1' }, {})
   })
 
-  it('declares and forwards command --command with the --props and --full-report options from the shared contract', () => {
+  it('declares and forwards command --command with the --full-report option from the shared contract', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'command').helpInformation()
 
     expect(help).toContain('--test <test>')
     expect(help).toContain('--command <command>')
-    expect(help).toContain('--props')
     expect(help).toContain('--full-report')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['command', '--test', 'r2', '--command', 'log-3', '--props', '--full-report', '--attempt', '1'], { from: 'user' })
+    program.parse(['command', '--test', 'r2', '--command', 'log-3', '--full-report', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test': 'r2', 'command': 'log-3', 'props': 'true', 'full-report': 'true', 'attempt': '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test': 'r2', 'command': 'log-3', 'full-report': 'true', 'attempt': '1' }, {})
   })
 
   // The CLI's own view options ride in the schema commands' help, but they shape
@@ -233,12 +232,12 @@ describe('lib/tap/build-program', () => {
     expect(help).toContain('--depth <depth>')
     expect(help).toContain('--path <path>')
 
-    program.parse(['command', '--test', 'r2', '--command', '3', '--props', '--depth', '2', '--path', 'Response>headers'], { from: 'user' })
+    program.parse(['command', '--test', 'r2', '--command', '3', '--depth', '2', '--path', 'Response>headers'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith(
       'command',
       {},
-      { test: 'r2', command: '3', props: 'true' },
+      { test: 'r2', command: '3' },
       { depth: '2', path: 'Response>headers' },
     )
   })

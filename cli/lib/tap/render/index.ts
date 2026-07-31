@@ -1,4 +1,4 @@
-import type { ClearResult, PinResult, TapCommandEntry, TapCommandName, TapCommandOptionSchema, TapConsoleProps, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import type { ClearResult, PinResult, TapCommandName, TapCommandOptionSchema, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
 import type { TapRunResult } from '../commands/run'
 import type { TapInstanceSummary } from '../commands/instances'
 import type { TapSpecEntry } from '../commands/specs'
@@ -15,8 +15,8 @@ import { renderDomHuman } from './dom'
 import { renderAriaHuman } from './aria'
 import { renderInspectHuman } from './inspect'
 import { renderPinHuman } from './pin'
-import { renderCommandEntryHuman } from './command'
-import { consolePropsOptions, renderConsolePropsHuman } from './console-props'
+import { renderCommandHuman } from './command'
+import { consolePropsOptions } from './console-props'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
@@ -48,21 +48,14 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
   },
   command: {
     options: consolePropsOptions,
-    // A console-props payload is arbitrary JSON and can carry the same keys a log
-    // entry does, so the flag that chose the shape decides the rendering rather
-    // than the shape itself.
     renderHuman: (result, options) => {
-      if (options.props !== 'true') {
-        return renderCommandEntryHuman(result as TapCommandEntry)
-      }
-
       // --full-report asks for every value however long, which is a payload to
       // pipe into a tool rather than to read: print it as the JSON it is.
       if (options['full-report'] === 'true') {
         return undefined
       }
 
-      return renderConsolePropsHuman(result as TapConsoleProps, { depth: options.depth, path: options.path })
+      return renderCommandHuman(result as TapCommandResult, { depth: options.depth, path: options.path })
     },
   },
   run: { renderHuman: (result) => renderRunHuman(result as TapRunResult) },

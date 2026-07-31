@@ -19,8 +19,20 @@ export interface TapCommandHook {
 }
 
 /**
- * The `command` command's default result: one row of the reporter's command
- * log, the lean projection the `commands` listing also returns.
+ * One DOM snapshot captured on a command row, as `pin --at` addresses it — by
+ * the driver's name for it or by its 1-based position.
+ */
+export interface TapCommandSnapshot {
+  /** 1-based position in the row's snapshots, in capture order. */
+  index: number
+  /** The driver's label, e.g. `before`, `after`. Absent on a row that captured one unnamed snapshot. */
+  name?: string
+  /** Wall-clock ms since the epoch at which the driver captured it. Absent on a snapshot the driver did not stamp. */
+  timestamp?: number
+}
+
+/**
+ * One row of the reporter's command log, as the `command` command reports it.
  */
 export interface TapCommandEntry {
   /**
@@ -44,11 +56,11 @@ export interface TapCommandEntry {
   /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */
   type?: 'parent' | 'child' | 'system'
   /**
-   * The hook this row ran in, resolved for a single command rather than carried
-   * by every row of the `commands` listing. Absent when the row ran in the test
-   * body itself — the section an unqualified command id resolves to.
+   * The section of the reporter panel this row ran under. A row of the test
+   * itself reports the reporter's own synthesized `test body` section — the
+   * section an unqualified command id resolves to.
    */
-  hook?: TapCommandHook
+  hook: TapCommandHook
   /**
    * High-level network detail — method, URL, status/indicator, stubbed flag,
    * response count, alias — matching what the reporter renders inline on
@@ -63,6 +75,22 @@ export interface TapCommandEntry {
   cleanedUp?: true
 }
 
+/**
+ * Everything the `command` command reports about one row: the row itself, the
+ * DOM snapshots pinnable on it, and the console properties the command logged.
+ * `snapshots` is always present — an empty list means the row has none to pin (a
+ * command that captured none, or a test the driver evicted from memory), never
+ * that they went unreported.
+ */
+export interface TapCommandResult extends TapCommandEntry {
+  snapshots: TapCommandSnapshot[]
+  /**
+   * The command's console properties. Absent when the driver has none to give —
+   * a row that logged none, or a test whose details it evicted from memory.
+   */
+  consoleProps?: TapConsoleProps
+}
+
 export type TapJsonValue = null | boolean | number | string | TapJsonValue[] | { [key: string]: TapJsonValue }
 
 /**
@@ -71,10 +99,10 @@ export type TapJsonValue = null | boolean | number | string | TapJsonValue[] | {
  *
  * The driver wraps every log's properties in a fixed envelope — the command's
  * own key/values under `props`, with `name`, `type` (`command` or `event`) and
- * any of `table`, `groups`, `error`, `snapshot`, `args` alongside it. The
- * values themselves are whatever the command logged, hence the open shape; a
- * value long enough to bury the rest of the payload arrives named by its length
- * unless `--full-report` asks for it in full. A command whose details the driver
- * has evicted from memory yields a bare `{ Message }` with no envelope.
+ * any of `table`, `groups`, `error`, `args` alongside it. The values themselves
+ * are whatever the command logged, hence the open shape; a value long enough to
+ * bury the rest of the payload arrives named by its length unless
+ * `--full-report` asks for it in full. A command whose details the driver has
+ * evicted from memory yields a bare `{ Message }` with no envelope.
  */
 export type TapConsoleProps = { [key: string]: TapJsonValue }

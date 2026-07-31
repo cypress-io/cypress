@@ -53,6 +53,16 @@ a renderer reuses them without widening its own result type. Domain-shaped
 helpers like these belong here rather than in `format.ts`, which stays free of
 contract types.
 
+## One row, top to bottom (`command.ts`)
+
+The `command` view reads down the way the app's panels do: the section title the
+row sits under, the row itself, then everything hanging off it — its network
+detail, its snapshots, and the console properties the console panel would show.
+Each of those sections is always rendered, empty state and all, so the output
+has the same shape whichever row it describes, and the panels are titled by
+what they hold rather than by the command that owns them (the row above already
+names it).
+
 ## Deep payloads open collapsed (`console-props.ts`)
 
 A command's console properties are the one result with no bounded shape — a
@@ -103,7 +113,7 @@ any instance version that has the command at all.
    `renderHuman` makes the command print the rendering by default; `--json`
    bypasses it. A command with no entry keeps printing JSON, and a `renderHuman`
    that returns undefined declines for the options it was invoked with — what
-   `command --props --full-report` does, since a payload asked for in full is
+   `command --full-report` does, since a payload asked for in full is
    one to pipe somewhere, not to read.
 3. The `result` shape is the command's typed interface from the shared
    `@packages/cypress-instances` contract — render from that, and let anything

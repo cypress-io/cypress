@@ -2,7 +2,7 @@ import chalk from 'chalk'
 
 import type { TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
 import { color, countsLine, emptyState, heading, layout, stateBadge, table, titleLine } from './format'
-import { aliasSuffix, cleanedSuffix, commandLabel, formatMessage, networkDot, networkSuffix } from './command-row'
+import { aliasSuffix, cleanedSuffix, commandLabel, formatMessage, networkDot, networkSuffix, sectionHeading } from './command-row'
 
 // The panel's status badge colors: red for a failed session, orange while one
 // is being recreated, the reporter's jade otherwise.
@@ -155,15 +155,12 @@ const renderRow = (command: TapReporterCommand, idWidth: number, nameWidth: numb
     : renderCommandRow(command, idWidth, nameWidth)
 }
 
-// The hook id in the title is the qualifier a duplicated row number needs
-// (`pin r8 h1:1`), since numbers restart per section.
 const renderSection = (section: Section, hookName: string, idWidth: number): string[] => {
   const commandRows = section.rows.filter((command) => !isEventRow(command))
   const nameWidth = Math.max(0, ...commandRows.map((command) => commandLabel(command).length))
-  const qualifier = section.hookId ? ` · ${section.hookId}` : ''
 
   return [
-    heading(`${hookName.toUpperCase()}${qualifier}`),
+    sectionHeading(hookName, section.hookId),
     ...section.rows.map((command) => renderRow(command, idWidth, nameWidth)),
   ]
 }

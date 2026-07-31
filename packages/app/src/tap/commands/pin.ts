@@ -1,5 +1,5 @@
 import { defineCommand, TapCommandError } from './definition'
-import { attemptSelectionError, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
+import { attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner, TapTestsRunner } from '../types'
 import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
@@ -88,10 +88,6 @@ export const reconcilePin = (runner: PinSnapshotRunner): void => {
   if (!stillLive) {
     releasePin()
   }
-}
-
-const liveSnapshots = (props: PinSnapshotProps | undefined): PinSnapshotEntry[] => {
-  return (props?.snapshots ?? []).filter((entry): entry is PinSnapshotEntry => Boolean(entry))
 }
 
 const toRef = (snapshots: PinSnapshotEntry[], index: number): SnapshotRef => {

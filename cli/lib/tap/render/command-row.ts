@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapNetworkInfo } from '@packages/cypress-instances'
-import { color } from './format'
+import { color, heading } from './format'
 
 // The command-log row grammar, shared by the two renderers that show command log
 // entries — `reporter`'s full log and `command`'s single entry — so a row reads
@@ -20,6 +20,15 @@ export interface RenderableCommand {
   aliasType?: string
   referencedAliases?: string[]
   cleanedUp?: true
+}
+
+// The title of a hook section of the command log. The hook id in the title is
+// the qualifier a duplicated row number needs (`pin r8 h1:1`), since numbers
+// restart per section.
+export const sectionHeading = (hookName: string | undefined, hookId: string | undefined): string => {
+  const qualifier = hookId ? ` · ${hookId}` : ''
+
+  return heading(`${(hookName ?? 'commands').toUpperCase()}${qualifier}`)
 }
 
 // The reporter's status dot for a network row.

@@ -47,15 +47,23 @@ describe('tap/commands/command', () => {
     },
   }
 
+  const TEST_BODY = { hookId: 'r2', hookName: 'test body' }
+
   // The spec's own window.Cypress is the instance running this test, so stub
   // the runner seam rather than replace it.
   const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
 
-  const stubTests = (getSerializedConsolePropsForLog?: unknown) => {
+  const stubTests = (getSerializedConsolePropsForLog: unknown = () => undefined) => {
     return stubRunner({
       getTestState: (id: string) => TESTS_STATE[id],
       getSerializedConsolePropsForLog,
     })
+  }
+
+  // The snapshots come off the runner's own per-log lookup, a seam of its own —
+  // left unstubbed, a row reports no snapshots.
+  const stubSnapshots = (getSnapshotPropsForLog: unknown) => {
+    return cy.stub(tapManagerDataSource, 'getSnapshotRunner').returns({ getSnapshotPropsForLog })
   }
 
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
@@ -80,11 +88,11 @@ describe('tap/commands/command', () => {
     })
   })
 
-  it('returns one lean command entry, keeping only the listed fields', async () => {
+  it('returns one command entry, keeping only the listed fields', async () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'h1:1' })).to.deep.eq({
-      result: { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent', hook: { hookId: 'h1', hookName: 'before each' } },
+      result: { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent', hook: { hookId: 'h1', hookName: 'before each' }, snapshots: [] },
     })
   })
 
@@ -94,17 +102,18 @@ describe('tap/commands/command', () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'h1:1', attempt: '1' })).to.deep.eq({
-      result: { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent', hook: { hookId: 'h1' } },
+      result: { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent', hook: { hookId: 'h1' }, snapshots: [] },
     })
   })
 
   // Row numbers restart per section, so `1` names both the before-each visit and
-  // the test body's first command; the test body is what an unqualified id means.
+  // the test body's first command; the test body is what an unqualified id means,
+  // and it reports the reporter's own synthesized section.
   it('resolves a duplicated row number to the test body, not the hook', async () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })).to.deep.eq({
-      result: { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent' },
+      result: { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent', hook: TEST_BODY, snapshots: [] },
     })
   })
 
@@ -112,7 +121,54 @@ describe('tap/commands/command', () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1', attempt: '1' })).to.deep.eq({
-      result: { id: '1', name: 'get', message: '#user', state: 'failed', type: 'parent' },
+      result: { id: '1', name: 'get', message: '#user', state: 'failed', type: 'parent', hook: TEST_BODY, snapshots: [] },
+    })
+  })
+
+  // The driver's snapshots are the handles `pin --at` takes, named or numbered,
+  // and each carries the wall clock it was captured at.
+  it('lists the row’s snapshots, looked up by the driver log id', async () => {
+    stubTests()
+
+    const getSnapshotPropsForLog = cy.stub().returns({
+      url: 'http://localhost:3000/login',
+      snapshots: [{ name: 'before', timestamp: 1767276202481.37 }, { name: 'after', timestamp: 1767276202613.81 }],
+    })
+
+    stubSnapshots(getSnapshotPropsForLog)
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })).to.deep.eq({
+      result: {
+        id: '1',
+        name: 'get',
+        message: '#user',
+        state: 'passed',
+        type: 'parent',
+        hook: TEST_BODY,
+        snapshots: [{ index: 1, name: 'before', timestamp: 1767276202481 }, { index: 2, name: 'after', timestamp: 1767276202614 }],
+      },
+    })
+
+    expect(getSnapshotPropsForLog).to.have.been.calledOnceWith('r2', 'log-2')
+  })
+
+  // The driver's memory cleanup nulls entries in place, and a single snapshot is
+  // unnamed — neither is a snapshot the list can address.
+  it('drops nulled snapshots and reports an unnamed one by position alone', async () => {
+    stubTests()
+    stubSnapshots(() => ({ snapshots: [null, { timestamp: 1767276202481 }] }))
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })).to.deep.eq({
+      result: { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent', hook: TEST_BODY, snapshots: [{ index: 1, timestamp: 1767276202481 }] },
+    })
+  })
+
+  it('reports no snapshots for a row the driver holds none for', async () => {
+    stubTests()
+    stubSnapshots(() => ({ snapshots: null }))
+
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })).to.deep.eq({
+      result: { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent', hook: TEST_BODY, snapshots: [] },
     })
   })
 
@@ -132,7 +188,7 @@ describe('tap/commands/command', () => {
 
     stubTests(getSerializedConsolePropsForLog)
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '9', props: 'true', attempt: '1' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '9', attempt: '1' })).to.deep.eq({
       error: {
         code: 'COMMAND_NOT_FOUND',
         message: 'no command of this test matches the id "9" — use the reporter command (with --test) to list this test’s commands',
@@ -144,7 +200,7 @@ describe('tap/commands/command', () => {
 
   // The driver keys its per-log details by its own log id, not by the row number
   // the reporter displays — so the handle has to be resolved before the lookup.
-  it('returns JSON-safe console properties for --props, looked up by the driver log id', async () => {
+  it('returns JSON-safe console properties with the entry, looked up by the driver log id', async () => {
     const consoleProps = {
       name: 'get',
       type: 'command',
@@ -159,11 +215,36 @@ describe('tap/commands/command', () => {
 
     stubTests(getSerializedConsolePropsForLog)
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1', props: 'true' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })
 
     expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2', undefined)
-    expect(outcome).to.deep.eq({ result: consoleProps })
+    expect(outcome).to.deep.eq({
+      result: { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent', hook: TEST_BODY, snapshots: [], consoleProps },
+    })
+
     expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
+  })
+
+  // The app's console panel prints this note when it has no snapshot to show —
+  // it says nothing about the command, and `snapshots` is what reports the ones
+  // the row actually captured.
+  it('drops the envelope’s console-panel snapshot note', async () => {
+    stubTests(() => {
+      return {
+        name: 'get',
+        type: 'command',
+        props: { Selector: '#user' },
+        snapshot: 'The snapshot is missing. Displaying current state of the DOM.',
+      }
+    })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })
+
+    expect((outcome as { result: { consoleProps: unknown } }).result.consoleProps).to.deep.eq({
+      name: 'get',
+      type: 'command',
+      props: { Selector: '#user' },
+    })
   })
 
   it('selects console properties from the requested retry attempt', async () => {
@@ -172,10 +253,10 @@ describe('tap/commands/command', () => {
 
     stubTests(getSerializedConsolePropsForLog)
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1', props: 'true', attempt: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1', attempt: '1' })
 
     expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-b', undefined)
-    expect(outcome).to.deep.eq({ result: consoleProps })
+    expect((outcome as { result: { consoleProps: unknown } }).result.consoleProps).to.deep.eq(consoleProps)
   })
 
   it('preserves the driver’s memory-cleanup message', async () => {
@@ -183,17 +264,27 @@ describe('tap/commands/command', () => {
 
     stubTests(() => cleanup)
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r4', command: '1', props: 'true' })).to.deep.eq({ result: cleanup })
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r4', command: '1' })).to.deep.eq({
+      result: {
+        id: '1',
+        name: 'visit',
+        state: 'passed',
+        type: 'parent',
+        hook: { hookId: 'r4', hookName: 'test body' },
+        cleanedUp: true,
+        snapshots: [],
+        consoleProps: cleanup,
+      },
+    })
   })
 
-  it('fails with CONSOLE_PROPS_UNAVAILABLE when the driver has no details for a listed command', async () => {
-    stubTests(() => undefined)
+  // Details the driver no longer holds are simply absent — the row itself is
+  // still worth reporting, so this is not a failure.
+  it('omits console properties the driver has none of', async () => {
+    stubTests(() => ({}))
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1', props: 'true' })).to.deep.eq({
-      error: {
-        code: 'CONSOLE_PROPS_UNAVAILABLE',
-        message: 'this command has no console properties available — command details are captured in open mode and kept only for the most recent tests (numTestsKeptInMemory)',
-      },
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })).to.deep.eq({
+      result: { id: '1', name: 'get', message: '#user', state: 'passed', type: 'parent', hook: TEST_BODY, snapshots: [] },
     })
   })
 
@@ -206,25 +297,11 @@ describe('tap/commands/command', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, {
       'test': 'r2',
       'command': '1',
-      'props': 'true',
       'full-report': 'true',
     })
 
     expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2', { fullReport: true })
-    expect(outcome).to.deep.eq({ result: consoleProps })
-  })
-
-  it('fails with PROPS_REQUIRED before reading the runner when --full-report has no --props', async () => {
-    const getRunner = stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
-
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test': 'r2', 'command': '1', 'full-report': 'true' })).to.deep.eq({
-      error: {
-        code: 'PROPS_REQUIRED',
-        message: 'pass --props with --full-report — only a command’s console properties are ever shortened',
-      },
-    })
-
-    expect(getRunner).not.to.have.been.called
+    expect((outcome as { result: { consoleProps: unknown } }).result.consoleProps).to.deep.eq(consoleProps)
   })
 
   it('fails dispatch without reading the runner when a required option is missing', async () => {

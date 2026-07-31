@@ -51,7 +51,7 @@ describe('lib/tap/render/console-props', () => {
   describe('depth', () => {
     it('expands three levels, folds what is deeper or oversized, and names the ways to open it', () => {
       expect(renderProps(REQUEST)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request  (event)
+        "CONSOLE PROPS
           Resource Type  xhr
           Method         POST
           URL            https://jsonplaceholder.cypress.io/comments
@@ -79,7 +79,7 @@ describe('lib/tap/render/console-props', () => {
 
     it('stops at the level --depth names', () => {
       expect(renderProps(REQUEST, { depth: '2' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request  (event)
+        "CONSOLE PROPS
           Resource Type  xhr
           Method         POST
           URL            https://jsonplaceholder.cypress.io/comments
@@ -104,7 +104,7 @@ describe('lib/tap/render/console-props', () => {
 
     it('expands everything for --depth all, collapsing nothing', () => {
       expect(renderProps(REQUEST, { depth: 'all' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request  (event)
+        "CONSOLE PROPS
           Resource Type  xhr
           Method         POST
           URL            https://jsonplaceholder.cypress.io/comments
@@ -146,7 +146,7 @@ describe('lib/tap/render/console-props', () => {
 
     it('summarizes every container for --depth 0', () => {
       expect(renderProps(REQUEST, { depth: '0' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request  (event)
+        "CONSOLE PROPS
           Resource Type             xhr
           Method                    POST
           URL                       https://jsonplaceholder.cypress.io/comments
@@ -175,7 +175,7 @@ describe('lib/tap/render/console-props', () => {
   describe('path', () => {
     it('shows one section, breadcrumbed, matching keys case-insensitively by prefix', () => {
       expect(renderProps(REQUEST, { path: 'matched `cy.intercept()`>resp>head' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request  (event) › Matched \`cy.intercept()\` › Response › headers
+        "CONSOLE PROPS › Matched \`cy.intercept()\` › Response › headers
           date          Thu, 30 Jul 2026 18:44:46 GMT
           content-type  application/json; charset=utf-8"
       `)
@@ -183,7 +183,7 @@ describe('lib/tap/render/console-props', () => {
 
     it('prints a scalar at an explicit path in full', () => {
       expect(renderProps(REQUEST, { path: 'URL' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request  (event) › URL
+        "CONSOLE PROPS › URL
           https://jsonplaceholder.cypress.io/comments"
       `)
     })
@@ -199,7 +199,7 @@ describe('lib/tap/render/console-props', () => {
 
       expect(renderProps(envelope)).toContain('Events  {9 items}')
       expect(renderProps(envelope, { path: 'Events' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · log › Events
+        "CONSOLE PROPS › Events
           index  type
           1      click
           2      click
@@ -222,7 +222,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope, { path: 'error' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · get › error
+        "CONSOLE PROPS › error
           AssertionError: Timed out retrying
             at Context.eval (webpack://spec.cy.js:4:1)"
       `)
@@ -266,7 +266,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request
+        "CONSOLE PROPS
           tabbed  a b c
           tinted  red
           crlf
@@ -283,7 +283,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · x
+        "CONSOLE PROPS
           line one line two                 v
           kyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy…  value
           short                             1"
@@ -292,12 +292,12 @@ describe('lib/tap/render/console-props', () => {
 
     it('states the emptiness of a section that holds nothing', () => {
       expect(renderProps({ name: 'log', type: 'command', props: {} })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · log
+        "CONSOLE PROPS
           (nothing here)"
       `)
 
       expect(renderProps({ name: 'x', type: 'command', props: { Options: {} } }, { path: 'Options' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · x › Options
+        "CONSOLE PROPS › Options
           (nothing here)"
       `)
     })
@@ -306,7 +306,7 @@ describe('lib/tap/render/console-props', () => {
       const envelope: TapConsoleProps = { name: 'x', type: 'command', props: { blank: '', '': { deep: 1 } } }
 
       expect(renderProps(envelope)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · x
+        "CONSOLE PROPS
           blank  (empty string)
           (empty key)
             deep  1"
@@ -347,7 +347,7 @@ describe('lib/tap/render/console-props', () => {
     setColumns(60)
 
     expect(renderProps(REQUEST, { depth: '0' })).toMatchInlineSnapshot(`
-      "CONSOLE PROPS · request  (event)
+      "CONSOLE PROPS
         Resource Type             xhr
         Method                    POST
         URL                       https://jsonplaceholder.cypress…
@@ -382,7 +382,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope, { depth: 'all' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request
+        "CONSOLE PROPS
           Request
             Request URL      https://jsonplaceholder.cypress.io/comments?postId=1&id=3
             Request Headers
@@ -405,7 +405,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · request
+        "CONSOLE PROPS
           Response Body
             [
               {
@@ -433,7 +433,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · type
+        "CONSOLE PROPS
           Typed       hi
           Applied To  <input id="name">
 
@@ -475,25 +475,21 @@ describe('lib/tap/render/console-props', () => {
       expect(renderProps(envelope, { path: 'OTHER>metadata>Details' })).toContain('detail-9  value')
     })
 
-    it('renders envelope error and snapshot notes as their own sections', () => {
+    it('renders the envelope error as its own section', () => {
       const envelope: TapConsoleProps = {
         name: 'get',
         type: 'command',
         props: { Selector: '.missing' },
         error: 'AssertionError: Timed out retrying\n  at Context.eval (webpack://spec.cy.js:4:1)',
-        snapshot: 'The snapshot is missing. Displaying current state of the DOM.',
       }
 
       expect(renderProps(envelope)).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · get
+        "CONSOLE PROPS
           Selector  .missing
 
         ERROR
           AssertionError: Timed out retrying
-            at Context.eval (webpack://spec.cy.js:4:1)
-
-        SNAPSHOT
-          The snapshot is missing. Displaying current state of the DOM."
+            at Context.eval (webpack://spec.cy.js:4:1)"
       `)
     })
 
@@ -525,7 +521,7 @@ describe('lib/tap/render/console-props', () => {
       }
 
       expect(renderProps(envelope, { depth: 'all' })).toMatchInlineSnapshot(`
-        "CONSOLE PROPS · its
+        "CONSOLE PROPS
           Subject
             1
               postId  1

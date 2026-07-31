@@ -1100,8 +1100,9 @@ describe('lib/exec/tap', () => {
           inspect [options] <selector>    inspect the first element matching a
                                           selector: its tag, attributes, computed
                                           styles, box model, and accessibility node
-          command [options]               detail one command log entry of a test, or
-                                          show its console properties with --props
+          command [options]               detail one command log entry of a test —
+                                          its reporter row, the DOM snapshots pinnable
+                                          on it, and its console properties
           reporter [options]              render a test’s full reporter view — its
                                           routes, hooks, and command log — or, without
                                           --test, the spec-level overview: run stats
@@ -1133,21 +1134,25 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toMatchInlineSnapshot(`
         "Usage: cypress tap command [options]
 
-        detail one command log entry of a test, or show its console properties with --props
+        detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties
 
         Options:
           --test <test>        test id, as listed by the reporter command
-          --command <command>  command id, as listed by the reporter command
-          --props              show the command’s console properties instead of its log
-                               entry. A value long enough to bury the rest of the
-                               payload — a response body, a long string — is named by
-                               its length rather than returned; pass --full-report for
-                               its content
+          --command <command>  command id, as listed by the reporter command — a row
+                               number (test body first when duplicated), an e-prefixed
+                               event id, or hook-qualified like "h1:3"
           --full-report        return every console property in full, however long,
-                               instead of naming the long ones by their length;
-                               requires --props
+                               instead of naming the long ones by their length, printed
+                               as raw JSON
           --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
                                latest
+          --depth <depth>      how many levels of nested console properties to expand
+                               before summarizing the rest as "{n keys}": a number or
+                               "all" (default 3, and a section over 8 rows folds at any
+                               depth unless this is passed)
+          --path <path>        show one section of the console properties instead of
+                               the whole payload, addressed from the top level as
+                               "Response>headers" (case-insensitive, ">"-separated)
           --instance <pid>     target a specific running Cypress instance by its server
                                process id (pid)
           --json               print the raw JSON result instead of the human-readable

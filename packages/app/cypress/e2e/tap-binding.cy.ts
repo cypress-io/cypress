@@ -50,7 +50,8 @@ const commandNamed = (commands: Array<Record<string, any>>, name: string): Recor
   return command!
 }
 
-const ENTRY_KEYS = ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp']
+const ENTRY_KEYS = ['id', 'name', 'message', 'state', 'type', 'hook', 'network', 'cleanedUp', 'snapshots', 'consoleProps']
+const SNAPSHOT_KEYS = ['index', 'name', 'timestamp']
 const NETWORK_KEYS = ['method', 'url', 'indicator', 'status', 'stubbed', 'numResponses', 'alias']
 
 const withinKeys = (allowed: string[]) => {
@@ -58,8 +59,7 @@ const withinKeys = (allowed: string[]) => {
 }
 
 // Reads every row of a test's command log back through the singular `command`,
-// the one command that serves the lean entry contract now that the plural
-// listing is gone.
+// the one command that details a row now that the plural listing is gone.
 const leanEntries = async (binding: TapBinding, testId: string, rows: Array<Record<string, any>>): Promise<Array<Record<string, any>>> => {
   const entries: Array<Record<string, any>> = []
 
@@ -108,18 +108,18 @@ describe('tap binding', () => {
 
       expect((unknown as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
 
-      const consolePropsWithoutCommand = await binding.exec('command', {}, { test: 'r1', props: 'true' })
+      const commandWithoutCommandId = await binding.exec('command', {}, { test: 'r1' })
 
-      expect((consolePropsWithoutCommand as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
+      expect((commandWithoutCommandId as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
       // No spec has run yet, so there is no run to read — a domain failure.
       const specViewBeforeRun = await binding.exec('reporter')
 
       expect((specViewBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      const consolePropsBeforeRun = await binding.exec('command', {}, { test: 'r1', command: '1', props: 'true' })
+      const commandBeforeRun = await binding.exec('command', {}, { test: 'r1', command: '1' })
 
-      expect((consolePropsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      expect((commandBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
       const reporterBeforeRun = await binding.exec('reporter', {}, { test: 'r1' })
 
@@ -206,17 +206,13 @@ describe('tap binding', () => {
       // cy.visit's document load logs a request row, so `network` is part of the
       // contract even here; the dedicated network spec below asserts its shape.
       for (const entry of await leanEntries(binding, testId, commands)) {
-        expect(Object.keys(entry), `command ${entry.id}`).to.include.members(['id', 'name'])
+        expect(Object.keys(entry), `command ${entry.id}`).to.include.members(['id', 'name', 'hook', 'snapshots'])
         expect(Object.keys(entry), `command ${entry.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
       }
 
-      const missingConsolePropsTest = await binding.exec('command', {}, { test: 'not-a-test', command: commands[0].id as string, props: 'true' })
+      const missingCommandTest = await binding.exec('command', {}, { test: 'not-a-test', command: commands[0].id as string })
 
-      expect((missingConsolePropsTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
-
-      const missingConsolePropsCommand = await binding.exec('command', {}, { test: testId, command: 'not-a-command', props: 'true' })
-
-      expect((missingConsolePropsCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
+      expect((missingCommandTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
       const missingSelectedCommand = await binding.exec('command', {}, { test: testId, command: 'not-a-command' })
 
@@ -316,22 +312,12 @@ describe('tap binding with a retrying spec', () => {
       expect(Object.keys(entry)).to.satisfy(withinKeys(ENTRY_KEYS))
       expect(entry).to.include({ id: failedCommand!.id, name: failedCommand!.name, state: 'failed' })
 
-      const firstAttemptConsoleProps = await binding.exec('command', {}, {
-        test: testId,
-        command: failedCommand!.id as string,
-        props: 'true',
-        attempt: '1',
-      })
+      // The console properties travel with the row, read from the same attempt.
+      expect(entry.consoleProps).to.include({ name: failedCommand!.name, type: 'command' })
 
-      expect('result' in firstAttemptConsoleProps).to.eq(true)
-      expect((firstAttemptConsoleProps as { result: Record<string, unknown> }).result).to.include({
-        name: failedCommand!.name,
-        type: 'command',
-      })
+      const attemptOutOfRange = await binding.exec('command', {}, { test: testId, command: failedCommand!.id as string, attempt: '3' })
 
-      const consolePropsOutOfRange = await binding.exec('command', {}, { test: testId, command: failedCommand!.id as string, props: 'true', attempt: '3' })
-
-      expect((consolePropsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+      expect((attemptOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     })
   })
 })
@@ -362,25 +348,35 @@ describe('tap binding console properties', () => {
 
       const selected = (selectedCommand as { result: Record<string, unknown> }).result
 
-      expect(Object.keys(selected)).to.deep.eq(['id', 'name', 'message', 'state', 'type'])
-      // The lean entry is the reporter's row narrowed to the wire contract.
+      expect(Object.keys(selected)).to.deep.eq(['id', 'name', 'message', 'state', 'type', 'hook', 'snapshots', 'consoleProps'])
+      // The row is the reporter's, narrowed to the wire contract, with the
+      // section it ran in, the snapshots pinnable on it — always reported, even
+      // for a row with none — and the properties it logged.
       expect(selected).to.deep.eq({
         id: getToggle!.id,
         name: getToggle!.name,
         message: getToggle!.message,
         state: getToggle!.state,
         type: getToggle!.type,
+        hook: { hookId: testId, hookName: 'test body' },
+        snapshots: selected.snapshots,
+        consoleProps: selected.consoleProps,
       })
 
-      const missingCommand = await binding.exec('command', {}, { test: testId, props: 'true' })
+      const snapshots = selected.snapshots as Array<Record<string, unknown>>
+
+      expect(snapshots).to.have.length.greaterThan(0)
+      snapshots.forEach((snapshot, index) => {
+        expect(Object.keys(snapshot), `snapshot ${index + 1}`).to.satisfy(withinKeys(SNAPSHOT_KEYS))
+        expect(snapshot.index).to.eq(index + 1)
+        expect(snapshot.timestamp).to.be.a('number')
+      })
+
+      const missingCommand = await binding.exec('command', {}, { test: testId })
 
       expect((missingCommand as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
-      const consolePropsOutcome = await binding.exec('command', {}, { test: testId, command: getToggle!.id as string, props: 'true' })
-
-      expect('result' in consolePropsOutcome).to.eq(true)
-
-      const consoleProps = (consolePropsOutcome as { result: Record<string, any> }).result
+      const consoleProps = selected.consoleProps as Record<string, any>
 
       expect(Object.keys(consoleProps)).to.deep.eq(['name', 'type', 'props'])
       expect(consoleProps.name).to.eq('get')
@@ -394,9 +390,13 @@ describe('tap binding console properties', () => {
 
       expect(JSON.parse(JSON.stringify(consoleProps))).to.deep.eq(consoleProps)
 
-      const unavailable = await binding.exec('command', {}, { test: testId, command: emptyConsoleProps.id as string, props: 'true' })
+      // A row the driver holds no details for still reports its row, with no
+      // console properties on it.
+      const unavailable = await binding.exec('command', {}, { test: testId, command: emptyConsoleProps.id as string })
+      const withoutProps = (unavailable as { result: Record<string, unknown> }).result
 
-      expect((unavailable as { error: { code: string } }).error.code).to.eq('CONSOLE_PROPS_UNAVAILABLE')
+      expect(withoutProps).to.have.property('id', emptyConsoleProps.id)
+      expect(withoutProps).not.to.have.property('consoleProps')
     })
   })
 
@@ -410,9 +410,9 @@ describe('tap binding console properties', () => {
       const { testId, commands } = await firstTestCommands(binding)
       const commandId = commandNamed(commands, 'deep-console-props').id as string
       const propsOf = async (options: Record<string, string> = {}) => {
-        const result = await binding.exec('command', {}, { test: testId, command: commandId, props: 'true', ...options })
+        const result = await binding.exec('command', {}, { test: testId, command: commandId, ...options })
 
-        return (result as { result: Record<string, any> }).result
+        return (result as { result: Record<string, any> }).result.consoleProps
       }
 
       const body = Array.from({ length: 500 }, (_unused, index) => ({ id: index, tags: ['a', 'b'] }))
@@ -431,10 +431,6 @@ describe('tap binding console properties', () => {
 
       expect(full.props.actual.body).to.deep.eq(body)
       expect(full.props.actual.note).to.eq('x'.repeat(1200))
-
-      const withoutProps = await binding.exec('command', {}, { 'test': testId, 'command': commandId, 'full-report': 'true' })
-
-      expect((withoutProps as { error: { code: string } }).error.code).to.eq('PROPS_REQUIRED')
     })
   })
 })
