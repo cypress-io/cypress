@@ -76,6 +76,13 @@ describe('lib/exec/xvfb', function () {
   })
 
   describe('#isNeeded', function () {
+    it('uses provided env when determining if xvfb is needed', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      expect(xvfb.isNeeded({ DISPLAY: undefined })).toBe(true)
+    })
+
     it('does not need xvfb on osx', function () {
       vi.mocked(os.platform).mockReturnValue('darwin')
       expect(xvfb.isNeeded()).toBe(false)
@@ -83,15 +90,13 @@ describe('lib/exec/xvfb', function () {
 
     it('does not need xvfb on linux when DISPLAY is set', function () {
       vi.mocked(os.platform).mockReturnValue('linux')
-      vi.stubEnv('DISPLAY', ':99')
 
-      expect(xvfb.isNeeded()).toBe(false)
+      expect(xvfb.isNeeded({ DISPLAY: ':99' })).toBe(false)
     })
 
     it('does need xvfb on linux when no DISPLAY is set', function () {
-      vi.stubEnv('DISPLAY', undefined)
       vi.mocked(os.platform).mockReturnValue('linux')
-      expect(xvfb.isNeeded()).toBe(true)
+      expect(xvfb.isNeeded({ DISPLAY: undefined })).toBe(true)
     })
   })
 })

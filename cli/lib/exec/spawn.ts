@@ -102,6 +102,13 @@ function createSpawnFunction (
       // it is a tty as opposed to a pipe.
       stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
 
+      // Sandboxed shells can leak ELECTRON_RUN_AS_NODE=1 into child processes.
+      // For normal Cypress launches this breaks CLI arg parsing (e.g. --smoke-test, --ping).
+      // Keep node-mode only when explicitly forced by Cypress internals.
+      if (!stdioOptions.env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
+        delete stdioOptions.env.ELECTRON_RUN_AS_NODE
+      }
+
       if (node11WindowsFix) {
         stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
       }
@@ -380,14 +387,19 @@ export async function start (args: string | string[], options: StartOptions = {}
     '--userNodeVersion', process.versions.node,
   ])
 
-  const needsXvfb = xvfb.isNeeded()
+  const dev = options.dev ?? false
+  const detached = options.detached ?? false
+  const env = _.extend({}, options.env ?? process.env)
+
+  if (!env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
+    delete env.ELECTRON_RUN_AS_NODE
+  }
+
+  const needsXvfb = xvfb.isNeeded(env)
 
   debug('needs to start own Xvfb?', needsXvfb)
 
   const stdio = options.stdio ?? getStdioStrategy(needsXvfb)
-  const dev = options.dev ?? false
-  const detached = options.detached ?? false
-  const env = options.env ?? process.env
 
   const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env })
 
