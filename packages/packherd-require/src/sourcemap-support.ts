@@ -107,6 +107,8 @@ export function getSourceMapAndContent (
 
   const sourceContent = map.sourceContentFor(fileUri, true)
 
+  if (sourceContent == null) return undefined
+
   return { map, url, sourceContent }
 }
 

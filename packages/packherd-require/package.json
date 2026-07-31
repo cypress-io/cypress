@@ -18,7 +18,7 @@
   "dependencies": {
     "convert-source-map": "^1.7.0",
     "debug": "^4.3.4",
-    "source-map-js": "^0.6.2"
+    "source-map-js": "^1.2.1"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

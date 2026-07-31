@@ -49,18 +49,20 @@ export function processSourceMap (
 
     // Extract and offset mappings from current sourcemap
     consumer.eachMapping((item: MappingItem) => {
-      const orig: Position = {
-        line: item.originalLine,
-        column: item.originalColumn,
-      }
       const gen: Position = {
         line: item.generatedLine + lineOffset,
         column: item.generatedColumn,
       }
+
+      const hasOriginal = item.originalLine != null && item.originalColumn != null
+      const orig: Position | null = hasOriginal
+        ? { line: item.originalLine!, column: item.originalColumn! }
+        : null
+
       const mapping: Mapping = {
         generated: gen,
         original: orig,
-        source: relativePath(baseDirPath, item.source),
+        source: item.source == null ? null : relativePath(baseDirPath, item.source),
         name: item.name,
       }
 
