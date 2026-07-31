@@ -3,7 +3,7 @@ import assert from 'assert'
 import arch from 'arch'
 import os from 'os'
 import ospath from 'ospath'
-import hasha from 'hasha'
+import crypto from 'crypto'
 import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
@@ -30,10 +30,17 @@ const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 /**
  * Returns SHA512 of a file
  */
-const getFileChecksum = (filename: string): any => {
+const getFileChecksum = (filename: string): Promise<string> => {
   assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
 
-  return hasha.fromFile(filename, { algorithm: 'sha512' })
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha512')
+    const stream = fs.createReadStream(filename)
+
+    stream.on('error', reject)
+    stream.on('data', (chunk) => hash.update(chunk))
+    stream.on('end', () => resolve(hash.digest('hex')))
+  })
 }
 
 const getFileSize = async (filename: string): Promise<any> => {

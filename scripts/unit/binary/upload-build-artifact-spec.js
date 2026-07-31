@@ -1,6 +1,5 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
-const hasha = require('hasha')
 const fs = require('fs')
 
 const {
@@ -57,7 +56,7 @@ describe('upload-release-artifact', () => {
 
     beforeEach(function () {
       sandbox = sinon.sandbox.create()
-      sandbox.stub(hasha, 'fromFileSync').returns('checksum')
+      sandbox.stub(fs, 'readFileSync').returns('checksum')
       sandbox.stub(fs, 'statSync').returns('size')
       sandbox.stub(s3helpers, 'makeS3').returns('size')
       sandbox.stub(s3helpers, 'setUserMetadata')

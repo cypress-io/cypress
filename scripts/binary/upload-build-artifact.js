@@ -2,7 +2,7 @@ const minimist = require('minimist')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const fs = require('fs')
-const hasha = require('hasha')
+const crypto = require('crypto')
 const _ = require('lodash')
 
 const upload = require('./upload')
@@ -39,7 +39,7 @@ const setChecksum = async (filename, key) => {
   la(check.unemptyString(filename), 'expected filename', filename)
   la(check.unemptyString(key), 'expected uploaded S3 key', key)
 
-  const checksum = hasha.fromFileSync(filename, { algorithm: 'sha512' })
+  const checksum = crypto.createHash('sha512').update(fs.readFileSync(filename)).digest('hex')
   const {
     size,
   } = fs.statSync(filename)

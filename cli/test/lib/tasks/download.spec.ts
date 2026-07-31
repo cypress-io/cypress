@@ -5,7 +5,7 @@ import si, { Systeminformation } from 'systeminformation'
 import chalk from 'chalk'
 import path from 'path'
 import nock from 'nock'
-import hasha from 'hasha'
+import crypto from 'crypto'
 import createDebug from 'debug'
 import execa from 'execa'
 import fs from 'fs-extra'
@@ -295,7 +295,7 @@ describe('lib/tasks/download', function () {
     let onProgress: vi.Mock
 
     beforeEach(function () {
-      expectedChecksum = hasha.fromFileSync(examplePath)
+      expectedChecksum = crypto.createHash('sha512').update(fs.readFileSync(examplePath)).digest('hex')
 
       expectedFileSize = fs.statSync(examplePath).size
 
