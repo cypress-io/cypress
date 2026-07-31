@@ -32,4 +32,8 @@ describe('lib/tap/render', () => {
   it('has no rendering for a command that prints JSON', () => {
     expect(renderingFor('run-state')).to.eq(undefined)
   })
+
+  it('has no rendering for a schema command without a registered view', () => {
+    expect(renderingFor('health')).to.eq(undefined)
+  })
 })

@@ -102,6 +102,15 @@ export const columns = (
   ]
 }
 
+// Columns rendered as a standalone nested block.
+export const tableRows = (
+  header: string[],
+  rows: string[][],
+  colorize?: (cells: string[], index: number) => string[],
+): string[] => {
+  return columns(header, rows, colorize).map((line) => `${indent(1)}${line}`)
+}
+
 // A counted panel title with its content indented beneath it. Content rendered
 // on its own — no title to sit under — keeps the left margin.
 export const panel = (title: string, count: number | undefined, lines: string[]): string[] => {

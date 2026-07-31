@@ -216,12 +216,6 @@ const tapCommandIds = (logs: SerializedCommandLog[]): Map<string, string> => {
 
 const hookIdOf = (log: SerializedCommandLog): string | undefined => (log as ReporterLog).hookId
 
-export interface ResolvedCommand {
-  /** The driver's log id — the handle its per-log lookups (console props, snapshots) take. */
-  logId: string
-  entry: CommandEntry
-}
-
 // Matches a displayed command id to its underlying log. The id is a row's
 // number as the reporter shows it (`12` or the event rows' `e3`), optionally
 // qualified with its hook section (`h1:12`) since the numbers restart per
@@ -257,6 +251,19 @@ const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], i
   throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
 }
 
+export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
+  const logs = orderedAttemptLogs(attempt)
+  const ids = tapCommandIds(logs)
+
+  return findCommandLog(attempt, logs, ids, tapId, testId)?.id
+}
+
+export interface ResolvedCommand {
+  /** The driver's log id — the handle its per-log lookups (console props, snapshots) take. */
+  logId: string
+  entry: CommandEntry
+}
+
 // The hook a row ran in, named the way the reporter names its sections. A log
 // carries only its hookId, so the name comes from the attempt's hook timings;
 // the test's own commands carry the test id and belong to no hook.
@@ -274,30 +281,30 @@ const commandHook = (attempt: SerializedTest, log: SerializedCommandLog, testId:
 }
 
 /**
- * Resolves a command id the way the reporter shows it — a row number, an
- * e-prefixed event id, or a hook-qualified `h1:3` — to the driver log id the
- * runner keys on plus the serialized entry to display. The one command-id
- * lookup the `command` and `pin` commands share, so both accept exactly the
- * ids the reporter emits. The entry carries the hook the row ran in, which the
- * numbers alone leave ambiguous.
+ * Resolves a command handle to both the driver's log id and the serialized entry,
+ * for a caller that needs the row *and* the driver's own details for it. The
+ * handle follows `resolveCommandLogId`'s rules: the reporter's displayed row
+ * number, hook-qualifiable, test body winning a duplicate. The entry carries the
+ * hook the row ran in, which the numbers alone leave ambiguous.
  */
 export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: string): ResolvedCommand | undefined => {
+  const logId = resolveCommandLogId(attempt, tapId, testId)
+
+  if (logId === undefined) {
+    return undefined
+  }
+
   const logs = orderedAttemptLogs(attempt)
-  const ids = tapCommandIds(logs)
-  const log = findCommandLog(attempt, logs, ids, tapId, testId)
+  const log = logs.find((entry) => entry.id === logId)
 
   if (!log) {
     return undefined
   }
 
   const hook = commandHook(attempt, log, testId)
-  const entry = serializeCommandEntry(log, ids.get(log.id))
+  const entry = serializeCommandEntry(log, tapCommandIds(logs).get(log.id))
 
-  return { logId: log.id, entry: hook ? { ...entry, hook } : entry }
-}
-
-export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
-  return resolveCommand(attempt, tapId, testId)?.logId
+  return { logId, entry: hook ? { ...entry, hook } : entry }
 }
 
 // The display-level slice of a log's attrs the reporter panel reads beyond the

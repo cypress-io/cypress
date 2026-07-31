@@ -73,7 +73,7 @@ describe('lib/tap/render/console-props', () => {
                 comment  {2 keys}
           Alias          postComment
 
-        2 sections collapsed — open one with --path "Matched \`cy.intercept()\`>Request>headers", or all of it with --depth all"
+        2 sections collapsed — open one with --path 'Matched \`cy.intercept()\`>Request>headers', or all of it with --depth all"
       `)
     })
 
@@ -98,7 +98,7 @@ describe('lib/tap/render/console-props', () => {
               body        {1 key}
           Alias          postComment
 
-        3 sections collapsed — open one with --path "Matched \`cy.intercept()\`>Request>headers", or all of it with --depth all"
+        3 sections collapsed — open one with --path 'Matched \`cy.intercept()\`>Request>headers', or all of it with --depth all"
       `)
     })
 
@@ -153,7 +153,7 @@ describe('lib/tap/render/console-props', () => {
           Matched \`cy.intercept()\`  {4 keys}
           Alias                     postComment
 
-        1 section collapsed — open one with --path "Matched \`cy.intercept()\`", or all of it with --depth all"
+        1 section collapsed — open one with --path 'Matched \`cy.intercept()\`', or all of it with --depth all"
       `)
     })
 
@@ -185,6 +185,31 @@ describe('lib/tap/render/console-props', () => {
       expect(renderProps(REQUEST, { path: 'URL' })).toMatchInlineSnapshot(`
         "CONSOLE PROPS · request  (event) › URL
           https://jsonplaceholder.cypress.io/comments"
+      `)
+    })
+
+    it('renders like-shaped object rows as a table when a path opens their array', () => {
+      const envelope: TapConsoleProps = {
+        name: 'log',
+        type: 'command',
+        props: {
+          Events: Array.from({ length: 9 }, (_value, index) => ({ index: index + 1, type: 'click' })),
+        },
+      }
+
+      expect(renderProps(envelope)).toContain('Events  {9 items}')
+      expect(renderProps(envelope, { path: 'Events' })).toMatchInlineSnapshot(`
+        "CONSOLE PROPS · log › Events
+          index  type
+          1      click
+          2      click
+          3      click
+          4      click
+          5      click
+          6      click
+          7      click
+          8      click
+          9      click"
       `)
     })
 
@@ -307,7 +332,14 @@ describe('lib/tap/render/console-props', () => {
       const rendered = renderProps({ name: 'x', type: 'command', props: deep as TapConsoleProps['props'] })
 
       expect(rendered.split('\n')).to.have.length.lessThan(12)
-      expect(rendered).toContain('--path "next>next>next>next"')
+      expect(rendered).toContain('--path \'next>next>next>next\'')
+    })
+
+    it('shell-quotes collapsed paths containing backticks and apostrophes', () => {
+      const key = 'Matched `cy.intercept()` and user\'s route'
+      const envelope: TapConsoleProps = { name: 'x', type: 'command', props: { [key]: { nested: true } } }
+
+      expect(renderProps(envelope, { depth: '0' })).toContain('--path \'Matched `cy.intercept()` and user\'\\\'\'s route\'')
     })
   })
 
@@ -323,7 +355,7 @@ describe('lib/tap/render/console-props', () => {
         Alias                     postComment
 
       1 section collapsed — open all of it with --depth all, or one with:
-        --path "Matched \`cy.intercept()\`""
+        --path 'Matched \`cy.intercept()\`'"
     `)
   })
 
@@ -412,6 +444,37 @@ describe('lib/tap/render/console-props', () => {
       `)
     })
 
+    it('opens a collapsed section using a named table panel path', () => {
+      const details = Object.fromEntries(Array.from({ length: 9 }, (_value, index) => [`event-${index + 1}`, 'fired']))
+      const envelope: TapConsoleProps = {
+        name: 'type',
+        type: 'command',
+        props: { Typed: 'hi' },
+        table: {
+          1: {
+            name: 'Keyboard Events',
+            data: { Details: details },
+          },
+        },
+      }
+
+      expect(renderProps(envelope)).toContain('--path \'KEYBOARD EVENTS>Details\'')
+      expect(renderProps(envelope, { path: 'KEYBOARD EVENTS>Details' })).toContain('event-9  fired')
+    })
+
+    it('opens a collapsed section using the synthetic OTHER panel path', () => {
+      const details = Object.fromEntries(Array.from({ length: 9 }, (_value, index) => [`detail-${index + 1}`, 'value']))
+      const envelope = {
+        name: 'log',
+        type: 'command',
+        props: { Message: 'hello' },
+        metadata: { Details: details },
+      } as TapConsoleProps
+
+      expect(renderProps(envelope)).toContain('--path \'OTHER>metadata>Details\'')
+      expect(renderProps(envelope, { path: 'OTHER>metadata>Details' })).toContain('detail-9  value')
+    })
+
     it('renders envelope error and snapshot notes as their own sections', () => {
       const envelope: TapConsoleProps = {
         name: 'get',
@@ -431,6 +494,19 @@ describe('lib/tap/render/console-props', () => {
 
         SNAPSHOT
           The snapshot is missing. Displaying current state of the DOM."
+      `)
+    })
+
+    it('reports the fallback error from the walk that matched more of the path', () => {
+      const envelope: TapConsoleProps = {
+        name: 'get',
+        type: 'command',
+        props: { Selector: '.missing' },
+        error: 'AssertionError: Timed out retrying',
+      }
+
+      expect(renderProps(envelope, { path: 'error>deeper' })).toMatchInlineSnapshot(`
+        ""error" is a value, not a section — there is nothing under it to reach with "deeper"."
       `)
     })
 

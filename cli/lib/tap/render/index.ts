@@ -7,8 +7,6 @@ import type { FrameDomResult } from '../commands/dom'
 import type { FrameAriaResult } from '../commands/aria'
 import type { FrameInspectResult } from '../commands/inspect'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
-import { renderCommandEntryHuman } from './command'
-import { consolePropsOptions, renderConsolePropsHuman } from './console-props'
 import { renderRunHuman } from './run'
 import { renderInstancesHuman } from './instances'
 import { renderSpecsHuman } from './specs'
@@ -17,6 +15,8 @@ import { renderDomHuman } from './dom'
 import { renderAriaHuman } from './aria'
 import { renderInspectHuman } from './inspect'
 import { renderPinHuman } from './pin'
+import { renderCommandEntryHuman } from './command'
+import { consolePropsOptions, renderConsolePropsHuman } from './console-props'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
