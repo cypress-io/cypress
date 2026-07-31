@@ -492,7 +492,8 @@ const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowB
   }
 
   const { renderProps, collapsed } = createPropsRenderer(depth, rowBudget)
-  const body = withBody(renderProps(found.value as PropsValue, 0, found.trail))
+  const rows = Array.isArray(found.value) ? rowsTable(found.value, '') : undefined
+  const body = withBody(rows ?? renderProps(found.value as PropsValue, 0, found.trail))
 
   return [[header, ...body], ...collapsedFooter(collapsed)]
 }

@@ -188,6 +188,31 @@ describe('lib/tap/render/console-props', () => {
       `)
     })
 
+    it('renders like-shaped object rows as a table when a path opens their array', () => {
+      const envelope: TapConsoleProps = {
+        name: 'log',
+        type: 'command',
+        props: {
+          Events: Array.from({ length: 9 }, (_value, index) => ({ index: index + 1, type: 'click' })),
+        },
+      }
+
+      expect(renderProps(envelope)).toContain('Events  {9 items}')
+      expect(renderProps(envelope, { path: 'Events' })).toMatchInlineSnapshot(`
+        "CONSOLE PROPS · log › Events
+          index  type
+          1      click
+          2      click
+          3      click
+          4      click
+          5      click
+          6      click
+          7      click
+          8      click
+          9      click"
+      `)
+    })
+
     it('reaches an envelope section beside props by name', () => {
       const envelope: TapConsoleProps = {
         name: 'get',
