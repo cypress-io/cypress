@@ -137,9 +137,9 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
      * @see: https://github.com/vercel/next.js/blob/5f3351dbb8de71bcdbc91d869c04bc862a25da5f/packages/next/build/webpack/config/blocks/css/loaders/client.ts#L24
      */
     componentIndexHtml: componentIndexHtmlGenerator([
-      `<!-- Used by Next.js to inject CSS. -->\n`,
+      `<!-- Used by Next.js to inject CSS. -->`,
       `<div id="__next_css__DO_NOT_USE__"></div>`,
-    ].join(' '.repeat(8))),
+    ].join('\n')),
   },
   {
     type: 'vue3',

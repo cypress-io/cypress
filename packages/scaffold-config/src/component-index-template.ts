@@ -2,7 +2,7 @@ import dedent from 'dedent'
 
 export const componentIndexHtmlGenerator = (headModifier: string = '') => {
   return () => {
-    const template = dedent`
+    const template = dedent.withOptions({ alignValues: true })`
     <!DOCTYPE html>
     <html>
       <head>
