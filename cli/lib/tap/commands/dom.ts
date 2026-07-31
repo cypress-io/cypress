@@ -8,10 +8,15 @@ import { defineNativeCommand } from './definition'
 
 const DEFAULT_MAX_CHARS = 30000
 
-interface FrameDomResult {
+/** What `cypress tap dom` returns: the whole document, or per-selector matches. */
+export interface FrameDomResult {
+  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
   url?: string
+  /** The document's outerHTML — present in whole-page mode. */
   html?: string
+  /** Per-match outerHTML — present in selector mode. */
   matches?: { count: number, html: string[] }
+  /** Present (always `true`) when the browser-side cap clipped the output. */
   truncated?: true
 }
 

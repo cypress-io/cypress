@@ -30,6 +30,6 @@ describe('lib/tap/render', () => {
   })
 
   it('has no rendering for a command that prints JSON', () => {
-    expect(renderingFor('specs')).to.eq(undefined)
+    expect(renderingFor('run-state')).to.eq(undefined)
   })
 })

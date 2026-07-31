@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapCommandOptionSchema, TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
-import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth } from './format'
+import { clamp, color, columns, emptyState, heading, layout, terminalWidth } from './format'
 
 // A command's console properties are the deepest payload the tap returns — a
 // `cy.request` row carries its matcher, request, response and every header of
@@ -151,18 +151,18 @@ const rowsTable = (values: TapJsonValue[], indent: string): string[] | undefined
     return undefined
   }
 
-  const columns = [...new Set(values.flatMap((row) => Object.keys(row)))]
+  const columnKeys = [...new Set(values.flatMap((row) => Object.keys(row)))]
 
-  if (!columns.length) {
+  if (!columnKeys.length) {
     return undefined
   }
 
-  const rows = values.map((row) => columns.map((column) => cell(row[column])))
+  const rows = values.map((row) => columnKeys.map((column) => cell(row[column])))
 
   // Cells are plain here, so coloring them after padding is a no-op width-wise;
   // the withheld marker still needs its hue.
-  return tableRows(columns, rows, (cells) => cells.map((text) => (WITHHELD.test(text.trim()) ? color.aborted(text) : text)))
-  .map((line) => `${indent}${line}`)
+  return columns(columnKeys, rows, (cells) => cells.map((text) => (WITHHELD.test(text.trim()) ? color.aborted(text) : text)))
+  .map((line) => `${indent}  ${line}`)
 }
 
 type PropsValue = { [key: string]: TapJsonValue } | TapJsonValue[]

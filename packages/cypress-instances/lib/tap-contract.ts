@@ -84,29 +84,8 @@ export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
 // and help text can't drift between the commands that expose them. `test` is
 // required in some commands and optional in others, so each use spreads it and
 // sets `required`; `attempt` is identical everywhere and used directly.
-const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the tests command' } as const
+const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the reporter command' } as const
 const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
-
-const testsMeta = {
-  name: 'tests',
-  description: 'list the tests of the active run and their state, or detail one by id',
-  params: [
-    { ...testIdField, required: false },
-  ],
-  options: [
-    attemptField,
-  ],
-} as const satisfies TapCommandSchema
-
-const commandsMeta = {
-  name: 'commands',
-  description: 'list the command log entries of a test',
-  params: [],
-  options: [
-    { ...testIdField, required: true },
-    attemptField,
-  ],
-} as const satisfies TapCommandSchema
 
 const commandMeta = {
   name: 'command',
@@ -114,7 +93,7 @@ const commandMeta = {
   params: [],
   options: [
     { ...testIdField, required: true },
-    { name: 'command', type: 'string', required: true, description: 'command id, as listed by the commands command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
+    { name: 'command', type: 'string', required: true, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
     { name: 'props', type: 'boolean', required: false, description: 'show the command’s console properties instead of its log entry. A value long enough to bury the rest of the payload — a response body, a long string — is named by its length rather than returned; pass --full-report for its content' },
     { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length, printed as raw JSON; requires --props' },
     attemptField,
@@ -125,7 +104,8 @@ const reporterMeta = {
   name: 'reporter',
   description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and every suite’s tests',
   details: `Shows test results the way the Cypress app's reporter panel does, right in
-your terminal. Pass --test <id> (ids come from the tests command) to see one
+your terminal. Pass --test <id> (test ids come from the spec overview this
+same command prints with no --test) to see one
 test's full story: its network routes, the hooks that ran, the complete
 command log, and the failure output when something went wrong. Add --attempt
 to view an earlier retry.
@@ -144,7 +124,7 @@ const pinMeta = {
   description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
   params: [
     { ...testIdField, required: false },
-    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the commands command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
+    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
   ],
   options: [
     attemptField,
@@ -166,8 +146,6 @@ const runStateMeta = {
 // TapManager), and the CLI stamps it with its own version to render help with no
 // instance attached. Order here is the order commands list in help.
 export const TAP_COMMANDS = [
-  testsMeta,
-  commandsMeta,
   commandMeta,
   reporterMeta,
   pinMeta,
@@ -288,3 +266,7 @@ export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
 export * from './contracts/reporter'
 
 export * from './contracts/command'
+
+export * from './contracts/pinned'
+
+export * from './contracts/pin'

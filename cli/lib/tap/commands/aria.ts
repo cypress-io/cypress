@@ -28,7 +28,9 @@ interface AXNode {
   backendDOMNodeId?: number
 }
 
-interface AriaNodeOut {
+/** One projected accessibility node in the tree `cypress tap aria` returns. */
+export interface AriaNodeOut {
+  /** Nesting depth within the projected tree (root is 0). */
   depth: number
   role: string
   name?: string
@@ -36,10 +38,14 @@ interface AriaNodeOut {
   states?: string[]
 }
 
-interface FrameAriaResult {
+/** What `cypress tap aria` returns: the projected accessibility tree. */
+export interface FrameAriaResult {
+  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
   url?: string
   nodes: AriaNodeOut[]
+  /** Number of nodes returned (`nodes.length`, before any client-side view). */
   nodeCount: number
+  /** Present (always `true`) when the node cap clipped the tree. */
   truncated?: true
 }
 

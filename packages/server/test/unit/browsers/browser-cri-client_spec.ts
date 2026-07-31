@@ -135,12 +135,12 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(criImport.Version).to.be.calledTwice
     })
 
-    it('advertises the browser websocket url to cypress instances once connected', async function () {
+    it('advertises the browser websocket url and name to cypress instances once connected', async function () {
       const setCdpBrowserWsUrl = sinon.stub(cypressInstances, 'setCdpBrowserWsUrl')
 
       await getClient()
 
-      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url')
+      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url', 'Chrome')
     })
 
     it('clears the cypress instances cdp url when the browser connection is lost', async function () {

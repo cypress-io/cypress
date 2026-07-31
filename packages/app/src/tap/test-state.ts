@@ -2,36 +2,14 @@ import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
-import type { TapNetworkInfo, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
-import type { CommandEntry, CommandHook, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
+import type { TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
+import type { CommandEntry, CommandHook, TapTestsRunner, TestError, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
 // end-of-run summary).
 const unreachedState = (runComplete: boolean): TestStateValue => {
   return runComplete ? 'skipped' : 'pending'
-}
-
-export const serializeTestsState = (runner: TapTestsRunner): TestStateEntry[] => {
-  const tests = Object.values(runner.getAllTestsState())
-  const runComplete = runner.isRunComplete()
-
-  return tests.map(({ id, title, duration, state, currentRetry }): TestStateEntry => {
-    return omitNullish({
-      id,
-      title,
-      duration,
-      state: state ?? unreachedState(runComplete),
-      retries: currentRetry,
-    })
-  })
-}
-
-// The driver serializes a runnable by copying own properties, so object values
-// like `timings` are live references into its runner state — snapshot them at
-// read time. The JSON round-trip covers browsers without native structuredClone.
-const cloneReferenceObject = <T>(value: T): T => {
-  return typeof structuredClone === 'function' ? structuredClone(value) : JSON.parse(JSON.stringify(value))
 }
 
 const asString = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined)
@@ -82,7 +60,7 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
 
 export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapCommandError => {
   if (selection.error === 'TEST_NOT_FOUND') {
-    return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the tests command to list this run’s tests`)
+    return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the reporter command to list this run’s tests`)
   }
 
   const { attempts } = selection
@@ -92,22 +70,6 @@ export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | {
     : `test "${testId}" has ${attempts} attempts; pass --attempt 1–${attempts} (defaults to the latest)`
 
   return new TapCommandError('ATTEMPT_NOT_FOUND', message)
-}
-
-export const serializeTestDetail = (test: SerializedTest, attempt: SerializedTest, runComplete: boolean): TestDetailEntry => {
-  const titlePath = test._titlePath
-  const { duration, state, currentRetry, timings, err } = attempt
-
-  return omitNullish({
-    id: test.id,
-    title: test.title,
-    fullTitle: Array.isArray(titlePath) ? titlePath.join(' > ') : test.title,
-    duration,
-    state: state ?? unreachedState(runComplete),
-    retries: currentRetry,
-    timings: timings != null ? cloneReferenceObject(timings) : undefined,
-    error: err != null ? serializeTestError(err) : undefined,
-  })
 }
 
 // The reporter's `renderProps` (resolved to an object by the time a log
@@ -254,16 +216,18 @@ const tapCommandIds = (logs: SerializedCommandLog[]): Map<string, string> => {
 
 const hookIdOf = (log: SerializedCommandLog): string | undefined => (log as ReporterLog).hookId
 
-/**
- * Resolves a command handle to the driver's log id. A handle is the row's id
- * as displayed (`12` or `e3`), optionally qualified with its hook section
- * (`h1:12`) since the reporter's numbers restart per section. A plain number
- * prefers the test body, then a unique match anywhere; a remaining tie is
- * ambiguous rather than silently guessed.
- */
-export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
-  const logs = orderedAttemptLogs(attempt)
-  const ids = tapCommandIds(logs)
+export interface ResolvedCommand {
+  /** The driver's log id — the handle its per-log lookups (console props, snapshots) take. */
+  logId: string
+  entry: CommandEntry
+}
+
+// Matches a displayed command id to its underlying log. The id is a row's
+// number as the reporter shows it (`12` or the event rows' `e3`), optionally
+// qualified with its hook section (`h1:12`) since the numbers restart per
+// section. A plain number prefers the test body, then a unique match anywhere;
+// a remaining tie is ambiguous rather than silently guessed.
+const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], ids: Map<string, string>, tapId: string, testId: string): SerializedCommandLog | undefined => {
   const colon = tapId.indexOf(':')
   const hookQualifier = colon === -1 ? undefined : tapId.slice(0, colon)
   const rowId = colon === -1 ? tapId : tapId.slice(colon + 1)
@@ -273,13 +237,13 @@ export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, test
   })
 
   if (candidates.length <= 1) {
-    return candidates[0]?.id
+    return candidates[0]
   }
 
   const testBody = candidates.find((log) => hookIdOf(log) === testId)
 
   if (testBody) {
-    return testBody.id
+    return testBody
   }
 
   const hookNames = new Map(attemptHooks(attempt).map(({ hookId, hookName }) => [hookId, hookName]))
@@ -291,19 +255,6 @@ export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, test
   })
 
   throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
-}
-
-export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] => {
-  const logs = orderedAttemptLogs(attempt)
-  const ids = tapCommandIds(logs)
-
-  return logs.map((log) => serializeCommandEntry(log, ids.get(log.id)))
-}
-
-export interface ResolvedCommand {
-  /** The driver's log id — the handle its per-log lookups (console props, snapshots) take. */
-  logId: string
-  entry: CommandEntry
 }
 
 // The hook a row ran in, named the way the reporter names its sections. A log
@@ -323,30 +274,30 @@ const commandHook = (attempt: SerializedTest, log: SerializedCommandLog, testId:
 }
 
 /**
- * Resolves a command handle to both the driver's log id and the serialized entry,
- * for a caller that needs the row *and* the driver's own details for it. The
- * handle follows `resolveCommandLogId`'s rules: the reporter's displayed row
- * number, hook-qualifiable, test body winning a duplicate. The entry carries the
- * hook the row ran in, which the numbers alone leave ambiguous.
+ * Resolves a command id the way the reporter shows it — a row number, an
+ * e-prefixed event id, or a hook-qualified `h1:3` — to the driver log id the
+ * runner keys on plus the serialized entry to display. The one command-id
+ * lookup the `command` and `pin` commands share, so both accept exactly the
+ * ids the reporter emits. The entry carries the hook the row ran in, which the
+ * numbers alone leave ambiguous.
  */
 export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: string): ResolvedCommand | undefined => {
-  const logId = resolveCommandLogId(attempt, tapId, testId)
-
-  if (logId === undefined) {
-    return undefined
-  }
-
   const logs = orderedAttemptLogs(attempt)
-  const log = logs.find((entry) => entry.id === logId)
+  const ids = tapCommandIds(logs)
+  const log = findCommandLog(attempt, logs, ids, tapId, testId)
 
   if (!log) {
     return undefined
   }
 
   const hook = commandHook(attempt, log, testId)
-  const entry = serializeCommandEntry(log, tapCommandIds(logs).get(log.id))
+  const entry = serializeCommandEntry(log, ids.get(log.id))
 
-  return { logId, entry: hook ? { ...entry, hook } : entry }
+  return { logId: log.id, entry: hook ? { ...entry, hook } : entry }
+}
+
+export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
+  return resolveCommand(attempt, tapId, testId)?.logId
 }
 
 // The display-level slice of a log's attrs the reporter panel reads beyond the
@@ -514,6 +465,25 @@ export const serializeReporterView = (test: SerializedTest, attempt: SerializedT
     commands: logs.filter((log) => !isRouteLog(log)).map((log) => serializeReporterCommand(log, ids)),
     error: attempt.err != null ? serializeReporterError(attempt.err) : undefined,
   })
+}
+
+/**
+ * The reporter row for one log of an attempt, with the hook section it renders
+ * under — what the `pin` and `status` commands report about the pinned command,
+ * so a pin reads exactly like its line in the reporter's command log.
+ */
+export const serializeReporterRow = (test: SerializedTest, attempt: SerializedTest, logId: string): { command: TapReporterCommand, hookName?: string } | undefined => {
+  const logs = orderedAttemptLogs(attempt)
+  const log = logs.find((entry) => entry.id === logId)
+
+  if (!log) {
+    return undefined
+  }
+
+  const command = serializeReporterCommand(log, tapCommandIds(logs))
+  const hookName = serializeReporterHooks(test, attempt).find(({ hookId }) => hookId === command.hookId)?.hookName
+
+  return omitNullish({ command, hookName })
 }
 
 export interface RunResults {
