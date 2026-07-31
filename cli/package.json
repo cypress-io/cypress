@@ -29,7 +29,7 @@
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "@types/tmp": "^0.2.3",
-    "arch": "^2.2.0",
+    "arch": "^3.0.0",
     "blob-util": "^2.0.2",
     "bluebird": "^3.7.2",
     "buffer": "^5.7.1",

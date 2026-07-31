@@ -77,7 +77,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
           return 'pending'
         }
 
-        if (req.responseReceived.status >= 200 && req.responseReceived.status <= 299) {
+        if (req.responseReceived.status >= 200 && req.responseReceived.status <= 399) {
           return 'successful'
         }
 

@@ -14,6 +14,7 @@
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
 - Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 - Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+- Fixed an issue where HTTP `3xx` responses (such as `304 Not Modified`) were shown with a failed (red) indicator in the Command Log. These responses now display as successful. Fixes [#34066](https://github.com/cypress-io/cypress/issues/34066). Fixed in [#34282](https://github.com/cypress-io/cypress/pull/34282).
 
 **Misc:**
 
@@ -22,6 +23,7 @@
 **Dependency Updates:**
 
 - Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
+- Upgraded `arch` from `2.2.0` to `3.0.0`. Addressed in [#34426](https://github.com/cypress-io/cypress/pull/34426).
 - Removed `tslib` (previously `1.14.1`) from the `cypress` package's runtime dependencies. Addressed in [#34372](https://github.com/cypress-io/cypress/pull/34372).
 - Upgraded `ws` from `8.18.3` to `8.21.1`. Addressed in [#34392](https://github.com/cypress-io/cypress/pull/34392).
 
