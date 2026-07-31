@@ -343,7 +343,7 @@ export = {
       ps = options.proxyServer
 
       if (ps) {
-        return this._setProxy(win.webContents, ps)
+        return this._setProxy(win.webContents, ps, options.proxyBypassList)
       }
     }
 
@@ -388,7 +388,7 @@ export = {
 
         // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
         cdpAutomation._listenForFrameTreeChanges(pageCriClient)
-        await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+        await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
       } else if (pageCriClient) {
         // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
         await cdpAutomation._handlePausedRequests(pageCriClient)
@@ -488,12 +488,11 @@ export = {
     return webContents.session.setUserAgent(userAgent)
   },
 
-  _setProxy (webContents, proxyServer) {
+  _setProxy (webContents, proxyServer, proxyBypassList?: string) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // bypass the proxy for loopback addresses
-      // https://github.com/cypress-io/cypress/issues/1872
-      proxyBypassRules: '<-loopback>',
+      // without any rules, Chromium's implicit rules keep loopback off the proxy
+      ...(proxyBypassList ? { proxyBypassRules: proxyBypassList } : {}),
     })
   },
 

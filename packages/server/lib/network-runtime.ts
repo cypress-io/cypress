@@ -15,6 +15,7 @@ import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { createFileServerOriginMiddleware } from './adapters/file-server-origin'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 
 export type CreateProxyRuntimeDeps = {
@@ -39,6 +40,9 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export type CreateCdpFetchRuntimeDeps = {
   client: Pick<ICriClient, 'send' | 'on' | 'off'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  // Protocol-neutral subscription to AUT document navigation commits,
+  // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
+  onAUTFrameNavigated?: (listener: (url: string) => void) => () => void
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
   remoteStates: RemoteStates
@@ -192,9 +196,33 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     }),
   )
 
+  // CDP Fetch continues to the browser origin, so strategy:file URLs need a
+  // Node-side file-server origin after the legacy pipeline (see file-server-origin).
+  networkInterception.use(createFileServerOriginMiddleware({
+    remoteStates: deps.remoteStates,
+    getFileServerToken: deps.getFileServerToken,
+    request: deps.request,
+  }))
+
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
+    // Download-manager pauses omit networkId and never emit requestWillBeSent;
+    // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
+    addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
   })
+
+  // Proxy parity: cookie simulation's simulated top, which nothing else
+  // updates when the proxy is off. Sourced from navigation commits because
+  // cache-served documents never produce a Fetch pause. Only http(s) commits
+  // count — about:blank (test isolation), data:, and blob: never transit
+  // the proxy.
+  const onAUTFrameNavigated = (url: string) => {
+    if (/^https?:/.test(url)) {
+      networkProxy.http.setAUTUrl(url)
+    }
+  }
+
+  let unsubscribeAUTFrameNavigated: (() => void) | undefined
 
   return {
     networkProxy,
@@ -203,8 +231,17 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
-    start () {
-      return fetchTransport.start()
+    async start () {
+      unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
+
+      try {
+        await fetchTransport.start()
+      } catch (err) {
+        unsubscribeAUTFrameNavigated?.()
+        unsubscribeAUTFrameNavigated = undefined
+
+        throw err
+      }
     },
     // Transport only — callers (server-base) already own networkProxy.reset so
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
@@ -212,6 +249,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       fetchTransport.reset()
     },
     stop () {
+      unsubscribeAUTFrameNavigated?.()
+      unsubscribeAUTFrameNavigated = undefined
+
       return fetchTransport.stop()
     },
   }

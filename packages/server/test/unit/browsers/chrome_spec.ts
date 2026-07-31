@@ -465,6 +465,14 @@ describe('lib/browsers/chrome', () => {
         }, this.automation)
 
         expect(onPageCriClientReady).to.have.been.calledOnce
+
+        // the runtime needs the isAUTFrame lookup and the protocol-neutral
+        // AUT-navigation subscription
+        const [, isAUTFrame, onAUTFrameNavigated] = onPageCriClientReady.firstCall.args
+
+        expect(isAUTFrame).to.be.a('function')
+        expect(onAUTFrameNavigated).to.be.a('function')
+
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
           patterns: [{
             resourceType: 'Document',
@@ -1025,15 +1033,27 @@ describe('lib/browsers/chrome', () => {
       expect(args).not.to.include('--user-agent=foo')
     })
 
-    // https://github.com/cypress-io/cypress/issues/1872
-    it('adds <-loopback> proxy bypass rule', () => {
-      const arg = '--proxy-bypass-list=<-loopback>'
-
+    it('adds the configured proxy server and bypass list', () => {
       const args = chrome._getArgs({
         majorVersion: '89',
-      }, {})
+      }, {
+        proxyServer: 'http://proxy.example:8080',
+        proxyBypassList: 'localhost,example.com',
+      })
 
-      expect(args).to.include(arg)
+      expect(args).to.include('--proxy-server=http://proxy.example:8080')
+      expect(args).to.include('--proxy-bypass-list=localhost,example.com')
+    })
+
+    // an empty bypass list leaves chromium's implicit loopback rules in place
+    it('does not add a proxy bypass list when none is configured', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        proxyServer: 'http://proxy.example:8080',
+      })
+
+      expect(args.join(' ')).not.to.include('--proxy-bypass-list')
     })
 
     it('translates hosts into host resolver rules', () => {
@@ -1078,6 +1098,28 @@ describe('lib/browsers/chrome', () => {
       })
 
       expect(args.find((arg) => arg.startsWith('--host-resolver-rules'))).to.be.undefined
+    })
+
+    context('cache-aware font loading', () => {
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
+      it('disables it when the proxy is disabled', () => {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        const args = chrome._getArgs({}, {})
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.include('WebFontsCacheAwareTimeoutAdaption')
+        expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
+      })
+
+      it('keeps it when the proxy is enabled', () => {
+        const args = chrome._getArgs({}, {})
+
+        expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('WebFontsCacheAwareTimeoutAdaption')
+      })
     })
   })
 
