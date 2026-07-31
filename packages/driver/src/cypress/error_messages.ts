@@ -610,6 +610,15 @@ export default {
     },
   },
 
+  getAllStorage: {
+    timed_out (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
+  },
+
   getCookie: {
     invalid_argument: {
       message: `${cmd('getCookie')} must be passed a string argument for name.`,
