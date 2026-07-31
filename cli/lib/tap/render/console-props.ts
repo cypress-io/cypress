@@ -436,6 +436,10 @@ const tableSections = (value: TapJsonValue, renderProps: (value: PropsValue, lev
   })
 }
 
+const shellQuote = (value: string): string => {
+  return `'${value.replace(/'/g, `'\\''`)}'`
+}
+
 // What was left folded, and the two ways to open it: straight to the one section
 // that matters, or the whole payload. A depth suggestion is deliberately absent —
 // a section can fold for its size as well as its depth, so `--depth n + 1` is not
@@ -447,7 +451,7 @@ const collapsedFooter = (collapsed: string[][]): string[][] => {
 
   const count = collapsed.length
   const sections = `${count} section${count === 1 ? '' : 's'}`
-  const path = `--path "${collapsed[0].join(PATH_SEPARATOR)}"`
+  const path = `--path ${shellQuote(collapsed[0].join(PATH_SEPARATOR))}`
   const hint = `${sections} collapsed — open one with ${path}, or all of it with --depth all`
 
   if (hint.length <= terminalWidth()) {

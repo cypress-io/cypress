@@ -73,7 +73,7 @@ describe('lib/tap/render/console-props', () => {
                 comment  {2 keys}
           Alias          postComment
 
-        2 sections collapsed — open one with --path "Matched \`cy.intercept()\`>Request>headers", or all of it with --depth all"
+        2 sections collapsed — open one with --path 'Matched \`cy.intercept()\`>Request>headers', or all of it with --depth all"
       `)
     })
 
@@ -98,7 +98,7 @@ describe('lib/tap/render/console-props', () => {
               body        {1 key}
           Alias          postComment
 
-        3 sections collapsed — open one with --path "Matched \`cy.intercept()\`>Request>headers", or all of it with --depth all"
+        3 sections collapsed — open one with --path 'Matched \`cy.intercept()\`>Request>headers', or all of it with --depth all"
       `)
     })
 
@@ -153,7 +153,7 @@ describe('lib/tap/render/console-props', () => {
           Matched \`cy.intercept()\`  {4 keys}
           Alias                     postComment
 
-        1 section collapsed — open one with --path "Matched \`cy.intercept()\`", or all of it with --depth all"
+        1 section collapsed — open one with --path 'Matched \`cy.intercept()\`', or all of it with --depth all"
       `)
     })
 
@@ -332,7 +332,14 @@ describe('lib/tap/render/console-props', () => {
       const rendered = renderProps({ name: 'x', type: 'command', props: deep as TapConsoleProps['props'] })
 
       expect(rendered.split('\n')).to.have.length.lessThan(12)
-      expect(rendered).toContain('--path "next>next>next>next"')
+      expect(rendered).toContain('--path \'next>next>next>next\'')
+    })
+
+    it('shell-quotes collapsed paths containing backticks and apostrophes', () => {
+      const key = 'Matched `cy.intercept()` and user\'s route'
+      const envelope: TapConsoleProps = { name: 'x', type: 'command', props: { [key]: { nested: true } } }
+
+      expect(renderProps(envelope, { depth: '0' })).toContain('--path \'Matched `cy.intercept()` and user\'\\\'\'s route\'')
     })
   })
 
@@ -348,7 +355,7 @@ describe('lib/tap/render/console-props', () => {
         Alias                     postComment
 
       1 section collapsed — open all of it with --depth all, or one with:
-        --path "Matched \`cy.intercept()\`""
+        --path 'Matched \`cy.intercept()\`'"
     `)
   })
 
@@ -451,7 +458,7 @@ describe('lib/tap/render/console-props', () => {
         },
       }
 
-      expect(renderProps(envelope)).toContain('--path "KEYBOARD EVENTS>Details"')
+      expect(renderProps(envelope)).toContain('--path \'KEYBOARD EVENTS>Details\'')
       expect(renderProps(envelope, { path: 'KEYBOARD EVENTS>Details' })).toContain('event-9  fired')
     })
 
@@ -464,7 +471,7 @@ describe('lib/tap/render/console-props', () => {
         metadata: { Details: details },
       } as TapConsoleProps
 
-      expect(renderProps(envelope)).toContain('--path "OTHER>metadata>Details"')
+      expect(renderProps(envelope)).toContain('--path \'OTHER>metadata>Details\'')
       expect(renderProps(envelope, { path: 'OTHER>metadata>Details' })).toContain('detail-9  value')
     })
 
