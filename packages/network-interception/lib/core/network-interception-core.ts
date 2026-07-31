@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type {
   ForBrowserNetworkAutomation,
   ForCommandLog,
@@ -72,6 +73,8 @@ export class NetworkInterceptionCore {
       throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
 
+    debug.core('endRequestIfBlocked %o', this.buildRequestExchange(ctx))
+
     return port.endRequestIfBlocked(ctx, () => this.runRequestPolicies(ctx))
   }
 
@@ -89,13 +92,20 @@ export class NetworkInterceptionCore {
     const registration = this.options.policyRegistration
 
     if (!registration) {
+      debug.core('runRequestPolicies skipped (no policy registration)')
+
       return { ended: false, state: {} }
     }
 
-    return registration.runPolicies({
+    const exchange = this.buildRequestExchange(ctx)
+    const result = await registration.runPolicies({
       phase: 'request',
-      exchange: this.buildRequestExchange(ctx),
+      exchange,
     })
+
+    debug.core('runRequestPolicies %o -> %o', exchange, result)
+
+    return result
   }
 
   async correlateBrowserPreRequest (ctx: unknown): Promise<void> {
@@ -117,6 +127,8 @@ export class NetworkInterceptionCore {
     if (!port) {
       throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
+
+    debug.core('forwardToOrigin %o', this.buildRequestExchange(ctx))
 
     return port.forwardToOrigin(ctx)
   }

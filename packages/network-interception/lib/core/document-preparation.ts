@@ -1,3 +1,5 @@
+import { debug } from '../debug'
+
 export type InjectionLevel = false | 'full' | 'partial' | 'fullCrossOrigin'
 
 export type InjectionLevelFacts = {
@@ -24,6 +26,18 @@ export type SecurityRemovalFacts = {
  * Pure injection-level decision — extracted from proxy `SetInjectionLevel` middleware.
  */
 export function resolveInjectionLevel (facts: InjectionLevelFacts): InjectionLevel | false {
+  const level = resolveInjectionLevelInner(facts)
+
+  debug.document('resolveInjectionLevel isHTML=%s isInitial=%s isAUTFrame=%s -> %s',
+    facts.isHTML,
+    facts.isInitial,
+    facts.isAUTFrame,
+    level ?? false)
+
+  return level
+}
+
+function resolveInjectionLevelInner (facts: InjectionLevelFacts): InjectionLevel | false {
   if (facts.hasFileServerError && !facts.isInitial) {
     return 'partial'
   }
@@ -54,7 +68,7 @@ export function resolveInjectionLevel (facts: InjectionLevelFacts): InjectionLev
  * Pure framebusting-removal decision — extracted from proxy `SetInjectionLevel` middleware.
  */
 export function resolveWantsSecurityRemoved (facts: SecurityRemovalFacts): boolean {
-  return (facts.modifyObstructiveCode || facts.experimentalModifyObstructiveThirdPartyCode) &&
+  const wantsSecurityRemoved = (facts.modifyObstructiveCode || facts.experimentalModifyObstructiveThirdPartyCode) &&
     // if experimentalModifyObstructiveThirdPartyCode is enabled, we want to modify all framebusting code that is html or javascript that passes through the proxy
     ((facts.experimentalModifyObstructiveThirdPartyCode
       && (facts.isHTML || facts.isRenderedHTML || facts.isJavaScript)) ||
@@ -62,4 +76,12 @@ export function resolveWantsSecurityRemoved (facts: SecurityRemovalFacts): boole
      facts.wantsInjection === 'fullCrossOrigin' ||
      // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
      (facts.isJavaScript && facts.isReqMatchSuperDomainOrigin))
+
+  debug.document('resolveWantsSecurityRemoved modifyObstructive=%s thirdParty=%s wantsInjection=%s -> %s',
+    facts.modifyObstructiveCode,
+    facts.experimentalModifyObstructiveThirdPartyCode,
+    facts.wantsInjection,
+    wantsSecurityRemoved)
+
+  return wantsSecurityRemoved
 }
