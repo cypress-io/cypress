@@ -154,6 +154,12 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
 export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   ctx.stage = HttpStages[type]
 
+  // pipe() attaches error handlers to the destination, not the source. Track the
+  // active middleware onError so a body stream destroy(err) (e.g. CDP Fetch
+  // Invalid InterceptionId) settles the waiting middleware instead of hanging.
+  const wiredIncomingResStreams = new WeakSet<Readable>()
+  let activeOnError: ((error: Error) => void) | undefined
+
   const runMiddlewareStack = (): Promise<void> => {
     const middlewares = ctx.middleware[type]
 
@@ -204,6 +210,8 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         _end(onError(error))
       }
 
+      activeOnError = _onError
+
       function onClose () {
         if (!ctx.res.writableFinished) {
           _onError(createBrowserConnectionClosedError())
@@ -215,6 +223,13 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       // The request phase is handled elsewhere because we always want the request phase to complete before erroring on canceled.
       if (type === HttpStages.IncomingResponse) {
         ctx.res.on('close', onClose)
+
+        if (ctx.incomingResStream && !wiredIncomingResStreams.has(ctx.incomingResStream)) {
+          wiredIncomingResStreams.add(ctx.incomingResStream)
+          ctx.incomingResStream.on('error', (error: Error) => {
+            activeOnError?.(error)
+          })
+        }
       }
 
       function _end (retval?) {

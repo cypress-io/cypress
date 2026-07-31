@@ -43,18 +43,13 @@ describe('http', function () {
       })
 
       const streamMiddleware = vi.fn().mockImplementation(function () {
-        const pt = new PassThrough()
-
-        this.incomingResStream = pt
-        this.makeResStreamPlainText = () => {
-          pt.on('error', this.onError)
-        }
-
+        this.incomingResStream = new PassThrough()
         this.next()
       })
 
       const useStreamMiddleware = vi.fn().mockImplementation(function () {
-        this.makeResStreamPlainText()
+        // Emit after next() from the prior middleware; stage wiring must still
+        // route the source error through onError (pipe destinations alone do not).
         this.incomingResStream.emit('error', new Error('bad gzip'))
         this.end()
       })
@@ -78,6 +73,54 @@ describe('http', function () {
       })
 
       expect(onError.mock.calls[0][0].message).toEqual('bad gzip')
+    })
+
+    it('settles when incomingResStream errors under pipe() without a source listener', async function () {
+      const onError = vi.fn()
+      const { PassThrough, Writable } = await import('stream')
+      const { EventEmitter } = await import('events')
+
+      const res = Object.assign(new EventEmitter(), {
+        off: vi.fn(),
+        on: vi.fn(),
+        writableFinished: false,
+        destroyed: false,
+      })
+
+      const bodyStream = new PassThrough()
+
+      const pipeMiddleware = vi.fn().mockImplementation(function () {
+        // Mirrors production response middleware: error is only on the destination.
+        bodyStream.pipe(new Writable({
+          write (_chunk, _encoding, callback) {
+            callback()
+          },
+        })).on('error', this.onError)
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res,
+        debug: () => {},
+        incomingResStream: bodyStream,
+        middleware: {
+          [HttpStages.IncomingResponse]: {
+            pipeMiddleware,
+          },
+        },
+      }
+
+      const stage = _runStage(HttpStages.IncomingResponse, ctx, onError)
+
+      bodyStream.destroy(new Error('Invalid InterceptionId.'))
+
+      await stage
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('Invalid InterceptionId.')
     })
 
     it('ignores async middleware rejections after next() was called', async function () {
