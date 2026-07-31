@@ -50,29 +50,23 @@ describe('Cypress Studio - State Management', () => {
 
     // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
     // TODO: https://github.com/cypress-io/cypress-services/issues/11085
-    cy.get('.command-name-visit').within(() => {
+    cy.reporter().find('.command-name-visit').within(() => {
       cy.contains('visit')
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').first().within(() => {
+    cy.reporter().find('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
 
-    cy.get('.command-name-click').within(() => {
+    cy.reporter().find('.command-name-click').within(() => {
       cy.contains('click')
     })
   })
 
   it('remains in studio mode when the test name is changed on the file system and file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
-
-    // since we aren't logged in, we need to close the connect to cloud panel
-    cy.get('[data-cy="studio-error"]').within(() => {
-      cy.contains('Login').should('be.visible')
-      cy.get('[aria-label="Close"]').click()
-    })
 
     cy.findByTestId('record-button-recording').should('be.visible')
 
@@ -102,7 +96,7 @@ describe('studio functionality', () => {
     // the commands should still be there since the save failed
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
 
-    cy.findByTestId('studio-error').should('contain.text', 'Failed to save test code')
+    cy.contains('Failed to save test code').should('be.visible')
   })
 
   it('does not exit studio mode if the spec is changed on the file system', () => {

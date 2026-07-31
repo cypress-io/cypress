@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import type { ExpectedResults } from '@packages/app/cypress/e2e/support/execute-spec'
 import { waitForSpecToFinish } from '@packages/app/cypress/e2e/support/execute-spec'
+import '@packages/app/cypress/e2e/support/reporter'
 
 declare global {
   namespace Cypress {

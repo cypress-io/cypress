@@ -131,10 +131,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // validate that the width we set in `withCtx` above is the starting point
         cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
 
-        cy.findByTestId('toggle-specs-button').click({ force: true })
+        cy.reporter().find('[data-cy="toggle-specs-button"]').click({ force: true })
 
         // this tooltip text confirms specs list is open
-        cy.contains('Collapse Specs List')
+        cy.reporter().contains('Collapse Specs List')
 
         // we will move the right-hand handle of the Reporter
         // to these positions from the left of the screen
@@ -200,7 +200,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.contains('dom-content.spec').click()
 
       cy.findByTestId('aut-url-input').invoke('val').should('contain', 'http://localhost:4455/cypress/e2e/dom-content.html')
-      cy.findByLabelText('Stats').should('not.exist')
+      cy.get('#reporter-frame').should('not.exist')
       cy.findByTestId('specs-list-panel').should('not.be.visible')
       cy.findByTestId('reporter-panel').should('not.be.visible')
       cy.findByTestId('sidebar').should('be.visible')
@@ -380,7 +380,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         )
       })
 
-      cy.contains('Dom Content').should('be.visible')
+      cy.reporter().contains('Dom Content').should('be.visible')
     })
   })
 })

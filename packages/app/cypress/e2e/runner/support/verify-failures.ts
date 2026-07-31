@@ -69,7 +69,7 @@ const verifyFailure = (options) => {
   stackRegex = regex || stackRegex || new RegExp(`${fileName}:${line || '\\d+'}${stackColumnArray.length ? `:(${stackColumnArray.join('|')})` : ''}`)
   codeFrameRegex = regex || codeFrameRegex || new RegExp(`${fileName}:${line || '\\d+'}${codeFrameColumnArray.length ? `:(${codeFrameColumnArray.join('|')})` : ''}`)
 
-  cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
+  cy.reporter().contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
   cy.get('@Root').within(() => {
     cy.contains('Stack trace').click()
@@ -218,7 +218,7 @@ export const createVerify = ({ fileName, filePath, hasPreferredIde, mode }): Cha
 export const verifyInternalFailure = (props) => {
   const { specTitle, method, stackMethod } = props
 
-  cy.contains('.runnable-title', specTitle).closest('.runnable').within(() => {
+  cy.reporter().contains('.runnable-title', specTitle).closest('.runnable').within(() => {
     cy.get('.runnable-err-message')
     .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
 

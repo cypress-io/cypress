@@ -569,11 +569,10 @@ describe('Launchpad: Setup Project', () => {
 
   describe('Command for package managers', () => {
     it('makes the right command for yarn', () => {
-      scaffoldAndOpenProject('pristine-yarn')
+      scaffoldAndOpenProject('pristine-yarn', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('React.js').click()
       cy.contains('Pick a bundler').click()
@@ -583,11 +582,10 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for pnpm', () => {
-      scaffoldAndOpenProject('pristine-pnpm')
+      scaffoldAndOpenProject('pristine-pnpm', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('React.js').click()
       cy.contains('Pick a bundler').click()
@@ -600,11 +598,10 @@ describe('Launchpad: Setup Project', () => {
     // Would be great to fully support Plug n Play eventually, but right now it causes issues relating
     // to not correctly detecting dependencies when installing the binary.
     it.skip('works with Yarn 3 Plug n Play', () => {
-      scaffoldAndOpenProject('yarn-v3.1.1-pnp')
+      scaffoldAndOpenProject('yarn-v3.1.1-pnp', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.contains('button', 'Vue.js 3(detected)').should('be.visible')
       cy.contains('button', 'Vite(detected)').should('be.visible')
       cy.contains('button', 'Next step').should('not.be.disabled').click()
@@ -612,11 +609,10 @@ describe('Launchpad: Setup Project', () => {
     })
 
     it('makes the right command for npm', () => {
-      scaffoldAndOpenProject('pristine-npm')
+      scaffoldAndOpenProject('pristine-npm', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('React.js').click()
       cy.contains('Pick a bundler').click()
@@ -628,12 +624,11 @@ describe('Launchpad: Setup Project', () => {
 
   describe('openLink', () => {
     it('opens docs link in the default browser', () => {
-      scaffoldAndOpenProject('pristine-with-e2e-testing')
+      scaffoldAndOpenProject('pristine-with-e2e-testing', ['--component'])
 
       cy.visitLaunchpad()
 
-      cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
-      cy.get('[data-testid="select-framework"]').click()
+      cy.get('[data-testid="select-framework"]', { timeout: 10000 }).click()
       cy.findByText('Vue.js 3').click()
       cy.contains('button', 'Pick a bundler').click()
       cy.findByText('Webpack').click()
