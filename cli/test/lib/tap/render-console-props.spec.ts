@@ -434,6 +434,19 @@ describe('lib/tap/render/console-props', () => {
       `)
     })
 
+    it('reports the fallback error from the walk that matched more of the path', () => {
+      const envelope: TapConsoleProps = {
+        name: 'get',
+        type: 'command',
+        props: { Selector: '.missing' },
+        error: 'AssertionError: Timed out retrying',
+      }
+
+      expect(renderProps(envelope, { path: 'error>deeper' })).toMatchInlineSnapshot(`
+        ""error" is a value, not a section — there is nothing under it to reach with "deeper"."
+      `)
+    })
+
     // A lone row carries no comparison, so it reads better as plain key/values.
     it('numbers array entries and leaves a single-row array untabled', () => {
       const envelope: TapConsoleProps = {

@@ -313,6 +313,12 @@ interface ResolvedPath {
   trail: string[]
 }
 
+interface FailedPath {
+  error: string
+  /** The keys matched before the walk failed. */
+  trail: string[]
+}
+
 // A hint has to name the keys that are actually there, so it lists as many as the
 // row holds and counts the rest rather than ending mid-word.
 const keyList = (keys: string[], room: number): string => {
@@ -338,19 +344,19 @@ const listedUnder = (message: string, label: string, keys: string[]): string => 
   return `${message}\n${label}${keyList(keys, Math.max(MIN_VALUE_WIDTH, terminalWidth() - label.length))}`
 }
 
-const pathFailure = (segment: string, trail: string[], value: PropsValue): { error: string } => {
+const pathFailure = (segment: string, trail: string[], value: PropsValue): FailedPath => {
   const at = trail.length ? ` under "${trail.join(PATH_SEPARATOR)}"` : ''
 
-  return { error: listedUnder(`No console property named "${segment}"${at}.`, 'Keys here: ', keysOf(value)) }
+  return { error: listedUnder(`No console property named "${segment}"${at}.`, 'Keys here: ', keysOf(value)), trail }
 }
 
-const walkPath = (root: PropsValue, segments: string[]): ResolvedPath | { error: string } => {
+const walkPath = (root: PropsValue, segments: string[]): ResolvedPath | FailedPath => {
   let current: TapJsonValue = root
   const trail: string[] = []
 
   for (const segment of segments) {
     if (!isContainer(current)) {
-      return { error: `"${trail.join(PATH_SEPARATOR)}" is a value, not a section — there is nothing under it to reach with "${segment}".` }
+      return { error: `"${trail.join(PATH_SEPARATOR)}" is a value, not a section — there is nothing under it to reach with "${segment}".`, trail }
     }
 
     const matched = matchKey(current as PropsValue, segment)
@@ -360,7 +366,7 @@ const walkPath = (root: PropsValue, segments: string[]): ResolvedPath | { error:
     }
 
     if ('ambiguous' in matched) {
-      return { error: listedUnder(`"${segment}" matches more than one key.`, 'Name one of: ', matched.ambiguous) }
+      return { error: listedUnder(`"${segment}" matches more than one key.`, 'Name one of: ', matched.ambiguous), trail }
     }
 
     current = childAt(current as PropsValue, matched.key)
@@ -469,9 +475,10 @@ const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowB
 
   // `props` holds what the top level shows, but the envelope's own sections
   // (table, error, snapshot) are addressable by name too.
-  const resolved = walkPath(pathRoot(envelope), segments)
-  const fallback = 'error' in resolved && pathRoot(envelope) !== envelope ? walkPath(envelope, segments) : resolved
-  const found = 'error' in fallback ? resolved : fallback
+  const root = pathRoot(envelope)
+  const resolved = walkPath(root, segments)
+  const fallback = 'error' in resolved && root !== envelope ? walkPath(envelope, segments) : resolved
+  const found = 'error' in fallback && 'error' in resolved && fallback.trail.length <= resolved.trail.length ? resolved : fallback
 
   if ('error' in found) {
     return [[emptyState(found.error)]]
