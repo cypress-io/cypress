@@ -302,6 +302,8 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
           : pausedResponse.responseHeaders,
         ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
       } : {
+        // Middleware answered at the request stage, so no response pause exists —
+        // rebuild the fulfill params (requestId/sessionId) from the stashed request pause.
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,

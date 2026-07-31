@@ -382,7 +382,7 @@ describe('lib/network-runtime', () => {
     expect(continueCall!.args[1]).to.include({ requestId: 'fetch-request' })
 
     await onRequestPaused(createPausedRequest({
-      requestId: 'fetch-response',
+      requestId: 'fetch-request',
       networkId: 'network-1',
       responseStatusCode: 200,
     }))
@@ -565,7 +565,7 @@ describe('lib/network-runtime', () => {
     expect(continueCall, 'expected Fetch.continueRequest').to.exist
 
     await onRequestPaused(createPausedRequest({
-      requestId: 'http-response',
+      requestId: 'http-request',
       networkId: 'network-http-1',
       url: 'https://example.test/app',
       responseStatusCode: 200,

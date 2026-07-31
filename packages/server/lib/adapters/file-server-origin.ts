@@ -9,7 +9,10 @@ type CreateFileServerOriginMiddlewareOptions = {
   request: ServerRequest
 }
 
-const HOP_BY_HOP_HEADERS = new Set([
+// Headers we do not forward to the file server. accept-encoding is load-bearing:
+// stripping it (together with gzip: false) keeps the file server's response
+// identity-encoded, which Fetch.fulfillRequest requires.
+const UNFORWARDED_HEADERS = new Set([
   'accept-encoding',
   'connection',
   'content-length',
@@ -25,7 +28,7 @@ const HOP_BY_HOP_HEADERS = new Set([
 
 function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
   return Object.entries(headers).reduce<HttpHeaders>((memo, [key, value]) => {
-    if (!HOP_BY_HOP_HEADERS.has(key.toLowerCase())) {
+    if (!UNFORWARDED_HEADERS.has(key.toLowerCase())) {
       memo[key] = value
     }
 
@@ -34,9 +37,14 @@ function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
 }
 
 /**
- * Node-side origin for strategy: 'file' URLs on the CDP Fetch path. The Fetch
- * terminal is continueRequest, so the browser never hits sendRequestOutgoing's
- * file-server rewrite — fulfill those URLs here instead.
+ * strategy:'file' URLs only resolve on the token-guarded file server. The CDP
+ * Fetch terminal is continueRequest, meaning the browser would fetch from the
+ * AUT origin itself and download Express's 500 error page.
+ *
+ * To avoid this, we request the file from the file server here in Node and
+ * return the response without calling next(). A middleware-produced body
+ * encodes as fulfilled: true, which the transport answers with
+ * Fetch.fulfillRequest.
  */
 export function createFileServerOriginMiddleware ({
   remoteStates,

@@ -140,11 +140,14 @@ export class CdpFetchTransport {
       return
     }
 
-    // Downloads pause without a networkId — the browser's download manager owns
-    // them, so no Network.requestWillBeSent is emitted to correlate against. The
-    // Fetch requestId is stable across a request pause and its response pause,
-    // so it keys the flow when networkId is absent.
-    const correlationId = event.networkId ?? event.requestId
+    // Fetch.requestId is unique per redirect hop and stable across that hop's
+    // request-stage and response-stage pauses — it keys pause pairing only.
+    // networkId (Network.requestWillBeSent id) is optional and shared across
+    // hops; it joins Network-domain state (pre-requests, extraInfo), not the
+    // in-flight Fetch map. Pre-request correlation is handled separately by the
+    // addPendingUrlWithoutPreRequest registration below when networkId is absent.
+    const fetchRequestId = event.requestId
+    const networkRequestId = event.networkId ?? event.requestId
     let requestContinued = false
     let response: CdpFetchTransportResponse | undefined
     let responseRequestId: string | undefined
@@ -152,10 +155,11 @@ export class CdpFetchTransport {
     let deferred: pDefer.DeferredPromise<CdpFetchTransportResponse> | undefined
 
     try {
-      debug('intercepting request pause %s %s (correlationId=%s, resourceType=%s)',
+      debug('intercepting request pause %s %s (fetchRequestId=%s, networkRequestId=%s, resourceType=%s)',
         event.request.method,
         event.request.url,
-        correlationId,
+        fetchRequestId,
+        networkRequestId,
         event.resourceType)
 
       // Without networkId there will never be a matching browser pre-request.
@@ -169,7 +173,7 @@ export class CdpFetchTransport {
         headers: {
           ...event.request.headers,
         },
-        id: correlationId,
+        id: networkRequestId,
         requestId: event.requestId,
         sessionId,
       }
@@ -199,7 +203,7 @@ export class CdpFetchTransport {
 
       deferred = responseDeferred
 
-      this.inFlightRequests.set(correlationId, deferred)
+      this.inFlightRequests.set(fetchRequestId, deferred)
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
         const headers = await this.continueRequestHeaders(event, outbound)
@@ -268,13 +272,13 @@ export class CdpFetchTransport {
         }, response.sessionId)
       }
 
-      this.cleanup(correlationId, deferred)
+      this.cleanup(fetchRequestId, deferred)
     } catch (err) {
       if (requestContinued) {
         deferred?.reject(err as Error)
       }
 
-      this.cleanup(correlationId, deferred)
+      this.cleanup(fetchRequestId, deferred)
 
       if (event.networkId) {
         // an errored flow gets no more pauses, so nothing will consume its
@@ -305,8 +309,10 @@ export class CdpFetchTransport {
       return
     }
 
-    const correlationId = event.networkId ?? event.requestId
-    const deferred = this.inFlightRequests.get(correlationId)
+    // Same Fetch.requestId as the request-stage pause for this hop.
+    const fetchRequestId = event.requestId
+    const networkRequestId = event.networkId ?? event.requestId
+    const deferred = this.inFlightRequests.get(fetchRequestId)
 
     if (!deferred) {
       // No flow ever consumes extraInfo tracking for an unmatched pause —
@@ -361,7 +367,7 @@ export class CdpFetchTransport {
     // reset() may have rejected this flow while the merge awaited extraInfo.
     // The resolve below would be a no-op and nothing else owns this pause —
     // release it, or the browser stays paused (reset keeps Fetch enabled).
-    if (this.inFlightRequests.get(correlationId) !== deferred) {
+    if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
       debug('releasing response pause rejected during set-cookie merge: %s', event.request.url)
       await this.safeSend('Fetch.continueResponse', {
         requestId: event.requestId,
@@ -379,7 +385,7 @@ export class CdpFetchTransport {
 
     deferred.resolve({
       ...event.request,
-      id: correlationId,
+      id: networkRequestId,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
@@ -558,12 +564,12 @@ export class CdpFetchTransport {
   // Must NOT clear extraInfo tracking on success — the next response under a
   // reused network id may already be tracked, and CDPNetworkExtraInfo manages
   // its own lifecycle. Errored and unmatched flows clear at their own sites.
-  private cleanup (correlationId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {
-    if (deferred && this.inFlightRequests.get(correlationId) !== deferred) {
+  private cleanup (fetchRequestId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {
+    if (deferred && this.inFlightRequests.get(fetchRequestId) !== deferred) {
       return
     }
 
-    this.inFlightRequests.delete(correlationId)
+    this.inFlightRequests.delete(fetchRequestId)
   }
 
   private rejectAll (err: Error): void {
@@ -573,9 +579,9 @@ export class CdpFetchTransport {
 
     debug('rejecting %d in-flight request(s): %s', this.inFlightRequests.size, err.message)
 
-    for (const [correlationId, deferred] of this.inFlightRequests) {
+    for (const [fetchRequestId, deferred] of this.inFlightRequests) {
       deferred.reject(err)
-      this.cleanup(correlationId, deferred)
+      this.cleanup(fetchRequestId, deferred)
     }
   }
 }
