@@ -73,8 +73,7 @@ export function processSourceMap (
     // Generate a new sourcemap with updated mappings. `ignoreInvalidMapping`
     // skips (and warns about) any malformed mapping instead of throwing, so one
     // bad segment degrades to a missing position rather than discarding the
-    // entire bundle's sourcemap. The option is honored at runtime but absent
-    // from the published type definitions, hence the local type extension.
+    // entire bundle's sourcemap.
     const generator = new SourceMapGenerator({
       file: EMBEDDED,
       sourceRoot,
