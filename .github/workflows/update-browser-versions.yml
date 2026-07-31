@@ -47,18 +47,24 @@ jobs:
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
 
             getVersions({ core })
-      - name: Determine name of new branch and if it already exists
+      - name: Check if an open PR already exists for the update branch
         id: check-branch
         env:
-          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}-cft-from-${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH_NAME: update-browser-versions
         run: |
-          echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
+          pr_exists=$(gh pr list --repo ${{ github.repository }} --head "$BRANCH_NAME" --base "$BASE_BRANCH" --state open --json number --jq 'length > 0')
+          # A leftover branch from a closed PR would base the new PR on a stale fork point
+          if [[ "$pr_exists" != "true" ]] && git show-ref --verify --quiet "refs/remotes/origin/$BRANCH_NAME"; then
+            git push origin --delete "$BRANCH_NAME"
+          fi
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "pr_exists=$pr_exists" >> $GITHUB_OUTPUT
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
-          echo "needs_pr=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}" >> $GITHUB_OUTPUT
-          echo "needs_branch_update=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_pr=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.pr_exists != 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_branch_update=${{ steps.get-versions.outputs.has_update == 'true' && steps.check-branch.outputs.pr_exists == 'true' }}" >> $GITHUB_OUTPUT
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
