@@ -26,8 +26,6 @@ describe('resolveCloudEnv', () => {
   })
 
   it('treats an empty CYPRESS_INTERNAL_CLOUD_ENV as an explicit value', () => {
-    // getenv returned a set-but-empty variable verbatim rather than using the
-    // fallback; preserve that behavior so there is no observable change.
     expect(resolveCloudEnv({ CYPRESS_INTERNAL_CLOUD_ENV: '', CYPRESS_INTERNAL_ENV: 'production' })).toEqual('')
   })
 
