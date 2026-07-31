@@ -10,7 +10,6 @@ import util from 'util'
 
 import { prefixLog, prefixStream } from './prefixStream'
 import { addChildProcess } from '../tasks/gulpRegistry'
-import stripAnsi from 'strip-ansi'
 
 export type AllSpawnableApps =
   | `cmd-${string}`
@@ -46,7 +45,7 @@ export async function spawnUntilMatch (
   spawned(prefix, config.command, {
     ...config.options,
     tapOut (chunk, enc, cb) {
-      if (!ready && stripAnsi(String(chunk)).match(config.match)) {
+      if (!ready && util.stripVTControlCharacters(String(chunk)).match(config.match)) {
         ready = true
         setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
       }
