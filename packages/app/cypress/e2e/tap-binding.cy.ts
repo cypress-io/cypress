@@ -83,7 +83,7 @@ describe('tap binding', () => {
     cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js')
 
     cy.waitForSpecToFinish({ passCount: 1 })
-    cy.contains('Dom Content').should('be.visible')
+    cy.reporter().contains('Dom Content').should('be.visible')
 
     cy.window().then(async (win) => {
       const outcome = await getBinding(win).exec('tests')
@@ -548,7 +548,7 @@ describe('tap binding pin lifecycle', () => {
     // Clicking the pinned command in the reporter unpins through a different
     // event path than the control above — it must restore the DOM all the same.
     pinClickAtBefore()
-    cy.contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
+    cy.reporter().contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
     expectReleased()
   })
 })
