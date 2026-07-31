@@ -6,7 +6,7 @@ import Debug from 'debug'
 import pkg from '@packages/root'
 import { fs } from '../util/fs'
 import { getCwd } from '../cwd'
-import md5 from 'md5'
+import crypto from 'crypto'
 import sanitize from 'sanitize-filename'
 import replace from 'lodash/replace'
 
@@ -71,7 +71,7 @@ export const toHashName = (projectRoot?: string): string => {
   }
 
   const name = sanitize(basename(projectRoot))
-  const hash = md5(projectRoot)
+  const hash = crypto.createHash('md5').update(projectRoot).digest('hex')
 
   return `${name}-${hash}`
 }

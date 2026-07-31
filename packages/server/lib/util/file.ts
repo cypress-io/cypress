@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import os from 'os'
-import md5 from 'md5'
+import crypto from 'crypto'
 import path from 'path'
 import debugModule from 'debug'
 import Promise from 'bluebird'
@@ -73,7 +73,7 @@ export class File {
     // If multiple users write to a specific directory is os.tmpdir, permission errors can arise.
     // Instead, we make a user specific directory with os.tmpdir.
     this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
-    this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
+    this._lockFilePath = path.join(this._lockFileDir, `${crypto.createHash('md5').update(this.path).digest('hex')}.lock`)
 
     this._queue = new pQueue({ concurrency: 1 })
 

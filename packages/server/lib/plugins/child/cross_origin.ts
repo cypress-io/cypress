@@ -1,4 +1,4 @@
-import md5 from 'md5'
+import crypto from 'crypto'
 import { fs } from 'memfs'
 import path from 'path'
 import webpack from 'webpack'
@@ -13,7 +13,7 @@ export const processCallback = ({ file, fn, projectRoot }: CrossOriginCallbackAr
   const typescriptPath = resolve.typescript(projectRoot)
   const webpackOptions = getFullWebpackOptions(file, typescriptPath)
 
-  const inputFileName = md5(source)
+  const inputFileName = crypto.createHash('md5').update(source).digest('hex')
   const inputDir = path.dirname(file)
   const inputPath = path.join(inputDir, inputFileName)
   const outputDir = '/'
