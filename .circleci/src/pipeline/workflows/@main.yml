@@ -592,8 +592,24 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
+# Windows CI is expensive (see cost analysis linked from the app team), so unlike the other
+# platform workflows above it does not run on every develop/release push. It runs once daily
+# via CircleCI Scheduled Pipelines (configured in the CircleCI UI, not here) that set
+# run-windows-scheduled=true, plus on everything else &full-workflow-filters covers . To revert
+# to running on every develop/release push again, delete this `when:` and restore
+# `when: *full-workflow-filters`.
 windows:
-  when: *full-workflow-filters
+  when:
+    or:
+      - equal: [ true, << pipeline.parameters.run-windows-scheduled >> ]
+      - and:
+          - *full-workflow-filters
+          - not:
+              or:
+                - equal: [ develop, << pipeline.git.branch >> ]
+                - matches:
+                    pattern: /^release\/\d+\.\d+\.\d+$/
+                    value: << pipeline.git.branch >>
   jobs:
     - node_modules_install:
         name: windows-node-modules-install

@@ -29,7 +29,7 @@ If only unit/integration tests scoped to changed packages are sufficient, do **n
 
 Push your work to the branch name you add — do not repurpose an existing allowlisted branch (for example, do not change `update-v8-snapshot-cache-on-develop` to a different name).
 
-This gate turns on the main/multi-platform workflow graph — including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs.
+This gate turns on the main/multi-platform workflow graph — including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs. Note: `windows` specifically excludes plain `develop`/`release/*` pushes from this gate (it runs on those via a daily CircleCI Scheduled Pipeline instead — see the comment above the `windows` workflow in `@main.yml`); any other branch added here still turns Windows on immediately as before.
 
 **Optional — only if you need more than main workflows + path-filtered jobs:**
 
