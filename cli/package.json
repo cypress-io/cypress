@@ -98,7 +98,6 @@
     "rollup": "^4.53.5",
     "semver": "^7.7.3",
     "shelljs": "0.8.5",
-    "strip-ansi": "6.0.1",
     "tslib": "^2.8.1",
     "tsx": "4.22.4",
     "typescript": "~5.9.2",
