@@ -795,15 +795,29 @@ describe('lib/exec/tap', () => {
       })
     }
 
-    it('triggers the run and renders the launch outcome as JSON, without opening a session', async () => {
+    it('triggers the run and renders the launch outcome, without opening a session', async () => {
       mockLiveResolved(liveInstance())
       mockInstanceGraphql()
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual({ spec: 'cypress/e2e/login.cy.ts', testingType: 'e2e', browser: 'Chrome' })
+
+      const output = logger.print()
+
+      expect(output).toContain('cypress/e2e/login.cy.ts')
+      expect(output).toContain('e2e')
+      expect(output).toContain('Chrome')
+      expect(() => JSON.parse(output)).toThrow()
 
       // The run is driven from the instance's data layer, not over a CDP session.
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw launch outcome with --json', async () => {
+      mockLiveResolved(liveInstance())
+      mockInstanceGraphql()
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ spec: 'cypress/e2e/login.cy.ts', testingType: 'e2e', browser: 'Chrome' })
     })
 
     it('sends the matched spec\'s instance-reported absolute path to the TapRunSpec operation', async () => {

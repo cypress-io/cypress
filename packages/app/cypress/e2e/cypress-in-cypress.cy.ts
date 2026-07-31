@@ -394,7 +394,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       postRunSpecMutation()
 
-      cy.contains('Dom Content').should('be.visible')
+      cy.reporter().contains('Dom Content').should('be.visible')
       cy.waitForSpecToFinish({ passCount: 1 })
 
       let firstRunStartedAt: number | undefined

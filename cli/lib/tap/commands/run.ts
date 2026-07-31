@@ -6,6 +6,16 @@ import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 import { posixify } from '../../util'
 
+/** What `cypress tap run` returns once a spec is launched. */
+export interface TapRunResult {
+  /** Project-relative path of the launched spec. */
+  spec: string
+  /** Testing type the run launched under. */
+  testingType: string
+  /** Display name of the browser the run launched in. */
+  browser: string
+}
+
 const RUN_SPEC_TIMEOUT_MS = 60_000
 
 const findTargetSpec = async (instance: LiveInstanceState, relative: string) => {
@@ -30,11 +40,13 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
     const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute), RUN_SPEC_TIMEOUT_MS)
 
     if (result?.__typename === 'RunSpecResponse') {
-      renderOutcome('run', {
+      const launched: TapRunResult = {
         spec: result.spec.relative.replace(/\\/g, '/'),
         testingType: result.testingType,
         browser: result.browser.displayName,
-      }, options.json)
+      }
+
+      renderOutcome('run', launched, options.json)
 
       return 0
     }

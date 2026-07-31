@@ -6,14 +6,16 @@ const CYPRESS_VERSION = '15.0.0'
 describe('tap/commands/command', () => {
   // r2's failed first attempt has its own command log, distinct from the passing
   // latest attempt, so attempt selection is observable. r4 stands in for a test
-  // the driver evicted from memory (numTestsKeptInMemory).
+  // the driver evicted from memory (numTestsKeptInMemory). --command takes the id
+  // the reporter displays — a per-section row number — so these logs are
+  // addressed as "1" and "2" rather than by the driver log ids they carry here.
   const TESTS_STATE = {
     r2: {
       id: 'r2',
       title: 'logs in',
       state: 'passed',
       commands: [
-        { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent', displayName: 'visit', hookId: 'h1' },
+        { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent', displayName: 'visit' },
         { id: 'log-2', name: 'get', message: '#user', state: 'passed', type: 'parent' },
       ],
       prevAttempts: [
@@ -52,7 +54,7 @@ describe('tap/commands/command', () => {
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-2' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2' })).to.deep.eq({
       error: {
         code: 'NO_RUN',
         message: 'no spec has been run yet — use the run command to run a spec first',
@@ -63,7 +65,7 @@ describe('tap/commands/command', () => {
   it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
     stubTests()
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'nope', command: 'log-2' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'nope', command: '2' })).to.deep.eq({
       error: {
         code: 'TEST_NOT_FOUND',
         message: 'no test of this run matches the id "nope" — use the tests command to list this run’s tests',
@@ -74,23 +76,23 @@ describe('tap/commands/command', () => {
   it('returns one lean command entry, keeping only the listed fields', async () => {
     stubTests()
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-1' })).to.deep.eq({
-      result: { id: 'log-1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1' })).to.deep.eq({
+      result: { id: '1', name: 'visit', message: '/login', state: 'passed', type: 'parent' },
     })
   })
 
   it('returns the entry from the requested attempt', async () => {
     stubTests()
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-b', attempt: '1' })).to.deep.eq({
-      result: { id: 'log-b', name: 'get', message: '#user', state: 'failed', type: 'parent' },
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2', attempt: '1' })).to.deep.eq({
+      result: { id: '2', name: 'get', message: '#user', state: 'failed', type: 'parent' },
     })
   })
 
   it('fails with ATTEMPT_NOT_FOUND when the attempt is out of range', async () => {
     stubTests()
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-2', attempt: '3' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2', attempt: '3' })).to.deep.eq({
       error: {
         code: 'ATTEMPT_NOT_FOUND',
         message: 'test "r2" has 2 attempts; pass --attempt 1–2 (defaults to the latest)',
@@ -103,10 +105,10 @@ describe('tap/commands/command', () => {
 
     stubTests(getSerializedConsolePropsForLog)
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-2', props: 'true', attempt: '1' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '3', props: 'true', attempt: '1' })).to.deep.eq({
       error: {
         code: 'COMMAND_NOT_FOUND',
-        message: 'no command of this test matches the id "log-2" — use the commands command to list this test’s commands',
+        message: 'no command of this test matches the id "3" — use the commands command to list this test’s commands',
       },
     })
 
@@ -128,8 +130,9 @@ describe('tap/commands/command', () => {
 
     stubTests(getSerializedConsolePropsForLog)
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-2', props: 'true' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2', props: 'true' })
 
+    // The displayed id resolves to the driver log id the runner keys on.
     expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2', undefined)
     expect(outcome).to.deep.eq({ result: consoleProps })
     expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)
@@ -141,7 +144,7 @@ describe('tap/commands/command', () => {
 
     stubTests(getSerializedConsolePropsForLog)
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-b', props: 'true', attempt: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2', props: 'true', attempt: '1' })
 
     expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-b', undefined)
     expect(outcome).to.deep.eq({ result: consoleProps })
@@ -152,13 +155,13 @@ describe('tap/commands/command', () => {
 
     stubTests(() => cleanup)
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r4', command: 'log-c', props: 'true' })).to.deep.eq({ result: cleanup })
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r4', command: '1', props: 'true' })).to.deep.eq({ result: cleanup })
   })
 
   it('fails with CONSOLE_PROPS_UNAVAILABLE when the driver has no details for a listed command', async () => {
     stubTests(() => undefined)
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: 'log-2', props: 'true' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2', props: 'true' })).to.deep.eq({
       error: {
         code: 'CONSOLE_PROPS_UNAVAILABLE',
         message: 'this command has no console properties available — command details are captured in open mode and kept only for the most recent tests (numTestsKeptInMemory)',
@@ -174,7 +177,7 @@ describe('tap/commands/command', () => {
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, {
       'test': 'r2',
-      'command': 'log-2',
+      'command': '2',
       'props': 'true',
       'full-report': 'true',
     })
@@ -186,7 +189,7 @@ describe('tap/commands/command', () => {
   it('fails with PROPS_REQUIRED before reading the runner when --full-report has no --props', async () => {
     const getRunner = stubRunner({ getTestState: (id: string) => TESTS_STATE[id] })
 
-    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test': 'r2', 'command': 'log-2', 'full-report': 'true' })).to.deep.eq({
+    expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test': 'r2', 'command': '2', 'full-report': 'true' })).to.deep.eq({
       error: {
         code: 'PROPS_REQUIRED',
         message: 'pass --props with --full-report — only a command’s console properties are ever shortened',
@@ -202,7 +205,7 @@ describe('tap/commands/command', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     expect((await manager.exec('command', {}, { test: 'r2' }) as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
-    expect((await manager.exec('command', {}, { command: 'log-2' }) as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
+    expect((await manager.exec('command', {}, { command: '2' }) as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
     expect(getRunner).not.to.have.been.called
   })
 })
