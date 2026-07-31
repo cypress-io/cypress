@@ -437,6 +437,37 @@ describe('lib/tap/render/console-props', () => {
       `)
     })
 
+    it('opens a collapsed section using a named table panel path', () => {
+      const details = Object.fromEntries(Array.from({ length: 9 }, (_value, index) => [`event-${index + 1}`, 'fired']))
+      const envelope: TapConsoleProps = {
+        name: 'type',
+        type: 'command',
+        props: { Typed: 'hi' },
+        table: {
+          1: {
+            name: 'Keyboard Events',
+            data: { Details: details },
+          },
+        },
+      }
+
+      expect(renderProps(envelope)).toContain('--path "KEYBOARD EVENTS>Details"')
+      expect(renderProps(envelope, { path: 'KEYBOARD EVENTS>Details' })).toContain('event-9  fired')
+    })
+
+    it('opens a collapsed section using the synthetic OTHER panel path', () => {
+      const details = Object.fromEntries(Array.from({ length: 9 }, (_value, index) => [`detail-${index + 1}`, 'value']))
+      const envelope = {
+        name: 'log',
+        type: 'command',
+        props: { Message: 'hello' },
+        metadata: { Details: details },
+      } as TapConsoleProps
+
+      expect(renderProps(envelope)).toContain('--path "OTHER>metadata>Details"')
+      expect(renderProps(envelope, { path: 'OTHER>metadata>Details' })).toContain('detail-9  value')
+    })
+
     it('renders envelope error and snapshot notes as their own sections', () => {
       const envelope: TapConsoleProps = {
         name: 'get',

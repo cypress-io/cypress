@@ -466,6 +466,42 @@ const pathRoot = (envelope: TapConsoleProps): PropsValue => {
   return isRecord(props) ? props : envelope
 }
 
+// Named tables and OTHER are display panels rather than keys in the serialized
+// envelope. Mirror those panels here so every path printed by collapsedFooter
+// is also accepted when copied back into --path.
+const panelPathRoot = (envelope: TapConsoleProps): PropsValue => {
+  if (!isRecord(envelope.props)) {
+    return {}
+  }
+
+  const panels: { [key: string]: TapJsonValue } = {}
+  const tables = envelope.table
+
+  if (isRecord(tables)) {
+    Object.keys(tables).forEach((slot) => {
+      const entry = tables[slot]
+
+      if (!isRecord(entry)) {
+        return
+      }
+
+      const title = (typeof entry.name === 'string' ? entry.name : `table ${slot}`).toUpperCase()
+
+      panels[title] = isContainer(entry.data) ? entry.data : entry
+    })
+  } else if (tables !== undefined) {
+    panels.TABLE = tables
+  }
+
+  const unexpected = Object.fromEntries(Object.entries(envelope).filter(([key]) => !ENVELOPE_KEYS.has(key)))
+
+  if (Object.keys(unexpected).length) {
+    panels.OTHER = unexpected
+  }
+
+  return panels
+}
+
 const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowBudget: number): string[][] => {
   const segments = path.split(PATH_SEPARATOR).map((segment) => segment.trim()).filter(Boolean)
 
@@ -476,9 +512,11 @@ const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowB
   // `props` holds what the top level shows, but the envelope's own sections
   // (table, error, snapshot) are addressable by name too.
   const root = pathRoot(envelope)
-  const resolved = walkPath(root, segments)
-  const fallback = 'error' in resolved && root !== envelope ? walkPath(envelope, segments) : resolved
-  const found = 'error' in fallback && 'error' in resolved && fallback.trail.length <= resolved.trail.length ? resolved : fallback
+  const roots = root === envelope ? [root] : [root, panelPathRoot(envelope), envelope]
+  const attempts = roots.map((candidate) => walkPath(candidate, segments))
+  const found = attempts.find((attempt) => !('error' in attempt)) ?? attempts.reduce((best, attempt) => {
+    return attempt.trail.length > best.trail.length ? attempt : best
+  })
 
   if ('error' in found) {
     return [[emptyState(found.error)]]
