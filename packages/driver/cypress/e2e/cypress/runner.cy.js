@@ -57,6 +57,36 @@ describe('getAllTestsState', () => {
   })
 })
 
+describe('getSnapshotPropsForLog', () => {
+  let attempts = 0
+
+  it('is retried once', { retries: 1 }, () => {
+    attempts++
+
+    cy.wrap(attempts).then((attempt) => {
+      if (attempt === 1) {
+        throw new Error('failing the first attempt so the test is retried')
+      }
+    })
+  })
+
+  // A retried test keeps each attempt's logs on its own attempt, so a lookup
+  // that searches the latest attempt alone answers "no such log" for every row
+  // of an earlier one — leaving the reporter's prior-attempt rows and the tap's
+  // --attempt with no snapshot to show for a command that has one.
+  it('resolves a log of an earlier attempt', () => {
+    const retried = _.find(_.values(Cypress.runner.getAllTestsState()), { title: 'is retried once' })
+
+    expect(retried.prevAttempts, 'the test was retried').to.have.length(1)
+
+    const earlier = _.find(retried.prevAttempts[0].commands, { name: 'wrap' })
+    const latest = _.find(retried.commands, { name: 'wrap' })
+
+    expect(Cypress.runner.getSnapshotPropsForLog(retried.id, latest.id), 'latest attempt').to.include({ id: latest.id })
+    expect(Cypress.runner.getSnapshotPropsForLog(retried.id, earlier.id), 'earlier attempt').to.include({ id: earlier.id })
+  })
+})
+
 // NOTE: this test must remain the last test in the spec
 // so we can test the root after hook
 // https://github.com/cypress-io/cypress/issues/2296

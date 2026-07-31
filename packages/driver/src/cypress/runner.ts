@@ -1987,7 +1987,7 @@ export default {
 
         if (!test) return
 
-        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+        const logAttrs = findLogAcrossAttempts(test, logId)
 
         if (logAttrs) {
           if (logAttrs._hasBeenCleanedUp) {
@@ -2007,8 +2007,7 @@ export default {
 
         if (!test) return
 
-        const attempts = [test, ...(test.prevAttempts || [])]
-        const logAttrs = _.find(_.flatMap(attempts, (attempt) => attempt.commands || []), (log) => log.id === logId)
+        const logAttrs = findLogAcrossAttempts(test, logId)
 
         if (!logAttrs) return
 
@@ -2026,7 +2025,7 @@ export default {
 
         if (!test) return
 
-        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+        const logAttrs = findLogAcrossAttempts(test, logId)
 
         if (logAttrs) {
           return LogUtils.getSnapshotProps(logAttrs)
@@ -2143,6 +2142,15 @@ const mixinLogs = (test) => {
       test[type] = _.map(logs, LogUtils.toSerializedJSON)
     }
   })
+}
+
+// A retried test keeps each attempt's logs on the attempt that produced them, so
+// a per-log lookup has to search every attempt: the reporter shows the rows of
+// earlier attempts too, and a log of one is only ever found here.
+const findLogAcrossAttempts = (test, logId: string) => {
+  const attempts = [test, ...(test.prevAttempts || [])]
+
+  return _.find(_.flatMap(attempts, (attempt) => attempt.commands || []), (log) => log.id === logId)
 }
 
 const serializeTest = (test): SerializedTest => {
