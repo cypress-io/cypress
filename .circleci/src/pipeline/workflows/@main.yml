@@ -595,7 +595,7 @@ darwin-arm64:
 # Windows CI is expensive (see cost analysis linked from the app team), so unlike the other
 # platform workflows above it does not run on every develop/release push. It runs once daily
 # via CircleCI Scheduled Pipelines (configured in the CircleCI UI, not here) that set
-# run-windows-scheduled=true, plus on everything else &full-workflow-filters covers . To revert
+# run-windows-scheduled=true, plus on everything else &full-workflow-filters covers. To revert
 # to running on every develop/release push again, delete this `when:` and restore
 # `when: *full-workflow-filters`.
 windows:

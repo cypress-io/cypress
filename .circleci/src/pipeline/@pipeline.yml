@@ -714,8 +714,8 @@ commands:
 
   # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 11 has the oldest glibc version (2.31) that we support.
   #
-  # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to
-  # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the
+  # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
+  # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
   # project directory so volume mounts are not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
   build-better-sqlite3:
     description: Build better-sqlite3 for glibc 2.31
