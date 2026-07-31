@@ -14,6 +14,7 @@
 
 **Dependency Updates:**
 
+- Upgraded `cookie-parser` from `1.4.5` to `1.4.7`, which upgrades its transitive `cookie` dependency from `0.4.0` to `0.7.2` to address [CVE-2024-47764](https://github.com/advisories/GHSA-pxg6-pf52-xh8x) reported in security scans. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 - Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
 
 ## 15.19.0
