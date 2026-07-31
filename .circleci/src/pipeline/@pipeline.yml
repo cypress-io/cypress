@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "150.0.7871.186"
-chrome-beta-version: &chrome-beta-version "151.0.7922.47"
+chrome-stable-version: &chrome-stable-version "151.0.7922.71"
+chrome-beta-version: &chrome-beta-version "152.0.7977.8"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "151.0.7922.47"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "151.0.7922.71"
 firefox-stable-version: &firefox-stable-version "152.0.5"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -1760,7 +1760,8 @@ commands:
               - equal: [ false, << pipeline.parameters.run-proxy-disabled-tests >> ]
           steps:
             - run:
-                name: Skipping proxy-disabled coverage — set run-proxy-disabled-tests=true to enable
+                name: Skipping proxy-disabled coverage — set run-proxy-disabled-tests=true to
+                  enable
                 command: circleci-agent step halt
 
 jobs:
