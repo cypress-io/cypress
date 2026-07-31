@@ -391,6 +391,18 @@ describe('toFileServerUrl', () => {
     expect(toFileServerUrl('http://other.localhost:2020/file.csv', fileState)).to.be.undefined
   })
 
+  it('returns undefined for userinfo URLs that only prefix-match the origin', () => {
+    // http://localhost:2020@evil.com/... parses as host evil.com with userinfo
+    // "localhost:2020" — must not rewrite or the file-server auth token leaks.
+    expect(toFileServerUrl('http://localhost:2020@evil.com/cypress/fixtures/records.csv', fileState))
+    .to.be.undefined
+  })
+
+  it('preserves path, search, and hash when rewriting', () => {
+    expect(toFileServerUrl('http://localhost:2020/fixtures/a.csv?x=1#frag', fileState))
+    .to.equal('http://localhost:2021/fixtures/a.csv?x=1#frag')
+  })
+
   it('returns undefined when fileServer is missing', () => {
     expect(toFileServerUrl('http://localhost:2020/file.csv', {
       ...fileState,

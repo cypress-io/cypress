@@ -25,11 +25,26 @@ export interface RemoteState {
 
 /** Rewrite a strategy:'file' AUT-origin URL onto the dedicated file server. */
 export function toFileServerUrl (url: string, state: RemoteState): string | undefined {
-  if (state.strategy !== 'file' || !state.fileServer || !url.startsWith(state.origin)) {
+  if (state.strategy !== 'file' || !state.fileServer) {
     return undefined
   }
 
-  return url.replace(state.origin, state.fileServer)
+  let parsed: URL
+
+  try {
+    parsed = new URL(url)
+  } catch {
+    return undefined
+  }
+
+  // Compare URL.origin, not a string prefix — prefix matching treats
+  // userinfo like http://localhost:2020@evil.com as under the file origin
+  // and would rewrite (and authorize) a request to the attacker host.
+  if (parsed.origin !== state.origin) {
+    return undefined
+  }
+
+  return `${state.fileServer}${parsed.pathname}${parsed.search}${parsed.hash}`
 }
 
 interface RemoteStatesServerPorts {

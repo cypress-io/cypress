@@ -316,14 +316,16 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
 
       const encoded = transportResponse.fulfilled ? toIdentityResponse(transportResponse) : transportResponse
 
-      debugVerbose('encodeResponse %s %o', httpResponse.url, {
-        id: httpResponse.id,
-        fulfilled,
-        statusCode: encoded.responseCode,
-        bodyBytes: encoded.body ? Buffer.from(encoded.body, 'base64').length : undefined,
-        headerNames: encoded.responseHeaders?.map(({ name }) => name),
-        usedPausedResponse: !!pausedResponse,
-      })
+      if (debugVerbose.enabled) {
+        debugVerbose('encodeResponse %s %o', httpResponse.url, {
+          id: httpResponse.id,
+          fulfilled,
+          statusCode: encoded.responseCode,
+          bodyBytes: encoded.body ? Buffer.from(encoded.body, 'base64').length : undefined,
+          headerNames: encoded.responseHeaders?.map(({ name }) => name),
+          usedPausedResponse: !!pausedResponse,
+        })
+      }
 
       return encoded
     },
