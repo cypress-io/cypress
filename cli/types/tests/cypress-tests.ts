@@ -46,6 +46,14 @@ namespace CypressConfigTests {
   Cypress.config('includeShadowDom') // $ExpectType boolean
 }
 
+namespace CypressEnvTests {
+  // Just making sure these are valid - no real type safety
+  cy.env(['KEY_1', 'KEY_2']) // $ExpectType Chainable<Record<string, any>>
+  cy.env(['KEY_1', 'KEY_2'], { log: false }) // $ExpectType Chainable<Record<string, any>>
+  cy.env(['KEY_1', 'KEY_2'], { timeout: 1000 }) // $ExpectType Chainable<Record<string, any>>
+  cy.env<{ KEY_1: string }>(['KEY_1'], { log: false, timeout: 1000 }) // $ExpectType Chainable<{ KEY_1: string; }>
+}
+
 namespace CypressExposeTests {
   // Just making sure these are valid - no real type safety
   Cypress.expose('foo')
