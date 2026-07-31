@@ -49,6 +49,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
     projectRoot: instance.projectRoot,
     testingType: instance.testingType,
     browserAttached,
+    browserName: instance.browserName,
   }
 
   if (!browserAttached) {

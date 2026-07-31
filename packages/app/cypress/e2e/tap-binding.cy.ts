@@ -494,18 +494,21 @@ describe('tap binding pin lifecycle', () => {
       expect(Object.keys(pinOutcome.result.pinned)).to.deep.eq(['test', 'command', 'at'])
       expect(pinOutcome.result.pinned.test).to.eq(testId)
       expect(pinOutcome.result.pinned.command).to.eq(commandId)
-      expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, name: 'after' })
+      expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, total: 2, name: 'after' })
 
       // Re-running pin on the pinned command moves it in place.
       const moved = (await binding.exec('pin', { test: testId, command: commandId }, { at: 'before' })) as { result: Record<string, any> }
 
-      expect(moved.result.pinned.at).to.deep.eq({ index: 1, name: 'before' })
+      expect(moved.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
 
-      // run-state reports the pin while it is live.
+      // run-state reports the pin while it is live, as the row the reporter shows.
       const runState = (await binding.exec('run-state')) as { result: Record<string, any> }
 
       expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results', 'pinned'])
-      expect(runState.result.pinned).to.deep.eq({ command: commandId, at: { index: 1, name: 'before' } })
+      expect(runState.result.pinned.test).to.eq(testId)
+      expect(runState.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
+      expect(runState.result.pinned.command.id).to.eq(commandId)
+      expect(runState.result.pinned.command.name).to.eq('click')
     })
 
     // The pinned "before" snapshot is really rendered into the AUT frame.

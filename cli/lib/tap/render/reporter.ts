@@ -244,6 +244,15 @@ const renderSection = (section: Section, hookName: string, idWidth: number): str
   ]
 }
 
+// One hook section on its own, for the surfaces that show a slice of the command
+// log rather than a whole attempt (the pinned command). Ids align within the
+// rows given, since there is no wider log to line up with.
+export const renderCommandSection = (rows: TapReporterCommand[], hookName: string | undefined): string[] => {
+  const idWidth = Math.max(2, ...rows.map((command) => command.id.length))
+
+  return renderSection({ hookId: rows[0]?.hookId, rows }, hookName ?? 'commands', idWidth)
+}
+
 // The reporter's error panel: name, message, and the code frame with its
 // `>`-marked failing line.
 const renderError = (error: TapReporterError): string[] => {

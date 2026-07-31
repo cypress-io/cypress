@@ -2,7 +2,7 @@ import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
-import type { TapNetworkInfo, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
+import type { TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
 import type { CommandEntry, TapTestsRunner, TestDetailEntry, TestError, TestStateEntry, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
@@ -485,6 +485,25 @@ export const serializeReporterView = (test: SerializedTest, attempt: SerializedT
     commands: logs.filter((log) => !isRouteLog(log)).map((log) => serializeReporterCommand(log, ids)),
     error: attempt.err != null ? serializeReporterError(attempt.err) : undefined,
   })
+}
+
+/**
+ * The reporter row for one log of an attempt, with the hook section it renders
+ * under — what the `pin` and `status` commands report about the pinned command,
+ * so a pin reads exactly like its line in the reporter's command log.
+ */
+export const serializeReporterRow = (test: SerializedTest, attempt: SerializedTest, logId: string): { command: TapReporterCommand, hookName?: string } | undefined => {
+  const logs = orderedAttemptLogs(attempt)
+  const log = logs.find((entry) => entry.id === logId)
+
+  if (!log) {
+    return undefined
+  }
+
+  const command = serializeReporterCommand(log, tapCommandIds(logs))
+  const hookName = serializeReporterHooks(test, attempt).find(({ hookId }) => hookId === command.hookId)?.hookName
+
+  return omitNullish({ command, hookName })
 }
 
 export interface RunResults {
