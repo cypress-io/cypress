@@ -6,9 +6,13 @@ import { defineNativeCommand } from './definition'
 import type { TapSpecsQuery } from '@packages/cypress-instances'
 import type { TapCliOptions } from '../types'
 
-interface TapSpecEntry {
+/** One row of `cypress tap specs`: a runnable spec of the active project. */
+export interface TapSpecEntry {
+  /** POSIX project-relative spec path. */
   relativePath: string
+  /** Git's human-readable last-modified time (e.g. `2 hours ago`); absent without git info. */
   lastModified?: string
+  /** Machine-facing last-modified epoch; JSON-only, omitted from the human view. */
   lastModifiedTimestamp?: string
 }
 
