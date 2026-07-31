@@ -12,7 +12,6 @@ linux-x64:
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'v8-snapshot-force-norewrite-all-bundles', << pipeline.git.branch >> ]
-      - equal: [ 'mschile/issue-33926-webkit-automation-socket', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
