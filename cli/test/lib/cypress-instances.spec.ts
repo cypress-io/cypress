@@ -165,14 +165,22 @@ describe('lib/cypress-instances', () => {
       return JSON.parse(makeRecord({ serverPort, instanceId }))
     }
 
-    it('resolves the record with the live CDP state when the instance echoes the instanceId', async () => {
-      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL } })
+    it('resolves the record with the live CDP state and browser name when the instance echoes the instanceId', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL, browserName: 'Chrome' } })
       const record = recordFor(port)
 
       expect(await verifyInstanceRecord(record)).toEqual({
         ...record,
         cdpBrowserWsUrl: CDP_WS_URL,
+        browserName: 'Chrome',
       })
+    })
+
+    it('nulls the browser name when the CDP endpoint is unreachable', async () => {
+      const deadCdpPort = await getClosedPort()
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: `ws://127.0.0.1:${deadCdpPort}/devtools/browser/abc`, browserName: 'Chrome' } })
+
+      expect((await verifyInstanceRecord(recordFor(port)))!.browserName).toBeNull()
     })
 
     it('normalizes a missing or junk cdpBrowserWsUrl in the probe response to null', async () => {

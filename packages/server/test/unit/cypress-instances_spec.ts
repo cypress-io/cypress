@@ -116,23 +116,25 @@ describe('lib/cypress-instances', () => {
 
       const onDiskBefore = await fs.readJson(recordPath)
 
-      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc', 'Chrome')
 
       expect(cypressInstances.getCurrent()).to.deep.include({
         serverPort: 4455,
         cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
       })
 
       expect(await fs.readJson(recordPath)).to.deep.eq(onDiskBefore)
     })
 
-    it('clears the endpoint when the browser goes away', async () => {
+    it('clears the endpoint and browser name when the browser goes away', async () => {
       await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
 
-      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc', 'Chrome')
       cypressInstances.setCdpBrowserWsUrl(null)
 
       expect(cypressInstances.getCurrent()!.cdpBrowserWsUrl).to.be.null
+      expect(cypressInstances.getCurrent()!.browserName).to.be.null
     })
 
     it('is a no-op when no record has been written yet', () => {
@@ -158,6 +160,7 @@ describe('lib/cypress-instances', () => {
       expect(cypressInstances.getCurrent()).to.deep.eq({
         ...await fs.readJson(recordPath),
         cdpBrowserWsUrl: null,
+        browserName: null,
       })
     })
   })

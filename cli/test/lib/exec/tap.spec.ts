@@ -99,6 +99,7 @@ const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstan
   instanceId: 'inst-1',
   testingType: 'e2e',
   cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+  browserName: 'Chrome',
   ...overrides,
 })
 
@@ -400,35 +401,53 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
-    it('renders the live instances as a JSON summary and exits 0, without opening a session', async () => {
+    it('renders the live instances as a table and exits 0, without opening a session', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([
-        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x' }),
-        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null }),
+        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
       ])
 
       expect(await tap.start(['instances'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual([
-        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true },
-        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false },
-      ])
+
+      const output = logger.print()
+
+      expect(output).toContain('INSTANCES (2)')
+      expect(output).toContain('111')
+      expect(output).toContain('/projects/app')
+      expect(output).toContain('Chrome')
+      expect(() => JSON.parse(output)).toThrow()
 
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw instance summaries with --json', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([
+        liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
+        liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
+      ])
+
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([
+        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome' },
+        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null },
+      ])
     })
 
     it('reports the testing type as null for an instance that has not chosen one', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, testingType: null })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0].testingType).toBeNull()
     })
 
     it('never exposes the internal serverPort', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111, serverPort: 49200 })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0]).not.toHaveProperty('serverPort')
     })
 
@@ -483,6 +502,7 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
@@ -498,28 +518,40 @@ describe('lib/exec/tap', () => {
       vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'none'))
 
       expect(await tap.start(['status'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+
+      const output = logger.print()
+
+      expect(output).toContain('not connected')
+      expect(() => JSON.parse(output)).toThrow()
       // Nothing live means nothing to connect to.
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw status object with --json', async () => {
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'none'))
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
     it('reports "not connected" for a stale discovery record too', async () => {
       vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('STALE_INSTANCE', 'stale'))
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
     it('reports "browser not selected" without opening a session when no browser is attached', async () => {
-      mockLiveResolved(liveInstance({ pid: 111, cdpBrowserWsUrl: null }))
+      mockLiveResolved(liveInstance({ pid: 111, cdpBrowserWsUrl: null, browserName: null }))
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'browser not selected',
         pid: 111,
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: false,
+        browserName: null,
       })
 
       // The early lifecycle is reported from discovery alone.
@@ -530,13 +562,14 @@ describe('lib/exec/tap', () => {
       mockLiveResolved(liveInstance())
       mockSession(schema, { result: { spec: null, totalSpecs: 3 } } satisfies TapExecResult)
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'spec not selected',
         pid: 4242,
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: true,
+        browserName: 'Chrome',
         totalSpecs: 3,
       })
     })
@@ -553,13 +586,14 @@ describe('lib/exec/tap', () => {
         },
       } satisfies TapExecResult)
 
-      expect(await tap.start(['status'], {})).toBe(0)
+      expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
         status: 'running',
         pid: 4242,
         projectRoot: '/projects/app',
         testingType: 'e2e',
         browserAttached: true,
+        browserName: 'Chrome',
         totalSpecs: 3,
         spec: 'cypress/e2e/login.cy.ts',
         totalTests: 5,
@@ -624,6 +658,7 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
@@ -635,7 +670,7 @@ describe('lib/exec/tap', () => {
       return selection
     }
 
-    it('renders the live spec list as JSON and exits 0, without opening a session', async () => {
+    it('renders the live spec list as a headed list and exits 0, without opening a session', async () => {
       mockLiveResolved(liveInstance())
       vi.mocked(queryInstanceGraphql).mockResolvedValue({
         currentProject: { specs: [
@@ -645,15 +680,34 @@ describe('lib/exec/tap', () => {
       })
 
       expect(await tap.start(['specs'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('SPECS (2)')
+      expect(output).toContain('cypress/e2e/a.cy.ts')
+      expect(output).toContain('2 hours ago')
+      expect(() => JSON.parse(output)).toThrow()
+
+      // The spec list comes from the instance's data layer, not the browser.
+      expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw spec entries (with git timestamps) via --json', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/a.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/b.cy.ts', gitInfo: null },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       // git's last-modified (human-readable + raw timestamp) rides along when
       // present, omitted when the spec has none.
       expect(JSON.parse(logger.print())).toEqual([
         { relativePath: 'cypress/e2e/a.cy.ts', lastModified: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' },
         { relativePath: 'cypress/e2e/b.cy.ts' },
       ])
-
-      // The spec list comes from the instance's data layer, not the browser.
-      expect(withTapSession).not.toHaveBeenCalled()
     })
 
     it('lists specs even when the instance has no browser attached', async () => {
@@ -662,7 +716,7 @@ describe('lib/exec/tap', () => {
         currentProject: { specs: [{ relative: 'cypress/e2e/a.cy.ts' }] },
       })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/a.cy.ts' }])
     })
 
@@ -672,7 +726,7 @@ describe('lib/exec/tap', () => {
         currentProject: { specs: [{ relative: 'cypress\\e2e\\win.cy.ts', gitInfo: null }] },
       })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/win.cy.ts' }])
     })
 
@@ -699,7 +753,7 @@ describe('lib/exec/tap', () => {
       mockLiveResolved(liveInstance())
       vi.mocked(queryInstanceGraphql).mockResolvedValue({ currentProject: null })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([])
     })
 
@@ -715,7 +769,7 @@ describe('lib/exec/tap', () => {
         ] },
       })
 
-      expect(await tap.start(['specs'], {})).toBe(0)
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
       // Non-string git fields are dropped, not rendered as junk.
       expect(JSON.parse(logger.print())).toEqual([
         { relativePath: 'cypress/e2e/no-git.cy.ts' },
@@ -772,6 +826,7 @@ describe('lib/exec/tap', () => {
       instanceId: 'inst-1',
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
       ...overrides,
     })
 
@@ -795,15 +850,29 @@ describe('lib/exec/tap', () => {
       })
     }
 
-    it('triggers the run and renders the launch outcome as JSON, without opening a session', async () => {
+    it('triggers the run and renders the launch outcome, without opening a session', async () => {
       mockLiveResolved(liveInstance())
       mockInstanceGraphql()
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
-      expect(JSON.parse(logger.print())).toEqual({ spec: 'cypress/e2e/login.cy.ts', testingType: 'e2e', browser: 'Chrome' })
+
+      const output = logger.print()
+
+      expect(output).toContain('cypress/e2e/login.cy.ts')
+      expect(output).toContain('e2e')
+      expect(output).toContain('Chrome')
+      expect(() => JSON.parse(output)).toThrow()
 
       // The run is driven from the instance's data layer, not over a CDP session.
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw launch outcome with --json', async () => {
+      mockLiveResolved(liveInstance())
+      mockInstanceGraphql()
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ spec: 'cypress/e2e/login.cy.ts', testingType: 'e2e', browser: 'Chrome' })
     })
 
     it('sends the matched spec\'s instance-reported absolute path to the TapRunSpec operation', async () => {
@@ -1031,9 +1100,6 @@ describe('lib/exec/tap', () => {
           inspect [options] <selector>    inspect the first element matching a
                                           selector: its tag, attributes, computed
                                           styles, box model, and accessibility node
-          tests [options] [test]          list the tests of the active run and their
-                                          state, or detail one by id
-          commands [options]              list the command log entries of a test
           command [options]               detail one command log entry of a test, or
                                           show its console properties with --props
           reporter [options]              render a test’s full reporter view — its
@@ -1063,16 +1129,23 @@ describe('lib/exec/tap', () => {
     it('renders the baked-in per-command help when no instance is found', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
-      expect(await tap.start(['tests', '--help'], {})).toBe(0)
+      expect(await tap.start(['command', '--help'], {})).toBe(0)
       expect(logger.print()).toMatchInlineSnapshot(`
-        "Usage: cypress tap tests [options] [test]
+        "Usage: cypress tap command [options]
 
-        list the tests of the active run and their state, or detail one by id
-
-        Arguments:
-          test                 test id, as listed by the tests command
+        detail one command log entry of a test, or show its console properties with --props
 
         Options:
+          --test <test>        test id, as listed by the reporter command
+          --command <command>  command id, as listed by the reporter command
+          --props              show the command’s console properties instead of its log
+                               entry. A value long enough to bury the rest of the
+                               payload — a response body, a long string — is named by
+                               its length rather than returned; pass --full-report for
+                               its content
+          --full-report        return every console property in full, however long,
+                               instead of naming the long ones by their length;
+                               requires --props
           --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
                                latest
           --instance <pid>     target a specific running Cypress instance by its server

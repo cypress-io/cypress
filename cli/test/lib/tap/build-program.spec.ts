@@ -193,17 +193,17 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' }, {})
   })
 
-  it('declares and forwards the commands listing options from the shared contract', () => {
+  it('declares and forwards the reporter listing options from the shared contract', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
-    const help = subcommand(program, 'commands').helpInformation()
+    const help = subcommand(program, 'reporter').helpInformation()
 
     expect(help).toContain('--test <test>')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['commands', '--test', 'r2', '--attempt', '1'], { from: 'user' })
+    program.parse(['reporter', '--test', 'r2', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('commands', {}, { test: 'r2', attempt: '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { test: 'r2', attempt: '1' }, {})
   })
 
   it('declares and forwards command --command with the --props and --full-report options from the shared contract', () => {

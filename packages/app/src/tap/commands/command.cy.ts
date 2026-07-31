@@ -9,7 +9,9 @@ describe('tap/commands/command', () => {
   // command are both row 1, the duplicate the resolution rules have to settle.
   // r2's failed first attempt has its own command log, distinct from the passing
   // latest attempt, so attempt selection is observable. r4 stands in for a test
-  // the driver evicted from memory (numTestsKeptInMemory).
+  // the driver evicted from memory (numTestsKeptInMemory). --command takes the id
+  // the reporter displays — a per-section row number — so these logs are
+  // addressed as "1" and "2" rather than by the driver log ids they carry here.
   const TESTS_STATE = {
     r2: {
       id: 'r2',
@@ -75,7 +77,7 @@ describe('tap/commands/command', () => {
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'nope', command: '1' })).to.deep.eq({
       error: {
         code: 'TEST_NOT_FOUND',
-        message: 'no test of this run matches the id "nope" — use the tests command to list this run’s tests',
+        message: 'no test of this run matches the id "nope" — use the reporter command to list this run’s tests',
       },
     })
   })
@@ -135,7 +137,7 @@ describe('tap/commands/command', () => {
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '9', props: 'true', attempt: '1' })).to.deep.eq({
       error: {
         code: 'COMMAND_NOT_FOUND',
-        message: 'no command of this test matches the id "9" — use the commands command to list this test’s commands',
+        message: 'no command of this test matches the id "9" — use the reporter command (with --test) to list this test’s commands',
       },
     })
 
@@ -161,6 +163,7 @@ describe('tap/commands/command', () => {
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '1', props: 'true' })
 
+    // The displayed id resolves to the driver log id the runner keys on.
     expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2', undefined)
     expect(outcome).to.deep.eq({ result: consoleProps })
     expect(JSON.parse(JSON.stringify(outcome))).to.deep.eq(outcome)

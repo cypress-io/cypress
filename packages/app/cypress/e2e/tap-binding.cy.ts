@@ -8,6 +8,74 @@ const getBinding = (win: Cypress.AUTWindow) => {
   return binding
 }
 
+type TapBinding = ReturnType<typeof getBinding>
+
+const reporterResult = async (binding: TapBinding, options: Record<string, string> = {}): Promise<Record<string, any>> => {
+  const outcome = await binding.exec('reporter', {}, options)
+
+  if (!('result' in outcome)) {
+    throw new Error(`the reporter command is expected to succeed, got ${JSON.stringify(outcome)}`)
+  }
+
+  return (outcome as { result: Record<string, any> }).result
+}
+
+// Test ids come from the reporter's spec overview. It groups tests by suite
+// section, so flatten it back to document order to pick one out of a run.
+const specTests = async (binding: TapBinding): Promise<Array<Record<string, any>>> => {
+  const view = await reporterResult(binding)
+
+  return [...view.tests, ...view.suites.flatMap((suite: Record<string, any>) => suite.tests)]
+}
+
+// Command ids come from the reporter view of a single test — its command log.
+const reporterCommands = async (binding: TapBinding, options: Record<string, string>): Promise<Array<Record<string, any>>> => {
+  return (await reporterResult(binding, options)).commands
+}
+
+// Each fixture spec holds a single test, so its id plus its command log is the
+// starting point for anything addressing a command.
+const firstTestCommands = async (binding: TapBinding): Promise<{ testId: string, commands: Array<Record<string, any>> }> => {
+  const tests = await specTests(binding)
+  const testId = tests[0].id as string
+
+  return { testId, commands: await reporterCommands(binding, { test: testId }) }
+}
+
+const commandNamed = (commands: Array<Record<string, any>>, name: string): Record<string, any> => {
+  const command = commands.find((entry) => entry.name === name)
+
+  expect(command, `the ${name} command`).to.exist
+
+  return command!
+}
+
+const ENTRY_KEYS = ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp']
+const NETWORK_KEYS = ['method', 'url', 'indicator', 'status', 'stubbed', 'numResponses', 'alias']
+
+const withinKeys = (allowed: string[]) => {
+  return (keys: string[]) => keys.every((key) => allowed.includes(key))
+}
+
+// Reads every row of a test's command log back through the singular `command`,
+// the one command that serves the lean entry contract now that the plural
+// listing is gone.
+const leanEntries = async (binding: TapBinding, testId: string, rows: Array<Record<string, any>>): Promise<Array<Record<string, any>>> => {
+  const entries: Array<Record<string, any>> = []
+
+  for (const row of rows) {
+    const outcome = await binding.exec('command', {}, { test: testId, command: row.id as string })
+
+    if (!('result' in outcome)) {
+      throw new Error(`row ${row.id} is expected to resolve, got ${JSON.stringify(outcome)}`)
+    }
+
+    entries.push((outcome as { result: Record<string, any> }).result)
+  }
+
+  return entries
+}
+
 describe('tap binding', () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
@@ -26,10 +94,15 @@ describe('tap binding', () => {
       }
 
       const schema = await binding.getSchema()
+      const names = schema.commands.map((command) => command.name)
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['tests', 'commands', 'command', 'reporter'])
-      expect(schema.commands.map((command) => command.name)).not.to.include('console-props')
+      expect(names).to.include.members(['command', 'reporter', 'pin', 'run-state'])
+      expect(names).not.to.include('console-props')
+      // The two list subcommands folded into reporter: its spec overview lists
+      // the run's tests, and its --test view lists one test's command log.
+      expect(names).not.to.include('tests')
+      expect(names).not.to.include('commands')
 
       const unknown = await binding.exec('not-a-command')
 
@@ -40,15 +113,11 @@ describe('tap binding', () => {
       expect((consolePropsWithoutCommand as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
       // No spec has run yet, so there is no run to read — a domain failure.
-      const testsBeforeRun = await binding.exec('tests')
+      const specViewBeforeRun = await binding.exec('reporter')
 
-      expect((testsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      expect((specViewBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      const commandsBeforeRun = await binding.exec('commands', {}, { test: 'r1' })
-
-      expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
-
-      const consolePropsBeforeRun = await binding.exec('command', {}, { test: 'r1', command: 'log-1', props: 'true' })
+      const consolePropsBeforeRun = await binding.exec('command', {}, { test: 'r1', command: '1', props: 'true' })
 
       expect((consolePropsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
@@ -79,78 +148,81 @@ describe('tap binding', () => {
     })
   })
 
-  it('reads tests, commands, and run-state for a completed run', () => {
+  it('reads the reporter view and run-state for a completed run', () => {
     cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js')
 
     cy.waitForSpecToFinish({ passCount: 1 })
-    cy.contains('Dom Content').should('be.visible')
+    cy.reporter().contains('Dom Content').should('be.visible')
 
     cy.window().then(async (win) => {
-      const outcome = await getBinding(win).exec('tests')
+      const binding = getBinding(win)
 
-      expect('result' in outcome).to.eq(true)
+      const specView = await reporterResult(binding)
 
-      const tests = (outcome as { result: Array<Record<string, unknown>> }).result
+      expect(specView.spec).to.eq('cypress/e2e/dom-content.spec.js')
+      expect(specView.stats).to.include({ passed: 1, failed: 0 })
+      // The fixture's one test lives in a suite, so the overview groups it there
+      // rather than listing it at the root.
+      expect(specView.tests).to.deep.eq([])
+      expect(specView.suites.map((suite: Record<string, any>) => suite.title)).to.deep.eq(['Dom Content'])
+
+      const tests = [...specView.tests, ...specView.suites.flatMap((suite: Record<string, any>) => suite.tests)]
 
       expect(tests).to.have.length.greaterThan(0)
 
       for (const test of tests) {
-        expect(Object.keys(test), `entry ${test.id}`).to.deep.eq(['id', 'title', 'duration', 'state', 'retries'])
+        expect(Object.keys(test), `entry ${test.id}`).to.deep.eq(['id', 'title', 'state', 'duration', 'retries'])
         expect(test.state).to.eq('passed')
         expect(test.duration).to.be.a('number')
         expect(test.retries).to.eq(0)
       }
 
-      const detailOutcome = await getBinding(win).exec('tests', { test: tests[0].id as string })
-
-      expect('result' in detailOutcome).to.eq(true)
-
-      const detail = (detailOutcome as { result: Record<string, unknown> }).result
-
-      expect(detail.id).to.eq(tests[0].id)
-      expect(detail.fullTitle).to.eq('Dom Content > renders the test content')
-      expect(detail.state).to.eq('passed')
-      expect(detail.timings).to.be.an('object')
-      expect(detail.error).to.be.undefined
-
-      const missingDetail = await getBinding(win).exec('tests', { test: 'not-a-test' })
-
-      expect((missingDetail as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
-
       const testId = tests[0].id as string
 
-      const commandsOutcome = await getBinding(win).exec('commands', {}, { test: testId })
+      const view = await reporterResult(binding, { test: testId })
 
-      expect('result' in commandsOutcome).to.eq(true)
+      expect(view.test).to.deep.eq({
+        id: testId,
+        title: 'renders the test content',
+        fullTitle: 'Dom Content > renders the test content',
+        state: 'passed',
+      })
 
-      const commands = (commandsOutcome as { result: Array<Record<string, unknown>> }).result
+      // The fixture has no before/after hooks, so the only section is the
+      // synthesized test body — the reporter's bucket for the test's own commands.
+      expect(view.hooks).to.deep.eq([{ hookId: testId, hookName: 'test body' }])
+      expect(view.error).to.be.undefined
+
+      const missingTest = await binding.exec('reporter', {}, { test: 'not-a-test' })
+
+      expect((missingTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      const commands = view.commands as Array<Record<string, any>>
 
       expect(commands).to.have.length.greaterThan(0)
 
-      for (const command of commands) {
-        expect(Object.keys(command), `command ${command.id}`).to.include.members(['id', 'name'])
-        // cy.visit's document load logs a request row, so `network` is part of
-        // the contract even here; the dedicated network spec below asserts its shape.
-        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp'].includes(key)))
+      // Every row the reporter lists is addressable by its displayed id, and
+      // reads back as a lean entry that stays within the wire contract.
+      // cy.visit's document load logs a request row, so `network` is part of the
+      // contract even here; the dedicated network spec below asserts its shape.
+      for (const entry of await leanEntries(binding, testId, commands)) {
+        expect(Object.keys(entry), `command ${entry.id}`).to.include.members(['id', 'name'])
+        expect(Object.keys(entry), `command ${entry.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
       }
 
-      const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
-
-      expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
-
-      const missingConsolePropsTest = await getBinding(win).exec('command', {}, { test: 'not-a-test', command: commands[0].id as string, props: 'true' })
+      const missingConsolePropsTest = await binding.exec('command', {}, { test: 'not-a-test', command: commands[0].id as string, props: 'true' })
 
       expect((missingConsolePropsTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
-      const missingConsolePropsCommand = await getBinding(win).exec('command', {}, { test: testId, command: 'not-a-command', props: 'true' })
+      const missingConsolePropsCommand = await binding.exec('command', {}, { test: testId, command: 'not-a-command', props: 'true' })
 
       expect((missingConsolePropsCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
 
-      const missingSelectedCommand = await getBinding(win).exec('command', {}, { test: testId, command: 'not-a-command' })
+      const missingSelectedCommand = await binding.exec('command', {}, { test: testId, command: 'not-a-command' })
 
       expect((missingSelectedCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
 
-      const runStateOutcome = await getBinding(win).exec('run-state')
+      const runStateOutcome = await binding.exec('run-state')
 
       expect('result' in runStateOutcome).to.eq(true)
 
@@ -179,7 +251,7 @@ describe('tap binding with a retrying spec', () => {
     cy.specsPageIsVisible()
   })
 
-  it('selects a retried test’s attempt via --attempt on tests and commands', () => {
+  it('selects a retried test’s attempt via --attempt', () => {
     cy.visitApp('/specs/runner?file=cypress/e2e/retries.cy.js')
 
     // The test fails on its first attempt, then passes on the retry.
@@ -188,49 +260,47 @@ describe('tap binding with a retrying spec', () => {
     cy.window().then(async (win) => {
       const binding = getBinding(win)
 
-      const listOutcome = await binding.exec('tests')
-      const tests = (listOutcome as { result: Array<Record<string, unknown>> }).result
+      const tests = await specTests(binding)
       const testId = tests[0].id as string
 
-      // One retry was taken, so two attempts exist.
+      // One retry was taken, so two attempts exist — the overview reports both.
       expect(tests[0].state).to.eq('passed')
       expect(tests[0].retries).to.eq(1)
+      expect(tests[0].attempts.map((attempt: Record<string, unknown>) => attempt.state)).to.deep.eq(['failed', 'passed'])
 
-      const latest = (await binding.exec('tests', { test: testId })) as { result: Record<string, unknown> }
+      const latest = await reporterResult(binding, { test: testId })
 
-      expect(latest.result.state).to.eq('passed')
-      expect(latest.result.error).to.be.undefined
+      expect(latest.test.state).to.eq('passed')
+      // The passing latest attempt has no error panel.
+      expect(latest.error).to.be.undefined
 
-      const first = (await binding.exec('tests', { test: testId }, { attempt: '1' })) as { result: Record<string, unknown> }
+      const first = await reporterResult(binding, { test: testId, attempt: '1' })
 
-      expect(first.result.id).to.eq(testId)
-      expect(first.result.fullTitle).to.eq(latest.result.fullTitle)
-      expect(first.result.state).to.eq('failed')
-      expect(first.result.error).to.be.an('object')
+      expect(first.test.id).to.eq(testId)
+      expect(first.test.fullTitle).to.eq(latest.test.fullTitle)
+      expect(first.test.state).to.eq('failed')
+      expect(Object.keys(first.error)).to.satisfy(withinKeys(['name', 'message', 'stack', 'codeFrame']))
+      expect(first.error.message).to.be.a('string')
 
-      const second = (await binding.exec('tests', { test: testId }, { attempt: '2' })) as { result: Record<string, unknown> }
+      const second = await reporterResult(binding, { test: testId, attempt: '2' })
 
-      expect(second.result).to.deep.eq(latest.result)
+      expect(second).to.deep.eq(latest)
 
-      const outOfRange = await binding.exec('tests', { test: testId }, { attempt: '3' })
+      const outOfRange = await binding.exec('reporter', {}, { test: testId, attempt: '3' })
 
       expect((outOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
 
-      const listWithAttempt = await binding.exec('tests', {}, { attempt: '1' })
+      // --attempt selects one test's attempt, so it has no meaning on the
+      // spec-level overview.
+      const overviewWithAttempt = await binding.exec('reporter', {}, { attempt: '1' })
 
-      expect((listWithAttempt as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
-
-      const latestCommands = (await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }
-      const firstCommands = (await binding.exec('commands', {}, { test: testId, attempt: '1' })) as { result: Array<Record<string, unknown>> }
-
-      expect(latestCommands.result).to.have.length.greaterThan(0)
-      expect(firstCommands.result).to.have.length.greaterThan(0)
+      expect((overviewWithAttempt as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
 
       // The failing first attempt has a failed command; the passing latest has none.
-      expect(firstCommands.result.some((command) => command.state === 'failed')).to.eq(true)
-      expect(latestCommands.result.every((command) => command.state !== 'failed')).to.eq(true)
+      expect(first.commands.some((command: Record<string, unknown>) => command.state === 'failed')).to.eq(true)
+      expect(latest.commands.every((command: Record<string, unknown>) => command.state !== 'failed')).to.eq(true)
 
-      const failedCommand = firstCommands.result.find((command) => command.state === 'failed')
+      const failedCommand = (first.commands as Array<Record<string, any>>).find((command) => command.state === 'failed')
 
       expect(failedCommand, 'failed command from attempt 1').to.exist
 
@@ -240,7 +310,11 @@ describe('tap binding with a retrying spec', () => {
         attempt: '1',
       })
 
-      expect((firstAttemptCommand as { result: Record<string, unknown> }).result).to.deep.eq(failedCommand)
+      const entry = (firstAttemptCommand as { result: Record<string, any> }).result
+
+      // The lean entry is the reporter's row narrowed to the wire contract.
+      expect(Object.keys(entry)).to.satisfy(withinKeys(ENTRY_KEYS))
+      expect(entry).to.include({ id: failedCommand!.id, name: failedCommand!.name, state: 'failed' })
 
       const firstAttemptConsoleProps = await binding.exec('command', {}, {
         test: testId,
@@ -255,32 +329,9 @@ describe('tap binding with a retrying spec', () => {
         type: 'command',
       })
 
-      const commandsOutOfRange = await binding.exec('commands', {}, { test: testId, attempt: '3' })
-
-      expect((commandsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
-
       const consolePropsOutOfRange = await binding.exec('command', {}, { test: testId, command: failedCommand!.id as string, props: 'true', attempt: '3' })
 
       expect((consolePropsOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
-
-      // reporter selects attempts through the same machinery: the first
-      // attempt's view carries its failed state, its error panel, and
-      // out-of-range still fails.
-      const firstReporter = (await binding.exec('reporter', {}, { test: testId, attempt: '1' })) as { result: Record<string, any> }
-
-      expect(firstReporter.result.test.state).to.eq('failed')
-      expect(firstReporter.result.commands.some((command: Record<string, unknown>) => command.state === 'failed')).to.eq(true)
-      expect(Object.keys(firstReporter.result.error)).to.satisfy((keys: string[]) => keys.every((key) => ['name', 'message', 'stack', 'codeFrame'].includes(key)))
-      expect(firstReporter.result.error.message).to.be.a('string')
-
-      // The passing latest attempt has no error panel.
-      const latestReporter = (await binding.exec('reporter', {}, { test: testId })) as { result: Record<string, unknown> }
-
-      expect(latestReporter.result.error).to.be.undefined
-
-      const reporterOutOfRange = await binding.exec('reporter', {}, { test: testId, attempt: '3' })
-
-      expect((reporterOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     })
   })
 })
@@ -301,21 +352,25 @@ describe('tap binding console properties', () => {
 
     cy.window().then(async (win) => {
       const binding = getBinding(win)
-      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
-      const testId = tests[0].id as string
-      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
+      const { testId, commands } = await firstTestCommands(binding)
       const getToggle = commands.find((command) => command.name === 'get' && command.message === '#toggle')
-      const emptyConsoleProps = commands.find((command) => command.name === 'empty-console-props')
+      const emptyConsoleProps = commandNamed(commands, 'empty-console-props')
 
       expect(getToggle, 'the get #toggle command').to.exist
-      expect(emptyConsoleProps, 'the empty console props log').to.exist
 
       const selectedCommand = await binding.exec('command', {}, { test: testId, command: getToggle!.id as string })
 
       const selected = (selectedCommand as { result: Record<string, unknown> }).result
 
       expect(Object.keys(selected)).to.deep.eq(['id', 'name', 'message', 'state', 'type'])
-      expect(selected).to.deep.eq(getToggle)
+      // The lean entry is the reporter's row narrowed to the wire contract.
+      expect(selected).to.deep.eq({
+        id: getToggle!.id,
+        name: getToggle!.name,
+        message: getToggle!.message,
+        state: getToggle!.state,
+        type: getToggle!.type,
+      })
 
       const missingCommand = await binding.exec('command', {}, { test: testId, props: 'true' })
 
@@ -339,7 +394,7 @@ describe('tap binding console properties', () => {
 
       expect(JSON.parse(JSON.stringify(consoleProps))).to.deep.eq(consoleProps)
 
-      const unavailable = await binding.exec('command', {}, { test: testId, command: emptyConsoleProps!.id as string, props: 'true' })
+      const unavailable = await binding.exec('command', {}, { test: testId, command: emptyConsoleProps.id as string, props: 'true' })
 
       expect((unavailable as { error: { code: string } }).error.code).to.eq('CONSOLE_PROPS_UNAVAILABLE')
     })
@@ -352,14 +407,8 @@ describe('tap binding console properties', () => {
 
     cy.window().then(async (win) => {
       const binding = getBinding(win)
-      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
-      const testId = tests[0].id as string
-      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
-      const deep = commands.find((command) => command.name === 'deep-console-props')
-
-      expect(deep, 'the deep console props log').to.exist
-
-      const commandId = deep!.id as string
+      const { testId, commands } = await firstTestCommands(binding)
+      const commandId = commandNamed(commands, 'deep-console-props').id as string
       const propsOf = async (options: Record<string, string> = {}) => {
         const result = await binding.exec('command', {}, { test: testId, command: commandId, props: 'true', ...options })
 
@@ -417,20 +466,15 @@ describe('tap binding pin lifecycle', () => {
     })
   }
 
-  // Resolves the run's real test and click-command ids and pins the click's
-  // "before" snapshot — the pre-click DOM, distinguishable from the live page.
+  // Resolves the run's real test and click-command ids from the reporter and
+  // pins the click's "before" snapshot — the pre-click DOM, distinguishable
+  // from the live page.
   const pinClickAtBefore = () => {
     cy.window().then(async (win) => {
       const binding = getBinding(win)
 
-      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
-      const testId = tests[0].id as string
-      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
-      const click = commands.find((command) => command.name === 'click')
-
-      expect(click, 'the click command').to.exist
-
-      const outcome = await binding.exec('pin', { test: testId, command: click!.id as string }, { at: 'before' })
+      const { testId, commands } = await firstTestCommands(binding)
+      const outcome = await binding.exec('pin', { test: testId, command: commandNamed(commands, 'click').id as string }, { at: 'before' })
 
       expect('result' in outcome).to.eq(true)
     })
@@ -465,14 +509,8 @@ describe('tap binding pin lifecycle', () => {
     cy.window().then(async (win) => {
       const binding = getBinding(win)
 
-      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
-      const testId = tests[0].id as string
-      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, unknown>> }).result
-      const click = commands.find((command) => command.name === 'click')
-
-      expect(click, 'the click command').to.exist
-
-      const commandId = click!.id as string
+      const { testId, commands } = await firstTestCommands(binding)
+      const commandId = commandNamed(commands, 'click').id as string
 
       const missingTest = await binding.exec('pin', { test: 'not-a-test', command: commandId })
 
@@ -491,21 +529,28 @@ describe('tap binding pin lifecycle', () => {
       const pinOutcome = (await binding.exec('pin', { test: testId, command: commandId })) as { result: Record<string, any> }
 
       expect(Object.keys(pinOutcome.result)).to.satisfy((keys: string[]) => keys.every((key) => ['pinned', 'url'].includes(key)))
-      expect(Object.keys(pinOutcome.result.pinned)).to.deep.eq(['test', 'command', 'at'])
+      expect(Object.keys(pinOutcome.result.pinned)).to.satisfy((keys: string[]) => keys.every((key) => ['test', 'command', 'hookName', 'at'].includes(key)))
       expect(pinOutcome.result.pinned.test).to.eq(testId)
-      expect(pinOutcome.result.pinned.command).to.eq(commandId)
-      expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, name: 'after' })
+      // The pinned command is reported as its reporter row, the same shape run-state
+      // reports, named by the hook section that row renders under.
+      expect(pinOutcome.result.pinned.command.id).to.eq(commandId)
+      expect(pinOutcome.result.pinned.command.name).to.eq('click')
+      expect(pinOutcome.result.pinned.hookName).to.eq('test body')
+      expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, total: 2, name: 'after' })
 
       // Re-running pin on the pinned command moves it in place.
       const moved = (await binding.exec('pin', { test: testId, command: commandId }, { at: 'before' })) as { result: Record<string, any> }
 
-      expect(moved.result.pinned.at).to.deep.eq({ index: 1, name: 'before' })
+      expect(moved.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
 
-      // run-state reports the pin while it is live.
+      // run-state reports the pin while it is live, as the row the reporter shows.
       const runState = (await binding.exec('run-state')) as { result: Record<string, any> }
 
       expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'totalTests', 'results', 'pinned'])
-      expect(runState.result.pinned).to.deep.eq({ command: commandId, at: { index: 1, name: 'before' } })
+      expect(runState.result.pinned.test).to.eq(testId)
+      expect(runState.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
+      expect(runState.result.pinned.command.id).to.eq(commandId)
+      expect(runState.result.pinned.command.name).to.eq('click')
     })
 
     // The pinned "before" snapshot is really rendered into the AUT frame.
@@ -548,7 +593,7 @@ describe('tap binding pin lifecycle', () => {
     // Clicking the pinned command in the reporter unpins through a different
     // event path than the control above — it must restore the DOM all the same.
     pinClickAtBefore()
-    cy.contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
+    cy.reporter().contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
     expectReleased()
   })
 })
@@ -565,14 +610,7 @@ describe('tap binding with network activity', () => {
     cy.specsPageIsVisible()
   })
 
-  const ENTRY_KEYS = ['id', 'name', 'message', 'state', 'type', 'network', 'cleanedUp']
-  const NETWORK_KEYS = ['method', 'url', 'indicator', 'status', 'stubbed', 'numResponses', 'alias']
-
-  const withinKeys = (allowed: string[]) => {
-    return (keys: string[]) => keys.every((key) => allowed.includes(key))
-  }
-
-  it('surfaces high-level network detail on request, intercept, and cy.request rows', () => {
+  it('surfaces high-level network detail on request and cy.request rows', () => {
     cy.visitApp('/specs/runner?file=cypress/e2e/network.cy.js')
 
     cy.waitForSpecToFinish({ passCount: 1 })
@@ -580,38 +618,28 @@ describe('tap binding with network activity', () => {
     cy.window().then(async (win) => {
       const binding = getBinding(win)
 
-      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
-      const testId = tests[0].id as string
+      const { testId, commands } = await firstTestCommands(binding)
 
-      const commands = ((await binding.exec('commands', {}, { test: testId })) as { result: Array<Record<string, any>> }).result
+      // The cy.intercept registration is bucketed under routes, not the command
+      // log, so the ROUTES table is where it is asserted (see the reporter view
+      // test below); every row here is a command with an id of its own.
+      const entries = await leanEntries(binding, testId, commands)
 
       // Nothing internal leaks: every row stays within the wire contract, and
       // every network object stays within its typed field set.
-      for (const command of commands) {
-        expect(Object.keys(command), `row ${command.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
+      for (const entry of entries) {
+        expect(Object.keys(entry), `row ${entry.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
 
-        if (command.network) {
-          expect(Object.keys(command.network), `network ${command.id}`).to.satisfy(withinKeys(NETWORK_KEYS))
+        if (entry.network) {
+          expect(Object.keys(entry.network), `network ${entry.id}`).to.satisfy(withinKeys(NETWORK_KEYS))
         }
       }
 
-      expect(commands.filter((command) => command.network), 'rows carrying network detail').to.have.length.greaterThan(0)
+      expect(entries.filter((entry) => entry.network), 'rows carrying network detail').to.have.length.greaterThan(0)
 
-      // The cy.intercept registration is bucketed under routes; it merges into
-      // the command log as a route row with the stubbed flag, matcher, alias,
-      // and match count.
-      const route = commands.find((command) => command.name === 'route')
-
-      expect(route, 'the intercept route row').to.exist
-      expect(route!.network.method).to.eq('GET')
-      expect(route!.network.url).to.contain('/api/users')
-      expect(route!.network.stubbed).to.eq(true)
-      expect(route!.network.alias).to.eq('getUsers')
-      expect(route!.network.numResponses).to.be.greaterThan(0)
-
-      // The stubbed request itself: served by the stub, so it did not go to
-      // origin. Carries method, URL, the reporter's status indicator, and alias.
-      const stubbed = commands.find((command) => command.name === 'request' && command.network?.stubbed === true && command.network?.alias === 'getUsers')
+      // The stubbed request: served by the stub, so it did not go to origin.
+      // Carries method, URL, the reporter's status indicator, and alias.
+      const stubbed = entries.find((entry) => entry.name === 'request' && entry.network?.stubbed === true && entry.network?.alias === 'getUsers')
 
       expect(stubbed, 'the stubbed request row').to.exist
       expect(stubbed!.network.method).to.eq('GET')
@@ -620,7 +648,7 @@ describe('tap binding with network activity', () => {
       expect(stubbed!.message, 'the reporter display message').to.contain('/api/users')
 
       // A real request that went to origin (the page fetching itself).
-      const real = commands.find((command) => command.name === 'request' && command.network?.stubbed === false)
+      const real = entries.find((entry) => entry.name === 'request' && entry.network?.stubbed === false)
 
       expect(real, 'a real request row').to.exist
       expect(real!.network.method).to.be.a('string')
@@ -628,7 +656,7 @@ describe('tap binding with network activity', () => {
 
       // cy.request keeps its method/URL in the display message, exposing only
       // the status indicator as a structured field (no request URL on the log).
-      const cyRequest = commands.find((command) => command.name === 'request' && command.network && !command.network.url && !command.network.method && command.network.indicator)
+      const cyRequest = entries.find((entry) => entry.name === 'request' && entry.network && !entry.network.url && !entry.network.method && entry.network.indicator)
 
       expect(cyRequest, 'the cy.request row').to.exist
       expect(cyRequest!.network.indicator).to.eq('successful')
@@ -651,11 +679,10 @@ describe('tap binding with network activity', () => {
 
       expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
-      const tests = ((await binding.exec('tests')) as { result: Array<Record<string, unknown>> }).result
+      const tests = await specTests(binding)
       const testId = tests[0].id as string
 
-      const outcome = (await binding.exec('reporter', {}, { test: testId })) as { result: Record<string, any> }
-      const view = outcome.result
+      const view = await reporterResult(binding, { test: testId })
 
       expect(Object.keys(view)).to.deep.eq(['test', 'hooks', 'sessions', 'agents', 'routes', 'commands'])
       expect(view.test).to.deep.eq({
@@ -671,7 +698,7 @@ describe('tap binding with network activity', () => {
 
       // The cy.intercept registration lives in the ROUTES table, not the log.
       expect(view.routes).to.have.length(1)
-      expect(Object.keys(view.routes[0])).to.satisfy((keys: string[]) => keys.every((key) => REPORTER_ROUTE_KEYS.includes(key)))
+      expect(Object.keys(view.routes[0])).to.satisfy(withinKeys(REPORTER_ROUTE_KEYS))
       expect(view.routes[0].method).to.eq('GET')
       expect(view.routes[0].url).to.contain('/api/users')
       expect(view.routes[0].stubbed).to.eq(true)
@@ -680,12 +707,12 @@ describe('tap binding with network activity', () => {
       expect(view.commands.some((command: Record<string, unknown>) => command.name === 'route')).to.eq(false)
 
       for (const command of view.commands as Array<Record<string, any>>) {
-        expect(Object.keys(command), `row ${command.id}`).to.satisfy((keys: string[]) => keys.every((key) => REPORTER_COMMAND_KEYS.includes(key)))
+        expect(Object.keys(command), `row ${command.id}`).to.satisfy(withinKeys(REPORTER_COMMAND_KEYS))
         expect(command.hookId, `hookId of ${command.id}`).to.eq(testId)
       }
 
       // The stubbed fetch surfaces as an event row labeled by its displayName,
-      // carrying the same network detail the commands command reports.
+      // carrying the same network detail a lean command entry reports.
       const eventRow = (view.commands as Array<Record<string, any>>).find((command) => command.event === true && command.network?.stubbed === true)
 
       expect(eventRow, 'the stubbed request event row').to.exist

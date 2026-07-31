@@ -29,7 +29,7 @@ describe('lib/tap/render', () => {
     .to.eq(undefined)
   })
 
-  it('has no rendering for a command that prints JSON', () => {
-    expect(renderingFor('specs')).to.eq(undefined)
+  it('has no rendering for a schema command without a registered view', () => {
+    expect(renderingFor('health')).to.eq(undefined)
   })
 })
