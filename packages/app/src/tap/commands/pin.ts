@@ -3,16 +3,7 @@ import { attemptSelectionError, resolveCommandLogId, selectTestAttempt, serializ
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner, TapTestsRunner } from '../types'
 import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
-import type { PinnedView, SnapshotRef } from '../contract'
-
-export interface PinResult {
-  pinned: { test: string, command: string, at: SnapshotRef }
-  url?: string
-}
-
-export interface ClearResult {
-  cleared: boolean
-}
+import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
 interface PinnedState {
   test: string
@@ -143,8 +134,15 @@ const movePin = (runner: PinSnapshotRunner, at: string | undefined): PinResult =
 
   pinned = { ...current, at: at_, snapshot: snapshots[index] }
 
+  return pinResult(runner, props)
+}
+
+// What both `pin` and `status` report about the pin, so a fresh pin, a snapshot
+// move, and a later status all read the same. The row resolves — the pin was
+// just verified against this attempt.
+const pinResult = (runner: PinSnapshotRunner, props: PinSnapshotProps | undefined): PinResult => {
   return {
-    pinned: { test: current.test, command: current.command, at: at_ },
+    pinned: getPinnedView(runner) as PinnedView,
     ...(props?.url !== undefined ? { url: props.url } : {}),
   }
 }
@@ -235,8 +233,5 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
 
   pinned = { test, command, attempt, logId, at: at_, original, snapshot: snapshots[index] }
 
-  return {
-    pinned: { test, command, at: at_ },
-    ...(props?.url !== undefined ? { url: props.url } : {}),
-  }
+  return pinResult(runner, props)
 })

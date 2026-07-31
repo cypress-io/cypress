@@ -64,7 +64,11 @@ describe('tap/commands/pin', () => {
 
     expect(outcome).to.deep.eq({
       result: {
-        pinned: { test: 'r2', command: '1', at: { index: 2, total: 2, name: 'after' } },
+        pinned: {
+          test: 'r2',
+          at: { index: 2, total: 2, name: 'after' },
+          command: { id: '1', name: 'get', message: '#status', state: 'passed', type: 'parent' },
+        },
         url: 'http://localhost:8080/index.html',
       },
     })
@@ -102,7 +106,7 @@ describe('tap/commands/pin', () => {
     await manager.exec('pin', { test: 'r2', command: '1' })
     const switched = await manager.exec('pin', { test: 'r2', command: '2' })
 
-    expect((switched as { result: any }).result.pinned.command).to.eq('2')
+    expect((switched as { result: any }).result.pinned.command.id).to.eq('2')
     // No re-capture and no second listener: the original DOM and unpin listener
     // from the first pin stand, so clearing still restores the true live app.
     expect(detachDom).to.have.been.calledOnce
@@ -150,7 +154,9 @@ describe('tap/commands/pin', () => {
     expect(changeSnapshotState).to.have.been.calledOnceWith(0)
 
     expect((moved as { result: any }).result.pinned).to.deep.eq({
-      test: 'r2', command: '1', at: { index: 1, total: 2, name: 'before' },
+      test: 'r2',
+      at: { index: 1, total: 2, name: 'before' },
+      command: { id: '1', name: 'get', message: '#status', state: 'passed', type: 'parent' },
     })
   })
 
@@ -183,7 +189,7 @@ describe('tap/commands/pin', () => {
     // Pin state is released, so a fresh pin lands cleanly.
     const outcome = await manager.exec('pin', { test: 'r2', command: '1' })
 
-    expect((outcome as { result: any }).result.pinned.command).to.eq('1')
+    expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
   })
 
   it('restores the captured DOM and drops the pin when the runner unpins externally (the ✕)', async () => {
@@ -205,7 +211,7 @@ describe('tap/commands/pin', () => {
     // The pin is released, so a fresh pin lands cleanly.
     const outcome = await manager.exec('pin', { test: 'r2', command: '1' })
 
-    expect((outcome as { result: any }).result.pinned.command).to.eq('1')
+    expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
   })
 
   it('drops the pin without restoring when --clear arrives while a spec is running', async () => {
@@ -380,7 +386,7 @@ describe('tap/commands/pin', () => {
     // The stale pin was released, so a fresh pin lands cleanly.
     const outcome = await manager.exec('pin', { test: 'r2', command: '1' })
 
-    expect((outcome as { result: any }).result.pinned.command).to.eq('1')
+    expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
   })
 
   it('requires a test and command (or --clear) before attempting a pin', async () => {
@@ -454,7 +460,7 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', { test: 'r5', command: '1' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r5', 'log-t1')
-    expect((outcome as { result: any }).result.pinned.command).to.eq('1')
+    expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
   })
 
   it('resolves a hook-qualified handle to that section’s row', async () => {
