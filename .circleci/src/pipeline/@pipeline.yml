@@ -1828,6 +1828,16 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
+          name: Check yarn.lock is deduplicated 🧬
+          command: |
+            if ! yarn check-lockfile; then
+              echo ""
+              echo "yarn.lock has duplicates that the local postinstall would collapse on its own,"
+              echo "so the committed lockfile does not match the tree contributors actually install."
+              echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
+              exit 1
+            fi
+      - run:
           name: Linting 🧹
           command: |
             yarn clean
@@ -1931,6 +1941,14 @@ jobs:
       - run: |
           if [[ -z "$MAIN_RECORD_KEY" ]]; then
             echo "skipping for contributor PRs since we don't record to the cloud"
+            circleci-agent step halt
+          fi
+
+          # Contributor PRs from forks run with $CIRCLE_BRANCH set to the PR ref
+          # (e.g. pull/34282/head), which is not a real branch and cannot be
+          # cloned below. There is no cloud run to verify for these anyway, so skip.
+          if [[ "$CIRCLE_BRANCH" =~ ^pull\/[0-9]+ ]]; then
+            echo "skipping for contributor PRs — $CIRCLE_BRANCH is an external PR ref that cannot be checked out"
             circleci-agent step halt
           fi
       - update_known_hosts
