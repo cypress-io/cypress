@@ -94,7 +94,7 @@
     "execa-wrap": "1.4.0",
     "jiti": "^2.4.2",
     "mock-fs": "5.4.0",
-    "nock": "13.2.9",
+    "nock": "14.0.17",
     "resolve-pkg": "2.0.0",
     "rimraf": "^6.1.2",
     "semver": "^7.7.3",
