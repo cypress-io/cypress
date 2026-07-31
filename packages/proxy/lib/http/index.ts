@@ -157,8 +157,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   // pipe() attaches error handlers to the destination, not the source. Track the
   // active middleware onError so a body stream destroy(err) (e.g. CDP Fetch
   // Invalid InterceptionId) settles the waiting middleware instead of hanging.
+  // Transform streams (gzip/br) may already call this.onError; share one gate so
+  // Error-stage work cannot race from both listeners.
   const wiredIncomingResStreams = new WeakSet<Readable>()
   let activeOnError: ((error: Error) => void) | undefined
+  let stageErrorHandled = false
 
   const runMiddlewareStack = (): Promise<void> => {
     const middlewares = ctx.middleware[type]
@@ -189,6 +192,12 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       function _onError (error: Error) {
+        if (stageErrorHandled) {
+          return
+        }
+
+        stageErrorHandled = true
+
         ctx.debug('Error in middleware %o', { middlewareName, error })
 
         if (type === HttpStages.Error) {

@@ -123,6 +123,54 @@ describe('http', function () {
       expect(onError.mock.calls[0][0].message).toEqual('Invalid InterceptionId.')
     })
 
+    it('invokes stage onError once when a transform stream has duplicate error listeners', async function () {
+      const onError = vi.fn()
+      const { PassThrough } = await import('stream')
+      const { EventEmitter } = await import('events')
+
+      const res = Object.assign(new EventEmitter(), {
+        off: vi.fn(),
+        on: vi.fn(),
+        writableFinished: false,
+        destroyed: false,
+      })
+
+      const transformStream = new PassThrough()
+
+      const attachTransformMiddleware = vi.fn().mockImplementation(function () {
+        // Mirrors CompressBody: attach onError then next() with the transform as current stream.
+        transformStream.on('error', this.onError)
+        this.incomingResStream = transformStream
+        this.next()
+      })
+
+      const laterMiddleware = vi.fn().mockImplementation(function () {
+        // Stage wiring attaches a second listener; both must collapse to one onError call.
+        this.incomingResStream.emit('error', new Error('bad gzip'))
+        this.end()
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res,
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingResponse]: {
+            attachTransformMiddleware,
+            laterMiddleware,
+          },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingResponse, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('bad gzip')
+    })
+
     it('ignores async middleware rejections after next() was called', async function () {
       const onError = vi.fn()
       let rejectLate: (err: Error) => void
