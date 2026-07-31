@@ -8332,10 +8332,10 @@
     "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
 
-"@testing-library/cypress@10.1.0":
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-10.1.0.tgz#e1f12e2f8206e7cdf12d3ca23b6d303d08f44180"
-  integrity sha512-tNkNtYRqPQh71xXKuMizr146zlellawUfDth7A/urYU4J66g0VGZ063YsS0gqS79Z58u1G/uo9UxN05qvKXMag==
+"@testing-library/cypress@10.1.3":
+  version "10.1.3"
+  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-10.1.3.tgz#c1ea24b799ca2b1d2e733325bb1b59cdbdfa7f2d"
+  integrity sha512-rVCH92TmU8idROHqCdTSp/bosIIUezihSwFfR/J2GZD0EAwyzRuYNseh54eziKJWjJ64BCXPT3X3jLO7v4yenQ==
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^10.1.0"
