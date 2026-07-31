@@ -1,10 +1,9 @@
 const systemTests = require('../lib/system-tests').default
 
-// WebKit's driver socket is polling-only and shares the browser's per-host
-// connection pool (~6) with AUT traffic. When more requests than that are
-// simultaneously held by function-handler intercepts, the polling transport
-// must not starve — otherwise the `before:request` events never reach the
-// driver and every held request deadlocks until the test times out.
+// More parallel requests than WebKit's per-host connection pool (~6), all held
+// by a function-handler intercept awaiting the driver. If the driver socket
+// competed for that same pool, the `before:request` events would never reach
+// the driver and every held request would deadlock.
 const PARALLEL = 12
 
 const html = `<!DOCTYPE html>

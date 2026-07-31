@@ -11,10 +11,6 @@ declare global {
 
 // Whether this browser communicates over the automation channel (a window
 // binding bridged by CDP in Chromium or Playwright in WebKit) instead of HTTP.
-// WebKit cannot use the websocket transport (#23807), and HTTP long-polling
-// shares the browser's per-host connection pool with AUT traffic — enough
-// simultaneously-held intercepted requests starve the socket and deadlock the
-// run (#33926) — so it uses the automation channel as well.
 let usesAutomationSocket = false
 
 const getAutomationSocket = (fullNamespace: string): SocketShape => {

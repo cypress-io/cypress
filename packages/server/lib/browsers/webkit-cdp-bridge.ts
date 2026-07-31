@@ -8,11 +8,7 @@ const debugVerbose = Debug('cypress-verbose:server:browsers:webkit-cdp-bridge')
 /**
  * Adapts a Playwright page to the `CDPSocketBridge` interface so the
  * automation socket (`CDPSocketServer`) can carry driver <-> server traffic in
- * WebKit the same way CDP does in Chromium — over the automation channel
- * instead of HTTP. WebKit cannot use the websocket transport (#23807), and
- * HTTP long-polling shares the browser's per-host connection pool with AUT
- * traffic, so enough simultaneously-held intercepted requests would starve the
- * socket and deadlock the run (#33926).
+ * WebKit the same way CDP does in Chromium.
  */
 export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
   private frameByContextId = new Map<number, playwright.Frame>()
