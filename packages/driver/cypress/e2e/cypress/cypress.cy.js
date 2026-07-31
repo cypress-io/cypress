@@ -36,6 +36,22 @@ describe('driver/src/cypress/index', () => {
         expect($el.get(0)).to.eq($foo.get(0))
       })
     })
+
+    // `$.expr[':']` is an alias for `$.expr.pseudos`; both reference the same
+    // table, so a custom selector registered through either one resolves.
+    it('aliases expr[\':\'] to expr.pseudos', () => {
+      expect(Cypress.$.expr[':']).to.equal(Cypress.$.expr.pseudos)
+
+      Cypress.$.expr.pseudos.foo = (elem) => {
+        return Boolean(elem.getAttribute('foo'))
+      }
+
+      const $foo = $('<div foo=\'bar\'>foo element</div>').appendTo(cy.$$('body'))
+
+      cy.get(':foo').then(($el) => {
+        expect($el.get(0)).to.eq($foo.get(0))
+      })
+    })
   })
 
   context('_', () => {
