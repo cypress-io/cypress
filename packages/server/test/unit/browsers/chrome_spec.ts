@@ -1033,15 +1033,27 @@ describe('lib/browsers/chrome', () => {
       expect(args).not.to.include('--user-agent=foo')
     })
 
-    // https://github.com/cypress-io/cypress/issues/1872
-    it('adds <-loopback> proxy bypass rule', () => {
-      const arg = '--proxy-bypass-list=<-loopback>'
-
+    it('adds the configured proxy server and bypass list', () => {
       const args = chrome._getArgs({
         majorVersion: '89',
-      }, {})
+      }, {
+        proxyServer: 'http://proxy.example:8080',
+        proxyBypassList: 'localhost,example.com',
+      })
 
-      expect(args).to.include(arg)
+      expect(args).to.include('--proxy-server=http://proxy.example:8080')
+      expect(args).to.include('--proxy-bypass-list=localhost,example.com')
+    })
+
+    // an empty bypass list leaves chromium's implicit loopback rules in place
+    it('does not add a proxy bypass list when none is configured', () => {
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {
+        proxyServer: 'http://proxy.example:8080',
+      })
+
+      expect(args.join(' ')).not.to.include('--proxy-bypass-list')
     })
 
     it('translates hosts into host resolver rules', () => {
