@@ -4,6 +4,7 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
+const { load: loadTerminalSize } = require('./lib/util/terminal-size')
 const { GracefulExit } = require('./lib/util/graceful-exit')
 const { NetProfiler } = require('./lib/util/net_profiler')
 const { debugElapsedTime } = require('./lib/util/performance_benchmark')
@@ -88,6 +89,10 @@ patchFs(fs)
 
 // override tty if we're being forced to
 overrideTty()
+
+// eagerly load the ESM-only `terminal-size` module so terminal size lookups can
+// be resolved synchronously once the run produces output
+loadTerminalSize().catch(() => {})
 
 if (process.env.CY_NET_PROFILE && isRunningElectron) {
   const netProfiler = new NetProfiler()
