@@ -272,12 +272,23 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Proxy-disabled (CDP Fetch) coverage — off by default.
-  # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
-  # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
+  # Focused proxy-disabled jobs for known-green CDP Fetch remediations.
+  # Always run when their path filters match (not gated on run-proxy-disabled-tests).
+  - system-tests-upstream-proxy-cdp:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-downloads-cdp:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
+
+  # Full proxy-disabled (CDP Fetch) coverage — off by default.
+  # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
+  # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
   - driver-integration-tests-chrome:
       name: driver-integration-tests-chrome-cdp
       context: test-runner:cypress-record-key
@@ -441,8 +452,9 @@ jobs:
 
   # Fan-in aggregator — the only required GitHub status check for PRs.
   # Required jobs fan into this one. Jobs that halt early (pipeline parameter
-  # false) still complete successfully. Proxy-disabled *-cdp jobs above are
-  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate.
+  # false) still complete successfully. Full proxy-disabled *-cdp jobs above are
+  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate;
+  # focused CDP jobs for known-green fixes are included.
   - all-jobs-passed:
       requires:
         # Always-run jobs
@@ -463,6 +475,9 @@ jobs:
         - system-tests-webkit
         - system-tests-non-root
         - h2-dual-stack-tests
+        - system-tests-upstream-proxy-cdp
+        - system-tests-downloads-cdp
+        - unit-tests-proxy-disabled
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta

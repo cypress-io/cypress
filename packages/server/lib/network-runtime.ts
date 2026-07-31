@@ -15,6 +15,7 @@ import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { createFileServerOriginMiddleware } from './adapters/file-server-origin'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 
 export type CreateProxyRuntimeDeps = {
@@ -195,8 +196,19 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     }),
   )
 
+  // CDP Fetch continues to the browser origin, so strategy:file URLs need a
+  // Node-side file-server origin after the legacy pipeline (see file-server-origin).
+  networkInterception.use(createFileServerOriginMiddleware({
+    remoteStates: deps.remoteStates,
+    getFileServerToken: deps.getFileServerToken,
+    request: deps.request,
+  }))
+
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
+    // Download-manager pauses omit networkId and never emit requestWillBeSent;
+    // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
+    addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
   })
 
   // Proxy parity: cookie simulation's simulated top, which nothing else
