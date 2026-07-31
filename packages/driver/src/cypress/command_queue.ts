@@ -15,6 +15,18 @@ import type { IStability } from '../cy/stability'
 const debugErrors = Debug('cypress:driver:errors')
 const debug = Debug('cypress:driver:command_queue')
 
+// Number of most-recently-finished commands whose subjects we never release.
+// Some command fns read their immediate `prev` command's subject (e.g.
+// `end-logGroup` forwarding the yielded subject) and freshly-enqueued nested
+// commands may still reference a just-resolved subject, so we keep a trailing
+// buffer well clear of the running edge of the queue.
+const CLEAN_SUBJECTS_TRAILING_WINDOW = 100
+
+// Only sweep once at least this many additional commands have moved behind the
+// trailing window. This keeps short/typical tests untouched entirely and bounds
+// the sweep cost on long tests to a small amortized constant per command.
+const CLEAN_SUBJECTS_BATCH_SIZE = 100
+
 const __stackReplacementMarker = (fn, args) => {
   return fn(...args)
 }
@@ -117,6 +129,9 @@ export class CommandQueue extends Queue<$Command> {
   stability: IStability
   cy: $Cy
 
+  // index up to which finished-command subjects have already been released
+  private cleanedSubjectsIndex = 0
+
   constructor (
     state: StateFunc,
     stability: IStability,
@@ -146,6 +161,11 @@ export class CommandQueue extends Queue<$Command> {
 
   names () {
     return _.invokeMap(this.get(), 'get', 'name')
+  }
+
+  clear () {
+    super.clear()
+    this.cleanedSubjectsIndex = 0
   }
 
   enqueue (command: $Command) {
@@ -390,10 +410,6 @@ export class CommandQueue extends Queue<$Command> {
         this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
       }
 
-      // TODO: This line was causing subjects to be cleaned up prematurely in some instances (Specifically seen on the within command)
-      // The command log would print the yielded value as null if checked outside of the current command chain.
-      // this.cleanSubjects()
-
       this.state({
         commandIntermediateValue: undefined,
         // reset the nestedIndex back to null
@@ -495,6 +511,10 @@ export class CommandQueue extends Queue<$Command> {
         // move on to the next queueable
         this.index += 1
 
+        // release memory held by finished commands that can no longer be
+        // referenced. safe to do here because the index only ever moves forward.
+        this.cleanSubjects()
+
         const pauseFn = this.state('onPaused')
 
         if (pauseFn) {
@@ -573,26 +593,67 @@ export class CommandQueue extends Queue<$Command> {
     return promise
   }
 
-  // This function iterates through all upcoming commands in the queue, then
-  // discards the subject chain for every chainer that can't be referenced
-  // in the future (eg, no upcoming commands belong to the same chain).
-
-  // This is safe because aliases (which might be referenced later) are stored
-  // separately, in state('aliases'), and any subjects that "flow upwards" (eg.
-  // the subject of a chain inside a .then() command) have already replaced
-  // the subject of their parent chainer by the time this is called.
+  // Releases the subject (and fn / queryFn closures) held by finished commands
+  // that can no longer be referenced, along with their entries in
+  // state('subjects'). On long-running or recursive tests the command queue
+  // grows without bound for the life of a single test, and the DOM/jQuery
+  // subjects pinned to each finished command are a primary source of renderer
+  // memory pressure.
+  //
+  // This is only performed in run mode. In interactive mode the command log
+  // lets you time-travel and inspect the value each command yielded, which
+  // reads a finished command's subject lazily (via consoleProps) - so releasing
+  // it there would change observable behavior. Run mode never surfaces those
+  // subjects, so releasing them is unobservable.
+  //
+  // Safety:
+  //  - The queue index only ever moves forward within a test (nested commands
+  //    are inserted ahead of it and recovery jumps forward), so commands behind
+  //    it are never re-executed.
+  //  - A trailing window of recently-finished commands is always retained, since
+  //    some command fns read their immediate `prev` command's subject.
+  //  - Aliases snapshot their own subject chain into state('aliases'), so
+  //    pruning state('subjects') here cannot affect a referenced `@alias`.
   cleanSubjects () {
-    const stillNeeded = this.queueables.slice(this.index).map((c) => c.get('chainerId'))
+    const boundary = this.index - CLEAN_SUBJECTS_TRAILING_WINDOW
 
-    this.queueables.slice(0, this.index).forEach((command) => {
-      // Once a command has resolved, and its chainer is no longer referenced
-      // by future commands, we can throw away the reference to the function
-      // and its subject to free memory.
-      if (command.get('subject') && stillNeeded.indexOf(command.get('chainerId')) === -1) {
+    // wait until enough commands have moved behind the trailing window to make a
+    // sweep worthwhile - this leaves short/typical tests untouched entirely.
+    if (boundary - this.cleanedSubjectsIndex < CLEAN_SUBJECTS_BATCH_SIZE) {
+      return
+    }
+
+    if (Cypress.config('isInteractive')) {
+      return
+    }
+
+    // chainers still reachable: anything in the retained window or upcoming.
+    const stillNeeded = new Set<string>()
+
+    for (let i = Math.max(0, boundary); i < this.length; i++) {
+      stillNeeded.add(this.at(i).get('chainerId'))
+    }
+
+    // release finished commands that have aged out of the trailing window and
+    // whose chainer can no longer be referenced. leave still-needed commands in
+    // place (and stop advancing the cursor past them) so they're revisited once
+    // their chain has fully finished.
+    let i = this.cleanedSubjectsIndex
+
+    for (; i < boundary; i++) {
+      const command = this.at(i)
+
+      if (stillNeeded.has(command.get('chainerId'))) {
+        break
+      }
+
+      if (command.get('subject') || command.get('fn') || command.get('queryFn')) {
         command.set({ fn: null, subject: null, queryFn: null })
       }
-    })
+    }
 
-    this.cy.state('subjects', _.pick(this.cy.state('subjects'), stillNeeded))
+    this.cleanedSubjectsIndex = i
+
+    this.cy.state('subjects', _.pick(this.cy.state('subjects'), [...stillNeeded]))
   }
 }

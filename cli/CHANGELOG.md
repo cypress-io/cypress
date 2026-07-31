@@ -3,6 +3,7 @@
 
 **Performance:**
 
+- Fixed an issue where a single long-running or recursive test that ran a very large number of commands could exhaust the browser's renderer memory and crash it (`We detected that the Chrome Renderer process just crashed`), because the values each command yielded (including DOM elements) were retained for the entire test. During `cypress run`, these values are now released once they can no longer be referenced. Fixes [#34422](https://github.com/cypress-io/cypress/issues/34422).
 - Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
 - Reduced the sampling overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) when Cypress runs inside a memory-limited container using cgroup v1. Memory readings no longer spawn helper subprocesses on every sampling interval, which lowers CPU usage that previously competed with the tests, most noticeably on constrained CI machines. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105). Fixed in [#34331](https://github.com/cypress-io/cypress/pull/34331).
 
