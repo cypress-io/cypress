@@ -281,10 +281,22 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
       // enqueued appropriately.
       cy
       .then(() => {
-        return percySnapshot(screenshotName, {
+        const snapshotOptions: CustomSnapshotOptions & { readiness?: { preset: 'disabled' } } = {
           ...options,
           widths: [snapshotWidth],
-        })
+        }
+
+        // Percy's readiness gate (`@percy/dom`'s waitForReady) drives both its
+        // checks and its own timeout off real timers. When cy.clock() has
+        // installed fake timers the AUT clock is frozen, so waitForReady can
+        // never resolve and the snapshot command times out. The frozen DOM is
+        // already the deterministic state we want to capture, so skip readiness.
+        // @ts-ignore - cy.state is not in the public types
+        if (cy.state('clock')) {
+          snapshotOptions.readiness = { preset: 'disabled' }
+        }
+
+        return percySnapshot(screenshotName, snapshotOptions)
       })
       .then(() => {
         return reset()
