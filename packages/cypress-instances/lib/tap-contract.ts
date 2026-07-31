@@ -94,7 +94,7 @@ const commandMeta = {
   options: [
     { ...testIdField, required: true },
     { name: 'command', type: 'string', required: true, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
-    { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length, printed as raw JSON' },
+    { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length — a value too long for its row then reads as a block under its key' },
     attemptField,
   ],
 } as const satisfies TapCommandSchema

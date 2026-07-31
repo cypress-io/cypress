@@ -84,6 +84,25 @@ export const clamp = (text: string, width: number): string => {
   return text.length <= width ? text : `${text.slice(0, Math.max(1, width - 1))}…`
 }
 
+// A value too long for its row that has to stay whole — nothing dropped, and
+// still no soft wrap deciding where the break lands. Broken at the last space
+// that fits, or mid-token when there is none (a URL, a base64 blob).
+export const wrap = (text: string, width: number): string[] => {
+  const room = Math.max(1, width)
+  const lines: string[] = []
+  let rest = text
+
+  while (rest.length > room) {
+    const space = rest.lastIndexOf(' ', room)
+    const cut = space > 0 ? space : room
+
+    lines.push(rest.slice(0, cut))
+    rest = rest.slice(space > 0 ? cut + 1 : cut)
+  }
+
+  return [...lines, rest]
+}
+
 // Pad before coloring: the escape codes chalk adds would otherwise count
 // toward the column width. `colorize` styles the padded cells — it also gets the
 // row index, since a padded cell no longer compares equal to the value it holds

@@ -49,13 +49,14 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
   command: {
     options: consolePropsOptions,
     renderHuman: (result, options) => {
-      // --full-report asks for every value however long, which is a payload to
-      // pipe into a tool rather than to read: print it as the JSON it is.
-      if (options['full-report'] === 'true') {
-        return undefined
-      }
-
-      return renderCommandHuman(result as TapCommandResult, { depth: options.depth, path: options.path })
+      return renderCommandHuman(result as TapCommandResult, {
+        depth: options.depth,
+        path: options.path,
+        // The instance returned every value in full; the view then keeps them
+        // whole rather than clamping them back to a row. `--json` is still how
+        // you get the payload itself.
+        full: options['full-report'] === 'true',
+      })
     },
   },
   run: { renderHuman: (result) => renderRunHuman(result as TapRunResult) },

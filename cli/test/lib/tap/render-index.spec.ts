@@ -35,18 +35,23 @@ describe('lib/tap/render', () => {
     ].join('\n'))
   })
 
-  // A payload asked for in full is one to pipe into a tool, so it prints as the
-  // JSON it is rather than through a view.
-  it('declines the rendering for --full-report, deferring to the raw JSON', () => {
+  // --full-report is about what the instance returns, not about how it reads:
+  // the view still renders, and a value too long for its row keeps every
+  // character it was asked for instead of being clamped back down.
+  it('renders --full-report through the view, keeping the long values whole', () => {
     const result = {
       id: '3',
       name: 'request',
       hook: { hookId: 'r2', hookName: 'test body' },
       snapshots: [],
-      consoleProps: { name: 'request', type: 'command', props: { body: 'a'.repeat(50_000) } },
+      consoleProps: { name: 'request', type: 'command', props: { body: 'x'.repeat(5_000) } },
     }
 
-    expect(renderCommand(result, { 'full-report': 'true' })).to.eq(undefined)
+    const rendered = renderCommand(result, { 'full-report': 'true' })
+
+    expect(rendered).to.include('CONSOLE PROPS')
+    expect(rendered).not.to.include('…')
+    expect(rendered!.replace(/[^x]/g, '')).to.have.length(5_000)
   })
 
   it('has no rendering for a command that prints JSON', () => {

@@ -1,14 +1,14 @@
 import chalk from 'chalk'
 
 import type { TapCommandOptionSchema, TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
-import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth } from './format'
+import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth, wrap } from './format'
 
 // A command's console properties are the deepest payload the tap returns — a
 // `cy.request` row carries its matcher, request, response and every header of
 // each. Printed whole it is pages of indentation, so this renders the shape
 // first, the way the browser console panel opens collapsed: a few levels expand,
 // and a section that is deeper or too long to read at a glance is summarized as
-// `{n keys}` until --depth or --path asks for it. The full payload is always one
+// `{n keys}` / `[n items]` until --depth or --path asks for it. The full payload is one
 // --json away.
 
 // Deep enough that a request's matcher, its response and that response's body
@@ -35,13 +35,15 @@ const MIN_VALUE_WIDTH = 24
 const MAX_KEY_WIDTH = 32
 
 export const consolePropsOptions: readonly TapCommandOptionSchema[] = [
-  { name: 'depth', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
+  { name: 'depth', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
   { name: 'path', type: 'string', required: false, description: 'show one section of the console properties instead of the whole payload, addressed from the top level as "Response>headers" (case-insensitive, ">"-separated)' },
 ]
 
 export interface ConsolePropsOptions {
   depth?: string
   path?: string
+  /** `--full-report`: the values arrived whole, so render them whole. */
+  full?: boolean
 }
 
 const isRecord = (value: TapJsonValue): value is { [key: string]: TapJsonValue } => {
@@ -116,17 +118,20 @@ const emptyContainerInline = (value: TapJsonValue): InlineValue | undefined => {
 // What a collapsed container reads as: its size, so the shape is still legible
 // and the cost of expanding it is known before you do.
 const summaryInline = (value: TapJsonValue): InlineValue => {
-  const size = Array.isArray(value) ? value.length : Object.keys(value as object).length
-  const unit = Array.isArray(value) ? 'item' : 'key'
+  const isArray = Array.isArray(value)
+  const size = isArray ? value.length : Object.keys(value as object).length
+  const unit = isArray ? 'item' : 'key'
+  const [open, close] = isArray ? ['[', ']'] : ['{', '}']
 
-  return { text: `{${size} ${unit}${size === 1 ? '' : 's'}}`, style: chalk.dim }
+  return { text: `${open}${size} ${unit}${size === 1 ? '' : 's'}${close}`, style: chalk.dim }
 }
 
-// A cell has to stay one line of bounded width or the column alignment that
-// makes a table readable is gone; the untruncated value is one --json away.
+// A cell keeps the column alignment that makes a table readable, so it stays one
+// line of bounded width — unless `--full-report` asked for every value, which is
+// the one case where the value matters more than the column does.
 const MAX_CELL = 40
 
-const cell = (value: TapJsonValue | undefined): string => {
+const cell = (value: TapJsonValue | undefined, full: boolean): string => {
   if (value === undefined) {
     return ''
   }
@@ -139,14 +144,18 @@ const cell = (value: TapJsonValue | undefined): string => {
     return '{…}'
   }
 
-  return clamp(String(value).replace(/\s+/g, ' ').trim(), MAX_CELL)
+  // A cell cannot hold the newlines of a multi-line value whatever was asked
+  // for: they would end the row the table is aligning.
+  const text = String(value).replace(/\s+/g, ' ').trim()
+
+  return full ? text : clamp(text, MAX_CELL)
 }
 
 // Rows of like-shaped objects are what the driver's `table` console prop holds
 // (its keyboard/mouse event tables) — render them the way the reporter renders a
 // table, the row keys themselves as the column headers. A lone row reads better
 // as plain key/values, so it is left to the caller.
-const rowsTable = (values: TapJsonValue[], indent: string): string[] | undefined => {
+const rowsTable = (values: TapJsonValue[], indent: string, full: boolean): string[] | undefined => {
   if (values.length < 2 || !values.every(isRecord)) {
     return undefined
   }
@@ -157,7 +166,7 @@ const rowsTable = (values: TapJsonValue[], indent: string): string[] | undefined
     return undefined
   }
 
-  const rows = values.map((row) => columnKeys.map((column) => cell(row[column])))
+  const rows = values.map((row) => columnKeys.map((column) => cell(row[column], full)))
 
   // Cells are plain here, so coloring them after padding is a no-op width-wise;
   // the withheld marker still needs its hue.
@@ -173,13 +182,28 @@ const entriesOf = (value: PropsValue): Array<[string, TapJsonValue]> => {
     : Object.entries(value)
 }
 
+interface PropsRenderer {
+  renderProps: (value: PropsValue, level: number, trail?: string[]) => string[]
+  /** A value that carries its own newlines, or one too long for a row, under its key. */
+  block: (text: string, indent: string) => string[]
+  /** Like-shaped object rows as a table, or undefined for values that aren't. */
+  rows: (values: TapJsonValue[], indent: string) => string[] | undefined
+  /** The `>`-joined path of every container the render summarized. */
+  collapsed: string[][]
+}
+
 /**
  * Renders a properties tree to `maxDepth` levels of containers, collecting the
  * `>`-joined path of each container it summarized so the caller can offer them
- * as the next command to run.
+ * as the next command to run. `full` is `--full-report`: every value the
+ * instance returned reads whole, wrapped onto as many rows as it takes rather
+ * than clamped to one.
  */
-const createPropsRenderer = (maxDepth: number, rowBudget: number) => {
+const createPropsRenderer = (maxDepth: number, rowBudget: number, full: boolean): PropsRenderer => {
   const collapsed: string[][] = []
+
+  const block = (text: string, indent: string): string[] => blockLines(text, indent, full)
+  const rows = (values: TapJsonValue[], indent: string): string[] | undefined => rowsTable(values, indent, full)
 
   // Scalars align in one column with their sibling scalars; a container gets its
   // own key line with its children indented beneath it, so nesting reads as
@@ -221,34 +245,44 @@ const createPropsRenderer = (maxDepth: number, rowBudget: number) => {
 
     return entries.flatMap(([key, child]) => {
       const inline = inlined.get(key)
+      const keyLine = `${indent}${chalk.dim(label(key))}`
 
       if (inline) {
+        // Asked for in full, a value that outgrows its row moves under its key
+        // instead: the row's width is what the clamp exists to protect, and there
+        // is nothing left to protect once the value has a block of its own.
+        if (full && inline.clampable && inline.text.length > valueWidth) {
+          return [keyLine, ...block(inline.text, childIndent)]
+        }
+
         const text = inline.clampable ? clamp(inline.text, valueWidth) : inline.text
 
         return [`${indent}${chalk.dim(label(key).padEnd(width))}  ${inline.style ? inline.style(text) : text}`]
       }
 
-      const keyLine = `${indent}${chalk.dim(label(key))}`
-
       if (isBlock(child)) {
-        return [keyLine, ...blockLines(child, childIndent)]
+        return [keyLine, ...block(child, childIndent)]
       }
 
-      const rows = Array.isArray(child) ? rowsTable(child, indent) : undefined
+      const table = Array.isArray(child) ? rows(child, indent) : undefined
 
-      return [keyLine, ...(rows ?? renderProps(child as PropsValue, level + 1, [...trail, key]))]
+      return [keyLine, ...(table ?? renderProps(child as PropsValue, level + 1, [...trail, key]))]
     })
   }
 
-  return { renderProps, collapsed }
+  return { renderProps, block, rows, collapsed }
 }
 
-const blockLines = (text: string, indent: string): string[] => {
+const blockLines = (text: string, indent: string, full: boolean): string[] => {
   const width = Math.max(MIN_VALUE_WIDTH, terminalWidth() - indent.length)
 
   // A body split on its newlines still carries the `\r` of a CRLF payload, which
   // would drag the cursor back over the line it just printed.
-  return text.split('\n').map((line) => `${indent}${clamp(onOneRow(line), width)}`)
+  return text.split('\n').flatMap((line) => {
+    const row = onOneRow(line)
+
+    return full ? wrap(row, width).map((part) => `${indent}${part}`) : [`${indent}${clamp(row, width)}`]
+  })
 }
 
 interface DepthChoice {
@@ -398,7 +432,7 @@ const ERROR_TINT = { title: color.fail, line: color.errHeaderText }
 // An envelope key beside `props`, as its own titled section. A tinted section
 // colors its title and its lines — the error arrives as a stack, so what carries
 // the color is the block, not a props tree.
-const extraSection = (title: string, value: TapJsonValue, renderProps: (value: PropsValue, level: number, trail?: string[]) => string[], tint?: typeof ERROR_TINT): string[][] => {
+const extraSection = (title: string, value: TapJsonValue, render: PropsRenderer, tint?: typeof ERROR_TINT): string[][] => {
   if (value == null) {
     return []
   }
@@ -406,10 +440,10 @@ const extraSection = (title: string, value: TapJsonValue, renderProps: (value: P
   const sectionTitle = tint ? tint.title(title) : heading(title)
 
   if (isContainer(value)) {
-    return emptyContainerInline(value) ? [] : [[sectionTitle, ...renderProps(value as PropsValue, 0, [title])]]
+    return emptyContainerInline(value) ? [] : [[sectionTitle, ...render.renderProps(value as PropsValue, 0, [title])]]
   }
 
-  const lines = blockLines(String(value), '  ')
+  const lines = render.block(String(value), '  ')
 
   return [[sectionTitle, ...(tint ? lines.map((line) => tint.line(line)) : lines)]]
 }
@@ -417,9 +451,9 @@ const extraSection = (title: string, value: TapJsonValue, renderProps: (value: P
 // Each table the driver logged is a slot in `table`, keyed by the order it
 // should render in and carrying its own display name — the reporter's tables,
 // straight across.
-const tableSections = (value: TapJsonValue, renderProps: (value: PropsValue, level: number, trail?: string[]) => string[]): string[][] => {
+const tableSections = (value: TapJsonValue, render: PropsRenderer): string[][] => {
   if (!isRecord(value)) {
-    return extraSection('TABLE', value, renderProps)
+    return extraSection('TABLE', value, render)
   }
 
   return Object.keys(value)
@@ -433,15 +467,15 @@ const tableSections = (value: TapJsonValue, renderProps: (value: PropsValue, lev
 
     const title = (typeof entry.name === 'string' ? entry.name : `table ${slot}`).toUpperCase()
     const data = entry.data
-    const rows = Array.isArray(data) ? rowsTable(data, '') : undefined
+    const table = Array.isArray(data) ? render.rows(data, '') : undefined
 
-    if (rows) {
-      return [[heading(title, (data as TapJsonValue[]).length), ...rows]]
+    if (table) {
+      return [[heading(title, (data as TapJsonValue[]).length), ...table]]
     }
 
     const body = isContainer(data) ? data as { [key: string]: TapJsonValue } : entry
 
-    return [[heading(title), ...renderProps(body, 0, [title])]]
+    return [[heading(title), ...render.renderProps(body, 0, [title])]]
   })
 }
 
@@ -515,7 +549,7 @@ const panelPathRoot = (envelope: TapConsoleProps): PropsValue => {
   return panels
 }
 
-const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowBudget: number): string[][] => {
+const renderPath = (envelope: TapConsoleProps, path: string, render: PropsRenderer): string[][] => {
   const segments = path.split(PATH_SEPARATOR).map((segment) => segment.trim()).filter(Boolean)
 
   if (!segments.length) {
@@ -539,14 +573,13 @@ const renderPath = (envelope: TapConsoleProps, path: string, depth: number, rowB
 
   if (!isContainer(found.value)) {
     // An explicit path asks for exactly this value, so it prints whole.
-    return [[header, ...blockLines(found.value === null ? 'null' : String(found.value), '  ')]]
+    return [[header, ...render.block(found.value === null ? 'null' : String(found.value), '  ')]]
   }
 
-  const { renderProps, collapsed } = createPropsRenderer(depth, rowBudget)
-  const rows = Array.isArray(found.value) ? rowsTable(found.value, '') : undefined
-  const body = withBody(rows ?? renderProps(found.value as PropsValue, 0, found.trail))
+  const table = Array.isArray(found.value) ? render.rows(found.value, '') : undefined
+  const body = withBody(table ?? render.renderProps(found.value as PropsValue, 0, found.trail))
 
-  return [[header, ...body], ...collapsedFooter(collapsed)]
+  return [[header, ...body], ...collapsedFooter(render.collapsed)]
 }
 
 // A section can be present and hold nothing — `props: {}`, or a path that lands
@@ -563,31 +596,31 @@ export const renderConsolePropsHuman = (envelope: TapConsoleProps, options: Cons
 
   const { depth, rowBudget, note } = readDepth(options.depth)
   const noteBlock = note ? [[emptyState(note)]] : []
+  const render = createPropsRenderer(depth, rowBudget, options.full === true)
 
   if (options.path) {
-    return layout([...renderPath(envelope, options.path, depth, rowBudget), ...noteBlock])
+    return layout([...renderPath(envelope, options.path, render), ...noteBlock])
   }
 
-  const { renderProps, collapsed } = createPropsRenderer(depth, rowBudget)
   const props = envelope.props
 
   // A payload with no envelope — the driver's stand-in for a command whose
   // details it has since evicted — is rendered as it arrives.
   if (!isRecord(props)) {
-    return layout([[heading('CONSOLE PROPS'), ...withBody(renderProps(envelope, 0))], ...collapsedFooter(collapsed), ...noteBlock])
+    return layout([[heading('CONSOLE PROPS'), ...withBody(render.renderProps(envelope, 0))], ...collapsedFooter(render.collapsed), ...noteBlock])
   }
 
   const { table: tables, groups, error, args } = envelope
   const unexpected = Object.fromEntries(Object.entries(envelope).filter(([key]) => !ENVELOPE_KEYS.has(key)))
 
   return layout([
-    [propsHeader(), ...withBody(renderProps(props, 0))],
-    ...(tables === undefined ? [] : tableSections(tables, renderProps)),
-    ...(groups === undefined ? [] : extraSection('GROUPS', groups, renderProps)),
-    ...(args === undefined ? [] : extraSection('ARGS', args, renderProps)),
-    ...(error === undefined ? [] : extraSection('ERROR', error, renderProps, ERROR_TINT)),
-    ...(Object.keys(unexpected).length ? extraSection('OTHER', unexpected, renderProps) : []),
-    ...collapsedFooter(collapsed),
+    [propsHeader(), ...withBody(render.renderProps(props, 0))],
+    ...(tables === undefined ? [] : tableSections(tables, render)),
+    ...(groups === undefined ? [] : extraSection('GROUPS', groups, render)),
+    ...(args === undefined ? [] : extraSection('ARGS', args, render)),
+    ...(error === undefined ? [] : extraSection('ERROR', error, render, ERROR_TINT)),
+    ...(Object.keys(unexpected).length ? extraSection('OTHER', unexpected, render) : []),
+    ...collapsedFooter(render.collapsed),
     ...noteBlock,
   ])
 }

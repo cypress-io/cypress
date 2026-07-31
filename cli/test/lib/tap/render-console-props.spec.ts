@@ -197,7 +197,7 @@ describe('lib/tap/render/console-props', () => {
         },
       }
 
-      expect(renderProps(envelope)).toContain('Events  {9 items}')
+      expect(renderProps(envelope)).toContain('Events  [9 items]')
       expect(renderProps(envelope, { path: 'Events' })).toMatchInlineSnapshot(`
         "CONSOLE PROPS › Events
           index  type
@@ -316,7 +316,7 @@ describe('lib/tap/render/console-props', () => {
     it('summarizes a huge array and reaches an index through --path', () => {
       const big: TapConsoleProps = { name: 'x', type: 'command', props: { items: Array.from({ length: 2000 }, (_value, index) => index) } }
 
-      expect(renderProps(big)).toContain('items  {2000 items}')
+      expect(renderProps(big)).toContain('items  [2000 items]')
       expect(renderProps({ name: 'x', type: 'command', props: { items: ['a', 'b', 'c'] } }, { path: 'items>2' })).toContain('b')
     })
 
@@ -340,6 +340,65 @@ describe('lib/tap/render/console-props', () => {
       const envelope: TapConsoleProps = { name: 'x', type: 'command', props: { [key]: { nested: true } } }
 
       expect(renderProps(envelope, { depth: '0' })).toContain('--path \'Matched `cy.intercept()` and user\'\\\'\'s route\'')
+    })
+  })
+
+  // The row's width is what the clamp protects; a value asked for in full gets a
+  // block of its own instead, where there is no column left to protect.
+  describe('full report', () => {
+    const envelope: TapConsoleProps = {
+      name: 'request',
+      type: 'command',
+      props: { Status: 200, Body: `${'a'.repeat(40)} ${'b'.repeat(40)} ${'c'.repeat(20)}` },
+    }
+
+    it('wraps a value too long for its row under its key, losing nothing', () => {
+      setColumns(60)
+
+      expect(renderProps(envelope, { full: true })).toMatchInlineSnapshot(`
+        "CONSOLE PROPS
+          Status  200
+          Body
+            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+            bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+            cccccccccccccccccccc"
+      `)
+    })
+
+    // A key/value that still fits keeps its row: only what outgrows the row moves.
+    it('leaves a value that fits on its row alone', () => {
+      setColumns(200)
+
+      expect(renderProps(envelope, { full: true })).toMatchInlineSnapshot(`
+        "CONSOLE PROPS
+          Status  200
+          Body    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb cccccccccccccccccccc"
+      `)
+    })
+
+    // The table's own clamp is the other place a value loses its tail; asked for
+    // in full, the column widens instead.
+    it('keeps table cells whole, widening the column', () => {
+      setColumns(200)
+
+      const rows = Array.from({ length: 3 }, (_value, index) => ({ id: index + 1, note: 'a'.repeat(60) }))
+      const envelope: TapConsoleProps = { name: 'log', type: 'command', props: { Rows: rows } }
+
+      expect(renderProps(envelope, { depth: 'all' })).toContain('…')
+      expect(renderProps(envelope, { depth: 'all', full: true })).not.toContain('…')
+      expect(renderProps(envelope, { depth: 'all', full: true })).toContain(`1   ${'a'.repeat(60)}`)
+    })
+
+    // A token with no space to break at (a URL, a base64 blob) breaks mid-word
+    // rather than running past the row it was given.
+    it('breaks an unbroken token at the row instead of overflowing', () => {
+      setColumns(40)
+
+      const rendered = renderProps({ name: 'x', type: 'command', props: { Blob: 'z'.repeat(100) } }, { full: true })
+
+      expect(rendered).not.toContain('…')
+      expect(rendered.replace(/[^z]/g, '')).to.have.length(100)
+      expect(rendered.split('\n').every((line) => line.length <= 40)).to.eq(true)
     })
   })
 

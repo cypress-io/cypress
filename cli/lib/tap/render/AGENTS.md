@@ -112,9 +112,9 @@ any instance version that has the command at all.
 2. Register it in [`index.ts`](./index.ts) under the command name. Declaring
    `renderHuman` makes the command print the rendering by default; `--json`
    bypasses it. A command with no entry keeps printing JSON, and a `renderHuman`
-   that returns undefined declines for the options it was invoked with — what
-   `command --full-report` does, since a payload asked for in full is
-   one to pipe somewhere, not to read.
+   that returns undefined declines for the options it was invoked with, printing
+   the raw JSON instead — a per-option escape hatch for a result no view can
+   honestly render.
 3. The `result` shape is the command's typed interface from the shared
    `@packages/cypress-instances` contract — render from that, and let anything
    machine-facing stay reachable through `--json`.

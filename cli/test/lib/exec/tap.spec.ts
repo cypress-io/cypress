@@ -1142,14 +1142,15 @@ describe('lib/exec/tap', () => {
                                number (test body first when duplicated), an e-prefixed
                                event id, or hook-qualified like "h1:3"
           --full-report        return every console property in full, however long,
-                               instead of naming the long ones by their length, printed
-                               as raw JSON
+                               instead of naming the long ones by their length — a
+                               value too long for its row then reads as a block under
+                               its key
           --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
                                latest
           --depth <depth>      how many levels of nested console properties to expand
-                               before summarizing the rest as "{n keys}": a number or
-                               "all" (default 3, and a section over 8 rows folds at any
-                               depth unless this is passed)
+                               before summarizing the rest as "{n keys}" / "[n items]":
+                               a number or "all" (default 3, and a section over 8 rows
+                               folds at any depth unless this is passed)
           --path <path>        show one section of the console properties instead of
                                the whole payload, addressed from the top level as
                                "Response>headers" (case-insensitive, ">"-separated)
