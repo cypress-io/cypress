@@ -5,9 +5,8 @@ const IMAGE = 'cypress/base:24.0.0'
 
 beforePrePullImages([IMAGE])
 
-// TypeScript 7 specs are transpiled with the @babel/preset-typescript bundled inside
-// the binary, so this must run against the built binary — dev-mode runs resolve the
-// preset from the monorepo and can't catch binary packaging problems.
+// dev-mode runs resolve @babel/preset-typescript from the monorepo, so binary
+// packaging problems only reproduce against the built binary
 describe('typescript 7', () => {
   systemTests.it(`can run a typescript 7 project in ${IMAGE}`, {
     withBinary: true,
