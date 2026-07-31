@@ -68,7 +68,7 @@ describe('tap/commands/command', () => {
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'nope', command: '2' })).to.deep.eq({
       error: {
         code: 'TEST_NOT_FOUND',
-        message: 'no test of this run matches the id "nope" — use the tests command to list this run’s tests',
+        message: 'no test of this run matches the id "nope" — use the reporter command to list this run’s tests',
       },
     })
   })
@@ -108,7 +108,7 @@ describe('tap/commands/command', () => {
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '3', props: 'true', attempt: '1' })).to.deep.eq({
       error: {
         code: 'COMMAND_NOT_FOUND',
-        message: 'no command of this test matches the id "3" — use the commands command to list this test’s commands',
+        message: 'no command of this test matches the id "3" — use the reporter command (with --test) to list this test’s commands',
       },
     })
 

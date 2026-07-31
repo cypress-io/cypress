@@ -26,7 +26,7 @@ export const commandCommand = defineCommand('command', async (_params, options):
   const resolved = resolveCommand(selection.attempt, command, test)
 
   if (!resolved) {
-    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the commands command to list this test’s commands`)
+    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --test) to list this test’s commands`)
   }
 
   if (!props) {
