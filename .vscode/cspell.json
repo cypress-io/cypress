@@ -22,7 +22,6 @@
         "forcedefault",
         "framebusting",
         "geckodriver",
-        "getenv",
         "GIBIBYTES",
         "graphcache",
         "headlessly",
