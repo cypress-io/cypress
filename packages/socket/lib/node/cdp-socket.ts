@@ -1,4 +1,3 @@
-import type { CDPClient } from '@packages/types/src/protocol'
 import type Protocol from 'devtools-protocol/types/protocol.d'
 import { EventEmitter } from 'stream'
 import { randomUUID } from 'crypto'
@@ -6,6 +5,17 @@ import { decode, encode } from '../utils'
 import Debug from 'debug'
 
 const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
+
+/**
+ * The subset of the CDP surface this socket needs. Satisfied by a real CDP
+ * client (Chromium) or by an adapter over another automation protocol that can
+ * expose a window binding and evaluate script (e.g. Playwright for WebKit).
+ */
+export interface CDPSocketBridge {
+  send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params?: object): Promise<any>
+  on (event: 'Runtime.bindingCalled', listener: (event: Protocol.Runtime.BindingCalledEvent) => void): void
+  off (event: 'Runtime.bindingCalled', listener: (event: Protocol.Runtime.BindingCalledEvent) => void): void
+}
 
 /**
  * The goal of this class is to emulate the socket io server API, but using the Chrome DevTools Protocol.
@@ -23,7 +33,7 @@ export class CDPSocketServer extends EventEmitter {
     this._fullNamespace = `${path}${namespace}`
   }
 
-  async attachCDPClient (cdpClient: CDPClient): Promise<void> {
+  async attachCDPClient (cdpClient: CDPSocketBridge): Promise<void> {
     this._cdpSocket = await CDPSocket.init(cdpClient, this._fullNamespace)
 
     await Promise.all(Object.values(this._namespaceMap).map(async (server) => {
@@ -76,11 +86,11 @@ export class CDPSocketServer extends EventEmitter {
 }
 
 export class CDPSocket extends EventEmitter {
-  private _cdpClient?: CDPClient
+  private _cdpClient?: CDPSocketBridge
   private _namespace: string
   private _executionContextId?: number
 
-  constructor (cdpClient: CDPClient, namespace: string) {
+  constructor (cdpClient: CDPSocketBridge, namespace: string) {
     super()
 
     this._cdpClient = cdpClient
@@ -89,7 +99,7 @@ export class CDPSocket extends EventEmitter {
     this._cdpClient.on('Runtime.bindingCalled', this.processCDPRuntimeBinding)
   }
 
-  static async init (cdpClient: CDPClient, namespace: string): Promise<CDPSocket> {
+  static async init (cdpClient: CDPSocketBridge, namespace: string): Promise<CDPSocket> {
     await cdpClient.send('Runtime.enable')
     await cdpClient.send('Runtime.addBinding', {
       name: `cypressSendToServer-${namespace}`,

@@ -6,6 +6,7 @@ import type { Automation } from '../automation'
 import { WebKitAutomation } from './webkit-automation'
 import * as unhandledExceptions from '../unhandled_exceptions'
 import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket'
 import utils from './utils'
 
 const debug = Debug('cypress:server:browsers:webkit')
@@ -71,7 +72,7 @@ function removeBadExitListener () {
   else debug('did not find killProcessAndCleanup, which may cause interactive mode to unexpectedly open')
 }
 
-export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
+export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance> {
   if (!options.experimentalWebKitSupport) {
     throw new Error('WebKit was launched, but the experimental feature was not enabled. Please add `experimentalWebKitSupport: true` to your config file to launch WebKit.')
   }
@@ -128,6 +129,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     videoApi: options.videoApi,
     userAgent: options.userAgent,
     isHeadless: !!browser.isHeadless,
+    cdpSocketServer,
   })
 
   automation.use(wkAutomation)

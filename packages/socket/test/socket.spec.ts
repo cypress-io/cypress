@@ -38,14 +38,13 @@ describe('Socket', function () {
     expect(socket._namespace).toEqual('/path/default')
   })
 
-  it('creates a websocket for webkit browsers', function () {
+  it('creates an automation socket for webkit browsers', function () {
+    // @ts-expect-error
+    global.window = {}
     const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
 
     // @ts-expect-error
-    expect(socket.io.opts.path).toEqual('/path')
-    // socket.io-client 4.6+ normalizes string transports into transport classes; the polling transport class is named "XHR".
-    // @ts-expect-error
-    expect(socket.io.opts.transports[0].name).toEqual('XHR')
+    expect(socket._namespace).toEqual('/path/default')
   })
 
   describe('.getPathToClientSource', function () {

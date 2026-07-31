@@ -9,52 +9,46 @@ declare global {
   }
 }
 
-let chromium = false
+// Whether this browser communicates over the automation channel (a window
+// binding bridged by CDP in Chromium or Playwright in WebKit) instead of HTTP.
+// WebKit cannot use the websocket transport (#23807), and HTTP long-polling
+// shares the browser's per-host connection pool with AUT traffic — enough
+// simultaneously-held intercepted requests starve the socket and deadlock the
+// run (#33926) — so it uses the automation channel as well.
+let usesAutomationSocket = false
+
+const getAutomationSocket = (fullNamespace: string): SocketShape => {
+  // When running in Chromium and with a baseUrl set to something that includes basic auth: (e.g. http://user:pass@localhost:1234), the assets
+  // will load twice. Thus, we need to add the cypress sockets to the window object rather than just relying on a local variable.
+  window.cypressSockets ||= {}
+  if (!window.cypressSockets[fullNamespace]) {
+    window.cypressSockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
+  }
+
+  // Connect the socket regardless of whether or not we have newly created it
+  window.cypressSockets[fullNamespace].connect()
+
+  return window.cypressSockets[fullNamespace] as unknown as SocketShape
+}
 
 export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptions>): SocketShape {
-  if (chromium) {
-    const fullNamespace = `${opts?.path}${uri}`
-
-    // When running in Chromium and with a baseUrl set to something that includes basic auth: (e.g. http://user:pass@localhost:1234), the assets
-    // will load twice. Thus, we need to add the cypress sockets to the window object rather than just relying on a local variable.
-    window.cypressSockets ||= {}
-    if (!window.cypressSockets[fullNamespace]) {
-      window.cypressSockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
-    }
-
-    // Connect the socket regardless of whether or not we have newly created it
-    window.cypressSockets[fullNamespace].connect()
-
-    return window.cypressSockets[fullNamespace] as unknown as SocketShape
+  if (usesAutomationSocket) {
+    return getAutomationSocket(`${opts?.path}${uri}`)
   }
 
   return io(uri, { parser: cypressParser, ...opts })
 }
 
 export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string}): SocketShape {
-  if (browserFamily === 'chromium') {
-    chromium = true
+  if (browserFamily === 'chromium' || browserFamily === 'webkit') {
+    usesAutomationSocket = true
 
-    const fullNamespace = `${path}/default`
-
-    // When running in Chromium and with a baseUrl set to something that includes basic auth: (e.g. http://user:pass@localhost:1234), the assets
-    // will load twice. Thus, we need to add the cypress sockets to the window object rather than just relying on a local variable.
-    window.cypressSockets ||= {}
-    if (!window.cypressSockets[fullNamespace]) {
-      window.cypressSockets[fullNamespace] = new CDPBrowserSocket(fullNamespace)
-    }
-
-    // Connect the socket regardless of whether or not we have newly created it
-    window.cypressSockets[fullNamespace].connect()
-
-    return window.cypressSockets[fullNamespace] as unknown as SocketShape
+    return getAutomationSocket(`${path}/default`)
   }
 
   return io({
     path,
-    // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
-    // https://github.com/cypress-io/cypress/issues/23807
-    transports: browserFamily === 'webkit' ? ['polling'] : ['websocket'],
+    transports: ['websocket'],
     parser: cypressParser,
   })
 }
