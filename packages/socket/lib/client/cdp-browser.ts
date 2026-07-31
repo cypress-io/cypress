@@ -1,5 +1,4 @@
 /// <reference lib="dom" />
-import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from '../utils'
 import { Emitter, DefaultEventsMap } from '@socket.io/component-emitter'
 
@@ -58,7 +57,7 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
   // @ts-expect-error TODO: fix emit type
   emit = async (event: string, ...args: any[]) => {
     // Generate a unique key for this event
-    const uuid = uuidv4()
+    const uuid = crypto.randomUUID()
     let callback
 
     if (typeof args[args.length - 1] === 'function') {

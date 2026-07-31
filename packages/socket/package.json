@@ -29,8 +29,7 @@
     "flatted": "3.4.2",
     "socket.io": "4.8.3",
     "socket.io-client": "4.8.3",
-    "socket.io-parser": "4.2.6",
-    "uuid": "11.1.1"
+    "socket.io-parser": "4.2.6"
   },
   "devDependencies": {
     "@packages/types": "0.0.0-development",
