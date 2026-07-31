@@ -230,21 +230,12 @@ export const getElements = ($el) => {
 }
 
 /*
- * We add three custom expressions to jquery. These let us use custom
+ * We add three custom pseudo-selectors to jquery via `$.expr.pseudos`, the
+ * canonical extension point for the selector engine. These let us use custom
  * logic around case sensitivity, and match strings or regular expressions.
- * See https://github.com/jquery/sizzle/wiki/#-pseudo-selectors for
- * documentation on adding Sizzle selectors.
  *
- * Our use of
- *
- *   $.expr[':']['cy-contains'] = $.expr.createPseudo()
- *
- * is equivalent to
- *
- *   Sizzle.selectors.pseudos['cy-contains'] = Sizzle.selectors.createPseudo()
- *
- * in the documentation linked above. $.expr[':'] is jquery's alias for
- * Sizzle.selectors.pseudos.
+ * `$.expr.createPseudo` builds a pseudo-selector that captures its argument
+ * (the text inside the parentheses) when the selector is compiled.
  *
  * These custom expressions are used exclusively by cy.contains; see
  * `getContainsSelector` below.
@@ -252,7 +243,7 @@ export const getElements = ($el) => {
 
 // Example:
 // button:cy-contains("Login")
-$.expr[':']['cy-contains'] = $.expr.createPseudo((text) => {
+$.expr.pseudos['cy-contains'] = $.expr.createPseudo((text) => {
   text = JSON.parse(`"${ text }"`)
 
   return function (elem) {
@@ -264,7 +255,7 @@ $.expr[':']['cy-contains'] = $.expr.createPseudo((text) => {
 
 // Example:
 // .login-button:cy-contains-insensitive("login")
-$.expr[':']['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
+$.expr.pseudos['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
   text = JSON.parse(`"${ text }"`)
 
   return function (elem) {
@@ -283,7 +274,7 @@ function isSubmit (elem: Element): elem is HTMLInputElement {
 
 // Example:
 // #login>li:first:cy-contains-regex('/asdf 1/i')
-$.expr[':']['cy-contains-regex'] = $.expr.createPseudo((text) => {
+$.expr.pseudos['cy-contains-regex'] = $.expr.createPseudo((text) => {
   const lastSlash = text.lastIndexOf('/')
   const regex = new RegExp(text.slice(1, lastSlash), text.slice(lastSlash + 1))
 

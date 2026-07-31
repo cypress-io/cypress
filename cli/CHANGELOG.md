@@ -8,6 +8,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) block could intermittently fail with `TypeError: Cannot read properties of undefined (reading 'applied')`, incorrectly reported as originating from your test code. Addressed in [#34376](https://github.com/cypress-io/cypress/pull/34376).
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
 - Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 - Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
@@ -16,6 +17,8 @@
 
 - Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
 - Upgraded `@sinonjs/fake-timers` from `11.3.1` to `14.0.0`. While [`cy.clock()`](https://on.cypress.io/clock) is active, the faked `performance` object now implements `performance.mark()` and `performance.measure()` (previously no-ops that returned `undefined`) and reports a faked `performance.timeOrigin`. Addressed in [#34377](https://github.com/cypress-io/cypress/pull/34377).
+- Removed `tslib` (previously `1.14.1`) from the `cypress` package's runtime dependencies. Addressed in [#34372](https://github.com/cypress-io/cypress/pull/34372).
+- Upgraded `ws` from `8.18.3` to `8.21.1`. Addressed in [#34392](https://github.com/cypress-io/cypress/pull/34392).
 
 ## 15.19.0
 
