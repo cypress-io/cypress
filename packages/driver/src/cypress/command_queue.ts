@@ -15,16 +15,12 @@ import type { IStability } from '../cy/stability'
 const debugErrors = Debug('cypress:driver:errors')
 const debug = Debug('cypress:driver:command_queue')
 
-// Number of most-recently-finished commands whose subjects we never release.
-// Some command fns read their immediate `prev` command's subject (e.g.
-// `end-logGroup` forwarding the yielded subject) and freshly-enqueued nested
-// commands may still reference a just-resolved subject, so we keep a trailing
-// buffer well clear of the running edge of the queue.
+// Commands within this many positions of the queue's running edge keep their
+// subjects; cleanSubjects() explains why releasing up to the edge is unsafe.
 const CLEAN_SUBJECTS_TRAILING_WINDOW = 100
 
-// Only sweep once at least this many additional commands have moved behind the
-// trailing window. This keeps short/typical tests untouched entirely and bounds
-// the sweep cost on long tests to a small amortized constant per command.
+// Minimum number of newly-finished commands before a sweep runs, so short tests
+// stay off this path and the amortized per-command cost on long tests stays low.
 const CLEAN_SUBJECTS_BATCH_SIZE = 100
 
 const __stackReplacementMarker = (fn, args) => {
@@ -129,7 +125,7 @@ export class CommandQueue extends Queue<$Command> {
   stability: IStability
   cy: $Cy
 
-  // index up to which finished-command subjects have already been released
+  // commands before this index have already been swept
   private cleanedSubjectsIndex = 0
 
   constructor (
@@ -511,8 +507,6 @@ export class CommandQueue extends Queue<$Command> {
         // move on to the next queueable
         this.index += 1
 
-        // release memory held by finished commands that can no longer be
-        // referenced. safe to do here because the index only ever moves forward.
         this.cleanSubjects()
 
         const pauseFn = this.state('onPaused')
@@ -595,30 +589,23 @@ export class CommandQueue extends Queue<$Command> {
 
   // Releases the subject (and fn / queryFn closures) held by finished commands
   // that can no longer be referenced, along with their entries in
-  // state('subjects'). On long-running or recursive tests the command queue
-  // grows without bound for the life of a single test, and the DOM/jQuery
-  // subjects pinned to each finished command are a primary source of renderer
-  // memory pressure.
+  // state('subjects'). A single long-running or recursive test keeps growing the
+  // queue, and the values pinned to each finished command (DOM/jQuery subjects
+  // especially) are a primary source of renderer memory pressure until it ends.
   //
-  // This is only performed in run mode. In interactive mode the command log
-  // lets you time-travel and inspect the value each command yielded, which
-  // reads a finished command's subject lazily (via consoleProps) - so releasing
-  // it there would change observable behavior. Run mode never surfaces those
-  // subjects, so releasing them is unobservable.
+  // Only run mode is swept. Interactive mode lets the command log time-travel and
+  // inspect the value each command yielded, reading a finished command's subject
+  // lazily via consoleProps; run mode never surfaces those subjects.
   //
-  // Safety:
-  //  - The queue index only ever moves forward within a test (nested commands
-  //    are inserted ahead of it and recovery jumps forward), so commands behind
-  //    it are never re-executed.
-  //  - A trailing window of recently-finished commands is always retained, since
-  //    some command fns read their immediate `prev` command's subject.
-  //  - Aliases snapshot their own subject chain into state('aliases'), so
-  //    pruning state('subjects') here cannot affect a referenced `@alias`.
+  // Releasing behind the index is safe because the index only moves forward
+  // within a test (nested commands insert ahead of it, recovery jumps forward),
+  // so those commands are never re-executed. A trailing window is still retained
+  // because some command fns read their immediate `prev` command's subject (e.g.
+  // `end-logGroup`). Aliases snapshot their own chain into state('aliases'), so
+  // pruning state('subjects') here cannot affect an `@alias`.
   cleanSubjects () {
     const boundary = this.index - CLEAN_SUBJECTS_TRAILING_WINDOW
 
-    // wait until enough commands have moved behind the trailing window to make a
-    // sweep worthwhile - this leaves short/typical tests untouched entirely.
     if (boundary - this.cleanedSubjectsIndex < CLEAN_SUBJECTS_BATCH_SIZE) {
       return
     }
@@ -634,10 +621,8 @@ export class CommandQueue extends Queue<$Command> {
       stillNeeded.add(this.at(i).get('chainerId'))
     }
 
-    // release finished commands that have aged out of the trailing window and
-    // whose chainer can no longer be referenced. leave still-needed commands in
-    // place (and stop advancing the cursor past them) so they're revisited once
-    // their chain has fully finished.
+    // stop at the first still-needed command so the cursor revisits it (and
+    // anything behind it) on a later sweep once its chain has finished.
     let i = this.cleanedSubjectsIndex
 
     for (; i < boundary; i++) {
