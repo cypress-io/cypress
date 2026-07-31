@@ -6,17 +6,12 @@ import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
-import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
+import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cdp-protocol/cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
-
-interface Version {
-  major: number
-  minor: number
-}
 
 type BrowserCriClientOptions = {
   browserClient: CriClient
@@ -440,7 +435,10 @@ export class BrowserCriClient {
     if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
       if (browserCriClient.hasExtraTargetClient(targetId)) {
         debug('Close extra target client (id: %s)')
-        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch(() => { })
+        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch((err) => {
+          debug('error closing extra target client %s: %o', targetId, err)
+        })
+
         browserCriClient.removeExtraTargetClient(targetId)
       }
 
@@ -459,30 +457,48 @@ export class BrowserCriClient {
     //
     // otherwise it means the the browser itself was closed
 
+    const debugCloseError = (targetName: string) => {
+      return (err: Error) => {
+        debug('error closing %s target client after Target.targetDestroyed for %s: %o', targetName, targetId, err)
+      }
+    }
+
     // always close the connection to the page targets because it was destroyed
-    browserCriClient.currentlyAttachedTarget.close().catch(() => { })
-    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
-    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
-    browserCriClient.currentlyAttachedStudioTarget?.close().catch(() => { })
+    browserCriClient.currentlyAttachedTarget.close().catch(debugCloseError('page'))
+    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(debugCloseError('protocol'))
+    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(debugCloseError('cy-prompt'))
+    browserCriClient.currentlyAttachedStudioTarget?.close().catch(debugCloseError('studio'))
+
+    const targetDestroyedAt = Date.now()
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
       // it's not a problem if we're expected to be closing the browser naturally
       // and not as a result of an unexpected page or browser closure
       if (browserCriClient.resettingBrowserTargets) {
+        debug('Target.targetDestroyed received for %s while resettingBrowserTargets is true', targetId)
+
         // do nothing, we're good
         return resolve(true)
       }
 
       if (typeof browserCriClient.gracefulShutdown !== 'undefined') {
+        debug('Target.targetDestroyed received for %s while gracefulShutdown is %o', targetId, browserCriClient.gracefulShutdown)
+
         return resolve(browserCriClient.gracefulShutdown)
       }
 
       // when process.on('exit') is called, we call onClose
-      browserCriClient.onClose = resolve
+      browserCriClient.onClose = (gracefulShutdown) => {
+        debug('onClose called with %o %dms after Target.targetDestroyed for %s', gracefulShutdown, Date.now() - targetDestroyedAt, targetId)
+
+        resolve(gracefulShutdown)
+      }
 
       // or when the browser's CDP ws connection is closed
       browserClient.ws?.once('close', () => {
+        debug('browser websocket closed %dms after Target.targetDestroyed for %s', Date.now() - targetDestroyedAt, targetId)
+
         resolve(false)
       })
     })
@@ -498,7 +514,7 @@ export class BrowserCriClient {
       errors.throwErr('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY', browserName)
     })
     .catch(Bluebird.TimeoutError, () => {
-      debug('browser websocket did not close, page was closed %o', { targetId })
+      debug('neither a browser websocket close nor onClose was observed within 500ms of Target.targetDestroyed for %s', targetId)
       // the browser websocket didn't close meaning
       // only the page was closed, not the browser
       errors.throwErr('BROWSER_PAGE_CLOSED_UNEXPECTEDLY', browserName)
@@ -564,6 +580,16 @@ export class BrowserCriClient {
       return
     }
 
+    // If the browser process crashed, the underlying connection is dead and any
+    // `Target.*` command we send here will never resolve (hanging the run) or
+    // reject (throwing out of post-spec teardown). There are no targets left to
+    // reset, so skip it entirely. @see https://github.com/cypress-io/cypress/issues/24338
+    if (this.browserClient.crashed) {
+      debug('browser cri client is crashed, not resetting browser targets')
+
+      return
+    }
+
     this.resettingBrowserTargets = true
 
     if (!this.currentlyAttachedTarget) {
@@ -586,11 +612,17 @@ export class BrowserCriClient {
 
       debug('target closed', this.currentlyAttachedTarget.targetId)
 
+      const debugResetCloseError = (targetName: string) => {
+        return (err: Error) => {
+          debug('error closing %s target client while resetting browser targets: %o', targetName, err)
+        }
+      }
+
       await Promise.all([
-        this.currentlyAttachedTarget.close().catch(() => {}),
-        this.currentlyAttachedProtocolTarget?.close().catch(() => {}),
-        this.currentlyAttachedCyPromptTarget?.close().catch(() => {}),
-        this.currentlyAttachedStudioTarget?.close().catch(() => {}),
+        this.currentlyAttachedTarget.close().catch(debugResetCloseError('page')),
+        this.currentlyAttachedProtocolTarget?.close().catch(debugResetCloseError('protocol')),
+        this.currentlyAttachedCyPromptTarget?.close().catch(debugResetCloseError('cy-prompt')),
+        this.currentlyAttachedStudioTarget?.close().catch(debugResetCloseError('studio')),
       ])
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
@@ -685,6 +717,23 @@ export class BrowserCriClient {
    */
   getWebSocketDebuggerUrl () {
     return this.versionInfo.webSocketDebuggerUrl
+  }
+
+  /**
+   * Synchronously mark the root browser client and every attached target client
+   * as crashed. Used when the browser *process* crashes (e.g. it exits with
+   * SIGTRAP): unlike a renderer/tab crash, a process crash never emits
+   * `Target.targetCrashed`, so nothing else flips these clients into the crashed
+   * state. Without this, post-spec teardown (`resetBrowserTargets` via
+   * `reset:browser:tabs:for:next:spec`, `afterSpec`, etc.) can issue CDP commands
+   * on the dead connection that never resolve and hang the run.
+   */
+  markCrashed = () => {
+    this.browserClient?.markCrashed()
+    this.currentlyAttachedTarget?.markCrashed()
+    this.currentlyAttachedProtocolTarget?.markCrashed()
+    this.currentlyAttachedCyPromptTarget?.markCrashed()
+    this.currentlyAttachedStudioTarget?.markCrashed()
   }
 
   /**

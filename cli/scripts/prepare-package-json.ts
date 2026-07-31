@@ -42,6 +42,11 @@ function preparePackageForNpmRelease (json: any, branchName?: string): any {
       commitDate: new Date(getStdout('git show -s --format=%ci')).toISOString(),
       stable: false,
     },
+    // @packages/ dependencies are internal, and included in the cli bundle via rollup
+    ...(json.dependencies ? { dependencies: Object.fromEntries(
+      Object.entries(json.dependencies || {})
+      .filter(([key]) => !key.startsWith('@packages/')),
+    ) } : {}),
     description,
     homepage,
     license,

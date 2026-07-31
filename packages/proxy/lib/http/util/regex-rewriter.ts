@@ -19,6 +19,18 @@ const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(\btop\b|\bparent\b)([.
 
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g
+
+// A `<base target="_top">` (or `_parent`) is inherited by every untargeted <a> and <form>,
+// so navigations would break out of the AUT iframe even if individual elements look safe.
+// Strip the attribute so the browser falls back to the default (`_self`).
+//
+// NOTE: the unquoted branch captures the boundary character into group 2 rather than using a
+// zero-width lookahead. `replaceStream` (replace_stream.ts) re-applies the regex to the
+// already-matched substring, and a positive lookahead for a boundary char fails at
+// end-of-match — so the stream path would silently skip the replacement. Consuming the
+// boundary char in the match and re-emitting it via `$2` keeps both the stream and
+// in-memory paths in lockstep.
+const baseTagTargetRe = /(<base\b[^>]*?)\s+target\s*=\s*(?:"_(?:top|parent)"|'_(?:top|parent)'|_(?:top|parent)([\s/>]))/gi
 /**
  * Matches the word integrity if being set on an object, such as foo.integrity. This MUST be followed by a valid hash to match. This is replaced with
  * foo['cypress-stripped-integrity']
@@ -32,9 +44,14 @@ const javaScriptIntegrityReplacementRe = new RegExp(`[\\.](${STRIPPED_INTEGRITY_
  */
 const generalIntegrityReplacementRe = new RegExp(`(?:(?<!(var|let|nst)\\s)[^\\.\\s'"]?)(${STRIPPED_INTEGRITY_TAG}|integrity)((?:'|")?\\]?(\\s?=|["|'],)\\s?(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
 
-export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+export function strip (html: string, { modifyObstructiveThirdPartyCode, removeSRIAttributes }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
+  removeSRIAttributes: false,
 }) {
+  // Both flags are origin-scoped by the caller: experimentalModifyObstructiveThirdPartyCode for
+  // third-party resources, removeSRIAttributes for first-party.
+  const stripIntegrity = modifyObstructiveThirdPartyCode || removeSRIAttributes
+
   let rewrittenHTML = html
   .replace(modifyObstructiveThirdPartyCode ? topOrParentExpandedEqualityBeforeRe : topOrParentEqualityBeforeRe, '$1self')
   .replace(modifyObstructiveThirdPartyCode ? topOrParentExpandedEqualityAfterRe : topOrParentEqualityAfterRe, 'self$2')
@@ -42,8 +59,9 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
   .replace(topWindowLocationRe, 'self$2')
+  .replace(baseTagTargetRe, '$1$2')
 
-  if (modifyObstructiveThirdPartyCode) {
+  if (stripIntegrity) {
     rewrittenHTML = rewrittenHTML.replace(javaScriptIntegrityReplacementRe, `['${STRIPPED_INTEGRITY_TAG}']$2`)
     rewrittenHTML = rewrittenHTML.replace(generalIntegrityReplacementRe, `${STRIPPED_INTEGRITY_TAG}$3`)
   }
@@ -51,9 +69,14 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   return rewrittenHTML
 }
 
-export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+export function stripStream ({ modifyObstructiveThirdPartyCode, removeSRIAttributes }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
+  removeSRIAttributes: false,
 }) {
+  // Both flags are origin-scoped by the caller: experimentalModifyObstructiveThirdPartyCode for
+  // third-party resources, removeSRIAttributes for first-party.
+  const stripIntegrity = modifyObstructiveThirdPartyCode || removeSRIAttributes
+
   return pumpify(
     utf8Stream(),
     replaceStream(
@@ -64,7 +87,8 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         jiraTopWindowGetterRe,
         jiraTopWindowGetterUnMinifiedRe,
         topWindowLocationRe,
-        ...(modifyObstructiveThirdPartyCode ? [
+        baseTagTargetRe,
+        ...(stripIntegrity ? [
           javaScriptIntegrityReplacementRe,
           generalIntegrityReplacementRe,
         ] : []),
@@ -76,7 +100,8 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
         'self$2',
-        ...(modifyObstructiveThirdPartyCode ? [
+        '$1$2',
+        ...(stripIntegrity ? [
           `['${STRIPPED_INTEGRITY_TAG}']$2`,
           `${STRIPPED_INTEGRITY_TAG}$3`,
         ] : []),

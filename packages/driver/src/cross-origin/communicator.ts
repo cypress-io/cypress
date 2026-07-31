@@ -6,6 +6,8 @@ import { $Location } from '../cypress/location'
 import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSnapshotForSerialization, reifySnapshotFromSerialization } from '../util/serialization/log'
 
 const debug = debugFn('cypress:driver:multi-origin')
+// for logs emitted on every promisified cross-origin message
+const debugVerbose = debugFn('cypress-verbose:driver:multi-origin')
 
 const CROSS_ORIGIN_PREFIX = 'cross:origin:'
 const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}log:added`, `${CROSS_ORIGIN_PREFIX}log:changed`]
@@ -40,9 +42,11 @@ const sharedPromiseSetup = ({
   let timeoutId
 
   const responseEvent = `${event}:${Date.now()}`
+  const sentAt = Date.now()
 
   const handler = (result) => {
     clearTimeout(timeoutId)
+    debugVerbose('%s received a response from %s spec bridge %dms after setup (timeout %dms)', event, specBridgeName, Date.now() - sentAt, timeout)
     resolve(result)
   }
 
@@ -70,6 +74,26 @@ const sharedPromiseSetup = ({
 export class PrimaryOriginCommunicator extends EventEmitter {
   private crossOriginDriverWindows: {[key: string]: Window} = {}
   userInvocationStack?: string
+
+  /**
+   * Clears all cached spec-bridge windows. The runner calls this after
+   * `test:before:after:run:async` (e.g. about:blank) so `window:load` can still
+   * use `toAllSpecBridges('window:load', ...)` before references are dropped.
+   */
+  clearCrossOriginDriverWindows () {
+    this.crossOriginDriverWindows = {}
+  }
+
+  override removeAllListeners (eventName?: string | symbol): this {
+    if (arguments.length === 0) {
+      super.removeAllListeners()
+      this.crossOriginDriverWindows = {}
+    } else {
+      super.removeAllListeners(eventName)
+    }
+
+    return this
+  }
 
   /**
    * The callback handler that receives messages from secondary origins.

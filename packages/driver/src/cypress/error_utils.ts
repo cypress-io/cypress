@@ -17,7 +17,7 @@ import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
 import type { HandlerType } from './runner'
 
-const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileName', 'lineNumber', 'columnNumber', 'host', 'uncaught', 'actual', 'expected', 'showDiff', 'isPending', 'isRecovered', 'docsUrl', 'codeFrame', 'docsUrlTitle'] as const
+const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileName', 'lineNumber', 'columnNumber', 'host', 'uncaught', 'actual', 'expected', 'showDiff', 'isPending', 'isRecovered', 'docsUrl', 'codeFrame', 'docsUrlTitle', 'triggerAction'] as const
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
@@ -330,6 +330,7 @@ export class InternalCypressError extends Error {
 export class CypressError extends Error {
   docsUrl?: string
   docsUrlTitle?: string | null
+  triggerAction?: 'loginModal' | 'projectConnectModal' | null
   retry?: boolean
   userInvocationStack?: any
   onFail?: Function
@@ -391,8 +392,9 @@ const replaceErrMsgTokens = (errMessage, args) => {
   return $utils.normalizeNewLines(getMsg(args), 2)
 }
 
-// recursively try for a default docsUrl
-const docsUrlByParents = (msgPath) => {
+// Walk up the error message path (e.g. foo.bar.baz -> foo.bar -> foo) and return
+// the first ancestor object in allErrorMessages that defines `propName`.
+const findPropByParents = (msgPath, propName) => {
   msgPath = msgPath.split('.').slice(0, -1).join('.')
 
   if (!msgPath) {
@@ -401,28 +403,11 @@ const docsUrlByParents = (msgPath) => {
 
   const obj = _.get(allErrorMessages, msgPath)
 
-  if (obj.hasOwnProperty('docsUrl')) {
-    return obj.docsUrl
+  if (obj.hasOwnProperty(propName)) {
+    return obj[propName]
   }
 
-  return docsUrlByParents(msgPath)
-}
-
-// recursively try for a default docsUrlTitle
-const docsUrlTitleByParents = (msgPath) => {
-  msgPath = msgPath.split('.').slice(0, -1).join('.')
-
-  if (!msgPath) {
-    return // reached root
-  }
-
-  const obj = _.get(allErrorMessages, msgPath)
-
-  if (obj.hasOwnProperty('docsUrlTitle')) {
-    return obj.docsUrlTitle
-  }
-
-  return docsUrlTitleByParents(msgPath)
+  return findPropByParents(msgPath, propName)
 }
 
 const errByPath = (msgPath, args?) => {
@@ -444,13 +429,20 @@ const errByPath = (msgPath, args?) => {
     }
   }
 
-  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || docsUrlByParents(msgPath)
-  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || docsUrlTitleByParents(msgPath)
+  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || findPropByParents(msgPath, 'docsUrl')
+  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || findPropByParents(msgPath, 'docsUrlTitle')
+  const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || findPropByParents(msgPath, 'triggerAction')
+
+  const resolvedTriggerAction =
+    triggerAction === 'loginModal' || triggerAction === 'projectConnectModal'
+      ? triggerAction
+      : undefined
 
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
     docsUrl: docsUrl ? replaceErrMsgTokens(docsUrl, args) : undefined,
     docsUrlTitle: docsUrlTitle ? replaceErrMsgTokens(docsUrlTitle, args) : undefined,
+    triggerAction: resolvedTriggerAction,
   })
 }
 
@@ -565,6 +557,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
   let docsUrlTitle = error?.docsUrlTitle
+  let triggerAction = error?.triggerAction
 
   // reset the message on a cross origin script error
   // since no details are accessible
@@ -574,6 +567,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
     message = crossOriginErr.message
     docsUrl = crossOriginErr.docsUrl
     docsUrlTitle = crossOriginErr.docsUrlTitle
+    triggerAction = crossOriginErr.triggerAction
   }
 
   // it's possible the error was thrown as a string (throw 'some error')
@@ -584,6 +578,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
 
   err.docsUrl = docsUrl
   err.docsUrlTitle = docsUrlTitle
+  err.triggerAction = triggerAction
 
   // makeErrFromObj clones the error, so the original doesn't get mutated
   return {
@@ -618,17 +613,88 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
+// #27415 — Repeated identical uncaught exceptions within a test collapse into one
+// updating log (consecutive occurrences only). Handled (suppressed) exceptions
+// skip DOM snapshots. State is cleared with each test via `cy.reset()`.
+// https://github.com/cypress-io/cypress/issues/27415
+interface UncaughtErrorSignature {
+  runnableId?: string
+  message: string
+  retry: number
+  handled: boolean
+}
+
+const UNCAUGHT_ERROR_STATE_KEY = 'uncaughtErrorLog'
+
+interface UncaughtErrorRecord {
+  signature: UncaughtErrorSignature
+  log: any
+  count: number
+}
+
+// Collapse unless a previously suppressed error later throws unhandled (it needs
+// its own failing log rather than updating the grey suppressed one).
+const canCollapseHandledTransition = (previousHandled: boolean, currentHandled: boolean): boolean => {
+  return currentHandled || !previousHandled
+}
+
+const canCollapseUncaughtError = (previous: UncaughtErrorSignature | undefined, current: UncaughtErrorSignature): boolean => {
+  return (
+    previous !== undefined &&
+    // only collapse errors scoped to a test, so two test-less errors
+    // (both with an undefined runnableId) are never treated as the same log
+    current.runnableId !== undefined &&
+    previous.runnableId === current.runnableId &&
+    previous.message === current.message &&
+    previous.retry === current.retry &&
+    canCollapseHandledTransition(previous.handled, current.handled)
+  )
+}
+
 const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
   const error = toLoggableError(err)
+  const message = `${error.name || 'Error'}: ${error.message}`
+  const state = typeof Cypress.state === 'function' ? Cypress.state : undefined
+  const runnable = state?.('runnable')
 
-  Cypress.log({
-    message: `${error.name || 'Error'}: ${error.message}`,
+  const signature: UncaughtErrorSignature = {
+    runnableId: runnable?.id,
+    message,
+    retry: $utils.getTestAttemptFromRunnable(runnable),
+    handled,
+  }
+
+  const previous: UncaughtErrorRecord | undefined = state?.(UNCAUGHT_ERROR_STATE_KEY)
+
+  // previous.log can be undefined if the prior Cypress.log was suppressed
+  // (e.g. onBeforeLog returned false); never try to update a missing log
+  if (previous?.log && canCollapseUncaughtError(previous.signature, signature)) {
+    const count = previous.count + 1
+
+    previous.log.set({
+      message: `${message} (${count})`,
+      // an unhandled occurrence turns the collapsed log red/failed
+      ...(handled ? {} : { error: err }),
+    })
+
+    state?.(UNCAUGHT_ERROR_STATE_KEY, {
+      log: previous.log,
+      count,
+      // once a collapsed log is unhandled (red), it stays unhandled
+      signature: { ...signature, handled: previous.signature.handled && handled },
+    })
+
+    return
+  }
+
+  const log = Cypress.log({
+    message,
     name: 'uncaught exception',
     type: 'parent',
     // specifying the error causes the log to be red/failed
     // otherwise, if it's been handled, we omit the error so it is grey/passed
     error: handled ? undefined : err,
-    snapshot: true,
+    snapshot: !handled,
     event: true,
     timeout: 0,
     end: true,
@@ -641,6 +707,10 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
       return consoleObj
     },
   })
+
+  // Cypress.log returns undefined when the log is suppressed; only retain a
+  // record we can actually update, otherwise clear any stale prior record.
+  state?.(UNCAUGHT_ERROR_STATE_KEY, log ? { signature, log, count: 1 } : undefined)
 }
 
 interface LoggableError { name?: string, message: string }
@@ -703,6 +773,7 @@ export default {
   isCypressErr,
   isSpecError,
   logError,
+  UNCAUGHT_ERROR_STATE_KEY,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

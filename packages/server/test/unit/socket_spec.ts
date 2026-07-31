@@ -1,0 +1,1328 @@
+import '../spec_helper'
+import _ from 'lodash'
+import path from 'path'
+import httpsAgent from 'https-proxy-agent'
+// NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
+// we are unable to import ESM into a CommonJS test context, even if we await import() the module.
+import * as socketIo from '@packages/socket/lib/client'
+import Fixtures from '@tooling/system-tests'
+import * as errors from '../../lib/errors'
+import { SocketE2E } from '../../lib/socket-e2e'
+import { ServerBase } from '../../lib/server-base'
+import { Automation } from '../../lib/automation'
+import preprocessor from '../../lib/plugins/preprocessor'
+import { fs } from '../../lib/util/fs'
+import * as session from '../../lib/session'
+import devServer from '../../lib/plugins/dev-server'
+import * as createRoutes from '../../lib/routes'
+import { getCtx } from '../../lib/makeDataContext'
+import { sinon } from '../spec_helper'
+import { SocketCt } from '../../lib/socket-ct'
+import runEvents from '../../lib/plugins/run_events'
+
+let ctx
+
+describe('lib/socket', () => {
+  beforeEach(async function () {
+    ctx = getCtx()
+    ctx.coreData.activeBrowser = {
+      path: 'path-to-browser-one',
+    }
+
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
+
+    // Don't bother initializing the child process, etc for this
+    sinon.stub(ctx.actions.project, 'initializeActiveProject')
+    sinon.stub(preprocessor.emitter, 'on')
+    sinon.stub(preprocessor.emitter, 'off')
+
+    Fixtures.scaffold()
+    session.clearSessions(true)
+
+    this.todosPath = Fixtures.projectPath('todos')
+
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    return ctx.lifecycleManager.getFullInitialConfig()
+    .then((cfg) => {
+      this.cfg = cfg
+      this.server = new ServerBase(cfg)
+    })
+  })
+
+  afterEach(function () {
+    Fixtures.remove()
+
+    return this.server.close()
+  })
+
+  describe('integration', () => {
+    let mockCyPrompt
+
+    beforeEach(function (done) {
+      // create a for realz socket.io connection
+      // so we can test server emit / client emit events
+      this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        testingType: 'e2e',
+        getCurrentBrowser: () => null,
+      })
+      .then(() => {
+        this.options = {
+          getSavedState: sinon.stub(),
+          onSavedStateChanged: sinon.spy(),
+          onStudioInit: sinon.stub(),
+          onStudioDestroy: sinon.stub(),
+          onCyPromptReady: sinon.stub(),
+        }
+
+        this.automation = new Automation({
+          cyNamespace: this.cfg.namespace,
+          cookieNamespace: this.cfg.socketIoCookie,
+          screenshotsFolder: this.cfg.screenshotsFolder,
+        })
+
+        // Create a mock studio object with addSocketListeners method
+        const mockStudio = {
+          addSocketListeners: sinon.stub(),
+        }
+
+        const studioLifecycleManager = {
+          registerStudioReadyListener: sinon.stub().callsFake((callback) => {
+            callback(mockStudio)
+
+            return () => {}
+          }),
+        }
+
+        // Create a mock cy prompt object with handleBackendRequest method
+        mockCyPrompt = {
+          addSocketListeners: sinon.stub(),
+          status: 'INITIALIZED',
+          reset: sinon.stub(),
+        }
+
+        ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        const cyPromptLifecycleManager = {
+          getCyPrompt: sinon.stub().resolves({
+            cyPromptManager: mockCyPrompt,
+          }),
+          resetCyPrompt: sinon.stub().callsFake(() => {
+            mockCyPrompt.reset()
+          }),
+          registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
+            callback(mockCyPrompt)
+
+            return () => {}
+          }),
+        }
+
+        ctx.coreData.cyPromptLifecycleManager = cyPromptLifecycleManager
+
+        this.server.startWebsockets(this.automation, this.cfg, this.options)
+        this.socket = this.server._socket
+
+        done = _.once(done)
+
+        // when our real client connects then we're done
+        this.socket.socketIo.on('connection', (socket) => {
+          this.socketClient = socket
+
+          return done()
+        })
+
+        const { proxyUrl, socketIoRoute } = this.cfg
+
+        // force node into legit proxy mode like a browser
+        this.agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
+
+        this.client = socketIo.client(proxyUrl, {
+          agent: this.agent,
+          path: socketIoRoute,
+          transports: ['websocket'],
+        })
+      })
+    })
+
+    afterEach(function () {
+      return this.client.disconnect()
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4346
+    it('can emit a circular object without crashing', function (done) {
+      const foo = {
+        bar: {},
+      }
+
+      foo.bar.baz = foo
+
+      // stubbing session#getSession here just so we have something that we can
+      // control the resolved value of
+      sinon.stub(session, 'getSession').resolves(foo)
+
+      return this.client.emit('backend:request', 'get:session', 'quuz', (res) => {
+        expect(res.response).to.deep.eq(foo)
+
+        return done()
+      })
+    })
+
+    describe('on(automation:push:request)', () => {
+      beforeEach(function (done) {
+        this.socketClient.on('automation:client:connected', () => {
+          return done()
+        })
+
+        return this.client.emit('automation:client:connected')
+      })
+
+      it('emits \'automation:push:message\'', function (done) {
+        const data = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' }, removed: true }
+
+        const emit = sinon.stub(this.socket.socketIo, 'emit')
+
+        return this.client.emit('automation:push:request', 'change:cookie', data, () => {
+          expect(emit).to.be.calledWith('automation:push:message', 'change:cookie', {
+            cookie: { name: 'foo', value: 'bar' },
+            message: 'Cookie Removed: \'foo\'',
+            removed: true,
+          })
+
+          return done()
+        })
+      })
+    })
+
+    describe('on(watch:test:file)', () => {
+      it('calls socket#watchTestFileByPath with config, spec argument', function (done) {
+        sinon.stub(this.socket, 'watchTestFileByPath')
+
+        const specArgument = {}
+
+        return this.client.emit('watch:test:file', specArgument, () => {
+          expect(this.socket.watchTestFileByPath).to.be.calledWith(this.cfg, specArgument)
+
+          return done()
+        })
+      })
+    })
+
+    describe('on(app:connect)', () => {
+      it('calls options.onConnect with socketId and socket', function (done) {
+        this.options.onConnect = function (socketId, socket) {
+          expect(socketId).to.eq('sid-123')
+          expect(socket.connected).to.be.true
+
+          return done()
+        }
+
+        return this.client.emit('app:connect', 'sid-123')
+      })
+    })
+
+    describe('on(backend:request, get:fixture)', () => {
+      it('returns the fixture object', function (done) {
+        const cb = function (resp) {
+          expect(resp.response).to.deep.eq([
+            { 'json': true },
+          ])
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', cb)
+      })
+
+      it('errors when fixtures fails', function (done) {
+        const cb = function (resp) {
+          expect(resp.error.message).to.include('A fixture file could not be found')
+          expect(resp.error.message).to.include('does-not-exist.txt')
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'does-not-exist.txt', {}, cb)
+      })
+
+      it('passes Buffers through intact', function (done) {
+        const cb = function (resp) {
+          expect(resp.response).to.eql(Buffer.from('[{"json": true}]'))
+
+          return done()
+        }
+
+        return this.client.emit('backend:request', 'get:fixture', 'foo', { encoding: null }, cb)
+      })
+    })
+
+    describe('on(backend:request, http:request)', () => {
+      it('calls socket#onRequest', function (done) {
+        sinon.stub(this.options, 'onRequest').resolves({ foo: 'bar' })
+
+        return this.client.emit('backend:request', 'http:request', 'foo', (resp) => {
+          expect(resp.response).to.deep.eq({ foo: 'bar' })
+
+          return done()
+        })
+      })
+
+      it('catches errors and clones them', function (done) {
+        const err = new Error('foo bar baz')
+
+        sinon.stub(this.options, 'onRequest').rejects(err)
+
+        return this.client.emit('backend:request', 'http:request', 'foo', (resp) => {
+          expect(resp.error).to.deep.eq(errors.cloneErr(err))
+
+          return done()
+        })
+      })
+    })
+
+    describe('on(backend:request, wait:for:prompt:ready)', () => {
+      it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
+        const mockCyPrompt = {
+          cyPromptManager: {
+            status: 'INITIALIZED',
+          },
+          error: undefined,
+        }
+
+        ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
+
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
+          expect(resp.response).to.deep.eq({ success: true })
+
+          expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt.cyPromptManager)
+
+          return done()
+        })
+      })
+
+      it('awaits cy prompt ready and returns false if cy prompt is not ready', function (done) {
+        const mockCyPrompt = {
+          cyPromptManager: {
+            status: 'NOT_INITIALIZED',
+          },
+          error: undefined,
+        }
+
+        ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
+
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
+          expect(resp.response).to.deep.eq({ success: false })
+
+          return done()
+        })
+      })
+
+      it('awaits cy prompt ready and returns error if cy prompt error is thrown', function (done) {
+        const mockCyPrompt = {
+          cyPromptManager: undefined,
+          error: new Error('not loaded'),
+        }
+
+        ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
+
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
+          expect(resp.response).to.deep.eq({
+            error: errors.cloneErr(mockCyPrompt.error),
+          })
+
+          return done()
+        })
+      })
+    })
+
+    describe('on(get:app:state)', () => {
+      it('calls getSavedState with options and returns the state', function (done) {
+        this.options.getSavedState.resolves({ reporterWidth: 500 })
+
+        this.client.emit('get:app:state', { type: 'global' }, (resp) => {
+          expect(this.options.getSavedState).to.be.calledWith({ type: 'global' })
+          expect(resp.data).to.deep.eq({ reporterWidth: 500 })
+
+          done()
+        })
+      })
+
+      it('handles errors thrown by getSavedState', function (done) {
+        const err = new Error('boom')
+
+        this.options.getSavedState.rejects(err)
+
+        this.client.emit('get:app:state', { type: 'global' }, (resp) => {
+          expect(this.options.getSavedState).to.be.calledWith({ type: 'global' })
+          expect(resp.error).to.deep.eq(errors.cloneErr(err))
+
+          done()
+        })
+      })
+    })
+
+    describe('on(save:app:state)', () => {
+      it('calls onSavedStateChanged with the state and options', function (done) {
+        this.client.emit('save:app:state', { reporterWidth: 500, __options: { type: 'global' } }, () => {
+          expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 }, { type: 'global' })
+
+          done()
+        })
+      })
+    })
+
+    describe('on(studio:init)', () => {
+      it('calls onStudioInit', async function () {
+        this.options.onStudioInit.resolves({ canAccessStudioAI: true, cloudStudioSessionId: 'test-session-id' })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', {}, ({ canAccessStudioAI, cloudStudioSessionId }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.true
+            expect(cloudStudioSessionId).to.eq('test-session-id')
+
+            resolve()
+          })
+        })
+      })
+
+      it('calls onStudioInit and handles undefined cloudStudioSessionId', async function () {
+        this.options.onStudioInit.resolves({ canAccessStudioAI: false, cloudStudioSessionId: undefined })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', {}, ({ canAccessStudioAI, cloudStudioSessionId }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.false
+            expect(cloudStudioSessionId).to.be.undefined
+
+            resolve()
+          })
+        })
+      })
+
+      it('passes through options to onStudioInit', async function () {
+        const sessionId = 'test-session-id'
+
+        this.options.onStudioInit.resolves({ canAccessStudioAI: false, cloudStudioSessionId: sessionId })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', { sessionId }, ({ canAccessStudioAI, cloudStudioSessionId }) => {
+            expect(this.options.onStudioInit).to.be.calledWith({ sessionId })
+            expect(canAccessStudioAI).to.be.false
+            expect(cloudStudioSessionId).to.eq(sessionId)
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioInit', async function () {
+        this.options.onStudioInit.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', {}, ({ error }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    describe('on(studio:destroy)', () => {
+      it('calls onStudioDestroy', async function () {
+        this.options.onStudioDestroy.resolves()
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', () => {
+            expect(this.options.onStudioDestroy).to.be.called
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioDestroy', async function () {
+        this.options.onStudioDestroy.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', ({ error }) => {
+            expect(this.options.onStudioDestroy).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    describe('on(prompt:reset)', () => {
+      it('calls reset', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('prompt:reset', () => {
+            expect(ctx.coreData.cyPromptLifecycleManager.resetCyPrompt).to.be.called
+            expect(mockCyPrompt.reset).to.be.called
+
+            resolve()
+          })
+        })
+      })
+
+      it('does not call reset if there is runState', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', {}, () => {
+            resolve()
+          })
+        })
+
+        await new Promise((resolve) => {
+          this.client.emit('prompt:reset', () => {
+            expect(ctx.coreData.cyPromptLifecycleManager.resetCyPrompt).not.to.be.called
+            expect(mockCyPrompt.reset).not.to.be.called
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    describe('studio.addSocketListeners', () => {
+      it('calls addSocketListeners on studio when socket connects', async function () {
+        preprocessor.emitter.on.reset()
+
+        // Verify that registerStudioReadyListener was called
+        expect(ctx.coreData.studioLifecycleManager.registerStudioReadyListener).to.be.called
+
+        // Check that the callback was called with the mock studio object
+        const registerStudioReadyListenerCallback = ctx.coreData.studioLifecycleManager.registerStudioReadyListener.firstCall.args[0]
+
+        expect(registerStudioReadyListenerCallback).to.be.a('function')
+
+        // Verify the mock studio's addSocketListeners was called by the callback
+        const mockStudio = { addSocketListeners: sinon.stub() }
+
+        registerStudioReadyListenerCallback(mockStudio)
+        expect(mockStudio.addSocketListeners).to.be.called
+
+        const addSocketListenersOptions = mockStudio.addSocketListeners.firstCall.args[0]
+
+        expect(addSocketListenersOptions).to.be.an('object')
+        expect(addSocketListenersOptions).to.have.property('socket')
+        expect(addSocketListenersOptions).to.have.property('onAfterSave')
+        expect(addSocketListenersOptions).to.have.property('onBeforeSave')
+
+        const onBeforeSave = addSocketListenersOptions.onBeforeSave
+
+        this.cfg.watchForFileChanges = false
+
+        onBeforeSave()
+
+        expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
+
+        const preprocessorCallback = preprocessor.emitter.on.firstCall.args[1]
+
+        sinon.stub(this.socket._socketIo, 'emit')
+        sinon.stub(fs, 'statAsync').resolves()
+
+        await preprocessorCallback()
+
+        expect(this.socket._socketIo.emit).to.be.calledWith('watched:file:changed')
+
+        this.socket._socketIo.emit.reset()
+      })
+    })
+
+    describe('cy.prompt.addSocketListeners', () => {
+      it('calls addSocketListeners on cy prompt when socket connects', async function () {
+        preprocessor.emitter.on.reset()
+
+        // Verify that registerCyPromptReadyListener was called
+        expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
+
+        const registerCyPromptReadyListenerCallback = ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener.firstCall.args[0]
+
+        expect(registerCyPromptReadyListenerCallback).to.be.a('function')
+
+        const mockCyPrompt = { addSocketListeners: sinon.stub() }
+
+        registerCyPromptReadyListenerCallback(mockCyPrompt)
+        expect(mockCyPrompt.addSocketListeners).to.be.called
+
+        const addSocketListenersOptions = mockCyPrompt.addSocketListeners.firstCall.args[0]
+
+        expect(addSocketListenersOptions).to.be.an('object')
+        expect(addSocketListenersOptions).to.have.property('socket')
+        expect(addSocketListenersOptions).to.have.property('onAfterSave')
+        expect(addSocketListenersOptions).to.have.property('onBeforeSave')
+
+        const onBeforeSave = addSocketListenersOptions.onBeforeSave
+
+        this.cfg.watchForFileChanges = false
+
+        onBeforeSave()
+
+        expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
+
+        const preprocessorCallback = preprocessor.emitter.on.firstCall.args[1]
+
+        sinon.stub(this.socket._socketIo, 'emit')
+        sinon.stub(fs, 'statAsync').resolves()
+
+        await preprocessorCallback()
+
+        expect(this.socket._socketIo.emit).to.be.calledWith('watched:file:changed')
+
+        this.socket._socketIo.emit.reset()
+      })
+    })
+
+    describe('#isRunnerSocketConnected', function () {
+      it('returns false when runner is not connected', function () {
+        expect(this.socket.isRunnerSocketConnected()).to.eq(false)
+      })
+
+      describe('runner connected', () => {
+        beforeEach(function (done) {
+          this.socketClient.on('automation:client:connected', () => {
+            this.socketClient.on('runner:connected', () => {
+              return done()
+            })
+
+            this.client.emit('runner:connected')
+          })
+
+          return this.client.emit('automation:client:connected')
+        })
+
+        it('returns true when runner is connected', function () {
+          expect(this.socket.isRunnerSocketConnected()).to.eq(true)
+        })
+      })
+    })
+
+    describe('on(backend:request, save:session)', () => {
+      it('saves spec sessions', function (done) {
+        const sessionData = {
+          id: 'spec',
+          cacheAcrossSpecs: false,
+        }
+
+        this.client.emit('backend:request', 'save:session', sessionData, () => {
+          const state = session.getState()
+
+          expect(state).to.deep.eq({
+            globalSessions: {},
+            specSessions: {
+              'spec': sessionData,
+            },
+          })
+
+          done()
+        })
+      })
+
+      it('saves global sessions', function (done) {
+        const sessionData = {
+          id: 'global',
+          cacheAcrossSpecs: true,
+        }
+
+        this.client.emit('backend:request', 'save:session', sessionData, () => {
+          const state = session.getState()
+
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': sessionData,
+            },
+            specSessions: {},
+          })
+
+          done()
+        })
+      })
+
+      it('returns error if session data has no id', function (done) {
+        const sessionData = {}
+
+        this.client.emit('backend:request', 'save:session', sessionData, ({ error }) => {
+          expect(error.message).to.eq('session data had no id')
+          done()
+        })
+      })
+    })
+
+    describe('on(backend:request, clear:sessions)', () => {
+      it('clears spec sessions', function (done) {
+        let state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.specSessions = {
+          spec: { id: 'spec' },
+        }
+
+        this.client.emit('backend:request', 'clear:sessions', false, () => {
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': { id: 'global' },
+            },
+            specSessions: {},
+          })
+
+          done()
+        })
+      })
+
+      it('clears all sessions', function (done) {
+        let state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.specSessions = {
+          spec: { id: 'spec' },
+        }
+
+        this.client.emit('backend:request', 'clear:sessions', true, () => {
+          expect(state).to.deep.eq({
+            globalSessions: {},
+            specSessions: {},
+          })
+
+          done()
+        })
+      })
+    })
+
+    describe('on(backend:request, get:session)', () => {
+      it('returns global session', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        this.client.emit('backend:request', 'get:session', 'global', ({ response, error }) => {
+          expect(error).to.be.undefined
+          expect(response).deep.eq({
+            id: 'global',
+          })
+
+          done()
+        })
+      })
+
+      it('returns spec session', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {}
+        state.specSessions = {
+          'spec': { id: 'spec' },
+        }
+
+        this.client.emit('backend:request', 'get:session', 'spec', ({ response, error }) => {
+          expect(error).to.be.undefined
+          expect(response).deep.eq({
+            id: 'spec',
+          })
+
+          done()
+        })
+      })
+
+      it('returns error when session does not exist', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {}
+        state.specSessions = {}
+        this.client.emit('backend:request', 'get:session', 1, ({ response, error }) => {
+          expect(response).to.be.undefined
+          expect(error.message).to.eq('session with id "1" not found')
+
+          done()
+        })
+      })
+    })
+
+    describe('on(backend:request, reset:cached:test:state)', () => {
+      it('clears spec sessions', function (done) {
+        const state = session.getState()
+
+        state.globalSessions = {
+          global: { id: 'global' },
+        }
+
+        state.specSessions = {
+          local: { id: 'local' },
+        }
+
+        this.client.emit('backend:request', 'reset:cached:test:state', ({ error }) => {
+          expect(error).to.be.undefined
+
+          expect(state).to.deep.eq({
+            globalSessions: {
+              'global': { id: 'global' },
+            },
+            specSessions: {},
+          })
+
+          done()
+        })
+      })
+    })
+
+    describe('on(get:cached:test:state)', () => {
+      it('returns cached test state', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', {
+            currentId: 'test',
+            currentRetry: 0,
+          }, resolve)
+        })
+
+        const mockProtocolManager = {
+          resetTest: sinon.stub(),
+        }
+
+        this.socket['_protocolManager'] = mockProtocolManager
+
+        await new Promise((resolve) => {
+          this.client.emit('get:cached:test:state', (runState, testState) => {
+            expect(runState).to.deep.eq({
+              currentId: 'test',
+              currentRetry: 0,
+            })
+
+            expect(testState).to.deep.eq({
+              activeSessions: {},
+            })
+
+            expect(mockProtocolManager.resetTest).to.be.calledWith('test', 0)
+
+            resolve()
+          })
+        })
+      })
+    })
+  })
+
+  describe('run events (experimentalInteractiveRunEvents)', () => {
+    let runEventsStub
+
+    beforeEach(async function () {
+      runEventsStub = sinon.stub(runEvents, 'execute').resolves()
+
+      this.cfg.experimentalInteractiveRunEvents = true
+
+      await this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        testingType: 'e2e',
+        getCurrentBrowser: () => null,
+      })
+
+      const options = {
+        getSavedState: sinon.stub(),
+        onSavedStateChanged: sinon.spy(),
+        onStudioInit: sinon.stub(),
+        onStudioDestroy: sinon.stub(),
+        onCyPromptReady: sinon.stub(),
+      }
+
+      const automation = new Automation({
+        cyNamespace: this.cfg.namespace,
+        cookieNamespace: this.cfg.socketIoCookie,
+        screenshotsFolder: this.cfg.screenshotsFolder,
+      })
+
+      const mockCyPrompt = {
+        addSocketListeners: sinon.stub(),
+        status: 'INITIALIZED',
+        reset: sinon.stub(),
+      }
+
+      ctx.coreData.studioLifecycleManager = {
+        registerStudioReadyListener: sinon.stub().callsFake((callback) => {
+          callback({ addSocketListeners: sinon.stub() })
+
+          return () => {}
+        }),
+      }
+
+      ctx.coreData.cyPromptLifecycleManager = {
+        getCyPrompt: sinon.stub().resolves({ cyPromptManager: mockCyPrompt }),
+        resetCyPrompt: sinon.stub(),
+        registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
+          callback(mockCyPrompt)
+
+          return () => {}
+        }),
+      }
+
+      this.server.startWebsockets(automation, this.cfg, options)
+      this.socket = this.server._socket
+
+      const { proxyUrl, socketIoRoute } = this.cfg
+      const agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
+
+      await new Promise((resolve) => {
+        this.socket.socketIo.on('connection', () => resolve(null))
+        this.client = socketIo.client(proxyUrl, {
+          agent,
+          path: socketIoRoute,
+          transports: ['websocket'],
+        })
+      })
+    })
+
+    afterEach(function () {
+      runEventsStub?.restore()
+
+      return this.client?.disconnect()
+    })
+
+    describe('on(plugins:before:spec)', () => {
+      it('executes before:spec on initial spec load', async function () {
+        const spec = { relative: 'cypress/e2e/spec.cy.js', absolute: '/project/cypress/e2e/spec.cy.js' }
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', spec, resolve)
+        })
+
+        expect(runEventsStub).to.have.been.calledWith('before:spec', spec)
+      })
+
+      it('skips before:spec when Cypress reloads mid-test due to cross-origin navigation (runState set)', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test-1' }, resolve)
+        })
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', { relative: 'cypress/e2e/spec.cy.js' }, resolve)
+        })
+
+        expect(runEventsStub).not.to.have.been.called
+      })
+
+      it('executes before:spec again after runState is consumed', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test-1' }, resolve)
+        })
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', { relative: 'cypress/e2e/spec.cy.js' }, resolve)
+        })
+
+        expect(runEventsStub).not.to.have.been.called
+
+        // Consuming runState simulates what happens when get:cached:test:state is called after reload
+        await new Promise((resolve) => {
+          this.client.emit('get:cached:test:state', resolve)
+        })
+
+        const spec = { relative: 'cypress/e2e/spec.cy.js', absolute: '/project/cypress/e2e/spec.cy.js' }
+
+        await new Promise((resolve) => {
+          this.client.emit('plugins:before:spec', spec, resolve)
+        })
+
+        expect(runEventsStub).to.have.been.calledOnceWith('before:spec', spec)
+      })
+    })
+  })
+
+  describe('unit', () => {
+    describe('e2e', () => {
+      beforeEach(function () {
+        this.mockClient = sinon.stub({
+          on () {},
+          emit () {},
+          conn: {
+            transport: {
+              name: 'websocket',
+            },
+          },
+        })
+
+        this.io = {
+          of: sinon.stub().returns({ on () {} }),
+          on: sinon.stub().withArgs('connection').yields(this.mockClient),
+          emit: sinon.stub(),
+          close: sinon.stub(),
+        }
+
+        sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
+
+        return this.server.open(this.cfg, {
+          SocketCtor: SocketE2E,
+          createRoutes,
+          testingType: 'e2e',
+          getCurrentBrowser: () => null,
+        })
+        .then(() => {
+          this.automation = new Automation({
+            cyNamespace: this.cfg.namespace,
+            cookieNamespace: this.cfg.socketIoCookie,
+            screenshotsFolder: this.cfg.screenshotsFolder,
+          })
+
+          this.server.startWebsockets(this.automation, this.cfg, {})
+
+          this.socket = this.server._socket
+        })
+      })
+
+      describe('constructor', () => {
+        it('listens for \'file:updated\' on preprocessor', function () {
+          this.cfg.watchForFileChanges = true
+          new SocketE2E(this.cfg)
+
+          expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
+        })
+
+        it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
+          preprocessor.emitter.on.reset()
+          this.cfg.watchForFileChanges = false
+          new SocketE2E(this.cfg)
+
+          expect(preprocessor.emitter.on).not.to.be.called
+        })
+      })
+
+      describe('#sendFocusBrowserMessage', function () {
+        it('sends an automation request of focus:browser:window', function () {
+          sinon.stub(this.automation, 'request')
+
+          this.socket.sendFocusBrowserMessage()
+
+          expect(this.automation.request).to.be.calledWith('focus:browser:window', {})
+        })
+      })
+
+      describe('#close', () => {
+        it('calls close on #io', function () {
+          this.socket.close()
+
+          expect(this.socket.socketIo.close).to.be.called
+        })
+
+        it('does not error when io isnt defined', function () {
+          return this.socket.close()
+        })
+      })
+
+      describe('#watchTestFileByPath', () => {
+        beforeEach(function () {
+          this.socket.testsDir = Fixtures.project('todos/tests')
+          this.filePath = `${this.socket.testsDir}/test1.js`
+
+          return sinon.stub(preprocessor, 'getFile').resolves()
+        })
+
+        it('returns undefined if trying to watch special path __all', function () {
+          const result = this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'integration/__all',
+          })
+
+          expect(result).to.be.undefined
+        })
+
+        it('returns undefined if #testFilePath matches arguments', function () {
+          this.socket.testFilePath = path.join('integration', 'test1.js')
+          const result = this.socket.watchTestFileByPath(this.cfg, {
+            relative: path.join('integration', 'test1.js'),
+          })
+
+          expect(result).to.be.undefined
+        })
+
+        it('closes existing watched test file', function () {
+          sinon.stub(preprocessor, 'removeFile')
+          this.socket.testFilePath = 'tests/test1.js'
+
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'test2.js',
+          }).then(() => {
+            expect(preprocessor.removeFile).to.be.calledWithMatch('test1.js', this.cfg)
+          })
+        })
+
+        it('sets #testFilePath', function () {
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: `${path.sep}test1.js`,
+          }).then(() => {
+            expect(this.socket.testFilePath).to.eq(`test1.js`)
+          })
+        })
+
+        it('can normalizes leading slash', function () {
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: `${path.sep}integration${path.sep}test1.js`,
+          }).then(() => {
+            expect(this.socket.testFilePath).to.eq(`integration${path.sep}test1.js`)
+          })
+        })
+
+        it('watches file by path', function () {
+          this.socket.watchTestFileByPath(this.cfg, {
+            relative: `integration${path.sep}test2.coffee`,
+          })
+
+          expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.coffee`, this.cfg)
+        })
+
+        it('watches file by relative path in spec object', function () {
+          // this is what happens now with component / integration specs
+          const spec = {
+            absolute: `${path.sep}foo${path.sep}bar`,
+            relative: `relative${path.sep}to${path.sep}root${path.sep}test2.coffee`,
+          }
+
+          this.socket.watchTestFileByPath(this.cfg, spec)
+
+          expect(preprocessor.getFile).to.be.calledWith(spec.relative, this.cfg)
+        })
+
+        it('triggers watched:file:changed event when preprocessor \'file:updated\' is received', function (done) {
+          sinon.stub(fs, 'statAsync').resolves()
+          this.cfg.watchForFileChanges = true
+          this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'integration/test2.coffee',
+          })
+
+          preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.coffee')
+
+          return setTimeout(() => {
+            expect(this.io.emit).to.be.calledWith('watched:file:changed')
+
+            return done()
+          }, 200)
+        })
+      })
+
+      describe('#startListening', () => {
+        describe('watch:test:file', () => {
+          it('listens for watch:test:file event', function () {
+            this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
+
+            expect(this.mockClient.on).to.be.calledWith('watch:test:file')
+          })
+
+          it('passes filePath to #watchTestFileByPath', function () {
+            const watchTestFileByPath = sinon.stub(this.socket, 'watchTestFileByPath')
+
+            this.mockClient.on.withArgs('watch:test:file').yields({ relative: 'foo/bar/baz' })
+
+            this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
+
+            expect(watchTestFileByPath).to.be.calledWith(this.cfg, { relative: 'foo/bar/baz' })
+          })
+        })
+
+        describe('#onTestFileChange', () => {
+          beforeEach(() => {
+            return sinon.spy(fs, 'statAsync')
+          })
+
+          it('calls statAsync on .js file', function () {
+            return this.socket.onTestFileChange('foo/bar.js').catch(() => {}).then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar.js')
+            })
+          })
+
+          it('calls statAsync on .coffee file', function () {
+            return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
+            })
+          })
+
+          it('does not emit if stat throws', function () {
+            return this.socket.onTestFileChange('foo/bar.js').then(() => {
+              expect(this.io.emit).not.to.be.called
+            })
+          })
+        })
+
+        describe('#onCloudTestFileChange', () => {
+          it('calls #onTestFileChange', function () {
+            preprocessor.emitter.off.reset()
+            sinon.stub(this.socket, 'onTestFileChange').resolves()
+
+            return this.socket.onCloudTestFileChange('foo/bar.js').then(() => {
+              expect(this.socket.onTestFileChange).to.be.calledWith('foo/bar.js')
+              expect(preprocessor.emitter.off).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+            })
+          })
+        })
+
+        describe('#onBeforeSave', () => {
+          it('calls #onTestFileChange and listens for file:updated when config.watchForFileChanges is false', function () {
+            preprocessor.emitter.on.reset()
+
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onBeforeSave(this.cfg)
+
+            expect(preprocessor.emitter.on).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+          })
+
+          it('calls #onTestFileChange and does not listen for file:updated when config.watchForFileChanges is true', function () {
+            preprocessor.emitter.on.reset()
+
+            this.cfg.watchForFileChanges = true
+
+            this.socket.onBeforeSave(this.cfg)
+
+            expect(preprocessor.emitter.on).not.to.be.called
+          })
+        })
+
+        describe('#onAfterSave', () => {
+          it('removes listener for file:updated when there is an error and config.watchForFileChanges is false', function () {
+            preprocessor.emitter.off.reset()
+
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+            expect(preprocessor.emitter.off).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+          })
+
+          it('does not remove listener for file:updated when there is an error and config.watchForFileChanges is true', function () {
+            preprocessor.emitter.off.reset()
+
+            this.cfg.watchForFileChanges = true
+
+            this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+            expect(preprocessor.emitter.off).not.to.be.called
+          })
+
+          it('does not remove listener for file:updated when there is no error', function () {
+            preprocessor.emitter.off.reset()
+
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onAfterSave(this.cfg)
+
+            expect(preprocessor.emitter.off).not.to.be.called
+          })
+        })
+      })
+    })
+
+    describe('ct', () => {
+      beforeEach(function () {
+        this.mockClient = sinon.stub({
+          on () {},
+          emit () {},
+          conn: {
+            transport: {
+              name: 'websocket',
+            },
+          },
+        })
+
+        this.io = {
+          of: sinon.stub().returns({ on () {} }),
+          on: sinon.stub().withArgs('connection').yields(this.mockClient),
+          emit: sinon.stub(),
+          close: sinon.stub(),
+        }
+
+        sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
+        sinon.stub(devServer.emitter, 'on')
+        sinon.stub(devServer.emitter, 'off')
+
+        return this.server.open(this.cfg, {
+          SocketCtor: SocketCt,
+          createRoutes,
+          testingType: 'ct',
+          getCurrentBrowser: () => null,
+        })
+        .then(() => {
+          this.automation = new Automation({
+            cyNamespace: this.cfg.namespace,
+            cookieNamespace: this.cfg.socketIoCookie,
+            screenshotsFolder: this.cfg.screenshotsFolder,
+          })
+
+          this.server.startWebsockets(this.automation, this.cfg, {})
+
+          this.socket = this.server._socket
+        })
+      })
+
+      describe('#onCloudTestFileChange', () => {
+        it('calls #onCloudTestFileChange', function () {
+          devServer.emitter.off.reset()
+          sinon.stub(this.socket, 'toRunner')
+
+          this.socket.onCloudTestFileChange({ specFile: 'foo/bar.js' })
+
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', { specFile: 'foo/bar.js' })
+          expect(devServer.emitter.off).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
+        })
+      })
+
+      describe('#onBeforeSave', () => {
+        it('calls #onTestFileChange and listens for dev-server:compile:success when config.watchForFileChanges is false', function () {
+          devServer.emitter.on.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onBeforeSave(this.cfg)
+
+          expect(devServer.emitter.on).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
+        })
+      })
+
+      describe('#onAfterSave', () => {
+        it('removes listener for dev-server:compile:success when there is an error and config.watchForFileChanges is false', function () {
+          devServer.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+          expect(devServer.emitter.off).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
+        })
+
+        it('does not remove listener for dev-server:compile:success when there is an error and config.watchForFileChanges is true', function () {
+          devServer.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = true
+
+          this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+          expect(devServer.emitter.off).not.to.be.called
+        })
+
+        it('does not remove listener for dev-server:compile:success when there is no error', function () {
+          devServer.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onAfterSave(this.cfg)
+
+          expect(devServer.emitter.off).not.to.be.called
+        })
+      })
+    })
+  })
+})

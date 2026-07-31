@@ -12,16 +12,17 @@ import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
-import type { RemoteStates } from './remote_states'
+import type { RemoteStates } from '@packages/network-tools'
 import bodyParser from 'body-parser'
 import path from 'path'
-import AppData from './util/app_data'
-import CacheBuster from './util/cache_buster'
+import * as AppData from './util/app_data'
+import { strip as cacheBusterStrip } from './util/cache_buster'
 import specController from './controllers/spec'
 import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { isProxyDisabled } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:routes')
 
@@ -29,7 +30,8 @@ export interface InitializeRoutes {
   config: Cfg
   getSpec: () => FoundSpec | null
   nodeProxy: httpProxy
-  networkProxy: NetworkProxy
+  networkProxy?: NetworkProxy
+  getNetworkProxy?: () => NetworkProxy | undefined
   remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
@@ -38,6 +40,7 @@ export interface InitializeRoutes {
 export const createCommonRoutes = ({
   config,
   networkProxy,
+  getNetworkProxy,
   testingType,
   getSpec,
   remoteStates,
@@ -46,6 +49,7 @@ export const createCommonRoutes = ({
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
+  const resolveNetworkProxy = () => getNetworkProxy?.() ?? networkProxy
 
   // When a test visits an http:// site and we load our main app page,
   // (e.g. test has cy.visit('http://example.com'), we load http://example.com/__/)
@@ -107,11 +111,27 @@ export const createCommonRoutes = ({
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     router.get('/__cypress-studio/*', async (req, res) => {
-      await networkProxy.handleHttpRequest(req, res)
+      const proxy = resolveNetworkProxy()
+
+      if (!proxy) {
+        return res.sendStatus(404)
+      }
+
+      await proxy.handleHttpRequest(req, res)
+
+      return
     })
 
     router.get('/__cypress-cy-prompt/*', async (req, res) => {
-      await networkProxy.handleHttpRequest(req, res)
+      const proxy = resolveNetworkProxy()
+
+      if (!proxy) {
+        return res.sendStatus(404)
+      }
+
+      await proxy.handleHttpRequest(req, res)
+
+      return
     })
 
     router.get('/status-code-test/:num', (req, res) => {
@@ -138,7 +158,7 @@ export const createCommonRoutes = ({
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
-    const test = CacheBuster.strip(req.query.p)
+    const test = cacheBusterStrip(req.query.p as string)
 
     specController.handle(test, req, res, config, next, onError)
   })
@@ -172,15 +192,31 @@ export const createCommonRoutes = ({
   })
 
   router.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
+    const proxy = resolveNetworkProxy()
+
+    if (!proxy) {
+      return res.sendStatus(404)
+    }
+
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
-    networkProxy.http.getRenderedHTMLOrigins()[origin] = true
+    proxy.http.getRenderedHTMLOrigins()[origin] = true
 
     res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
+
+    return
   })
 
   router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
-    await networkProxy.handleSourceMapRequest(req, res)
+    const proxy = resolveNetworkProxy()
+
+    if (!proxy) {
+      return res.sendStatus(404)
+    }
+
+    await proxy.handleSourceMapRequest(req, res)
+
+    return
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
@@ -252,7 +288,10 @@ export const createCommonRoutes = ({
   }
 
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
-    const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
+    // Path-only clientRoute hits are expected when CDP Fetch replaces the
+    // MITM proxy; only treat them as "not launched through Cypress" when the
+    // HTTP proxy is supposed to be in use.
+    const nonProxied = !isProxyDisabled() && (req.proxiedUrl?.startsWith('/') ?? false)
 
     getCtx().actions.app.setBrowserUserAgent(req.headers['user-agent'])
 
@@ -270,10 +309,11 @@ export const createCommonRoutes = ({
   // serve static assets from the dist'd Vite app
   router.get([
     `${clientRoute}assets/*`,
+    `${clientRoute}fonts/*`,
     `${clientRoute}shiki/*`,
   ], (req, res) => {
     debug('proxying static assets %s, params[0] %s', req.url, req.params[0])
-    const pathToFile = getPathToDist('app', 'assets', req.params[0])
+    const pathToFile = getPathToDist('app', req.path.slice(clientRoute.length))
 
     return send(req, pathToFile).pipe(res)
   })
@@ -289,15 +329,28 @@ export const createCommonRoutes = ({
       // their own app.js files + spec.js files
       nodeProxy.web(req, res, {}, (e) => {
         if (e) {
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+          debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
         }
       })
     })
   }
 
-  router.all('*', async (req, res) => {
-    await networkProxy.handleHttpRequest(req, res)
-  })
+  // MITM catch-all: only when the proxy is enabled. CDP Fetch owns browser
+  // traffic when disabled; registering this after createCdpFetchNetworkRuntime
+  // would incorrectly send Express fall-through through createFetchOrigin.
+  if (!isProxyDisabled() && (getNetworkProxy || networkProxy)) {
+    router.all('*', async (req, res) => {
+      const proxy = resolveNetworkProxy()
+
+      if (!proxy) {
+        res.sendStatus(404)
+
+        return
+      }
+
+      await proxy.handleHttpRequest(req, res)
+    })
+  }
 
   // when we experience uncaught errors
   // during routing just log them out to

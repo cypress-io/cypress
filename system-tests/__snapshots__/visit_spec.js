@@ -209,17 +209,11 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     visit_non_html_content_type_failing.cy.js                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/visit_non_html_content_type_failing.cy.js/when      (1280x720)
-     content type is plaintext -- fails (failed).png                                                
 
 
 ====================================================================================================
@@ -528,7 +522,7 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
 
 `
 
-exports['e2e visit / low response timeout / passes with experimentalSourceRewriting'] = `
+exports['e2e visit / source rewriting / passes with experimentalSourceRewriting'] = `
 
 ====================================================================================================
 

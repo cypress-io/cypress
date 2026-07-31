@@ -25,9 +25,9 @@ export const baseConfig: Cypress.ConfigOptions = {
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
-    experimentalPromptCommand: true,
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
+    removeSRIAttributes: true,
     setupNodeEvents: (on, config) => {
       on('task', {
         log (message) {

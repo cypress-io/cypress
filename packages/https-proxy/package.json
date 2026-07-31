@@ -21,16 +21,16 @@
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
-    "node-forge": "^1.3.0",
+    "node-forge": "^1.4.0",
     "semaphore": "1.1.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/request": "^3.0.10",
+    "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@packages/network": "0.0.0-development",
     "@types/semaphore": "1.1.4",
-    "tsx": "^4.20.6",
+    "tsx": "^4.22.4",
     "vitest": "^3.2.4"
   },
   "files": [

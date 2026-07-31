@@ -6,6 +6,7 @@ export const LocalSettingsPreferences = objectType({
   description: 'local setting preferences',
   definition (t) {
     t.boolean('autoScrollingEnabled')
+    t.boolean('codeEditorLineWrap')
     t.string('preferredEditorBinary')
     t.boolean('isSpecsListOpen')
     t.boolean('showFetchRequests')
@@ -53,6 +54,15 @@ export const LocalSettingsPreferences = objectType({
           // if error is thrown, browser doesn't exist
           return false
         }
+      },
+    })
+
+    t.json('banners', {
+      description: 'User-scoped banner state — used by cloud-driven messages whose `dismissal.scope` is `user`. The shape mirrors `currentProject.savedState.banners` but lives in global appData.',
+      resolve: async (source, args, ctx) => {
+        const preferences = await ctx._apis.localSettingsApi.getPreferences()
+
+        return preferences.banners || {}
       },
     })
 

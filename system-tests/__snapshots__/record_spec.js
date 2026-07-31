@@ -374,10 +374,6 @@ exports['e2e record passing passes 2'] = [
       'end': '2018-02-01T20:14:19.323Z',
       'duration': 1234,
     },
-    'metadata': {
-      'studioCreated': 0,
-      'studioExtended': 0,
-    },
   },
   {
     'stats': {
@@ -454,10 +450,6 @@ exports['e2e record passing passes 2'] = [
       'end': '2018-02-01T20:14:19.323Z',
       'duration': 1234,
     },
-    'metadata': {
-      'studioCreated': 0,
-      'studioExtended': 0,
-    },
   },
   {
     'stats': {
@@ -530,10 +522,6 @@ exports['e2e record passing passes 2'] = [
       'start': '2018-02-01T20:14:19.323Z',
       'end': '2018-02-01T20:14:19.323Z',
       'duration': 1234,
-    },
-    'metadata': {
-      'studioCreated': 0,
-      'studioExtended': 0,
     },
   },
 ]
@@ -3432,7 +3420,7 @@ exports['e2e record capture-protocol enabled passing retrieves the capture proto
 
 `
 
-exports['capture-protocol api errors upload 500 - does not retry continues 1'] = `
+exports['capture-protocol api errors upload 500 - tries 3 times and fails continues 1'] = `
 
 ====================================================================================================
 
@@ -3497,13 +3485,13 @@ exports['capture-protocol api errors upload 500 - does not retry continues 1'] =
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Uploading after Xm, Ys ZZ.ZZms 2/2 - http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error
 
-Warning: We encountered an HTTP error while uploading the Test Replay recording for this spec.
+Warning: We encountered multiple errors while uploading the Test Replay recording for this spec.
 
-These results will not display Test Replay recordings.
+We attempted to upload the Test Replay recording 3 times.
 
-This error will not affect or change the exit code.
-
-http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with HTTP 500: Internal Server Error
+http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error
+http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error
+http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error
 
 ====================================================================================================
 

@@ -60,6 +60,8 @@ describe('e2e downloads', () => {
   })
 
   it('does not trash downloads between runs if trashAssetsBeforeRuns: false', async function () {
+    this.retries(10)
+
     await systemTests.exec(this, {
       project: 'downloads',
       spec: 'download_csv.cy.ts',

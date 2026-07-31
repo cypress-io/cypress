@@ -30,8 +30,7 @@ export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypre
 // and are required when creating a project.
 export type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'excludeSpecPattern' | 'specPattern' | 'experimentalModifyObstructiveThirdPartyCode' | 'injectDocumentDomain' | 'video' | 'videoCompression' | 'videosFolder' | 'resolvedNodeVersion' | 'resolvedNodePath' | 'trashAssetsBeforeRuns' | 'experimentalWebKitSupport' | 'justInTimeCompile'>
-  & Pick<Cypress.ResolvedConfigOptions['e2e'], 'experimentalPromptCommand'> // TODO: Figure out how to type this better.
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'excludeSpecPattern' | 'specPattern' | 'experimentalModifyObstructiveThirdPartyCode' | 'removeSRIAttributes' | 'injectDocumentDomain' | 'video' | 'videoCompression' | 'videosFolder' | 'resolvedNodeVersion' | 'resolvedNodePath' | 'trashAssetsBeforeRuns' | 'experimentalWebKitSupport' | 'justInTimeCompile'>
 
 export interface SettingsOptions {
   testingType?: 'component' |'e2e'
@@ -57,7 +56,13 @@ type BannerKeys = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKeys]
 export type BannersState = {
   [bannerId in BannerId]?: BannerState
-} & { _disabled?: boolean } // used for testing
+} & {
+  _disabled?: boolean // used for testing
+  // Cloud-driven banners are namespaced as `cloud:<message_id>` and stored under
+  // the same `BannersState` shape. They aren't part of the static `BannerIds` enum
+  // since the id list is minted by the cloud catalog at runtime.
+  [cloudId: `cloud:${string}`]: BannerState | undefined
+}
 
 export type MajorVersionWelcomeDismissed = {
   [key: string]: number

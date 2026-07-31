@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
 import la from 'lazy-ass'
-import check from 'check-more-types'
 import Debug from 'debug'
 import Promise from 'bluebird'
 import isForkPr from 'is-fork-pr'
@@ -16,14 +15,15 @@ import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import * as capture from '../capture'
 import * as env from '../util/env'
-import ciProvider from '../util/ci_provider'
+import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
-import { countStudioUsage } from '../util/spec_writer'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
 import type { Cfg } from '../project-base'
 import type { RunResult } from './results'
 import type { ReadyOptions } from './run'
+
+import type { PostRunRequest_v3Type } from '../validations/cloudValidations'
 
 const debug = Debug('cypress:server:record')
 const debugCiInfo = Debug('cypress:server:record:ci-info')
@@ -170,7 +170,7 @@ const updateInstanceStdout = async (options: any = {}) => {
 }
 
 const postInstanceResults = (options: any = {}) => {
-  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -196,7 +196,6 @@ const postInstanceResults = (options: any = {}) => {
     video,
     reporterStats,
     screenshots,
-    metadata,
   })
   .catch((err: any) => {
     debug('failed updating instance %o', {
@@ -207,8 +206,8 @@ const postInstanceResults = (options: any = {}) => {
   })
 }
 
-const getCommitFromGitOrCi = (git: any) => {
-  la(check.object(git), 'expected git information object', git)
+const getCommitFromGitOrCi = (git: any): PostRunRequest_v3Type['commit'] => {
+  la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
     sha: git.sha,
@@ -218,7 +217,7 @@ const getCommitFromGitOrCi = (git: any) => {
     message: git.message,
     remoteOrigin: git.remote,
     defaultBranch: null,
-  })
+  }) as PostRunRequest_v3Type['commit']
 }
 
 const billingLink = (orgId: any) => {
@@ -300,12 +299,12 @@ const createRun = Promise.method((options: any = {}) => {
     autoCancelAfterFailures,
     project,
   })
-  .tap((response: any) => {
+  .then((response: any) => {
     if (!(response && response.warnings && response.warnings.length)) {
-      return
+      return response
     }
 
-    return _.each(response.warnings, (warning: any) => {
+    _.each(response.warnings, (warning: any) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
@@ -345,6 +344,8 @@ const createRun = Promise.method((options: any = {}) => {
           })
       }
     })
+
+    return response
   }).catch((err: any) => {
     debug('failed creating run with status %o',
       _.pick(err, ['name', 'message', 'statusCode', 'stack']))
@@ -512,6 +513,7 @@ interface InstanceOptions {
     osVersion: any
     browserName: any
     browserVersion: any
+    browserFamily: any
   }
   parallel?: any
   ciBuildId?: any
@@ -546,7 +548,7 @@ async function createInstance (options: InstanceOptions) {
   }
 }
 
-const _postInstanceTests = ({
+async function _postInstanceTests ({
   runId,
   instanceId,
   config,
@@ -555,17 +557,18 @@ const _postInstanceTests = ({
   parallel,
   ciBuildId,
   group,
-}) => {
-  return api.postInstanceTests({
-    runId,
-    instanceId,
-    config,
-    tests,
-    hooks,
-  })
-  .catch((err: any) => {
-    throwCloudCannotProceed({ parallel, ciBuildId, group, err })
-  })
+}) {
+  try {
+    return await api.postInstanceTests({
+      runId,
+      instanceId,
+      config,
+      tests,
+      hooks,
+    })
+  } catch (err: unknown) {
+    throw cloudCannotProceedErr({ parallel, ciBuildId, group, err })
+  }
 }
 
 const createRunAndRecordSpecs = (options: any = {}) => {
@@ -604,6 +607,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       osVersion: sys.osVersion,
       browserName: browser.displayName,
       browserVersion: browser.version,
+      browserFamily: browser.family,
     }
 
     telemetry.startSpan({ name: 'record:createRun' })
@@ -691,17 +695,13 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
         debug('after spec run %o', { spec })
 
-        return countStudioUsage(spec.absolute)
-        .then((metadata) => {
-          return postInstanceResults({
-            group,
-            config,
-            results,
-            parallel,
-            ciBuildId,
-            instanceId,
-            metadata,
-          })
+        return postInstanceResults({
+          group,
+          config,
+          results,
+          parallel,
+          ciBuildId,
+          instanceId,
         })
         .then((resp: any) => {
           if (!resp) {
@@ -792,42 +792,34 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
         .value()
 
-        const responseDidFail = {}
-        const response = await _postInstanceTests({
-          runId,
-          instanceId,
-          config: resolvedRuntimeConfig,
-          tests,
-          hooks,
-          parallel,
-          ciBuildId,
-          group,
-        })
-        .catch((err: any) => {
+        try {
+          const response = await _postInstanceTests({
+            runId,
+            instanceId,
+            config: resolvedRuntimeConfig,
+            tests,
+            hooks,
+            parallel,
+            ciBuildId,
+            group,
+          })
+
+          if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
+            errorsWarning('CLOUD_CANCEL_SKIPPED_SPEC')
+
+            // set a property on the response so the browser runner
+            // knows not to start executing tests
+            project.emit('end', { skippedSpec: true, stats: {} })
+
+            // dont call the cb, let the browser hang until it's killed
+            return
+          }
+
+          return cb(response)
+        } catch (err: unknown) {
           onError(err)
-
-          return responseDidFail
-        })
-
-        if (response === responseDidFail) {
-          debug('`responseDidFail` equals `response`, allowing browser to hang until it is killed: Response %o', { responseDidFail })
-
-          // dont call the cb, let the browser hang until it's killed
-          return
+          debug('postInstanceTests failed, allowing browser to hang until it is killed: Error %o', { err })
         }
-
-        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          errorsWarning('CLOUD_CANCEL_SKIPPED_SPEC')
-
-          // set a property on the response so the browser runner
-          // knows not to start executing tests
-          project.emit('end', { skippedSpec: true, stats: {} })
-
-          // dont call the cb, let the browser hang until it's killed
-          return
-        }
-
-        return cb(response)
       })
 
       return runAllSpecs({

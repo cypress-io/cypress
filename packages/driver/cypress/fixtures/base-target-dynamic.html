@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Base Target Dynamic Fixture</title>
+    <script>
+      window.injectBase = function (target) {
+        const base = document.createElement('base')
+
+        base.setAttribute('href', '/')
+        base.setAttribute('target', target)
+        document.head.appendChild(base)
+      }
+    </script>
+  </head>
+  <body>
+    <a id="link" href="/fixtures/dom.html">Link</a>
+    <a id="nested-link" href="/fixtures/dom.html"><span id="nested-link-child">Nested Link</span></a>
+    <form id="form" method="GET" action="/fixtures/dom.html">
+      <button type="submit" id="submit">Submit</button>
+    </form>
+  </body>
+</html>

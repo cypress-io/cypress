@@ -1313,3 +1313,65 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
   })
 })
+
+describe('cy.prompt command buttons', { viewportHeight: 1000 }, () => {
+  let runner: EventEmitter
+  let runnables: RootRunnable
+
+  const addPromptCommand = () => {
+    addCommand(runner, {
+      id: 200,
+      name: 'prompt',
+      message: 'cy.prompt instructions',
+      state: 'passed',
+    })
+  }
+
+  beforeEach(() => {
+    cy.fixture('runnables_commands').then((_runnables) => {
+      runnables = _runnables
+    })
+
+    runner = new EventEmitter()
+
+    cy.visit('/').then((win) => {
+      win.render({
+        runner,
+        runnerStore: {
+          spec: {
+            name: 'foo',
+            absolute: '/foo/bar',
+            relative: 'foo/bar',
+          },
+        },
+      })
+    })
+
+    cy.get('.reporter.mounted').then(() => {
+      runner.emit('runnables:ready', runnables)
+      runner.emit('reporter:start', {})
+    })
+  })
+
+  it('shows the Feedback and Get Code buttons by default', () => {
+    addPromptCommand()
+
+    cy.get('.command-name-prompt').should('exist')
+    cy.get('.command-prompt-get-feedback').should('be.visible')
+    cy.get('.command-prompt-get-code').should('be.visible')
+  })
+
+  it('hides the buttons when cy.prompt actions are disabled (e.g. test replay)', () => {
+    // command.tsx reads the reporter's appState singleton, exposed as window.state
+    cy.window().then((win) => {
+      win.state.setCyPromptActionsEnabled(false)
+      addPromptCommand()
+    })
+
+    // command still renders; only the buttons are gated
+    cy.get('.command-name-prompt').should('exist')
+    cy.get('.command-prompt-get-code-feedback-container').should('not.exist')
+    cy.get('.command-prompt-get-feedback').should('not.exist')
+    cy.get('.command-prompt-get-code').should('not.exist')
+  })
+})

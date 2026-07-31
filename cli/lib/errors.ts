@@ -241,20 +241,6 @@ const invalidConfigFile = {
   solution: 'Either pass a relative path to a valid Cypress config file or remove this option.',
 }
 
-/**
- * This error happens when CLI detects that the child Test Runner process
- * was killed with a signal, like SIGBUS
- * @see https://github.com/cypress-io/cypress/issues/5808
- * @param {'close'|'event'} eventName Child close event name
- * @param {string} signal Signal that closed the child process, like "SIGBUS"
-*/
-const childProcessKilled = (eventName: string, signal: string): any => {
-  return {
-    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
-    solution: solutionUnknown,
-  }
-}
-
 const CYPRESS_RUN_BINARY = {
   notValid: (value: string): any => {
     const properFormat = `**/${state.getPlatformExecutable()}`
@@ -266,12 +252,6 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-async function addPlatformInformation (info: any): Promise<any> {
-  const platform = await util.getPlatformInfo()
-
-  return { ...info, platform }
-}
-
 /**
  * Given an error object (see the errors above), forms error message text with details,
  * then resolves with Error instance you can throw or reject with.
@@ -280,7 +260,7 @@ async function addPlatformInformation (info: any): Promise<any> {
  * @example
   ```js
   // inside a Promise with "resolve" and "reject"
-  const errorObject = childProcessKilled('exit', 'SIGKILL')
+  const errorObject = errors.versionMismatch
   return getError(errorObject).then(reject)
   ```
  */
@@ -294,41 +274,68 @@ export async function getError (errorObject: any): Promise<Error> {
   return err
 }
 
+export function getErrorSync (errorObject: any, platform: string): Error {
+  const errorMessage = syncFormErrorText({
+    ...errorObject,
+    platform,
+  })
+
+  const err: any = new Error(errorMessage)
+
+  err.known = true
+
+  return err
+}
+
 /**
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
  */
-export async function formErrorText (info: any, msg?: string, prevMessage?: string): Promise<string> {
-  const infoWithPlatform = await addPlatformInformation(info)
+interface ErrorInfo {
+  description: string
+  solution: string | ((msg?: string, prevMessage?: string) => string)
+  platform: string
+  footer?: string
+}
 
+export async function formErrorText (info: Omit<ErrorInfo, 'platform'>, msg?: string, prevMessage?: string): Promise<string> {
+  const platform = await util.getPlatformInfo()
+
+  return syncFormErrorText({
+    ...info,
+    platform,
+  }, msg, prevMessage)
+}
+
+function syncFormErrorText (info: ErrorInfo, msg?: string, prevMessage?: string): string {
   const formatted: string[] = []
 
   function add (msg: string): void {
     formatted.push(stripIndents(msg))
   }
 
-  assert.ok(_.isString(infoWithPlatform.description) && !_.isEmpty(infoWithPlatform.description), 'expected error description to be text.')
+  assert.ok(_.isString(info.description) && !_.isEmpty(info.description), 'expected error description to be text.')
 
   // assuming that if there the solution is a function it will handle
   // error message and (optional previous error message)
-  if (_.isFunction(infoWithPlatform.solution)) {
-    const text = infoWithPlatform.solution(msg, prevMessage)
+  if (_.isFunction(info.solution)) {
+    const text = info.solution(msg, prevMessage)
 
     assert.ok(_.isString(text) && !_.isEmpty(text), 'expected solution to be text.')
 
     add(`
-        ${infoWithPlatform.description}
+        ${info.description}
 
         ${text}
 
       `)
   } else {
-    assert.ok(_.isString(infoWithPlatform.solution) && !_.isEmpty(infoWithPlatform.solution), 'expected error solution to be text.')
+    assert.ok(_.isString(info.solution) && !_.isEmpty(info.solution), 'expected error solution to be text.')
 
     add(`
-        ${infoWithPlatform.description}
+        ${info.description}
 
-        ${infoWithPlatform.solution}
+        ${info.solution}
 
       `)
 
@@ -345,15 +352,15 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
   add(`
       ${hr}
 
-      ${infoWithPlatform.platform}
+      ${info.platform}
     `)
 
-  if (infoWithPlatform.footer) {
+  if (info.footer) {
     add(`
 
         ${hr}
 
-        ${infoWithPlatform.footer}
+        ${info.footer}
       `)
   }
 
@@ -415,7 +422,6 @@ export const errors = {
   invalidCacheDirectory,
   CYPRESS_RUN_BINARY,
   smokeTestFailure,
-  childProcessKilled,
   incompatibleHeadlessFlags,
   invalidRunProjectPath,
   invalidTestingType,

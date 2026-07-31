@@ -2,7 +2,7 @@ import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
 import type { CypressWantsInjection } from '../../types'
-import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 
 export type SecurityOpts = {
   isNotJavascript?: boolean
@@ -10,6 +10,7 @@ export type SecurityOpts = {
   useAstSourceRewriting: boolean
   modifyObstructiveThirdPartyCode: boolean
   modifyObstructiveCode: boolean
+  removeSRIAttributes: boolean
   deferSourceMapRewrite: (opts: any) => string
 }
 

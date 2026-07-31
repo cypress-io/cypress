@@ -5,7 +5,7 @@ import type {
   StaticResponseWithOptions,
   BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
-} from '@packages/net-stubbing/lib/types'
+} from '@packages/network-interception'
 import {
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
@@ -25,10 +25,6 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (forceNetworkError && (body || statusCode || headers)) {
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
-  }
-
-  if (forceNetworkError && Cypress.isBrowser('webkit')) {
-    err('`forceNetworkError` was passed, but it is not currently supported in experimental WebKit.')
   }
 
   if (body && fixture) {
@@ -55,6 +51,14 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (delay && (!_.isFinite(delay) || delay < 0)) {
     err('`delay` must be a finite, positive number.')
+  }
+
+  // setTimeout uses a 32-bit signed integer internally, so delays >= 2**31
+  // (about 24.8 days) are silently treated as 1ms and effectively ignored.
+  const MAX_TIMEOUT = 2147483647 // 2**31 - 1
+
+  if (delay && delay > MAX_TIMEOUT) {
+    err(`\`delay\` must be less than ${MAX_TIMEOUT + 1}ms (approximately 24.8 days). Larger values are silently ignored by the timer implementation.`)
   }
 }
 

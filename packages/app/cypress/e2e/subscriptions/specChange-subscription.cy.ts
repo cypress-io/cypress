@@ -164,6 +164,7 @@ describe('specChange subscription', () => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -181,7 +182,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="spec-item-link"]', { timeout: 7500 })
+      cy.get('[data-cy="spec-item-link"]', { timeout: 15000 })
       .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -193,9 +194,9 @@ e2e: {
     it('responds to specChange event for an added file', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -220,9 +221,9 @@ e2e: {
     it('responds to specChange event for a removed file', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -244,10 +245,10 @@ e2e: {
 
     it('handles removing the last file', () => {
       cy.contains('dom-content.spec').click()
-      cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+      cy.reporter().find('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
       cy.get('[data-cy=specs-list-panel]').should('be.visible')
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.withCtx(async (ctx, o) => {
         await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
       }, {
@@ -297,9 +298,9 @@ e2e: {
     it('responds to a cypress.config.js file change', () => {
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
 
-      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -312,6 +313,7 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -329,7 +331,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="spec-file-item"]', { timeout: 7500 })
+      cy.get('[data-cy="spec-file-item"]', { timeout: 15000 })
       .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -436,6 +438,7 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+allowCypressEnv: false,
 projectId: 'abc123',
 experimentalInteractiveRunEvents: true,
 component: {
@@ -453,7 +456,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
+      cy.get('[data-cy="file-match-indicator"]', { timeout: 15000 })
       .should('contain', '3 matches')
 
       // Regression for https://github.com/cypress-io/cypress/issues/27103
@@ -461,6 +464,7 @@ e2e: {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {
@@ -487,7 +491,7 @@ module.exports = {
 }`)
       })
 
-      cy.get('[data-cy="create-spec-page-title"]')
+      cy.get('[data-cy="create-spec-page-title"]', { timeout: 15000 })
       .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
     })
   })

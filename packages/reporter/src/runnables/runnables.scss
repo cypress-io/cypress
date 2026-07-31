@@ -193,17 +193,6 @@ $dotted-line-left-padding: 19px;
       }
     }
 
-    .attempt-item:hover {
-      > .runnable-wrapper .runnable-controls i.fa-redo {
-        visibility: visible !important;
-      }
-
-      .hooks-container,
-      .runnable-err-wrapper {
-        border-color: $gray-500;
-      }
-    }
-
     .runnable-state,
     .attempt-state {
       display: inline-block;
@@ -606,7 +595,9 @@ $dotted-line-left-padding: 19px;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 250px;
-  max-width: 250px;
+  // the popover renders in the reporter iframe and cannot overflow it, so
+  // shrink to the iframe's viewport when the panel is narrower than 250px
+  max-width: calc(100vw - 16px);
   padding: 8px;
   font-family: $font-system;
   

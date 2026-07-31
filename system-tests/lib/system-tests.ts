@@ -29,6 +29,9 @@ const human = require('human-interval')
 const morgan = require('morgan')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
+const treeKill = require('tree-kill')
+const { once } = require('events')
+const os = require('os')
 const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
@@ -43,8 +46,9 @@ type CypressConfig = { [key: string]: any }
 export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'chrome-for-testing' | 'webkit'
 | '!electron' | '!chrome' | '!chrome-for-testing' | '!firefox' | '!webkit'
 
-type ExecResult = {
-  code: number
+export type ExecResult = {
+  code: number | null
+  signal: NodeJS.Signals | null
   stdout: string
   stderr: string
 }
@@ -68,6 +72,10 @@ export type ItOptions = ExecOptions & {
    * Same as using `systemTests.it.skip`.
    */
   skip?: boolean
+  /**
+   * If set, the system test will be retried up to the given number of times.
+   */
+  retries?: number
 }
 
 type ExecOptions = {
@@ -219,7 +227,15 @@ type ExecOptions = {
    */
   configFile?: string
   /**
-   * Set a custom executable to run instead of the default.
+   * Set a custom executable to run instead of the default (`node` or `cypress` when `withBinary`).
+   * May include argv prefixes separated by spaces (for example `bun run cypress run`); these are
+   * prepended before harness args. `child_process.spawn` requires a single binary name; multi-token
+   * strings are split on whitespace (shell quoting is not supported).
+   *
+   * When the command invokes the Cypress CLI (argv contains a `cypress` segment), harness args are
+   * CLI flags (`--dev`, `--project`, …), not `node` + `@packages/server` argv. Otherwise (e.g.
+   * `bun install`) harness args are empty and the child process `cwd` defaults to the scaffolded
+   * project directory unless overridden via `spawnOpts.cwd`.
    */
   command?: string
   /**
@@ -246,6 +262,11 @@ type ExecOptions = {
    * Run Cypress with POSIX exit codes.
    */
   posixExitCodes?: boolean
+  /**
+   * If true, skip asserting the Cypress child exited without a termination signal (e.g. SIGABRT).
+   * @default false
+   */
+  skipExitSignalAssertion?: boolean
 }
 
 type Server = {
@@ -285,10 +306,74 @@ export type SpawnerResult = {
   stdout: stream.Readable
   stderr: stream.Readable
   on(event: 'error', cb: (err: Error) => void): void
-  on(event: 'exit', cb: (exitCode: number) => void): void
+  on(event: 'exit', cb: (exitCode: number | null, signal?: NodeJS.Signals | null) => void): void
   kill: ChildProcess['kill']
   pid: number
 }
+
+/** Active Cypress child from {@link systemTests.exec} (tree-kill; Docker has no host pid). */
+let activeCypressSpawn: SpawnerResult | null = null
+let activeSpawnIsDocker = false
+let interruptRequested = false
+let interruptInProgress = false
+
+const INTERRUPT_CHILD_WAIT_MS = 30000
+
+async function handleHarnessInterrupt (signal: NodeJS.Signals) {
+  if (interruptInProgress) {
+    process.exit(1)
+
+    return
+  }
+
+  interruptInProgress = true
+  interruptRequested = true
+
+  // So Mocha (or others) cannot exit this process before we tear down Cypress.
+  process.removeAllListeners(signal)
+
+  try {
+    if (activeCypressSpawn && !activeSpawnIsDocker) {
+      await new Promise<void>((resolve) => {
+        treeKill(activeCypressSpawn!.pid, signal, (err?: Error) => {
+          if (err) {
+            debug('tree-kill error: %o', err)
+          }
+
+          resolve()
+        })
+      })
+
+      try {
+        await Promise.race([
+          once(activeCypressSpawn, 'exit'),
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('timeout waiting for Cypress exit')), INTERRUPT_CHILD_WAIT_MS)
+          }),
+        ])
+      } catch (e) {
+        debug('waiting for Cypress exit after interrupt: %o', e)
+      }
+    }
+  } finally {
+    activeCypressSpawn = null
+    activeSpawnIsDocker = false
+
+    const code = 128 + os.constants.signals[signal]
+
+    process.exit(code)
+  }
+}
+
+function installHarnessInterruptHandlers () {
+  for (const sig of (['SIGINT', 'SIGTERM'] as const)) {
+    process.prependListener(sig, () => {
+      void handleHarnessInterrupt(sig)
+    })
+  }
+}
+
+installHarnessInterruptHandlers()
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
   if (options.withBinary) {
@@ -299,6 +384,184 @@ const cpSpawner: Spawner = (cmd, args, env, options) => {
     env,
     ...options.spawnOpts,
   })
+}
+
+/**
+ * `child_process.spawn` expects a single executable as `cmd`, not a shell string like `bun run cypress`.
+ * When `options.command` contains spaces, split into `[executable, ...prefixArgv]` and prepend prefix
+ * argv before the harness-generated arguments.
+ */
+function resolveSpawnCommand (options: ExecOptions, harnessArgs: string[]): { cmd: string, args: string[] } {
+  if (!options.command) {
+    return {
+      cmd: options.withBinary ? 'cypress' : 'node',
+      args: harnessArgs,
+    }
+  }
+
+  const trimmed = options.command.trim()
+
+  if (!trimmed.includes(' ')) {
+    return {
+      cmd: trimmed,
+      args: harnessArgs,
+    }
+  }
+
+  const segments = trimmed.split(/\s+/)
+
+  return {
+    cmd: segments[0],
+    args: [...segments.slice(1), ...harnessArgs],
+  }
+}
+
+/**
+ * True when `command` runs the `cypress` CLI (e.g. `bun run cypress run`), as opposed to a
+ * package-manager-only command like `bun install`.
+ */
+function customSpawnCommandReferencesCypress (command: string): boolean {
+  return command.trim().split(/\s+/).includes('cypress')
+}
+
+/**
+ * Token after `cypress` in a spawn command string, e.g. `run` for `bun run cypress run`.
+ */
+function parseCypressCliSubcommandFromSpawnCommand (command: string): string | undefined {
+  const segments = command.trim().split(/\s+/)
+  const idx = segments.lastIndexOf('cypress')
+
+  return segments[idx + 1]
+}
+
+/**
+ * When the harness spawns a real Cypress CLI (see `resolveSpawnCommand`), argv must be
+ * CLI-compatible. Server-only flags like `--run-project` are invalid on `cypress open` / `cypress run`.
+ * Non-run subcommands (`install`, `verify`, `version`, `help`) omit project and harness run flags.
+ */
+function buildInitialCliHarnessArgs (
+  options: ExecOptions,
+  projectPath: string,
+  command: string,
+): string[] {
+  const subcommand = parseCypressCliSubcommandFromSpawnCommand(command)
+  const args: string[] = []
+
+  // Monorepo system tests hit the CLI package on disk; `--dev` switches spawn to `scripts/start.js`.
+  // `cypress install` / `version` / `help` do not accept that global flag in this position.
+  if (subcommand !== 'install' && subcommand !== 'version' && subcommand !== 'help') {
+    args.push('--dev')
+  }
+
+  switch (subcommand) {
+    case 'run':
+    case 'open':
+      args.push(`--project=${projectPath}`)
+      args.push(options.testingType === 'component' ? '--component' : '--e2e')
+      break
+    case 'install':
+    case 'verify':
+    case 'version':
+    case 'help':
+      break
+    default:
+      args.push(`--project=${projectPath}`)
+      args.push(options.testingType === 'component' ? '--component' : '--e2e')
+      break
+  }
+
+  return args
+}
+
+function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) {
+  if (options.spec) {
+    args.push(`--spec=${options.spec}`)
+  }
+
+  if (options.port) {
+    ensurePort(options.port)
+    args.push(`--port=${options.port}`)
+  }
+
+  if (!_.isUndefined(options.headed)) {
+    args.push('--headed', String(options.headed))
+  }
+
+  if (options.record) {
+    args.push('--record')
+  }
+
+  if (options.quiet) {
+    args.push('--quiet')
+  }
+
+  if (options.parallel) {
+    args.push('--parallel')
+  }
+
+  if (options.group) {
+    args.push(`--group=${options.group}`)
+  }
+
+  if (options.ciBuildId) {
+    args.push(`--ci-build-id=${options.ciBuildId}`)
+  }
+
+  if (options.key) {
+    args.push(`--key=${options.key}`)
+  }
+
+  if (options.reporter) {
+    args.push(`--reporter=${options.reporter}`)
+  }
+
+  if (options.reporterOptions) {
+    args.push(`--reporter-options=${options.reporterOptions}`)
+  }
+
+  if (options.browser) {
+    args.push(`--browser=${options.browser}`)
+  }
+
+  if (options.config) {
+    args.push('--config', JSON.stringify(options.config))
+  }
+
+  if (options.env) {
+    args.push('--env', options.env)
+  }
+
+  if (options.outputPath) {
+    args.push('--output-path', options.outputPath)
+  }
+
+  if (options.noExit) {
+    args.push('--no-exit')
+  }
+
+  if (options.tag) {
+    args.push(`--tag=${options.tag}`)
+  }
+
+  if (options.configFile) {
+    args.push(`--config-file=${options.configFile}`)
+  }
+
+  if (options.userNodePath) {
+    args.push(`--userNodePath=${options.userNodePath}`)
+  }
+
+  if (options.userNodeVersion) {
+    args.push(`--userNodeVersion=${options.userNodeVersion}`)
+  }
+
+  if (options.passWithNoTests) {
+    args.push('--pass-with-no-tests')
+  }
+
+  if (options.posixExitCodes) {
+    args.push('--posix-exit-codes')
+  }
 }
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
@@ -390,7 +653,13 @@ const startServer = function (obj) {
 
   const app = Express()
 
-  const srv = https ? createHttpsServer(app) : new http.Server(app)
+  let srv
+
+  if (https) {
+    srv = createHttpsServer(app)
+  } else {
+    srv = new http.Server(app)
+  }
 
   allowDestroy(srv)
 
@@ -532,6 +801,11 @@ const localItFn = function (title: string, opts: ItOptions) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
+      // Only set retries when explicitly provided; otherwise allow Mocha to inherit from parent suite
+      if ('retries' in opts) {
+        this.retries(options.retries)
+      }
+
       if (options.useSeparateBrowserSnapshots) {
         title = testTitle
       }
@@ -679,6 +953,28 @@ const systemTests = {
     debug('converting options to args %o', { options })
 
     const projectPath = Fixtures.projectPath(options.project)
+
+    if (options.command) {
+      if (customSpawnCommandReferencesCypress(options.command)) {
+        const args = buildInitialCliHarnessArgs(options, projectPath, options.command)
+        const subcommand = parseCypressCliSubcommandFromSpawnCommand(options.command)
+
+        if (
+          subcommand !== 'install'
+          && subcommand !== 'verify'
+          && subcommand !== 'version'
+          && subcommand !== 'help'
+        ) {
+          appendExecHarnessOptionSuffixes(args, options)
+        }
+
+        return args
+      }
+
+      // e.g. `bun install` — not a Cypress invocation; no server/CLI runner argv.
+      return []
+    }
+
     const args = options.withBinary ? [
       `run`,
       `--project=${projectPath}`,
@@ -691,94 +987,7 @@ const systemTests = {
       `--testingType=${options.testingType || 'e2e'}`,
     ]
 
-    if (options.spec) {
-      args.push(`--spec=${options.spec}`)
-    }
-
-    if (options.port) {
-      ensurePort(options.port)
-      args.push(`--port=${options.port}`)
-    }
-
-    if (!_.isUndefined(options.headed)) {
-      args.push('--headed', String(options.headed))
-    }
-
-    if (options.record) {
-      args.push('--record')
-    }
-
-    if (options.quiet) {
-      args.push('--quiet')
-    }
-
-    if (options.parallel) {
-      args.push('--parallel')
-    }
-
-    if (options.group) {
-      args.push(`--group=${options.group}`)
-    }
-
-    if (options.ciBuildId) {
-      args.push(`--ci-build-id=${options.ciBuildId}`)
-    }
-
-    if (options.key) {
-      args.push(`--key=${options.key}`)
-    }
-
-    if (options.reporter) {
-      args.push(`--reporter=${options.reporter}`)
-    }
-
-    if (options.reporterOptions) {
-      args.push(`--reporter-options=${options.reporterOptions}`)
-    }
-
-    if (options.browser) {
-      args.push(`--browser=${options.browser}`)
-    }
-
-    if (options.config) {
-      args.push('--config', JSON.stringify(options.config))
-    }
-
-    if (options.env) {
-      args.push('--env', options.env)
-    }
-
-    if (options.outputPath) {
-      args.push('--output-path', options.outputPath)
-    }
-
-    if (options.noExit) {
-      args.push('--no-exit')
-    }
-
-    if (options.tag) {
-      args.push(`--tag=${options.tag}`)
-    }
-
-    if (options.configFile) {
-      args.push(`--config-file=${options.configFile}`)
-    }
-
-    if (options.userNodePath) {
-      args.push(`--userNodePath=${options.userNodePath}`)
-    }
-
-    if (options.userNodeVersion) {
-      args.push(`--userNodeVersion=${options.userNodeVersion}`)
-    }
-
-    if (options.passWithNoTests) {
-      args.push('--pass-with-no-tests')
-    }
-
-    if (options.posixExitCodes) {
-      args.push('--posix-exit-codes')
-    }
+    appendExecHarnessOptionSuffixes(args, options)
 
     return args
   },
@@ -802,6 +1011,10 @@ const systemTests = {
   async exec (ctx, options: ExecOptions) {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
+
+    if (interruptRequested) {
+      ctx.skip()
+    }
 
     debug('processed options %o', options)
     const args = options.args || this.args(options)
@@ -839,10 +1052,23 @@ const systemTests = {
     let stdout = ''
     let stderr = ''
 
-    const exit = function (code) {
-      const { expectedExitCode } = options
+    const exit = function (code: number | null, signal: NodeJS.Signals | null | undefined) {
+      if (interruptRequested) {
+        return {
+          code,
+          signal: signal == null ? null : signal,
+          stdout,
+          stderr,
+        }
+      }
+
+      const { expectedExitCode, skipExitSignalAssertion } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
+        if (!skipExitSignalAssertion) {
+          expect(signal == null, `Cypress process exited by signal: ${signal} (exit code ${code})`).to.be.true
+        }
+
         if (expectedExitCode === 0) {
           expect(code).to.eq(expectedExitCode, `Process errored: Exit code ${code}`)
         } else {
@@ -893,7 +1119,7 @@ const systemTests = {
             }
           }
 
-          expect(parseFloat(version)).to.be.a.number
+          expect(parseFloat(version)).to.be.a('number')
 
           // if we are in headed mode or headed is undefined in a browser other
           // than electron
@@ -925,14 +1151,19 @@ const systemTests = {
 
       return {
         code,
+        signal: signal == null ? null : signal,
         stdout,
         stderr,
       }
     }
 
-    debug('spawning Cypress %o', { args })
+    const { cmd, args: spawnArgs } = resolveSpawnCommand(options, args)
 
-    const cmd = options.command || (options.withBinary ? 'cypress' : 'node')
+    debug('spawning Cypress %o', { cmd, args: spawnArgs })
+
+    if (options.command && !customSpawnCommandReferencesCypress(options.command)) {
+      options.spawnOpts = { cwd: projectPath, ...options.spawnOpts }
+    }
 
     const env = _.chain(process.env)
     .omit('CYPRESS_DEBUG')
@@ -973,41 +1204,66 @@ const systemTests = {
     .extend(options.processEnv)
     .value()
 
-    const spawnerFn: Spawner = options.dockerImage ? dockerSpawner : cpSpawner
-    const sp: SpawnerResult = await spawnerFn(cmd, args, env, options)
-
-    options.onSpawn && options.onSpawn(sp)
-
-    const ColorOutput = function () {
-      const colorOutput = new stream.Transform()
-
-      colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
-
-      return colorOutput
+    if (interruptRequested) {
+      ctx.skip()
     }
 
-    // pipe these to our current process
-    // so we can see them in the terminal
-    // color it so we can tell which is test output
-    sp.stdout
-    .pipe(ColorOutput())
-    .pipe(process.stdout)
+    const spawnerFn: Spawner = options.dockerImage ? dockerSpawner : cpSpawner
+    const sp: SpawnerResult = await spawnerFn(cmd, spawnArgs, env, options)
 
-    sp.stderr
-    .pipe(ColorOutput())
-    .pipe(process.stderr)
+    activeSpawnIsDocker = !!options.dockerImage
+    activeCypressSpawn = sp
 
-    sp.stdout.on('data', (buf) => stdout += buf.toString())
-    sp.stderr.on('data', (buf) => stderr += buf.toString())
+    try {
+      options.onSpawn && options.onSpawn(sp)
 
-    const exitCode = await new Promise((resolve, reject) => {
-      sp.on('error', reject)
-      sp.on('exit', resolve)
-    })
+      const ColorOutput = function () {
+        const colorOutput = new stream.Transform()
 
-    await copy(projectPath)
+        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
 
-    return exit(exitCode)
+        return colorOutput
+      }
+
+      // pipe these to our current process
+      // so we can see them in the terminal
+      // color it so we can tell which is test output
+      sp.stdout
+      .pipe(ColorOutput())
+      .pipe(process.stdout)
+
+      sp.stderr
+      .pipe(ColorOutput())
+      .pipe(process.stderr)
+
+      sp.stdout.on('data', (buf) => stdout += buf.toString())
+      sp.stderr.on('data', (buf) => stderr += buf.toString())
+
+      const [exitCode, exitSignal] = await new Promise<[number | null, NodeJS.Signals | null | undefined]>((resolve, reject) => {
+        sp.on('error', reject)
+        sp.on('exit', (code, sig) => {
+          resolve([code, sig])
+        })
+      })
+
+      await copy(projectPath)
+
+      if (interruptRequested) {
+        return {
+          code: exitCode,
+          signal: exitSignal == null ? null : exitSignal,
+          stdout,
+          stderr,
+        }
+      }
+
+      return exit(exitCode, exitSignal)
+    } finally {
+      if (activeCypressSpawn === sp) {
+        activeCypressSpawn = null
+        activeSpawnIsDocker = false
+      }
+    }
   },
 
   sendHtml (contents) {

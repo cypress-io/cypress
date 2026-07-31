@@ -1,9 +1,115 @@
 import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
-import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx } from '../../../lib/http'
+import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
 import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
+import { HttpIntercept } from '@packages/network-interception'
+import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
+  describe('_runStage', function () {
+    it('routes async middleware rejections to onError', async function () {
+      const onError = vi.fn()
+      const asyncMiddleware = vi.fn().mockRejectedValue(new Error('async oops'))
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: { asyncMiddleware },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('Internal error while proxying "GET url" in asyncMiddleware:\nasync oops')
+    })
+
+    it('propagates stream errors after middleware has called next()', async function () {
+      const onError = vi.fn()
+      const { PassThrough } = await import('stream')
+      const { EventEmitter } = await import('events')
+
+      const res = Object.assign(new EventEmitter(), {
+        off: vi.fn(),
+        on: vi.fn(),
+        writableFinished: false,
+        destroyed: false,
+      })
+
+      const streamMiddleware = vi.fn().mockImplementation(function () {
+        const pt = new PassThrough()
+
+        this.incomingResStream = pt
+        this.makeResStreamPlainText = () => {
+          pt.on('error', this.onError)
+        }
+
+        this.next()
+      })
+
+      const useStreamMiddleware = vi.fn().mockImplementation(function () {
+        this.makeResStreamPlainText()
+        this.incomingResStream.emit('error', new Error('bad gzip'))
+        this.end()
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res,
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingResponse]: {
+            streamMiddleware,
+            useStreamMiddleware,
+          },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingResponse, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('bad gzip')
+    })
+
+    it('ignores async middleware rejections after next() was called', async function () {
+      const onError = vi.fn()
+      let rejectLate: (err: Error) => void
+
+      const asyncMiddleware = vi.fn().mockImplementation(function () {
+        this.next()
+
+        return new Promise((_resolve, reject) => {
+          rejectLate = reject
+        })
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: { asyncMiddleware },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+      rejectLate!(new Error('late async rejection'))
+      await new Promise((resolve) => setTimeout(resolve, 10))
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+  })
+
   describe('Http.handle', function () {
     let config: CyServer.Config & Cypress.Config
     let middleware: HttpMiddlewareStacks
@@ -28,8 +134,18 @@ describe('http', function () {
         [HttpStages.Error]: { error },
       }
 
-      httpOpts = { config, middleware } as ServerCtx & { middleware?: HttpMiddlewareStacks }
+      httpOpts = { config, middleware, request: { rp: vi.fn() } } as ServerCtx & { middleware?: HttpMiddlewareStacks } & { request: { rp: Mock } }
     })
+
+    function createHttp () {
+      const http = new Http(httpOpts)
+      const httpIntercept = new HttpIntercept(proxyHttpCodec)
+
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
+      http.networkInterception = httpIntercept
+
+      return http
+    }
 
     it('calls IncomingRequest stack, then IncomingResponse stack', async function () {
       incomingRequest.mockImplementation(function () {
@@ -49,7 +165,7 @@ describe('http', function () {
       })
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({}, { on, off })
+      await createHttp().handleHttpRequest({}, { on, off })
 
       expect(incomingRequest, 'incomingRequest').toHaveBeenCalledOnce()
       expect(incomingResponse, 'incomingResponse').toHaveBeenCalledOnce()
@@ -69,7 +185,7 @@ describe('http', function () {
       })
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
       expect(error).toHaveBeenCalledOnce()
@@ -94,7 +210,7 @@ describe('http', function () {
         this.end()
       })
 
-      const http = new Http(httpOpts)
+      const http = createHttp()
 
       http.addPendingBrowserPreRequest = vi.fn()
 
@@ -123,7 +239,7 @@ describe('http', function () {
         this.end()
       })
 
-      const http = new Http(httpOpts)
+      const http = createHttp()
 
       http.addPendingBrowserPreRequest = vi.fn()
 
@@ -153,7 +269,7 @@ describe('http', function () {
         this.end()
       })
 
-      const http = new Http(httpOpts)
+      const http = createHttp()
 
       http.addPendingBrowserPreRequest = vi.fn()
 
@@ -183,7 +299,7 @@ describe('http', function () {
       })
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).toHaveBeenCalledOnce()
       expect(error).toHaveBeenCalledOnce()
@@ -257,7 +373,7 @@ describe('http', function () {
       middleware[HttpStages.Error].error2 = error2
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       const middlewareFunctions = [
         incomingRequest, incomingRequest2,
         incomingResponse, incomingResponse2,
@@ -271,13 +387,32 @@ describe('http', function () {
       expect(on).toHaveBeenCalledTimes(2)
       expect(off).toHaveBeenCalledTimes(10)
     })
+
+    it('does not forward to origin when request middleware already ended the client response', async function () {
+      const sendOutgoing = vi.spyOn(sendRequestOutgoingModule, 'sendRequestOutgoing')
+
+      incomingRequest.mockImplementation(function () {
+        this.res.headersSent = true
+        this.res.writableFinished = true
+        this.end()
+      })
+
+      // @ts-expect-error
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+
+      expect(incomingRequest).toHaveBeenCalledOnce()
+      expect(incomingResponse).not.toHaveBeenCalled()
+      expect(sendOutgoing).not.toHaveBeenCalled()
+
+      sendOutgoing.mockRestore()
+    })
   })
 
   describe('Http.reset', function () {
     let httpOpts
 
     beforeEach(function () {
-      httpOpts = { config: {}, middleware: {} }
+      httpOpts = { config: {}, middleware: {}, request: { rp: vi.fn() } }
     })
 
     it('resets preRequests when resetBetweenSpecs is true', function () {
@@ -321,7 +456,7 @@ describe('http', function () {
         [HttpStages.Error]: { error },
       }
 
-      httpOpts = { config, middleware } as ServerCtx & { middleware?: HttpMiddlewareStacks }
+      httpOpts = { config, middleware, request: { rp: vi.fn() } } as ServerCtx & { middleware?: HttpMiddlewareStacks } & { request: { rp: Mock } }
     })
 
     it('properly ignores requests that are controlled by a service worker', () => {

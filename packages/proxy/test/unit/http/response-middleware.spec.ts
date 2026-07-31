@@ -5,12 +5,11 @@ import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
 import { testMiddleware } from './helpers'
-import { RemoteStates } from '@packages/server/lib/remote_states'
+import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
-import { DocumentDomainInjection } from '@packages/network-tools'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
@@ -55,6 +54,69 @@ describe('http/response-middleware', function () {
       'CompressBody',
       'SendResponseBodyToClient',
     ])
+  })
+
+  describe('ClearCyInitialCookie', function () {
+    const { ClearCyInitialCookie } = ResponseMiddleware
+
+    function prepareContext (resProps = {}) {
+      const cookie = vi.fn()
+
+      const ctx = {
+        req: { proxiedUrl: 'https://localhost:3502/fixtures/primary-origin.html', cookies: {} },
+        res: {
+          cookie,
+          wantsInjection: 'full',
+          isInitial: false,
+          on: () => {},
+          off: () => {},
+          ...resProps,
+        },
+        remoteStates: {
+          current: () => ({ domainName: 'localhost' }),
+        },
+      }
+
+      return { ctx, cookie }
+    }
+
+    it('expires the __cypress.unload cookie when serving an injected document, even if not the initial request', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: 'localhost', expires: new Date(0) })
+    })
+
+    it('does not modify the __cypress.unload cookie when nothing is being injected', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: false, isInitial: false })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).not.toHaveBeenCalledWith('__cypress.unload', '', expect.anything())
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34143
+    it('omits the domain attribute for IPv6 literal hosts so the cookie serializer does not throw', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '[::1]' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      // host-only cookie: no `domain` option, so express/cookie does not reject it
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { expires: new Date(0) })
+    })
+
+    it('keeps the domain attribute for IPv4 literal hosts', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      ctx.remoteStates.current = () => ({ domainName: '127.0.0.1' })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: '127.0.0.1', expires: new Date(0) })
+    })
   })
 
   describe('multiple this.next invocations', () => {
@@ -136,7 +198,6 @@ describe('http/response-middleware', function () {
     beforeEach(() => {
       headers = { 'header-name': 'header-value' }
       ctx = {
-        onlyRunMiddleware: vi.fn(),
         incomingRes: { headers },
         req: {},
         res: {
@@ -148,26 +209,40 @@ describe('http/response-middleware', function () {
 
     it('sets headers on response and runs minimal subsequent middleware if request is from an extra target', async () => {
       ctx.req.isFromExtraTarget = true
+      let allowedMiddlewareRan = false
+      let skippedMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        AttachPlainTextStreamFn () {
+          allowedMiddlewareRan = true
+          this.next()
+        },
+        OmitProblematicHeaders () {
+          skippedMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
       expect(ctx.res.set).toHaveBeenCalledWith(headers)
 
-      expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith([
-        'AttachPlainTextStreamFn',
-        'PatchExpressSetHeader',
-        'MaybeSendRedirectToClient',
-        'CopyResponseStatusCode',
-        'MaybeEndWithEmptyBody',
-        'CompressBody',
-        'SendResponseBodyToClient',
-      ])
+      expect(allowedMiddlewareRan).toBe(true)
+      expect(skippedMiddlewareRan).toBe(false)
     })
 
     it('runs all subsequent middleware if request is not from an extra target', async () => {
       ctx.req.isFromMainTarget = false
+      let subsequentMiddlewareRan = false
 
-      await testMiddleware([FilterNonProxiedResponse], ctx)
-      expect(ctx['onlyRunMiddleware']).not.toHaveBeenCalled()
+      await testMiddleware({
+        FilterNonProxiedResponse,
+        OmitProblematicHeaders () {
+          subsequentMiddlewareRan = true
+          this.next()
+        },
+      }, ctx)
+
+      expect(subsequentMiddlewareRan).toBe(true)
     })
   })
 
@@ -282,6 +357,28 @@ describe('http/response-middleware', function () {
         await testMiddleware([OmitProblematicHeaders], ctx)
         expect(ctx.res.set).toHaveBeenCalledWith(expect.not.objectContaining({ [prop]: expect.anything() }))
       })
+    })
+
+    it('records incomingResHadEmptyBody=true when origin sent Content-Length: 0', async function () {
+      prepareContext({ 'content-length': '0' })
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.incomingResHadEmptyBody).toBe(true)
+    })
+
+    it('records incomingResHadEmptyBody=false when Content-Length is non-zero', async function () {
+      prepareContext({ 'content-length': '42' })
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.incomingResHadEmptyBody).toBe(false)
+    })
+
+    it('records incomingResHadEmptyBody=false when Content-Length is absent', async function () {
+      prepareContext()
+      delete ctx.incomingRes.headers['content-length']
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.incomingResHadEmptyBody).toBe(false)
     })
 
     let badHeaders = {
@@ -1135,11 +1232,12 @@ describe('http/response-middleware', function () {
       expect(appendStub).not.toHaveBeenCalled()
     })
 
-    it('is a noop in the cookie jar when top does NOT need simulating', async function () {
+    it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {
       const appendStub = vi.fn()
 
       const cookieJar = {
         getAllCookies: () => [{ key: 'cookie', value: 'value' }],
+        getCookies: () => [],
         setCookie: vi.fn(),
       }
 
@@ -1161,8 +1259,73 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
-      expect(cookieJar.setCookie).not.toHaveBeenCalled()
+      // the cookie is still recorded in the server-side cookie jar so it does not
+      // go stale and overwrite fresh browser cookies on a later top-level
+      // navigation. See https://github.com/cypress-io/cypress/issues/25841
+      expect(cookieJar.setCookie).toHaveBeenCalledWith(expect.objectContaining({
+        key: 'cookie',
+        value: 'value',
+      }), 'http://www.foobar.com/login', 'strict')
+
+      // the browser sets the cookie itself since the AUT is the primary origin,
+      // so we do not need to sync the cookie into the browser via automation
+      expect(ctx.serverBus.emit).not.toHaveBeenCalled()
       expect(appendStub).toHaveBeenCalledExactlyOnceWith('Set-Cookie', 'cookie=value')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/25841
+    // A same-origin fetch/XHR response that sets a cookie does not need top to be
+    // simulated (the AUT is the primary origin and is not the AUT frame), but the
+    // cookie must still be recorded in the server-side jar. Otherwise the jar
+    // keeps a stale value and overwrites the browser's fresh cookie on the next
+    // top-level navigation (e.g. a reload following the request).
+    ;['fetch', 'xhr'].forEach((resourceType) => {
+      it(`records same-origin ${resourceType} response cookie in jar without browser automation sync`, async function () {
+        const appendStub = vi.fn()
+
+        const cookieJar = {
+          getAllCookies: () => [],
+          getCookies: () => [],
+          setCookie: vi.fn(),
+        }
+
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a same-origin, non-AUT-frame request: top does not need simulating
+            resourceType,
+            credentialsLevel: resourceType === 'fetch' ? 'same-origin' : true,
+            proxiedUrl: 'http://www.foobar.com/messages',
+            isAUTFrame: false,
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': '_venuu_flash=fresh-value',
+            },
+          },
+        })
+
+        ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
+        // the AUT is the primary super domain origin, so top does NOT need simulating
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // the fresh cookie is recorded in the jar so a subsequent navigation does
+        // not reuse a stale value
+        expect(cookieJar.setCookie).toHaveBeenCalledWith(expect.objectContaining({
+          key: '_venuu_flash',
+          value: 'fresh-value',
+        }), 'http://www.foobar.com/messages', 'strict')
+
+        // the browser sets the cookie natively for a same-origin request, so no
+        // automation sync is needed
+        expect(ctx.serverBus.emit).not.toHaveBeenCalled()
+        expect(appendStub).toHaveBeenCalledExactlyOnceWith('Set-Cookie', '_venuu_flash=fresh-value')
+      })
     })
 
     const getCookieJarStub = () => {
@@ -2019,12 +2182,190 @@ describe('http/response-middleware', function () {
       expect(responseEndedWithEmptyBodyStub).not.toHaveBeenCalled()
     })
 
+    describe('when origin response had Content-Length: 0', function () {
+      // Regression coverage for cypress-io/cypress#16469: a DELETE 200 (or any
+      // 200 with Content-Length: 0) was being re-emitted with Transfer-Encoding:
+      // chunked, which broke clients that assumed there would be content.
+      it('sends Content-Length: 0 and ends without piping a body', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: {},
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).toHaveBeenCalledWith('Content-Length', '0')
+        expect(end).toHaveBeenCalledOnce()
+      })
+
+      it('notifies protocolManager that the response ended with an empty body', async function () {
+        prepareContext({
+          protocolManager: {
+            responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+          },
+          req: {
+            browserPreRequest: {
+              requestId: '123',
+              cdpRequestWillBeSentTimestamp: 1,
+              cdpRequestWillBeSentReceivedTimestamp: 2,
+              proxyRequestReceivedTimestamp: 3,
+              cdpLagDuration: 4,
+              proxyRequestCorrelationDuration: 5,
+            },
+          },
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader: vi.fn(),
+            end: vi.fn(),
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(responseEndedWithEmptyBodyStub).toHaveBeenCalledWith(
+          expect.objectContaining({
+            requestId: '123',
+            isCached: false,
+            timings: expect.objectContaining({
+              cdpRequestWillBeSentTimestamp: 1,
+              cdpRequestWillBeSentReceivedTimestamp: 2,
+              proxyRequestReceivedTimestamp: 3,
+              cdpLagDuration: 4,
+              proxyRequestCorrelationDuration: 5,
+            }),
+          }),
+        )
+      })
+
+      it('does not short-circuit when downstream wants to inject HTML', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: {},
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: 'full',
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+
+      it('does not short-circuit when downstream wants security stripped', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: {},
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: true,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+
+      it('does not short-circuit when a cy.intercept route matched (interceptor may have replaced the body)', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: { requestId: 'req-42' },
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          netStubbingState: {
+            requests: { 'req-42': {} },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+    })
+
+    it('does not short-circuit a 200 response when origin did not send Content-Length: 0', async function () {
+      const setHeader = vi.fn()
+      const end = vi.fn()
+
+      prepareContext({
+        req: {},
+        incomingRes: {
+          statusCode: 200,
+        },
+        incomingResHadEmptyBody: false,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          setHeader,
+          end,
+        },
+      })
+
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+      expect(setHeader).not.toHaveBeenCalled()
+      expect(end).not.toHaveBeenCalled()
+    })
+
     function prepareContext (props) {
       ctx = {
         incomingRes: props.incomingRes,
         protocolManager: props.protocolManager,
         req: props.req,
-        res: {
+        incomingResHadEmptyBody: props.incomingResHadEmptyBody,
+        netStubbingState: props.netStubbingState,
+        res: props.res || {
           on: (event, listener) => {},
           off: (event, listener) => {},
           end: () => {},

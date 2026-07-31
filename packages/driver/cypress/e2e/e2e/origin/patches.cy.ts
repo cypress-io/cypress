@@ -1,4 +1,14 @@
 // Stubbing increases the time taken to make a backend request call, so we increase the default command timeout to avoid flake.
+
+/** Restore before re-stubbing on the primary `Cypress` (spec-bridge callbacks must inline the same pattern — `cy.origin` cannot see file-level helpers). */
+function restoreBackendRequestHandlerStubIfNeeded () {
+  const handler = Cypress.backendRequestHandler as unknown as { restore?: () => void }
+
+  if (typeof handler?.restore === 'function') {
+    handler.restore()
+  }
+}
+
 describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout: 10000 }, () => {
   context('submit', () => {
     beforeEach(() => {
@@ -54,6 +64,42 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           $button.attr('integrity', 'sha-123')
           expect($button.attr('integrity')).to.equal('sha-123')
           expect($button.attr('cypress-stripped-integrity')).to.be.undefined
+        })
+      })
+    })
+  })
+
+  // el.integrity = … (the webpack-subresource-integrity pattern) is set via the reflected
+  // property; a regex can't rewrite a non-literal value, so the setter is overridden at runtime.
+  context('integrity property', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+    })
+
+    it('redirects the reflected integrity property to cypress-stripped-integrity for HTMLScriptElement', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.window().then((win: Window) => {
+          const script = win.document.createElement('script')
+
+          script.integrity = 'sha-123'
+          expect(script.getAttribute('integrity')).to.be.null
+          expect(script.getAttribute('cypress-stripped-integrity')).to.equal('sha-123')
+          // the getter still reflects the value back so app code reading it is unaffected
+          expect(script.integrity).to.equal('sha-123')
+        })
+      })
+    })
+
+    it('redirects the reflected integrity property to cypress-stripped-integrity for HTMLLinkElement', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.window().then((win: Window) => {
+          const link = win.document.createElement('link')
+
+          link.integrity = 'sha-123'
+          expect(link.getAttribute('integrity')).to.be.null
+          expect(link.getAttribute('cypress-stripped-integrity')).to.equal('sha-123')
+          expect(link.integrity).to.equal('sha-123')
         })
       })
     })
@@ -461,8 +507,15 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the spec bridge', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
+        restoreBackendRequestHandlerStubIfNeeded()
         cy.stub(Cypress, 'backendRequestHandler').log(false).callThrough()
         cy.origin('http://www.foobar.com:3500', () => {
+          const handler = Cypress.backendRequestHandler as unknown as { restore?: () => void }
+
+          if (typeof handler?.restore === 'function') {
+            handler.restore()
+          }
+
           cy.stub(Cypress, 'backendRequestHandler').log(false).callThrough()
         })
 

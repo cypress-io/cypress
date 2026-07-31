@@ -22,6 +22,9 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
   stdout = new stream.PassThrough()
   stderr = new stream.PassThrough()
 
+  /** Placeholder; Cypress runs in Docker — harness interrupt does not tree-kill this pid. */
+  pid = 0
+
   constructor (private dockerImage: string) {
     super()
   }
@@ -100,7 +103,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
         }
 
         log('Docker run exited:', { err, data })
-        this.emit('exit', data.StatusCode)
+        this.emit('exit', data.StatusCode, null)
       },
     )
   }
@@ -122,6 +125,22 @@ const checkBuiltBinary = async () => {
   } catch (err) {
     throw new Error('Expected built CLI in /cli/build. Run `yarn build` in `cli`.')
   }
+}
+
+// Matches systemTests.it default (run.js sets Mocha CLI --timeout to 10s otherwise).
+const SYSTEM_TEST_TIMEOUT_MS = Number(process.env.SYSTEM_TEST_TIMEOUT || 120000)
+
+// Pre-pulls all images in parallel before tests run so per-test pulls hit the local cache.
+// Uses allSettled so a transient failure doesn't abort the suite — dockerSpawner retries individually.
+export const prePullImages = async (images: string[]): Promise<void> => {
+  await Promise.allSettled(images.map((image) => new DockerProcess(image).pull()))
+}
+
+export const beforePrePullImages = (images: string[]): void => {
+  before(async function () {
+    this.timeout(SYSTEM_TEST_TIMEOUT_MS)
+    await prePullImages(images)
+  })
 }
 
 export const dockerSpawner: Spawner = async (cmd, args, env, options) => {

@@ -175,6 +175,21 @@ describe('header', () => {
           cy.percySnapshot()
         })
 
+        it('shows code editor line wrap toggle, can toggle it, and emits save:state when clicked', () => {
+          const switchSelector = '[data-cy=code-editor-line-wrap-switch]'
+
+          cy.spy(runner, 'emit')
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
+          cy.get(switchSelector).click()
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
+          cy.wrap(runner.emit).should('be.calledWith', 'save:state')
+          cy.percySnapshot()
+        })
+
         it('opens the open in IDE button', () => {
           cy.spy(runner, 'emit')
 

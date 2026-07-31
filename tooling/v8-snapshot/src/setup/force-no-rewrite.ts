@@ -19,6 +19,9 @@ export default [
   // `address instanceof (__get_URL2__())` -- right hand side not an object
   // even though function is in scope
   '*/node_modules/ws/lib/websocket.js',
+  // `const { types: { isUint8Array } } = require('util')` -- the bundler cannot
+  // build a lazy accessor for a nested binding and panics
+  '*/node_modules/ws/lib/sender.js',
   // defers PassThroughStream which is then not accepted as a constructor
   '*/node_modules/get-stream/buffer-stream.js',
   // deferring should be fine as it just reexports `process` which in the
@@ -51,5 +54,4 @@ export default [
   '*/node_modules/ci-info/index.js',
   '*/node_modules/@babel/traverse/lib/index.js',
   '*/node_modules/@babel/types/lib/definitions/index.js',
-  '*/node_modules/axios/lib/adapters/http.js',
 ]

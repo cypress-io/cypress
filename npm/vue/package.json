@@ -9,21 +9,25 @@
     "check-ts": "yarn tsd && vue-tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "lint": "eslint",
     "test": "yarn cy:run",
     "tsd": "yarn build && yarn tsc -p test-tsd/tsconfig.json",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "@vitejs/plugin-vue": "6.0.3",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",
-    "axios": "0.30.2",
+    "axios": "^1.15.1",
     "cypress": "0.0.0-development",
     "rollup": "3.29.5",
     "typescript": "~5.4.5",
     "vite": "6.3.5",
+    "vue-eslint-parser": "^10.0.0",
     "vue": "3.2.47",
     "vue-i18n": "9.14.5",
     "vue-router": "^4.0.0",
@@ -86,5 +90,8 @@
         ]
       }
     }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,vue}": "eslint --fix"
   }
 }

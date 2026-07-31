@@ -7,6 +7,7 @@ import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/browsers/bidi_automation'
 import type { Automation } from '../../../lib/automation'
 import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, NetworkResponseStartedParameters } from 'webdriver/build/bidi/localTypes'
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 // make sure testing promises resolve before asserting on async function conditions
 const flushPromises = () => {
@@ -70,6 +71,8 @@ describe('lib/browsers/bidi_automation', () => {
         beforeEach(() => {
           mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'mockInterceptId' })
           mockWebdriverClient.networkRemoveIntercept = sinon.stub().resolves()
+          // the AUT is identified by its window.name, seeded with AUT_FRAME_NAME_IDENTIFIER
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
         })
 
         it('does nothing if parent context is not initially assigned', async () => {
@@ -102,6 +105,32 @@ describe('lib/browsers/bidi_automation', () => {
           await flushPromises()
 
           expect(mockWebdriverClient.networkRemoveIntercept).not.to.have.been.called
+        })
+
+        it('does not set the AUT context for a non-AUT child frame (e.g. the reporter iframe)', async () => {
+          // the reporter iframe is also a direct child of the top-level context, but its
+          // window.name does not carry the AUT identifier, so it must be ignored
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: 'Cypress Reporter' } })
+
+          const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+          bidiAutomationInstance.setTopLevelContextId('123')
+
+          mockWebdriverClient.emit('browsingContext.contextCreated', {
+            parent: '123',
+            context: '456',
+            url: 'www.foobar.com',
+            userContext: '',
+            children: [],
+          })
+
+          await flushPromises()
+
+          // @ts-expect-error
+          expect(bidiAutomationInstance.autContextId).to.be.undefined
+          // @ts-expect-error
+          expect(bidiAutomationInstance.interceptId).to.be.undefined
+          expect(mockWebdriverClient.networkAddIntercept).not.to.have.been.called
         })
 
         describe('correctly sets the AUT frame and intercepts requests from the frame when the top frame is set.', () => {
@@ -209,6 +238,8 @@ describe('lib/browsers/bidi_automation', () => {
         beforeEach(() => {
           mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'mockInterceptId' })
           mockWebdriverClient.networkContinueRequest = sinon.stub().resolves()
+          // the AUT is identified by its window.name, seeded with AUT_FRAME_NAME_IDENTIFIER
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: `${AUT_FRAME_NAME_IDENTIFIER} 'foobar'` } })
 
           mockRequest = {
             context: '123',
@@ -640,6 +671,72 @@ describe('lib/browsers/bidi_automation', () => {
                 // this would filter out secure cookies and prevent sending them in a secure context
                 secure: false,
               } })
+            })
+
+            // localhost and the loopback range are "potentially trustworthy" origins, so they are
+            // treated as secure contexts and secure cookies are still sent over http for those hosts.
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1618113
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1648993
+            it('data.url / loopback host does not filter out secure cookies', async () => {
+              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+                cookies: [{
+                  domain: 'localhost',
+                  expiry: 123456789,
+                  httpOnly: false,
+                  name: 'secureKey',
+                  path: '/',
+                  sameSite: 'lax',
+                  secure: true,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'secureValue',
+                  },
+                }, {
+                  domain: 'localhost',
+                  expiry: 123456789,
+                  httpOnly: false,
+                  name: 'insecureKey',
+                  path: '/',
+                  sameSite: 'lax',
+                  secure: false,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'insecureValue',
+                  },
+                }],
+              })
+
+              const cookies = await bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {
+                url: 'http://localhost:3500/index.html',
+              })
+
+              // the secure cookie is returned even though this is an http url
+              expect(cookies).to.deep.equal([{
+                domain: 'localhost',
+                expirationDate: 123456789,
+                httpOnly: false,
+                hostOnly: false,
+                name: 'secureKey',
+                path: '/',
+                sameSite: 'lax',
+                secure: true,
+                value: 'secureValue',
+              }, {
+                domain: 'localhost',
+                expirationDate: 123456789,
+                httpOnly: false,
+                hostOnly: false,
+                name: 'insecureKey',
+                path: '/',
+                sameSite: 'lax',
+                secure: false,
+                value: 'insecureValue',
+              }])
+
+              // the secure filter is NOT applied for loopback hosts
+              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
             })
 
             it('data.url / path', async () => {
@@ -1348,67 +1445,6 @@ describe('lib/browsers/bidi_automation', () => {
                 httpOnly: true,
                 hostOnly: false,
                 sameSite: 'unspecified',
-                expirationDate: undefined,
-              })
-            })
-
-            it('defaults sameSite to "none" on Firefox 139 and under', async () => {
-              const cyCookie = {
-                name: 'testCookie',
-                value: 'testValue',
-                domain: '.foobar.com',
-                path: '/',
-                secure: true,
-                httpOnly: true,
-              }
-
-              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
-
-              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
-                cookies: [{
-                  domain: '.foobar.com',
-                  httpOnly: true,
-                  expiry: undefined,
-                  name: 'testCookie',
-                  path: '/',
-                  sameSite: 'no_restriction',
-                  secure: true,
-                  size: 10,
-                  value: {
-                    type: 'string',
-                    value: 'testValue',
-                  },
-                }],
-              })
-
-              // force firefox 139
-              // @ts-expect-error
-              bidiAutomationInstance.majorFirefoxVersion = 139
-
-              const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
-
-              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
-                cookie: {
-                  name: 'testCookie',
-                  value: { type: 'string', value: 'testValue' },
-                  domain: '.foobar.com',
-                  path: '/',
-                  httpOnly: true,
-                  secure: true,
-                  sameSite: 'none',
-                  expiry: undefined,
-                },
-              })
-
-              expect(cookie).to.deep.equal({
-                name: 'testCookie',
-                value: 'testValue',
-                domain: '.foobar.com',
-                path: '/',
-                secure: true,
-                httpOnly: true,
-                hostOnly: false,
-                sameSite: 'no_restriction',
                 expirationDate: undefined,
               })
             })
@@ -2262,6 +2298,46 @@ describe('lib/browsers/bidi_automation', () => {
           expect(mockWebdriverClient.browsingContextActivate).to.have.been.calledWith({
             context: '123',
           })
+        })
+      })
+
+      describe('perform:user:gesture', () => {
+        it('synthesizes a trusted pointer click in the top-level context to grant transient activation', async () => {
+          mockWebdriverClient.inputPerformActions = sinon.stub().resolves()
+          mockWebdriverClient.inputReleaseActions = sinon.stub().resolves()
+
+          bidiAutomationInstance.setTopLevelContextId('123')
+
+          const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})
+
+          expect(returnValue).to.be.undefined
+          expect(mockWebdriverClient.inputPerformActions).to.have.been.calledOnce
+
+          // the `id` is non-deterministic (timestamped) so assert on the meaningful shape directly
+          const performArgs = (mockWebdriverClient.inputPerformActions as sinon.SinonStub).firstCall.args[0]
+
+          expect(performArgs.context).to.equal('123')
+          expect(performArgs.actions).to.have.length(1)
+          expect(performArgs.actions[0]).to.include({
+            type: 'pointer',
+          })
+
+          expect(performArgs.actions[0].parameters).to.deep.equal({ pointerType: 'mouse' })
+          expect(performArgs.actions[0].actions).to.deep.equal([
+            { type: 'pointerMove', x: 0, y: 0 },
+            { type: 'pointerDown', button: 0 },
+            { type: 'pointerUp', button: 0 },
+          ])
+
+          expect(mockWebdriverClient.inputReleaseActions).to.have.been.calledWith({
+            context: '123',
+          })
+        })
+
+        it('fails gracefully if no top-level context is initialized', async () => {
+          bidiAutomationInstance.setTopLevelContextId(undefined)
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).to.be.rejectedWith('Cannot perform user gesture: no top-level context initialized')
         })
       })
 

@@ -88,11 +88,10 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
 interface RunnablesListProps {
   runnables: RunnableArray
   studioEnabled: boolean
-  canSaveStudioLogs: boolean
   spec: Cypress.Cypress['spec']
 }
 
-const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs, spec }: RunnablesListProps) => {
+const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, spec }: RunnablesListProps) => {
   return (
     <div className='wrap'>
       <ul className='runnables'>
@@ -100,7 +99,6 @@ const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studi
           (<Runnable
             key={runnable.id}
             model={runnable}
-            canSaveStudioLogs={canSaveStudioLogs}
             studioEnabled={studioEnabled}
             shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
             spec={spec}
@@ -117,12 +115,11 @@ interface RunnablesContentProps {
   spec: Cypress.Cypress['spec']
   error?: RunnablesErrorModel
   studioEnabled: boolean
-  canSaveStudioLogs: boolean
   appState?: AppState
   statsStore: StatsStore
 }
 
-const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesStore, spec, error, studioEnabled, canSaveStudioLogs, appState, statsStore }: RunnablesContentProps) => {
+const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesStore, spec, error, studioEnabled, appState, statsStore }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -151,7 +148,6 @@ const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesS
     <RunnablesList
       runnables={isRunning ? runnables : runnablesHistory[specPath]}
       studioEnabled={studioEnabled}
-      canSaveStudioLogs={canSaveStudioLogs}
       spec={spec}
     />
   )
@@ -167,10 +163,9 @@ interface RunnablesProps {
   scroller: Scroller
   appState?: AppState
   studioEnabled: boolean
-  canSaveStudioLogs: boolean
 }
 
-const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, error, runnablesStore, spec, studioEnabled, canSaveStudioLogs, statsStore }) => {
+const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, error, runnablesStore, spec, studioEnabled, statsStore }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -198,7 +193,6 @@ const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, erro
         appState={appState}
         runnablesStore={runnablesStore}
         studioEnabled={studioEnabled}
-        canSaveStudioLogs={canSaveStudioLogs}
         spec={spec}
         error={error}
         statsStore={statsStore}

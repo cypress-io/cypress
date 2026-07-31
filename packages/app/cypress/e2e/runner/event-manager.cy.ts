@@ -20,7 +20,7 @@ describe('event-manager', () => {
       })
 
       // trigger a rerun
-      cy.get('.restart').click()
+      cy.reporter().find('.restart').click()
 
       // keep retrying until eventReceived becomes true
       cy.wrap(() => eventReceived).invoke('call').should('be.true')
@@ -39,7 +39,7 @@ describe('event-manager', () => {
       cy.wrap(() => eventManager.reporterBus.listeners('runner:next').length).invoke('call').should('equal', 1)
 
       // trigger a rerun
-      cy.get('.restart').click()
+      cy.reporter().find('.restart').click()
 
       shouldHaveTestResults({
         passCount: 2,
@@ -83,5 +83,23 @@ describe('event-manager', () => {
     cy.visitApp(`specs`)
 
     cy.get('@resetDirtyState').should('have.been.calledOnce')
+  })
+
+  it('forwards open:login:connect:modal from reporter to local bus', () => {
+    loadSpec({
+      filePath: 'hooks/basic.cy.js',
+      passCount: 2,
+    })
+
+    cy.window().then((win) => {
+      const eventManager = win.getEventManager()
+      const args = { utmMedium: 'test-medium', utmContent: 'test-content' }
+
+      cy.spy(eventManager.localBus, 'emit').as('localBusEmit')
+
+      eventManager.reporterBus.emit('open:login:connect:modal', args)
+
+      expect(eventManager.localBus.emit).to.have.been.calledWith('open:login:connect:modal', args)
+    })
   })
 })

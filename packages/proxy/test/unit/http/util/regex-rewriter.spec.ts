@@ -433,6 +433,41 @@ describe('http/util/regex-rewriter', () => {
       })).toEqual(expectedWithModifyObstructiveThirdPartyCode)
     })
 
+    describe('removeSRIAttributes', () => {
+      it('strips integrity from static <script> and <link> when removeSRIAttributes is set', () => {
+        const html = `<script integrity="sha384-abc123" src="app.js"></script>\n<link rel="stylesheet" integrity="sha256-def456" href="app.css">`
+
+        expect(regexRewriter.strip(html, { removeSRIAttributes: true })).toEqual(
+          `<script cypress-stripped-integrity="sha384-abc123" src="app.js"></script>\n<link rel="stylesheet" cypress-stripped-integrity="sha256-def456" href="app.css">`,
+        )
+      })
+
+      it('strips integrity assigned via a JS string literal when removeSRIAttributes is set', () => {
+        const js = `el.integrity = 'sha384-abc123'`
+
+        expect(regexRewriter.strip(js, { removeSRIAttributes: true })).toEqual(`el['cypress-stripped-integrity'] = 'sha384-abc123'`)
+      })
+
+      it('strips integrity assigned via bracket access when removeSRIAttributes is set', () => {
+        const js = `el['integrity'] = 'sha384-abc123'`
+
+        expect(regexRewriter.strip(js, { removeSRIAttributes: true })).toEqual(`el['cypress-stripped-integrity'] = 'sha384-abc123'`)
+      })
+
+      it('leaves integrity untouched when neither flag is set', () => {
+        const html = `<script integrity="sha384-abc123" src="app.js"></script>`
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('does not enable third-party obstructive-code rewriting (integrity stripping is decoupled)', () => {
+        // `e.self === e.top` is only rewritten under modifyObstructiveThirdPartyCode, not removeSRIAttributes
+        const js = `if (e.self === e.top) run()`
+
+        expect(regexRewriter.strip(js, { removeSRIAttributes: true })).toEqual(regexRewriter.strip(js))
+      })
+    })
+
     it('replaces jira window getter', () => {
       const jira = `\
 for (; !function (n) {
@@ -497,6 +532,56 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
     parentOf = parentOf.parent;
 }\
 `)
+    })
+
+    describe('<base> target stripping', () => {
+      it('strips target="_top"', () => {
+        expect(regexRewriter.strip('<base href="/" target="_top">')).toEqual('<base href="/">')
+      })
+
+      it('strips target="_parent"', () => {
+        expect(regexRewriter.strip('<base target="_parent">')).toEqual('<base>')
+      })
+
+      it('strips target when attribute comes before other attrs', () => {
+        expect(regexRewriter.strip('<base target="_top" href="/">')).toEqual('<base href="/">')
+      })
+
+      it('strips target with single quotes', () => {
+        expect(regexRewriter.strip(`<base target='_top'>`)).toEqual('<base>')
+      })
+
+      it('strips unquoted target', () => {
+        expect(regexRewriter.strip('<base target=_top>')).toEqual('<base>')
+      })
+
+      it('strips target case-insensitively', () => {
+        expect(regexRewriter.strip('<base target="_TOP">')).toEqual('<base>')
+      })
+
+      it('preserves target="_blank"', () => {
+        const html = '<base target="_blank">'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('preserves target="_self"', () => {
+        const html = '<base target="_self">'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('preserves <base> with no target', () => {
+        const html = '<base href="/">'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('does not match target=_topfoo', () => {
+        const html = '<base target=_topfoo>'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
     })
 
     describe('libs', () => {
@@ -652,6 +737,49 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         })
 
         replacer.end()
+      })
+    })
+
+    // `replaceStream` re-applies each pattern to the already-matched substring,
+    // which can diverge from the one-shot `strip()` path when the regex depends
+    // on context at the match boundary (e.g., lookaheads past the last captured
+    // character). Exercise each quoting variant through the stream path directly.
+    describe('<base> target stripping', () => {
+      const runStream = (input: string) => {
+        return new Promise<string>((resolve, reject) => {
+          const replacer = regexRewriter.stripStream()
+
+          replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+            try {
+              resolve(str.toString())
+            } catch (err) {
+              reject(err)
+            }
+          }))
+
+          replacer.write(input)
+          replacer.end()
+        })
+      }
+
+      it('strips unquoted target', async () => {
+        expect(await runStream('<base target=_top>')).toEqual('<base>')
+      })
+
+      it('strips double-quoted target', async () => {
+        expect(await runStream('<base href="/" target="_top">')).toEqual('<base href="/">')
+      })
+
+      it('strips single-quoted target', async () => {
+        expect(await runStream(`<base target='_parent'>`)).toEqual('<base>')
+      })
+
+      it('preserves other attrs after unquoted target', async () => {
+        expect(await runStream('<base target=_top href="/">')).toEqual('<base href="/">')
+      })
+
+      it('preserves self-closing after unquoted target', async () => {
+        expect(await runStream('<base target=_top/>')).toEqual('<base/>')
       })
     })
   })

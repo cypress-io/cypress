@@ -103,12 +103,14 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
       version,
     }, { spaces: 2 })
 
-    await execa('yarn', ['lerna', 'run', 'build', '--concurrency', '4'], {
+    const buildConcurrency = String(Math.min(4, os.availableParallelism()))
+
+    await execa('yarn', ['lerna', 'run', 'build', '--concurrency', buildConcurrency], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
 
-    await execa('yarn', ['lerna', 'run', 'build-prod', '--concurrency', '4'], {
+    await execa('yarn', ['lerna', 'run', 'build-prod', '--concurrency', buildConcurrency], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })

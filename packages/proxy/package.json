@@ -31,13 +31,14 @@
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
-    "@cypress/request": "^3.0.10",
+    "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@cypress/sinon-chai": "2.9.1",
     "@packages/errors": "0.0.0-development",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
+    "@packages/network-interception": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

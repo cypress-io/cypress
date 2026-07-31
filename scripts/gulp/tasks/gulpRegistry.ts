@@ -2,6 +2,7 @@ import type { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 import treeKill from 'tree-kill'
 import gulp from 'gulp'
+import os from 'os'
 
 const childProcesses = new Set<ChildProcess>()
 const exitedPids = new Set<number>()
@@ -10,20 +11,26 @@ let hasExited = false
 
 export function addChildProcess (child: ChildProcess) {
   if (hasExited) {
-    treeKill(child.pid)
+    if (child.pid) {
+      treeKill(child.pid)
+    }
 
     return
   }
 
   childProcesses.add(child)
-  child.on('exit', () => {
+  child.on('exit', async (code) => {
     if (!hasExited) {
-      exitAndRemoveProcess(child)
+      await exitAndRemoveProcess(child)
     }
   })
 }
 
 export async function exitAndRemoveProcess (child: ChildProcess) {
+  if (!child.pid) {
+    return
+  }
+
   if (exitedPids.has(child.pid)) {
     return
   }
@@ -72,17 +79,30 @@ export async function exitAfterAll () {
 }
 
 async function exitHandler (exitCode: number) {
+  // do not execute if the signal handler has already been called
+  if (hasExited) {
+    return
+  }
+
   hasExited = true
-  console.log(`Exiting with code ${exitCode}`)
   await exitAllProcesses()
   process.exit(exitCode)
 }
 
-async function signalHandler (signal: NodeJS.Signals, code: number) {
+async function signalHandler (signal: NodeJS.Signals) {
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(false)
+  }
+
   hasExited = true
-  console.log(`Exiting due to ${signal}`)
-  await exitAllProcesses()
-  process.exit(128 + code)
+  try {
+    await exitAllProcesses()
+  } catch (error) {
+    console.error(`An error occurred while handling signal ${signal}: ${error}`)
+    process.exit(1)
+  }
+
+  process.exit(128 + os.constants.signals[signal])
 }
 
 async function uncaughtExceptionHandler (error: Error) {

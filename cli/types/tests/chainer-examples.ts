@@ -150,6 +150,22 @@ expect('foo').to.not.include.value('foo')
 expect('foo').to.not.include.text('foo')
 expect('foo').to.not.include.html('foo')
 
+// Ensure we've extended chai.Assertion with chai-jquery's focus assertions
+expect(Cypress.$('#result')).to.have.focus
+expect(Cypress.$('#result')).to.be.focused
+expect(Cypress.$('#result')).to.not.have.focus
+expect(Cypress.$('#result')).to.not.be.focused
+
+// Ensure the chai assertion aliases are typed
+expect(1).to.exists
+expect(2).to.be.greaterThanOrEqual(1)
+expect(1).to.be.lessThanOrEqual(2)
+expect('foo').to.contain.oneOf(['foo', 'bar'])
+cy.wrap(6).should('be.greaterThanOrEqual', 5)
+cy.wrap(4).should('be.lessThanOrEqual', 5)
+cy.wrap(6).should('not.be.greaterThanOrEqual', 7)
+cy.wrap(4).should('not.be.lessThanOrEqual', 3)
+
 cy.wrap([1, 2, 3]).should('include.members', [1, 2])
 ;
 () => {

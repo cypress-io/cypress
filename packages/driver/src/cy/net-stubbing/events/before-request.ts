@@ -15,12 +15,31 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import type { NetEvent } from '@packages/net-stubbing/lib/types'
+import type { NetEvent } from '@packages/network-interception'
 import Debug from 'debug'
+import { DriverCommandLogAdapter } from '../adapters'
 
 const debug = Debug('cypress:driver:net-stubbing:events:before-request')
 
 type Result = HandlerResult<CyHttpMessages.IncomingRequest>
+
+// The command-log adapter only depends on the `Cypress` instance, so cache one
+// per instance instead of allocating a new adapter + closure on every request.
+const commandLogAdapters = new WeakMap<Cypress.Cypress, DriverCommandLogAdapter>()
+
+const getCommandLogAdapter = (Cypress: Cypress.Cypress): DriverCommandLogAdapter => {
+  let adapter = commandLogAdapters.get(Cypress)
+
+  if (!adapter) {
+    adapter = new DriverCommandLogAdapter({
+      logInterception: (interception, route) => Cypress.ProxyLogging.logInterception(interception as Interception, route),
+    })
+
+    commandLogAdapters.set(Cypress, adapter)
+  }
+
+  return adapter
+}
 
 const validEvents = ['before:response', 'response', 'after:response']
 
@@ -306,7 +325,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.setLogFlag = Cypress.ProxyLogging.logInterception(request, route)?.setFlag || (() => {})
+  const commandLog = getCommandLogAdapter(Cypress)
+
+  request.setLogFlag = commandLog.logInterception({ interception: request, route })?.setFlag || (() => {})
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

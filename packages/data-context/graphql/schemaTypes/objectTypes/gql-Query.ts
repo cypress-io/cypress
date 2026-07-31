@@ -84,12 +84,6 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.authState,
     })
 
-    t.field('cloudStudioRequested', {
-      type: 'Boolean',
-      description: 'Whether cloud studio is requested by the environment',
-      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioRequested ?? false,
-    })
-
     t.nonNull.field('localSettings', {
       type: LocalSettings,
       description: 'local settings on a device-by-device basis',
@@ -134,6 +128,29 @@ export const Query = objectType({
     t.string('machineId', {
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
+    })
+
+    t.nullable.string('autoProvisionedProjectId', {
+      description: 'Project ID auto-provisioned during signup that could not be written to the config file automatically',
+      resolve: (_, __, ctx) => ctx.coreData.autoProvisionedProjectId,
+    })
+
+    t.list.nonNull.field('cloudAppMessages', {
+      type: 'CloudAppMessage',
+      description: 'Cloud-driven in-app banner content. Local override of the merged cloud field so we can inject the current project slug for per-project feature-flag scoping.',
+      resolve: async (root, args, ctx, info) => {
+        const projectId = await ctx.project.projectId()
+
+        // Omit projectSlug entirely in global mode — passing null is not the
+        // same as omitting in GraphQL, and the remote field's doc contract
+        // says "When omitted, only globally-targeted messages are returned."
+        return ctx.cloud.delegateCloudField({
+          field: 'cloudAppMessages',
+          args: projectId ? { projectSlug: projectId } : {},
+          ctx,
+          info,
+        })
+      },
     })
   },
   sourceType: {

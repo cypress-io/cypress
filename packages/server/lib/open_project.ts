@@ -1,31 +1,34 @@
 import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
-import Bluebird from 'bluebird'
 import assert from 'assert'
-
+import { EventEmitter } from 'events'
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
-import { cookieJar } from './util/cookies'
+import { cookieJar } from './automation/cookie/jar'
 import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
+import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 
 const debug = Debug('cypress:server:open_project')
 
-export class OpenProject {
+export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
 
   constructor () {
+    super()
+
     return autoBindDebug(this)
   }
 
@@ -79,8 +82,6 @@ export class OpenProject {
 
     const cfg = this.projectBase.getConfig()
 
-    if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
-
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
       url,
@@ -88,7 +89,6 @@ export class OpenProject {
       browsers: cfg.browsers as FoundBrowser[],
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
-      proxyServer: cfg.proxyServer,
       socketIoRoute: cfg.socketIoRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: !!cfg.isTextTerminal,
@@ -96,6 +96,26 @@ export class OpenProject {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
+      // proxy launch opts must win over prevOptions: args may carry a normalized
+      // NO_PROXY that is wrong for the MITM path, and <-loopback> must never leak
+      // onto the disable-proxy path (#34351).
+      ...(isProxyEnabled() ? {
+        proxyServer: ensureProxyServer(cfg),
+        // the AUT is served over loopback by our own proxy, so subtract Chromium's
+        // implicit rules to keep that traffic proxied
+        // https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassList: '<-loopback>',
+      } : {
+        proxyServer: undefined,
+        proxyBypassList: undefined,
+        // Chromium-family only: Firefox/WebKit parse proxyServer differently and
+        // do not honor Chromium bypass / scheme-map syntax yet (#34351).
+        ...(browser.family === 'chromium' ? translateEgressPolicyToLaunchOpts(cfg.hosts) : {}),
+        hosts: cfg.hosts,
+        onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
+          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
+        },
+      }),
     }
 
     // if we don't have the isHeaded property
@@ -348,6 +368,8 @@ export class OpenProject {
         throw (err)
       }
     }
+
+    this.emit('ready')
 
     return this
   }

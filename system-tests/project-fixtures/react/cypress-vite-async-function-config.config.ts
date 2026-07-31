@@ -1,9 +1,12 @@
 import { defineConfig } from 'cypress'
 import reactPlugin from '@vitejs/plugin-react'
+import { fileURLToPath } from 'url'
 import * as path from 'path'
 import * as fs from 'fs'
 
-module.exports = defineConfig({
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export default defineConfig({
   component: {
     devServer: {
       framework: 'react',

@@ -20,14 +20,10 @@ The changelog should include anything that was merged into the `develop` branch 
     ```md
     ## <RELEASE_VERSION>
 
-    _Released <RELEASE_DATE> (PENDING)_
-
     **<CHANGE_SECTION:**
 
     - <CHANGELOG_ENTRY>
     ```
-
-    The `RELEASE_DATE` follows the `MM/DD/YYYY` format (two-digit month, two-digit day, four-digit year), including leading zeros for any single-digit month or day.
 
 2. Each changelog entry is written and merged with the associated user-facing code change in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 3. The changelog entry should be added to the associated change section. The supported change sections for the changelog (that should be listed in the order below) are:
@@ -46,6 +42,7 @@ The changelog should include anything that was merged into the `develop` branch 
 5. Do not refer to 'we' when writing a changelog item. We want to phrase the changelog in a way that emphasizes how the user is impacted. Additionally 'we' may not have addressed the issue, an outside contributor may have.
     - _Example:_ Instead of 'We fixed a situation where a cross-origin error could incorrectly throw in Chrome' write 'Cross-origin errors will no longer incorrectly throw in Chrome in certain situations'.
 6. Be as direct as possible in explaining the changes, but with enough clarity that the user understands the full impact. Users should *never* have to click on the link to the issue/PR to understand the change that happened and *absolutely never* have to look at the code to understand the change. If you cannot yourself understand the change from the Changelog entry, add more context.
+    - Do not include implementation details (e.g. internal function/file names, refactors, the specific code path that changed, or how the fix works under the hood). Describe only the user-facing impact — what behavior the user will now observe. If a change has no user-facing impact, it does not belong in the changelog.
 7. Order the changelog items in order of impact. The most impactful features/bugfixes should be ordered first.
 8. If a changelog item is a regression, the description should start with `Fixed a regression in [9.1.0](#9-1-0)` with a link to the release that introduced it.
 9. For each changelog item, there should be a link to the issue(s) it addresses (or the PR that it was addressed in if there is no corresponding issue(s)). See phrasing below
@@ -53,6 +50,10 @@ The changelog should include anything that was merged into the `develop` branch 
     - For other issues: "Addresses [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234))."
     - When no issues, but PR: "Addressed in [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234))."
     - When multiple issues: "Fixes [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234)), [#13]([https://github.com/cypress-io/cypress/issues/13](https://github.com/cypress-io/cypress/issues/1234)) and [#14]([https://github.com/cypress-io/cypress/issues/14](https://github.com/cypress-io/cypress/issues/1234))."
+10. When a changelog item references a Cypress command, plugin event, or configuration option, link the first mention to its documentation for consistency with existing entries. Either link form is acceptable: the `https://on.cypress.io/<slug>` short link or an absolute `https://docs.cypress.io/<path>` URL.
+    - _Example (`on.cypress.io`):_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`before:spec`](https://on.cypress.io/before-spec-api) ``.
+    - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
+11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
 
 ## Formatting
 
@@ -75,7 +76,6 @@ No backticks for:
 ## Release
 
 At the time of the release, the releaser will:
-- remove the `(PENDING)` text next to the planned release date and adjust the date if needed
 - ensure the Changelog is coherent
 - ensure the change sections are in the correct order
 - ensure that the entries are ordered by impact

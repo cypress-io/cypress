@@ -78,6 +78,10 @@ describe('webpack-batteries-included-preprocessor features', () => {
       await runAndEval('ts_spec.ts', { ...options })
     })
 
+    it('handles tsconfig paths without baseUrl (TypeScript 6+ style)', async () => {
+      await runAndEval('paths-no-baseurl/spec.ts', { ...options })
+    })
+
     it('handles tsx', async () => {
       await runAndEval('tsx_spec.tsx', { ...options })
     })
@@ -123,6 +127,27 @@ describe('webpack-batteries-included-preprocessor features', () => {
         expect(err.message).toContain('You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have \'typescript\' installed to enable TypeScript support')
         expect(err.message).toContain('tsx_spec.tsx')
       }
+    })
+  })
+
+  describe('with typescript 7', () => {
+    const options = { typescript: require.resolve('typescript-v7') }
+
+    it('handles typescript (and tsconfig paths) via babel', async () => {
+      await runAndEval('ts_spec.ts', { ...options })
+    })
+
+    it('handles tsx via babel', async () => {
+      await runAndEval('tsx_spec.tsx', { ...options })
+    })
+
+    it('handles importing .ts and .tsx via babel', async () => {
+      await runAndEval('typescript_imports_spec.js', { ...options })
+    })
+
+    // Babel must still emit decorator metadata for TypeScript 7, as ts-loader did.
+    it('emits decorator metadata (emitDecoratorMetadata parity) via babel', async () => {
+      await runAndEval('typescript_decorators_spec.ts', { ...options })
     })
   })
 })

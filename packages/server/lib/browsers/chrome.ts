@@ -8,29 +8,26 @@ import * as extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
 
-import appData from '../util/app_data'
+import * as appData from '../util/app_data'
 import { fs } from '../util/fs'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp-protocol/cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
 import * as errors from '../errors'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
-const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
-const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
-const CHROME_VERSION_WITH_FPS_INCREASE = 89
-const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -208,6 +205,41 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   return args
 }
 
+const HOST_RESOLVER_RULES = '--host-resolver-rules='
+
+/**
+ * Merge multiple `--host-resolver-rules` arguments into one.
+ *
+ * Cypress pushes its own rules in `_getArgs` (translated from `hosts` when the
+ * MITM proxy is disabled) and users may add their own via
+ * `before:browser:launch`. Chromium only honors the last occurrence of the
+ * switch, so the values must be combined. Within the merged value the first
+ * matching rule wins, so later (user-supplied) arguments are placed first to
+ * let them override the rules derived from `hosts`.
+ */
+const _normalizeHostResolverRules = function (args: string[]): string[] {
+  const ruleArgs = args.filter((arg) => arg.startsWith(HOST_RESOLVER_RULES))
+
+  if (ruleArgs.length <= 1) {
+    return args
+  }
+
+  // Empty values are dropped rather than merged — Chromium only honors the
+  // last occurrence of the switch, so a trailing empty value would otherwise
+  // clear the rules derived from `hosts`.
+  const values = ruleArgs
+  .map((arg) => arg.slice(HOST_RESOLVER_RULES.length))
+  .filter(Boolean)
+
+  const rest = args.filter((arg) => !arg.startsWith(HOST_RESOLVER_RULES))
+
+  if (!values.length) {
+    return rest
+  }
+
+  return rest.concat(`${HOST_RESOLVER_RULES}${values.reverse().join(',')}`)
+}
+
 // we now store the extension in each browser profile
 const _removeRootExtension = () => {
   return fs
@@ -240,15 +272,15 @@ const _disableRestorePagesPrompt = function (userDir) {
 
     return
   })
-  .catch(() => { })
+  .catch((err) => {
+    debug('error reading or writing the preferences file %s: %o', prefsPath, err)
+  })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
-  const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
-
+async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi) {
   const { writeVideoFrame } = await videoOptions.useFfmpegVideoController()
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
 }
 
 // a utility function that navigates to the given URL
@@ -323,6 +355,8 @@ export = {
 
   _normalizeArgExtensions,
 
+  _normalizeHostResolverRules,
+
   _removeRootExtension,
 
   _recordVideo,
@@ -382,33 +416,49 @@ export = {
       args.push(`--proxy-server=${ps}`)
     }
 
+    // With the MITM proxy disabled the browser performs origin fetches itself,
+    // so the Node-side DNS remap (evil-dns) can't honor `hosts` — translate it
+    // into Chromium resolver rules at launch instead.
+    if (!_.isEmpty(options.hosts)) {
+      const rules = _.map(options.hosts, (ip, host) => {
+        // Chromium parses the replacement's last `:` as an optional port, so
+        // IPv6 literals must be bracketed.
+        const replacement = ip.includes(':') && !ip.startsWith('[') ? `[${ip}]` : ip
+
+        return `MAP ${host} ${replacement}`
+      }).join(',')
+
+      args.push(`${HOST_RESOLVER_RULES}${rules}`)
+    }
+
+    // Blink's cache-aware font loading hard-fails uncached @font-face loads
+    // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
+    // which the proxy-disabled transport always enables (crbug.com/1196004).
+    // Web fonts do not load at all with the proxy disabled unless this flag
+    // stays — do not remove it.
+    if (isProxyDisabled()) {
+      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
+
+      if (disableFeaturesIndex === -1) {
+        args.push('--disable-features=WebFontsCacheAwareTimeoutAdaption')
+      } else {
+        args[disableFeaturesIndex] += ',WebFontsCacheAwareTimeoutAdaption'
+      }
+    }
+
     if (options.chromeWebSecurity === false) {
       args.push('--disable-web-security')
       args.push('--allow-running-insecure-content')
     }
 
-    // prevent AUT shaking in 66 & 67, but flag breaks chrome in 68+
-    // https://github.com/cypress-io/cypress/issues/2037
-    // https://github.com/cypress-io/cypress/issues/2215
-    // https://github.com/cypress-io/cypress/issues/2223
-    const { majorVersion, isHeadless } = browser
+    const { isHeadless } = browser
 
-    if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
-      args.push('--disable-blink-features=RootLayerScrolling')
-    }
-
-    // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
-    // https://github.com/cypress-io/cypress/issues/1872
-    if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK) {
-      args.push('--proxy-bypass-list=<-loopback>')
+    if (options.proxyBypassList) {
+      args.push(`--proxy-bypass-list=${options.proxyBypassList}`)
     }
 
     if (isHeadless) {
-      if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
-        args.push('--headless=new')
-      } else {
-        args.push('--headless')
-      }
+      args.push('--headless=new')
 
       // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
@@ -435,6 +485,10 @@ export = {
     // Do nothing on failure here since we're shutting down anyway
     browserCriClient?.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = undefined
+  },
+
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
   },
 
   async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
@@ -526,7 +580,18 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+
+    // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
+    // Fetch must be wired here when the MITM proxy is disabled. The page is
+    // already loaded — enable Page, listen for future frame changes, and seed
+    // the frame tree so isAUTFrame works before any new frameAttached events.
+    if (isProxyDisabled()) {
+      await pageCriClient.send('Page.enable')
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await cdpAutomation.seedFrameTree(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
+    }
   },
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts, browser: Browser) {
@@ -537,8 +602,20 @@ export = {
     pageCriClient.on('Target.targetCrashed', async (event) => {
       debug('target crashed!', event)
       if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
+        debug('Target.targetCrashed received for target %s while the currently attached target is %s; event ignored, no sibling CRI clients marked as crashed', event.targetId, browserCriClient?.currentlyAttachedTarget?.targetId)
+
         return
       }
+
+      // Synchronously mark sibling CRI clients (which share the same targetId)
+      // as crashed. Each sibling has its own websocket and its own listener for
+      // Target.targetCrashed, but those listeners fire when Chrome happens to
+      // deliver the event on that connection — which can be after spec
+      // cleanup runs. Without this propagation, the protocol's `afterSpec`
+      // hook can call `cdpClient.send` on a crashed page and hang forever.
+      browserCriClient.currentlyAttachedProtocolTarget?.markCrashed()
+      browserCriClient.currentlyAttachedCyPromptTarget?.markCrashed()
+      browserCriClient.currentlyAttachedStudioTarget?.markCrashed()
 
       const err = errors.get('RENDERER_CRASHED', browser.displayName)
 
@@ -572,15 +649,21 @@ export = {
 
     await Promise.all([
       pageCriClient.send('ServiceWorker.enable'),
-      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
+      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
       utils.initializeCDP(pageCriClient, automation),
     ])
 
-    await this._navigateUsingCRI(pageCriClient, url)
+    if (isProxyDisabled()) {
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 
-    await cdpAutomation._handlePausedRequests(pageCriClient)
-    cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      await this._navigateUsingCRI(pageCriClient, url)
+    } else {
+      await this._navigateUsingCRI(pageCriClient, url)
+      await cdpAutomation._handlePausedRequests(pageCriClient)
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+    }
 
     return cdpAutomation
   },
@@ -595,7 +678,7 @@ export = {
       _getChromePreferences(userDir),
     ])
 
-    const defaultArgs = this._getArgs(browser, options, port)
+    const defaultArgs = this._getArgs(browser, options, String(port))
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
       preferences: rawPreferences,
@@ -632,8 +715,9 @@ export = {
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
     // normalize the --load-extensions argument by
-    // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+    // massaging what the user passed into our own, and merge any
+    // user-supplied --host-resolver-rules with the ones derived from `hosts`
+    const args = _normalizeHostResolverRules(_normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser))
 
     // this overrides any previous user-data-dir args
     // by being the last one

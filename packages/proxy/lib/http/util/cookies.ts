@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
-import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { RequestCredentialLevel } from '../../types'
-import type { ResourceType } from '@packages/net-stubbing'
+import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
+import type { RequestCredentialLevel, ResourceType } from '../../resourceTypeAndCredentialManager'
+
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network-tools'
 
 type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
@@ -30,7 +30,12 @@ interface RequestDetails {
  * @returns {boolean}
  */
 export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: ResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
-  if (!AUTUrl) return false
+  // no AUT URL means this is the first visit. cookies set by that AUT-frame document
+  // response must still land in the jar so they can be re-attached after a later
+  // cross-origin redirect back to the primary origin
+  if (!AUTUrl) {
+    return !!isAutFrame
+  }
 
   const siteContext = calculateSiteContext(requestUrl, AUTUrl)
 

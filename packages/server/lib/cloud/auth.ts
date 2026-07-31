@@ -10,7 +10,7 @@ const { shell } = require('electron')
 
 const machineId = require('./machine_id')
 import { id as randomId } from '../util/random'
-const user = require('./user')
+const user = require('./user').default
 
 let app
 let authCallback
@@ -19,14 +19,26 @@ let openExternalAttempted = false
 let authRedirectReached = false
 let server
 
+const AUTH_FLOWS = {
+  login: {
+    campaign: 'Log In',
+    getBaseUrl: () => user.getBaseLoginUrl(),
+  },
+  signup: {
+    campaign: 'Sign Up',
+    getBaseUrl: () => user.getBaseSignupUrl(),
+  },
+}
+
 const buildLoginRedirectUrl = (server) => {
   const { port } = server.address()
 
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
+const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, flow = 'login', remoteOrigin) => {
   const { port } = server.address()
+  const authFlow = AUTH_FLOWS[flow] || AUTH_FLOWS.login
 
   if (!authState) {
     authState = randomId(32)
@@ -44,11 +56,15 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
       platform: os.platform(),
     }
 
+    if (remoteOrigin) {
+      authUrl.query.remoteOrigin = remoteOrigin
+    }
+
     if (utmMedium) {
       authUrl.query = {
         utm_source: utmSource,
         utm_medium: utmMedium,
-        utm_campaign: 'Log In',
+        utm_campaign: authFlow.campaign,
         utm_content: utmContent,
         ...authUrl.query,
       }
@@ -56,6 +72,14 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
 
     return authUrl.format()
   })
+}
+
+const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'login', remoteOrigin)
+}
+
+const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'signup', remoteOrigin)
 }
 
 const getOriginFromUrl = (originalUrl) => {
@@ -67,7 +91,7 @@ const getOriginFromUrl = (originalUrl) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent) => {
+const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent, flow = 'login', remoteOrigin) => {
   if (!server) {
     // launch an express server to listen for the auth callback from Cypress Cloud
     const origin = getOriginFromUrl(baseLoginUrl)
@@ -78,11 +102,11 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      buildFullLoginUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent)
-      .then((fullLoginUrl) => {
-        debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
+      buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, flow, remoteOrigin)
+      .then((fullAuthUrl) => {
+        debug('Received GET to /redirect-to-auth, redirecting: %o', { fullAuthUrl })
 
-        res.redirect(303, fullLoginUrl)
+        res.redirect(303, fullAuthUrl)
 
         sendMessage('AUTH_BROWSER_LAUNCHED')
       })
@@ -108,7 +132,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
         return redirectToStatus('error')
       }
 
-      const { state, name, email, access_token } = req.query
+      const { state, name, email, access_token, project_slug } = req.query
 
       if (state === authState && access_token) {
         const userObj = {
@@ -117,9 +141,14 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
           authToken: access_token,
         }
 
+        const callbackObj = {
+          ...userObj,
+          ...(project_slug ? { projectSlug: project_slug } : {}),
+        }
+
         return user.set(userObj)
         .then(() => {
-          authCallback(undefined, userObj)
+          authCallback(undefined, callbackObj)
           redirectToStatus('success')
         })
         .catch((err) => {
@@ -179,7 +208,9 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
  */
 const _internal = {
   buildLoginRedirectUrl,
+  buildFullAuthUrl,
   buildFullLoginUrl,
+  buildFullSignupUrl,
   getOriginFromUrl,
   launchServer,
   stopServer,
@@ -189,7 +220,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmSource, utmMedium, utmContent) => {
+const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -198,18 +229,19 @@ const start = (onMessage, utmSource, utmMedium, utmContent) => {
     })
   }
   authRedirectReached = false
+  const authFlow = AUTH_FLOWS[flow] || AUTH_FLOWS.login
 
-  return user.getBaseLoginUrl()
-  .then((baseLoginUrl) => {
-    return _internal.launchServer(baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent)
+  return authFlow.getBaseUrl()
+  .then((baseAuthUrl) => {
+    return _internal.launchServer(baseAuthUrl, sendMessage, utmSource, utmMedium, utmContent, flow, remoteOrigin)
   })
   .then(() => {
     return _internal.buildLoginRedirectUrl(server)
   })
-  .then((loginRedirectUrl) => {
-    debug('Trying to open native auth to URL %s', loginRedirectUrl)
+  .then((authRedirectUrl) => {
+    debug('Trying to open native auth to URL %s', authRedirectUrl)
 
-    return _internal.launchNativeAuth(loginRedirectUrl, sendMessage)
+    return _internal.launchNativeAuth(authRedirectUrl, sendMessage)
     .then(() => {
       debug('successfully opened native auth url')
     })
@@ -227,8 +259,20 @@ const start = (onMessage, utmSource, utmMedium, utmContent) => {
   })
 }
 
+/**
+ * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
+ */
+const start = (onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return startAuth('login', onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
+}
+
+const startSignup = (onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return startAuth('signup', onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
+}
+
 export = {
   start,
+  startSignup,
   stopServer,
   _internal,
 }

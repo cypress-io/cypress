@@ -9,7 +9,7 @@ import assert from 'assert'
 
 import recordMode from './record'
 import * as errors from '../errors'
-import Reporter from '../reporter'
+import { Reporter } from '../reporter'
 import browserUtils from '../browsers'
 import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
@@ -19,7 +19,7 @@ import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
 import * as system from '../util/system'
-import chromePolicyCheck from '../util/chrome_policy_check'
+import { run as runChromePolicyCheck } from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
@@ -31,6 +31,7 @@ import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
+import { isRunningAsElectronProcess } from '../util/electron-app'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -46,6 +47,14 @@ let isRunCancelled = false
 
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+// WebKit records video through Playwright, which ties each recording to a single page and only
+// finalizes the file when that page closes (https://github.com/cypress-io/cypress/issues/23815).
+// That conflicts with single-tab mode reusing one page across specs, so when video is enabled
+// WebKit recycles the tab per spec instead. See the call sites for each per-spec consequence.
+function isWebKitRecordingVideo (browser: Browser, videoRecording?: VideoRecording) {
+  return browser.family === 'webkit' && !!videoRecording
+}
 
 let earlyExitTerminator = new EarlyExitTerminator()
 
@@ -317,6 +326,12 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
         videoRecording.controller = videoController
       },
       onProjectCaptureVideoFrames (fn) {
+        // browsers that capture video through the project event emitter (e.g. Firefox via the
+        // driver's getUserMedia recorder) re-register a handler for each spec, since the browser
+        // — and thus the project — is reused across specs. Remove any previous handler first so
+        // frames are only ever written to the current spec's video controller and listeners don't
+        // accumulate across specs.
+        options.project.removeAllListeners('capture:video:frames')
         options.project.on('capture:video:frames', fn)
       },
     },
@@ -492,9 +507,15 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
+  // WebKit + video recycles the tab per spec via the standard new-tab path (connectToNewSpec, see
+  // isWebKitRecordingVideo), so skip the in-place single-tab navigation and fall through to it.
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo(browser, options.videoRecording)) {
     // reset browser state to match default behavior when opening/closing a new tab
+    const resetBrowserStateStartedAt = Date.now()
+
     await openProject.resetBrowserState()
+
+    debug('resetBrowserState completed in %dms', Date.now() - resetBrowserStateStartedAt)
 
     // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
     if (telemetry.isEnabled()) {
@@ -560,10 +581,17 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     .then(() => {
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
-    .catch(Bluebird.TimeoutError, async (err) => {
-      debug('Catch on waitForBrowserToConnect')
+    .catch((err) => {
+      const isTimeout = err instanceof Bluebird.TimeoutError
+      const isFirefoxConnect = (err as CypressError)?.type === 'FIREFOX_COULD_NOT_CONNECT'
 
-      return retryOnError(err as CypressError)
+      if (isTimeout || isFirefoxConnect) {
+        debug('Catch on waitForBrowserToConnect: %s', isTimeout ? 'timeout' : 'firefox could not connect')
+
+        return retryOnError(err as CypressError)
+      }
+
+      throw err
     })
   }
 
@@ -596,10 +624,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
+async function waitForTestsToFinishRunning (options: { project: Project, browser: Browser, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
+  const { project, browser, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -685,6 +713,17 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     // possibly because the user deleted it in the after:spec event
     debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
+    const compressedVideoName = videoRecording?.api.compressedVideoName
+
+    if (compressedVideoName) {
+      try {
+        debug('removing compressed video file: %s', compressedVideoName)
+        await fs.remove(compressedVideoName)
+      } catch (err) {
+        debug('Error removing compressed video file: %o', err)
+      }
+    }
+
     results.video = null
   }
 
@@ -695,15 +734,36 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-  if (usingExperimentalSingleTabMode && !isLastSpec) {
+  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo: isWebKitRecordingVideo(browser, videoRecording) })
+
+  // WebKit + video already closed the page (and the runner socket) in endVideoCapture, so destroyAut
+  // would wait forever for an 'aut:destroy:complete' reply that never arrives. The tab is recreated
+  // per spec anyway (see isWebKitRecordingVideo), so skip it.
+  if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo(browser, videoRecording)) {
+    debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
+
+    // Even though single-tab mode intentionally keeps the same browser tab open
+    // between specs, we still need to reset the server's network/proxy state so it
+    // does not leak across specs. The default per-tab flow does this (below) via
+    // project.server.reset() after the tab is closed, which clears the pre-request
+    // correlation queue, response buffers, service worker manager, remote states,
+    // and stored credentials. Skipping it in single-tab mode allowed that state to
+    // accumulate over long runs, producing rare, order-dependent failures.
+    // See: https://github.com/cypress-io/cypress/issues/24146
+    debug('resetting server state between specs in single-tab run mode')
+    project.server.reset()
   }
 
   // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
+    const resetTabsStartedAt = Date.now()
+
     await openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
+
+    debug('resetBrowserTabsForNextSpec completed in %dms', Date.now() - resetTabsStartedAt)
 
     debug('resetting server state')
 
@@ -962,7 +1022,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
+    // WebKit + video can't reuse a controller across specs (its page-scoped video is finalized on
+    // close), so create a fresh recording per spec (see isWebKitRecordingVideo).
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && !isWebKitRecordingVideo(browser, project.videoRecording)) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
@@ -982,6 +1044,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       spec,
       config,
       project,
+      browser,
       estimated,
       screenshots,
       videoRecording,
@@ -1022,6 +1085,7 @@ export interface ReadyOptions {
   browser: string
   browsers?: FoundBrowser[]
   ciBuildId: string
+  cwd?: string
   exit: boolean
   group: string
   headed: boolean
@@ -1029,7 +1093,7 @@ export interface ReadyOptions {
   onError?: (err: Error) => void
   outputPath: string
   parallel: boolean
-  projectRoot: string
+  projectRoot?: string
   quiet: boolean
   record: boolean
   socketId: string
@@ -1053,7 +1117,14 @@ async function ready (options: ReadyOptions) {
     quiet: false,
   })
 
-  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
+  // projectRoot can be undefined when --project/--run-project is omitted, or when
+  // argv parsing leaves project as a boolean (for example `--project` with no
+  // path). Fall back to cwd here rather than in args.ts, which would
+  // incorrectly set currentProject in global open mode and bypass the Launchpad
+  // project picker.
+  options.projectRoot = options.projectRoot ?? String(options.cwd ?? process.cwd())
+  const projectRoot = options.projectRoot
+  const { record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
 
@@ -1126,8 +1197,20 @@ async function ready (options: ReadyOptions) {
       await writeOutput(options.outputPath, createPublicRunResults(results))
 
       return results
-    } else {
-      errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+    }
+
+    errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+  }
+
+  if (specPatternFromCli) {
+    const rawPatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    // relativeSpecPattern uses a forward-slash concat and may not strip Windows absolute paths;
+    // fall back to path.relative for any pattern that remains absolute.
+    const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
+    const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
+
+    if (unmatchedPatterns.length > 0) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, unmatchedPatterns)
     }
   }
 
@@ -1136,7 +1219,7 @@ async function ready (options: ReadyOptions) {
   }
 
   if (browser.family === 'chromium') {
-    chromePolicyCheck.run(onWarning)
+    runChromePolicyCheck(onWarning)
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
@@ -1214,7 +1297,7 @@ async function ready (options: ReadyOptions) {
 export async function run (options, loading: Promise<void>) {
   debug('run start')
   // Check if running as electron process
-  if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+  if (isRunningAsElectronProcess({ debug })) {
     // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
     const app = require('electron').app
 

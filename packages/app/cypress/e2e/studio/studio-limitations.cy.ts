@@ -1,8 +1,8 @@
 describe('Cypress Studio - Limitations', () => {
   it('does not show the studio button in component testing mode', () => {
     // Load project in component testing mode
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio', ['--component'])
+    cy.scaffoldProject('studio')
+    cy.openProject('studio', ['--component'])
     cy.startAppServer('component')
     cy.visitApp()
     cy.specsPageIsVisible()
@@ -13,7 +13,7 @@ describe('Cypress Studio - Limitations', () => {
     cy.findByTestId('studio-button').should('not.exist')
 
     // Verify no launch studio buttons are present in test results
-    cy.get('.runnable-wrapper').should('not.contain', '[data-cy="launch-studio"]')
+    cy.reporter().find('.runnable-wrapper').should('not.contain', '[data-cy="launch-studio"]')
   })
 
   it('hides studio button when running all specs', () => {
@@ -37,7 +37,7 @@ describe('Cypress Studio - Limitations', () => {
     cy.waitForSpecToFinish()
 
     // Verify that we're running all specs by checking the header
-    cy.get('[data-cy="runnable-header"]').should('contain', 'All Specs')
+    cy.reporter().find('[data-cy="runnable-header"]').should('contain', 'All Specs')
 
     // Verify that the studio button is NOT visible when running all specs
     cy.findByTestId('studio-button').should('not.exist')
@@ -47,9 +47,9 @@ describe('Cypress Studio - Limitations', () => {
   })
 
   it('shows studio button when running a single spec', () => {
-    // Use the existing experimental-studio project
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio')
+    // Use the existing studio project
+    cy.scaffoldProject('studio')
+    cy.openProject('studio')
     cy.startAppServer('e2e')
     cy.visitApp()
     cy.specsPageIsVisible()
@@ -60,8 +60,8 @@ describe('Cypress Studio - Limitations', () => {
     cy.waitForSpecToFinish()
 
     // Verify that we're running a single spec (not all specs)
-    cy.get('[data-cy="runnable-header"]').should('contain', 'spec.cy.js')
-    cy.get('[data-cy="runnable-header"]').should('not.contain', 'All Specs')
+    cy.reporter().find('[data-cy="runnable-header"]').should('contain', 'spec.cy.js')
+    cy.reporter().find('[data-cy="runnable-header"]').should('not.contain', 'All Specs')
 
     // Verify that the studio button IS visible when running a single spec
     cy.findByTestId('studio-button').should('be.visible')

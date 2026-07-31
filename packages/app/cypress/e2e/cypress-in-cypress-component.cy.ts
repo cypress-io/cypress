@@ -17,7 +17,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
       cy.findByTestId('select-browser').click()
@@ -30,7 +30,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('body').click()
 
       // Temporarily removed from CT since it doesn't work. Invert this assertion when completing https://github.com/cypress-io/cypress/issues/24549
-      cy.get('.hook-open-in-ide').should('not.exist')
+      cy.reporter().find('.hook-open-in-ide').should('not.exist')
 
       cy.get('#unified-runner').should('have.attr', 'style', 'width: 500px; height: 500px; transform: scale(1); position: absolute; margin-left: 225px;')
     })
@@ -40,7 +40,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Settings page and back to spec runner
       cy.contains('a', 'Settings').click()
@@ -48,7 +48,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       // go to Runs page and back to spec runner
       cy.contains('a', 'Runs').click()
@@ -56,7 +56,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test component')
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23159
@@ -87,7 +87,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       cy.visitApp(`/specs/runner?file=${goodFilePath}`)
 
-      cy.contains('renders the test component').should('be.visible')
+      cy.reporter().contains('renders the test component').should('be.visible')
 
       cy.withCtx((ctx, o) => {
         ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
@@ -107,7 +107,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.specsPageIsVisible()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test component')
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.browser, 'setActiveBrowserById')

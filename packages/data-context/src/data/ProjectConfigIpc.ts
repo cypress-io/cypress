@@ -3,23 +3,38 @@ import { CypressError, getError } from '@packages/errors'
 import type { DebugData, FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
+import fs from 'fs'
 import path from 'path'
 import inspector from 'inspector'
 import debugLib from 'debug'
 import { getTsconfig } from 'get-tsconfig'
-import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
+import { autoBindDebug, hasTypeScriptInstalled, shouldLoadConfigAsEsm, toPosix } from '../util'
 import _ from 'lodash'
 import os from 'os'
 import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
+import { TagStream } from '@packages/stderr-filtering'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 const debugVerbose = debugLib(`cypress-verbose:lifecycle:ProjectConfigIpc`)
 
-const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
-import { TagStream } from '@packages/stderr-filtering'
+// In dev the .ts source exists; in production only the compiled .js is present.
+const resolveRequireAsyncChildPath = (): string => {
+  const serverRoot = path.dirname(require.resolve('@packages/server/package.json'))
+  const tsPath = path.join(serverRoot, 'lib/plugins/child/require_async_child.ts')
+
+  if (fs.existsSync(tsPath)) {
+    return tsPath
+  }
+
+  return require.resolve('@packages/server/lib/plugins/child/require_async_child.js')
+}
+
+const CHILD_PROCESS_FILE_PATH = resolveRequireAsyncChildPath()
+
+debugVerbose(' using child process file path: %s', CHILD_PROCESS_FILE_PATH)
 
 // NOTE: need the file:// prefix to avoid https://nodejs.org/api/errors.html#err_unsupported_esm_url_scheme on windows
 const tsx = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx'))}` : toPosix(require.resolve('tsx'))
@@ -70,15 +85,17 @@ export class ProjectConfigIpc extends EventEmitter {
   ) {
     super()
     this._childProcess = this.forkConfigProcess()
-    this._childProcess.on('error', (err) => {
-      // this.emit('error', err)
+    this._childProcess.on('error', (err: any) => {
+      debug('child process error: %s', err)
     })
 
     this._childProcess.on('message', (msg: { event: string, args: any[] }) => {
+      debug('received %s message from child process %s with args %o', msg.event, this._childProcess.pid, msg.args)
       this.emit(msg.event, ...msg.args)
     })
 
     this._childProcess.once('disconnect', () => {
+      debug('received disconnect event from child process %s', this._childProcess.pid)
       this.emit('disconnect')
     })
 
@@ -104,8 +121,12 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'main:process:will:disconnect'): void
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
+      debug('not sending %s message to child process. Killed? %s, Connected? %s', event, this._childProcess.killed, this._childProcess.connected)
+
       return false
     }
+
+    debug('sending %s message to child process %s with args %o', event, this._childProcess.pid, args)
 
     return this._childProcess.send({ event, args })
   }
@@ -114,6 +135,8 @@ export class ProjectConfigIpc extends EventEmitter {
   on(evt: 'export:telemetry', listener: (data: string) => void): void
   on(evt: 'main:process:will:disconnect:ack', listener: () => void): void
   on(evt: 'warning', listener: (warningErr: CypressError) => void): this
+  on(evt: 'disconnect', listener: () => void): this
+  on(evt: 'exit', listener: (code: number, signal: string) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
@@ -166,6 +189,12 @@ export class ProjectConfigIpc extends EventEmitter {
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
+      })
+
+      this._childProcess.on('exit', (code, signal) => {
+        debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
+        this.emit('exit', code, signal)
+        this.cleanupIpc()
       })
 
       /**
@@ -277,7 +306,11 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   private forkConfigProcess (): ChildProcess {
-    const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
+    const shouldLoadAsEsm = shouldLoadConfigAsEsm(this.configFilePath)
+
+    debug('config file %s will load as %s', this.configFilePath, shouldLoadAsEsm ? 'esm' : 'cjs')
+
+    const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath, '--shouldLoadAsEsm', String(shouldLoadAsEsm)]
     // we do NOT want telemetry enabled within our cy-in-cy tests as it isn't configured to handled it
     const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY')
 
@@ -362,6 +395,10 @@ export class ProjectConfigIpc extends EventEmitter {
       childOptions.env.NODE_OPTIONS = tsxLoader
     }
 
+    // stripped from NODE_OPTIONS by require_async_child (https://github.com/cypress-io/cypress/issues/34076)
+    // =-form required: minimist parses a dash-leading value as a separate flag
+    configProcessArgs.push(`--tsxLoaderOptions=${tsxLoader}`)
+
     const telemetryCtx = encodeTelemetryContext({ context: telemetry.getActiveContextObject(), version: pkg.version })
 
     // Pass the active context from the main process to the child process as the --telemetryCtx flag.
@@ -399,14 +436,23 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   cleanupIpc () {
+    debug('cleaning up IPC')
     this.killChildProcess()
     this.removeAllListeners()
   }
 
-  private killChildProcess () {
-    this._childProcess.kill()
+  private killChildProcess (): void {
     this._childProcess.stdout?.removeAllListeners()
     this._childProcess.stderr?.removeAllListeners()
     this._childProcess.removeAllListeners()
+
+    if (this._childProcess.killed || !this._childProcess.connected) {
+      debug('child process %s already killed', this._childProcess.pid)
+
+      return
+    }
+
+    debug('killing child process %s', this._childProcess.pid)
+    this._childProcess.kill()
   }
 }

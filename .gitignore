@@ -404,3 +404,14 @@ system-tests/lib/validations
 # IDE files
 .cursor/*
 !.cursor/BUGBOT.md
+!.cursor/skills
+!.cursor/environment.json
+!.cursor/Dockerfile
+
+settings.local.json
+
+.claude/*
+
+# chunk active sidecar tracking
+.chunk/sidecar.json
+.chunk/sidecar.*.json

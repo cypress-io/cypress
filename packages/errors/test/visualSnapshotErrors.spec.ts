@@ -609,6 +609,11 @@ describe('visual error templates', () => {
         default: [2020],
       }
     },
+    FILE_SERVER_COULD_NOT_LISTEN: () => {
+      return {
+        default: [3, makeErr()],
+      }
+    },
     ERROR_READING_FILE: () => {
       return {
         default: ['/path/to/read/file.ts', makeErr()],
@@ -626,6 +631,12 @@ describe('visual error templates', () => {
         pathNoCommonPattern: ['/path/to/project/root', ['/foo/*_spec.js']],
         arrPattern: ['/path/to/project/root', ['**_spec.js', '**/*.cy.*']],
         noPattern: ['/path/to/project/root'],
+      }
+    },
+    SPEC_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/project/root', 'cypress/e2e/nonexistent.cy.ts'],
+        multiplePatterns: ['/path/to/project/root', ['cypress/e2e/nonexistent.cy.ts', 'cypress/e2e/also-not-found.cy.ts']],
       }
     },
     RENDERER_CRASHED: () => {
@@ -738,6 +749,11 @@ describe('visual error templates', () => {
       return {
         default: ['configFile', 'cypress.config.js', '`something` was not right'],
         noFileType: [null, null, '`something` was not right'],
+      }
+    },
+    CONFIG_BROWSERS_INVALID: () => {
+      return {
+        default: ['chrome'],
       }
     },
     RENAMED_CONFIG_OPTION: () => {
@@ -881,9 +897,15 @@ describe('visual error templates', () => {
         default: ['foo'],
       }
     },
+    INVALID_CYPRESS_ENV_OVERRIDE: () => {
+      return {
+        default: ['env', 'notAnObject'],
+      }
+    },
     CDP_COULD_NOT_CONNECT: () => {
       return {
         default: ['chrome', 2345, makeErr()],
+        electron: ['electron', 2345, makeErr()],
       }
     },
     FIREFOX_COULD_NOT_CONNECT: () => {
@@ -1068,6 +1090,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_PROMPT_COMMAND_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
@@ -1075,12 +1103,6 @@ describe('visual error templates', () => {
     },
 
     EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
-    EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
       return {
         default: [],
       }

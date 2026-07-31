@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
       "entry": [
@@ -86,6 +86,9 @@
         "src/**/*.{ts,tsx,js,jsx,vue}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-typed-document-node/core"
       ]
     },
     "packages/frontend-shared": {
@@ -115,7 +118,7 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
-        "lib/plugins/child/default_plugins_file.js",
+        "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
         "test/**/*.{ts,js}"
@@ -135,7 +138,9 @@
         "babel-loader",
         "playwright-core",
         "playwright-webkit",
-        "tsx"
+        "tsx",
+        "mocha",
+        "zod"
       ]
     },
     "packages/launchpad": {
@@ -151,6 +156,9 @@
         "src/**/*.{ts,tsx,js,jsx,vue}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-typed-document-node/core"
       ]
     },
     "packages/example": {
@@ -289,6 +297,7 @@
     },
     "packages/proxy": {
       "entry": [
+        "lib/index.ts",
         "lib/http/util/rewriter.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -299,10 +308,18 @@
       ]
     },
     "packages/data-context": {
+      "entry": [
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-codegen/documents",
+        "@graphql-codegen/<<"
       ]
     },
     "packages/launcher": {
@@ -406,6 +423,14 @@
       ]
     },
     "packages/network-tools": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/network-interception": {
       "entry": [
         "lib/index.ts"
       ],
@@ -526,6 +551,9 @@
       ]
     },
     "npm/puppeteer": {
+      "entry": [
+        "src/support/index.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ],
@@ -536,10 +564,14 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "jiti"
       ]
     },
     "npm/react": {
       "entry": [
+        "cypress/support/**/*.{js,jsx,ts,tsx}",
         "cypress/component/**/*.{jsx,tsx,cy.jsx,cy.tsx}"
       ],
       "project": [
@@ -610,7 +642,8 @@
         "src/v8-snapshot.ts",
         "src/setup/index.ts",
         "src/generator/blueprint.ts",
-        "src/blueprint/**/*.js"
+        "src/blueprint/**/*.js",
+        "src/doctor/process-script.worker.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
@@ -622,6 +655,9 @@
       ]
     },
     "tooling/electron-mksnapshot": {
+      "entry": [
+        "src/mksnapshot-bin.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ]
@@ -655,6 +691,7 @@
         "@babel/core",
         "@babel/preset-env",
         "babel-loader",
+        "mocha",
         "mochawesome-7.1.4",
         "semver",
         "systeminformation",
@@ -702,13 +739,13 @@
     "**/*.gen.js",
     "**/project-fixtures/**",
     "**/projects/**",
+    "packages/data-context/test/unit/codegen/files/**",
     "system-tests/lib/validations/**"
   ],
   "ignoreDependencies": [
     "@types/*",
     "eslint-*",
     "prettier",
-    "mocha",
     "chai",
     "sinon",
     "cypress",
@@ -731,8 +768,15 @@
     "zone.js"
   ],
   "ignoreBinaries": [
+    "arch",
+    "awk",
     "circleci",
     "cypress",
+    "ditto",
+    "iconutil",
+    "lipo",
+    "openssl",
+    "pgrep",
     "rm",
     "tar",
     "tslint",
@@ -741,7 +785,6 @@
   "rules": {
     "binaries": "error",
     "catalog": "error",
-    "classMembers": "error",
     "dependencies": "error",
     "duplicates": "error",
     "enumMembers": "error",
@@ -772,22 +815,34 @@
     "packages/server/lib/cloud/protocol.ts": [
       "exports"
     ],
-    "packages/server/lib/plugins/child/cross_origin.js": [
-      "exports"
-    ],
-    "packages/server/lib/plugins/child/dev-server.js": [
-      "exports"
-    ],
     "packages/server/lib/video_capture.ts": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/index.ts": [
+      "exports"
+    ],
+    "packages/server/lib/saved_state.ts": [
       "exports"
     ],
     "packages/data-context/graphql/index.ts": [
       "exports",
       "types"
     ],
-    "packages/net-stubbing/lib/external-types.ts": [
+    "packages/network-interception/lib/types/external-types.ts": [
       "exports",
       "types"
+    ],
+    "packages/network-interception/lib/ports/driven-ports.ts": [
+      "types"
+    ],
+    "packages/network-interception/lib/ports/driving-ports.ts": [
+      "types"
+    ],
+    "packages/network-interception/lib/exchange/network-exchange.ts": [
+      "types"
+    ],
+    "packages/network-interception/lib/core/route-matching.ts": [
+      "duplicates"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"
@@ -844,6 +899,9 @@
     "packages/driver/src/cypress/server.ts": [
       "exports"
     ],
+    "packages/driver/src/cy/commands/actions/check.ts": [
+      "exports"
+    ],
     "packages/driver/src/cy/commands/actions/click.ts": [
       "exports"
     ],
@@ -869,6 +927,9 @@
       "exports"
     ],
     "packages/driver/src/cy/commands/actions/trigger.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/type.ts": [
       "exports"
     ],
     "packages/driver/src/cy/commands/querying/focused.ts": [

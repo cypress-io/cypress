@@ -28,6 +28,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
   'EXPERIMENTAL_STUDIO_REMOVED',
+  'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
   'CYPRESS_ENV_DEPRECATION',
 ] as const
 
@@ -206,6 +207,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: {},
     validation: validate.isPlainObject,
     overrideLevel: 'any',
+    requireRestartOnChange: 'server',
   }, {
     name: 'expose',
     defaultValue: {},
@@ -256,12 +258,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
-  }, {
-    name: 'experimentalPromptCommand',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -350,6 +346,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 20,
     validation: validate.isNumber,
     overrideLevel: 'any',
+  }, {
+    name: 'removeSRIAttributes',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
   }, {
     name: 'reporter',
     defaultValue: 'spec',
@@ -558,7 +559,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isPlainObject,
   }, {
     name: 'isInteractive',
-    defaultValue: true,
+    // `isInteractive` is the inverse of `isTextTerminal`, which run mode sets
+    // to `true`. Deriving it from the mode options ensures plugins /
+    // setupNodeEvents receive the correct value rather than a static default.
+    // https://github.com/cypress-io/cypress/issues/20789
+    defaultValue: (options: Record<string, any> = {}) => !options.isTextTerminal,
     validation: validate.isBoolean,
   }, {
     name: 'isTextTerminal',
@@ -660,6 +665,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     isWarning: true,
   },
   {
+    name: 'experimentalPromptCommand',
+    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'allowCypressEnv',
     errorKey: 'CYPRESS_ENV_DEPRECATION',
     // Display this warning if the value is not present or is explicitly false
@@ -712,12 +722,6 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalPromptCommand',
-    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  },
-  {
     name: 'justInTimeCompile',
     errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
@@ -762,11 +766,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
-      isWarning: false,
-    },
-    {
-      name: 'experimentalPromptCommand',
-      errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
       isWarning: false,
     },
     {

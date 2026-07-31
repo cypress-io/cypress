@@ -2,7 +2,8 @@ import _, { DebouncedFunc } from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
-import { HIGHLIGHT_ATTR, type ISnapshots } from '../cy/snapshots'
+import { HIGHLIGHT_ATTR } from '../cy/snapshots'
+import type { ISnapshots } from '../cy/snapshots'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -21,16 +22,66 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
 
+// Log attrs on `test.routes` / `agents` / `commands` / `hooks` retain payloads
+// (stringified args, URLs, `consoleProps`, custom `Cypress.log` fields, etc.) after a
+// test falls out of `numTestsKeptInMemory`. Everything not in this allowlist is set to
+// `null` so GC can reclaim memory and clean up custom log properties.
+//
+// Keep short display identifiers (`name`, `displayName`, `alias`, …) so `getTestsState` /
+// serialized run state still renders command logs, routes, and agents after restore.
+const REDUCE_MEMORY_PRESERVED_KEYS = new Set([
+  '_hasBeenCleanedUp',
+  'alias',
+  'aliasType',
+  'autoEnd',
+  'callCount',
+  'chainerId',
+  'count',
+  'createdAtTimestamp',
+  'defaultCollapsedState',
+  'displayName',
+  'end',
+  'ended',
+  'event',
+  'functionName',
+  'group',
+  'groupEnd',
+  'groupLevel',
+  'groupStart',
+  'hidden',
+  'hookId',
+  'id',
+  'instrument',
+  'isCrossOriginLog',
+  'isStubbed',
+  'method',
+  'name',
+  'numElements',
+  'numResponses',
+  'referencesAlias',
+  'snapshot',
+  'state',
+  'status',
+  'testCurrentRetry',
+  'testId',
+  'timestamp',
+  'timeout',
+  'type',
+  'updatedAtTimestamp',
+  'visible',
+  'wallClockStartedAt',
+])
+
 let counter = 0
 
 export const LogUtils = {
-  // mutate attrs by nulling out
-  // object properties
   reduceMemory: (attrs) => {
-    return _.each(attrs, (value, key) => {
-      if (_.isObject(value)) {
-        attrs[key] = null
+    return _.each(attrs, (_value, key) => {
+      if (REDUCE_MEMORY_PRESERVED_KEYS.has(key)) {
+        return
       }
+
+      attrs[key] = null
     })
   },
 
@@ -180,17 +231,6 @@ const defaults = function (state: StateFunc, config, obj) {
 
   const runnable = state('runnable')
 
-  const getTestAttemptFromRunnable = (runnable) => {
-    if (!runnable) {
-      return
-    }
-
-    const t = $utils.getTestFromRunnable(runnable)
-
-    // @ts-ignore
-    return t._currentRetry || 0
-  }
-
   counter++
   _.defaults(obj, {
     isCrossOriginLog: Cypress.isCrossOriginSpecBridge,
@@ -203,7 +243,7 @@ const defaults = function (state: StateFunc, config, obj) {
     url: state('url'),
     hookId: state('hookId'),
     testId: runnable ? runnable.id : undefined,
-    testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
+    testCurrentRetry: $utils.getTestAttemptFromRunnable(state('runnable')),
     viewportWidth: state('viewportWidth'),
     viewportHeight: state('viewportHeight'),
     referencesAlias: undefined,
@@ -397,14 +437,25 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if
-    // 1. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
-    // 2. we're in headless mode
-    // 3. or we're not storing tests and the protocol is not enabled
-    if (
-      (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
-      || (!this.config('isInteractive')
-      || (this.config('numTestsKeptInMemory') === 0)) && !this.state('isProtocolEnabled')) {
+    // Take a snapshot only when something will consume it: command-log time-travel
+    // (interactive mode with tests retained in memory) or Test Replay capture.
+    // Cross-origin logs on the primary origin defer to the spec bridge origin.
+    const shouldDeferSnapshotToSpecBridge =
+      !Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog')
+
+    const needsTimeTravelSnapshot =
+      this.config('isInteractive') && this.config('numTestsKeptInMemory') !== 0
+
+    // Protocol uses a portion of the snapshot for the replayed DOM.
+    // the command-log snapshot's `body`/`htmlAttrs` are dropped at ingestion
+    // via replacing `cy.createSnapshot` outright during consumption.
+    const needsProtocolSnapshot = this.state('isProtocolEnabled')
+
+    const shouldTakeSnapshot =
+      !shouldDeferSnapshotToSpecBridge
+      && (needsTimeTravelSnapshot || needsProtocolSnapshot)
+
+    if (!shouldTakeSnapshot) {
       return this
     }
 

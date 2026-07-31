@@ -243,6 +243,7 @@ function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
   } else {
     cp.once('exit', (code, signal) => {
       log.log(`Exit code: ${code} => ${signal}`)
+      dfd.resolve(cp)
     })
 
     cp.once('error', (e) => {

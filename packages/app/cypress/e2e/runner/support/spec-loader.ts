@@ -5,9 +5,9 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: Ex
   passCount = passCount || '--'
   failCount = failCount || '--'
 
-  cy.get('button.restart', { timeout: 30000 }).should('be.visible') // ensure tests are finished running
+  cy.reporter({ timeout: 30000 }).find('button.restart', { timeout: 30000 }).should('be.visible') // ensure tests are finished running
 
-  cy.get('.stats', { timeout: 10000 }).within(() => {
+  cy.reporter().find('.stats', { timeout: 10000 }).within(() => {
     cy.get('.passed .num', { timeout: 40000 }).should('have.text', `${passCount}`)
     cy.get('.failed .num', { timeout: 40000 }).should('have.text', `${failCount}`)
 
@@ -15,6 +15,15 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: Ex
       cy.get('.pending .num', { timeout: 20000 }).should('have.text', `${pendingCount}`)
     }
   })
+
+  // For the no-tests case (both counts are 0 → '--'), the stats assertions
+  // above match BOTH the pre-run state and the no-tests final state, so they
+  // can pass before the reporter has rendered. Explicitly wait for the
+  // reporter to exit its Loading state (runnablesStore.isReady === true) so
+  // downstream assertions (e.g. on the empty-state copy) don't race.
+  if (passCount === '--' && failCount === '--') {
+    cy.reporter().find('.runnable-loading', { timeout: 30000 }).should('not.exist')
+  }
 }
 
 type ExperimentalRetriesProjects = 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | 'detect-flake-but-always-fail-stop-any-passed'
@@ -80,6 +89,8 @@ export function loadSpec (options: LoadSpecOptions) {
 
   cy.visitApp(`specs/runner?file=cypress/e2e/${filePath}`)
 
+  cy.reporter().find('[data-cy="runnable-header"]', { timeout: 30000 }).should('contain', Cypress._.last(filePath.split('/')))
+
   if (setup) {
     setup()
   }
@@ -96,9 +107,14 @@ export function runSpec ({ fileName, projectName }: { fileName: string, projectN
 
   cy.visitApp(`specs/runner?file=cypress/e2e/runner/${fileName}`)
 
+  // Spec navigation within the app remounts the reporter iframe. Wait for the
+  // new spec's file name to show in the runnable header so queries can't
+  // anchor to the outgoing spec's reporter.
+  cy.reporter({ timeout: 30000 }).find('[data-cy="runnable-header"]', { timeout: 30000 }).should('contain', Cypress._.last(fileName.split('/')))
+
   // First ensure the test is loaded
-  cy.get('.passed > .num').should('contain', '--')
-  cy.get('.failed > .num').should('contain', '--')
+  cy.reporter().find('.passed > .num').should('contain', '--')
+  cy.reporter().find('.failed > .num').should('contain', '--')
 
   return cy.window()
 }

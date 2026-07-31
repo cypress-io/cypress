@@ -23,7 +23,6 @@ const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`).default
 const resolve = require(`../../lib/util/resolve`)
 const { fs } = require(`../../lib/util/fs`)
-const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 /**
@@ -84,7 +83,6 @@ describe('Routes', () => {
     ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-    sinon.stub(CacheBuster, 'get').returns('-123')
     sinon.stub(ServerBase.prototype, 'reset')
     sinon.stub(pluginsModule, 'has').returns(false)
 
@@ -385,6 +383,41 @@ describe('Routes', () => {
       })
     })
 
+    it('internal loopback header bypasses forceProxy redirect without a proxy set', function () {
+      // serve-internal-routes hits Express as a path-only request; without the
+      // trusted token _forceProxyMiddleware would 302 to clientRoute.
+      const { cypressInternalLoopbackToken } = require('../../lib/adapters/internal-routes')
+
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': '1',
+          'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers['location']).to.be.undefined
+      })
+    })
+
+    it('spoofed loopback header without the process token does not bypass forceProxy', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': 'https://evil.example/__/',
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
+      })
+    })
+
     it('routes when baseUrl is set', function () {
       return this.setup({ baseUrl: 'http://localhost:9999/app' })
       .then(() => {
@@ -394,6 +427,41 @@ describe('Routes', () => {
 
           expect(res.body).to.match(/window.__Cypress__ = true/)
         })
+      })
+    })
+  })
+
+  context('when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
+    beforeEach(function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      return this.setup({ projectName: 'foobarbaz' })
+    })
+
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    it('does not redirect non-proxied traffic to clientRoute', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/xhrs/foo`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).not.to.eq(302)
+        expect(res.headers.location).to.be.undefined
+      })
+    })
+
+    it('serves the runner app from clientRoute instead of the Whoops page', function () {
+      return this.rp({
+        url: `${this.proxy}/__`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.match(/This browser was not launched through Cypress\./)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
       })
     })
   })
@@ -1024,10 +1092,9 @@ describe('Routes', () => {
       })
 
       it('properly correlates when proxy failure come first', function () {
+        const followupPreRequestTimeout = 1000
+
         this.networkProxy.setPreRequestTimeout(50)
-        // If this takes longer than the Promise.delay and the prerequest timeout then the second
-        // call has hit the prerequest timeout which is a problem
-        this.timeout(900)
 
         nock(this.server.remoteStates.current().origin)
         .get('/')
@@ -1049,7 +1116,7 @@ describe('Routes', () => {
 
         // Wait 100 ms to make sure the request times out
         return Promise.delay(100).then(() => {
-          this.networkProxy.setPreRequestTimeout(1000)
+          this.networkProxy.setPreRequestTimeout(followupPreRequestTimeout)
           nock(this.server.remoteStates.current().origin)
           .get('/')
           .once()
@@ -1064,6 +1131,7 @@ describe('Routes', () => {
             url: 'http://www.github.com/',
           })
 
+          const followupStart = Date.now()
           const followupRequestPromise = this.rp({
             url: 'http://www.github.com/',
             headers: {
@@ -1073,6 +1141,9 @@ describe('Routes', () => {
           })
 
           return followupRequestPromise.then((res) => {
+            // If the followup hit the pre-request timeout, the proxy incorrectly correlated
+            // with the stale pre-request from the first (timed-out) request.
+            expect(Date.now() - followupStart, 'followup request hit the pre-request timeout').to.be.lessThan(followupPreRequestTimeout)
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include('hello from baz!')
@@ -1274,7 +1345,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('e=window.Cypress=parent.Cypress')
+          expect(res.body).to.include('window.Cypress=parent.Cypress')
           expect(res.body).to.include('gzip</html>')
         })
       })
@@ -1428,7 +1499,7 @@ describe('Routes', () => {
 
           expect(res.statusCode).to.eq(200)
           expect(res.headers['content-encoding']).to.eq('br')
-          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('window.Cypress=parent.Cypress')
           expect(decompressed).to.include('brotli</html>')
         })
       })
@@ -1548,7 +1619,7 @@ describe('Routes', () => {
 
           expect(res.statusCode).to.eq(200)
           expect(res.headers['content-encoding']).to.eq('gzip, br')
-          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('window.Cypress=parent.Cypress')
           expect(decompressed).to.include('layered-gzip-br</html>')
         })
       })
@@ -1580,7 +1651,7 @@ describe('Routes', () => {
 
           expect(res.statusCode).to.eq(200)
           expect(res.headers['content-encoding']).to.eq('br, gzip')
-          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('window.Cypress=parent.Cypress')
           expect(decompressed).to.include('layered-br-gzip</html>')
         })
       })

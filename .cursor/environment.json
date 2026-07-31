@@ -1,0 +1,9 @@
+{
+  "$schema": "https://cursor.com/schemas/environment.schema.json",
+  "name": "cypress-monorepo",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "install": "yarn --frozen-lockfile || yarn",
+  "start": "Xvfb :1 -screen 0 1920x1080x24 -ac +extension RANDR > /tmp/xvfb.log 2>&1 &"
+}

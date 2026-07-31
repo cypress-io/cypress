@@ -1,9 +1,9 @@
-import type { Readable } from 'stream'
-import type { Request, Response } from 'express'
+import type { Readable, Writable } from 'stream'
+import type { CookieOptions, Request, Response } from 'express'
 import type { ProxyTimings } from '@packages/types'
-import type { ResourceType } from '@packages/net-stubbing'
-import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
+import type { BackendRoute } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
+import type { RequestCredentialLevel, ResourceType } from './resourceTypeAndCredentialManager'
 
 /**
  * An incoming request to the Cypress web server.
@@ -17,6 +17,8 @@ export type CypressIncomingRequest = Request & {
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
+  originalAcceptEncoding?: string
+  requestBodyMaterialized?: boolean
   isAUTFrame: boolean
   credentialsLevel?: RequestCredentialLevel
   isFromExtraTarget: boolean
@@ -31,20 +33,40 @@ export type CypressIncomingRequest = Request & {
   isSyncRequest: boolean
 }
 
-export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
-
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
+
+export type CypressHeaderValue = string | string[] | number | undefined
+
+export interface CypressOutgoingResponseLike extends Writable {
+  injectionNonce?: string
+  isInitial: null | boolean
+  // null = undecided; SetInjectionLevel only determines a level when unset
+  wantsInjection: CypressWantsInjection | null
+  wantsSecurityRemoved: null | boolean
+  body?: string | Readable
+  destroyed: boolean
+  writableFinished: boolean
+  headersSent: boolean
+  statusCode: number
+  statusMessage: string
+  set (nameOrHeaders: string | Record<string, CypressHeaderValue>, value?: CypressHeaderValue): this
+  append (name: string, value: CypressHeaderValue): this
+  setHeader (name: string, value: CypressHeaderValue): this
+  getHeader (name: string): CypressHeaderValue | undefined
+  getHeaders (): Record<string, CypressHeaderValue>
+  getHeaderNames (): string[]
+  removeHeader (name: string): void
+  status (statusCode: number): this
+  redirect (url: string): this
+  redirect (statusCode: number, url: string): this
+  cookie (name: string, value: string, options?: CookieOptions): this
+  writeHead (statusCode: number, headers?: Record<string, CypressHeaderValue>): this
+}
 
 /**
  * An outgoing response to an incoming request to the Cypress web server.
  */
-export type CypressOutgoingResponse = Response & {
-  injectionNonce?: string
-  isInitial: null | boolean
-  wantsInjection: CypressWantsInjection
-  wantsSecurityRemoved: null | boolean
-  body?: string | Readable
-}
+export type CypressOutgoingResponse = Response & CypressOutgoingResponseLike
 
 export { ErrorMiddleware } from './http/error-middleware'
 

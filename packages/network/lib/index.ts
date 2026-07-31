@@ -17,4 +17,4 @@ export { allowDestroy } from './allow-destroy'
 
 export { concatStream } from './concat-stream'
 
-export { CombinedAgent } from './agent'
+export { CombinedAgent, shouldProxyForUrl } from './agent'

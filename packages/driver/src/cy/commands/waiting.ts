@@ -4,7 +4,8 @@ import { waitForRoute } from '../net-stubbing/wait-for-route'
 import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
 import ordinal from 'ordinal'
 
-import $errUtils, { type CypressError, type InternalCypressError } from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
+import type { CypressError, InternalCypressError } from '../../cypress/error_utils'
 import type { $Cy } from '../../cypress/cy'
 import type { StateFunc } from '../../cypress/state'
 import type { Log } from '../../cypress/log'
@@ -266,6 +267,13 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       return waitForXhr(str, _.omit(options, 'error'))
     })
     .then((responses) => {
+      // cy.retry may resolve with undefined when the runnable has already
+      // ended (canceled or transitioned). Bail out rather than dereferencing
+      // undefined entries below.
+      if (responses.some((r) => r == null)) {
+        return
+      }
+
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
       const ret = responses.length === 1 ? responses[0] : ((resp) => {
@@ -327,7 +335,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
     return new Promise((resolve, reject) => {
       Cypress.specBridgeCommunicator.once('wait:for:xhr:end', (responsesOrErr) => {
         // determine if this is an error by checking if there is a spec bridge error
-        if (responsesOrErr.hasSpecBridgeError) {
+        if (responsesOrErr?.hasSpecBridgeError) {
           delete responsesOrErr.hasSpecBridgeError
           if (options.log) {
             // skip this 'wait' log since it was already added through the primary

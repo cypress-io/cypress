@@ -4,18 +4,18 @@ This package finds and launches browsers for each operating system.
 
 ## Developing
 
-The TypeScript source files are in [`lib`](/lib) folder.
+The TypeScript source files are in the [`lib`](/lib) folder.
 
-To see browsers detected on your machine, just run:
+To see the browsers detected on your machine, run the following from the `packages/launcher` directory. The `@packages/ts` require hook transpiles the TypeScript on the fly:
 
 ```bash
-node index.js
+node -r @packages/ts/register -e "require('./lib/detect').detect().then(console.log, console.error)"
 ```
 
-You can supply a list of binaries to test if they're browsers or not. Try running:
+You can also check whether a specific binary is recognized as a browser by passing its path:
 
 ```bash
-node index.js /bin/bash /usr/bin/chromium-browser
+node -r @packages/ts/register -e "require('./lib/detect').detectByPath(process.argv[1]).then(console.log, console.error)" /usr/bin/chromium-browser
 ```
 
 ## Testing

@@ -13,15 +13,17 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { getRoutesForRequest } from '@packages/network-interception'
+import { DriverInterceptRegistrationAdapter, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
-import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
-import Request from './request'
+import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
-import templateEngine from './template_engine'
+import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
@@ -30,22 +32,30 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import type { Server as WebSocketServer } from 'ws'
-import { RemoteStates, RemoteState } from './remote_states'
-import { cookieJar, SerializableAutomationCookie } from './util/cookies'
-import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
+import { RemoteStates } from '@packages/network-tools'
+import type { RemoteState } from '@packages/network-tools'
+import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
+import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
-import headersUtil from './util/headers'
+import { getContentType } from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { Automation } from './automation'
-import type { AutomationCookie } from './automation/cookies'
+import type { AutomationCookie } from './automation/cookie/automation'
+import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
+import { GracefulExit } from './util/graceful-exit'
+import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
+import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-runtime'
+import { isProxyDisabled } from './util/is-proxy-disabled'
+import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -87,15 +97,30 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
   return function (req, res, next) {
-    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
-
     // if this request is a non-proxied cy-in-cy request,
     // we need to update the proxiedUrl and allow it to pass through
+    // (runs even when the MITM proxy is disabled — cy-in-cy self tests may use that path)
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && _isNonProxiedRequest(req) && req.headers.referer) {
       const referrerUrl = new URL(req.headers.referer)
 
       req.proxiedUrl = `${referrerUrl.origin}${req.proxiedUrl}`
 
+      return next()
+    }
+
+    // CDP Fetch owns browser traffic when the MITM proxy is disabled, so
+    // path-only requests to the Cypress server are expected — not a sign the
+    // browser was launched outside Cypress.
+    if (isProxyDisabled()) {
+      return next()
+    }
+
+    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    // Trusted loopback from serve-internal-routes: path-only HTTP to Express
+    // must reach internal route handlers instead of redirecting to clientRoute.
+    // Require the per-process token — AUT content can forge the URL header alone.
+    if (isTrustedInternalLoopback(req.headers)) {
       return next()
     }
 
@@ -120,12 +145,26 @@ const setProxiedUrl = function (req) {
     return
   }
 
+  // Loopback requests from serve-internal-routes arrive path-only, but carry
+  // the browser's original absolute URL in the loopback header so consumers
+  // like the spec-bridge iframe controller can still derive the origin.
+  // Only honor the URL when accompanied by the per-process loopback token.
+  const loopbackUrl = getTrustedLoopbackUrl(req.headers)
+
+  if (typeof loopbackUrl === 'string' && fullyQualifiedRe.test(loopbackUrl)) {
+    req.proxiedUrl = removeDefaultPort(loopbackUrl)
+
+    req.url = getPath(req.url)
+
+    return
+  }
+
   // backup the original proxied url
   // and slice out the host/origin
   // and only leave the path which is
   // how browsers would normally send
   // use their url
-  req.proxiedUrl = removeDefaultPort(req.url).format()
+  req.proxiedUrl = removeDefaultPort(req.url)
 
   req.url = getPath(req.url)
 }
@@ -151,7 +190,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
-  protected resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   protected _fileServer: FileServer | null
   protected _baseUrl: string | null
   protected _server?: DestroyableHttpServer
@@ -159,21 +197,29 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
+  protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
+  protected _networkInterceptionCore?: NetworkInterceptionCore
+  protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
+  protected _openConfig?: Cfg
+  // Retained so late-bound CDP Fetch NetworkProxy (created after open when the
+  // MITM proxy is disabled) still receives protocol / pre-request settings.
+  private _protocolManager?: ProtocolManagerShape
+  private _preRequestTimeout?: number
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
-  protected _graphqlWS?: WebSocketServer
+  protected _graphqlWS?: GraphqlWsHandle
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
+  private shouldCorrelatePreRequests: () => boolean = () => false
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
   private _documentDomainInjection: DocumentDomainInjection
 
   constructor (config: Cfg) {
     this.isListening = false
-    // @ts-ignore
-    this.request = Request()
+    this.request = new Request()
     this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
@@ -190,8 +236,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._remoteStates = new RemoteStates(remoteStatePorts, this._documentDomainInjection)
-
-    this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
   }
 
   ensureProp = ensureProp
@@ -216,6 +260,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._netStubbingState, 'open')
   }
 
+  get networkPolicyRegistration () {
+    return this.ensureProp(this._networkPolicyRegistration, 'open')
+  }
+
+  get networkInterceptionCore () {
+    return this.ensureProp(this._networkInterceptionCore, 'open')
+  }
+
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
   }
@@ -225,11 +277,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
+    this._protocolManager = protocolManager
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
   }
 
   setPreRequestTimeout (timeout: number) {
+    this._preRequestTimeout = timeout
     this._networkProxy?.setPreRequestTimeout(timeout)
   }
 
@@ -242,90 +296,73 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.socket.toDriver('cross:origin:cookies', cookies)
     })
 
-    this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
+    this.socket.localBus.on('request:sent:with:credentials', (credentials: { url: string, resourceType: ResourceType, credentialStatus: RequestCredentialLevel }) => {
+      this._networkProxy?.setCredentials(credentials)
+    })
   }
 
-  createServer (
+  async createServer (
     app: Express,
     config: Cfg,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]> {
-    return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+  ): Promise<[number, WarningErr?]> {
+    const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+    this._server = this._createHttpServer(app)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+    debug('createServer connecting to server')
+
+    this.server.on('connect', this.onConnect.bind(this))
+
+    this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
+
+    // Start the file server first so its port is known before we begin
+    // listening for proxied requests on the main server. The primary
+    // remote state's `<root>` strategy reads `_fileServer.port()`
+    // synchronously, so the fileServer must exist before the primary
+    // is computed. The httpsProxy comes after — it depends on the main
+    // server's port.
+    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+
+    const listenedPort = await this._listen(port)
+
+    this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+
+    if (!isProxyDisabled()) {
+      this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+        onRequest: this.callListeners.bind(this),
+        onUpgrade: this.onSniUpgrade.bind(this),
+      }) as HttpsProxyServer
+    }
+
+    let warning: WarningErr | undefined
+
+    // if we have a baseUrl let's go ahead and make sure the server is
+    // connectable!
+    if (baseUrl) {
+      this._baseUrl = baseUrl
+
+      if (config.isTextTerminal) {
+        try {
+          await this._retryBaseUrlCheck(baseUrl, onWarning)
+        } catch (e) {
+          debug(e)
+          throw errors.get('CANNOT_CONNECT_BASE_URL')
+        }
+      } else {
+        try {
+          await ensureUrl.isListening(baseUrl)
+        } catch (err) {
+          debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+          warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl) as WarningErr
         }
       }
+    }
 
-      debug('createServer connecting to server')
-
-      this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-      this.server.once('error', onError)
-
-      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
-
-      return this._listen(port, (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
-        }
-      })
-      .then((port) => {
-        return Bluebird.all([
-          createHttpsProxy(appData.path('proxy'), port, {
-            onRequest: this.callListeners.bind(this),
-            onUpgrade: this.onSniUpgrade.bind(this),
-          }),
-
-          fileServer.create(fileServerFolder as string),
-        ])
-        .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy as HttpsProxyServer
-          this._fileServer = fileServer as FileServer
-
-          // if we have a baseUrl let's go ahead
-          // and make sure the server is connectable!
-          if (baseUrl) {
-            this._baseUrl = baseUrl
-
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
-
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
-              })
-            }
-
-            return ensureUrl.isListening(baseUrl)
-            .return(null)
-            .catch((err) => {
-              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
-
-              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-            })
-          }
-        }).then((warning) => {
-          // once we open set the domain to root by default
-          // which prevents a situation where navigating
-          // to http sites redirects to /__/ cypress
-          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
-          return resolve([port, warning])
-        })
-      })
-    })
+    return [listenedPort, warning]
   }
 
   open (config: Cfg, {
@@ -339,6 +376,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }: OpenServerOptions) {
     debug('server open')
     this.testingType = testingType
+    this._openConfig = config
+    this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
@@ -356,15 +395,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({
-      config,
-      remoteStates: this._remoteStates,
-      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
-      shouldCorrelatePreRequests,
-      getCurrentBrowser,
-    })
+    if (isProxyDisabled()) {
+      // CDP Fetch runtime attaches NetworkProxy later in createCdpFetchNetworkRuntime.
+      // Create netStubbingState now so startWebsockets can bind driver intercept registration.
+      this._netStubbingState = netStubbingState()
+    } else {
+      this.createNetworkProxy({
+        config,
+        remoteStates: this._remoteStates,
+        shouldCorrelatePreRequests,
+        getCurrentBrowser,
+      })
+    }
 
-    if (config.experimentalSourceRewriting) {
+    if (config.experimentalSourceRewriting && !isProxyDisabled()) {
       createInitialWorkers()
     }
 
@@ -374,7 +418,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       config,
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
-      networkProxy: this._networkProxy!,
+      networkProxy: this._networkProxy,
+      getNetworkProxy: () => this._networkProxy,
       onError,
       getSpec,
       testingType,
@@ -386,7 +431,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(createCommonRoutes(routeOptions))
 
-    return this.createServer(app, config, onWarning)
+    // Preserve Bluebird-typed return value.
+    return Bluebird.resolve(this.createServer(app, config, onWarning))
   }
 
   createExpressApp (config) {
@@ -398,7 +444,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
     // https://github.com/cypress-io/cypress/issues/2891
-    app.engine('html', templateEngine.render)
+    app.engine('html', renderTemplate)
 
     // handle the proxied url in case
     // we have not yet started our websocket server
@@ -433,7 +479,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   useMorgan () {
-    return require('morgan')('dev')
+    return require('morgan')('dev', {
+      skip: () => GracefulExit.isShuttingDown,
+    })
   }
 
   getHttpServer () {
@@ -449,25 +497,112 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests, getCurrentBrowser }) {
+  createNetworkProxy ({ config, remoteStates, shouldCorrelatePreRequests, getCurrentBrowser }) {
     const getFileServerToken = () => {
       return this._fileServer?.token
     }
 
-    this._netStubbingState = netStubbingState()
-    // @ts-ignore
-    this._networkProxy = new NetworkProxy({
+    const runtime = createProxyRuntime({
       config,
       shouldCorrelatePreRequests,
       remoteStates,
       getFileServerToken,
       getCookieJar: () => cookieJar,
       socket: this.socket,
-      netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
-      resourceTypeAndCredentialManager,
       getCurrentBrowser,
+    })
+
+    this._netStubbingState = runtime.netStubbingState
+    this._networkProxy = runtime.networkProxy
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
+    this._networkInterceptionCore = runtime.networkInterceptionCore
+  }
+
+  async createCdpFetchNetworkRuntime (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+    isAUTFrame?: (frameId: string) => Promise<boolean>,
+    onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
+  ) {
+    await this.stopCdpFetchRuntime()
+
+    const runtime = createCdpFetchRuntime({
+      client,
+      isAUTFrame,
+      onAUTFrameNavigated,
+      config: this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config'],
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      remoteStates: this._remoteStates,
+      getFileServerToken: () => this._fileServer?.token,
+      getCookieJar: () => cookieJar,
+      socket: this.socket,
+      request: this.request,
+      serverBus: this._eventBus,
+      getCurrentBrowser: this.getCurrentBrowser ?? (() => {
+        throw new Error('getCurrentBrowser is not available')
+      }),
+      netStubbingState: this._netStubbingState,
+    })
+
+    this._cdpFetchRuntime = runtime
+    this._networkProxy = runtime.networkProxy
+    this._netStubbingState = runtime.netStubbingState
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
+    this._networkInterceptionCore = runtime.networkInterceptionCore
+
+    // NetworkProxy was created after open(); re-apply settings that may have
+    // been stored while _networkProxy was still undefined.
+    if (this._protocolManager) {
+      this._networkProxy.setProtocolManager(this._protocolManager)
+    }
+
+    if (this._preRequestTimeout != null) {
+      this._networkProxy.setPreRequestTimeout(this._preRequestTimeout)
+    }
+
+    await runtime.start()
+  }
+
+  private resetCdpFetchRuntime () {
+    try {
+      this._cdpFetchRuntime?.reset()
+    } catch (err) {
+      debug('CDP Fetch runtime reset failed: %s', err?.stack || err)
+    }
+  }
+
+  private stopCdpFetchRuntime () {
+    // Stopping sends Fetch.disable to the previous page client, which may
+    // already be gone (spec change, browser relaunch); failing to stop the
+    // old runtime must not fail the next launch.
+    const previous = this._cdpFetchRuntime
+
+    this._cdpFetchRuntime = undefined
+
+    // Drop the shared pointer before dispose so concurrent getNetworkProxy /
+    // addBrowserPreRequest callers cannot use a NetworkProxy whose sweep
+    // timer has already been cleared.
+    if (previous && this._networkProxy === previous.networkProxy) {
+      this._networkProxy = undefined
+    }
+
+    if (!previous) {
+      return
+    }
+
+    // Disable Fetch and drop handlers before dispose so paused requests cannot
+    // enter the legacy pipeline against a NetworkProxy whose PreRequests
+    // sweep/buffers are already cleared. Then dispose so replaced runtimes do
+    // not leave sweep timers accumulating across specs.
+    return previous.stop().catch((err) => {
+      debug('CDP Fetch runtime stop failed: %s', err?.stack || err)
+    }).finally(() => {
+      try {
+        previous.networkProxy.dispose()
+      } catch (err) {
+        debug('CDP Fetch NetworkProxy dispose failed: %s', err?.stack || err)
+      }
     })
   }
 
@@ -476,15 +611,27 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.netStubbingState = this.netStubbingState
-    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
+    options.interceptRegistration = new DriverInterceptRegistrationAdapter({
+      state: this.netStubbingState,
+      socket: this.socket,
+      getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
+    })
+
+    // Lazy lookup: under proxy-disabled mode NetworkProxy is created later in
+    // createCdpFetchNetworkRuntime, after websockets start. The legacy HTML
+    // injection pipeline populates this map once that runtime exists.
+    options.getRenderedHTMLOrigins = () => {
+      return this._networkProxy?.http.getRenderedHTMLOrigins() ?? {}
+    }
+
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
-      this.networkProxy.reset({ resetBetweenSpecs: false })
+      this._networkProxy?.reset({ resetBetweenSpecs: false })
+      this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
-      this.resourceTypeAndCredentialManager.clear()
+      this._networkProxy?.clearCredentials()
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
@@ -501,11 +648,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+    await this._networkProxy?.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
-    this.networkProxy.removePendingBrowserPreRequest(requestId)
+    this._networkProxy?.removePendingBrowserPreRequest(requestId)
   }
 
   getBrowserPreRequests () {
@@ -517,23 +664,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
-    this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+    this._networkProxy?.addPendingUrlWithoutPreRequest(downloadUrl)
   }
 
   updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    this.networkProxy.updateServiceWorkerRegistrations(data)
+    this._networkProxy?.updateServiceWorkerRegistrations(data)
   }
 
   updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    this.networkProxy.updateServiceWorkerVersions(data)
+    this._networkProxy?.updateServiceWorkerVersions(data)
   }
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
-    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+    this._networkProxy?.updateServiceWorkerClientSideRegistrations(data)
   }
 
   handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
-    this.networkProxy.handleServiceWorkerClientEvent(event)
+    this._networkProxy?.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -549,8 +696,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError) {
-    return new Bluebird<number>((resolve) => {
+  _listen (port: number | null | undefined): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          reject(this.portInUseErr(port))
+        }
+      }
+
+      this.server.once('error', onError)
+
       const listener = () => {
         const address = this.server.address() as AddressInfo
 
@@ -560,10 +718,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         this.server.removeListener('error', onError)
 
-        return resolve(address.port)
+        resolve(address.port)
       }
 
-      return this.server.listen(port || 0, '127.0.0.1', listener)
+      this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
@@ -647,7 +805,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
-    this.resourceTypeAndCredentialManager.clear()
+    this.resetCdpFetchRuntime()
+    this._networkProxy?.clearCredentials()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
@@ -664,20 +823,33 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     evilDns.clear()
 
-    return this._server.destroyAsync()
+    // Fully tear down CDP Fetch (Fetch.disable + NetworkProxy.dispose). reset()
+    // only clears in-flight state so the next test can keep using Fetch.
+    return Promise.resolve(this.stopCdpFetchRuntime())
+    .then(() => this._server!.destroyAsync())
     .then(() => {
       this.isListening = false
     })
   }
 
   close () {
-    return Bluebird.all([
-      this._close(),
-      this._socket?.close(),
-      this._fileServer?.close(),
-      this._httpsProxy?.close(),
-      this._graphqlWS?.close(),
-    ])
+    // graphql-ws clients must be closed before the HTTP server is destroyed.
+    const graphqlDispose = this._graphqlWS?.dispose
+      ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
+        // graphql-ws dispose() closes the ws server; repeating close() rejects with
+        // "The server is not running". Clear handle so subsequent close() is a no-op for gql.
+        this._graphqlWS = undefined
+      })
+      : Bluebird.resolve()
+
+    return graphqlDispose.then(() => {
+      return Bluebird.all([
+        this._close(),
+        this._socket?.close(),
+        this._fileServer?.close(),
+        this._httpsProxy?.close(),
+      ])
+    })
     .then((res) => {
       this._middleware = null
 
@@ -727,6 +899,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   onConnect (req, socket, head) {
     debug('Got CONNECT request from %s', req.url)
+
+    if (isProxyDisabled()) {
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
+      socket.end()
+
+      return
+    }
 
     socket.once('upstream-connected', this.socketAllowed.add)
 
@@ -876,7 +1055,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
               }
 
               const isOk = statusIs2xxOrAllowedFailure()
-              const contentType = headersUtil.getContentType(incomingRes)
+              const contentType = getContentType(incomingRes)
 
               const details: Record<string, unknown> = {
                 isOkStatusCode: isOk,

@@ -1,6 +1,7 @@
 import '@packages/frontend-shared/cypress/support/e2e'
 import 'cypress-real-events/support'
 import './execute-spec'
+import './reporter'
 
 Cypress.on('window:before:load', (win) => {
   // Can set this in a spec-by-spec basis to 'true' to use
@@ -15,6 +16,29 @@ beforeEach(() => {
   // `experimentalSingleTabRunMode, which is not a valid experiment for for e2e testing.
   // @ts-ignore - dynamically defined during tests using
   expect(window.top?.getEventManager().autDestroyedCount).to.be.undefined
+})
+
+beforeEach(() => {
+  // Mock out all studio telemetry requests so that our tests don't pollute Honeycomb data
+  cy.mockNodeCloudRequest({ url: '/studio/telemetry', method: 'post', body: {}, persist: true })
+  cy.mockNodeCloudRequest({ url: '/studio/metrics', method: 'post', body: {}, persist: true })
+})
+
+afterEach(() => {
+  const specPath = Cypress.spec.relative.replace(/\\/g, '/')
+
+  if (!specPath.includes('e2e/studio/')) {
+    return
+  }
+
+  // reset studio after each test to avoid triggering the browser's unsaved changes dialog in between tests
+  cy.get('body').then(($body) => {
+    const $btn = $body.find('[data-cy="studio-reset-button"]')
+
+    if ($btn.length) {
+      cy.wrap($btn).click({ force: true })
+    }
+  })
 })
 
 function e2eTestingTypeIsSelected () {

@@ -537,6 +537,22 @@ export class ProjectDataSource {
     return this.ctx.project.specs.find((x) => x.absolute === absolute)
   }
 
+  getUnmatchedPatterns (patterns: string[], specs: SpecWithRelativeRoot[]): string[] {
+    // Use micromatch (the matcher backing `globby`/`fast-glob` used to discover specs)
+    const MICROMATCH_OPTIONS = { dot: true }
+    // Normalize to forward slashes: path.relative may return backslashes on Windows and
+    // micromatch treats backslashes as escape characters rather than path separators.
+    const normalize = (p: string) => p.split(path.sep).join('/')
+    const specRelativePaths = specs
+    .map((s) => s.relative)
+    .filter((p): p is string => typeof p === 'string')
+    .map(normalize)
+
+    return patterns.filter((pattern) => {
+      return !specRelativePaths.some((specPath) => micromatch.isMatch(specPath, normalize(pattern), MICROMATCH_OPTIONS))
+    })
+  }
+
   async getProjectPreferences (projectTitle: string) {
     const preferences = await this.api.getProjectPreferencesFromCache()
 

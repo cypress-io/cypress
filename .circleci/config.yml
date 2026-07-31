@@ -19,6 +19,17 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
+  # Set to true when triggering the pipeline manually to bypass path filtering
+  # and run all CI jobs regardless of which files changed.
+  run-all-jobs:
+    type: boolean
+    default: false
+  # Opt-in proxy-disabled (CDP Fetch) coverage. Default false so known-red
+  # suites do not fail or cancel the pull-request workflow; enable via
+  # Trigger Pipeline when investigating that path.
+  run-proxy-disabled-tests:
+    type: boolean
+    default: false
 
 commands:
   persist:
@@ -58,12 +69,6 @@ commands:
           name: Pack workflows
           command: |
             ./scripts/pack-ci.sh --all
-  validate-workflows:
-    steps:
-      - run:
-          name: Validate workflows
-          command: |
-            ./scripts/pack-ci.sh --validate --pack=false
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
@@ -134,7 +139,7 @@ jobs:
   pack-workflows:
     docker:
         - image: cimg/base:stable
-    resource_class: small
+    resource_class: small.gen2
     steps:
         - cancel-draft-prs
         - checkout:
@@ -148,9 +153,11 @@ jobs:
   launch-primary-workflow:
       docker:
           - image: cimg/base:stable
-      resource_class: small
+      resource_class: small.gen2
       steps:
           - cancel-draft-prs
+          - checkout:
+              method: blobless
           - attach_workspace:
               at: .
           - run:
@@ -160,5 +167,16 @@ jobs:
                     echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
                     exit 1
                 fi
+          - run:
+              name: Generate path-filtered pipeline parameters
+              environment:
+                RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
+                RUN_PROXY_DISABLED_TESTS: << pipeline.parameters.run-proxy-disabled-tests >>
+              command: |
+                bash .circleci/scripts/generate-pipeline-parameters.sh \
+                  > /tmp/pipeline-parameters.json
+                echo "Generated parameters:"
+                cat /tmp/pipeline-parameters.json
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
+              parameters: /tmp/pipeline-parameters.json

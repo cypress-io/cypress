@@ -3,13 +3,11 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 import Debug from 'debug'
 import _ from 'lodash'
 import WebSocket from 'ws'
-import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp_automation'
-import { CriClient } from '../../lib/browsers/cri-client'
+import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp-protocol/cdp_automation'
+import { CriClient } from '../../lib/browsers/cdp-protocol/cri-client'
 import { expect, nock } from '../spec_helper'
 import pDefer from 'p-defer'
 import sinon from 'sinon'
-
-// import Bluebird from 'bluebird'
 
 const debug = Debug('cypress:server:tests')
 

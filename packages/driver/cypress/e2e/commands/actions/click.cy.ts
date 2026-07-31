@@ -1259,7 +1259,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: 'bottom' })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
         })
       })
 
@@ -1283,7 +1283,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
         })
       })
 
@@ -1295,7 +1295,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'center' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'center' })
         })
       })
 
@@ -1307,7 +1307,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'nearest', inline: 'nearest' })
         })
       })
 
@@ -1331,7 +1331,63 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
+        })
+      })
+
+      it('horizontally scrolls element to the leftmost point, away from a right-floating sticky element', () => {
+        cy.viewport(800, 400)
+
+        const $body = cy.$$('body')
+
+        $body.children().remove()
+
+        const $container = $('<div></div>')
+        .css({
+          width: '512px',
+          height: '128px',
+          overflowX: 'scroll',
+        })
+        .appendTo($body)
+
+        const $row = $('<div></div>')
+        .css({
+          width: '2048px',
+          height: '128px',
+          display: 'flex',
+        })
+        .appendTo($container)
+
+        // spacer pushing the target to the right of the container's viewport
+        $('<div></div>').css({ width: '512px', height: '128px' }).appendTo($row)
+
+        const $target = $('<div></div>')
+        .attr('id', 'target')
+        .css({ width: '128px', height: '128px', background: 'green' })
+        .appendTo($row)
+
+        $('<div></div>').css({ width: '512px', height: '128px' }).appendTo($row)
+
+        // a sticky element floating on the right edge of the scrollable container
+        $('<div></div>')
+        .attr('id', 'right-sticky')
+        .css({
+          position: 'sticky',
+          right: '0',
+          width: '256px',
+          height: '128px',
+          background: 'yellow',
+        })
+        .appendTo($row)
+
+        const clicked = cy.stub()
+
+        $target.on('click', clicked)
+
+        // with `inline: 'nearest'` the target would be scrolled under the
+        // right-sticky element and the click would never reach it
+        cy.get('#target').click().then(() => {
+          expect(clicked).to.be.calledOnce
         })
       })
 

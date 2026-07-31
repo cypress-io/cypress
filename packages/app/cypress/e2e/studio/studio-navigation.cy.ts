@@ -1,5 +1,74 @@
 import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName, openNewTestFromSpecHeader } from './helper'
 
+describe('Cypress Studio - Unsaved Changes Navigation Guard', () => {
+  it('blocks navigation away from the runner when studio has unsaved changes', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    // try to navigate away - the router guard should block this
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    // navigation should be blocked and the unsaved changes modal should appear
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    // we should still be on the runner page
+    cy.location().its('hash').should('contain', '/specs/runner')
+  })
+
+  it('allows navigation after discarding unsaved changes', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    cy.findByTestId('unsaved-changes-discard-button').click()
+
+    // navigation should now proceed
+    cy.location().its('hash').should('contain', '/runs')
+  })
+
+  it('prevents navigation when cancel is clicked in the unsaved changes dialog', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    cy.findByTestId('unsaved-changes-cancel-button').click()
+
+    // modal should close and we should remain in the runner
+    cy.findByTestId('unsaved-changes-modal').should('not.exist')
+    cy.location().its('hash').should('contain', '/specs/runner')
+
+    // studio should still be open
+    cy.findByTestId('studio-panel').should('be.visible')
+  })
+
+  it('does not block navigation when there are no unsaved changes', () => {
+    launchStudio()
+
+    // navigate away without making any changes
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    // no unsaved changes modal should appear
+    cy.findByTestId('unsaved-changes-modal').should('not.exist')
+
+    cy.location().its('hash').should('contain', '/runs')
+  })
+})
+
 describe('Cypress Studio - Navigation and URL Management', () => {
   it('does not re-enter studio mode when changing pages and then coming back', () => {
     launchStudio()
@@ -20,12 +89,12 @@ describe('Cypress Studio - Navigation and URL Management', () => {
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
-    cy.get('[data-cy="studio-back-button"]').click()
+    cy.reporter().find('[data-cy="studio-back-button"]').click()
 
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
 
-    cy.get('.runnable-title').eq(0).should('contain.text', 'studio functionality')
-    cy.get('.runnable-title').eq(1).should('contain.text', 'visits a basic html page')
+    cy.reporter().find('.runnable-title').eq(0).should('contain.text', 'studio functionality')
+    cy.reporter().find('.runnable-title').eq(1).should('contain.text', 'visits a basic html page')
   })
 
   it('updates the AUT url when navigating to a different page', () => {
@@ -100,7 +169,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
     // the studio url parameters should be removed
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
 
-    cy.get('.studio-single-test-container').should('be.visible')
+    cy.reporter().find('.studio-single-test-container').should('be.visible')
 
     cy.percySnapshot()
 
@@ -109,7 +178,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
 
     // the studio url parameters should be removed
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
-    cy.get('.studio-single-test-container').should('be.visible')
+    cy.reporter().find('.studio-single-test-container').should('be.visible')
   })
 
   it('does not remove the studio url parameters when saving test changes', () => {
@@ -166,7 +235,7 @@ describe('studio functionality', () => {
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
-    cy.get('[data-cy="studio-back-button"]').click()
+    cy.reporter().find('[data-cy="studio-back-button"]').click()
 
     cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
   })

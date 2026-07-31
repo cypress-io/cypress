@@ -3,7 +3,7 @@ import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
 import React, { useState, useEffect, useCallback } from 'react'
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 import Button from '@cypress-design/react-button'
 
 import appState from '../lib/app-state'
@@ -73,7 +73,7 @@ export const formattedMessage = (message: string, name?: string) => {
     }
     // for assertions print the exact text so that characters like _ and *
     // are not escaped in the assertion display when comparing values
-    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+    const result = assertionArray.flatMap((s, index) => [_.escape(s), expectedActualArray()[index]])
 
     return result.join('')
   }
@@ -521,6 +521,8 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     return null
   }
 
+  const shouldShowCodeButton = model.state === 'passed' || (model.state === 'failed' && model.err?.name && !['PromptDisabledError', 'PromptAuthenticationError', 'PromptUsageLimitError'].includes(model.err.name))
+
   return (
     <>
       <li className={cs('command', `command-name-${commandName}`)}>
@@ -565,7 +567,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
-              {model.isCyPrompt && (
+              {model.isCyPrompt && appState.cyPromptActionsEnabled && (
                 <div
                   className='command-prompt-get-code-feedback-container'
                   onClick={(e) => e.stopPropagation()}
@@ -589,7 +591,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     />
                     <span>Feedback</span>
                   </Button>
-                  {model.state === 'passed' && (
+                  {shouldShowCodeButton && (
                     <Button
                       variant="indigo-dark-mode"
                       size="20"

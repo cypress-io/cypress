@@ -1,11 +1,10 @@
 import type { Protocol } from 'devtools-protocol'
-import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey } from '@packages/types'
-import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
+import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import type { SendDebuggerCommand } from '../../browsers/cdp-protocol/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
 import { isEqual } from 'lodash'
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
-import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
@@ -60,9 +59,12 @@ export async function cdpKeyPress (
     throw new Error('Could not find AUT frame')
   }
 
-  const topActiveElement = await evaluateInFrameContext('document.activeElement', send, contexts, frameTree.frame)
+  const topActiveElement = await evaluateInFrameContext(
+    `document.activeElement instanceof HTMLIFrameElement ? document.activeElement.name || document.activeElement.id : ''`,
+    send, contexts, frameTree.frame,
+  )
 
-  const autFrameIsActive = topActiveElement.result.description && autFrame.frame.name && topActiveElement.result.description.includes(autFrame.frame.name)
+  const autFrameIsActive = typeof topActiveElement.result.value === 'string' && !!autFrame.frame.name && topActiveElement.result.value.includes(autFrame.frame.name)
 
   if (!autFrameIsActive) {
     await evaluateInFrameContext('window.focus()', send, contexts, autFrame.frame)

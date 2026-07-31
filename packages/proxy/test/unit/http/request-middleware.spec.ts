@@ -4,10 +4,21 @@ import RequestMiddleware from '../../../lib/http/request-middleware'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
-import { RemoteStates } from '@packages/server/lib/remote_states'
-import { CookieJar } from '@packages/server/lib/util/cookies'
+import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
+import { NetworkInterceptionCore } from '@packages/network-interception'
 import { HttpMiddlewareThis } from '../../../lib/http'
-import { DocumentDomainInjection } from '@packages/network-tools'
+import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
+
+vi.mock('../../../lib/resourceTypeAndCredentialManager', () => {
+  return {
+    resourceTypeAndCredentialManager: {
+      get: vi.fn(),
+      set: vi.fn(),
+      clear: vi.fn(),
+    },
+  }
+})
 
 describe('http/request-middleware', () => {
   const serverPort = 3030
@@ -23,6 +34,10 @@ describe('http/request-middleware', () => {
   beforeEach(() => {
     documentDomainInjection = DocumentDomainInjection.InjectionBehavior({ injectDocumentDomain: false, testingType: 'e2e' })
     remoteStates = new RemoteStates(remoteStateConfig, documentDomainInjection)
+  })
+
+  afterEach(() => {
+    vi.resetAllMocks()
   })
 
   it('exports the members in the correct order', () => {
@@ -42,7 +57,6 @@ describe('http/request-middleware', () => {
       'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',
-      'SendRequestOutgoing',
     ])
   })
 
@@ -52,7 +66,6 @@ describe('http/request-middleware', () => {
     function prepareContext (headers = {}) {
       return {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
-        onlyRunMiddleware: vi.fn(),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
         },
@@ -93,12 +106,25 @@ describe('http/request-middleware', () => {
         const ctx = prepareContext({
           'x-cypress-is-from-extra-target': 'true',
         })
+        let maybeSetBasicAuthHeadersRan = false
+        let skippedMiddlewareRan = false
 
-        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+        await testMiddleware({
+          ExtractCypressMetadataHeaders,
+          MaybeSetBasicAuthHeaders () {
+            maybeSetBasicAuthHeadersRan = true
+            this.next()
+          },
+          MaybeSimulateSecHeaders () {
+            skippedMiddlewareRan = true
+            this.next()
+          },
+        }, ctx)
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
-        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['MaybeSetBasicAuthHeaders', 'SendRequestOutgoing'])
+        expect(maybeSetBasicAuthHeadersRan).toBe(true)
+        expect(skippedMiddlewareRan).toBe(false)
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
@@ -174,13 +200,12 @@ describe('http/request-middleware', () => {
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from prerequest (xhr)', async () => {
+      vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({ resourceType: 'xhr', credentialStatus: 'same-origin' })
+
       const ctx = {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
-        },
-        resourceTypeAndCredentialManager: {
-          get: vi.fn().mockReturnValue({}),
         },
         req: {
           resourceType: 'xhr',
@@ -193,18 +218,17 @@ describe('http/request-middleware', () => {
       }
 
       await testMiddleware([CalculateCredentialLevelIfApplicable], ctx)
-      expect(ctx.resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `xhr`)
+      expect(resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `xhr`)
     })
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from prerequest (fetch)', async () => {
+      vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({ resourceType: 'fetch', credentialStatus: 'same-origin' })
+
       const ctx = {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
-        },
-        resourceTypeAndCredentialManager: {
-          get: vi.fn().mockReturnValue({}),
         },
         req: {
           resourceType: 'fetch',
@@ -217,20 +241,19 @@ describe('http/request-middleware', () => {
       }
 
       await testMiddleware([CalculateCredentialLevelIfApplicable], ctx)
-      expect(ctx.resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `fetch`)
+      expect(resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `fetch`)
     })
 
     it('sets the resourceType and credentialsLevel on the request from whatever is returned by resourceTypeAndCredentialManager if conditions apply, assuming resourceType does NOT exist on the request', async () => {
+      vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({
+        resourceType: 'fetch',
+        credentialStatus: 'same-origin',
+      })
+
       const ctx = {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
-        },
-        resourceTypeAndCredentialManager: {
-          get: vi.fn().mockReturnValue({
-            resourceType: 'fetch',
-            credentialStatus: 'same-origin',
-          }),
         },
         req: {
           resourceType: undefined,
@@ -595,6 +618,18 @@ describe('http/request-middleware', () => {
       })
     })
 
+    it('routes missing cookieState port failures to onError', async () => {
+      const ctx = await getContext()
+      const onError = vi.fn()
+
+      ctx.networkInterceptionCore = new NetworkInterceptionCore()
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx, onError)
+
+      expect(onError).toHaveBeenCalledOnce()
+      expect(onError.mock.calls[0][0].message).toMatch(/NetworkInterceptionCore\.cookieState is not configured/)
+    })
+
     async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {
       const cookieJar = new CookieJar()
 
@@ -715,6 +750,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
       expect(ctx.req.headers!['accept-encoding']).toBe('gzip,br')
+      expect(ctx.req.originalAcceptEncoding).toBe('gzip, deflate, br')
     })
 
     it('strips to br only when client sends only br', async () => {
@@ -957,64 +993,56 @@ describe('http/request-middleware', () => {
     })
   })
 
-  describe('SendRequestOutgoing', () => {
-    const { SendRequestOutgoing } = RequestMiddleware
+  describe('RedirectToClientRouteIfUnloaded', () => {
+    const { RedirectToClientRouteIfUnloaded } = RequestMiddleware
+    const clientRoute = '/__/'
 
-    let ctx
-
-    beforeEach(() => {
-      const headers = {}
-
-      ctx = {
-        onError: vi.fn(),
-        request: {
-          create: (opts) => {
-            return {
-              inputArgs: opts,
-              on: (event, callback) => {
-                if (event === 'response') {
-                  callback({ request: { timings: {} } })
-                }
-              },
-            }
-          },
-        },
+    function prepareContext ({ hasAppUnloaded, isPrimarySuperDomainOrigin }: { hasAppUnloaded: boolean, isPrimarySuperDomainOrigin: boolean }) {
+      return {
         req: {
-          body: '{}',
-          headers,
-          socket: {
-            on: () => {},
-          },
-        },
+          proxiedUrl: 'http://localhost:3500/fixtures/auth/index.html',
+          cookies: hasAppUnloaded ? { '__cypress.unload': 'true' } : {},
+        } as Partial<CypressIncomingRequest>,
         res: {
-          on: (event, listener) => {},
-          off: (event, listener) => {},
-        } as Partial<CypressOutgoingResponse>,
-        remoteStates,
+          on: vi.fn(),
+          off: vi.fn(),
+          redirect: vi.fn(),
+        } as any,
+        config: {
+          clientRoute,
+        },
+        remoteStates: {
+          isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(isPrimarySuperDomainOrigin),
+        },
       }
+    }
+
+    it('redirects to the client route when the app has unloaded and the request is the primary super domain origin', async () => {
+      const ctx = prepareContext({ hasAppUnloaded: true, isPrimarySuperDomainOrigin: true })
+
+      await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
+
+      expect(ctx.res.redirect).toHaveBeenCalledWith(clientRoute)
     })
 
-    describe('same-origin file request', () => {
-      beforeEach(() => {
-        ctx.getFileServerToken = () => 'abcd1234'
-        ctx.req.proxiedUrl = 'https://www.cypress.io/file'
-        ctx.remoteStates.set({
-          origin: 'https://www.cypress.io',
-          strategy: 'file',
-        } as any)
-      })
+    it('does NOT redirect when the app has unloaded but the request is NOT the primary super domain origin', async () => {
+      // a stale `__cypress.unload` cookie can linger on a previously-primary
+      // domain (Firefox's `unload` event is unreliable). A later cross-origin
+      // AUT navigation back to that domain must be served, not redirected to
+      // the client route, otherwise the AUT is bounced to the Cypress specs UI.
+      const ctx = prepareContext({ hasAppUnloaded: true, isPrimarySuperDomainOrigin: false })
 
-      it('adds `x-cypress-authorization` header', async () => {
-        await testMiddleware([SendRequestOutgoing], ctx)
-        expect(ctx.req.headers['x-cypress-authorization']).toEqual('abcd1234')
-      })
+      await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
 
-      it('handles nil fileServer token', async () => {
-        ctx.getFileServerToken = () => undefined
+      expect(ctx.res.redirect).not.toHaveBeenCalled()
+    })
 
-        await testMiddleware([SendRequestOutgoing], ctx)
-        expect(ctx.req.headers['x-cypress-authorization']).toBeUndefined()
-      })
+    it('does NOT redirect when the app has not unloaded', async () => {
+      const ctx = prepareContext({ hasAppUnloaded: false, isPrimarySuperDomainOrigin: true })
+
+      await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
+
+      expect(ctx.res.redirect).not.toHaveBeenCalled()
     })
   })
 })

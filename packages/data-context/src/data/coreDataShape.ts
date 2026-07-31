@@ -14,6 +14,7 @@ export interface AuthenticatedUserShape {
   name?: string
   email?: string
   authToken?: string
+  projectSlug?: string
 }
 
 export interface ProjectShape {
@@ -31,6 +32,11 @@ interface ServersDataShape {
   gqlServer?: Maybe<Server>
   gqlServerPort?: Maybe<number>
   gqlSocketServer?: Maybe<SocketIONamespace>
+  /**
+   * graphql-ws `useServer` dispose — must run before `gqlServer.destroy()` so
+   * protocol clients close before the HTTP server tears down sockets.
+   */
+  gqlGraphqlWsDispose?: Maybe<() => Promise<void>>
 }
 
 export interface DevStateShape {
@@ -132,6 +138,7 @@ export interface CoreDataShape {
   studioLifecycleManager?: StudioLifecycleManagerShape
   cyPromptLifecycleManager?: CyPromptLifecycleManagerShape
   currentRecordingInfo: RecordingInfo
+  autoProvisionedProjectId: string | null
 }
 
 /**
@@ -199,6 +206,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     didBrowserPreviouslyHaveUnexpectedExit: false,
     studioLifecycleManager: undefined,
     currentRecordingInfo: {},
+    autoProvisionedProjectId: null,
   }
 
   async function machineId (): Promise<string | null> {

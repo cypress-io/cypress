@@ -8,6 +8,7 @@ import { telemetry, Span } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
+import { createFetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -18,15 +19,17 @@ import type { SocketBroadcaster } from '@packages/socket'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
+  CypressOutgoingResponseLike,
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
+import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
-import type { RemoteStates } from '@packages/server/lib/remote_states'
-import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
+import type { RemoteStates } from '@packages/network-tools'
+import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
+import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
@@ -47,6 +50,19 @@ const isVerbose = isVerboseTelemetry
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
+class BrowserConnectionClosedError extends Error {
+  code = 'ERR_BROWSER_CONNECTION_CLOSED'
+
+  constructor (message: string) {
+    super(message)
+    this.name = 'BrowserConnectionClosedError'
+  }
+}
+
+const createBrowserConnectionClosedError = () => {
+  return new BrowserConnectionClosedError('The browser closed the connection before the response completed.')
+}
+
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
@@ -61,9 +77,9 @@ export type HttpMiddlewareStacks = {
   }
 }
 
-type HttpMiddlewareCtx<T> = {
+export type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
-  res: CypressOutgoingResponse
+  res: CypressOutgoingResponseLike
   handleHttpRequestSpan?: Span
   reqMiddlewareSpan?: Span
   resMiddlewareSpan?: Span
@@ -95,12 +111,13 @@ export type ServerCtx = Readonly<{
   getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
-  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
+  networkInterceptionCore: NetworkInterceptionCore
+  networkInterception?: ForNetworkInterception<any, any>
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
-  request: any
+  request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
 }>
@@ -110,6 +127,8 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'config',
   'getFileServerToken',
   'netStubbingState',
+  'networkInterceptionCore',
+  'networkInterception',
   'next',
   'end',
   'onResponse',
@@ -171,12 +190,23 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         }
 
         ctx.res.off('close', onClose)
+
+        // If this middleware already completed (e.g. it called `next()` before a
+        // stream error surfaced), still propagate to the stage error handler so
+        // late response stream failures (gzip/br decode, piping) can reset the
+        // client connection. Do not call `_end` again — the stack has moved on.
+        if (ended) {
+          onError(error)
+
+          return
+        }
+
         _end(onError(error))
       }
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(new Error('Socket closed before finished writing response.'))
+          _onError(createBrowserConnectionClosedError())
         }
       }
 
@@ -206,6 +236,9 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       const fullCtx = {
+        // Spread ctx first so middleware helpers (next/end/onResponse/...) always
+        // win over any same-named fields that may exist on the request ctx.
+        ...ctx,
         next: () => {
           fullCtx.next = () => {
             const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
@@ -237,11 +270,24 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         onlyRunMiddleware: (names: string[]) => {
           ctx.middleware[type] = _.pick(ctx.middleware[type], names)
         },
-        ...ctx,
       }
 
       try {
-        middleware.call(fullCtx)
+        const returnValue = middleware.call(fullCtx)
+
+        if (returnValue != null && typeof returnValue.then === 'function') {
+          Bluebird.resolve(returnValue).catch((err: Error) => {
+            // If the middleware already completed successfully, ignore late rejections.
+            if (ended) {
+              return
+            }
+
+            err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+
+            errorUtils.logError(err)
+            fullCtx.onError(err)
+          })
+        }
       } catch (err) {
         err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
 
@@ -273,12 +319,13 @@ export class Http {
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
+  networkInterceptionCore: NetworkInterceptionCore
+  networkInterception?: ForNetworkInterception<any, any>
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
-  request: any
+  request: ServerRequest
   socket: SocketBroadcaster
   serverBus: EventEmitter
-  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -287,17 +334,18 @@ export class Http {
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
-    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
+    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
+    this.networkInterceptionCore = opts.networkInterceptionCore
+    this.networkInterception = opts.networkInterception
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
-    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
 
@@ -306,7 +354,120 @@ export class Http {
     }
   }
 
-  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+  private buildOnError (ctx: HttpMiddlewareCtx<any>) {
+    const onError = async (error: Error): Promise<void> => {
+      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
+
+      if (pendingRequest) {
+        delete ctx.pendingRequest
+        ctx.removePendingRequest(pendingRequest)
+      }
+
+      ctx.error = error
+
+      // if there is a pre-request and the error has not been handled and the response has not been destroyed
+      // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
+      //
+      // browsers will retry requests in the event of network errors, but they will not send pre-requests,
+      // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
+      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
+        ctx.req.browserPreRequest.errorHandled = true
+        const preRequest = {
+          ...ctx.req.browserPreRequest,
+          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+          errorHandled: false,
+        }
+
+        ctx.debug('Re-using pre-request data %o', preRequest)
+        await this.addPendingBrowserPreRequest(preRequest)
+      }
+
+      return _runStage(HttpStages.Error, ctx, onError)
+    }
+
+    return onError
+  }
+
+  createLegacyProxyPipeline (codec: TransportCodecPort<any, any>): InterceptMiddleware {
+    return async (request, next): Promise<HttpResponse> => {
+      try {
+        const ctx = codec.encodeRequest(request)
+
+        const onError = this.buildOnError(ctx)
+
+        await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+        // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+        // In this case we don't want to run the response middleware and should just exit.
+        if (ctx.res.destroyed) {
+          const error = createBrowserConnectionClosedError()
+
+          await onError(error)
+
+          throw error
+        }
+
+        // Skip the origin fetch when request middleware already finished the client
+        // response (e.g. blocked-host 503 or unload redirect) without setting incomingRes.
+        // Middleware that ends the client response must set headersSent/writableFinished
+        // (or incomingRes); otherwise the pipeline will still call next()/origin.
+        if (!ctx.incomingRes && !ctx.res.headersSent && !ctx.res.writableFinished) {
+          const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: ctx.reqMiddlewareSpan, isVerbose: true })
+
+          try {
+            const response = await next(codec.decodeRequest(ctx))
+
+            span?.end()
+
+            codec.encodeResponse(response)
+
+            if (ctx.incomingRes && !ctx.incomingResStream) {
+              throw new Error('Incoming response stream was not set by the HTTP transport codec.')
+            }
+          } catch (err) {
+            span?.end()
+            await onError(err as Error)
+
+            // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
+            // encoding a synthetic empty success body via decodeResponse.
+            throw err
+          }
+        }
+
+        if (ctx.incomingRes) {
+          // start the span that is responsible for recording the start time of the entire middleware run on the stack
+          ctx.resMiddlewareSpan = telemetry.startSpan({
+            name: 'response:middleware',
+            parentSpan: ctx.handleHttpRequestSpan,
+            isVerbose,
+          })
+
+          await _runStage(HttpStages.IncomingResponse, ctx, onError)
+          .finally(() => {
+            ctx.resMiddlewareSpan?.end()
+          })
+
+          if (ctx.error) {
+            throw ctx.error
+          }
+
+          return codec.decodeResponse(ctx)
+        }
+
+        if (ctx.error) {
+          throw ctx.error
+        }
+
+        ctx.debug('Warning: Request was not fulfilled with a response.')
+
+        return codec.decodeResponse(ctx)
+      } finally {
+        codec.releaseRequest?.(request.id)
+      }
+    }
+  }
+
+  createMiddlewareContext (req: CypressIncomingRequest, res: CypressOutgoingResponseLike, handleHttpRequestSpan?: Span): HttpMiddlewareCtx<any> {
     const colorFn = debugVerbose.enabled ? getRandomColorFn() : undefined
     const debugUrl = debugVerbose.enabled ?
       (req.proxiedUrl.length > 80 ? `${req.proxiedUrl.slice(0, 80)}...` : req.proxiedUrl)
@@ -324,9 +485,10 @@ export class Http {
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
+      networkInterceptionCore: this.networkInterceptionCore,
+      networkInterception: this.networkInterception,
       socket: this.socket,
       serverBus: this.serverBus,
-      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
       simulatedCookies: [],
       debug: (formatter, ...args) => {
@@ -368,35 +530,12 @@ export class Http {
       getCurrentBrowser: this.getCurrentBrowser,
     }
 
-    const onError = async (error: Error): Promise<void> => {
-      const pendingRequest = ctx.pendingRequest as PendingRequest | undefined
+    return ctx
+  }
 
-      if (pendingRequest) {
-        delete ctx.pendingRequest
-        ctx.removePendingRequest(pendingRequest)
-      }
-
-      ctx.error = error
-
-      // if there is a pre-request and the error has not been handled and the response has not been destroyed
-      // (which implies the request was canceled by the browser), try to re-use the pre-request for the next retry
-      //
-      // browsers will retry requests in the event of network errors, but they will not send pre-requests,
-      // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
-      if (ctx.req.browserPreRequest && !ctx.req.browserPreRequest.errorHandled && !ctx.res.destroyed) {
-        ctx.req.browserPreRequest.errorHandled = true
-        const preRequest = {
-          ...ctx.req.browserPreRequest,
-          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
-          errorHandled: false,
-        }
-
-        ctx.debug('Re-using pre-request data %o', preRequest)
-        await this.addPendingBrowserPreRequest(preRequest)
-      }
-
-      return _runStage(HttpStages.Error, ctx, onError)
-    }
+  handleHttpRequest (req: CypressIncomingRequest, res: CypressOutgoingResponse, handleHttpRequestSpan?: Span) {
+    const ctx = this.createMiddlewareContext(req, res, handleHttpRequestSpan)
+    const onError = this.buildOnError(ctx)
 
     // start the span that is responsible for recording the start time of the entire middleware run on the stack
     // make this span a part of the middleware ctx so we can keep names simple when correlating
@@ -406,29 +545,18 @@ export class Http {
       isVerbose,
     })
 
-    return _runStage(HttpStages.IncomingRequest, ctx, onError)
-    .then(() => {
-      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-      // In this case we don't want to run the response middleware and should just exit.
-      if (res.destroyed) {
-        return onError(new Error('Socket closed before finished writing response'))
+    if (!this.networkInterception) {
+      return onError(new Error('Network interception is not configured for the proxy runtime.'))
+    }
+
+    return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
+    .catch((err) => {
+      // The legacy pipeline may already have run error middleware for this ctx.
+      if (ctx.error) {
+        return
       }
 
-      if (ctx.incomingRes) {
-        // start the span that is responsible for recording the start time of the entire middleware run on the stack
-        ctx.resMiddlewareSpan = telemetry.startSpan({
-          name: 'response:middleware',
-          parentSpan: handleHttpRequestSpan,
-          isVerbose,
-        })
-
-        return _runStage(HttpStages.IncomingResponse, ctx, onError)
-        .finally(() => {
-          ctx.resMiddlewareSpan?.end()
-        })
-      }
-
-      return ctx.debug('Warning: Request was not fulfilled with a response.')
+      return onError(err)
     })
   }
 

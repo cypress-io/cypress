@@ -185,6 +185,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-wrapper-object-types': 'off',
       '@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
 
+      'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
       'mocha/no-setup-in-describe': 'off',
       'mocha/max-top-level-suites': 'off',
@@ -267,6 +268,24 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     files: ['webpack.config.js'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+
+  // v8 snapshot bundling fails on mixed inline type + value imports
+  {
+    files: [
+      'packages/**/lib/**/*.{js,ts,tsx}',
+      'packages/**/src/**/*.{js,ts,tsx}',
+      'packages/server/**/*.{js,ts,tsx}',
+    ],
+    ignores: [
+      '**/test/**',
+      '**/*.spec.*',
+      '**/cypress/**',
+      '**/__snapshots__/**',
+    ],
+    rules: {
+      'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
     },
   },
 ]

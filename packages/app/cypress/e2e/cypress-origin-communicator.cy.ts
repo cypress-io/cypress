@@ -1,14 +1,43 @@
-describe('Cypress In Cypress Origin Communicator', () => {
+describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 10000 }, () => {
   describe('primary origin memory leak prevention', () => {
-    let removeAllListenersSpy
+    let spies: Array<ReturnType<typeof cy.spy>>
 
     beforeEach(() => {
-      removeAllListenersSpy = undefined
+      spies = []
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
     })
+
+    // Spy on `removeAllListeners` for the current Cypress instance and every
+    // future one the event-manager creates. Each inner Cypress owns its own
+    // PrimaryOriginCommunicator, so when the "different spec" test triggers a
+    // teardown-then-create sequence, we need to catch the cleanup on the OLD
+    // instance and also spy the NEW one. Must be invoked after a spec has
+    // loaded — before that, getEventManager() throws.
+    const trackRemoveAllListenersOnAllCypressInstances = () => {
+      cy.window().then((win) => {
+        const em = win.getEventManager()
+        const trackSpy = (cypress) => {
+          spies.push(cy.spy(cypress.primaryOriginCommunicator, 'removeAllListeners'))
+        }
+
+        const current = em.getCypress()
+
+        if (current) trackSpy(current)
+
+        em.on('cypress:created', trackSpy)
+      })
+    }
+
+    const assertZeroArgCleanupFired = () => {
+      cy.wrap(null).should(() => {
+        const noArgCalls = spies.flatMap((spy) => spy.getCalls()).filter((c) => c.args.length === 0)
+
+        expect(noArgCalls.length).to.be.at.least(1)
+      })
+    }
 
     /**
      * NOTE: This is more of a integration style test suite. We are not verifying that cy.origin works in these cases,
@@ -20,17 +49,51 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
 
-      cy.then(() => {
+      cy.get('a[href="#/runs"]').click()
+      cy.location('hash').should('include', '/runs')
+
+      assertZeroArgCleanupFired()
+    })
+
+    it('clears cached spec bridge window targets when primaryOriginCommunicator.removeAllListeners() runs without an event', () => {
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
+
+      cy.window().then((win) => {
         // @ts-ignore
-        removeAllListenersSpy = cy.spy(window.top[0].Cypress.primaryOriginCommunicator, 'removeAllListeners')
+        const comm = win.Cypress.primaryOriginCommunicator as any
+
+        // @ts-ignore — hold stub across navigation for the assertion below
+        window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
+
+        comm.onMessage({
+          data: { event: 'cross:origin:bridge:ready', origin: 'https://cypress-map-teardown-test.invalid' },
+          // @ts-ignore
+          source: window.__cyCommunicatorMapTest,
+        })
       })
 
       cy.get('a[href="#/runs"]').click()
       cy.location('hash').should('include', '/runs')
 
-      cy.then(() => {
-        expect(removeAllListenersSpy).to.be.calledOnce
+      assertZeroArgCleanupFired()
+
+      cy.window().then((win) => {
+        // @ts-ignore
+        const comm = win.Cypress.primaryOriginCommunicator as any
+        // @ts-ignore
+        const stub = window.__cyCommunicatorMapTest
+
+        stub.postMessage.resetHistory()
+        comm.toAllSpecBridges('test:map:should:not:reach:stub', {})
+        expect(stub.postMessage).not.to.have.been.called
+        // @ts-ignore
+        delete window.__cyCommunicatorMapTest
       })
     })
 
@@ -39,18 +102,12 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-
-      cy.then(() => {
-        // @ts-ignore
-        removeAllListenersSpy = cy.spy(window.top[0].Cypress.primaryOriginCommunicator, 'removeAllListeners')
-      })
+      trackRemoveAllListenersOnAllCypressInstances()
 
       cy.get('a[href="#/settings"]').click()
       cy.location('hash').should('include', '/settings')
 
-      cy.then(() => {
-        expect(removeAllListenersSpy).to.be.calledOnce
-      })
+      assertZeroArgCleanupFired()
     })
 
     it('cleans up the primaryOriginCommunicator events when navigating to run a different spec', () => {
@@ -58,18 +115,13 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
 
-      cy.then(() => {
-        // @ts-ignore
-        removeAllListenersSpy = cy.spy(window.top[0].Cypress.primaryOriginCommunicator, 'removeAllListeners')
-      })
-
-      cy.get('[aria-controls="reporter-inline-specs-list"]').type('{enter}')
+      cy.reporter().find('[aria-controls="reporter-inline-specs-list"]').click()
       cy.get('[data-cy="spec-row-item"]').contains('123').click()
+      cy.waitForSpecToFinish()
 
-      cy.then(() => {
-        expect(removeAllListenersSpy).to.be.calledOnce
-      })
+      assertZeroArgCleanupFired()
     })
   })
 
@@ -97,9 +149,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
 
       cy.findByTestId('sidebar-link-specs-page').click()
       cy.location('hash').should('include', '/specs')
@@ -107,9 +159,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
     })
 
     it('passes upon test reload mid test execution', () => {
@@ -124,9 +176,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.contains('simple_origin.cy').click()
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
 
       cy.withCtx(async (ctx) => {
         const indexPath = ctx.path.join('cypress', 'e2e', 'origin', 'simple_origin.cy.js')
@@ -139,9 +191,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
 
       cy.waitForSpecToFinish()
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.reporter().find('.passed > .num').should('contain', 1)
       // make sure duplicate logs are not present
-      cy.get('.command-name-origin').find('.command-name-log').should('have.length', 2)
+      cy.reporter().find('.command-name-origin').find('.command-name-log').should('have.length', 2)
     })
   })
 })

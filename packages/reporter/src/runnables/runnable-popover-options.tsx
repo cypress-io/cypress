@@ -4,12 +4,13 @@ import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import cs from 'classnames'
 
-import Tooltip from '@cypress/react-tooltip'
 import Button from '@cypress-design/react-button'
 import { IconActionAddMedium, IconWindowCodeEditor, IconMenuDotsVertical } from '@cypress-design/react-icon'
 import defaultEvents, { Events } from '../lib/events'
 import Switch from '../lib/switch'
 import appState from '../lib/app-state'
+import Tooltip from '../lib/tooltip'
+import { getReporterBody, getReporterDocument } from '../lib/reporter-document'
 
 interface Props {
   events?: Events
@@ -44,7 +45,10 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
 
       setPopoverPosition({
         top: rect.bottom + 4,
-        left: rect.right - 250, // 250px is the popover width
+        // the popover renders in the reporter iframe and cannot overflow
+        // it, so keep it inside the left edge when the panel is narrow
+        // (250px is the popover width)
+        left: Math.max(8, rect.right - 250),
       })
     }
 
@@ -56,8 +60,25 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     setIsOpen(false)
   }
 
+  const getSuiteIdForNewTest = (): string => {
+    const test = Cypress.state('test')
+    const parent = test && test?.parent
+
+    let suiteId = 'r1'
+
+    if (isStudioSingleTest) {
+      if (parent && parent.id && parent.type === 'suite') {
+        suiteId = parent.id
+      }
+    }
+
+    return suiteId
+  }
+
   const handleNewTest = () => {
-    events.emit('studio:init:suite', { suiteId: 'r1', entrySource: 'new-test-root' })
+    const suiteId = getSuiteIdForNewTest()
+
+    events.emit('studio:init:suite', { suiteId, entrySource: suiteId === 'r1' ? 'new-test-root' : 'new-test-suite' })
     setIsOpen(false)
   }
 
@@ -68,6 +89,11 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
 
   const toggleShowFetchRequests = () => {
     appState.toggleShowFetchRequests()
+    events.emit('save:state')
+  }
+
+  const toggleCodeEditorLineWrap = () => {
+    appState.toggleCodeEditorLineWrap()
     events.emit('save:state')
   }
 
@@ -91,14 +117,21 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
       }
     }
 
+    // the reporter renders into its own document (the iframe) while its JS runs
+    // in the top window, so listen on both documents to dismiss the popover on
+    // interactions anywhere in the app
+    const doc = getReporterDocument()
+    const docs = new Set([document, doc])
+    const wins = new Set([window, doc.defaultView ?? window])
+
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      window.addEventListener('scroll', handleScroll, true)
+      docs.forEach((d) => d.addEventListener('mousedown', handleClickOutside))
+      wins.forEach((w) => w.addEventListener('scroll', handleScroll, true))
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
+      docs.forEach((d) => d.removeEventListener('mousedown', handleClickOutside))
+      wins.forEach((w) => w.removeEventListener('scroll', handleScroll, true))
     }
   }, [isOpen])
 
@@ -124,14 +157,14 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           <span>Open in IDE</span>
         </button>
 
-        {!isStudioSingleTest && <button
+        <button
           className="runnable-popover-item"
           onClick={handleNewTest}
           data-cy="runnable-popover-new-test"
         >
           <IconActionAddMedium strokeColor="gray-500" />
           <span>New test</span>
-        </button>}
+        </button>
       </div>
 
       <div className="runnable-popover-section">
@@ -167,6 +200,25 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
         </div>
 
       </div>
+
+      <div className="runnable-popover-section">
+        <div className="runnable-popover-section-title">Studio preferences</div>
+        <div className="runnable-popover-item-with-toggle">
+          <div className="runnable-popover-item-with-toggle-content">
+            <div className="runnable-popover-item-text">
+              <span className="runnable-popover-item-label">Code editor line wrap</span>
+            </div>
+            <Switch
+              data-cy="code-editor-line-wrap-switch"
+              value={appState.codeEditorLineWrap}
+              onUpdate={action('toggle:code:editor:line:wrap', toggleCodeEditorLineWrap)}
+            />
+          </div>
+          <span className="runnable-popover-item-description">
+            Wrap long lines instead of scrolling horizontally.
+          </span>
+        </div>
+      </div>
     </div>
   )
 
@@ -199,7 +251,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           )
         }
       </div>
-      {isOpen && createPortal(popoverContent, document.body)}
+      {isOpen && createPortal(popoverContent, getReporterBody())}
     </>
   )
 })

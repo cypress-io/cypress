@@ -284,6 +284,77 @@ describe('config/src/project/utils', () => {
         baz: 'quux',
       })
     })
+
+    it('warns and ignores CYPRESS_env when set to a non-object string value', () => {
+      vi.stubEnv('CYPRESS_env', 'notAnObject')
+
+      const obj = { env: { existing: 'value' } }
+
+      const result = parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'notAnObject')
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('does not spread invalid CYPRESS_env into indexed env keys', () => {
+      vi.stubEnv('CYPRESS_env', 'bad')
+
+      const result = parseEnv({ env: { existing: 'value' } }, {})
+
+      expect(result).toEqual({ existing: 'value' })
+      expect(result).not.toHaveProperty('0')
+    })
+
+    it('warns and ignores CYPRESS_env when set to a numeric string', () => {
+      vi.stubEnv('CYPRESS_env', '42')
+
+      const obj = { env: {} }
+
+      const result = parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 42)
+      expect(result).toEqual({})
+    })
+
+    it('warns and ignores CYPRESS_env when set to a JSON array', () => {
+      vi.stubEnv('CYPRESS_env', '[]')
+
+      const result = parseEnv({ env: { existing: 'value' } }, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', [])
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('warns and ignores CYPRESS_ENV regardless of casing', () => {
+      vi.stubEnv('CYPRESS_ENV', 'notAnObject')
+
+      const result = parseEnv({ env: { existing: 'value' } }, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'notAnObject')
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('applies CYPRESS_env when set to a valid JSON object', () => {
+      vi.stubEnv('CYPRESS_env', '{"foo":"bar"}')
+
+      const obj = { env: {} }
+
+      parseEnv(obj, {})
+
+      expect(errors.warning).not.toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', expect.anything())
+      expect(obj.env).toEqual({ foo: 'bar' })
+    })
+
+    it('warns and ignores CYPRESS_expose when set to a non-object string value', () => {
+      vi.stubEnv('CYPRESS_expose', 'notAnObject')
+
+      const obj = { expose: { existing: 'value' } }
+
+      parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'expose', 'notAnObject')
+      expect(obj.expose).toEqual({ existing: 'value' })
+    })
   })
 
   describe('.resolveConfigValues', () => {
@@ -817,6 +888,25 @@ describe('config/src/project/utils', () => {
       await defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/33198
+    // A `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string, which used to
+    // slip past validation and crash later when the browser list was mapped over.
+    it('throws a clear validation error when browsers is coerced to a non-array via env', async function () {
+      vi.stubEnv('CYPRESS_BROWSERS', 'chrome')
+
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+
+      try {
+        await mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)
+        throw new Error('Expected error to be thrown')
+      } catch (err: any) {
+        expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_BROWSERS_INVALID', 'chrome')
+      }
+    })
+
     it('port=null', async function () {
       await defaults('port', null)
     })
@@ -1030,9 +1120,17 @@ describe('config/src/project/utils', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', async function () {
-      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
 
       expect(cfg.numTestsKeptInMemory).toEqual(0)
+    })
+
+    it('honors numTestsKeptInMemory in runMode when CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY=true', async function () {
+      vi.stubEnv('CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY', 'true')
+
+      const cfg = await defaults('numTestsKeptInMemory', 50, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
+
+      expect(cfg.numTestsKeptInMemory).toEqual(50)
     })
 
     it('resets watchForFileChanges to false when runMode', async function () {
@@ -1051,6 +1149,30 @@ describe('config/src/project/utils', () => {
       const cfg = await defaults('isTextTerminal', true, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
 
       expect(cfg.isTextTerminal).toBe(true)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    it('isInteractive=true in open mode', async function () {
+      const cfg = await defaults('isInteractive', true, { projectRoot: '/foo/bar/', supportFile: false })
+
+      expect(cfg.isInteractive).toBe(true)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    it('isInteractive=false in run mode (isTextTerminal=true)', async function () {
+      const cfg = await defaults('isInteractive', false, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.isInteractive).toBe(false)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    // since isInteractive is derived from the isTextTerminal mode option, its
+    // resolved value should still report `from: 'default'` in run mode rather
+    // than be mistaken for a user-provided config value.
+    it('resolves isInteractive=false from default in run mode', async function () {
+      const cfg = await defaults('isInteractive', false, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.resolved.isInteractive).toEqual({ value: false, from: 'default' })
     })
 
     it('can override socketId in options', async function () {
@@ -1193,7 +1315,6 @@ describe('config/src/project/utils', () => {
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
-          experimentalPromptCommand: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1214,6 +1335,7 @@ describe('config/src/project/utils', () => {
           port: { value: 1234, from: 'cli' },
           projectId: { value: null, from: 'default' },
           redirectionLimit: { value: 20, from: 'default' },
+          removeSRIAttributes: { value: false, from: 'default' },
           reporter: { value: 'json', from: 'cli' },
           resolvedNodePath: { value: null, from: 'default' },
           resolvedNodeVersion: { value: null, from: 'default' },
@@ -1318,7 +1440,6 @@ describe('config/src/project/utils', () => {
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
-          experimentalPromptCommand: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1348,6 +1469,7 @@ describe('config/src/project/utils', () => {
           port: { value: 2020, from: 'config' },
           projectId: { value: 'projectId123', from: 'env' },
           redirectionLimit: { value: 20, from: 'default' },
+          removeSRIAttributes: { value: false, from: 'default' },
           reporter: { value: 'spec', from: 'default' },
           resolvedNodePath: { value: null, from: 'default' },
           resolvedNodeVersion: { value: null, from: 'default' },

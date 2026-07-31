@@ -1,30 +1,30 @@
 import debugModule from 'debug'
-import toInteger from 'lodash/toInteger'
-import isNumber from 'lodash/isNumber'
-import { isHostOnlyCookie } from './cdp_automation'
-import { cookieMatches } from '../automation/util'
+import { isLocalhost } from '@packages/network-tools'
+import { cookieMatches, isHostOnlyCookie } from '../automation/cookie/util'
+import { convertBiDiCookieToCyCookie, convertCyCookieToBiDiCookie, convertSameSiteExtensionToBiDi } from '../automation/cookie/converters/bidi'
 import { bidiKeyPress } from '../automation/commands/key_press'
 import { AutomationNotImplemented } from '../automation/automation_not_implemented'
 
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import { AutomationMiddleware, AutomationCommands, toSupportedKey } from '@packages/types'
+import { AutomationMiddleware, AutomationCommands, toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,
   NetworkResponseStartedParameters,
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
-  NetworkCookie,
   BrowsingContextInfo,
-  NetworkSameSite,
 } from 'webdriver/build/bidi/localTypes'
-import type { CyCookie as CyBaseCookie } from '../automation/util'
+import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
+import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
 import { bidiGetUrl } from '../automation/commands/get_url'
 import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
+import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
+import { AUT_FRAME_HEADER } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
@@ -34,28 +34,6 @@ const BIDI_SCREENSHOT_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:screenshot`
 const debug = debugModule(BIDI_DEBUG_NAMESPACE)
 const debugCookies = debugModule(BIDI_COOKIE_DEBUG_NAMESPACE)
 const debugScreenshot = debugModule(BIDI_SCREENSHOT_DEBUG_NAMESPACE)
-
-type CyCookie = Omit<CyBaseCookie, 'sameSite'> & {
-  sameSite: 'no_restriction' | 'lax' | 'strict' | 'unspecified'
-}
-
-// if the filter is not an exact match OR, if looselyMatchCookiePath is enabled, doesn't include the path.
-// ex: /foo/bar/baz path should include cookies for /foo/bar/baz, /foo/bar, /foo, and /
-// this is shipped in remoteTypes within webdriver but it isn't exported, so we need to redefine the type
-interface StoragePartialCookie extends Record<string, unknown> {
-  name: string
-  value: {
-    type: 'string'
-    value: string
-  }
-  domain: string
-  path: string
-  httpOnly: boolean
-  hostOnly?: boolean
-  secure: boolean
-  sameSite: NetworkSameSite | 'default'
-  expiry?: number
-}
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
 
@@ -103,88 +81,7 @@ const normalizeResourceType = (type: RequestInitiatorType): ResourceType => {
   }
 }
 
-function convertSameSiteBiDiToExtension (str: NetworkSameSite | 'default') {
-  if (str === 'none') {
-    return 'no_restriction'
-  }
-
-  if (str === 'default') {
-    // put firefox version check here, under 140 we need to return 'no_restriction'
-    return 'unspecified'
-  }
-
-  return str
-}
-
-function convertSameSiteExtensionToBiDi (str: CyCookie['sameSite'], majorFirefoxVersion?: number) {
-  if (str === 'no_restriction') {
-    return 'none'
-  }
-
-  if (str === 'unspecified') {
-    // put firefox version check here, under 140 we need to return 'no_restriction'
-    return 'default'
-  }
-
-  // @see https://www.w3.org/TR/webdriver-bidi/#type-network-Cookie
-  // in Firefox 140, BiDi added the 'default' value to be able to assign 'unspecified', which was also added in Firefox 140.
-  const defaultValue = majorFirefoxVersion && majorFirefoxVersion < 140 ? 'none' : 'default'
-
-  // if no value, default to 'none' as this is the browser default in firefox specifically.
-  // Every other browser defaults to 'lax'
-  return str === undefined ? defaultValue : str
-}
-
-// used to normalize cookies to CyCookie before returning them through the automation client
-const convertBiDiCookieToCyCookie = (cookie: NetworkCookie): CyCookie => {
-  const cyCookie: CyCookie = {
-    name: cookie.name,
-    value: cookie.value.value,
-    domain: cookie.domain,
-    path: cookie.path,
-    httpOnly: cookie.httpOnly,
-    hostOnly: !!isHostOnlyCookie(cookie),
-    expirationDate: cookie.expiry ?? undefined,
-    secure: cookie.secure,
-    sameSite: convertSameSiteBiDiToExtension(cookie.sameSite),
-  }
-
-  debugCookies(`parsed BiDi cookie %o to cy cookie %o`, cookie, cyCookie)
-
-  return cyCookie
-}
-
-const convertCyCookieToBiDiCookie = (cookie: CyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
-  const cookieToSet: StoragePartialCookie = {
-    name: cookie.name,
-    value: {
-      type: 'string',
-      value: cookie.value,
-    },
-    domain: cookie.domain,
-    path: cookie.path,
-    httpOnly: cookie.httpOnly,
-    secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
-    // BiDi cookie expiry is in seconds from EPOCH, but sometimes the automation client feeds in a float and BiDi does not know how to handle it.
-    // If trying to set a float on the expiry time in BiDi, the setting silently fails.
-    expiry: (cookie.expirationDate === -Infinity ? 0 : (isNumber(cookie.expirationDate) ? toInteger(cookie.expirationDate) : null)) ?? undefined,
-  }
-
-  if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
-    cookieToSet.domain = `.${cookie.domain}`
-  }
-
-  if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
-    cookieToSet.hostOnly = false
-  }
-
-  debugCookies(`parsed cy cookie %o to BiDi cookie %o`, cookie, cookieToSet)
-
-  return cookieToSet
-}
-
-const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
+const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartialCookie => {
   const cookieToClearFilter: StoragePartialCookie = {
     name: cookie.name,
     value: {
@@ -195,7 +92,7 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVe
     path: cookie.path,
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
   }
 
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
@@ -228,13 +125,11 @@ export class BidiAutomation {
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
-  private majorFirefoxVersion: number | undefined
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
     debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
-    this.majorFirefoxVersion = parseInt(webDriverClient?.capabilities?.browserVersion || '') || undefined
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
@@ -252,30 +147,59 @@ export class BidiAutomation {
   }
 
   private onBrowsingContextCreated = async (params: BrowsingContextInfo) => {
-    debugVerbose('received browsingContext.contextCreated %o', params)
-    // the AUT iframe is always the FIRST child created by the top level parent (second is the reporter, if it exists which isnt the case for headless/test replay)
-    if (!this.autContextId && params.parent && this.topLevelContextId === params.parent) {
-      debug(`new browsing context ${params.context} created within top-level parent context ${params.parent}.`)
-      debug(`setting browsing context ${params.context} as the AUT context.`)
+    debug('received browsingContext.contextCreated %o', params)
 
-      this.autContextId = params.context
+    // Only direct children of the top-level context are candidates for the AUT.
+    if (this.autContextId || !params.parent || this.topLevelContextId !== params.parent) {
+      return
+    }
 
-      // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
-      // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
-      // AUT in the request interceptor.
-      if (!this.interceptId) {
-        debugVerbose(`no interceptor defined for top-level context ${params.parent}.`)
-        debugVerbose(`creating interceptor to determine if a request belongs to the AUT.`)
-        // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
-        // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
-        // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
-        const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
+    // The top-level context has more than one direct child iframe — the AUT and
+    // the reporter iframe — and their creation order is not guaranteed, so
+    // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
+    // for exactly this purpose) rather than assuming it is the first child
+    // created.
+    let contextName = ''
 
-        debugVerbose(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
+    try {
+      contextName = (await this.webDriverClient.scriptEvaluate({
+        expression: 'window.name',
+        target: { context: params.context },
+        awaitPromise: false,
+        // @ts-expect-error - result is not typed
+      }))?.result?.value ?? ''
+    } catch (err) {
+      debug(`could not read window.name for browsing context ${params.context}; skipping AUT identification for it: %o`, err)
 
-        // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
-        this.interceptId = intercept
-      }
+      return
+    }
+
+    if (!contextName.startsWith(AUT_FRAME_NAME_IDENTIFIER)) {
+      debug(`browsing context ${params.context} (name: '${contextName}') is not the AUT; skipping.`)
+
+      return
+    }
+
+    debug(`new browsing context ${params.context} (name: '${contextName}' created within top-level parent context ${params.parent}.`)
+    debug(`setting browsing context ${params.context} as the AUT context.`)
+
+    this.autContextId = params.context
+
+    // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
+    // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
+    // AUT in the request interceptor.
+    if (!this.interceptId) {
+      debug(`no interceptor defined for top-level context ${params.parent}.`)
+      debug(`creating interceptor to determine if a request belongs to the AUT.`)
+      // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
+      // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
+      // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
+      const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
+
+      debug(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
+
+      // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
+      this.interceptId = intercept
     }
   }
 
@@ -361,7 +285,7 @@ export class BidiAutomation {
         debug(`AUT request detected, adding X-Cypress-Is-AUT-Frame for request ID: ${params.request.request}`)
 
         params.request.headers.push({
-          name: 'X-Cypress-Is-AUT-Frame',
+          name: AUT_FRAME_HEADER,
           value: {
             type: 'string',
             value: 'true',
@@ -442,7 +366,16 @@ export class BidiAutomation {
       filter.domain = url.hostname
       // if we are in a non-secure context, we do NOT want to get secure cookies and apply them,
       // but non-secure cookies can be applied in a secure context.
-      if (url.protocol === 'http:') {
+      //
+      // localhost and the loopback range (127.0.0.0/8, ::1) are "potentially
+      // trustworthy" origins, so browsers treat them as secure contexts and
+      // still send secure cookies over http for those hosts. Firefox has done
+      // this since Firefox 75 (see https://bugzilla.mozilla.org/show_bug.cgi?id=1618113
+      // and https://bugzilla.mozilla.org/show_bug.cgi?id=1648993), matching the
+      // Chromium/CDP behavior in getCookiesByUrl. Exclude those hosts from the
+      // secure filter so cy.request receives the same cookies the browser would.
+      // @see https://github.com/cypress-io/cypress/pull/34095 for the full rationale.
+      if (url.protocol === 'http:' && !isLocalhost(url)) {
         secure = false
       }
 
@@ -517,7 +450,7 @@ export class BidiAutomation {
 
     // if it does, convert it to a BiDi cookie filter and delete the cookie
     await this.webDriverClient.storageDeleteCookies({
-      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared, this.majorFirefoxVersion) as StorageCookieFilter,
+      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared) as StorageCookieFilter,
     })
 
     return cookieToBeCleared
@@ -559,7 +492,7 @@ export class BidiAutomation {
         {
           debugCookies(`set:cookie %o`, data)
           await this.webDriverClient.storageSetCookie({
-            cookie: convertCyCookieToBiDiCookie(data, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+            cookie: convertCyCookieToBiDiCookie(data) as BidiStoragePartialCookie,
           })
 
           const cookies = await this.getAllCookiesMatchingFilter(data)
@@ -571,7 +504,7 @@ export class BidiAutomation {
           debugCookies(`add:cookies %o`, data)
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+              cookie: convertCyCookieToBiDiCookie(cookie) as BidiStoragePartialCookie,
             })
           }))
 
@@ -584,7 +517,7 @@ export class BidiAutomation {
 
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
+              cookie: convertCyCookieToBiDiCookie(cookie) as BidiStoragePartialCookie,
             })
           }))
 
@@ -686,6 +619,18 @@ export class BidiAutomation {
             await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
             throw new Error('Cannot emit key press: no AUT context initialized')
+          }
+
+          return
+        case 'perform:user:gesture':
+          // Firefox 93+ requires a transient user activation before display capture is allowed,
+          // which the driver needs in order to record video via getUserMedia. We grant it by
+          // synthesizing a trusted gesture in the top-level context (where getUserMedia is called).
+          // @see https://github.com/cypress-io/cypress/issues/18415
+          if (this.topLevelContextId) {
+            await bidiPerformUserGesture(this.webDriverClient, this.topLevelContextId)
+          } else {
+            throw new Error('Cannot perform user gesture: no top-level context initialized')
           }
 
           return

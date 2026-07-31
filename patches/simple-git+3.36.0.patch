@@ -1,0 +1,32 @@
+diff --git a/node_modules/simple-git/dist/cjs/index.js b/node_modules/simple-git/dist/cjs/index.js
+index 311a792..e8040ea 100644
+--- a/node_modules/simple-git/dist/cjs/index.js
++++ b/node_modules/simple-git/dist/cjs/index.js
+@@ -1729,10 +1729,8 @@ var init_tasks_pending_queue = __esm({
+       static getName(name = "empty") {
+         return `task:${name}:${++_TasksPendingQueue.counter}`;
+       }
+-      static {
+-        this.counter = 0;
+-      }
+     };
++    TasksPendingQueue.counter = 0;
+   }
+ });
+ 
+diff --git a/node_modules/simple-git/dist/esm/index.js b/node_modules/simple-git/dist/esm/index.js
+index bc6ff91..7ddd754 100644
+--- a/node_modules/simple-git/dist/esm/index.js
++++ b/node_modules/simple-git/dist/esm/index.js
+@@ -1210,10 +1210,8 @@ var init_tasks_pending_queue = __esm({
+       static getName(name = "empty") {
+         return `task:${name}:${++_TasksPendingQueue.counter}`;
+       }
+-      static {
+-        this.counter = 0;
+-      }
+     };
++    TasksPendingQueue.counter = 0;
+   }
+ });
+ 

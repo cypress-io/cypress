@@ -4,7 +4,7 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp-protocol/cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
@@ -17,7 +17,8 @@ import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -53,13 +54,13 @@ const tryToCall = function (win, method) {
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
-  const port = getRemoteDebuggingPort()
+  const port = await getRemoteDebuggingPort()
 
   if (!browserCriClient) {
     debug(`browser CRI is not set. Creating...`)
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
-      port,
+      port: Number(port),
       browserName: 'electron',
       onAsynchronousError: options.onError,
       onReconnect: () => {},
@@ -180,6 +181,17 @@ export = {
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
       async onCrashed () {
+        // Synchronously mark sibling CRI clients (which share the same targetId)
+        // as crashed. Each sibling has its own websocket and its own listener for
+        // Target.targetCrashed, but those listeners fire when Chromium happens
+        // to deliver the event on that connection — which can be after spec
+        // cleanup runs. Without this propagation, the protocol's `afterSpec`
+        // hook can call `cdpClient.send` on a crashed page and hang forever.
+        // See the chrome.ts handler for the analogous case.
+        browserCriClient?.currentlyAttachedProtocolTarget?.markCrashed()
+        browserCriClient?.currentlyAttachedCyPromptTarget?.markCrashed()
+        browserCriClient?.currentlyAttachedStudioTarget?.markCrashed()
+
         const err = errors.get('RENDERER_CRASHED', 'Electron')
 
         await memory.endProfiling()
@@ -288,6 +300,20 @@ export = {
       })
     })
 
+    // When the page under test registers a `beforeunload` handler that requests a
+    // confirmation prompt (e.g. `window.onbeforeunload = () => 'msg'` or setting
+    // `event.returnValue`), Electron fires `will-prevent-unload` instead of showing
+    // the native panel. Cypress always proceeds with navigation during a test run,
+    // so we preventDefault here to dismiss the would-be prompt and allow the unload.
+    // Without this, the prompt is never answered, the page never unloads, and
+    // navigation hangs until pageLoadTimeout. This is scoped to the AUT/test
+    // browser windows (`_launch` runs for the main window and child windows) so
+    // the Cypress GUI window created via `Windows.create` is left untouched.
+    // @see https://github.com/cypress-io/cypress/issues/2118
+    win.webContents.on('will-prevent-unload', (event) => {
+      event.preventDefault()
+    })
+
     let cdpAutomation
 
     // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
@@ -317,7 +343,7 @@ export = {
       ps = options.proxyServer
 
       if (ps) {
-        return this._setProxy(win.webContents, ps)
+        return this._setProxy(win.webContents, ps, options.proxyBypassList)
       }
     }
 
@@ -353,9 +379,21 @@ export = {
 
     // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
     if (cdpAutomation) {
-      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (isProxyDisabled()) {
+        if (!pageCriClient) {
+          throw new Error('Missing pageCriClient in _launch')
+        }
+
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+        await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
+      } else if (pageCriClient) {
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        await cdpAutomation._handlePausedRequests(pageCriClient)
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      }
     }
 
     await win.loadURL(url)
@@ -450,13 +488,11 @@ export = {
     return webContents.session.setUserAgent(userAgent)
   },
 
-  _setProxy (webContents, proxyServer) {
+  _setProxy (webContents, proxyServer, proxyBypassList?: string) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // this should really only be necessary when
-      // running Chromium versions >= 72
-      // https://github.com/cypress-io/cypress/issues/1872
-      proxyBypassRules: '<-loopback>',
+      // without any rules, Chromium's implicit rules keep loopback off the proxy
+      ...(proxyBypassList ? { proxyBypassRules: proxyBypassList } : {}),
     })
   },
 
@@ -477,6 +513,10 @@ export = {
       browserCriClient?.close(options.gracefulShutdown).catch(() => {})
       browserCriClient = null
     }
+  },
+
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
   },
 
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {

@@ -1,0 +1,3 @@
+# electron-mksnapshot
+
+@AGENTS.md

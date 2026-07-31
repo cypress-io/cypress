@@ -9,11 +9,12 @@ import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
-import { DocumentDomainInjection } from '@packages/network-tools'
+import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { RemoteStates } from '@packages/server/lib/remote_states'
-import { CookieJar } from '@packages/server/lib/util/cookies'
-const Request = require('@packages/server/lib/request')
+import { HttpIntercept, NetworkPolicyRegistry } from '@packages/network-interception'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
+import { createProxyNetworkInterception } from '../../lib/adapters/create-proxy-network-interception'
+import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
 describe('network stubbing', () => {
@@ -54,25 +55,23 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
+      networkInterceptionCore: createProxyNetworkInterception({
+        policyRegistration: new NetworkPolicyRegistry(),
+      }),
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),
       remoteStates,
       getFileServerToken: () => 'fake-token',
-      request: new Request(),
+      request: new ServerRequest(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
-      resourceTypeAndCredentialManager: {
-        get () {
-          return {
-            resourceType: 'xhr',
-            credentialStatus: 'same-origin',
-          }
-        },
-        set () {},
-        clear () {},
-      },
+      getCurrentBrowser: vi.fn(),
     })
+    const httpIntercept = new HttpIntercept(proxy.codec)
+
+    httpIntercept.use(proxy.http.createLegacyProxyPipeline(proxy.codec))
+    proxy.withIntercept(httpIntercept)
 
     app.use((req, res, next) => {
       req.proxiedUrl = req.url = req.url.slice(1)
