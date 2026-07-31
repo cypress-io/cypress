@@ -97,10 +97,6 @@ export interface BreakingOption {
    * Whether to display or throw the error message based on the configuration value present.
    */
   shouldDisplayOrThrow?: (value: any) => boolean
-  /**
-   * Migration docs link surfaced alongside the error/warning message, e.g. for a renamed option.
-   */
-  docsUrl?: string
 }
 
 const isValidConfig = (testingType: string, config: any, opts: ValidationOptions) => {
@@ -689,7 +685,6 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'manageBrowserMemory',
     isWarning: true,
-    docsUrl: 'https://on.cypress.io/memory-management-migration',
   },
 ] as const
 

@@ -70,8 +70,8 @@ export function resetIssuedWarnings () {
 }
 
 const fireBreakingOptionEvent = (opt: BreakingOption, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
-  const { name, errorKey, newName, isWarning, value, docsUrl } = opt
-  const args: BreakingErrResult = { name, newName, value, configFile: cfg.configFile, testingType, docsUrl }
+  const { name, errorKey, newName, isWarning, value } = opt
+  const args: BreakingErrResult = { name, newName, value, configFile: cfg.configFile, testingType }
 
   if (isWarning) {
     if (issuedWarnings.has(errorKey)) {

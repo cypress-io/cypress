@@ -1290,7 +1290,6 @@ describe('config/src/project/utils', () => {
           newName: 'manageBrowserMemory',
           testingType: undefined,
           value: undefined,
-          docsUrl: 'https://on.cypress.io/memory-management-migration',
         })
       })
 
