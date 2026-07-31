@@ -2239,7 +2239,7 @@ declare namespace Cypress {
      * @example
      *    cy.env(['KEY_1', 'KEY_2']).then(({ KEY_1, KEY_2 }) => { ... })
      */
-    env(keys: string[]): Chainable<Record<string, any>>
+    env(keys: string[], options?: Partial<Loggable & Timeoutable>): Chainable<Record<string, any>>
 
     /**
      * Gets multiple environment variables with a specific type.
@@ -2250,7 +2250,7 @@ declare namespace Cypress {
      *      expect(KEY_2).to.be.a('number')
      *    })
      */
-    env<T extends object>(keys: string[]): Chainable<T>
+    env<T extends object>(keys: string[], options?: Partial<Loggable & Timeoutable>): Chainable<T>
 
     /**
      * Enables you to work with the subject yielded from the previous command.

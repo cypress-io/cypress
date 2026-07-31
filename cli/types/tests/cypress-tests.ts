@@ -54,6 +54,11 @@ namespace CypressEnvTests {
   Cypress.env({
     foo: 'bar',
   })
+
+  cy.env(['KEY_1', 'KEY_2']) // $ExpectType Chainable<Record<string, any>>
+  cy.env(['KEY_1', 'KEY_2'], { log: false }) // $ExpectType Chainable<Record<string, any>>
+  cy.env(['KEY_1', 'KEY_2'], { timeout: 1000 }) // $ExpectType Chainable<Record<string, any>>
+  cy.env<{ KEY_1: string }>(['KEY_1'], { log: false, timeout: 1000 }) // $ExpectType Chainable<{ KEY_1: string; }>
 }
 
 namespace CypressExposeTests {
