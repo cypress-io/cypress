@@ -287,12 +287,16 @@ export const installCustomPercyCommand = ({ before, elementOverrides }: {before?
         }
 
         // Percy's readiness gate (`@percy/dom`'s waitForReady) drives both its
-        // checks and its own timeout off real timers. When cy.clock() has
-        // installed fake timers the AUT clock is frozen, so waitForReady can
-        // never resolve and the snapshot command times out. The frozen DOM is
-        // already the deterministic state we want to capture, so skip readiness.
+        // checks and its own timeout off setTimeout. When cy.clock() has faked
+        // setTimeout the AUT clock is frozen, so waitForReady can never resolve
+        // and the snapshot command times out; the frozen DOM is already the
+        // deterministic state we want to capture, so skip readiness. Only key off
+        // setTimeout: a Date-only clock (cy.clock(date, ['Date'])) leaves timers
+        // real, so readiness still resolves and should run.
         // @ts-ignore - cy.state is not in the public types
-        if (cy.state('clock')) {
+        const clock = cy.state('clock')
+
+        if (clock?.details().methods.includes('setTimeout')) {
           snapshotOptions.readiness = { preset: 'disabled' }
         }
 
