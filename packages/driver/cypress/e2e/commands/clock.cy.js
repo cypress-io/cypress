@@ -47,6 +47,20 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    // An empty methods array expands to the default set (as it did before the
+    // @sinonjs/fake-timers 14 upgrade), and still leaves queueMicrotask alone.
+    it('expands an empty methods array to the default set', function () {
+      cy.clock(0, []).then(function (clock) {
+        const { methods } = clock.details()
+
+        expect(methods).to.include('setTimeout')
+        expect(methods).to.include('Date')
+        expect(methods).not.to.include('queueMicrotask')
+
+        expect(new this.window.Date().getTime()).to.equal(0)
+      })
+    })
+
     it('takes Date now arg', () => {
       // April 15, 2017
       const now = new Date(2017, 3, 15)
