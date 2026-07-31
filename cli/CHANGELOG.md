@@ -12,6 +12,9 @@
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
 - Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 - Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+
+**Misc:**
+
 - Fixed an issue where passing the `options` argument to [`cy.env()`](https://on.cypress.io/env), such as `cy.env(['FOO'], { log: false })`, raised a TypeScript error (`Expected 1 arguments, but got 2`). Fixes [#34284](https://github.com/cypress-io/cypress/issues/34284).
 
 **Dependency Updates:**
