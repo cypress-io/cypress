@@ -242,7 +242,11 @@ describe('src/cy/commands/waiting', () => {
       })
 
       describe('errors', {
-        defaultCommandTimeout: 100,
+        // `defaultCommandTimeout` also bounds the async `done()` callback. These
+        // tests invoke `done()` only after `cy.wait()` fails on its per-test
+        // `requestTimeout`/`responseTimeout`, so this must stay well above those
+        // or a loaded machine times the test out before it can assert.
+        defaultCommandTimeout: 4000,
       }, () => {
         it('throws when alias does not match a route (DOM element)', (done) => {
           cy.on('fail', (err) => {

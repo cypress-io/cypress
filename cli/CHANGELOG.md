@@ -40,6 +40,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) matching on the `auth` option compared only the portion of a Basic authentication password before the first colon, so a request whose password contained a colon (permitted by RFC 7617) failed to match. The full password is now compared. Fixed in [#34206](https://github.com/cypress-io/cypress/pull/34206).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) routes specifying a numeric `port` (for example `port: 8080` or `port: [8080]`) did not match requests on non-default ports. Such routes now match as documented. Fixes [#17653](https://github.com/cypress-io/cypress/issues/17653). Fixed in [#34205](https://github.com/cypress-io/cypress/pull/34205).
 - Fixed an issue where the TypeScript 7 support added in [15.18.0](#15-18-0) did not work: TypeScript spec and support files failed to compile with `Error: Cannot find module '@babel/preset-typescript'`. Fixes [#34359](https://github.com/cypress-io/cypress/issues/34359).
 - Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) block could intermittently fail with `TypeError: Cannot read properties of undefined (reading 'applied')`, incorrectly reported as originating from your test code. Addressed in [#34376](https://github.com/cypress-io/cypress/pull/34376).
