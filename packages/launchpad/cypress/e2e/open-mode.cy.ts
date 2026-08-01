@@ -82,7 +82,7 @@ describe('Launchpad: Open Mode', () => {
             'x-framework': 'react',
             'x-dev-server': 'webpack',
             'x-notifications': 'failed',
-            'x-dependencies': 'typescript@5.3.3',
+            'x-dependencies': o.sinon.match(/^typescript@\d+\.\d+\.\d+/),
           },
         })
       })

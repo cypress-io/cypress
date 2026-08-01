@@ -1,5 +1,4 @@
 import Debug from 'debug'
-import pDefer from 'p-defer'
 import type { BrowserPreRequest } from '../../types'
 import type Protocol from 'devtools-protocol'
 
@@ -93,7 +92,7 @@ export class ServiceWorkerManager {
   private serviceWorkerRegistrations: Map<string, ServiceWorkerRegistration> = new Map<string, ServiceWorkerRegistration>()
   private pendingInitiators: Map<string, string> = new Map<string, string>()
   private pendingControlledUrls: Map<string, string[]> = new Map<string, string[]>()
-  private pendingPotentiallyControlledRequests: Map<string, pDefer.DeferredPromise<boolean>[]> = new Map<string, pDefer.DeferredPromise<boolean>[]>()
+  private pendingPotentiallyControlledRequests: Map<string, PromiseWithResolvers<boolean>[]> = new Map<string, PromiseWithResolvers<boolean>[]>()
   private pendingServiceWorkerFetches: Map<string, boolean[]> = new Map<string, boolean[]>()
 
   /**
@@ -381,7 +380,7 @@ export class ServiceWorkerManager {
       this.pendingPotentiallyControlledRequests.set(url, promises)
     }
 
-    const deferred = pDefer<boolean>()
+    const deferred = Promise.withResolvers<boolean>()
 
     promises.push(deferred)
     debug('adding pending controlled request promise: %o', { url, requestId: browserPreRequest.requestId })

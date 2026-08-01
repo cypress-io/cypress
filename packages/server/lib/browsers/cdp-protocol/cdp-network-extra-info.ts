@@ -1,6 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
-import pDefer from 'p-defer'
 import type { ICriClient } from './cri-client'
 
 const debug = debugModule('cypress:server:browsers:cdp-network-extra-info')
@@ -8,7 +7,7 @@ const debug = debugModule('cypress:server:browsers:cdp-network-extra-info')
 type CDPNetworkExtraInfoClient = Pick<ICriClient, 'on' | 'off'>
 
 type ExtraInfoDeferred = {
-  deferred: pDefer.DeferredPromise<Protocol.Network.ResponseReceivedExtraInfoEvent | undefined>
+  deferred: PromiseWithResolvers<Protocol.Network.ResponseReceivedExtraInfoEvent | undefined>
   // requestWillBeSentExtraInfo arrived: this transaction is on the
   // instrumented wire path, so a response extraInfo will follow — hold for it
   expectsExtraInfo: boolean
@@ -216,7 +215,7 @@ export class CDPNetworkExtraInfo {
     // chain (same request id), so replace it
     if (!entry || entry.consumed) {
       entry = {
-        deferred: pDefer<Protocol.Network.ResponseReceivedExtraInfoEvent | undefined>(),
+        deferred: Promise.withResolvers<Protocol.Network.ResponseReceivedExtraInfoEvent | undefined>(),
         expectsExtraInfo: false,
         settled: false,
         consumed: false,
