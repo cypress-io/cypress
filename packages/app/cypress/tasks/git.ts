@@ -6,11 +6,12 @@ export async function initGitRepoForTestProject (projectPath: string) {
   const git = simpleGit({ baseDir: projectPath })
 
   if (process.env.CI) {
-    // need to set a user on CI
-    await Promise.all([
-      git.addConfig('user.name', 'Test User', true, 'global'),
-      git.addConfig('user.email', 'test-user@example.com', true, 'global'),
-    ])
+    // Set a user on CI. `git config --global` takes a lock on the global
+    // .gitconfig (a .gitconfig.lock file), and on Windows concurrent writes
+    // fail to acquire it with "could not lock config file ...: File exists",
+    // so these must not overlap.
+    await git.addConfig('user.name', 'Test User', true, 'global')
+    await git.addConfig('user.email', 'test-user@example.com', true, 'global')
   }
 
   const e2eFolder = path.join(projectPath, 'cypress', 'e2e')
