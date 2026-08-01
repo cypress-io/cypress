@@ -2719,7 +2719,6 @@
     "./node_modules/once/once.js",
     "./node_modules/onetime/index.js",
     "./node_modules/ospath/index.js",
-    "./node_modules/p-defer/index.js",
     "./node_modules/p-finally/index.js",
     "./node_modules/p-limit/index.js",
     "./node_modules/p-map/index.js",
@@ -3922,5 +3921,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "1c10858400ebf79b85215cb4d016d3db01d737272339f760002721b1f4eeaa9e"
+  "deferredHash": "b255ba92032628e58f706ade1c006d4d6b3f7447a4fe6f56428905a72003b1e0"
 }
