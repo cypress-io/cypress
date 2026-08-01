@@ -194,6 +194,26 @@ describe('core/route-matching', function () {
         url: 'services/api/agenda/Appointment?id=**',
       })
     })
+
+    // A slash-less matcher is matched against the basename of the url (the
+    // `matchBase` semantics), so a bare filename matches regardless of depth.
+    it('matches a slash-less glob against the url basename', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1',
+      }, {
+        url: 'a1',
+      })
+    })
+
+    // A matcher that contains a slash is NOT reduced to the basename, so it must
+    // match the full path rather than just the trailing segment.
+    it('does not basename-match a slash-containing glob', function () {
+      tryMatch({
+        proxiedUrl: 'http://foo.com/bar/a1',
+      }, {
+        url: 'nope/a1',
+      }, false)
+    })
   })
 
   describe('.getRoutesForRequest', function () {

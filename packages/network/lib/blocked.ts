@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import minimatch from 'minimatch'
+import picomatch from 'picomatch'
 import { stripProtocolAndDefaultPorts } from '@packages/network-tools'
 
 export function matches (urlToCheck: string, blockHosts: string[] | string) {
@@ -8,10 +8,11 @@ export function matches (urlToCheck: string, blockHosts: string[] | string) {
 
   const urlToCheckStripped = stripProtocolAndDefaultPorts(urlToCheck) as string
 
-  // use minimatch against the url
-  // to see if any match
+  // glob-match the stripped host against each block host to see if any match.
+  // picomatch throws on an empty pattern, which an empty block host never needs
+  // to match against anyway, so treat it as a non-match.
   const matchUrl = (hostMatcher: string) => {
-    return minimatch(urlToCheckStripped, hostMatcher)
+    return hostMatcher !== '' && picomatch.isMatch(urlToCheckStripped, hostMatcher)
   }
 
   return _.find(blockHostsNormalized, matchUrl)

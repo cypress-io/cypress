@@ -1,6 +1,6 @@
 import { URL, Url } from 'url'
 import debugModule from 'debug'
-import minimatch from 'minimatch'
+import picomatch from 'picomatch'
 import fs from 'fs-extra'
 import { X509Certificate, createPrivateKey } from 'crypto'
 import tls from 'tls'
@@ -31,15 +31,17 @@ export class ParsedUrl {
       }
     }
 
-    this.hostMatcher = new minimatch.Minimatch(this.host)
-    this.pathMatcher = new minimatch.Minimatch(this.path ?? '')
+    this.hostMatcher = picomatch(this.host)
+    // picomatch throws on an empty pattern, so only build a path matcher when a
+    // path is present. matchUrl only consults it when `rule.path` is set.
+    this.pathMatcher = this.path ? picomatch(this.path) : undefined
   }
 
   path: string | undefined
   host: string
   port: number | undefined
-  hostMatcher: minimatch.IMinimatch
-  pathMatcher: minimatch.IMinimatch
+  hostMatcher: picomatch.Matcher
+  pathMatcher: picomatch.Matcher | undefined
 }
 
 export class UrlMatcher {
@@ -52,14 +54,14 @@ export class UrlMatcher {
       return false
     }
 
-    let ret = rule.hostMatcher.match(hostname)
+    let ret = rule.hostMatcher(hostname)
 
     if (ret && rule.port) {
       ret = rule.port === port
     }
 
-    if (ret && rule.path) {
-      ret = rule.pathMatcher?.match(path ?? '')
+    if (ret && rule.path && rule.pathMatcher) {
+      ret = rule.pathMatcher(path ?? '')
     }
 
     return ret

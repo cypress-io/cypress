@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import minimatch from 'minimatch'
+import picomatch from 'picomatch'
 import url from 'url'
 import { debug } from '../debug'
 import type { RouteMatcherOptions } from '../types'
@@ -11,6 +11,29 @@ export type RouteMatchableRequest = {
   method: string
   proxiedUrl: string
   resourceType?: string
+}
+
+// Emulates `minimatch(value, matcher, { matchBase: true })` with picomatch.
+// `matchBase` only affects slash-less patterns: those additionally match against
+// the basename of the value, while a matcher containing a slash matches the full
+// value. picomatch's own `basename` option is not equivalent — it also alters
+// slash-containing patterns, so it can't be used as a drop-in for `matchBase`.
+function globMatchesWithBasename (value: string, matcher: string): boolean {
+  if (matcher === '') {
+    return false
+  }
+
+  const isMatch = picomatch(matcher)
+
+  if (isMatch(value)) {
+    return true
+  }
+
+  if (!matcher.includes('/')) {
+    return isMatch(value.slice(value.lastIndexOf('/') + 1))
+  }
+
+  return false
 }
 
 /**
@@ -33,7 +56,7 @@ export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMat
     const stringMatch = (value: string, matcher: string) => {
       return (
         value === matcher ||
-        minimatch(value, matcher, { matchBase: true }) ||
+        globMatchesWithBasename(value, matcher) ||
         (field === 'url' && (
           (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
         ))

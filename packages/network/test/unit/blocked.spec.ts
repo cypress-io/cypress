@@ -49,4 +49,9 @@ describe('lib/blocked', () => {
     matchesHost('http://mail.yahoo.com:80/bar', '*yahoo.com')
     matchesHost('https://localhost:6666/bar', 'localhost:6666')
   })
+
+  it('treats an empty block host as a non-match without throwing', () => {
+    expect(() => blocked.matches('https://example.com/', '')).not.toThrow()
+    matchesStr('https://example.com/', '', false)
+  })
 })
