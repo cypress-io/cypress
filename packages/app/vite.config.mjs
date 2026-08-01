@@ -40,7 +40,6 @@ const config = makeConfig({
       '@opentelemetry/core',
       'semver/functions/major',
       '@vueuse/core',
-      'javascript-time-ago',
     ],
     exclude: [
       '@toycode/markdown-it-class',

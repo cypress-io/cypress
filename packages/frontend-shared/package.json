@@ -24,7 +24,6 @@
     "@packages/data-context": "0.0.0-development",
     "@urql/devtools": "2.0.3",
     "gravatar": "1.8.2",
-    "javascript-time-ago": "2.3.8",
     "json-stable-stringify": "1.1.1",
     "md5": "2.3.0",
     "onigasm": "2.2.5",
