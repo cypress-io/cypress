@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'util'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import webpack from 'webpack'
 // @ts-ignore
@@ -16,7 +16,7 @@ const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 
 // opt in to livereload with ENABLE_LIVE_RELOAD set to '1'
 // eslint-disable-next-line no-console
-if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. Unset ${chalk.bold('ENABLE_LIVE_RELOAD')} to disable`))
+if (liveReloadEnabled && watchModeEnabled) console.log(styleText('gray', `\nLive Reloading is enabled. Unset ${styleText('bold', 'ENABLE_LIVE_RELOAD')} to disable`))
 
 process.env.NODE_ENV = env
 

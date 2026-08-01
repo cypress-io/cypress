@@ -21,7 +21,6 @@
     "babel-loader": "10.0.0",
     "buffer": "6.0.3",
     "chai": "4.5.0",
-    "chalk": "2.4.2",
     "clean-webpack-plugin": "4.0.0",
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.8.1",

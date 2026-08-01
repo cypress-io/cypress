@@ -1,4 +1,4 @@
-import { blueBright, gray, green, yellow } from 'ansi-colors'
+import { styleText } from 'util'
 import fs from 'fs'
 import crypto from 'crypto'
 import path from 'path'
@@ -7,6 +7,11 @@ import resolveFrom from 'resolve-from'
 
 import debug from 'debug'
 const logDebug = debug('cypress:snapgen:debug')
+
+const gray = (s: string) => styleText('gray', s)
+const green = (s: string) => styleText('green', s)
+const blueBright = (s: string) => styleText('blueBright', s)
+const yellow = (s: string) => styleText('yellow', s)
 
 /**
  * Gets the path of the Go bundler binary to use, either from the provided
