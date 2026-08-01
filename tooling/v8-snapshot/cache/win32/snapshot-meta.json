@@ -375,7 +375,6 @@
     "./node_modules/fs-extra/lib/json/index.js",
     "./node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/fs-extra/lib/path-exists/index.js",
-    "./node_modules/getenv/index.js",
     "./node_modules/globby/stream-utils.js",
     "./node_modules/graceful-fs/graceful-fs.js",
     "./node_modules/http-proxy/index.js",
@@ -810,6 +809,7 @@
     "./packages/network-interception/cjs/core/matcher-fields.js",
     "./packages/network-interception/cjs/core/merge-handler-result.js",
     "./packages/network-interception/cjs/core/route-matching.js",
+    "./packages/network-interception/cjs/debug.js",
     "./packages/network-interception/cjs/index.js",
     "./packages/network-tools/cjs/cors.js",
     "./packages/network-tools/cjs/document-domain-injection.js",
@@ -3715,6 +3715,7 @@
     "./packages/scaffold-config/node_modules/p-locate/index.js",
     "./packages/server/config/app.json",
     "./packages/server/lib/adapters/configurator-network-policy.ts",
+    "./packages/server/lib/adapters/file-server-origin.ts",
     "./packages/server/lib/adapters/internal-routes.ts",
     "./packages/server/lib/adapters/serve-internal-routes.ts",
     "./packages/server/lib/append_electron_switches.ts",
@@ -4061,5 +4062,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "3446a130096e728644e7e74cfefc8f28511005091b77a1c4535a8c9fd403a54b"
+  "deferredHash": "bdf0c5ed978e1fb4e4935282f93fc5a7a01650857c25a823d6e6e43266a0f6da"
 }
