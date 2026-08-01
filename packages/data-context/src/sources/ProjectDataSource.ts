@@ -8,7 +8,6 @@ import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
 import type { FSWatcher } from 'chokidar'
 import { defaultSpecPattern, defaultExcludeSpecPattern } from '@packages/config'
-import parseGlob from 'parse-glob'
 import micromatch from 'micromatch'
 import RandExp from 'randexp'
 import fs from 'fs'
@@ -141,6 +140,22 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   return lcp.slice(0, endIndex).join(path.sep)
 }
 
+// Splits a spec glob into the parts `getPathFromSpecPattern` needs to build an
+// example filename: the directory, the filename (before the first `.`), the
+// extension (from the first `.`), and the trailing extension (after the last `.`).
+function parseSpecGlob (specPattern: string) {
+  const { isGlob } = micromatch.scan(specPattern)
+  const lastSlash = specPattern.lastIndexOf('/')
+  const dirname = specPattern.slice(0, lastSlash + 1)
+  const basename = specPattern.slice(lastSlash + 1)
+  const firstDot = basename.indexOf('.')
+  const filename = firstDot === -1 ? basename : basename.slice(0, firstDot)
+  const extname = firstDot === -1 ? '' : basename.slice(firstDot)
+  const ext = extname ? extname.slice(extname.lastIndexOf('.') + 1) : ''
+
+  return { isGlob, dirname, filename, extname, ext }
+}
+
 export function getPathFromSpecPattern ({
   specPattern,
   testingType,
@@ -154,22 +169,22 @@ export function getPathFromSpecPattern ({
     return s.replace(/\*/g, fallback)
   }
 
-  const parsedGlob = parseGlob(specPattern)
+  const parsedGlob = parseSpecGlob(specPattern)
 
-  if (!parsedGlob.is.glob) {
+  if (!parsedGlob.isGlob) {
     return specPattern
   }
 
   // Remove double-slashes from dirname (like if specPattern has /**/*/)
-  let dirname = parsedGlob.path.dirname.replaceAll(/\/\/+/g, '/')
+  let dirname = parsedGlob.dirname.replaceAll(/\/\/+/g, '/')
 
   // If a spec can be in any root dir, go ahead and use "cypress/"
   if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
 
   const splittedDirname = dirname.split('/').filter((s) => s !== '**').map((x) => replaceWildCard(x, testingType)).join('/')
-  const fileName = replaceWildCard(parsedGlob.path.filename, name ? name : testingType === 'e2e' ? 'spec' : 'ComponentName')
+  const fileName = replaceWildCard(parsedGlob.filename, name ? name : testingType === 'e2e' ? 'spec' : 'ComponentName')
 
-  const extnameWithoutExt = parsedGlob.path.extname.replace(parsedGlob.path.ext, '')
+  const extnameWithoutExt = parsedGlob.extname.replace(parsedGlob.ext, '')
     || `.cy.${fileExtensionToUse}`
 
   let extname = replaceWildCard(extnameWithoutExt, 'cy')
@@ -178,7 +193,7 @@ export function getPathFromSpecPattern ({
 
   if (extname.endsWith('.')) extname = extname.slice(0, -1)
 
-  const basename = [fileName, extname, parsedGlob.path.ext].filter(Boolean).join('.')
+  const basename = [fileName, extname, parsedGlob.ext].filter(Boolean).join('.')
 
   const glob = splittedDirname + basename
 
