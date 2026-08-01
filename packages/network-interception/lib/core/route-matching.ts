@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
+import { debug } from '../debug'
 import type { RouteMatcherOptions } from '../types'
 import type { BackendRoute } from '../types/backend-route'
 import { getAllStringMatcherFields } from './matcher-fields'
@@ -126,9 +127,9 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
 
   matchable.https = proxiedUrl.protocol && (proxiedUrl.protocol.indexOf('https') === 0)
 
-  if (!matchable.port) {
-    matchable.port = matchable.https ? 443 : 80
-  }
+  // `url.parse` yields the port as a string; coerce it so it compares against
+  // the numeric `port` route matcher. Fall back to the protocol default.
+  matchable.port = matchable.port ? Number(matchable.port) : (matchable.https ? 443 : 80)
 
   return matchable
 }
@@ -146,7 +147,16 @@ export function matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest)
   const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
   const orderedRoutes = middleware.concat(handlers.reverse())
 
-  return orderedRoutes.filter((route) => !route.disabled && doesRouteMatch(route.routeMatcher, req))
+  const matched = orderedRoutes.filter((route) => !route.disabled && doesRouteMatch(route.routeMatcher, req))
+
+  debug.routes('%s %s matched %d of %d route(s) %o',
+    req.method,
+    req.proxiedUrl,
+    matched.length,
+    routes.length,
+    matched.map((route) => route.id))
+
+  return matched
 }
 
 /** @deprecated Use {@link matchRoutes} */
@@ -186,5 +196,14 @@ export function matchesRoutePreflight (routes: BackendRoute[], req: RouteMatchab
     return true
   })
 
-  return !hasCorsOverride && matchingRoutes.length > 0
+  const shouldAutoRespond = !hasCorsOverride && matchingRoutes.length > 0
+
+  if (shouldAutoRespond) {
+    debug.routes('preflight auto-respond %s %s (%d matching route(s))',
+      req.method,
+      req.proxiedUrl,
+      matchingRoutes.length)
+  }
+
+  return shouldAutoRespond
 }

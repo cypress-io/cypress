@@ -431,6 +431,21 @@ export = {
       args.push(`${HOST_RESOLVER_RULES}${rules}`)
     }
 
+    // Blink's cache-aware font loading hard-fails uncached @font-face loads
+    // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
+    // which the proxy-disabled transport always enables (crbug.com/1196004).
+    // Web fonts do not load at all with the proxy disabled unless this flag
+    // stays — do not remove it.
+    if (isProxyDisabled()) {
+      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
+
+      if (disableFeaturesIndex === -1) {
+        args.push('--disable-features=WebFontsCacheAwareTimeoutAdaption')
+      } else {
+        args[disableFeaturesIndex] += ',WebFontsCacheAwareTimeoutAdaption'
+      }
+    }
+
     if (options.chromeWebSecurity === false) {
       args.push('--disable-web-security')
       args.push('--allow-running-insecure-content')
@@ -438,9 +453,9 @@ export = {
 
     const { isHeadless } = browser
 
-    // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
-    // https://github.com/cypress-io/cypress/issues/1872
-    args.push('--proxy-bypass-list=<-loopback>')
+    if (options.proxyBypassList) {
+      args.push(`--proxy-bypass-list=${options.proxyBypassList}`)
+    }
 
     if (isHeadless) {
       args.push('--headless=new')
@@ -575,7 +590,7 @@ export = {
       await pageCriClient.send('Page.enable')
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await cdpAutomation.seedFrameTree(pageCriClient)
-      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
     }
   },
 
@@ -641,7 +656,7 @@ export = {
 
     if (isProxyDisabled()) {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
-      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame)
+      await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 
       await this._navigateUsingCRI(pageCriClient, url)
     } else {

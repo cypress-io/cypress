@@ -111,7 +111,6 @@
     "serialize-error": "^7.0.1",
     "shell-env": "4.0.1",
     "squirrelly": "^9.1.0",
-    "strip-ansi": "6.0.1",
     "syntax-error": "1.4.0",
     "systeminformation": "^5.27.7",
     "tar": "^7.5.21",
