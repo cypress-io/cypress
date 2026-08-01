@@ -6,7 +6,7 @@ import cors from 'cors'
 import { corsOriginDelegate, isOriginAllowed } from './corsOriginDelegate'
 import { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
-import { graphqlHTTP } from 'express-graphql'
+import { createHandler } from 'graphql-http/lib/use/express'
 import serverDestroy from 'server-destroy'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -16,7 +16,8 @@ import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
 import { graphqlSchema } from './schema'
-import { DefinitionNode, DocumentNode, execute, Kind, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql'
+import { renderGraphiQL } from './graphiql'
+import { DefinitionNode, DocumentNode, execute, ExecutionArgs, Kind, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
 
@@ -228,51 +229,58 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: { en
   }
 }
 
+const graphqlHTTPHandler = createHandler({
+  schema: graphqlSchema,
+  context: (req, params) => {
+    // graphql-http parses (and rejects) the query before invoking `context`, so
+    // `params.query` is guaranteed parseable here. We re-parse to attach the
+    // document to the per-request context consumed by the Nexus middleware.
+    const document = parse(params.query)
+
+    // The DataContext proxy is our per-request context; cast to satisfy
+    // graphql-http's index-signature `OperationContext` constraint.
+    return graphqlRequestContext({
+      req: req.raw,
+      context: getCtx(),
+      document,
+      variables: params.variables ?? null,
+    }) as unknown as Record<PropertyKey, unknown>
+  },
+  execute: (args) => {
+    // graphql@15's `execute` is overloaded, so graphql-http contextually types
+    // `args` as `GraphQLSchema | ExecutionArgs`; narrow to the object form.
+    const executionArgs = args as ExecutionArgs
+    const date = new Date()
+    const prefix = `${executionArgs.operationName ?? '(anonymous)'}`
+
+    DataContext.addActiveRequest()
+
+    return Promise.resolve(execute(executionArgs)).then((val) => {
+      debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
+
+      return val
+    }).finally(() => {
+      DataContext.finishActiveRequest()
+    })
+  },
+})
+
 /**
  * An Express middleware function handler which can be added to
  * routes expected to service a GraphQL request from an HTTP client.
+ *
+ * In development, a browser navigating to the endpoint is served the GraphiQL
+ * IDE; every other request is handled as a GraphQL operation by `graphql-http`.
  */
-export const graphQLHTTP = graphqlHTTP((req, res, params) => {
-  const context = getCtx()
-  let document: DocumentNode | undefined
+export const graphQLHTTP: express.Handler = (req, res, next) => {
+  if (IS_DEVELOPMENT && req.method === 'GET' && req.accepts(['json', 'html']) === 'html') {
+    res.type('html').send(renderGraphiQL(req.originalUrl.replace(/\?.*$/, '')))
 
-  // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
-  try {
-    // @ts-expect-error
-    document = parse(params.query)
-  } catch {
-    // error will be re-thrown in customParseFn below
+    return
   }
 
-  return {
-    schema: graphqlSchema,
-    graphiql: IS_DEVELOPMENT,
-    context: params && document ? graphqlRequestContext({
-      req: req as Request,
-      context,
-      document,
-      variables: params.variables,
-    }) : undefined,
-    customParseFn: (source) => {
-      // No need to re-parse if we have a document, otherwise re-parse to throw the error
-      return document ?? parse(source)
-    },
-    customExecuteFn: (args) => {
-      const date = new Date()
-      const prefix = `${args.operationName ?? '(anonymous)'}`
-
-      DataContext.addActiveRequest()
-
-      return Promise.resolve(execute(args)).then((val) => {
-        debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
-
-        return val
-      }).finally(() => {
-        DataContext.finishActiveRequest()
-      })
-    },
-  }
-})
+  return graphqlHTTPHandler(req, res, next)
+}
 
 interface GraphQLRequestContextOptions {
   app?: 'launchpad' | 'app'

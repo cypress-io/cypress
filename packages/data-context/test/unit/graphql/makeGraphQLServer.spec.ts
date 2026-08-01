@@ -118,6 +118,36 @@ describe('makeGraphQLServer (integration)', () => {
     })
   })
 
+  describe('GraphQL over HTTP', () => {
+    it('resolves a POST GraphQL operation via graphql-http', async () => {
+      const res = await fetch(`${baseUrl}/__launchpad/graphql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Origin': ownOrigin,
+        },
+        body: JSON.stringify({ query: '{ __typename }' }),
+      })
+
+      expect(res.status).toBe(200)
+      expect(await res.json()).toEqual({ data: { __typename: 'Query' } })
+    })
+
+    it('serves the GraphiQL IDE for a browser GET in development', async () => {
+      const res = await fetch(`${baseUrl}/__launchpad/graphql`, {
+        headers: {
+          'Accept': 'text/html',
+          'Origin': ownOrigin,
+        },
+      })
+
+      expect(res.status).toBe(200)
+      expect(res.headers.get('content-type')).toContain('text/html')
+      expect(await res.text()).toContain('GraphiQL')
+    })
+  })
+
   describe('WebSocket upgrade on /__launchpad/graphql-ws', () => {
     function openWs (origin: string | undefined): Promise<{ opened: boolean, statusCode?: number }> {
       return new Promise((resolve) => {
