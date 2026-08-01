@@ -3,7 +3,6 @@ import type { Request } from 'express'
 import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub } from '../src'
 import type { GraphQLRequestInfo } from '../src'
-import pDefer from 'p-defer'
 import cors from 'cors'
 import { corsOriginDelegate, isOriginAllowed } from './corsOriginDelegate'
 import { SocketIOServer } from '@packages/socket'
@@ -38,7 +37,7 @@ globalPubSub.on('reset:data-context', (ctx) => {
 })
 
 export async function makeGraphQLServer () {
-  const dfd = pDefer<number>()
+  const dfd = Promise.withResolvers<number>()
   const app = express()
 
   app.use(cors(corsOriginDelegate))

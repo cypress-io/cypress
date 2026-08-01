@@ -23,7 +23,6 @@ import nock from 'nock'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/data-context/test/graphql/stubCloudTypes'
-import pDefer from 'p-defer'
 import { Readable } from 'stream'
 
 const pkg = require('@packages/root')
@@ -536,7 +535,6 @@ async function makeE2ETasks () {
         require,
         process,
         sinon,
-        pDefer,
         projectDir (projectName) {
           if (!fixtureDirs.includes(projectName)) {
             throw new Error(`${projectName} is not a fixture project`)

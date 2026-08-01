@@ -229,6 +229,17 @@ Good examples:
 // Domain and let the cookie default to host-only.
 ```
 
+## Runtime targets
+
+Code in this monorepo runs in several runtimes, each with its own JavaScript / runtime-API floor. Before using a modern JS or Node/DOM API, identify which runtime a file executes in and confirm the API is supported there — do **not** assume the development Node version. Where each floor is defined:
+
+- **Dev tooling, gulp, build/dev scripts** — the Node version in [`.node-version`](./.node-version).
+- **The bundled app (main/Electron process)** — the Node embedded in the `electron` version pinned in the root [`package.json`](./package.json) (look up that Electron release's Node/V8).
+- **The config/plugins child process** (`@packages/server` `lib/plugins/child/require_async_child.ts`, forked by `@packages/data-context` `ProjectConfigIpc`) and the **`cypress` CLI** (`cli/`) — the *user's* Node, whose supported range is `engines.node` in [`cli/package.json`](./cli/package.json). This floor is lower than the dev/bundled Node, so it is the binding constraint for that code.
+- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency.
+
+Verify an API against the relevant floor (node.green for Node, caniuse/MDN for browsers) before relying on it.
+
 ## Pull Requests
 
 [`CONTRIBUTING.md`](./CONTRIBUTING.md) is the source of truth for PR conventions, including the semantic-release title prefix that determines the next version. The other essentials:

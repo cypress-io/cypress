@@ -98,7 +98,6 @@
     "morgan": "1.9.1",
     "node-machine-id": "1.1.12",
     "ospath": "1.2.2",
-    "p-defer": "^3.0.0",
     "p-queue": "6.1.0",
     "pidusage": "3.0.2",
     "pluralize": "8.0.0",

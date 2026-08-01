@@ -84,7 +84,6 @@
     "lodash": "4.17.23",
     "markdown-it": "13.0.1",
     "nock": "13.2.9",
-    "p-defer": "^3.0.0",
     "patch-package": "8.0.1",
     "postcss": "^8.4.22",
     "shiki": "^0.9.12",

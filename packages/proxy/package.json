@@ -24,7 +24,6 @@
     "grapheme-splitter": "1.0.4",
     "iconv-lite": "0.6.2",
     "lodash": "^4.17.19",
-    "p-defer": "3.0.0",
     "pumpify": "1.5.1",
     "through": "2.3.8",
     "utf8-stream": "0.0.0"
