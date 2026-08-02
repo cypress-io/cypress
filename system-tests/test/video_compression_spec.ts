@@ -115,6 +115,11 @@ describe('video compression 0', () => {
   systemTests.it('does not compress', {
     browser: 'chrome',
     spec: 'video_compression.cy.js',
+    // This spec runs no tests (NUM_TESTS is unset), so the browser opens and
+    // tears down almost immediately while recording video. That near-instant
+    // run intermittently exits non-zero from a browser-level error rather than
+    // a test failure, so retry to absorb the flake.
+    retries: 2,
     config: {
       allowCypressEnv: true,
       video: true,
