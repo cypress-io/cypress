@@ -443,11 +443,6 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
-          // Login auto-starts when the modal opens, so the CTA is disabled while
-          // pending. Its label flips "Opening browser" -> "Waiting for browser..."
-          // on an async GraphQL push, so asserting both labels in sequence races
-          // that push timing; assert the disabled pending state and let the settled
-          // "Login successful" dialog below confirm the flow completed.
           cy.findByRole('button', { name: /Opening browser|Waiting for browser/ })
           .should('be.visible')
           .and('be.disabled')
