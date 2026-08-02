@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
 import type { NetworkExchange } from '../exchange/network-exchange'
 import type { NetworkPolicy, PolicyContext, PolicyPhase } from '../policies/types'
@@ -24,6 +25,7 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
 
   add (policy: NetworkPolicy): void {
     this.policies.push(policy)
+    debug.policies('registered policy %s (%s)', policy.name, policy.provenance)
   }
 
   getPolicies (): ReadonlyArray<NetworkPolicy> {
@@ -37,6 +39,8 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
     const { phase, exchange, onContinue, onEnd } = options
     let ended = false
     const state: Record<string, unknown> = {}
+
+    debug.policies('runPolicies phase=%s %o', phase, exchange)
 
     const ctx: PolicyContext = {
       phase,
@@ -67,18 +71,23 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       }
 
       if (!policy.when(exchange)) {
-        // e.g. policy when() returns false — try the next registered policy.
+        debug.policies('skipped policy %s (when=false)', policy.name)
+
         continue
       }
 
+      debug.policies('applying policy %s', policy.name)
       await policy.apply(ctx)
 
       if (ended) {
+        debug.policies('policy chain ended by %s %o', policy.name, state)
+
         return { ended: true, state }
       }
     }
 
     if (!ended) {
+      debug.policies('policy chain completed without ending')
       onContinue?.()
     }
 

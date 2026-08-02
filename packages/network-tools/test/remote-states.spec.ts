@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, MockedObject, vi } from 'vitest'
 import { OriginBehavior } from '../lib/document-domain-injection'
 
-import { RemoteStates, DEFAULT_DOMAIN_NAME } from '../lib/remote-states'
+import { RemoteStates, DEFAULT_DOMAIN_NAME, toFileServerUrl } from '../lib/remote-states'
 import type { RemoteState } from '../lib/remote-states'
 
 describe('remote states', () => {
@@ -358,5 +358,55 @@ describe('remote states', () => {
 
       expect(actualState).to.deep.equal(state)
     })
+  })
+})
+
+describe('toFileServerUrl', () => {
+  const fileState: RemoteState = {
+    origin: 'http://localhost:2020',
+    strategy: 'file',
+    fileServer: 'http://localhost:2021',
+    domainName: 'localhost',
+    props: null,
+  }
+
+  const httpState: RemoteState = {
+    origin: 'https://example.test',
+    strategy: 'http',
+    fileServer: null,
+    domainName: 'example.test',
+    props: null,
+  }
+
+  it('rewrites URLs under the file-strategy origin to the file server', () => {
+    expect(toFileServerUrl('http://localhost:2020/cypress/fixtures/records.csv', fileState))
+    .to.equal('http://localhost:2021/cypress/fixtures/records.csv')
+  })
+
+  it('returns undefined for http strategy', () => {
+    expect(toFileServerUrl('https://example.test/app', httpState)).to.be.undefined
+  })
+
+  it('returns undefined when the URL is not under the current origin', () => {
+    expect(toFileServerUrl('http://other.localhost:2020/file.csv', fileState)).to.be.undefined
+  })
+
+  it('returns undefined for userinfo URLs that only prefix-match the origin', () => {
+    // http://localhost:2020@evil.com/... parses as host evil.com with userinfo
+    // "localhost:2020" — must not rewrite or the file-server auth token leaks.
+    expect(toFileServerUrl('http://localhost:2020@evil.com/cypress/fixtures/records.csv', fileState))
+    .to.be.undefined
+  })
+
+  it('preserves path, search, and hash when rewriting', () => {
+    expect(toFileServerUrl('http://localhost:2020/fixtures/a.csv?x=1#frag', fileState))
+    .to.equal('http://localhost:2021/fixtures/a.csv?x=1#frag')
+  })
+
+  it('returns undefined when fileServer is missing', () => {
+    expect(toFileServerUrl('http://localhost:2020/file.csv', {
+      ...fileState,
+      fileServer: null,
+    })).to.be.undefined
   })
 })
