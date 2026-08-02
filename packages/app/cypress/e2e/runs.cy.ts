@@ -778,9 +778,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         cy.specsPageIsVisible()
         moveToRunsPage()
-        // The Git-data runs list is populated from the relevantRuns subscription,
-        // which resolves local Git and cloud run data asynchronously. Wait for a
-        // resolved run to render so we don't assert against the still-empty list.
         cy.findByText('fix: using Git data CANCELLED').should('be.visible')
         cy.get('[data-cy="runs"]')
       })
@@ -791,21 +788,15 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.specsPageIsVisible()
         moveToRunsPage()
 
-        // The Git-data runs list is populated from the relevantRuns subscription,
-        // which resolves local Git and cloud run data asynchronously and re-renders
-        // the list as it settles. Re-query the card for each assertion (rather than
-        // scoping a `within` block to a captured element) so a mid-assertion
-        // re-render can't leave us asserting against a card detached from the DOM.
         cy.findByText('fix: using Git data CANCELLED').should('be.visible')
 
         cy.get('[href^="http://dummy.cypress.io/runs/0"]').first()
         .find('[data-cy="runNumber-status-CANCELLED"]')
-        .should('exist')
 
         cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
         cy.get('@firstRun').find('[data-cy="runCard-author"]').should('contain', 'John Appleseed')
-        cy.get('@firstRun').find('[data-cy="runCard-avatar"]').should('exist')
+        cy.get('@firstRun').find('[data-cy="runCard-avatar"]')
         cy.get('@firstRun').find('[data-cy="runCard-branchName"]').should('contain', 'main')
         cy.get('@firstRun').find('[data-cy="runCard-createdAt"]').should('contain', '01m 00s (an hour ago)')
 
