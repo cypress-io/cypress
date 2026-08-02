@@ -174,7 +174,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -192,7 +192,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -303,7 +303,10 @@ describe('cookies', () => {
 
               cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${baseUrl}`)
 
-              cy.getAllCookies().then((cookies) => {
+              // cross-origin cookies set across the redirect chain land in the
+              // automation jar via an event-driven sync, so retry the read until
+              // the jar has settled rather than asserting on a single snapshot
+              cy.getAllCookies().should((cookies) => {
                 // reverse them so they'll be in the order they were set
                 cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 
