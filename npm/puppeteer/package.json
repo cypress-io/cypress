@@ -27,7 +27,7 @@
     "eslint": "^9.31.0",
     "express": "4.21.0",
     "rimraf": "^6.1.1",
-    "semantic-release": "22.0.12",
+    "semantic-release": "25.0.8",
     "typescript": "5.4.5",
     "vitest": "^3.2.4"
   },
