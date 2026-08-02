@@ -41,6 +41,26 @@ export function createWebsocket (config: Cypress.Config) {
     window.location.href = url
   })
 
+  // Registered on the persistent socket rather than per-spec (in
+  // `addGlobalListeners`) so a dev-server recompile that finishes while the
+  // runner is being (re)mounted is never dropped. Otherwise a spec recompiled
+  // after a stale/empty compilation - e.g. one recreated with the same name it
+  // was just deleted under - could load the stale bundle and never rerun,
+  // because the compile:success arrived during the mount gap where the per-spec
+  // listener had been torn down. `stop()` preserves this listener across
+  // `ws.off()` for the same reason.
+  ws.on('dev-server:compile:success', ({ specFile }: { specFile?: string } = {}) => {
+    if (!_eventManager) {
+      return
+    }
+
+    const currentSpec = getMobxRunnerStore().spec
+
+    if (!specFile || specFile === currentSpec?.absolute) {
+      _eventManager.rerunSpec()
+    }
+  })
+
   return ws
 }
 

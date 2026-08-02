@@ -166,11 +166,9 @@ export class EventManager {
 
     this.ws.on('watched:file:changed', rerun)
 
-    this.ws.on('dev-server:compile:success', ({ specFile }) => {
-      if (!specFile || specFile === state?.spec?.absolute) {
-        rerun()
-      }
-    })
+    // `dev-server:compile:success` is registered once on the persistent socket
+    // in `createWebsocket` (not here) so it survives the runner mount gap. See
+    // the comment there.
 
     this.ws.on('runner:restart', rerun)
 
@@ -908,11 +906,15 @@ export class EventManager {
   stop () {
     this.localBus.removeAllListeners()
 
-    // Grab existing listeners for url change event, we want to preserve them
+    // Grab listeners registered once on the persistent socket (in
+    // `createWebsocket`), we want to preserve them across `ws.off()` rather
+    // than have them torn down with the per-spec listeners.
     const urlChangeListeners = this.ws.listeners('change:to:url')
+    const compileSuccessListeners = this.ws.listeners('dev-server:compile:success')
 
     this.ws.off()
     urlChangeListeners.forEach((listener) => this.ws.on('change:to:url', listener))
+    compileSuccessListeners.forEach((listener) => this.ws.on('dev-server:compile:success', listener))
   }
 
   async teardown (state: MobxRunnerStore, isRerun = false) {
