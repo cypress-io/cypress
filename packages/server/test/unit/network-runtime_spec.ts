@@ -299,6 +299,60 @@ describe('lib/network-runtime', () => {
     expect(client.send).to.have.been.calledWith('Fetch.disable')
   })
 
+  it('createCdpFetchRuntime records the AUT URL when the automation layer reports an AUT navigation commit', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    let notifyAUTFrameNavigated!: (url: string) => void
+    const unsubscribe = sinon.stub()
+    const onAUTFrameNavigated = sinon.stub().callsFake((listener: (url: string) => void) => {
+      notifyAUTFrameNavigated = listener
+
+      return unsubscribe
+    })
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      onAUTFrameNavigated,
+    })
+
+    await runtime.start()
+
+    const setAUTUrl = sinon.spy(runtime.networkProxy.http, 'setAUTUrl')
+
+    // test isolation blanks the AUT frame between tests; about:blank must
+    // never become the simulated top
+    notifyAUTFrameNavigated('about:blank')
+    notifyAUTFrameNavigated('data:text/html,<p>hi</p>')
+    notifyAUTFrameNavigated('https://app.test/dashboard')
+
+    expect(setAUTUrl).to.have.been.calledOnceWith('https://app.test/dashboard')
+
+    await runtime.stop()
+
+    expect(unsubscribe).to.have.been.calledOnce
+  })
+
+  it('createCdpFetchRuntime unsubscribes from AUT navigation commits when Fetch.enable fails', async () => {
+    const client = {
+      send: sinon.stub().rejects(new Error('enable failed')),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const unsubscribe = sinon.stub()
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      onAUTFrameNavigated: sinon.stub().returns(unsubscribe),
+    })
+
+    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+
+    expect(unsubscribe).to.have.been.calledOnce
+  })
+
   it('createCdpFetchRuntime starts Fetch interception and continues requests by default', async () => {
     const client = {
       send: sinon.stub().callsFake(async (method: string) => {
@@ -328,8 +382,192 @@ describe('lib/network-runtime', () => {
     expect(continueCall!.args[1]).to.include({ requestId: 'fetch-request' })
 
     await onRequestPaused(createPausedRequest({
-      requestId: 'fetch-response',
+      requestId: 'fetch-request',
       networkId: 'network-1',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+    await handled
+  })
+
+  it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+    const fileBody = Buffer.from('"Joe","Smith"')
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    deps.request = {
+      rp: sinon.stub(),
+      create: sinon.stub().resolves({
+        statusCode: 200,
+        headers: {
+          'content-type': 'text/csv',
+          'content-disposition': 'attachment; filename="records.csv"',
+        },
+        body: fileBody,
+      }),
+    } as any
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+    }))
+
+    await flush()
+
+    expect(deps.request.create).to.have.been.calledWithMatch({
+      url: 'http://localhost:2021/cypress/fixtures/records.csv',
+      headers: {
+        'x-cypress-authorization': 'token',
+      },
+    }, true)
+
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueCall, 'expected no Fetch.continueRequest').to.not.exist
+    expect(fulfillCall, 'expected Fetch.fulfillRequest').to.exist
+    expect(fulfillCall!.args[1]).to.include({
+      requestId: 'file-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall!.args[1].body).to.equal(fileBody.toString('base64'))
+  })
+
+  it('createCdpFetchRuntime fulfills download pauses without networkId without waiting for pre-request timeout', async function () {
+    this.timeout(5000)
+
+    const clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout'],
+    })
+
+    try {
+      const client = {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const deps = baseDeps()
+      const fileBody = Buffer.from('"Joe","Smith"')
+      const downloadUrl = 'http://localhost:2020/cypress/fixtures/records.csv'
+
+      deps.remoteStates.current = sinon.stub().returns({
+        origin: 'http://localhost:2020',
+        strategy: 'file',
+        fileServer: 'http://localhost:2021',
+        domainName: 'localhost',
+        props: null,
+      })
+
+      deps.request = {
+        rp: sinon.stub(),
+        create: sinon.stub().resolves({
+          statusCode: 200,
+          headers: {
+            'content-type': 'text/csv',
+            'content-disposition': 'attachment; filename="records.csv"',
+          },
+          body: fileBody,
+        }),
+      } as any
+
+      const runtime = createCdpFetchRuntime({
+        ...deps,
+        client,
+        shouldCorrelatePreRequests: () => true,
+      })
+      const addPendingSpy = sinon.spy(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
+      const onRequestPaused = await startCdpRuntime(runtime, client)
+
+      // Downloads omit networkId — without pre-registration CorrelateBrowserPreRequest
+      // would wait the default 2000ms pre-request timeout before file-server-origin runs.
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'download-file-request',
+        url: downloadUrl,
+      }))
+
+      await flush()
+      await clock.tickAsync(0)
+      await flush()
+
+      expect(addPendingSpy).to.have.been.calledOnceWith(downloadUrl)
+      expect(deps.request.create).to.have.been.calledOnce
+
+      const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+      expect(fulfillCall, 'expected Fetch.fulfillRequest before pre-request timeout').to.exist
+      expect(fulfillCall!.args[1]).to.include({
+        requestId: 'download-file-request',
+        responseCode: 200,
+      })
+
+      await handled
+    } finally {
+      clock.restore()
+    }
+  })
+
+  it('createCdpFetchRuntime continues http-strategy requests without hitting the file server', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.request = {
+      rp: sinon.stub(),
+      create: sinon.stub().resolves({
+        statusCode: 200,
+        headers: {},
+        body: 'should-not-be-used',
+      }),
+    } as any
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'http-request',
+      networkId: 'network-http-1',
+      url: 'https://example.test/app',
+    }))
+
+    await flush()
+
+    expect(deps.request.create).not.to.have.been.called
+
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'http-request',
+      networkId: 'network-http-1',
+      url: 'https://example.test/app',
       responseStatusCode: 200,
     }))
 

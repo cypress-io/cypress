@@ -2213,6 +2213,7 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     context('body parsing', function () {
+      // `/post-only` is shared by other tests here, including one that fires a `GET /post-only`
       [
         ['application/json', '{"foo":"bar"}'],
         ['application/vnd.api+json', '{}'],
@@ -2220,7 +2221,7 @@ describe('network stubbing', { retries: 15 }, function () {
         it(`automatically parses ${contentType} request bodies`, function () {
           const p = Promise.defer()
 
-          cy.intercept('/post-only', (req) => {
+          cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
             expect(req.headers['content-type']).to.eq(contentType)
             expect(req.body).to.deep.eq({ foo: 'bar' })
 
@@ -2245,7 +2246,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
         const p = Promise.defer()
 
-        cy.intercept('/post-only', (req) => {
+        cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
           expect(req.body).to.deep.eq(JSON.stringify({ foo: 'bar' }))
 
           p.resolve()
@@ -2264,7 +2265,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('sets body to string if JSON is malformed', function () {
         const p = Promise.defer()
 
-        cy.intercept('/post-only*', (req) => {
+        cy.intercept({ method: 'POST', url: '/post-only*' }, (req) => {
           expect(req.body).to.deep.eq('{ foo::: }')
 
           p.resolve()
