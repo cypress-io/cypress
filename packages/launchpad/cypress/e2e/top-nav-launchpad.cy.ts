@@ -386,12 +386,12 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log in' }).click()
         })
 
-        // The login flow auto-starts when the modal opens and resolves through real-time timers
-        // (the stub fires `browserOpened` and resolves the user via `setTimeout`, and `cy.clock`
-        // here only fakes `Date`, not timers). Wait for the settled "Login successful" state rather
-        // than the transient "Opening browser" / "Waiting for browser..." CTA labels, which the
-        // command queue can miss once those timers have advanced under CI load.
-        cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal')
+        cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
+          // The login flow auto-starts when the modal opens and the disabled CTA transitions between
+          // pending labels on real-time timers. Match either label so we assert the pending state
+          // without racing the exact transition the command queue can't reliably catch.
+          cy.findByRole('button', { name: /Opening browser|Waiting for browser/ }).should('be.visible').and('be.disabled')
+        })
 
         cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
