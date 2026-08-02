@@ -145,6 +145,17 @@ for (const project of WEBPACK_REACT) {
         cy.contains('button', 'Okay, run the spec').click()
       })
 
+      // The dev-server compiles the recreated spec asynchronously. The runner can
+      // navigate onto the stale, empty compilation produced while the spec was
+      // missing and miss the `dev-server:compile:success` that would rerun it,
+      // leaving the spec unexecuted. Once the runner has mounted (and is listening
+      // for compile events), re-save the spec to guarantee a compile:success
+      // reaches it, so the assertion below reflects a settled compilation.
+      cy.reporter().find('[data-cy="runnable-header"]').should('contain', 'App.cy.jsx')
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject('src/App.cy.jsx', await ctx.file.readFileInProject('src/App.cy.jsx'))
+      })
+
       // 5. assert recreated spec executes successfully
       cy.waitForSpecToFinish({ passCount: 1 })
     })
