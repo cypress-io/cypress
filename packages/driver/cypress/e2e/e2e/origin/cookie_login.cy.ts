@@ -35,6 +35,29 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
     cy.get('h1').invoke('text').should('equal', 'No user found')
   }
 
+  // Reload localhost until the server stops receiving the (now-expired) "user"
+  // cookie. Cypress applies the cross-origin cookie to the browser's jar
+  // asynchronously, so its Max-Age/Expires countdown begins an unknown lag
+  // after login; polling the real request converges on the actual expiry
+  // instead of guessing a fixed delay. We reload rather than use cy.getCookie()
+  // because Firefox doesn't reliably unset automation-set expiring cookies in
+  // its jar. A cookie that never expires exhausts the attempts and fails,
+  // preserving the assertion that it actually lapsed.
+  const reloadUntilLocalhostLoggedOut = (attemptsLeft = 8) => {
+    cy.get('h1').invoke('text').then((text) => {
+      if (text === 'No user found') {
+        return
+      }
+
+      expect(attemptsLeft, 'localhost never logged out after the cookie should have expired').to.be.greaterThan(0)
+
+      cy.wait(500)
+      cy.reload()
+
+      reloadUntilLocalhostLoggedOut(attemptsLeft - 1)
+    })
+  }
+
   beforeEach(() => {
     // makes it nice and readable even on a small screen with devtools open :)
     cy.viewport(300, 400)
@@ -481,9 +504,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         cy.get('[data-cy="login"]').click()
       })
 
-      cy.wait(1500) // give cookie time to expire
-      cy.reload()
-      verifyLocalhostNotLoggedIn()
+      reloadUntilLocalhostLoggedOut()
     })
 
     // expiring cookies set by automation don't seem to get unset appropriately
@@ -534,9 +555,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           cy.get('[data-cy="login"]').click()
         })
 
-        cy.wait(1500) // give cookie time to expire
-        cy.reload()
-        verifyLocalhostNotLoggedIn()
+        reloadUntilLocalhostLoggedOut()
       })
 
       it('before Max-Age, past Expires -> logged in', () => {
