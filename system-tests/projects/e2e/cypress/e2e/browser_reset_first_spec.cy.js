@@ -44,5 +44,8 @@ it('makes cached request', () => {
   cy.visit('http://localhost:1515/browser_reset.html')
   .then(req) // this creates the disk cache
   .then(indexedDB) // this creates the indexedDB
-  .then(swReq) // this creates the service worker
+  // serviceWorker.ready only resolves once the worker installs and activates.
+  // On Firefox that includes the install handler's network fetch + cache
+  // population, which can exceed the 4s default command timeout under CI load.
+  .then({ timeout: 30000 }, swReq) // this creates the service worker
 })

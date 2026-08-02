@@ -46,5 +46,8 @@ it('makes cached request', () => {
   cy.visit('http://localhost:1515/browser_reset.html')
   .then(req) // this should hit our server even though cached in the first spec
   .then(indexedDB) // this ensures the indexedDB is empty
-  .then(swReq) // this ensures the service worker is not registered
+  // After the browser state reset the worker is re-registered from scratch, so
+  // serviceWorker.ready must wait for a fresh install + activate. On Firefox that
+  // can exceed the 4s default command timeout under CI load.
+  .then({ timeout: 30000 }, swReq) // this ensures the service worker is not registered
 })
