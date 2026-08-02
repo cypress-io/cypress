@@ -387,9 +387,6 @@ describe('Launchpad Top Nav Workflows', () => {
         })
 
         cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
-          // The login flow auto-starts when the modal opens and the disabled CTA transitions between
-          // pending labels on real-time timers. Match either label so we assert the pending state
-          // without racing the exact transition the command queue can't reliably catch.
           cy.findByRole('button', { name: /Opening browser|Waiting for browser/ }).should('be.visible').and('be.disabled')
         })
 
