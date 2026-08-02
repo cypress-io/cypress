@@ -6,6 +6,12 @@ import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
 import type { SupportedKey } from './automation'
 
+export type CdpClientShape = {
+  send: (...args: any[]) => Promise<any>
+  on: (...args: any[]) => void
+  off: (...args: any[]) => void
+}
+
 /**
  * Interface for compiler error location information
  * Used across error handling systems to provide file, line, and column details
@@ -80,11 +86,16 @@ export type BrowserLaunchOpts = {
   browser: FoundBrowser & { isHeadless: boolean }
   url: string | undefined
   proxyServer?: string
+  proxyBypassList?: string
   isTextTerminal: boolean
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   relaunchBrowser?: () => Promise<any>
   protocolManager?: ProtocolManagerShape
+  onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>, onAUTFrameNavigated?: (listener: (url: string) => void) => () => void) => Promise<void>
+  // Only set when the MITM proxy is disabled: `hosts` is translated into
+  // browser-level resolver rules instead of the Node-side DNS remap.
+  hosts?: { [host: string]: string } | null
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

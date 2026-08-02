@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { toFileServerUrl } from '@packages/network-tools'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
 import type { RequestInterceptionMiddlewareCtx } from '../adapters/types'
@@ -21,7 +22,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     isVerbose,
   })
 
-  const requestOptions = {
+  const requestOptions: Record<string, any> = {
     browserPreRequest: mw.req.browserPreRequest,
     timeout: mw.req.responseTimeout,
     strictSSL: false,
@@ -33,21 +34,25 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
 
   const requestBodyBuffered = !!mw.req.body
 
-  const { strategy, origin, fileServer } = mw.remoteStates.current()
+  const remoteState = mw.remoteStates.current()
+  const fileServerUrl = toFileServerUrl(requestOptions.url, remoteState)
 
   span?.setAttributes({
     requestBodyBuffered,
-    strategy,
+    strategy: remoteState.strategy,
   })
 
-  if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
+  if (fileServerUrl) {
     mw.req.headers['x-cypress-authorization'] = mw.getFileServerToken()
-
-    requestOptions.url = requestOptions.url.replace(origin, fileServer as string)
+    requestOptions.url = fileServerUrl
   }
 
+  // Always forward method/headers from the (possibly intercepted) proxied request.
+  // Body is only attached when buffered; otherwise the IncomingMessage is piped below.
+  _.assign(requestOptions, _.pick(mw.req, 'method', 'headers'))
+
   if (requestBodyBuffered) {
-    _.assign(requestOptions, _.pick(mw.req, 'method', 'body', 'headers'))
+    requestOptions.body = mw.req.body
   }
 
   const req = mw.request.create(requestOptions)

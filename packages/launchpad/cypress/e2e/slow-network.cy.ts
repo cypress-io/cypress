@@ -10,7 +10,7 @@ describe('slow network: launchpad', () => {
       (ctx.util.fetch as Sinon.SinonStub).restore()
       o.testState.pendingFetches = []
       o.sinon.stub(ctx.util, 'fetch').callsFake(async (input, init) => {
-        const dfd = o.pDefer()
+        const dfd = Promise.withResolvers()
 
         o.testState.pendingFetches.push(dfd)
 

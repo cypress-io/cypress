@@ -383,6 +383,41 @@ describe('Routes', () => {
       })
     })
 
+    it('internal loopback header bypasses forceProxy redirect without a proxy set', function () {
+      // serve-internal-routes hits Express as a path-only request; without the
+      // trusted token _forceProxyMiddleware would 302 to clientRoute.
+      const { cypressInternalLoopbackToken } = require('../../lib/adapters/internal-routes')
+
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': '1',
+          'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers['location']).to.be.undefined
+      })
+    })
+
+    it('spoofed loopback header without the process token does not bypass forceProxy', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/automation/getLocalStorage`,
+        proxy: null,
+        headers: {
+          'x-cypress-internal-loopback': 'https://evil.example/__/',
+        },
+        followRedirect: false,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
+      })
+    })
+
     it('routes when baseUrl is set', function () {
       return this.setup({ baseUrl: 'http://localhost:9999/app' })
       .then(() => {
@@ -392,6 +427,41 @@ describe('Routes', () => {
 
           expect(res.body).to.match(/window.__Cypress__ = true/)
         })
+      })
+    })
+  })
+
+  context('when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
+    beforeEach(function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      return this.setup({ projectName: 'foobarbaz' })
+    })
+
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    it('does not redirect non-proxied traffic to clientRoute', function () {
+      return this.rp({
+        url: `${this.proxy}/__cypress/xhrs/foo`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).not.to.eq(302)
+        expect(res.headers.location).to.be.undefined
+      })
+    })
+
+    it('serves the runner app from clientRoute instead of the Whoops page', function () {
+      return this.rp({
+        url: `${this.proxy}/__`,
+        proxy: null,
+      })
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.match(/This browser was not launched through Cypress\./)
+        expect(res.body).to.match(/window.__Cypress__ = true/)
       })
     })
   })

@@ -34,6 +34,10 @@ function createCodec (): TransportCodecPort<TransportRequest, TransportResponse>
       return transportRequest
     },
 
+    getRequest (id) {
+      return inFlightRequests.get(id)!
+    },
+
     decodeResponse (response) {
       inFlightResponses.set(response.id, response)
 
