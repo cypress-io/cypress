@@ -326,8 +326,9 @@ export class SnapshotDoctor {
     bundle: Buffer
     meta: Metadata
   }> {
-    // 1. Generate the metadata not deferring anything yet
-    const { meta } = await this._createScript()
+    // 1. Generate the metadata not deferring anything yet, but still honoring
+    //    forceNorewrite since those modules break the bundler when rewritten
+    const { meta } = await this._createScript(undefined, this.forceNorewrite)
 
     // 2. Extract all module inputs from the metadata and detect circular
     // imports

@@ -1,6 +1,6 @@
 import '../spec_helper'
 import _ from 'lodash'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import { stripIndent } from 'common-tags'
 import Fixtures from '@tooling/system-tests'
 import { getCtx } from '@packages/data-context'

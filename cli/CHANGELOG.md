@@ -3,18 +3,31 @@
 
 **Performance:**
 
+- Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
 - Reduced the sampling overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) when Cypress runs inside a memory-limited container using cgroup v1. Memory readings no longer spawn helper subprocesses on every sampling interval, which lowers CPU usage that previously competed with the tests, most noticeably on constrained CI machines. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105). Fixed in [#34331](https://github.com/cypress-io/cypress/pull/34331).
 
 **Bugfixes:**
 
-- Fixed an issue where informational (1xx) HTTP responses were not treated as having an empty message body, contrary to RFC 7230. Such responses are now handled correctly during network processing. Fixed in [#34208](https://github.com/cypress-io/cypress/pull/34208).
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) matching on the `auth` option compared only the portion of a Basic authentication password before the first colon, so a request whose password contained a colon (permitted by RFC 7617) failed to match. The full password is now compared. Fixed in [#34206](https://github.com/cypress-io/cypress/pull/34206).
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) routes specifying a numeric `port` (for example `port: 8080` or `port: [8080]`) did not match requests on non-default ports. Such routes now match as documented. Fixes [#17653](https://github.com/cypress-io/cypress/issues/17653). Fixed in [#34205](https://github.com/cypress-io/cypress/pull/34205).
+- Fixed an issue where inline source maps embedded without a `charset` (for example those emitted by esbuild) were not decoded and were silently dropped. These inline source maps are now decoded. Fixed in [#34204](https://github.com/cypress-io/cypress/pull/34204).
+- Fixed an issue where the TypeScript 7 support added in [15.18.0](#15-18-0) did not work: TypeScript spec and support files failed to compile with `Error: Cannot find module '@babel/preset-typescript'`. Fixes [#34359](https://github.com/cypress-io/cypress/issues/34359).
+- Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) block could intermittently fail with `TypeError: Cannot read properties of undefined (reading 'applied')`, incorrectly reported as originating from your test code. Addressed in [#34376](https://github.com/cypress-io/cypress/pull/34376).
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
 - Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 - Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+- Fixed an issue where HTTP `3xx` responses (such as `304 Not Modified`) were shown with a failed (red) indicator in the Command Log. These responses now display as successful. Fixes [#34066](https://github.com/cypress-io/cypress/issues/34066). Fixed in [#34282](https://github.com/cypress-io/cypress/pull/34282).
+
+**Misc:**
+
+- Fixed an issue where passing the `options` argument to [`cy.env()`](https://on.cypress.io/env), such as `cy.env(['FOO'], { log: false })`, raised a TypeScript error (`Expected 1 arguments, but got 2`). Fixes [#34284](https://github.com/cypress-io/cypress/issues/34284).
 
 **Dependency Updates:**
 
 - Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
+- Upgraded `arch` from `2.2.0` to `3.0.0`. Addressed in [#34426](https://github.com/cypress-io/cypress/pull/34426).
+- Removed `tslib` (previously `1.14.1`) from the `cypress` package's runtime dependencies. Addressed in [#34372](https://github.com/cypress-io/cypress/pull/34372).
+- Upgraded `ws` from `8.18.3` to `8.21.1`. Addressed in [#34392](https://github.com/cypress-io/cypress/pull/34392).
 
 ## 15.19.0
 

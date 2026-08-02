@@ -1,4 +1,5 @@
 import zlib from 'zlib'
+import debugModule from 'debug'
 import type {
   HttpHeaders,
   HttpRequest,
@@ -10,6 +11,8 @@ import type {
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
 } from './cdp-fetch-transport'
+
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp-fetch-codec')
 
 type CdpFetchHttpResponse = HttpResponse & {
   body?: string | Buffer
@@ -111,6 +114,8 @@ function toIdentityResponse (transportResponse: CdpFetchTransportResponse): CdpF
   .filter((token) => token && token !== 'identity')
 
   if (!transportResponse.body || !encodings.length) {
+    debugVerbose('toIdentityResponse passthrough %s (no body or encodings)', transportResponse.url)
+
     return {
       ...transportResponse,
       responseHeaders: stripHeaderEntries(headers, WIRE_ENCODING_HEADERS),
@@ -120,6 +125,8 @@ function toIdentityResponse (transportResponse: CdpFetchTransportResponse): CdpF
   let body = Buffer.from(transportResponse.body, 'base64')
 
   try {
+    debugVerbose('toIdentityResponse decoding %s encodings %o', transportResponse.url, encodings)
+
     // encodings are listed in the order applied — decode outermost first
     for (let i = encodings.length - 1; i >= 0; i--) {
       const decode = CONTENT_DECODERS[encodings[i]]
@@ -131,8 +138,12 @@ function toIdentityResponse (transportResponse: CdpFetchTransportResponse): CdpF
       body = decode(body)
     }
   } catch (err) {
+    debugVerbose('toIdentityResponse decode failed for %s, keeping encoded body: %s', transportResponse.url, (err as Error).message)
+
     return transportResponse
   }
+
+  debugVerbose('toIdentityResponse decoded %s to %d byte(s)', transportResponse.url, body.length)
 
   return {
     ...transportResponse,
@@ -202,6 +213,13 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
       inFlightRequests.set(transportRequest.id, transportRequest)
 
+      debugVerbose('decodeRequest %s %s %o', transportRequest.method, transportRequest.url, {
+        id: transportRequest.id,
+        requestId: transportRequest.requestId,
+        headerNames: Object.keys(transportRequest.headers ?? {}),
+        hasPostData: transportRequest.postData !== undefined,
+      })
+
       return {
         id: transportRequest.id,
         url: transportRequest.url,
@@ -213,6 +231,14 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
 
     encodeRequest (httpRequest: HttpRequest): CdpFetchTransportRequest {
       const transportRequest = requireRequest(httpRequest.id)
+
+      debugVerbose('encodeRequest %s %s %o', httpRequest.method, httpRequest.url, {
+        id: httpRequest.id,
+        urlChanged: httpRequest.url !== transportRequest.url,
+        methodChanged: httpRequest.method !== undefined && httpRequest.method !== transportRequest.method,
+        headersChanged: httpRequest.headers !== undefined,
+        bodyChanged: httpRequest.body !== undefined,
+      })
 
       transportRequest.url = httpRequest.url
 
@@ -234,6 +260,13 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     decodeResponse (transportResponse: CdpFetchTransportResponse): HttpResponse {
       inFlightResponses.set(transportResponse.id, transportResponse)
 
+      debugVerbose('decodeResponse %s status=%s %o', transportResponse.url, transportResponse.responseCode, {
+        id: transportResponse.id,
+        requestId: transportResponse.requestId,
+        headerNames: transportResponse.responseHeaders?.map(({ name }) => name),
+        hasBodyStream: !!transportResponse.bodyStream,
+      })
+
       return {
         id: transportResponse.id,
         url: transportResponse.url,
@@ -246,6 +279,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
       const response = httpResponse as CdpFetchHttpResponse
       const pausedResponse = inFlightResponses.get(httpResponse.id)
+
       const fulfilled = response.body !== undefined
       // Middleware headers describe the body the pipeline produced — including
       // any re-encoding by CompressBody — so keep their content-encoding and
@@ -268,6 +302,8 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
           : pausedResponse.responseHeaders,
         ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
       } : {
+        // Middleware answered at the request stage, so no response pause exists —
+        // rebuild the fulfill params (requestId/sessionId) from the stashed request pause.
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,
@@ -278,10 +314,24 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       transportResponse.url = httpResponse.url
       inFlightResponses.delete(httpResponse.id)
 
-      return transportResponse.fulfilled ? toIdentityResponse(transportResponse) : transportResponse
+      const encoded = transportResponse.fulfilled ? toIdentityResponse(transportResponse) : transportResponse
+
+      if (debugVerbose.enabled) {
+        debugVerbose('encodeResponse %s %o', httpResponse.url, {
+          id: httpResponse.id,
+          fulfilled,
+          statusCode: encoded.responseCode,
+          bodyBytes: encoded.body ? Buffer.from(encoded.body, 'base64').length : undefined,
+          headerNames: encoded.responseHeaders?.map(({ name }) => name),
+          usedPausedResponse: !!pausedResponse,
+        })
+      }
+
+      return encoded
     },
 
     releaseRequest (id: string): void {
+      debugVerbose('releaseRequest %s', id)
       inFlightRequests.delete(id)
       inFlightResponses.delete(id)
     },
