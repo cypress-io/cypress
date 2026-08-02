@@ -6,6 +6,10 @@
 - Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
 - Reduced the sampling overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) when Cypress runs inside a memory-limited container using cgroup v1. Memory readings no longer spawn helper subprocesses on every sampling interval, which lowers CPU usage that previously competed with the tests, most noticeably on constrained CI machines. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105). Fixed in [#34331](https://github.com/cypress-io/cypress/pull/34331).
 
+**Features:**
+
+- [`cy.request()`](https://on.cypress.io/request) and [`cy.intercept()`](https://on.cypress.io/intercept) now accept the HTTP `QUERY` method. Previously it was rejected as an invalid method in the browser. Fixes [#28282](https://github.com/cypress-io/cypress/issues/28282).
+
 **Bugfixes:**
 
 - Fixed an issue where a `cy.*` command error message that interpolated a value containing a `$` character could render incorrectly, with a leaked `{{...}}` placeholder or duplicated or dropped surrounding text. Such values are now inserted verbatim. Fixed in [#34221](https://github.com/cypress-io/cypress/pull/34221).
