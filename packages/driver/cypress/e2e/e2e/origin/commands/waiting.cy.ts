@@ -228,7 +228,15 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
     })
 
-    context('errors', () => {
+    context('errors', {
+      // `defaultCommandTimeout` bounds both the async `done()` callback and the
+      // cy.origin spec-bridge round-trip. These tests call `done()` only after a
+      // cross-origin `cy.wait()` times out on its per-test `requestTimeout` and the
+      // failure propagates back across the spec bridge, so the inherited 4000ms
+      // budget occasionally lost that race under CI load. The asserted timeout
+      // still comes from `requestTimeout`, so the error messages are unchanged.
+      defaultCommandTimeout: 10000,
+    }, () => {
       it('throws when request is not made', { requestTimeout: 100 }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.equal('Timed out retrying after 100ms: `cy.wait()` timed out waiting `100ms` for the 1st request to the route: `not_called`. No request ever occurred.')
