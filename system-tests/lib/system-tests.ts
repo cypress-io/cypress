@@ -1246,6 +1246,24 @@ const systemTests = {
         })
       })
 
+      // The 'exit' event fires when the child terminates, but its piped stdout/stderr may still
+      // have buffered 'data' events that have not been appended yet — only stream end guarantees
+      // everything was captured. Resolving on 'exit' alone intermittently truncates stderr/stdout
+      // (e.g. a plugin log line going missing under CI load). Wait for both streams to finish so
+      // assertions run against complete output. DockerProcess writes all container output before
+      // it emits 'exit', so this only applies to the real (piped) ChildProcess path.
+      if (!options.dockerImage) {
+        await Promise.all(([sp.stdout, sp.stderr] as stream.Readable[]).map((s) => {
+          return new Promise<void>((resolve) => {
+            if (!s || s.readableEnded) {
+              return resolve()
+            }
+
+            stream.finished(s, () => resolve())
+          })
+        }))
+      }
+
       await copy(projectPath)
 
       if (interruptRequested) {
