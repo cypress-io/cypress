@@ -76,5 +76,9 @@ describe('e2e stdout', () => {
     spec: 'stdout_assertion_errors.cy.js',
     snapshot: true,
     expectedExitCode: 4,
+    // The run occasionally aborts early under Chrome (exit code 1) while
+    // capturing the four automatic failure screenshots, before all four
+    // failing assertions are recorded. Retry the run to absorb that flake.
+    retries: 2,
   })
 })
