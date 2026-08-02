@@ -80,21 +80,11 @@ The internal Cypress web server responded with:
   │ Failing:      3                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_failing.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing.cy.js/stdout_failing_spec -- fai     (1280x720)
-     ls (failed).png                                                                                
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing.cy.js/stdout_failing_spec -- fai     (1280x720)
-     ling hook -- is failing -- before each hook (failed).png                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing.cy.js/stdout_failing_spec -- pas     (1280x720)
-     sing hook -- is failing (failed).png                                                           
 
 
 ====================================================================================================
@@ -472,23 +462,11 @@ exports['e2e stdout / displays assertion errors'] = `
   │ Failing:      4                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  4                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     stdout_assertion_errors.cy.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors.cy.js/assertion errors      (1280x720)
-     -- fails with assertion diff, no retries (failed).png                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors.cy.js/assertion errors      (1280x720)
-     -- fails with assertion diff, with retries (failed).png                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors.cy.js/assertion errors      (1280x720)
-     -- fails with dom assertion without diff, with retries (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors.cy.js/assertion errors      (1280x720)
-     -- fails with dom assertion without diff, with retries (failed) (1).png                        
 
 
 ====================================================================================================

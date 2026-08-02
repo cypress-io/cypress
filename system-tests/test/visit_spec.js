@@ -165,6 +165,7 @@ describe('e2e visit', () => {
       spec: 'visit_http_500_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23162
@@ -208,6 +209,7 @@ describe('e2e visit', () => {
       spec: 'visit_response_never_ends_failing.cy.js',
       snapshot: true,
       expectedExitCode: 3,
+      config: { screenshotOnRunFailure: false },
     })
   })
 
@@ -254,6 +256,7 @@ describe('e2e visit', () => {
       spec: 'visit_http_timeout_failing.cy.js',
       snapshot: true,
       expectedExitCode: 2,
+      config: { screenshotOnRunFailure: false },
     })
   })
 })
