@@ -165,6 +165,15 @@ describe('e2e visit', () => {
       spec: 'visit_http_500_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      // This spec asserts on the 500 status code, not on a timeout. The `/fail`
+      // route responds immediately, but under the context's 500ms
+      // responseTimeout that response can lose the race on webkit (extra
+      // proxy/CDP overhead) and surface a network timeout instead, changing the
+      // snapshot. Restore normal timeouts so the status-code failure is stable.
+      config: {
+        responseTimeout: 30000,
+        pageLoadTimeout: 60000,
+      },
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23162
