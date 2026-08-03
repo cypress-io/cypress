@@ -1,6 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import { ProtocolManagerShape } from '@packages/types'
+import { ProtocolManagerShape, REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER, SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import { CdpAutomation, normalizeResourceType } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
@@ -642,6 +642,135 @@ context('lib/browsers/cdp_automation', () => {
         })
       })
 
+      it('gets the application url after the AUT overwrites window.name', async function () {
+        const client = {
+          send: sinon.stub().resolves({}),
+          on: sinon.stub(),
+          off: sinon.stub(),
+        }
+
+        client.send.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'root', url: 'about:blank' },
+            childFrames: [
+              {
+                frame: {
+                  id: 'reporter',
+                  name: REPORTER_FRAME_NAME,
+                  url: 'about:blank',
+                },
+              },
+              {
+                frame: {
+                  id: '1',
+                  name: 'Your project: foobar',
+                  url: 'about:blank',
+                },
+              },
+            ],
+          },
+        })
+
+        // the AUT frame is identified by name while it is still on the blank page
+        await cdpAutomation.seedFrameTree(client as any)
+        expect(await cdpAutomation.isAUTFrame('1')).to.be.true
+
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'root', url: 'about:blank' },
+            childFrames: [
+              {
+                frame: {
+                  id: 'reporter',
+                  name: REPORTER_FRAME_NAME,
+                  url: 'about:blank',
+                },
+              },
+              {
+                frame: {
+                  id: '1',
+                  name: 'application-window-123',
+                  url: 'http://localhost:3500/fixtures/dom.html',
+                },
+              },
+            ],
+          },
+        })
+
+        this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({
+          result: {
+            type: 'string',
+            value: 'http://localhost:3500/fixtures/dom.html',
+          },
+        })
+
+        // @ts-expect-error
+        cdpAutomation.executionContexts.set(123, {
+          auxData: {
+            frameId: '1',
+          },
+        })
+
+        expect(await this.onRequest('get:aut:url')).to.equal('http://localhost:3500/fixtures/dom.html')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Runtime.evaluate', {
+          expression: 'window.location.href',
+          contextId: 123,
+        })
+      })
+
+      it('falls back to the only child frame the runner does not own', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'root', url: 'about:blank' },
+            childFrames: [
+              { frame: { id: 'reporter', name: REPORTER_FRAME_NAME, url: 'about:blank' } },
+              { frame: { id: '1', name: '', url: 'http://localhost:3500/fixtures/dom.html' } },
+              { frame: { id: 'snapshot-0', name: `${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 0: 'foobar'`, url: 'about:blank' } },
+              { frame: { id: 'snapshot-1', name: `${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 1: 'foobar'`, url: 'about:blank' } },
+              { frame: { id: 'spec', name: `${SPEC_FRAME_NAME_IDENTIFIER}: '/__cypress/iframes/spec.js'`, url: 'http://localhost:3500/__cypress/iframes/spec.js' } },
+            ],
+          },
+        })
+
+        this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({
+          result: {
+            type: 'string',
+            value: 'http://localhost:3500/fixtures/dom.html',
+          },
+        })
+
+        // @ts-expect-error
+        cdpAutomation.executionContexts.set(123, {
+          auxData: {
+            frameId: '1',
+          },
+        })
+
+        expect(await this.onRequest('get:aut:url')).to.equal('http://localhost:3500/fixtures/dom.html')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Runtime.evaluate', {
+          expression: 'window.location.href',
+          contextId: 123,
+        })
+      })
+
+      it('fails rather than picking a runner frame when the AUT frame is gone', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'root', url: 'about:blank' },
+            childFrames: [
+              { frame: { id: 'reporter', name: REPORTER_FRAME_NAME, url: 'about:blank' } },
+              { frame: { id: 'snapshot-0', name: `${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 0: 'foobar'`, url: 'about:blank' } },
+              { frame: { id: 'spec', name: `${SPEC_FRAME_NAME_IDENTIFIER}: '/__cypress/iframes/spec.js'`, url: 'http://localhost:3500/__cypress/iframes/spec.js' } },
+              { frame: { id: 'bridge', name: `${SPEC_BRIDGE_FRAME_NAME_IDENTIFIER}: http://localhost:3500`, url: 'http://localhost:3500/__cypress/spec-bridge-iframes' } },
+            ],
+          },
+        })
+
+        await expect(this.onRequest('get:aut:url')).to.be.rejectedWith('Could not find AUT frame')
+      })
+
       it('fails silently if the frame cannot be found', async function () {
         expect(this.onRequest('get:aut:url')).to.be.rejectedWith('Could not find AUT frame')
       })
@@ -896,6 +1025,81 @@ context('lib/browsers/cdp_automation', () => {
 
         expect(await cdpAutomation.isAUTFrame('aut-inner')).to.be.true
         expect(await cdpAutomation.isAUTFrame('aut-outer')).to.be.false
+      })
+
+      it('keeps matching the AUT frame after the AUT overwrites window.name', async function () {
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [
+            {
+              frame: {
+                id: 'reporter',
+                name: REPORTER_FRAME_NAME,
+                url: 'about:blank',
+              },
+            },
+            {
+              frame: {
+                id: 'aut',
+                name: 'Your project: foobar',
+                url: 'about:blank',
+              },
+            },
+          ],
+        }
+
+        expect(await cdpAutomation.isAUTFrame('aut')).to.be.true
+
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [
+            {
+              frame: {
+                id: 'reporter',
+                name: REPORTER_FRAME_NAME,
+                url: 'about:blank',
+              },
+            },
+            {
+              frame: {
+                id: 'aut',
+                name: 'application-window-123',
+                url: 'http://localhost:3500/',
+              },
+            },
+          ],
+        }
+
+        expect(await cdpAutomation.isAUTFrame('aut')).to.be.true
+        expect(await cdpAutomation.isAUTFrame('reporter')).to.be.false
+      })
+
+      it('stops matching the remembered AUT frame once it detaches', async function () {
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [
+            {
+              frame: {
+                id: 'aut',
+                name: 'Your project: foobar',
+                url: 'about:blank',
+              },
+            },
+          ],
+        }
+
+        expect(await cdpAutomation.isAUTFrame('aut')).to.be.true
+
+        // @ts-expect-error - private cache used by _isAUTFrame
+        cdpAutomation.frameTree = {
+          frame: { id: 'root', url: 'about:blank' },
+          childFrames: [],
+        }
+
+        expect(await cdpAutomation.isAUTFrame('aut')).to.be.false
       })
     })
 
