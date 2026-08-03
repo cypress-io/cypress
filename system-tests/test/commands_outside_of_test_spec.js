@@ -7,12 +7,14 @@ describe('e2e commands outside of test', () => {
     spec: 'commands_outside_of_test.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('fails on failing assertions', {
     spec: 'assertions_failing_outside_of_test.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('passes on passing assertions', {
