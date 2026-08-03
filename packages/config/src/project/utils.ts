@@ -19,6 +19,7 @@ import {
   getPublicConfigKeys,
   validate,
   validateNoBreakingConfig,
+  warnAppliedConfigOptionAliases,
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
 import { options, breakingOptions } from '../options'
@@ -116,6 +117,27 @@ const removeEnvPrefix = (key: string) => {
   return key.slice(CYPRESS_ENV_PREFIX_LENGTH)
 }
 
+// A deprecated option set via `CYPRESS_*` also has to land on its replacement, which is what
+// the rest of Cypress reads. Adding the replacement to the env source means the precedence
+// and source-reporting rules below apply to it unchanged, rather than being restated.
+const withAliasedEnvConfigKeys = (processEnvs: Record<string, any>) => {
+  const providedConfigKeys = new Set(_.map(_.keys(processEnvs), matchesConfigKey))
+
+  return _.reduce(breakingOptions, (memo: Record<string, any>, opt) => {
+    if (!opt.newName || providedConfigKeys.has(opt.newName) || !providedConfigKeys.has(opt.name)) {
+      return memo
+    }
+
+    const envKey = _.findKey(processEnvs, (val, key) => matchesConfigKey(key) === opt.name)
+
+    if (envKey) {
+      memo[opt.newName] = processEnvs[envKey]
+    }
+
+    return memo
+  }, { ...processEnvs })
+}
+
 export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>, resolved: Record<string, any> = {}) {
   const envVars: any = (resolved.env = {})
 
@@ -131,7 +153,7 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
   const configEnv = cfg.env != null ? cfg.env : {}
   const envFile = cfg.envFile != null ? cfg.envFile : {}
 
-  let processEnvs = getProcessEnvVars(process.env) || {}
+  let processEnvs = withAliasedEnvConfigKeys(getProcessEnvVars(process.env) || {})
 
   cliEnvs = cliEnvs != null ? cliEnvs : {}
 
@@ -418,8 +440,25 @@ export function mergeDefaults (
   _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
   debug('merged config with options, got %o', config)
 
+  // Carry each source's deprecated options onto their replacements before the sources are
+  // merged together, so the usual precedence (CLI over env over config file) decides which
+  // one survives rather than the alias having to rank them itself.
+  applyConfigOptionAliases(config, {}, breakingOptions, errors.warning, (err, ...args) => {
+    throw makeConfigError(errors.get(err, ...args))
+  }, testingType)
+
+  if (config[testingType]) {
+    applyConfigOptionAliases(config[testingType], {}, breakingOptions, errors.warning, (err, options) => {
+      throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
+    }, testingType)
+  }
+
+  const cliOptions = applyConfigOptionAliases(allowed({ ...cliConfig, ...options }), {}, breakingOptions, errors.warning, (err, ...args) => {
+    throw makeConfigError(errors.get(err, ...args))
+  }, testingType)
+
   _
-  .chain(allowed({ ...cliConfig, ...options }))
+  .chain(cliOptions)
   .omit('env')
   .omit('expose')
   .omit('browsers')
@@ -437,19 +476,6 @@ export function mergeDefaults (
       config[key] = val
     }
   }).value()
-
-  // Carry a deprecated option's value onto its replacement (and fire its warning) before
-  // defaults are deep-merged in below, otherwise the replacement's default would already
-  // be present by the time we check whether the user set the deprecated option explicitly.
-  config = applyConfigOptionAliases(config, {}, breakingOptions, errors.warning, (err, ...args) => {
-    throw makeConfigError(errors.get(err, ...args))
-  }, testingType)
-
-  if (config[testingType]) {
-    applyConfigOptionAliases(config[testingType], {}, breakingOptions, errors.warning, (err, options) => {
-      throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
-    }, testingType)
-  }
 
   let url = config.baseUrl
 
@@ -496,9 +522,9 @@ export function mergeDefaults (
 
   config.expose = parseExposed(config, { ...cliConfig.expose, ...options.expose }, resolved)
 
-  // The alias pass above runs before `parseEnv`, so it cannot see a deprecated option set
-  // via `CYPRESS_*`. Re-run it against the pre-env snapshot to catch those.
-  applyConfigOptionAliases(config, configBeforeEnv, breakingOptions, errors.warning, (err, ...args) => {
+  // `parseEnv` applies `CYPRESS_*` overrides itself, replacement included, so only the
+  // deprecation warning is left to fire for anything the environment set.
+  warnAppliedConfigOptionAliases(config, configBeforeEnv, breakingOptions, errors.warning, (err, ...args) => {
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 

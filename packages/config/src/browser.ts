@@ -116,27 +116,28 @@ const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]
   })
 }
 
+// Whether `cfg` sets a deprecated option that has a functional replacement. `baseline` is
+// the config as it stood before the source under evaluation was applied, so a differing
+// value means that source set it. Presence alone can't answer this once defaults have been
+// merged, since the deprecated key is then always there; sources evaluated before defaults
+// are merged pass an empty baseline, where any value differs from `undefined`.
+const setsAliasedOption = (opt: BreakingOption, cfg: any, baseline: any) => {
+  return Boolean(opt.newName) && shouldFireBreakingOption(opt, cfg) && cfg[opt.name] !== baseline[opt.name]
+}
+
 // Carries a deprecated option's value onto its replacement (per `newName`) and fires its
-// breaking-option warning/error, for options that keep working as a functional alias
-// rather than being removed outright. `baseline` is the config as it stood before the
-// source being evaluated was applied; anything whose value differs from it was set by
-// that source. `validateNoBreakingConfig` excludes these `newName` options from its later
+// breaking-option warning/error, for options that keep working as a functional alias rather
+// than being removed outright. Callers apply this per source (config file, CLI, plugin
+// values) before those sources are merged, so ordinary precedence decides which source's
+// value survives. `validateNoBreakingConfig` excludes these `newName` options from its later
 // pass so they aren't (mis-)evaluated a second time.
 export const applyConfigOptionAliases = (modifiedConfig: any, baseline: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach((opt) => {
-    const { name, newName } = opt
-
-    if (!newName || !shouldFireBreakingOption(opt, modifiedConfig)) {
+    if (!setsAliasedOption(opt, modifiedConfig, baseline)) {
       return
     }
 
-    // Presence alone can't answer "was this option set?" - once defaults are merged the
-    // deprecated key is always there, so every config would look like it opted in. The
-    // baseline diff answers it instead; callers evaluating a config that has no defaults
-    // yet pass an empty baseline, where any value differs from `undefined`.
-    if (modifiedConfig[name] === baseline[name]) {
-      return
-    }
+    const { name, newName } = opt as { name: string, newName: string }
 
     // An absent replacement counts as unset, so a partial override - the shape a
     // `setupNodeEvents` plugin typically returns - still carries onto the replacement.
@@ -148,6 +149,17 @@ export const applyConfigOptionAliases = (modifiedConfig: any, baseline: any, bre
   })
 
   return modifiedConfig
+}
+
+// Fires the deprecation event for aliased options a source set, without copying anything.
+// For sources that apply their own values - `parseEnv` writes `CYPRESS_*` overrides itself,
+// including onto the replacement - so that precedence and source reporting stay in one place.
+export const warnAppliedConfigOptionAliases = (cfg: any, baseline: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+  breakingCfgOptions.forEach((opt) => {
+    if (setsAliasedOption(opt, cfg, baseline)) {
+      fireBreakingOptionEvent(opt, cfg, onWarning, onErr, testingType)
+    }
+  })
 }
 
 export const allowed = (obj = {}) => {

@@ -1327,17 +1327,44 @@ describe('config/src/project/utils', () => {
         expect(errors.warning).not.toBeCalledWith('RENAMED_CONFIG_OPTION', expect.anything())
       })
 
-      // CYPRESS_* overrides land on the config later in mergeDefaults than the config-file
-      // pass does, so they need an alias pass of their own.
       it('aliases the option when it is set via a CYPRESS_ environment variable', async function () {
         vi.stubEnv('CYPRESS_EXPERIMENTAL_MEMORY_MANAGEMENT', 'true')
 
-        await defaults('manageBrowserMemory', true, {})
+        const cfg = await defaults('manageBrowserMemory', true, {})
+
+        // the replacement has to report the environment as its source, not the config file
+        expect(cfg.resolved.manageBrowserMemory).toEqual({ value: true, from: 'env' })
 
         expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
           name: 'experimentalMemoryManagement',
           newName: 'manageBrowserMemory',
         }))
+      })
+
+      // Each source aliases its own deprecated keys before the sources are merged, so the
+      // normal precedence order decides the winner.
+      it('lets a CLI-set replacement outrank the deprecated option set via the environment', async function () {
+        vi.stubEnv('CYPRESS_EXPERIMENTAL_MEMORY_MANAGEMENT', 'true')
+
+        const cfg = await mergeDefaults(
+          { projectRoot: '/foo/bar/', supportFile: false } as any,
+          { testingType: 'e2e' },
+          { manageBrowserMemory: false },
+          getFilesByGlob,
+        )
+
+        expect(cfg.manageBrowserMemory).toEqual(false)
+      })
+
+      it('lets a CLI-set deprecated option outrank the replacement set in the config file', async function () {
+        const cfg = await mergeDefaults(
+          { projectRoot: '/foo/bar/', supportFile: false, manageBrowserMemory: false } as any,
+          { testingType: 'e2e' },
+          { experimentalMemoryManagement: true },
+          getFilesByGlob,
+        )
+
+        expect(cfg.manageBrowserMemory).toEqual(true)
       })
 
       it('does not alias or warn when only the replacement is set via a CYPRESS_ environment variable', async function () {
