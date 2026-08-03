@@ -206,19 +206,30 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('reporter', {}, { test: 'r2', attempt: '1' }, {})
   })
 
-  it('declares and forwards command --command with the --full-report option from the shared contract', () => {
+  it('declares and forwards command --command from the shared contract', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'command').helpInformation()
 
     expect(help).toContain('--test <test>')
     expect(help).toContain('--command <command>')
-    expect(help).toContain('--full-report')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['command', '--test', 'r2', '--command', 'log-3', '--full-report', '--attempt', '1'], { from: 'user' })
+    program.parse(['command', '--test', 'r2', '--command', 'log-3', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test': 'r2', 'command': 'log-3', 'full-report': 'true', 'attempt': '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test': 'r2', 'command': 'log-3', 'attempt': '1' }, {})
+  })
+
+  // `command` declares --json in its schema so the instance can be told, but the
+  // flag every command shares is still declared once, and it is that one the
+  // help lists — with the command's own wording.
+  it('declares a schema’s own --json once, keeping its description', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+    const help = subcommand(program, 'command').helpInformation()
+
+    expect(help.match(/--json/g)).toHaveLength(1)
+    expect(help).toContain('every console property in full')
+    expect(subcommand(program, 'reporter').helpInformation()).toContain('--json               print the raw JSON result')
   })
 
   // The CLI's own view options ride in the schema commands' help, but they shape

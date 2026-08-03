@@ -21,8 +21,7 @@ const consolePropsOf = (props: ConsolePropsResult | undefined): ConsolePropsResu
 }
 
 export const commandCommand = defineCommand('command', async (_params, options): Promise<CommandResult> => {
-  const { test, attempt, command } = options
-  const fullReport = options['full-report']
+  const { test, attempt, command, json } = options
 
   const runner = tapManagerDataSource.getRunner()
 
@@ -50,6 +49,6 @@ export const commandCommand = defineCommand('command', async (_params, options):
   return omitNullish<CommandResult>({
     ...resolved.entry,
     snapshots: serializeCommandSnapshots(liveSnapshots(snapshotProps)),
-    consoleProps: consolePropsOf(runner.getSerializedConsolePropsForLog(test, resolved.logId, fullReport ? { fullReport } : undefined)),
+    consoleProps: consolePropsOf(runner.getSerializedConsolePropsForLog(test, resolved.logId, json ? { full: true } : undefined)),
   })
 })

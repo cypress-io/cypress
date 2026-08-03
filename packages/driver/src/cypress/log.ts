@@ -34,7 +34,7 @@ const CONSOLE_PROPS_MAX_CONTAINER_LENGTH = 10000
 
 export interface SerializeConsolePropsOptions {
   /** Return every value in full, however long. */
-  fullReport?: boolean
+  full?: boolean
 }
 
 const serializedLength = (serialized): number => {
@@ -46,14 +46,14 @@ const serializedLength = (serialized): number => {
 }
 
 const withheld = (length: number): string => {
-  return `[${length.toLocaleString('en-US')} ${length === 1 ? 'character' : 'characters'} withheld — pass --full-report to include it]`
+  return `[${length.toLocaleString('en-US')} ${length === 1 ? 'character' : 'characters'} withheld — pass --json to include it]`
 }
 
 // A container's children are already bounded by the time this runs, so what is
 // measured is what would actually ship. The payload root is never named by its
 // length — collapsing it would leave the caller with no payload at all.
-const boundContainer = (serialized, depth: number, fullReport: boolean): any => {
-  if (fullReport || depth === 0) {
+const boundContainer = (serialized, depth: number, full: boolean): any => {
+  if (full || depth === 0) {
     return serialized
   }
 
@@ -62,7 +62,7 @@ const boundContainer = (serialized, depth: number, fullReport: boolean): any => 
   return length > CONSOLE_PROPS_MAX_CONTAINER_LENGTH ? withheld(length) : serialized
 }
 
-const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<object>, fullReport: boolean, depth: number, invokeFunction = false): any => {
+const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<object>, full: boolean, depth: number, invokeFunction = false): any => {
   if (BLACKLIST_PROPS.includes(key)) {
     return null
   }
@@ -74,7 +74,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
   if (_.isFunction(value)) {
     if (invokeFunction || groupsOrTableRe.test(key)) {
       try {
-        return serializeConsolePropsValue(value(), key, ancestors, fullReport, depth)
+        return serializeConsolePropsValue(value(), key, ancestors, full, depth)
       } catch {
         return null
       }
@@ -100,7 +100,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
   }
 
   if (typeof value === 'string') {
-    return !fullReport && value.length > CONSOLE_PROPS_MAX_VALUE_LENGTH ? withheld(value.length) : value
+    return !full && value.length > CONSOLE_PROPS_MAX_VALUE_LENGTH ? withheld(value.length) : value
   }
 
   if (!_.isObject(value)) {
@@ -127,7 +127,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
     let serialized
 
     try {
-      serialized = serializeConsolePropsValue(toJSON.call(value), key, ancestors, fullReport, depth)
+      serialized = serializeConsolePropsValue(toJSON.call(value), key, ancestors, full, depth)
     } catch {
       serialized = null
     }
@@ -146,7 +146,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
       entries = undefined
     }
 
-    const serialized = entries ? serializeConsolePropsValue(entries, '', ancestors, fullReport, depth) : null
+    const serialized = entries ? serializeConsolePropsValue(entries, '', ancestors, full, depth) : null
 
     ancestors.delete(value)
 
@@ -167,7 +167,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
 
     for (let index = 0; index < length; index++) {
       try {
-        serialized.push(serializeConsolePropsValue(value[index], '', ancestors, fullReport, depth + 1) ?? null)
+        serialized.push(serializeConsolePropsValue(value[index], '', ancestors, full, depth + 1) ?? null)
       } catch {
         serialized.push(null)
       }
@@ -175,7 +175,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
 
     ancestors.delete(value)
 
-    return boundContainer(serialized, depth, fullReport)
+    return boundContainer(serialized, depth, full)
   }
 
   const serialized: Record<string, any> = {}
@@ -200,7 +200,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
       continue
     }
 
-    const child = serializeConsolePropsValue(childValue, childKey, ancestors, fullReport, depth + 1, invokeChildren)
+    const child = serializeConsolePropsValue(childValue, childKey, ancestors, full, depth + 1, invokeChildren)
 
     if (child !== undefined) {
       Object.defineProperty(serialized, childKey, { value: child, enumerable: true, configurable: true, writable: true })
@@ -209,7 +209,7 @@ const serializeConsolePropsValue = (value, key: string, ancestors: WeakSet<objec
 
   ancestors.delete(value)
 
-  return boundContainer(serialized, depth, fullReport)
+  return boundContainer(serialized, depth, full)
 }
 
 // Log attrs on `test.routes` / `agents` / `commands` / `hooks` retain payloads
@@ -315,8 +315,8 @@ export const LogUtils = {
     return _.mapValues(attrs, stringify)
   },
 
-  toSerializedConsoleProps (consoleProps, { fullReport = false }: SerializeConsolePropsOptions = {}) {
-    return serializeConsolePropsValue(consoleProps, '', new WeakSet(), fullReport, 0)
+  toSerializedConsoleProps (consoleProps, { full = false }: SerializeConsolePropsOptions = {}) {
+    return serializeConsolePropsValue(consoleProps, '', new WeakSet(), full, 0)
   },
 
   getDisplayProps: (attrs) => {

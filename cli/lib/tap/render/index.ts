@@ -52,10 +52,6 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
       return renderCommandHuman(result as TapCommandResult, {
         depth: options.depth,
         path: options.path,
-        // The instance returned every value in full; the view then keeps them
-        // whole rather than clamping them back to a row. `--json` is still how
-        // you get the payload itself.
-        full: options['full-report'] === 'true',
       })
     },
   },

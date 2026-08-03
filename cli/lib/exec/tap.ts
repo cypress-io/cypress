@@ -49,6 +49,16 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
   return { wantsHelp, positionals, command }
 }
 
+// `--json` is parsed by the outer `cypress tap` command, so commander never
+// routes it to the command being run. A command that declares it in its own
+// schema needs it anyway — for that command the flag also changes what the
+// instance returns, not just how the CLI prints it — so it is handed over here.
+const withJson = (schema: TapSchema, name: string, options: Record<string, string>, json: boolean | undefined): Record<string, string> => {
+  const declared = schema.commands.find((command) => command.name === name)?.options.some((option) => option.name === 'json')
+
+  return json && declared ? { ...options, json: 'true' } : options
+}
+
 const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
   let dispatchCode: number | undefined
   const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
@@ -120,7 +130,7 @@ const tapModule = {
 
         let dispatchCode = 0
         const program = buildTapProgram(schema, async (name, args, commandOptions, renderOptions) => {
-          dispatchCode = await execCommand(session, name, args, commandOptions, options.json, renderOptions)
+          dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, renderOptions)
         })
 
         if (wantsHelp || !command) {

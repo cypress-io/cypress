@@ -94,7 +94,10 @@ const commandMeta = {
   options: [
     { ...testIdField, required: true },
     { name: 'command', type: 'string', required: true, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
-    { name: 'full-report', type: 'boolean', required: false, description: 'return every console property in full, however long, instead of naming the long ones by their length — a value too long for its row then reads as a block under its key' },
+    // `--json` is the CLI's own flag, but this command declares it because it
+    // also changes what the command returns: nothing is withheld from a payload
+    // that is not being rendered for reading room.
+    { name: 'json', type: 'boolean', required: false, description: 'print the raw JSON result instead of the human-readable rendering — every console property in full, however long, rather than the long ones named by their length' },
     attemptField,
   ],
 } as const satisfies TapCommandSchema

@@ -22,9 +22,9 @@ export interface TapTestsRunner {
   /**
    * Returns one command's console properties projected for the JSON-only tap
    * transport. A value long enough to bury the rest of the payload is named by
-   * its length unless `fullReport` asks for every value in full.
+   * its length unless `full` asks for every value in full.
    */
-  getSerializedConsolePropsForLog (testId: string, logId: string, options?: { fullReport?: boolean }): ConsolePropsResult | undefined
+  getSerializedConsolePropsForLog (testId: string, logId: string, options?: { full?: boolean }): ConsolePropsResult | undefined
   isRunComplete (): boolean
   /** ISO start time of the run; null before the first test runs. */
   getStartTime (): string | null

@@ -9,6 +9,7 @@ import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapSession } from '../../../lib/tap/tap-session'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
+import { buildTapSchema } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
@@ -215,6 +216,33 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual(reporterView)
+    })
+
+    // For `command`, --json also changes what the instance returns — nothing is
+    // withheld from a payload that is not being rendered for reading room — so
+    // the flag is handed over to it. Every other command keeps it to itself.
+    it('forwards --json to the instance for a command whose schema declares it', async () => {
+      const consoleProps = { name: 'request', type: 'command', props: { body: 'x'.repeat(2_000) } }
+      const call = mockSession(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
+
+      expect(await tap.start(['command', '--test', 'r2', '--command', '1'], { json: true })).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test': 'r2', 'command': '1', 'json': 'true' }])
+      expect(JSON.parse(logger.print()).consoleProps).toEqual(consoleProps)
+    })
+
+    it('does not forward --json for a command whose schema does not declare it', async () => {
+      const call = mockSession(reporterSchema, { result: reporterView })
+
+      expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['reporter', {}, { test: 'r2' }])
+    })
+
+    it('leaves the options alone without --json', async () => {
+      const commandView = { id: '1', name: 'visit', hook: { hookId: 'r2', hookName: 'test body' }, snapshots: [] }
+      const call = mockSession(buildTapSchema('15.0.0'), { result: commandView })
+
+      expect(await tap.start(['command', '--test', 'r2', '--command', '1'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { test: 'r2', command: '1' }])
     })
 
     it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
@@ -1141,10 +1169,6 @@ describe('lib/exec/tap', () => {
           --command <command>  command id, as listed by the reporter command — a row
                                number (test body first when duplicated), an e-prefixed
                                event id, or hook-qualified like "h1:3"
-          --full-report        return every console property in full, however long,
-                               instead of naming the long ones by their length — a
-                               value too long for its row then reads as a block under
-                               its key
           --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
                                latest
           --depth <depth>      how many levels of nested console properties to expand
@@ -1157,7 +1181,8 @@ describe('lib/exec/tap', () => {
           --instance <pid>     target a specific running Cypress instance by its server
                                process id (pid)
           --json               print the raw JSON result instead of the human-readable
-                               rendering
+                               rendering — every console property in full, however
+                               long, rather than the long ones named by their length
           -h, --help           display help for command
         "
       `)

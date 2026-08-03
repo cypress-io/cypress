@@ -400,7 +400,7 @@ describe('tap binding console properties', () => {
     })
   })
 
-  it('names a long console property by its length, and returns everything with --full-report', () => {
+  it('names a long console property by its length, and returns everything with --json', () => {
     cy.visitApp('/specs/runner?file=cypress/e2e/console-props.cy.js')
 
     cy.waitForSpecToFinish({ passCount: 1 })
@@ -416,7 +416,7 @@ describe('tap binding console properties', () => {
       }
 
       const body = Array.from({ length: 500 }, (_unused, index) => ({ id: index, tags: ['a', 'b'] }))
-      const withheldFor = (length: number) => `[${length.toLocaleString('en-US')} characters withheld — pass --full-report to include it]`
+      const withheldFor = (length: number) => `[${length.toLocaleString('en-US')} characters withheld — pass --json to include it]`
 
       const bounded = await propsOf()
 
@@ -427,7 +427,7 @@ describe('tap binding console properties', () => {
       expect(bounded.props.actual.status).to.eq(200)
       expect(bounded.props.actual.headers).to.deep.eq({ 'content-type': 'application/json' })
 
-      const full = await propsOf({ 'full-report': 'true' })
+      const full = await propsOf({ json: 'true' })
 
       expect(full.props.actual.body).to.deep.eq(body)
       expect(full.props.actual.note).to.eq('x'.repeat(1200))

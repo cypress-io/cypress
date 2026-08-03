@@ -94,15 +94,14 @@ export interface TapCommandResult extends TapCommandEntry {
 export type TapJsonValue = null | boolean | number | string | TapJsonValue[] | { [key: string]: TapJsonValue }
 
 /**
- * The `command --props` result: a command's console properties, projected for
- * the JSON-only tap transport.
+ * A command's console properties, projected for the JSON-only tap transport.
  *
  * The driver wraps every log's properties in a fixed envelope — the command's
  * own key/values under `props`, with `name`, `type` (`command` or `event`) and
  * any of `table`, `groups`, `error`, `args` alongside it. The values themselves
  * are whatever the command logged, hence the open shape; a value long enough to
- * bury the rest of the payload arrives named by its length unless
- * `--full-report` asks for it in full. A command whose details the driver has
- * evicted from memory yields a bare `{ Message }` with no envelope.
+ * bury the rest of the payload arrives named by its length unless `--json` asks
+ * for it in full. A command whose details the driver has evicted from memory
+ * yields a bare `{ Message }` with no envelope.
  */
 export type TapConsoleProps = { [key: string]: TapJsonValue }

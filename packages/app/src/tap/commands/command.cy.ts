@@ -208,7 +208,7 @@ describe('tap/commands/command', () => {
         Selector: '#user',
         Elements: 1,
         Yielded: '<input#user>',
-        body: '[12,480 characters withheld — pass --full-report to include it]',
+        body: '[12,480 characters withheld — pass --json to include it]',
       },
     }
     const getSerializedConsolePropsForLog = cy.stub().returns(consoleProps)
@@ -288,7 +288,7 @@ describe('tap/commands/command', () => {
     })
   })
 
-  it('asks the driver for every value in full for --full-report', async () => {
+  it('asks the driver for every value in full for --json', async () => {
     const consoleProps = { name: 'request', type: 'command', props: { body: { user: 'jane' } } }
     const getSerializedConsolePropsForLog = cy.stub().returns(consoleProps)
 
@@ -297,10 +297,10 @@ describe('tap/commands/command', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, {
       'test': 'r2',
       'command': '1',
-      'full-report': 'true',
+      'json': 'true',
     })
 
-    expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2', { fullReport: true })
+    expect(getSerializedConsolePropsForLog).to.have.been.calledOnceWith('r2', 'log-2', { full: true })
     expect((outcome as { result: { consoleProps: unknown } }).result.consoleProps).to.deep.eq(consoleProps)
   })
 

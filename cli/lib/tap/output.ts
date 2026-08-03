@@ -21,7 +21,7 @@ export const renderResult = (result: unknown): void => {
  * Print a command's result: its human-readable rendering when the command
  * defines one (see `./render`), the raw JSON otherwise or when `--json` asks
  * for it explicitly. The invoked options are forwarded because a command's
- * result shape can depend on them (`command --props`) — as can whether a
+ * result shape can depend on them (`command --json`) — as can whether a
  * rendering applies at all, which a renderer signals by returning undefined.
  */
 export const renderOutcome = (command: string, result: unknown, json: boolean | undefined, options: Record<string, string> = {}): void => {

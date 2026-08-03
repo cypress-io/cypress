@@ -25,8 +25,15 @@ const argumentDescriptions = (params: readonly TapCommandParamSchema[]): Record<
   return Object.fromEntries(params.map(({ name, description }) => [name, description]))
 }
 
+const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readable rendering'
+
 const declareOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): void => {
-  for (const { name, alias, type, required, description } of options) {
+  // A command that declares `--json` in its schema does so to receive it, not to
+  // add a second flag — it is declared below with the ones every command shares,
+  // so the schema contributes only its description.
+  const json = options.find(({ name }) => name === 'json')
+
+  for (const { name, alias, type, required, description } of options.filter((option) => option !== json)) {
     const lead = alias ? `-${alias}, ` : ''
     const flags = type === 'boolean' ? `${lead}--${name}` : `${lead}--${name} <${name}>`
 
@@ -41,7 +48,7 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
   // the top-level `cypress tap` command before a subprogram parses, so declaring
   // them here is purely so they render in each command's generated help.
   command.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
-  command.option('--json', 'print the raw JSON result instead of the human-readable rendering')
+  command.option('--json', json?.description ?? JSON_DESCRIPTION)
 }
 
 const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly string[]): Record<string, string> => {
@@ -138,7 +145,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   // The outer command disables its own help, making this the sole place they
   // surface.
   program.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
-  program.option('--json', 'print the raw JSON result instead of the human-readable rendering')
+  program.option('--json', JSON_DESCRIPTION)
 
   for (const native of tapCliCommands) {
     declareCommand(program, native)

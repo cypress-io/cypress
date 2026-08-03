@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapCommandOptionSchema, TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
-import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth, wrap } from './format'
+import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth } from './format'
 
 // A command's console properties are the deepest payload the tap returns — a
 // `cy.request` row carries its matcher, request, response and every header of
@@ -42,8 +42,6 @@ export const consolePropsOptions: readonly TapCommandOptionSchema[] = [
 export interface ConsolePropsOptions {
   depth?: string
   path?: string
-  /** `--full-report`: the values arrived whole, so render them whole. */
-  full?: boolean
 }
 
 const isRecord = (value: TapJsonValue): value is { [key: string]: TapJsonValue } => {
@@ -55,7 +53,7 @@ const isContainer = (value: TapJsonValue): boolean => typeof value === 'object' 
 // The serializer names a value too long to ship by its length rather than
 // returning it (see the driver's `withheld`); color the marker so it doesn't
 // read as content.
-const WITHHELD = /^\[[\d,]+ characters? withheld — pass --full-report to include it\]$/
+const WITHHELD = /^\[[\d,]+ characters? withheld — pass --json to include it\]$/
 
 // A response body or stack trace carries its own newlines; inlining it would
 // break the aligned column, so it reads as a block under its key.
@@ -127,11 +125,10 @@ const summaryInline = (value: TapJsonValue): InlineValue => {
 }
 
 // A cell keeps the column alignment that makes a table readable, so it stays one
-// line of bounded width — unless `--full-report` asked for every value, which is
-// the one case where the value matters more than the column does.
+// line of bounded width.
 const MAX_CELL = 40
 
-const cell = (value: TapJsonValue | undefined, full: boolean): string => {
+const cell = (value: TapJsonValue | undefined): string => {
   if (value === undefined) {
     return ''
   }
@@ -144,18 +141,18 @@ const cell = (value: TapJsonValue | undefined, full: boolean): string => {
     return '{…}'
   }
 
-  // A cell cannot hold the newlines of a multi-line value whatever was asked
-  // for: they would end the row the table is aligning.
+  // A cell cannot hold the newlines of a multi-line value: they would end the
+  // row the table is aligning.
   const text = String(value).replace(/\s+/g, ' ').trim()
 
-  return full ? text : clamp(text, MAX_CELL)
+  return clamp(text, MAX_CELL)
 }
 
 // Rows of like-shaped objects are what the driver's `table` console prop holds
 // (its keyboard/mouse event tables) — render them the way the reporter renders a
 // table, the row keys themselves as the column headers. A lone row reads better
 // as plain key/values, so it is left to the caller.
-const rowsTable = (values: TapJsonValue[], indent: string, full: boolean): string[] | undefined => {
+const rowsTable = (values: TapJsonValue[], indent: string): string[] | undefined => {
   if (values.length < 2 || !values.every(isRecord)) {
     return undefined
   }
@@ -166,7 +163,7 @@ const rowsTable = (values: TapJsonValue[], indent: string, full: boolean): strin
     return undefined
   }
 
-  const rows = values.map((row) => columnKeys.map((column) => cell(row[column], full)))
+  const rows = values.map((row) => columnKeys.map((column) => cell(row[column])))
 
   // Cells are plain here, so coloring them after padding is a no-op width-wise;
   // the withheld marker still needs its hue.
@@ -195,15 +192,13 @@ interface PropsRenderer {
 /**
  * Renders a properties tree to `maxDepth` levels of containers, collecting the
  * `>`-joined path of each container it summarized so the caller can offer them
- * as the next command to run. `full` is `--full-report`: every value the
- * instance returned reads whole, wrapped onto as many rows as it takes rather
- * than clamped to one.
+ * as the next command to run.
  */
-const createPropsRenderer = (maxDepth: number, rowBudget: number, full: boolean): PropsRenderer => {
+const createPropsRenderer = (maxDepth: number, rowBudget: number): PropsRenderer => {
   const collapsed: string[][] = []
 
-  const block = (text: string, indent: string): string[] => blockLines(text, indent, full)
-  const rows = (values: TapJsonValue[], indent: string): string[] | undefined => rowsTable(values, indent, full)
+  const block = (text: string, indent: string): string[] => blockLines(text, indent)
+  const rows = (values: TapJsonValue[], indent: string): string[] | undefined => rowsTable(values, indent)
 
   // Scalars align in one column with their sibling scalars; a container gets its
   // own key line with its children indented beneath it, so nesting reads as
@@ -248,13 +243,6 @@ const createPropsRenderer = (maxDepth: number, rowBudget: number, full: boolean)
       const keyLine = `${indent}${chalk.dim(label(key))}`
 
       if (inline) {
-        // Asked for in full, a value that outgrows its row moves under its key
-        // instead: the row's width is what the clamp exists to protect, and there
-        // is nothing left to protect once the value has a block of its own.
-        if (full && inline.clampable && inline.text.length > valueWidth) {
-          return [keyLine, ...block(inline.text, childIndent)]
-        }
-
         const text = inline.clampable ? clamp(inline.text, valueWidth) : inline.text
 
         return [`${indent}${chalk.dim(label(key).padEnd(width))}  ${inline.style ? inline.style(text) : text}`]
@@ -273,16 +261,12 @@ const createPropsRenderer = (maxDepth: number, rowBudget: number, full: boolean)
   return { renderProps, block, rows, collapsed }
 }
 
-const blockLines = (text: string, indent: string, full: boolean): string[] => {
+const blockLines = (text: string, indent: string): string[] => {
   const width = Math.max(MIN_VALUE_WIDTH, terminalWidth() - indent.length)
 
   // A body split on its newlines still carries the `\r` of a CRLF payload, which
   // would drag the cursor back over the line it just printed.
-  return text.split('\n').flatMap((line) => {
-    const row = onOneRow(line)
-
-    return full ? wrap(row, width).map((part) => `${indent}${part}`) : [`${indent}${clamp(row, width)}`]
-  })
+  return text.split('\n').map((line) => `${indent}${clamp(onOneRow(line), width)}`)
 }
 
 interface DepthChoice {
@@ -596,7 +580,7 @@ export const renderConsolePropsHuman = (envelope: TapConsoleProps, options: Cons
 
   const { depth, rowBudget, note } = readDepth(options.depth)
   const noteBlock = note ? [[emptyState(note)]] : []
-  const render = createPropsRenderer(depth, rowBudget, options.full === true)
+  const render = createPropsRenderer(depth, rowBudget)
 
   if (options.path) {
     return layout([...renderPath(envelope, options.path, render), ...noteBlock])
