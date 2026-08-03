@@ -49,9 +49,10 @@ const toScrollBehaviorAxes = (scrollBehavior) => {
 const getScrollIntoViewOptions = (scrollBehavior, configuredScrollBehavior) => {
   const { block, inline } = toScrollBehaviorAxes(scrollBehavior)
   const { block: configuredBlock } = toScrollBehaviorAxes(configuredScrollBehavior)
-  // a configured `false` turns scrolling off entirely, so it carries no
-  // alignment for a per-axis override to inherit
-  const resolvedBlock = block ?? (configuredBlock === false ? defaultScrollBehavior : configuredBlock)
+  // the configured value carries no block position to inherit when scrolling is
+  // off (`false`) or when it only set `inline`
+  const inheritedBlock = configuredBlock in scrollBehaviorOptionsMap ? configuredBlock : defaultScrollBehavior
+  const resolvedBlock = block ?? inheritedBlock
   const resolvedInline = inline ?? resolvedBlock
 
   return {

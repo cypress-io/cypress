@@ -1371,6 +1371,18 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('uses the default block behavior when only inline is specified in config', { scrollBehavior: { inline: 'nearest' } }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'nearest' })
+        })
+      })
+
       it('uses the default block behavior when only inline is specified and scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
