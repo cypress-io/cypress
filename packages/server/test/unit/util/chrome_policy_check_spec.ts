@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { stripIndent } from 'common-tags'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import { getRunner } from '../../../lib/util/chrome_policy_check'
 
 import '../../spec_helper'

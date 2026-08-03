@@ -9,11 +9,17 @@
 **Bugfixes:**
 
 - Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
+- Fixed an issue where a `cy.*` command error message that interpolated a value containing a `$` character could render incorrectly, with a leaked `{{...}}` placeholder or duplicated or dropped surrounding text. Such values are now inserted verbatim. Fixed in [#34221](https://github.com/cypress-io/cypress/pull/34221).
+- Fixed an issue where a Cypress error message that interpolated a value containing a `$` sequence (such as `$&`, `` $` ``, `$'`, or `$$`) could render with corrupted or duplicated text. Such values are now shown verbatim. Fixed in [#34220](https://github.com/cypress-io/cypress/pull/34220).
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) matching on the `auth` option compared only the portion of a Basic authentication password before the first colon, so a request whose password contained a colon (permitted by RFC 7617) failed to match. The full password is now compared. Fixed in [#34206](https://github.com/cypress-io/cypress/pull/34206).
+- Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) routes specifying a numeric `port` (for example `port: 8080` or `port: [8080]`) did not match requests on non-default ports. Such routes now match as documented. Fixes [#17653](https://github.com/cypress-io/cypress/issues/17653). Fixed in [#34205](https://github.com/cypress-io/cypress/pull/34205).
+- Fixed an issue where inline source maps embedded without a `charset` (for example those emitted by esbuild) were not decoded and were silently dropped. These inline source maps are now decoded. Fixed in [#34204](https://github.com/cypress-io/cypress/pull/34204).
 - Fixed an issue where the TypeScript 7 support added in [15.18.0](#15-18-0) did not work: TypeScript spec and support files failed to compile with `Error: Cannot find module '@babel/preset-typescript'`. Fixes [#34359](https://github.com/cypress-io/cypress/issues/34359).
 - Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) block could intermittently fail with `TypeError: Cannot read properties of undefined (reading 'applied')`, incorrectly reported as originating from your test code. Addressed in [#34376](https://github.com/cypress-io/cypress/pull/34376).
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
 - Fixed an issue where the configuration validation error shown when `passesRequired` is omitted from the experimental `detect-flake-and-pass-on-threshold` retry strategy reported the value of an unrelated option instead of the `passesRequired` value. Fixed in [#34202](https://github.com/cypress-io/cypress/pull/34202).
 - Fixed an issue where the configuration validation error for an absolute `ca` filepath in `clientCertificates` referenced the wrong certificate. Fixed in [#34201](https://github.com/cypress-io/cypress/pull/34201).
+- Fixed an issue where HTTP `3xx` responses (such as `304 Not Modified`) were shown with a failed (red) indicator in the Command Log. These responses now display as successful. Fixes [#34066](https://github.com/cypress-io/cypress/issues/34066). Fixed in [#34282](https://github.com/cypress-io/cypress/pull/34282).
 
 **Misc:**
 
@@ -22,6 +28,7 @@
 **Dependency Updates:**
 
 - Upgraded `tar` from `6.2.1` to `7.5.21` to address [CVE-2026-59873](https://github.com/advisories/GHSA-23hp-3jrh-7fpw) reported in security scans. Addresses [#34333](https://github.com/cypress-io/cypress/issues/34333). Addressed in [#34335](https://github.com/cypress-io/cypress/pull/34335).
+- Upgraded `arch` from `2.2.0` to `3.0.0`. Addressed in [#34426](https://github.com/cypress-io/cypress/pull/34426).
 - Removed `tslib` (previously `1.14.1`) from the `cypress` package's runtime dependencies. Addressed in [#34372](https://github.com/cypress-io/cypress/pull/34372).
 - Upgraded `ws` from `8.18.3` to `8.21.1`. Addressed in [#34392](https://github.com/cypress-io/cypress/pull/34392).
 

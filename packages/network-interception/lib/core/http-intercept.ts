@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type {
   ForHttpIntercept,
   HttpRequest,
@@ -14,6 +15,7 @@ export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TReq
 
   use (middleware: InterceptMiddleware): void {
     this.middlewares.push(middleware)
+    debug.http('registered middleware (%d total)', this.middlewares.length)
   }
 
   async handle (
@@ -22,9 +24,12 @@ export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TReq
   ): Promise<TResponse> {
     const request = this.codec.decodeRequest(transportRequest)
 
+    debug.http('handle %s %s (%d middleware)', request.method ?? 'GET', request.url, this.middlewares.length)
+
     type Forward = (nextRequest: HttpRequest) => Promise<HttpResponse>
 
     const terminal: Forward = async (nextRequest) => {
+      debug.http('forwarding to origin %s %s', nextRequest.method ?? 'GET', nextRequest.url)
       const encodedRequest = this.codec.encodeRequest(nextRequest)
 
       return this.codec.decodeResponse(await next(encodedRequest))
@@ -38,9 +43,15 @@ export class HttpIntercept<TRequest, TResponse> implements ForHttpIntercept<TReq
     )
 
     try {
-      return this.codec.encodeResponse(await forward(request))
+      const httpResponse = await forward(request)
+      const response = this.codec.encodeResponse(httpResponse)
+
+      debug.http('handle complete %s %s -> %d', request.method ?? 'GET', request.url, httpResponse.statusCode ?? 0)
+
+      return response
     } finally {
       this.codec.releaseRequest?.(request.id)
+      debug.http('released request %s', request.id)
     }
   }
 }
