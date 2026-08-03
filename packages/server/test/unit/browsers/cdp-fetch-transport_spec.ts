@@ -1184,7 +1184,7 @@ describe('CdpFetchTransport', () => {
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 
-      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-response', responseCode: 200 }).rejects(new Error('continueResponse failed'))
+      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200 }).rejects(new Error('continueResponse failed'))
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -1399,7 +1399,7 @@ describe('CdpFetchTransport', () => {
         await tick()
 
         await onRequestPaused(createPausedRequest({
-          requestId: 'fetch-response',
+          requestId: 'fetch-request',
           networkId: 'network-1',
           responseStatusCode: 200,
         }))
@@ -1417,10 +1417,87 @@ describe('CdpFetchTransport', () => {
       expect(middlewareSawResponse).not.to.have.been.called
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
+    it('hands middleware an empty body for redirect pauses instead of asking CDP for one', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const middlewareSawBody = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        middlewareSawBody(await readStream(response.bodyStream!))
+
+        return response
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 302,
+      })
+
+      response.responseHeaders = [{ name: 'location', value: 'https://example.test/next' }]
+
+      await onRequestPaused(response)
+
+      await handled
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+      expect(middlewareSawBody).to.have.been.calledWith('')
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 302,
+        responseHeaders: [{ name: 'location', value: 'https://example.test/next' }],
+      })
+    })
+
+    it('fetches the response body while the pause is still valid, even when nothing reads it', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('origin').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => next(req))
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-request',
+      })
     })
 
     it('exposes response pause bodies as a stream for middleware rewrites', async () => {

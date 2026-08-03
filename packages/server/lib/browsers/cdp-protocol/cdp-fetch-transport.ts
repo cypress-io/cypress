@@ -16,7 +16,16 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
+const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 const brotliDecompress = promisify(zlib.brotliDecompress)
+
+// CDP refuses Fetch.getResponseBody for a pause in the redirect-received state,
+// and documents a redirect status plus a location header as the way to tell that
+// state apart from response-received.
+const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+  return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
+    && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
+}
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
@@ -366,10 +375,10 @@ export class CdpFetchTransport {
     let bodyStream: Readable
 
     try {
-      bodyStream = await this.fetchResponseBody(event.requestId, event.responseHeaders, sessionId)
+      bodyStream = await this.fetchResponseBody(event, sessionId)
     } catch (err) {
-      debug('eager response body fetch failed for %s: %s', event.request.url, (err as Error).message)
-      deferred.reject(err as Error)
+      deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
+
       await this.safeSend('Fetch.continueResponse', {
         requestId: event.requestId,
       }, sessionId)
@@ -381,7 +390,7 @@ export class CdpFetchTransport {
     // The resolve below would be a no-op and nothing else owns this pause —
     // release it, or the browser stays paused (reset keeps Fetch enabled).
     if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
-      debug('releasing response pause rejected during set-cookie merge: %s', event.request.url)
+      debug('releasing response pause rejected while awaiting CDP: %s', event.request.url)
       await this.safeSend('Fetch.continueResponse', {
         requestId: event.requestId,
       }, sessionId)
@@ -426,13 +435,17 @@ export class CdpFetchTransport {
     ]
   }
 
-  private fetchResponseBody = async (requestId: string, responseHeaders?: Protocol.Fetch.HeaderEntry[], sessionId?: string): Promise<Readable> => {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Readable> => {
+    if (isRedirectPause(event)) {
+      return Readable.from([])
+    }
+
     const response = await this.client.send('Fetch.getResponseBody', {
-      requestId,
+      requestId: event.requestId,
     }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
     const raw = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-    const body = await this.decodeUndeliveredEncodings(raw, responseHeaders)
+    const body = await this.decodeUndeliveredEncodings(raw, event.responseHeaders)
 
     return Readable.from(body.length ? [body] : [])
   }
