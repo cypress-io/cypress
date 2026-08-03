@@ -221,7 +221,7 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').check({ scrollBehavior: 'bottom' })
 
       cy.get(':checkbox:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'nearest' })
       })
     })
 
@@ -246,7 +246,7 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').check()
 
       cy.get(':checkbox:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'nearest' })
       })
     })
 
@@ -296,7 +296,7 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').check()
 
       cy.get(':checkbox:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'nearest' })
       })
     })
 

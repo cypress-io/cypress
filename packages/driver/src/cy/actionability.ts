@@ -29,35 +29,37 @@ const dispatchPrimedChangeEvents = function (state) {
   }
 }
 
+// `top` and `bottom` only describe the block axis, so they leave `inline` at the
+// browser default the way `scrollIntoView(alignToTop)` does. The rest name a
+// position either axis can take, so they apply to both.
 const scrollBehaviorOptionsMap = {
-  top: 'start',
-  bottom: 'end',
-  center: 'center',
-  nearest: 'nearest',
+  top: { block: 'start', inline: 'nearest' },
+  bottom: { block: 'end', inline: 'nearest' },
+  start: { block: 'start', inline: 'start' },
+  end: { block: 'end', inline: 'end' },
+  center: { block: 'center', inline: 'center' },
+  nearest: { block: 'nearest', inline: 'nearest' },
 }
 
 const defaultScrollBehavior = 'top'
 
-const toScrollBehaviorAxes = (scrollBehavior) => {
-  return _.isPlainObject(scrollBehavior) ? scrollBehavior : { block: scrollBehavior, inline: scrollBehavior }
+// `scrollBehavior` is either one of the alignments above or an explicit per-axis
+// `{ block, inline }` using the same values as the native `scrollIntoView`.
+const toScrollIntoViewOptions = (scrollBehavior) => {
+  return _.isPlainObject(scrollBehavior)
+    ? _.pick(scrollBehavior, ['block', 'inline'])
+    : scrollBehaviorOptionsMap[scrollBehavior]
 }
 
-// `scrollBehavior` is either a single position applied to both axes or a
-// per-axis `{ block, inline }`. An omitted `block` falls back to the configured
-// position and `inline` then mirrors `block`, so a lone `{ inline: 'nearest' }`
-// leaves vertical scrolling alone.
+// an axis the caller left out keeps whatever the configured behavior aligned it
+// to, so `{ inline: 'start' }` alone does not disturb vertical scrolling
 const getScrollIntoViewOptions = (scrollBehavior, configuredScrollBehavior) => {
-  const { block, inline } = toScrollBehaviorAxes(scrollBehavior)
-  const { block: configuredBlock } = toScrollBehaviorAxes(configuredScrollBehavior)
-  // the configured value carries no block position to inherit when scrolling is
-  // off (`false`) or when it only set `inline`
-  const inheritedBlock = configuredBlock in scrollBehaviorOptionsMap ? configuredBlock : defaultScrollBehavior
-  const resolvedBlock = block ?? inheritedBlock
-  const resolvedInline = inline ?? resolvedBlock
-
   return {
-    block: scrollBehaviorOptionsMap[resolvedBlock],
-    inline: scrollBehaviorOptionsMap[resolvedInline],
+    ...scrollBehaviorOptionsMap[defaultScrollBehavior],
+    // a configured `false` turns scrolling off entirely, so it carries no
+    // alignment for a per-axis override to inherit
+    ...toScrollIntoViewOptions(configuredScrollBehavior),
+    ...toScrollIntoViewOptions(scrollBehavior),
   }
 }
 

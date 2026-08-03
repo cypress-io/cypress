@@ -1259,7 +1259,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: 'bottom' })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
         })
       })
 
@@ -1283,7 +1283,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
         })
       })
 
@@ -1331,7 +1331,31 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'nearest' })
+        })
+      })
+
+      it('applies scrollBehavior start to both axes', () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: 'start' })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'start' })
+        })
+      })
+
+      it('applies scrollBehavior end to both axes', { scrollBehavior: 'end' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
         })
       })
 
@@ -1340,14 +1364,14 @@ describe('src/cy/commands/actions/click', () => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('input:first').click({ scrollBehavior: { block: 'bottom', inline: 'nearest' } })
+        cy.get('input:first').click({ scrollBehavior: { block: 'end', inline: 'start' } })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'start' })
         })
       })
 
-      it('can specify each scrollBehavior axis in config', { scrollBehavior: { block: 'center', inline: 'nearest' } }, () => {
+      it('can specify each scrollBehavior axis in config', { scrollBehavior: { block: 'center', inline: 'start' } }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1355,23 +1379,35 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'start' })
         })
       })
 
-      it('leaves the block axis at the configured behavior when only inline is specified', { scrollBehavior: 'bottom' }, () => {
+      it('leaves the block axis at the configured alignment when only inline is specified', { scrollBehavior: 'bottom' }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('input:first').click({ scrollBehavior: { inline: 'nearest' } })
+        cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'start' })
         })
       })
 
-      it('uses the default block behavior when only inline is specified in config', { scrollBehavior: { inline: 'nearest' } }, () => {
+      it('leaves the inline axis at the configured alignment when only block is specified', { scrollBehavior: 'center' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: { block: 'end' } })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'center' })
+        })
+      })
+
+      it('uses the default alignment for axes missing from the config', { scrollBehavior: { inline: 'start' } }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1379,35 +1415,23 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'start' })
         })
       })
 
-      it('uses the default block behavior when only inline is specified and scrollBehavior is false in config', { scrollBehavior: false }, () => {
+      it('uses the default alignment when scrollBehavior is false in config and only inline is specified', { scrollBehavior: false }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('input:first').click({ scrollBehavior: { inline: 'nearest' } })
+        cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'start' })
         })
       })
 
-      it('mirrors the block axis onto inline when only block is specified', () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click({ scrollBehavior: { block: 'center' } })
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'center' })
-        })
-      })
-
-      it('horizontally scrolls element to the leftmost point, away from a right-floating sticky element', () => {
+      it('can horizontally scroll an element away from a right-floating sticky element with inline: start', () => {
         cy.viewport(800, 400)
 
         const $body = cy.$$('body')
@@ -1456,9 +1480,9 @@ describe('src/cy/commands/actions/click', () => {
 
         $target.on('click', clicked)
 
-        // with `inline: 'nearest'` the target would be scrolled under the
-        // right-sticky element and the click would never reach it
-        cy.get('#target').click().then(() => {
+        // the default leaves the inline axis at `nearest`, which parks the target
+        // under the right-sticky element where the click cannot reach it
+        cy.get('#target').click({ scrollBehavior: 'start' }).then(() => {
           expect(clicked).to.be.calledOnce
         })
       })
@@ -1491,21 +1515,21 @@ describe('src/cy/commands/actions/click', () => {
           return $container
         }
 
-        // the exact offset is subpixel-dependent across browsers, so only the
-        // fact that the container moved matters here
-        it('scrolls an already-visible element into the leftmost point by default', () => {
+        it('leaves the container alone when the element is already horizontally visible', () => {
           const $container = buildCarousel()
 
           cy.get('#slide-btn-0').click().then(() => {
-            expect($container[0].scrollLeft, 'container scrollLeft').to.be.greaterThan(0)
+            expect($container[0].scrollLeft, 'container scrollLeft').to.eq(0)
           })
         })
 
-        it('leaves the container alone when the inline axis is nearest', () => {
+        // the exact offset is subpixel-dependent across browsers, so only the
+        // fact that the container moved matters here
+        it('scrolls the container when the inline axis is aligned explicitly', () => {
           const $container = buildCarousel()
 
-          cy.get('#slide-btn-0').click({ scrollBehavior: { inline: 'nearest' } }).then(() => {
-            expect($container[0].scrollLeft, 'container scrollLeft').to.eq(0)
+          cy.get('#slide-btn-0').click({ scrollBehavior: { inline: 'start' } }).then(() => {
+            expect($container[0].scrollLeft, 'container scrollLeft').to.be.greaterThan(0)
           })
         })
       })

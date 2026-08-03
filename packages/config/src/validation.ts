@@ -266,19 +266,23 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
   return true
 }
 
-const SCROLL_BEHAVIOR_POSITIONS = ['center', 'top', 'bottom', 'nearest']
+// the per-axis form takes the same values as the native `scrollIntoView`
+const SCROLL_BEHAVIOR_POSITIONS = ['center', 'start', 'end', 'nearest']
+// a single value also accepts the block-axis-only alignments
+const SCROLL_BEHAVIOR_ALIGNMENTS = [...SCROLL_BEHAVIOR_POSITIONS, 'top', 'bottom']
 const SCROLL_BEHAVIOR_AXES = ['block', 'inline']
+const SCROLL_BEHAVIOR_POSITION_HINTS: Record<string, string> = { top: 'start', bottom: 'end' }
 
 /**
- * Checks that a value is a valid `scrollBehavior`: `false`, a single position
- * applied to both axes, or a per-axis object such as
- * `{ block: 'top', inline: 'nearest' }`.
+ * Checks that a value is a valid `scrollBehavior`: `false`, one alignment applied
+ * to both axes, or a per-axis object such as `{ block: 'start', inline: 'nearest' }`.
  */
 export const isValidScrollBehavior = (key: string, value: any): ErrResult | true => {
+  const alignments = SCROLL_BEHAVIOR_ALIGNMENTS.map((a) => str(a)).join(', ')
   const positions = SCROLL_BEHAVIOR_POSITIONS.map((p) => str(p)).join(', ')
-  const expected = `one of these values: ${positions}, false, or an object with keys "block" and/or "inline" set to one of ${positions}`
+  const expected = `one of these values: ${alignments}, false, or an object with keys "block" and/or "inline" set to one of ${positions}`
 
-  if (value === false || SCROLL_BEHAVIOR_POSITIONS.includes(value)) {
+  if (value === false || SCROLL_BEHAVIOR_ALIGNMENTS.includes(value)) {
     return true
   }
 
@@ -293,8 +297,12 @@ export const isValidScrollBehavior = (key: string, value: any): ErrResult | true
   }
 
   for (const axis of axes) {
-    if (!SCROLL_BEHAVIOR_POSITIONS.includes(value[axis])) {
-      return errMsg(`${key}.${axis}`, value[axis], `one of these values: ${positions}`)
+    const position = value[axis]
+
+    if (!SCROLL_BEHAVIOR_POSITIONS.includes(position)) {
+      const hint = SCROLL_BEHAVIOR_POSITION_HINTS[position]
+
+      return errMsg(`${key}.${axis}`, position, `one of these values: ${positions}${hint ? ` (use ${str(hint)} instead of ${str(position)})` : ''}`)
     }
   }
 

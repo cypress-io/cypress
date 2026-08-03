@@ -825,6 +825,18 @@ describe('lib/config', () => {
           return this.expectValidationPasses()
         })
 
+        it('passes if an enum (start)', function () {
+          this.setup({ scrollBehavior: 'start' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (end)', function () {
+          this.setup({ scrollBehavior: 'end' })
+
+          return this.expectValidationPasses()
+        })
+
         it('fails if not valid (number)', function () {
           this.setup({ scrollBehavior: 42 })
 
@@ -844,7 +856,7 @@ describe('lib/config', () => {
         })
 
         it('passes if both axes are provided', function () {
-          this.setup({ scrollBehavior: { block: 'top', inline: 'nearest' } })
+          this.setup({ scrollBehavior: { block: 'start', inline: 'nearest' } })
 
           return this.expectValidationPasses()
         })
@@ -856,15 +868,27 @@ describe('lib/config', () => {
         })
 
         it('passes if only the block axis is provided', function () {
-          this.setup({ scrollBehavior: { block: 'center' } })
+          this.setup({ scrollBehavior: { block: 'end' } })
 
           return this.expectValidationPasses()
         })
 
         it('fails if an axis is not a valid enum', function () {
-          this.setup({ scrollBehavior: { block: 'top', inline: 'left' } })
+          this.setup({ scrollBehavior: { block: 'start', inline: 'left' } })
 
           return this.expectValidationFails('be one of these values')
+        })
+
+        it('suggests the per-axis position when an axis uses a block alignment', function () {
+          this.setup({ scrollBehavior: { block: 'top' } })
+
+          return this.expectValidationFails('use "start" instead of "top"')
+        })
+
+        it('suggests the per-axis position when an axis uses bottom', function () {
+          this.setup({ scrollBehavior: { inline: 'bottom' } })
+
+          return this.expectValidationFails('use "end" instead of "bottom"')
         })
 
         it('fails if an axis is false', function () {

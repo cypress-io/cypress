@@ -2808,14 +2808,23 @@ declare namespace Cypress {
 
   type experimentalCspAllowedDirectives = 'default-src' | 'child-src' | 'frame-src' | 'script-src' | 'script-src-elem' | 'form-action'
 
-  type scrollBehaviorPosition = 'center' | 'top' | 'bottom' | 'nearest'
+  /** The same values as the native `scrollIntoView`, one axis at a time. */
+  type scrollBehaviorPosition = 'center' | 'start' | 'end' | 'nearest'
 
   /**
-   * A single position is applied to both axes. Use the per-axis form to align
-   * them separately, for example `{ block: 'top', inline: 'nearest' }` to leave
-   * horizontal scroll positions untouched unless the element is off screen.
+   * A single value applied to both axes, except for `top` and `bottom`, which
+   * align only the block (vertical) axis and leave the inline axis at the browser
+   * default, the way `scrollIntoView(alignToTop)` does.
    */
-  type scrollBehaviorOptions = false | scrollBehaviorPosition | {
+  type scrollBehaviorAlignment = scrollBehaviorPosition | 'top' | 'bottom'
+
+  /**
+   * Use the per-axis form to align the axes separately, for example
+   * `{ block: 'start', inline: 'nearest' }` to leave horizontal scroll positions
+   * untouched unless the element is off screen. An axis that is left out keeps
+   * whatever the configured behavior aligned it to.
+   */
+  type scrollBehaviorOptions = false | scrollBehaviorAlignment | {
     block?: scrollBehaviorPosition
     inline?: scrollBehaviorPosition
   }
