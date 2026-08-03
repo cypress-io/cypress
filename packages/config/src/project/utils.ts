@@ -19,7 +19,7 @@ import {
   getPublicConfigKeys,
   validate,
   validateNoBreakingConfig,
-  warnAppliedConfigOptionAliases,
+  warnSuppliedConfigOptionAliases,
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
 import { options, breakingOptions } from '../options'
@@ -512,19 +512,15 @@ export function mergeDefaults (
     config[testingType].allowCypressEnv = config.allowCypressEnv
   }
 
-  // `parseEnv` is the first point at which `CYPRESS_*` overrides land on the config, so
-  // snapshot it beforehand to detect which options the environment goes on to change.
-  const configBeforeEnv = { ...config }
-
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
 
   config.expose = parseExposed(config, { ...cliConfig.expose, ...options.expose }, resolved)
 
-  // `parseEnv` applies `CYPRESS_*` overrides itself, replacement included, so only the
-  // deprecation warning is left to fire for anything the environment set.
-  warnAppliedConfigOptionAliases(config, configBeforeEnv, breakingOptions, errors.warning, (err, ...args) => {
+  // `parseEnv` applies `CYPRESS_*` overrides itself, replacement included, and records which
+  // options it supplied, so only the deprecation warning is left to fire for those.
+  warnSuppliedConfigOptionAliases(config, breakingOptions, (name) => resolved[name]?.from === 'env', errors.warning, (err, ...args) => {
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 

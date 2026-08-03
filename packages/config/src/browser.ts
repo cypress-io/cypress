@@ -116,13 +116,17 @@ const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]
   })
 }
 
-// Whether `cfg` sets a deprecated option that has a functional replacement. `baseline` is
-// the config as it stood before the source under evaluation was applied, so a differing
-// value means that source set it. Presence alone can't answer this once defaults have been
-// merged, since the deprecated key is then always there; sources evaluated before defaults
-// are merged pass an empty baseline, where any value differs from `undefined`.
+// Whether `cfg` sets a deprecated option that has a functional replacement. `baseline` is the
+// config as it stood before the source under evaluation was applied, so a differing value
+// means this source set it. A source that names the deprecated option but not its replacement
+// is also stating intent about it, which is what distinguishes a partial `setupNodeEvents`
+// return that re-states an existing value from a whole config handed straight back.
 const setsAliasedOption = (opt: BreakingOption, cfg: any, baseline: any) => {
-  return Boolean(opt.newName) && shouldFireBreakingOption(opt, cfg) && cfg[opt.name] !== baseline[opt.name]
+  if (!opt.newName || !shouldFireBreakingOption(opt, cfg)) {
+    return false
+  }
+
+  return cfg[opt.name] !== baseline[opt.name] || !_.has(cfg, opt.newName)
 }
 
 // Carries a deprecated option's value onto its replacement (per `newName`) and fires its
@@ -151,12 +155,13 @@ export const applyConfigOptionAliases = (modifiedConfig: any, baseline: any, bre
   return modifiedConfig
 }
 
-// Fires the deprecation event for aliased options a source set, without copying anything.
-// For sources that apply their own values - `parseEnv` writes `CYPRESS_*` overrides itself,
-// including onto the replacement - so that precedence and source reporting stay in one place.
-export const warnAppliedConfigOptionAliases = (cfg: any, baseline: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+// Fires the deprecation event for aliased options `wasSuppliedBySource` reports as coming from
+// a source that applies its own values - `parseEnv` writes `CYPRESS_*` overrides itself,
+// replacement included, so that precedence and source reporting stay in one place. Asking the
+// source rather than comparing values also catches an option set to the value it already had.
+export const warnSuppliedConfigOptionAliases = (cfg: any, breakingCfgOptions: Readonly<BreakingOption[]>, wasSuppliedBySource: (name: string) => boolean, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach((opt) => {
-    if (setsAliasedOption(opt, cfg, baseline)) {
+    if (opt.newName && shouldFireBreakingOption(opt, cfg) && wasSuppliedBySource(opt.name)) {
       fireBreakingOptionEvent(opt, cfg, onWarning, onErr, testingType)
     }
   })

@@ -1367,6 +1367,19 @@ describe('config/src/project/utils', () => {
         expect(cfg.manageBrowserMemory).toEqual(true)
       })
 
+      // `false` matches the default, so this only warns if the environment is asked what it
+      // supplied rather than the resolved value being compared against the default.
+      it('warns when the environment sets the deprecated option to false', async function () {
+        vi.stubEnv('CYPRESS_EXPERIMENTAL_MEMORY_MANAGEMENT', 'false')
+
+        await defaults('manageBrowserMemory', false, {})
+
+        expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+        }))
+      })
+
       it('does not alias or warn when only the replacement is set via a CYPRESS_ environment variable', async function () {
         vi.stubEnv('CYPRESS_MANAGE_BROWSER_MEMORY', 'true')
 

@@ -258,6 +258,22 @@ describe('config/src/project/index', () => {
         expect(warningSpy).toBeCalledWith(...renamedWarning)
       })
 
+      // `false` is the deprecated option's default, so the plugin naming it is the only signal
+      // that it means to switch the replacement back off.
+      it('lets setupNodeEvents disable the replacement through the deprecated option', () => {
+        const cfg = {
+          ...resolvedCfg(),
+          manageBrowserMemory: true,
+          resolved: { ...resolvedCfg().resolved, manageBrowserMemory: { value: true, from: 'config' } },
+        }
+
+        vi.spyOn(errors, 'warning').mockImplementation(() => {})
+
+        const updated = updateWithPluginValues(cfg as any, { experimentalMemoryManagement: false }, 'e2e')
+
+        expect(updated.manageBrowserMemory).toEqual(false)
+      })
+
       it('does not warn when setupNodeEvents returns the config without touching the deprecated option', () => {
         const cfg = resolvedCfg()
         const warningSpy = vi.spyOn(errors, 'warning').mockImplementation(() => {})
