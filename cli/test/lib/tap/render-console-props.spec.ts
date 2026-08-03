@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import { renderConsolePropsHuman } from '../../../lib/tap/render/console-props'
 import type { ConsolePropsOptions } from '../../../lib/tap/render/console-props'
+import { color } from '../../../lib/tap/render/format'
 import type { TapConsoleProps } from '@packages/cypress-instances'
 
 // chalk's color level depends on where the suite runs, so strip any escape
@@ -46,7 +47,10 @@ describe('lib/tap/render/console-props', () => {
     Object.defineProperty(process.stdout, 'columns', { value: columns, configurable: true })
   }
 
-  afterEach(() => setColumns(undefined))
+  afterEach(() => {
+    setColumns(undefined)
+    vi.restoreAllMocks()
+  })
 
   describe('depth', () => {
     it('expands three levels, folds what is deeper or oversized, and names the ways to open it', () => {
@@ -442,6 +446,30 @@ describe('lib/tap/render/console-props', () => {
           h      <input id="name">  keydown, keypress, textInput, input, ke…  { code: KeyH, which: 72 }
           i      <input id="name">  keydown, keypress, textInput, input, ke…  { code: KeyI, which: 73 }"
       `)
+    })
+
+    it('renders a withheld table cell in full with aborted styling', () => {
+      const withheld = '[12,345 characters withheld — pass --json to include it]'
+
+      vi.spyOn(color, 'aborted').mockImplementation((text) => `<aborted>${text}</aborted>`)
+      const envelope: TapConsoleProps = {
+        name: 'log',
+        type: 'command',
+        props: {},
+        table: {
+          1: {
+            name: 'Values',
+            data: [
+              { value: withheld },
+              { value: 'visible' },
+            ],
+          },
+        },
+      }
+
+      const rendered = renderConsolePropsHuman(envelope)
+
+      expect(rendered).toContain(`<aborted>${withheld}</aborted>`)
     })
 
     it('opens a collapsed section using a named table panel path', () => {

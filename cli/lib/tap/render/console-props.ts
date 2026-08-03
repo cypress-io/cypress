@@ -145,7 +145,7 @@ const cell = (value: TapJsonValue | undefined): string => {
   // row the table is aligning.
   const text = String(value).replace(/\s+/g, ' ').trim()
 
-  return clamp(text, MAX_CELL)
+  return WITHHELD.test(text) ? text : clamp(text, MAX_CELL)
 }
 
 // Rows of like-shaped objects are what the driver's `table` console prop holds
