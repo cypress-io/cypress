@@ -1770,18 +1770,6 @@ commands:
                 command: circleci-agent step halt
 
 jobs:
-  # TEMPORARY — used only to smoke-test the run-windows-scheduled CircleCI Scheduled Pipeline
-  # without paying for the full windows job graph. Remove this job, and restore the real job
-  # list under the `windows` workflow in @main.yml, before marking the PR ready for review.
-  windows-schedule-smoke-test:
-    docker:
-      - image: cimg/base:stable
-    resource_class: small.gen2
-    steps:
-      - run:
-          name: Confirm scheduled trigger fired
-          command: echo "run-windows-scheduled fired correctly for branch << pipeline.git.branch >> at $(date)"
-
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
