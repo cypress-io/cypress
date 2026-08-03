@@ -7,29 +7,34 @@ describe('e2e uncaught errors', () => {
     spec: 'uncaught_synchronous_before_tests_parsed.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing2', {
     spec: 'uncaught_synchronous_during_hook.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing3', {
     spec: 'uncaught_during_test.cy.js',
     snapshot: true,
     expectedExitCode: 3,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing4', {
     spec: 'uncaught_during_hook.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing5', {
     spec: 'caught_async_sync_test.cy.js',
     snapshot: true,
     expectedExitCode: 4,
+    config: { screenshotOnRunFailure: false },
   })
 })

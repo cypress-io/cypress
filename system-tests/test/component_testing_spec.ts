@@ -174,6 +174,7 @@ describe('experimentalSingleTabRunMode', function () {
     browser: 'chrome',
     snapshot: true,
     expectedExitCode: 2,
+    config: { screenshotOnRunFailure: false },
   })
 
   // https://github.com/cypress-io/cypress/issues/23815

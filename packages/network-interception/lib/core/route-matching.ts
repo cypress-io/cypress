@@ -103,9 +103,19 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
     const [mechanism, credentials] = authHeader.split(' ', 2)
 
     if (mechanism && credentials && mechanism.toLowerCase() === 'basic') {
-      const [username, password] = Buffer.from(credentials, 'base64').toString().split(':', 2)
+      const decoded = Buffer.from(credentials, 'base64').toString()
+      // Basic credentials must contain a colon separating the userid from the
+      // password; only the first colon is the separator, so the password may
+      // itself contain colons (RFC 7617). Ignore malformed credentials with no
+      // separator rather than fabricating an auth matchable.
+      const separatorIndex = decoded.indexOf(':')
 
-      matchable.auth = { username, password }
+      if (separatorIndex !== -1) {
+        matchable.auth = {
+          username: decoded.slice(0, separatorIndex),
+          password: decoded.slice(separatorIndex + 1),
+        }
+      }
     }
   }
 
@@ -117,9 +127,9 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
 
   matchable.https = proxiedUrl.protocol && (proxiedUrl.protocol.indexOf('https') === 0)
 
-  if (!matchable.port) {
-    matchable.port = matchable.https ? 443 : 80
-  }
+  // `url.parse` yields the port as a string; coerce it so it compares against
+  // the numeric `port` route matcher. Fall back to the protocol default.
+  matchable.port = matchable.port ? Number(matchable.port) : (matchable.https ? 443 : 80)
 
   return matchable
 }

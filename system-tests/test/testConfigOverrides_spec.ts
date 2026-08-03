@@ -21,6 +21,7 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides/invalid-browser.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('has originalTitle when skipped due to browser config', {
@@ -44,6 +45,7 @@ describe('testConfigOverrides', () => {
     outputPath,
     browser: 'electron',
     expectedExitCode: 2,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('fails when setting invalid config opt with Cypress.config() in before:test:run:async', {
@@ -52,6 +54,7 @@ describe('testConfigOverrides', () => {
     outputPath,
     browser: 'electron',
     expectedExitCode: 2,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it(`fails when trying to perform testConfigOverrides for Cypress.env() with allowCypressEnv=false`, {
@@ -75,6 +78,7 @@ describe('testConfigOverrides', () => {
       snapshot: true,
       browser: browserList,
       expectedExitCode: 14,
+      config: { screenshotOnRunFailure: false },
     })
 
     systemTests.it(`fails when passing invalid config values with beforeEach - [${browserList}]`, {
@@ -82,6 +86,7 @@ describe('testConfigOverrides', () => {
       snapshot: true,
       browser: browserList,
       expectedExitCode: 8,
+      config: { screenshotOnRunFailure: false },
     })
 
     systemTests.it(`correctly fails when invalid config values for it.only [${browserList}]`, {
