@@ -17,7 +17,7 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../../automation/commands/key_press'
 import { AUT_FRAME_HEADER } from '../constants'
 
-import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 
 import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
@@ -58,6 +58,22 @@ interface HasFrame {
   childFrames?: HasFrame[]
 }
 
+const findFrameById = (frameTree: HasFrame | undefined, frameId: string): HasFrame | undefined => {
+  for (const child of frameTree?.childFrames || []) {
+    if (child.frame?.id === frameId) {
+      return child
+    }
+
+    const descendant = findFrameById(child, frameId)
+
+    if (descendant) {
+      return descendant
+    }
+  }
+
+  return undefined
+}
+
 // the resource types passed through to request middleware / cy.intercept matching; any
 // other type reported by the protocol (e.g. 'document', 'media', 'preflight') normalizes to 'other'
 // CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
@@ -69,6 +85,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   send: SendDebuggerCommand
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
+  private autFrameId: string | undefined
   private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
@@ -335,6 +352,32 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     })
   }
 
+  /**
+   * Locates the AUT frame within a frame tree. The runner seeds the AUT
+   * iframe's window.name with AUT_FRAME_NAME_IDENTIFIER, but the AUT can
+   * overwrite window.name at any point, so the id of the frame we last matched
+   * by name is remembered and reused for as long as that frame is attached —
+   * ids are stable for the lifetime of the iframe element.
+   */
+  private _findAutFrame = (frameTree: HasFrame | undefined): HasFrame | undefined => {
+    const isAutName = (item: HasFrame) => !!item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+
+    let frame = _.find(frameTree?.childFrames || [], isAutName) as HasFrame | undefined
+
+    // Cy-in-cy nests the real AUT under the outer AUT frame
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
+      frame = _.find(frame.childFrames || [], isAutName) as HasFrame | undefined
+    }
+
+    if (frame) {
+      this.autFrameId = frame.frame.id
+
+      return frame
+    }
+
+    return this.autFrameId ? findFrameById(frameTree, this.autFrameId) : undefined
+  }
+
   private _isAUTFrame = async (frameId: string) => {
     debugVerbose('need frame tree')
 
@@ -346,22 +389,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       await this.gettingFrameTree
     }
 
-    let frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
-      return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-    }) as HasFrame | undefined
+    const autFrame = this._findAutFrame(this.frameTree)
 
-    // Cy-in-cy nests the real AUT under the outer AUT frame — match _getAutFrame.
-    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
-      frame = _.find(frame.childFrames || [], (item: HasFrame) => {
-        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-      }) as HasFrame | undefined
-    }
-
-    if (frame) {
-      return frame.frame.id === frameId
-    }
-
-    return false
+    return !!autFrame && autFrame.frame.id === frameId
   }
 
   isAUTFrame = (frameId: string) => {
@@ -410,23 +440,19 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
       const frameTree = (await this.send('Page.getFrameTree')).frameTree
 
-      let frame = _.find(frameTree?.childFrames || [], (item: HasFrame) => {
-        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-      }) as HasFrame | undefined
-
-      // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
-      if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
-        frame = _.find(frame.childFrames || [], (item: HasFrame) => {
-          return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
-        }) as HasFrame | undefined
-      }
+      let frame = this._findAutFrame(frameTree)
 
       if (!frame) {
-        // if for whatever reason we cannot identify the AUT frame by name, we will fall back to the first child frame that exists.
-        // The first child frame should always be the AUT frame, followed by the spec frame
-        if (frameTree?.childFrames?.[0]) {
-          frame = frameTree.childFrames[0]
-        } else {
+        // if for whatever reason we cannot identify the AUT frame, fall back to the first child
+        // frame that is not one of the runner's own iframes — the AUT is the only child of top
+        // that the runner does not name itself
+        debugVerbose('could not identify AUT frame, falling back to the first non-runner child frame %o', { childFrameNames: frameTree?.childFrames?.map((item) => item.frame?.name) })
+
+        frame = _.find(frameTree?.childFrames || [], (item: HasFrame) => {
+          return !isRunnerFrameName(item.frame?.name)
+        }) as HasFrame | undefined
+
+        if (!frame) {
           throw new Error('Could not find AUT frame')
         }
       }

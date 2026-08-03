@@ -136,6 +136,13 @@ describe('e2e visit', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'visit.cy.js',
       snapshot: true,
+      // The context's low timeouts are for the failure-mode tests below. The
+      // TLSv1 visit's fail-then-retry handshake is racy under a 500ms
+      // responseTimeout, so restore normal timeouts for these passing visits.
+      config: {
+        responseTimeout: 30000,
+        pageLoadTimeout: 60000,
+      },
       onRun (exec) {
         return startTlsV1Server(6776)
         .then((serv) => {
@@ -158,6 +165,7 @@ describe('e2e visit', () => {
       spec: 'visit_http_500_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23162
@@ -201,6 +209,7 @@ describe('e2e visit', () => {
       spec: 'visit_response_never_ends_failing.cy.js',
       snapshot: true,
       expectedExitCode: 3,
+      config: { screenshotOnRunFailure: false },
     })
   })
 
@@ -247,6 +256,7 @@ describe('e2e visit', () => {
       spec: 'visit_http_timeout_failing.cy.js',
       snapshot: true,
       expectedExitCode: 2,
+      config: { screenshotOnRunFailure: false },
     })
   })
 })

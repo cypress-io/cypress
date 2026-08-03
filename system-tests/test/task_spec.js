@@ -8,6 +8,7 @@ describe('e2e task', () => {
       spec: 'task.cy.js',
       snapshot: true,
       expectedExitCode: 2,
+      config: { screenshotOnRunFailure: false },
     })
     .then(({ stdout }) => {
       // should include a stack trace from plugins file

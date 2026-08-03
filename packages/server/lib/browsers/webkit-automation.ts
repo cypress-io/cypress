@@ -10,7 +10,7 @@ import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
 import { convertPlaywrightCookieToCyCookie, convertCyCookieToPlaywrightCookie } from '../automation/cookie/converters/webkit'
 import utils from './utils'
 import type { CyCookie } from '../automation/cookie/util'
-import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
@@ -348,11 +348,12 @@ export class WebKitAutomation {
       autFrame = autFrame.childFrames().find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER)) ?? autFrame
     }
 
-    // If for whatever reason we cannot identify the AUT frame by name, fall back
-    // to the first child frame, which should always be the AUT frame.
+    // If for whatever reason we cannot identify the AUT frame by name, fall back to the first
+    // child frame that is not one of the runner's own iframes — the AUT is the only child of top
+    // that the runner does not name itself.
     if (!autFrame) {
-      debug('could not identify AUT frame by name, falling back to first child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
-      autFrame = childFrames[0]
+      debug('could not identify AUT frame by name, falling back to the first non-runner child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
+      autFrame = childFrames.find((frame) => !isRunnerFrameName(frame.name()))
     }
 
     if (!autFrame) {

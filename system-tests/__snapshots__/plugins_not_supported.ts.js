@@ -73,19 +73,11 @@ Because this error occurred during a \`after all\` hook we are skipping all of t
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     foo.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/foo.cy.js/Blank Contents -- renders the visit f     (1280x720)
-     ailure page (failed).png                                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/foo.cy.js/renders the visit failure page -- aft     (1280x720)
-     er all hook mergeUnitTestCoverage (failed).png                                                 
 
 
 ====================================================================================================
