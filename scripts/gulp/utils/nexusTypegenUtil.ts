@@ -1,6 +1,5 @@
 import { spawn, execSync } from 'child_process'
 import chalk from 'chalk'
-import pDefer from 'p-defer'
 import chokidar from 'chokidar'
 import _ from 'lodash'
 import path from 'path'
@@ -33,7 +32,7 @@ async function windowsTouch (filename: string, time: Date) {
 }
 
 export async function nexusTypegen (cfg: NexusTypegenCfg) {
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
 
   if (cfg.outputPath) {
     await fs.ensureDir(path.join(monorepoPaths.pkgDataContext, 'src/gen'))
@@ -100,7 +99,7 @@ interface NexusTypegenWatchCfg extends NexusTypegenCfg {
 }
 
 export async function watchNexusTypegen (cfg: NexusTypegenWatchCfg) {
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
 
   const watcher = chokidar.watch(cfg.watchPaths, {
     cwd: cfg.cwd,

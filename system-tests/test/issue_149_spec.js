@@ -11,6 +11,7 @@ describe('e2e issue 149', () => {
       spec: 'issue_149.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
     })
     .then(() => {
       // the other test should have still run which should

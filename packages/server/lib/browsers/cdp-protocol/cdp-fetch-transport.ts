@@ -1,6 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
-import pDefer from 'p-defer'
 import { Readable } from 'stream'
 import { promisify } from 'util'
 import zlib from 'zlib'
@@ -46,7 +45,7 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
 }
 
 export class CdpFetchTransport {
-  private readonly inFlightRequests = new Map<string, pDefer.DeferredPromise<CdpFetchTransportResponse>>()
+  private readonly inFlightRequests = new Map<string, PromiseWithResolvers<CdpFetchTransportResponse>>()
 
   private isStarted = false
 
@@ -152,7 +151,7 @@ export class CdpFetchTransport {
     let response: CdpFetchTransportResponse | undefined
     let responseRequestId: string | undefined
     let responseSessionId: string | undefined
-    let deferred: pDefer.DeferredPromise<CdpFetchTransportResponse> | undefined
+    let deferred: PromiseWithResolvers<CdpFetchTransportResponse> | undefined
 
     try {
       debug('intercepting request pause %s %s (fetchRequestId=%s, networkRequestId=%s, resourceType=%s)',
@@ -192,7 +191,7 @@ export class CdpFetchTransport {
         request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
       }
 
-      const responseDeferred = pDefer<CdpFetchTransportResponse>()
+      const responseDeferred = Promise.withResolvers<CdpFetchTransportResponse>()
 
       // reset()/stop() may reject this before the continue callback races on
       // it (e.g. a between-tests reset while request middleware is still
@@ -564,7 +563,7 @@ export class CdpFetchTransport {
   // Must NOT clear extraInfo tracking on success — the next response under a
   // reused network id may already be tracked, and CDPNetworkExtraInfo manages
   // its own lifecycle. Errored and unmatched flows clear at their own sites.
-  private cleanup (fetchRequestId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {
+  private cleanup (fetchRequestId: string, deferred?: PromiseWithResolvers<CdpFetchTransportResponse>): void {
     if (deferred && this.inFlightRequests.get(fetchRequestId) !== deferred) {
       return
     }
