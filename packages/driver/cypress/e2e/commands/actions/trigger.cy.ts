@@ -608,7 +608,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').trigger('mouseover', { scrollBehavior: 'bottom' })
 
         cy.get('button:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'nearest' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
         })
       })
 
@@ -633,7 +633,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').trigger('mouseover')
 
         cy.get('button:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'nearest' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
         })
       })
 
@@ -683,7 +683,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('button:first').trigger('mouseover')
 
         cy.get('button:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'nearest' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
         })
       })
 

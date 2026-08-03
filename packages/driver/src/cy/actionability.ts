@@ -33,8 +33,8 @@ const dispatchPrimedChangeEvents = function (state) {
 // browser default the way `scrollIntoView(alignToTop)` does. The rest name a
 // position either axis can take, so they apply to both.
 const scrollBehaviorOptionsMap = {
-  top: { block: 'start', inline: 'nearest' },
-  bottom: { block: 'end', inline: 'nearest' },
+  top: { block: 'start' },
+  bottom: { block: 'end' },
   start: { block: 'start', inline: 'start' },
   end: { block: 'end', inline: 'end' },
   center: { block: 'center', inline: 'center' },

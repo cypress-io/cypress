@@ -1259,7 +1259,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: 'bottom' })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
         })
       })
 
@@ -1283,7 +1283,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
         })
       })
 
@@ -1331,7 +1331,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'nearest' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
         })
       })
 
@@ -1415,7 +1415,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: 'top' })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'nearest' })
+          expect(el[0].scrollIntoView).calledWith({ block: 'start' })
         })
       })
 
