@@ -1383,7 +1383,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('leaves the block axis at the configured alignment when only inline is specified', { scrollBehavior: 'bottom' }, () => {
+      it('replaces the configured behavior rather than merging with it', { scrollBehavior: 'bottom' }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1391,23 +1391,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'start' })
+          expect(el[0].scrollIntoView).calledWith({ inline: 'start' })
         })
       })
 
-      it('leaves the inline axis at the configured alignment when only block is specified', { scrollBehavior: 'center' }, () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click({ scrollBehavior: { block: 'end' } })
-
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'center' })
-        })
-      })
-
-      it('combines a per-axis config and per-axis options that set opposite axes', { scrollBehavior: { block: 'center' } }, () => {
+      it('replaces a per-axis config with per-axis options for a different axis', { scrollBehavior: { block: 'center' } }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1415,7 +1403,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'start' })
+          expect(el[0].scrollIntoView).calledWith({ inline: 'start' })
         })
       })
 

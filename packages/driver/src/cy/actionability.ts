@@ -42,21 +42,13 @@ const scrollBehaviorOptionsMap = {
 }
 
 // `scrollBehavior` is either one of the alignments above or an explicit per-axis
-// `{ block, inline }` using the same values as the native `scrollIntoView`.
+// `{ block, inline }` using the same values as the native `scrollIntoView`. An
+// axis the caller left out is omitted so that `scrollIntoView` applies its own
+// default.
 const toScrollIntoViewOptions = (scrollBehavior) => {
   return _.isPlainObject(scrollBehavior)
     ? _.pick(scrollBehavior, ['block', 'inline'])
     : scrollBehaviorOptionsMap[scrollBehavior]
-}
-
-// an axis the caller left out keeps whatever the configured behavior aligned it
-// to, and is omitted entirely when neither sets it so that `scrollIntoView`
-// applies its own default
-const getScrollIntoViewOptions = (scrollBehavior, configuredScrollBehavior) => {
-  return {
-    ...toScrollIntoViewOptions(configuredScrollBehavior),
-    ...toScrollIntoViewOptions(scrollBehavior),
-  }
 }
 
 const getPositionFromArguments = function (positionOrX, y, options) {
@@ -554,7 +546,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
         if (options.scrollBehavior !== false) {
           // scroll the element into view
-          const scrollIntoViewOptions = getScrollIntoViewOptions(options.scrollBehavior, config('scrollBehavior'))
+          const scrollIntoViewOptions = toScrollIntoViewOptions(options.scrollBehavior)
           const removeScrollBehaviorFix = addScrollBehaviorFix($el)
 
           debug('scrollIntoView:', $el[0], scrollIntoViewOptions)

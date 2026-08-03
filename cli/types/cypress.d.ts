@@ -2821,8 +2821,9 @@ declare namespace Cypress {
   /**
    * Use the per-axis form to align the axes separately, for example
    * `{ block: 'start', inline: 'nearest' }` to leave horizontal scroll positions
-   * untouched unless the element is off screen. An axis that is left out keeps
-   * whatever the configured behavior aligned it to.
+   * untouched unless the element is off screen. An axis that is left out is
+   * aligned by `scrollIntoView`'s own default rather than inherited, and a value
+   * given to a command replaces the configured value rather than merging with it.
    */
   type scrollBehaviorOptions = false | scrollBehaviorAlignment | {
     block?: scrollBehaviorPosition
