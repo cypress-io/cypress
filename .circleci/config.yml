@@ -24,6 +24,13 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`
+  # workflow once daily. Must be declared here (not just in
+  # .circleci/src/pipeline/@pipeline.yml) since this is the entry-point config
+  # CircleCI validates trigger parameters against.
+  run-windows-scheduled:
+    type: boolean
+    default: false
   # Opt-in proxy-disabled (CDP Fetch) coverage. Default false so known-red
   # suites do not fail or cancel the pull-request workflow; enable via
   # Trigger Pipeline when investigating that path.
