@@ -3,6 +3,7 @@ require('../spec_helper')
 const { getCtx, setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
 
 const cp = require('child_process')
+const crypto = require('crypto')
 const fse = require('fs-extra')
 const http2 = require('http2')
 const os = require('os')
@@ -13,6 +14,7 @@ const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
+const CRI = require('chrome-remote-interface')
 const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
@@ -115,6 +117,16 @@ const PROXY_DISABLED_CY_SERVER_PORT = 45682
 const HTTP2_LATENCY_ORIGIN_PORT = 45333
 const HTTP2_LATENCY_ORIGIN_DELAY_MS = 50
 const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
+
+// Isolates response-body materialization cost: proxy-disabled interception
+// buffers every body and delivers via Fetch.fulfillRequest, while MITM streams
+// un-intercepted bodies through as chunks arrive. Large instant bodies expose
+// the CDP body-ferry cost; the slow chunked body exposes the streaming loss
+// (first byte to the page is gated on the origin's last byte).
+const LARGE_BODY_ORIGIN_PORT = 45334
+const LARGE_BODY_ORIGIN_URL = `https://localhost:${LARGE_BODY_ORIGIN_PORT}/`
+const LARGE_BODY_SLOW_CHUNKS = 10
+const LARGE_BODY_SLOW_CHUNK_INTERVAL_MS = 200
 
 const TEST_CASES = [
   // these first 4 cases don't involve Cypress, don't need to run every time
@@ -269,6 +281,81 @@ const startLatencyOrigin = (cert, key) => {
   })
 }
 
+const startLargeBodyOrigin = (cert, key) => {
+  // random bytes: constant-fill bodies brotli down to a few wire bytes under
+  // the MITM server's express compression(), voiding the size comparison
+  const bins = {
+    '/large-32mb.bin': crypto.randomBytes(32 * 1024 * 1024),
+    '/medium-8mb.bin': crypto.randomBytes(8 * 1024 * 1024),
+  }
+  // read each body to completion: Chrome's cache sink won't drain multi-MB
+  // unread fetch() bodies, and an undrained response never emits
+  // Network.loadingFinished, dropping the entry from the HAR
+  const html = [
+    '<html><body><script>',
+    `['/large-32mb.bin', '/medium-8mb.bin', '/slow-2mb.bin'].forEach((u) => fetch(u).then((r) => r.arrayBuffer()))`,
+    '</script></body></html>',
+  ].join('')
+
+  // maxSessionMemory: node defaults to 10 (MB); the browser multiplexes all
+  // of these requests onto one h2 session, and concurrent 32MB+8MB writes
+  // blow the default, killing sibling streams with a session error
+  const server = http2.createSecureServer({ cert, key, allowHTTP1: true, maxSessionMemory: 256 })
+
+  server.on('connection', (socket) => socket.on('error', () => {}))
+  server.on('secureConnection', (socket) => socket.on('error', () => {}))
+  server.on('tlsClientError', () => {})
+  server.on('sessionError', () => {})
+
+  server.on('request', (req, res) => {
+    const bin = bins[req.url]
+
+    // no-transform: opt out of the MITM server's express compression(), which
+    // would otherwise buffer the chunked slow response until end (hiding the
+    // streaming difference) and shrink the wire size
+    if (bin) {
+      res.setHeader('content-type', 'application/octet-stream')
+      res.setHeader('cache-control', 'no-transform, max-age=600')
+
+      return res.end(bin)
+    }
+
+    if (req.url === '/slow-2mb.bin') {
+      res.setHeader('content-type', 'application/octet-stream')
+      res.setHeader('cache-control', 'no-transform, max-age=600')
+
+      const chunk = crypto.randomBytes(200 * 1024)
+      let sent = 0
+
+      const timer = setInterval(() => {
+        if (res.writableEnded || res.destroyed || (res.stream && res.stream.destroyed)) {
+          return clearInterval(timer)
+        }
+
+        res.write(chunk)
+
+        if (++sent >= LARGE_BODY_SLOW_CHUNKS) {
+          clearInterval(timer)
+          res.end()
+        }
+      }, LARGE_BODY_SLOW_CHUNK_INTERVAL_MS)
+
+      return
+    }
+
+    res.setHeader('content-type', 'text/html')
+    res.end(html)
+  })
+
+  return new Promise((resolve, reject) => {
+    server.on('error', reject)
+    // dual-stack bind: the MITM proxy's upstream request resolves `localhost`
+    // via getaddrinfo, which returns ::1 first on macOS — a 127.0.0.1-only
+    // bind turns every proxied request into ERR_EMPTY_RESPONSE there
+    server.listen(LARGE_BODY_ORIGIN_PORT, resolve)
+  })
+}
+
 const average = (arr) => {
   return _.sum(arr) / arr.length
 }
@@ -279,7 +366,7 @@ const percentile = (sortedArr, p) => {
   return Math.round(sortedArr[i])
 }
 
-const getResultsFromHar = (har) => {
+const getResultsFromHar = (har, minEntries = 1000) => {
   // HAR 1.2 Spec: http://www.softwareishard.com/blog/har-12-spec/
   const { entries } = har.log
   const results = {}
@@ -332,7 +419,7 @@ const getResultsFromHar = (har) => {
 
   results['Min'] = mins.total
 
-  expect(timings.total.length).to.be.at.least(1000)
+  expect(timings.total.length).to.be.at.least(minEntries)
 
   ;[1, 5, 25, 50, 75, 95, 99, 99.7].forEach((p) => {
     results[`${p}% <=`] = percentile(timings.total, p)
@@ -343,8 +430,10 @@ const getResultsFromHar = (har) => {
   return results
 }
 
-const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
+const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, minHarEntries } = {}) => {
   const cdpPort = CDP_PORT + Math.round(Math.random() * 10000)
+
+  let runtimeClient
 
   const browser = {
     isHeadless: true,
@@ -482,9 +571,26 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
             if (!testCase.proxyDisabled) return
 
             // must run before Page.navigate so no request escapes interception —
-            // har-capturer calls preHook, then Network.enable (which the runtime's
-            // extra-info tracking relies on), then navigates
-            return proxyDisabledServer.createCdpFetchNetworkRuntime(cdp)
+            // har-capturer calls preHook, then Network.enable, then navigates.
+            // The runtime rides its own CDP connection to the same tab instead
+            // of har-capturer's: the vendored CRI in har-capturer leaves ws
+            // permessage-deflate on, taxing every Fetch body ferry with zlib
+            // that production (chrome-remote-interface >= 0.33 sets
+            // perMessageDeflate: false) does not pay. Network.enable on this
+            // connection feeds the runtime's extra-info tracking
+            return CRI({ port: cdpPort, target: cdp.webSocketUrl })
+            .then((client) => {
+              runtimeClient = client
+
+              // har-capturer destroys the tab after postHook; a close racing
+              // that teardown rejects pending sends and surfaces as an
+              // uncaught 'WebSocket connection closed' without a listener
+              runtimeClient.on('error', () => {})
+              runtimeClient.on('disconnect', () => {})
+
+              return Promise.resolve(proxyDisabledServer.createCdpFetchNetworkRuntime(runtimeClient))
+              .then(() => runtimeClient.send('Network.enable'))
+            })
           })
         },
         // wait til all data is done before finishing
@@ -495,9 +601,12 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
           return new Promise((resolve) => {
             cdp.on('event', (message) => {
               if (message.method === 'Network.dataReceived') {
-                // reset timer
+                // reset timer. CDP interception materializes bodies before
+                // fulfilling, so a slow origin produces a multi-second silent
+                // gap with no dataReceived — cases exercising that need a
+                // quiet window longer than the gap or the capture ends early
                 clearTimeout(timeout)
-                timeout = setTimeout(resolve, 1000)
+                timeout = setTimeout(resolve, testCase.harQuietMs || 1000)
               }
             })
           })
@@ -508,6 +617,11 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
             // the tab only after postHook). Failure is tolerated — the next
             // createCdpFetchNetworkRuntime stops the previous runtime itself
             return Promise.resolve(proxyDisabledServer.stopCdpFetchRuntime()).catch(() => {})
+            .then(() => {
+              if (!runtimeClient) return
+
+              return Promise.resolve(runtimeClient.close()).catch(() => {})
+            })
           })
         },
       })
@@ -532,7 +646,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
 
         if (onWire) onWire(wire)
 
-        const results = getResultsFromHar(har)
+        const results = getResultsFromHar(har, minHarEntries)
 
         _.merge(testCase, results)
 
@@ -585,6 +699,8 @@ describe('Proxy Performance', function () {
           }).start(HTTPS_PROXY_PORT),
 
           startLatencyOrigin(cert, key),
+
+          startLargeBodyOrigin(cert, key),
 
           setupFullConfigWithDefaults({
             projectRoot: '/tmp/a',
@@ -864,6 +980,80 @@ describe('Proxy Performance', function () {
       // both sides are connection-queueing-bound here; 2x bounds the CDP
       // pipeline's added per-request cost at equal protocol
       expect(results['Total']).to.be.lessThan(2 * mitmResults['Total'])
+    })
+  })
+
+  describe(`${LARGE_BODY_ORIGIN_URL} (large-body origin)`, function () {
+    this.retries(3)
+    this.timeout(120 * 1000)
+
+    // harQuietMs must exceed the slow asset's ~2s materialization gap (CDP
+    // emits no dataReceived while the body is ferried) — same window on both
+    // sides so entry inclusion is symmetric
+    const mitmCase = makeTestCase({ name: 'With Cypress proxy, Intercepted', cyProxy: true, cyIntercept: true, harQuietMs: 3500 })
+    const proxyDisabledCase = makeTestCase({ name: 'With proxy disabled, Intercepted (CDP)', proxyDisabled: true, harQuietMs: 3500 })
+
+    const BIN_PATHS = ['/large-32mb.bin', '/medium-8mb.bin', '/slow-2mb.bin']
+
+    const binTimings = (har) => {
+      return _.fromPairs(har.log.entries
+      .filter((entry) => entry.request.url.endsWith('.bin'))
+      .map((entry) => {
+        return [new URL(entry.request.url).pathname, {
+          wait: Math.round(entry.timings.wait),
+          receive: Math.round(entry.timings.receive),
+          total: Math.round(entry.time),
+        }]
+      }))
+    }
+
+    it('With proxy disabled, Intercepted (CDP) materializes large bodies that MITM streams through', async function () {
+      let mitmHar
+      let cdpHar
+
+      // paired and time-adjacent: both sides re-measured on every retry
+      await runBrowserTest(LARGE_BODY_ORIGIN_URL, mitmCase, { minHarEntries: 4, onHar: (har) => {
+        mitmHar = har
+      } })
+
+      await runBrowserTest(LARGE_BODY_ORIGIN_URL, proxyDisabledCase, { minHarEntries: 4, onHar: (har) => {
+        cdpHar = har
+
+        if (process.env.CIRCLE_ARTIFACTS) {
+          fs.writeFileSync(path.join(process.env.CIRCLE_ARTIFACTS, 'large-body-cdp-raw.json'), JSON.stringify(har))
+        }
+      } })
+
+      const mitm = binTimings(mitmHar)
+      const cdp = binTimings(cdpHar)
+
+      // eslint-disable-next-line no-console
+      console.table(BIN_PATHS.map((binPath) => {
+        return {
+          asset: binPath,
+          'MITM wait': mitm[binPath]?.wait,
+          'MITM receive': mitm[binPath]?.receive,
+          'MITM total': mitm[binPath]?.total,
+          'CDP wait': cdp[binPath]?.wait,
+          'CDP receive': cdp[binPath]?.receive,
+          'CDP total': cdp[binPath]?.total,
+        }
+      }))
+
+      for (const binPath of BIN_PATHS) {
+        expect(mitm[binPath], `MITM HAR entry for ${binPath}`).to.exist
+        expect(cdp[binPath], `proxy-disabled HAR entry for ${binPath}`).to.exist
+      }
+
+      const slowWindowMs = LARGE_BODY_SLOW_CHUNKS * LARGE_BODY_SLOW_CHUNK_INTERVAL_MS
+
+      // Structural, environment-independent claim: CDP interception cannot
+      // deliver the first byte of the slow response until the origin's last
+      // byte arrives (the body is materialized before Fetch.fulfillRequest),
+      // so its wait absorbs the full chunk window. MITM streams the response
+      // through as chunks arrive, so its wait ends at the first chunk.
+      expect(cdp['/slow-2mb.bin'].wait, 'proxy-disabled first byte gated on origin last byte').to.be.at.least(slowWindowMs / 2)
+      expect(cdp['/slow-2mb.bin'].wait, 'proxy-disabled slow-origin wait vs MITM').to.be.greaterThan(2 * mitm['/slow-2mb.bin'].wait)
     })
   })
 })
