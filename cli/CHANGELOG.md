@@ -1,5 +1,5 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.19.1
+## 15.20.0
 
 **Performance:**
 
