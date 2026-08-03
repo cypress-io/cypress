@@ -1,0 +1,16 @@
+{
+  "name": "cypress-34435-window-name-reporter-iframe-repro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reproduction for cypress-io/cypress#34435 — Chrome selects the reporter iframe when the AUT overwrites window.name",
+  "scripts": {
+    "serve": "node serve.js",
+    "test": "start-server-and-test serve http://127.0.0.1:12345 \"cypress run --browser chrome\"",
+    "cypress:run": "cypress run --browser chrome",
+    "cypress:open": "cypress open --e2e --browser chrome"
+  },
+  "devDependencies": {
+    "cypress": "15.19.0",
+    "start-server-and-test": "^2.0.0"
+  }
+}

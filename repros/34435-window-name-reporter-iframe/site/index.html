@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AUT</title>
+  </head>
+  <body>
+    <h1>AUT</h1>
+    <script>
+      // The application under test overwrites window.name. Cypress names the
+      // AUT iframe with a value beginning with "Your project:" so it can find
+      // it again later. Once the app clobbers window.name, that lookup fails
+      // and Cypress falls back to childFrames[0], which can be the reporter
+      // iframe (about:blank) instead of the AUT.
+      window.name = 'application-window-123'
+    </script>
+  </body>
+</html>
