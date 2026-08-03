@@ -6,7 +6,6 @@
  */
 import chokidar from 'chokidar'
 import path from 'path'
-import pDefer from 'p-defer'
 import fs from 'fs-extra'
 import { DevActions } from '@packages/data-context/src/actions/DevActions'
 
@@ -26,7 +25,7 @@ const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
  *------------------------------------------------------------------------**/
 
 export async function killExistingCypress () {
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
   const child = exec('killall Cypress')
 
   child.on('error', dfd.resolve)
@@ -150,7 +149,7 @@ export async function startCypressWatch () {
       return
     }
 
-    const dfd = pDefer()
+    const dfd = Promise.withResolvers()
 
     if (child) {
       isRestarting = true
