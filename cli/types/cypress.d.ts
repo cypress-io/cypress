@@ -2808,22 +2808,31 @@ declare namespace Cypress {
 
   type experimentalCspAllowedDirectives = 'default-src' | 'child-src' | 'frame-src' | 'script-src' | 'script-src-elem' | 'form-action'
 
-  /** The same values as the native `scrollIntoView`, one axis at a time. */
+  /**
+   * The same values as the native `scrollIntoView`, one axis at a time.
+   */
   type scrollBehaviorPosition = 'center' | 'start' | 'end' | 'nearest'
 
   /**
    * A single value applied to both axes, except for `top` and `bottom`, which
    * align only the block (vertical) axis and leave the inline axis at the browser
-   * default, the way `scrollIntoView(alignToTop)` does.
+   * default.
    */
   type scrollBehaviorAlignment = scrollBehaviorPosition | 'top' | 'bottom'
 
   /**
-   * Use the per-axis form to align the axes separately, for example
-   * `{ block: 'start', inline: 'nearest' }` to leave horizontal scroll positions
-   * untouched unless the element is off screen. An axis that is left out is
-   * aligned by `scrollIntoView`'s own default rather than inherited, and a value
-   * given to a command replaces the configured value rather than merging with it.
+   * How an element is scrolled into view before an action command:
+   *
+   * - `false` disables scrolling entirely.
+   * - An alignment aligns both axes, except `top` and `bottom`, which align only
+   *   the block axis.
+   * - `{ block, inline }` aligns each axis separately, for example
+   *   `{ block: 'start', inline: 'nearest' }` to leave horizontal scroll positions
+   *   untouched unless the element is off screen. An axis that is left out is
+   *   aligned by `scrollIntoView`'s own default.
+   *
+   * A value given to a command replaces the configured value rather than merging
+   * with it.
    */
   type scrollBehaviorOptions = false | scrollBehaviorAlignment | {
     block?: scrollBehaviorPosition

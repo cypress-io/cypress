@@ -8,7 +8,7 @@
 
 **Features:**
 
-- [`scrollBehavior`](https://docs.cypress.io/app/references/configuration#Actionability) now accepts a per-axis value, such as `{ block: 'start', inline: 'nearest' }`, so the vertical and horizontal alignment used to scroll an element into view before an action command can be set independently. The per-axis form takes the same values as the native `scrollIntoView`: `'start'`, `'end'`, `'center'`, and `'nearest'`. A single value still applies to both axes, and `'start'` and `'end'` are now accepted there as well. Addresses [#34460](https://github.com/cypress-io/cypress/issues/34460).
+- [`scrollBehavior`](https://docs.cypress.io/app/references/configuration#Actionability) now accepts a per-axis value, such as `{ block: 'start', inline: 'nearest' }`, so the vertical and horizontal alignment used to scroll an element into view before an action command can be set independently. The per-axis form takes the same values as the native `scrollIntoView`: `'start'`, `'end'`, `'center'`, and `'nearest'`. Addresses [#34460](https://github.com/cypress-io/cypress/issues/34460).
 
 **Bugfixes:**
 
