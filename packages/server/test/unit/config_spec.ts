@@ -842,6 +842,48 @@ describe('lib/config', () => {
 
           return this.expectValidationFails('be one of these values')
         })
+
+        it('passes if both axes are provided', function () {
+          this.setup({ scrollBehavior: { block: 'top', inline: 'nearest' } })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if only the inline axis is provided', function () {
+          this.setup({ scrollBehavior: { inline: 'nearest' } })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if only the block axis is provided', function () {
+          this.setup({ scrollBehavior: { block: 'center' } })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if an axis is not a valid enum', function () {
+          this.setup({ scrollBehavior: { block: 'top', inline: 'left' } })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if an axis is false', function () {
+          this.setup({ scrollBehavior: { block: false } })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if an unknown axis is provided', function () {
+          this.setup({ scrollBehavior: { block: 'top', axis: 'nearest' } })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if empty object', function () {
+          this.setup({ scrollBehavior: {} })
+
+          return this.expectValidationFails('be one of these values')
+        })
       })
 
       describe('watchForFileChanges', () => {

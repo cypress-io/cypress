@@ -1,10 +1,14 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.19.1
+## 15.20.0
 
 **Performance:**
 
 - Fixed an issue where visibility checks (such as [`.should('be.visible')`](https://on.cypress.io/should) and actionability) serialized an element's entire text subtree once per overflow-hidden ancestor, which on text-heavy pages could exhaust the renderer's memory and crash it (`We detected that the Chrome Renderer process just crashed`). Fixes [#34329](https://github.com/cypress-io/cypress/issues/34329).
 - Reduced the sampling overhead of [`experimentalMemoryManagement`](https://on.cypress.io/experiments) when Cypress runs inside a memory-limited container using cgroup v1. Memory readings no longer spawn helper subprocesses on every sampling interval, which lowers CPU usage that previously competed with the tests, most noticeably on constrained CI machines. Addresses [#34105](https://github.com/cypress-io/cypress/issues/34105). Fixed in [#34331](https://github.com/cypress-io/cypress/pull/34331).
+
+**Features:**
+
+- [`scrollBehavior`](https://docs.cypress.io/app/references/configuration#Actionability) now accepts a per-axis value, such as `{ block: 'top', inline: 'nearest' }`, so the vertical and horizontal alignment used to scroll an element into view before an action command can be set independently. Setting `inline` to `'nearest'` leaves horizontal scroll positions untouched when the element is already visible, which is useful for elements inside containers the application positions itself, such as carousels. A single value such as `'top'` continues to apply to both axes. Addresses [#34460](https://github.com/cypress-io/cypress/issues/34460).
 
 **Bugfixes:**
 

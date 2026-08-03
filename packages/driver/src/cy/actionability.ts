@@ -36,6 +36,30 @@ const scrollBehaviorOptionsMap = {
   nearest: 'nearest',
 }
 
+const defaultScrollBehavior = 'top'
+
+const toScrollBehaviorAxes = (scrollBehavior) => {
+  return _.isPlainObject(scrollBehavior) ? scrollBehavior : { block: scrollBehavior, inline: scrollBehavior }
+}
+
+// `scrollBehavior` is either a single position applied to both axes or a
+// per-axis `{ block, inline }`. An omitted `block` falls back to the configured
+// position and `inline` then mirrors `block`, so a lone `{ inline: 'nearest' }`
+// leaves vertical scrolling alone.
+const getScrollIntoViewOptions = (scrollBehavior, configuredScrollBehavior) => {
+  const { block, inline } = toScrollBehaviorAxes(scrollBehavior)
+  const { block: configuredBlock } = toScrollBehaviorAxes(configuredScrollBehavior)
+  // a configured `false` turns scrolling off entirely, so it carries no
+  // alignment for a per-axis override to inherit
+  const resolvedBlock = block ?? (configuredBlock === false ? defaultScrollBehavior : configuredBlock)
+  const resolvedInline = inline ?? resolvedBlock
+
+  return {
+    block: scrollBehaviorOptionsMap[resolvedBlock],
+    inline: scrollBehaviorOptionsMap[resolvedInline],
+  }
+}
+
 const getPositionFromArguments = function (positionOrX, y, options) {
   let position; let x
 
@@ -531,12 +555,11 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
         if (options.scrollBehavior !== false) {
           // scroll the element into view
-          const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
+          const scrollIntoViewOptions = getScrollIntoViewOptions(options.scrollBehavior, config('scrollBehavior'))
           const removeScrollBehaviorFix = addScrollBehaviorFix($el)
 
-          debug('scrollIntoView:', $el[0])
-          // Mirror the scroll behavior onto both axes.
-          $el.get(0).scrollIntoView({ block: scrollBehavior, inline: scrollBehavior })
+          debug('scrollIntoView:', $el[0], scrollIntoViewOptions)
+          $el.get(0).scrollIntoView(scrollIntoViewOptions)
 
           removeScrollBehaviorFix()
 

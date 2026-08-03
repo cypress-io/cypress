@@ -1335,6 +1335,66 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('can specify each scrollBehavior axis in options', () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: { block: 'bottom', inline: 'nearest' } })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
+        })
+      })
+
+      it('can specify each scrollBehavior axis in config', { scrollBehavior: { block: 'center', inline: 'nearest' } }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'nearest' })
+        })
+      })
+
+      it('leaves the block axis at the configured behavior when only inline is specified', { scrollBehavior: 'bottom' }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: { inline: 'nearest' } })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'nearest' })
+        })
+      })
+
+      it('uses the default block behavior when only inline is specified and scrollBehavior is false in config', { scrollBehavior: false }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: { inline: 'nearest' } })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'nearest' })
+        })
+      })
+
+      it('mirrors the block axis onto inline when only block is specified', () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: { block: 'center' } })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'center' })
+        })
+      })
+
       it('horizontally scrolls element to the leftmost point, away from a right-floating sticky element', () => {
         cy.viewport(800, 400)
 
@@ -1388,6 +1448,51 @@ describe('src/cy/commands/actions/click', () => {
         // right-sticky element and the click would never reach it
         cy.get('#target').click().then(() => {
           expect(clicked).to.be.calledOnce
+        })
+      })
+
+      describe('inline axis', () => {
+        // a carousel-style container: it clips horizontally and positions its
+        // slides itself, so a horizontal scroll leaves the layout broken
+        const buildCarousel = () => {
+          const $body = cy.$$('body')
+
+          $body.children().remove()
+
+          const $container = $('<div></div>')
+          .attr('id', 'carousel')
+          .css({ width: '400px', height: '128px', overflow: 'hidden' })
+          .appendTo($body)
+
+          const $row = $('<div></div>')
+          .css({ width: '1600px', height: '128px', display: 'flex' })
+          .appendTo($container)
+
+          _.times(4, (i) => {
+            const $slide = $('<div></div>')
+            .css({ width: '400px', height: '128px', boxSizing: 'border-box', padding: '30px' })
+            .appendTo($row)
+
+            $(`<button id="slide-btn-${i}">slide ${i}</button>`).appendTo($slide)
+          })
+
+          return $container
+        }
+
+        it('scrolls an already-visible element into the leftmost point by default', () => {
+          const $container = buildCarousel()
+
+          cy.get('#slide-btn-0').click().then(() => {
+            expect($container[0].scrollLeft, 'container scrollLeft').to.eq(30)
+          })
+        })
+
+        it('leaves the container alone when the inline axis is nearest', () => {
+          const $container = buildCarousel()
+
+          cy.get('#slide-btn-0').click({ scrollBehavior: { inline: 'nearest' } }).then(() => {
+            expect($container[0].scrollLeft, 'container scrollLeft').to.eq(0)
+          })
         })
       })
 

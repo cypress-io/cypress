@@ -2808,7 +2808,17 @@ declare namespace Cypress {
 
   type experimentalCspAllowedDirectives = 'default-src' | 'child-src' | 'frame-src' | 'script-src' | 'script-src-elem' | 'form-action'
 
-  type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
+  type scrollBehaviorPosition = 'center' | 'top' | 'bottom' | 'nearest'
+
+  /**
+   * A single position is applied to both axes. Use the per-axis form to align
+   * them separately, for example `{ block: 'top', inline: 'nearest' }` to leave
+   * horizontal scroll positions untouched unless the element is off screen.
+   */
+  type scrollBehaviorOptions = false | scrollBehaviorPosition | {
+    block?: scrollBehaviorPosition
+    inline?: scrollBehaviorPosition
+  }
 
   /**
    * Options to affect Actionability checks

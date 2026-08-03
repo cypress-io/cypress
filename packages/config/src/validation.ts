@@ -266,6 +266,41 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
   return true
 }
 
+const SCROLL_BEHAVIOR_POSITIONS = ['center', 'top', 'bottom', 'nearest']
+const SCROLL_BEHAVIOR_AXES = ['block', 'inline']
+
+/**
+ * Checks that a value is a valid `scrollBehavior`: `false`, a single position
+ * applied to both axes, or a per-axis object such as
+ * `{ block: 'top', inline: 'nearest' }`.
+ */
+export const isValidScrollBehavior = (key: string, value: any): ErrResult | true => {
+  const positions = SCROLL_BEHAVIOR_POSITIONS.map((p) => str(p)).join(', ')
+  const expected = `one of these values: ${positions}, false, or an object with keys "block" and/or "inline" set to one of ${positions}`
+
+  if (value === false || SCROLL_BEHAVIOR_POSITIONS.includes(value)) {
+    return true
+  }
+
+  if (!_.isPlainObject(value)) {
+    return errMsg(key, value, expected)
+  }
+
+  const axes = Object.keys(value)
+
+  if (!axes.length || !axes.every((axis) => SCROLL_BEHAVIOR_AXES.includes(axis))) {
+    return errMsg(key, value, expected)
+  }
+
+  for (const axis of axes) {
+    if (!SCROLL_BEHAVIOR_POSITIONS.includes(value[axis])) {
+      return errMsg(`${key}.${axis}`, value[axis], `one of these values: ${positions}`)
+    }
+  }
+
+  return true
+}
+
 /**
  * Checks if given value for a key is equal to one of the provided values.
  * @example
