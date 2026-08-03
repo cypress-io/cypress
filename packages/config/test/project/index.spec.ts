@@ -1,6 +1,7 @@
-import { vi, describe, it, expect, afterEach } from 'vitest'
+import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest'
 import errors from '@packages/errors'
 import { updateWithPluginValues } from '../../src/project'
+import { resetIssuedWarnings } from '../../src/browser'
 
 vi.mock('@packages/errors', async (importActual) => {
   const actual = await importActual()
@@ -203,7 +204,15 @@ describe('config/src/project/index', () => {
     })
 
     describe('experimentalMemoryManagement / manageBrowserMemory alias', () => {
-      it('carries the alias when setupNodeEvents mutates and returns the full config', () => {
+      beforeEach(() => {
+        resetIssuedWarnings()
+      })
+
+      afterEach(() => {
+        vi.restoreAllMocks()
+      })
+
+      it('carries the alias when setupNodeEvents returns the whole config it was given', () => {
         const cfg = {
           manageBrowserMemory: false,
           experimentalMemoryManagement: false,
@@ -213,7 +222,8 @@ describe('config/src/project/index', () => {
           },
         }
 
-        // simulates: setupNodeEvents(on, config) { config.experimentalMemoryManagement = true; return config }
+        // setupNodeEvents is handed the resolved config and returns it with the deprecated
+        // option set. It arrives here as a separate object, deserialized across the plugins IPC.
         const overrides = {
           ...cfg,
           experimentalMemoryManagement: true,

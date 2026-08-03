@@ -1280,9 +1280,12 @@ describe('config/src/project/utils', () => {
 
     describe('experimentalMemoryManagement / manageBrowserMemory alias', () => {
       it('aliases experimentalMemoryManagement=true onto manageBrowserMemory and warns once', async function () {
-        await defaults('manageBrowserMemory', true, {
+        const cfg = await defaults('manageBrowserMemory', true, {
           experimentalMemoryManagement: true,
         }, { configFile: 'cypress.config.js' })
+
+        // pins that the value was actually carried over rather than left at its default
+        expect(cfg.resolved.manageBrowserMemory).toEqual({ value: true, from: 'config' })
 
         expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', {
           configFile: 'cypress.config.js',
@@ -1293,7 +1296,9 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('aliases experimentalMemoryManagement=false onto manageBrowserMemory and still warns', async function () {
+      // `false` is also the default for manageBrowserMemory, so the copy itself is not
+      // observable here - the warning is the only assertable behavior.
+      it('warns when experimentalMemoryManagement is explicitly set to false', async function () {
         await defaults('manageBrowserMemory', false, {
           experimentalMemoryManagement: false,
         })

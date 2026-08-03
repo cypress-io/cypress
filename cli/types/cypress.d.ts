@@ -3282,9 +3282,9 @@ declare namespace Cypress {
      */
     experimentalWebKitSupport: boolean
     /**
-     * @deprecated Use `manageBrowserMemory` instead.
      * Enables support for improved memory management within Chromium-based browsers.
      * @default false
+     * @deprecated Use {@linkcode manageBrowserMemory} instead. This option continues to work, but will be removed in a future major version of Cypress.
      */
     experimentalMemoryManagement: boolean
     /**

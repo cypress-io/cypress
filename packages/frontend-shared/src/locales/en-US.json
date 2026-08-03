@@ -626,6 +626,10 @@
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
         "description": "Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback."
+      },
+      "experimentalMemoryManagement": {
+        "name": "Memory Management",
+        "description": "Deprecated: use the `manageBrowserMemory` configuration option instead. Enables support for improved memory management within Chromium-based browsers."
       }
     },
     "device": {

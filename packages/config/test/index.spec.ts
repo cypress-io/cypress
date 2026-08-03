@@ -1,4 +1,4 @@
-import { vi, describe, it, expect } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import path from 'path'
 import * as configUtil from '../src/index'
 
@@ -218,6 +218,58 @@ describe('config/src/index', () => {
         testingType: 'e2e',
         configFile: 'config.js',
       })
+    })
+  })
+
+  describe('.applyConfigOptionAliases', () => {
+    // Every renamed option shares the RENAMED_CONFIG_OPTION errorKey, so the warning
+    // dedupe has to be keyed per option name rather than per errorKey.
+    const aliasedOptions = [
+      { name: 'oldOne', errorKey: 'RENAMED_CONFIG_OPTION', newName: 'newOne', isWarning: true },
+      { name: 'oldTwo', errorKey: 'RENAMED_CONFIG_OPTION', newName: 'newTwo', isWarning: true },
+    ] as const
+
+    beforeEach(() => {
+      configUtil.resetIssuedWarnings()
+    })
+
+    it('warns for each aliased option even when they share an errorKey', () => {
+      const warningFn = vi.fn()
+      const errorFn = vi.fn()
+
+      configUtil.applyConfigOptionAliases({
+        oldOne: true,
+        oldTwo: true,
+        configFile: 'config.js',
+      }, {}, aliasedOptions, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledTimes(2)
+      expect(warningFn).toHaveBeenCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({ name: 'oldOne', newName: 'newOne' }))
+      expect(warningFn).toHaveBeenCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({ name: 'oldTwo', newName: 'newTwo' }))
+      expect(errorFn).toHaveBeenCalledTimes(0)
+    })
+
+    it('warns once per option until warnings are reset', () => {
+      const warningFn = vi.fn()
+      const errorFn = vi.fn()
+
+      configUtil.applyConfigOptionAliases({ oldOne: true, configFile: 'config.js' }, {}, aliasedOptions, warningFn, errorFn, 'e2e')
+      configUtil.applyConfigOptionAliases({ oldOne: true, configFile: 'config.js' }, {}, aliasedOptions, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledTimes(1)
+
+      configUtil.resetIssuedWarnings()
+      configUtil.applyConfigOptionAliases({ oldOne: true, configFile: 'config.js' }, {}, aliasedOptions, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledTimes(2)
+    })
+
+    it('carries the deprecated value onto its replacement', () => {
+      const cfg: any = { oldOne: true, configFile: 'config.js' }
+
+      configUtil.applyConfigOptionAliases(cfg, {}, aliasedOptions, vi.fn(), vi.fn(), 'e2e')
+
+      expect(cfg.newOne).toEqual(true)
     })
   })
 

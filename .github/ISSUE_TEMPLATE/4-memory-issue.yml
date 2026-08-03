@@ -6,7 +6,7 @@ body:
       value: |
         Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
 
-        Prior to logging a memory issue, please make sure you are running the latest version of Cypress and have enabled [`experimentalMemoryManagement`](https://on.cypress.io/experiments) for Chromium-based browsers (introduced in Cypress 12.4.0). 
+        Prior to logging a memory issue, please make sure you are running the latest version of Cypress and have enabled [`manageBrowserMemory`](https://docs.cypress.io/app/references/configuration#Global) for Chromium-based browsers.
 
         If you are running in `cypress open` mode, you can also try lowering [`numTestsKeptInMemory`](https://docs.cypress.io/guides/references/configuration#Options) in your config file.
 

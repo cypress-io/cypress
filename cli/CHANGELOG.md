@@ -3,7 +3,7 @@
 
 **Deprecations:**
 
-- Deprecated the `experimentalMemoryManagement` configuration option in favor of a new, stable [`manageBrowserMemory`](https://docs.cypress.io/app/references/configuration#Global) option with identical behavior. Setting `experimentalMemoryManagement` continues to work and now prints a console warning naming `manageBrowserMemory`; `experimentalMemoryManagement` will be removed in a future major version of Cypress. Addresses [#34385](https://github.com/cypress-io/cypress/issues/34385).
+- Deprecated the [`experimentalMemoryManagement`](https://on.cypress.io/experiments) configuration option in favor of a new, stable [`manageBrowserMemory`](https://docs.cypress.io/app/references/configuration#Global) option with identical behavior. Setting `experimentalMemoryManagement` continues to work and now prints a console warning naming `manageBrowserMemory`; `experimentalMemoryManagement` will be removed in a future major version of Cypress. Addresses [#34385](https://github.com/cypress-io/cypress/issues/34385).
 
 **Performance:**
 
