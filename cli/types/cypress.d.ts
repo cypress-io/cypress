@@ -2830,9 +2830,6 @@ declare namespace Cypress {
    *   `{ block: 'start', inline: 'nearest' }` to leave horizontal scroll positions
    *   untouched unless the element is off screen. An axis that is left out is
    *   aligned by `scrollIntoView`'s own default.
-   *
-   * A value given to a command replaces the configured value rather than merging
-   * with it.
    */
   type scrollBehaviorOptions = false | scrollBehaviorAlignment | {
     block?: scrollBehaviorPosition
