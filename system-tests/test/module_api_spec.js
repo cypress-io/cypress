@@ -24,6 +24,7 @@ describe('module api', () => {
     expectedExitCode: 5,
     config: {
       experimentalWebKitSupport: true,
+      screenshotOnRunFailure: false,
     },
     async onRun (execFn) {
       const { stdout } = await execFn()
@@ -53,6 +54,7 @@ describe('module api', () => {
       experimentalWebKitSupport: true,
       retries: 1,
       video: false,
+      screenshotOnRunFailure: false,
     },
     async onRun (execFn) {
       await execFn()
