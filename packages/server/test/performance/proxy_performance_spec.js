@@ -101,7 +101,6 @@ const start = (new Date()) / 1000
 
 const PROXY_PORT = process.env.PROXY_PORT || 45678
 const HTTPS_PROXY_PORT = process.env.HTTPS_PROXY_PORT || 45681
-const CDP_PORT = 45679 /** port range starts here, not the actual port */
 const CY_PROXY_PORT = 45680
 // the proxy-disabled ServerBase must bind a port to open(), but the browser
 // never connects to it — interception happens over the CDP connection
@@ -110,11 +109,32 @@ const PROXY_DISABLED_CY_SERVER_PORT = 45682
 // HTTP/2's win is eliminating HTTP/1.1 connection queueing, which requires
 // per-request latency — near-zero on CI, so the hosted page can't show the win
 // there. This origin injects the latency as a per-response delay instead.
-// The port must sit below 45679 (the randomized Chrome debug-port range): a
-// stray Chrome squatting it turns every origin request into ERR_EMPTY_RESPONSE.
 const HTTP2_LATENCY_ORIGIN_PORT = 45333
 const HTTP2_LATENCY_ORIGIN_DELAY_MS = 50
 const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
+
+// Chrome's debug port is randomized per launch, so the range has to stay clear
+// of every fixed port this spec binds. A collision leaves Chrome unable to
+// bind, and runHar's ECONNREFUSED retry reuses the same port — so the run
+// hangs to the timeout instead of recovering.
+const CDP_PORT_RANGE_START = 46000
+const CDP_PORT_RANGE_SIZE = 10000
+
+const FIXED_PORTS = {
+  PROXY_PORT,
+  HTTPS_PROXY_PORT,
+  CY_PROXY_PORT,
+  PROXY_DISABLED_CY_SERVER_PORT,
+  HTTP2_LATENCY_ORIGIN_PORT,
+}
+
+// enforced rather than commented: PROXY_PORT/HTTPS_PROXY_PORT come from the
+// environment, so the invariant can be broken from outside this file
+Object.entries(FIXED_PORTS).forEach(([name, port]) => {
+  if (Number(port) >= CDP_PORT_RANGE_START && Number(port) < CDP_PORT_RANGE_START + CDP_PORT_RANGE_SIZE) {
+    throw new Error(`${name} (${port}) falls inside the randomized Chrome debug-port range ${CDP_PORT_RANGE_START}-${CDP_PORT_RANGE_START + CDP_PORT_RANGE_SIZE - 1}; pick a port outside it`)
+  }
+})
 
 const TEST_CASES = [
   // these first 4 cases don't involve Cypress, don't need to run every time
@@ -344,7 +364,7 @@ const getResultsFromHar = (har) => {
 }
 
 const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
-  const cdpPort = CDP_PORT + Math.round(Math.random() * 10000)
+  const cdpPort = CDP_PORT_RANGE_START + Math.floor(Math.random() * CDP_PORT_RANGE_SIZE)
 
   const browser = {
     isHeadless: true,
