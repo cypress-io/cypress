@@ -22,6 +22,7 @@ describe('@cypress/vite-dev-server', function () {
           // @see https://github.com/cypress-io/cypress/issues/30881 and src/Rerendering.cy.jsx for details on skipping.
           spec: 'src/**/*.cy.jsx,!src/Rerendering.cy.jsx',
           expectedExitCode: 7,
+          config: { screenshotOnRunFailure: false },
         })
       })
 

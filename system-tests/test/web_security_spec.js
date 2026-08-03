@@ -77,6 +77,7 @@ describe('e2e web security', () => {
       spec: 'web_security.cy.js',
       config: {
         pageLoadTimeout: 5000,
+        screenshotOnRunFailure: false,
       },
       snapshot: true,
       expectedExitCode: 4,

@@ -102,6 +102,7 @@ describe('e2e forms', () => {
       spec: 'form_submission_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
       onStdout: (stdout) => {
         return stdout
         .replace(/((?: {6}-)+[^\n]+\n)/gm, '')

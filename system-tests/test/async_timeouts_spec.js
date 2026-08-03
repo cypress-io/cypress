@@ -7,8 +7,6 @@ describe('e2e async timeouts', () => {
     spec: 'async_timeouts.cy.js',
     snapshot: true,
     expectedExitCode: 2,
-    config: {
-      screenshotOnRunFailure: false,
-    },
+    config: { screenshotOnRunFailure: false },
   })
 })

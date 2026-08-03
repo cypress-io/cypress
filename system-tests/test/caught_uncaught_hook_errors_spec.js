@@ -12,23 +12,27 @@ describe('e2e caught and uncaught hooks errors', () => {
     spec: 'hook_caught_error_failing.cy.js',
     snapshot: true,
     expectedExitCode: 3,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing2', {
     spec: 'hook_uncaught_error_failing.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing3', {
     spec: 'hook_uncaught_root_error_failing.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 
   systemTests.it('failing4', {
     spec: 'hook_uncaught_error_events_failing.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 })
