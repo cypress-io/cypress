@@ -109,7 +109,21 @@ describe('CdpFetchTransport', () => {
         id: 'network-1',
         method: 'GET',
         url: 'https://example.test/',
+        resourceType: undefined,
       })
+    })
+
+    it('copies transport resourceType onto the neutral request', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        resourceType: 'xhr' as const,
+      }
+
+      expect(codec.decodeRequest(transportRequest).resourceType).to.equal('xhr')
     })
 
     it('encodes neutral request URL mutations onto the CDP transport context', () => {
@@ -359,6 +373,46 @@ describe('CdpFetchTransport', () => {
 
       await onRequestPaused(response)
       await handled
+    })
+
+    it('normalizes CDP Fetch resourceType onto the transport request for cookie middleware', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenResourceTypes: Array<string | undefined> = []
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use((req, next) => {
+        seenResourceTypes.push(req.resourceType)
+
+        return next(req)
+      })
+
+      for (const [cdpType, expected] of [
+        ['XHR', 'xhr'],
+        ['Fetch', 'fetch'],
+        ['Document', 'other'],
+      ] as const) {
+        const request = createPausedRequest({
+          requestId: `fetch-${cdpType}`,
+          networkId: `network-${cdpType}`,
+          resourceType: cdpType,
+        })
+        const response = createPausedRequest({
+          requestId: `fetch-${cdpType}`,
+          networkId: `network-${cdpType}`,
+          resourceType: cdpType,
+          responseStatusCode: 200,
+        })
+
+        const handled = onRequestPaused(request)
+
+        await tick()
+        await onRequestPaused(response)
+        await handled
+
+        expect(seenResourceTypes).to.include(expected)
+      }
     })
 
     it('strips a previously injected AUT frame header on redirect re-pause', async () => {

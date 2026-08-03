@@ -1,4 +1,5 @@
 import type { Readable } from 'stream'
+import type { ResourceType } from '../types/external-types'
 
 export type HttpHeaders = Record<string, string | string[] | undefined>
 
@@ -10,6 +11,7 @@ export type HttpRequest = {
   method?: string
   headers?: HttpHeaders
   body?: HttpBody
+  resourceType?: ResourceType
 }
 
 export type HttpResponse = {

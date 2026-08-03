@@ -2396,6 +2396,48 @@ jobs:
               test/downloads_spec.ts --browser electron
       - sanitize-verify-and-store-mocha-results
 
+  # Focused CDP coverage for cookie SameSite / credentials middleware (#34464).
+  # Chrome only — electron CDP cookie coverage tracked as a follow-up once a
+  # packaged Electron binary is reliably available for proxy-disabled runs.
+  # Excludes `cross-origin cookies, set:cookies` (baseUrl 127.0.0.3) which fails
+  # baseUrl verification under CDP for hosts/loopback reasons outside #34464.
+  # Runs always when system tests are selected — not gated on run-proxy-disabled-tests.
+  system-tests-cookies-cdp:
+    <<: *defaults
+    resource_class: medium+.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Cookie system tests with MITM disabled — e2e cookies (chrome)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/cookies_spec.ts --browser chrome --fgrep "e2e cookies"
+      - run:
+          name: Cookie system tests with MITM disabled — cookie jar sync (chrome)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/cookies_spec.ts --browser chrome --fgrep "cookie jar stays in sync"
+      - run:
+          name: Cookie system tests with MITM disabled — OAuth redirect cookie (chrome)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/cookies_spec.ts --browser chrome --fgrep "OAuth/SSO redirect-back cookie"
+      - sanitize-verify-and-store-mocha-results
+
   system-tests-node-modules-install:
     <<: *defaults
     steps:

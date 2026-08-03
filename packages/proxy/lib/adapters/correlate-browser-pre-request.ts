@@ -32,7 +32,7 @@ export async function correlateBrowserPreRequest (mw: RequestInterceptionMiddlew
   const copyResourceTypeAndNext = () => {
     mw.res.off('close', onClose)
 
-    mw.req.resourceType = mw.req.browserPreRequest?.resourceType
+    mw.req.resourceType = mw.req.browserPreRequest?.resourceType ?? mw.req.resourceType
 
     span?.setAttributes({
       resourceType: mw.req.resourceType,

@@ -40,6 +40,16 @@ describe('createSyntheticExpressContext', () => {
     expect(await readStream(req)).to.equal('name=value')
   })
 
+  it('copies resourceType from the neutral request onto req', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+      resourceType: 'xhr',
+    })
+
+    expect(req.resourceType).to.equal('xhr')
+  })
+
   it('lowercases request header keys like Node IncomingMessage', () => {
     const { req } = createSyntheticExpressContext({
       id: 'network-1',

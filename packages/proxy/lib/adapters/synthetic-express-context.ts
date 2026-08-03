@@ -284,6 +284,7 @@ export function createSyntheticExpressContext (request: HttpRequest): {
   req.url = request.url
   req.body = request.body
   req.requestId = request.id
+  req.resourceType = request.resourceType
   req.isAUTFrame = false
   req.isFromExtraTarget = false
   req.isSyncRequest = false

@@ -8,12 +8,13 @@ import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
-import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
 import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import { normalizeResourceType } from './normalize-resource-type'
 import { cdpKeyPress } from '../../automation/commands/key_press'
 import { AUT_FRAME_HEADER } from '../constants'
 
@@ -23,6 +24,8 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
+
+export { normalizeResourceType }
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -35,15 +38,6 @@ export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY
     format: 'jpeg',
     everyNthFrame,
   }
-}
-
-export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
-  resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
-  if (validResourceTypes.includes(resourceType as ResourceType)) {
-    return resourceType as ResourceType
-  }
-
-  return 'other'
 }
 
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
@@ -73,11 +67,6 @@ const findFrameById = (frameTree: HasFrame | undefined, frameId: string): HasFra
 
   return undefined
 }
-
-// the resource types passed through to request middleware / cy.intercept matching; any
-// other type reported by the protocol (e.g. 'document', 'media', 'preflight') normalizes to 'other'
-// CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
 
 export class CdpAutomation implements CDPClient, AutomationMiddleware {
   on: OnFn

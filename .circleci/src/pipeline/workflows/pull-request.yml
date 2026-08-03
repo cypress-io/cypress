@@ -282,6 +282,10 @@ jobs:
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
+  - system-tests-cookies-cdp:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
@@ -477,6 +481,7 @@ jobs:
         - h2-dual-stack-tests
         - system-tests-upstream-proxy-cdp
         - system-tests-downloads-cdp
+        - system-tests-cookies-cdp
         - unit-tests-proxy-disabled
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
