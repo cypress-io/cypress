@@ -30,8 +30,15 @@ function createPausedRequest (options: {
 }
 
 function createClient () {
+  const send = sinon.stub().resolves({})
+
+  // resolveResponse eagerly fetches the body for every response pause;
+  // give it a decodable default so tests that don't care about body content
+  // don't have to stub it themselves
+  send.withArgs('Fetch.getResponseBody').resolves({ body: '', base64Encoded: false })
+
   return {
-    send: sinon.stub().resolves({}),
+    send,
     on: sinon.stub(),
     off: sinon.stub(),
   }
@@ -1103,7 +1110,7 @@ describe('CdpFetchTransport', () => {
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 
-      client.send.onCall(1).rejects(new Error('continueResponse failed'))
+      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-response', responseCode: 200 }).rejects(new Error('continueResponse failed'))
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
@@ -1289,80 +1296,51 @@ describe('CdpFetchTransport', () => {
       expect(seenBody).to.equal('<html>already decoded</html>')
     })
 
-    it('attaches a baseline error listener to response body streams', async () => {
+    it('continues the response pause without running the intercept pipeline when the eager body fetch fails', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const middlewareSawResponse = sinon.stub()
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
-
-      let bodyStreamErrorListeners
-
-      httpIntercept.use(async (req, next) => {
-        const response = await next(req)
-
-        bodyStreamErrorListeners = response.bodyStream!.listenerCount('error')
-
-        return response
-      })
-
-      const handled = onRequestPaused(createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-      }))
-
-      await tick()
-
-      await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
-        networkId: 'network-1',
-        responseStatusCode: 200,
-      }))
-
-      await handled
-
-      expect(bodyStreamErrorListeners).to.be.greaterThan(0)
-    })
-
-    it('propagates getResponseBody Invalid InterceptionId to stream consumers without crashing', async () => {
-      const client = createClient()
-      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const { transport } = createTransport(client, { httpIntercept })
-      const onRequestPaused = await startTransport(transport, client)
+      const unhandled = sinon.stub()
 
       client.send.withArgs('Fetch.getResponseBody').rejects(new Error('Invalid InterceptionId.'))
 
-      let readError: Error | undefined
-
       httpIntercept.use(async (req, next) => {
         const response = await next(req)
 
-        try {
-          await readStream(response.bodyStream!)
-        } catch (err) {
-          readError = err as Error
-
-          throw err
-        }
+        middlewareSawResponse(response)
 
         return response
       })
 
-      const handled = onRequestPaused(createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-      }))
+      process.on('unhandledRejection', unhandled)
 
-      await tick()
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
 
-      await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
-        networkId: 'network-1',
-        responseStatusCode: 200,
-      }))
+        await tick()
 
-      await handled
+        await onRequestPaused(createPausedRequest({
+          requestId: 'fetch-response',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
 
-      expect(readError).to.have.property('message', 'Invalid InterceptionId.')
+        await handled
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(unhandled).not.to.have.been.called
+      } finally {
+        process.removeListener('unhandledRejection', unhandled)
+      }
+
+      // the eager fetch rejects before deferred.resolve, so the response never
+      // reaches the intercept pipeline
+      expect(middlewareSawResponse).not.to.have.been.called
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-response',

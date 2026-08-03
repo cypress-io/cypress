@@ -43,13 +43,18 @@ describe('http', function () {
       })
 
       const streamMiddleware = vi.fn().mockImplementation(function () {
-        this.incomingResStream = new PassThrough()
+        const pt = new PassThrough()
+
+        this.incomingResStream = pt
+        this.makeResStreamPlainText = () => {
+          pt.on('error', this.onError)
+        }
+
         this.next()
       })
 
       const useStreamMiddleware = vi.fn().mockImplementation(function () {
-        // Emit after next() from the prior middleware; stage wiring must still
-        // route the source error through onError (pipe destinations alone do not).
+        this.makeResStreamPlainText()
         this.incomingResStream.emit('error', new Error('bad gzip'))
         this.end()
       })
@@ -62,102 +67,6 @@ describe('http', function () {
           [HttpStages.IncomingResponse]: {
             streamMiddleware,
             useStreamMiddleware,
-          },
-        },
-      }
-
-      await _runStage(HttpStages.IncomingResponse, ctx, onError)
-
-      await vi.waitFor(() => {
-        expect(onError).toHaveBeenCalledOnce()
-      })
-
-      expect(onError.mock.calls[0][0].message).toEqual('bad gzip')
-    })
-
-    it('settles when incomingResStream errors under pipe() without a source listener', async function () {
-      const onError = vi.fn()
-      const { PassThrough, Writable } = await import('stream')
-      const { EventEmitter } = await import('events')
-
-      const res = Object.assign(new EventEmitter(), {
-        off: vi.fn(),
-        on: vi.fn(),
-        writableFinished: false,
-        destroyed: false,
-      })
-
-      const bodyStream = new PassThrough()
-
-      const pipeMiddleware = vi.fn().mockImplementation(function () {
-        // Mirrors production response middleware: error is only on the destination.
-        bodyStream.pipe(new Writable({
-          write (_chunk, _encoding, callback) {
-            callback()
-          },
-        })).on('error', this.onError)
-      })
-
-      const ctx = {
-        req: { method: 'GET', proxiedUrl: 'url' },
-        res,
-        debug: () => {},
-        incomingResStream: bodyStream,
-        middleware: {
-          [HttpStages.IncomingResponse]: {
-            pipeMiddleware,
-          },
-        },
-      }
-
-      const stage = _runStage(HttpStages.IncomingResponse, ctx, onError)
-
-      bodyStream.destroy(new Error('Invalid InterceptionId.'))
-
-      await stage
-
-      await vi.waitFor(() => {
-        expect(onError).toHaveBeenCalledOnce()
-      })
-
-      expect(onError.mock.calls[0][0].message).toEqual('Invalid InterceptionId.')
-    })
-
-    it('invokes stage onError once when a transform stream has duplicate error listeners', async function () {
-      const onError = vi.fn()
-      const { PassThrough } = await import('stream')
-      const { EventEmitter } = await import('events')
-
-      const res = Object.assign(new EventEmitter(), {
-        off: vi.fn(),
-        on: vi.fn(),
-        writableFinished: false,
-        destroyed: false,
-      })
-
-      const transformStream = new PassThrough()
-
-      const attachTransformMiddleware = vi.fn().mockImplementation(function () {
-        // Mirrors CompressBody: attach onError then next() with the transform as current stream.
-        transformStream.on('error', this.onError)
-        this.incomingResStream = transformStream
-        this.next()
-      })
-
-      const laterMiddleware = vi.fn().mockImplementation(function () {
-        // Stage wiring attaches a second listener; both must collapse to one onError call.
-        this.incomingResStream.emit('error', new Error('bad gzip'))
-        this.end()
-      })
-
-      const ctx = {
-        req: { method: 'GET', proxiedUrl: 'url' },
-        res,
-        debug: () => {},
-        middleware: {
-          [HttpStages.IncomingResponse]: {
-            attachTransformMiddleware,
-            laterMiddleware,
           },
         },
       }

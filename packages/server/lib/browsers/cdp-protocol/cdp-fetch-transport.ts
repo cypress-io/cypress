@@ -318,7 +318,20 @@ export class CdpFetchTransport {
 
     const responseHeaders = await this.withSetCookieHeaders(event, sessionId)
 
-    // reset() may have rejected this flow while the merge awaited extraInfo.
+    let bodyStream: Readable
+
+    try {
+      bodyStream = await this.fetchResponseBody(event.requestId, event.responseHeaders, sessionId)
+    } catch (err) {
+      deferred.reject(err as Error)
+      await this.safeSend('Fetch.continueResponse', {
+        requestId: event.requestId,
+      }, sessionId)
+
+      return
+    }
+
+    // reset() may have rejected this flow while the merge/fetch awaited CDP.
     // The resolve below would be a no-op and nothing else owns this pause —
     // release it, or the browser stays paused (reset keeps Fetch enabled).
     if (this.inFlightRequests.get(event.networkId!) !== deferred) {
@@ -329,8 +342,6 @@ export class CdpFetchTransport {
 
       return
     }
-
-    const bodyStream = this.createResponseBodyStream(event.requestId, event.responseHeaders, sessionId)
 
     deferred.resolve({
       ...event.request,
@@ -362,48 +373,15 @@ export class CdpFetchTransport {
     ]
   }
 
-  private createResponseBodyStream = (requestId: string, responseHeaders?: Protocol.Fetch.HeaderEntry[], sessionId?: string): Readable => {
-    let reading = false
-    let bodyStream: Readable
+  private fetchResponseBody = async (requestId: string, responseHeaders?: Protocol.Fetch.HeaderEntry[], sessionId?: string): Promise<Readable> => {
+    const response = await this.client.send('Fetch.getResponseBody', {
+      requestId,
+    }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    bodyStream = new Readable({
-      read: () => {
-        if (reading) {
-          return
-        }
+    const raw = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
+    const body = await this.decodeUndeliveredEncodings(raw, responseHeaders)
 
-        reading = true
-
-        void (async () => {
-          try {
-            const response = await this.client.send('Fetch.getResponseBody', {
-              requestId,
-            }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
-
-            const raw = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-            const body = await this.decodeUndeliveredEncodings(raw, responseHeaders)
-
-            if (body.length) {
-              bodyStream.push(body)
-            }
-
-            bodyStream.push(null)
-          } catch (err) {
-            bodyStream.destroy(err as Error)
-          }
-        })()
-      },
-    })
-
-    // pipe() attaches error handlers to the destination, not the source, so this
-    // stream can reach destroy() with no listener of its own — Chrome rejects
-    // getResponseBody with `Invalid InterceptionId` once the pause is gone.
-    // Without a baseline listener that emit is an uncaught exception.
-    bodyStream.on('error', (err: Error) => {
-      debug('response body stream error for %s: %s', requestId, err.message)
-    })
-
-    return bodyStream
+    return Readable.from(body.length ? [body] : [])
   }
 
   /**
