@@ -21,7 +21,10 @@ const brotliDecompress = promisify(zlib.brotliDecompress)
 
 // CDP refuses Fetch.getResponseBody for a pause in the redirect-received state,
 // and documents a redirect status plus a location header as the way to tell that
-// state apart from response-received.
+// state apart from response-received. Drift from MITM: redirect bodies are
+// therefore empty to middleware under proxy-disabled mode — CDP cannot provide
+// them — so 3xx handling differs from the MITM path, which may still surface
+// whatever the origin sent.
 const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
     && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
