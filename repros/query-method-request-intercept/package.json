@@ -1,0 +1,16 @@
+{
+  "name": "cypress-query-method-request-intercept-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Example project exercising the HTTP QUERY method with cy.request and cy.intercept",
+  "scripts": {
+    "serve": "node server.js",
+    "cypress:open": "cypress open --e2e --browser chrome",
+    "cypress:run": "cypress run --browser chrome",
+    "test": "start-server-and-test serve http://127.0.0.1:5599 cypress:run"
+  },
+  "devDependencies": {
+    "cypress": "^15.0.0",
+    "start-server-and-test": "^2.0.0"
+  }
+}

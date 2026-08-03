@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>QUERY method demo</title>
+  </head>
+  <body>
+    <h1>QUERY method demo</h1>
+
+    <input id="term" value="cypress" />
+    <button id="search">Search</button>
+
+    <pre id="results">no results yet</pre>
+
+    <script>
+      document.getElementById('search').addEventListener('click', async () => {
+        const term = document.getElementById('term').value
+
+        // The Fetch API allows the QUERY method and lets it carry a body,
+        // unlike GET/HEAD. This is what cy.intercept('QUERY', ...) will match.
+        const res = await fetch('/api/search', {
+          method: 'QUERY',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ term }),
+        })
+
+        const json = await res.json()
+
+        document.getElementById('results').textContent = JSON.stringify(json, null, 2)
+      })
+    </script>
+  </body>
+</html>
