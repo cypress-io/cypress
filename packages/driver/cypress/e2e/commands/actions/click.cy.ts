@@ -1407,6 +1407,30 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('combines a per-axis config and per-axis options that set opposite axes', { scrollBehavior: { block: 'center' } }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'start' })
+        })
+      })
+
+      it('lets a single value in options replace both axes of a per-axis config', { scrollBehavior: { block: 'center' } }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollBehavior: 'top' })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'nearest' })
+        })
+      })
+
       it('omits axes missing from the config so the browser default applies', { scrollBehavior: { inline: 'start' } }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
