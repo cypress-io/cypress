@@ -441,12 +441,12 @@ export function mergeDefaults (
   // Carry a deprecated option's value onto its replacement (and fire its warning) before
   // defaults are deep-merged in below, otherwise the replacement's default would already
   // be present by the time we check whether the user set the deprecated option explicitly.
-  config = applyConfigOptionAliases(config, breakingOptions, errors.warning, (err, ...args) => {
+  config = applyConfigOptionAliases(config, {}, breakingOptions, errors.warning, (err, ...args) => {
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 
   if (config[testingType]) {
-    applyConfigOptionAliases(config[testingType], breakingOptions, errors.warning, (err, options) => {
+    applyConfigOptionAliases(config[testingType], {}, breakingOptions, errors.warning, (err, options) => {
       throw makeConfigError(errors.get(err, { ...options, name: `${testingType}.${options.name}` }))
     }, testingType)
   }

@@ -1321,6 +1321,18 @@ describe('config/src/project/utils', () => {
 
         expect(errors.warning).not.toBeCalledWith('RENAMED_CONFIG_OPTION', expect.anything())
       })
+
+      it('aliases the option through a testing-type-scoped override', async function () {
+        await defaults('manageBrowserMemory', true, {
+          e2e: { experimentalMemoryManagement: true },
+        }, { testingType: 'e2e' })
+
+        expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+          testingType: 'e2e',
+        }))
+      })
     })
 
     describe('.resolved', () => {

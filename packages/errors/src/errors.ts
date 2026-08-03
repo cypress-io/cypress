@@ -793,7 +793,7 @@ export const AllCypressErrors = {
 
         If you're running lots of tests on a memory intense application.
           - Try increasing the CPU/memory on the machine you're running on.
-          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+          - Try enabling ${fmt.highlight('manageBrowserMemory')} in your config file.
           - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
 
         You can learn more here:

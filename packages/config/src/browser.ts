@@ -69,17 +69,38 @@ export function resetIssuedWarnings () {
   issuedWarnings.clear()
 }
 
+// Shared gating that both `validateNoBreakingOptions` and `applyConfigOptionAliases` must
+// apply before firing an event for a breaking option: the option must actually be set on
+// `cfg`, pass its own `shouldDisplayOrThrow` check (if any), and match `value` (if specified).
+const shouldFireBreakingOption = (opt: BreakingOption, cfg: any) => {
+  const { name, value, shouldDisplayOrThrow } = opt
+
+  if (!_.has(cfg, name) || (shouldDisplayOrThrow && !shouldDisplayOrThrow(cfg[name]))) {
+    return false
+  }
+
+  // Bail if a value is specified but the config does not have that value.
+  if (value && cfg[name] !== value) {
+    return false
+  }
+
+  return true
+}
+
 const fireBreakingOptionEvent = (opt: BreakingOption, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   const { name, errorKey, newName, isWarning, value } = opt
   const args: BreakingErrResult = { name, newName, value, configFile: cfg.configFile, testingType }
+  // `errorKey` alone isn't unique - multiple aliased options can share the same errorKey
+  // (e.g. every renamed option uses RENAMED_CONFIG_OPTION), so dedupe on the option name too.
+  const dedupeKey = `${errorKey}:${name}`
 
   if (isWarning) {
-    if (issuedWarnings.has(errorKey)) {
+    if (issuedWarnings.has(dedupeKey)) {
       return
     }
 
     // avoid re-issuing the same warning more than once
-    issuedWarnings.add(errorKey)
+    issuedWarnings.add(dedupeKey)
 
     return onWarning(errorKey, args)
   }
@@ -89,14 +110,7 @@ const fireBreakingOptionEvent = (opt: BreakingOption, cfg: any, onWarning: Error
 
 const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach((opt) => {
-    const { name, value, shouldDisplayOrThrow } = opt
-
-    if (_.has(cfg, name) && (!shouldDisplayOrThrow || shouldDisplayOrThrow(cfg[name]))) {
-      if (value && cfg[name] !== value) {
-        // Bail if a value is specified but the config does not have that value.
-        return
-      }
-
+    if (shouldFireBreakingOption(opt, cfg)) {
       fireBreakingOptionEvent(opt, cfg, onWarning, onErr, testingType)
     }
   })
@@ -105,26 +119,31 @@ const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]
 // Carries a deprecated option's value onto its replacement (per `newName`) and fires
 // its breaking-option warning/error, for options that keep working as a functional
 // alias rather than being removed outright. This has to run before defaults are
-// deep-merged into `cfg` (see mergeDefaults) - otherwise the deprecated option's own
-// default value would already be present, making every config look like it explicitly
-// set the deprecated option. `validateNoBreakingConfig` excludes these `newName`
-// options from its later pass so they aren't (mis-)evaluated a second time.
-export const applyConfigOptionAliases = (cfg: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+// deep-merged into `modifiedConfig` (see mergeDefaults) - otherwise the deprecated
+// option's own default value would already be present, making every config look like
+// it explicitly set the deprecated option. When defaults are already present (e.g. a
+// `setupNodeEvents` plugin that mutates and returns the full resolved config),
+// `baseline` is the pre-plugin config to diff against, so the alias only copies over
+// when the deprecated option actually changed and the replacement did not. It's the
+// caller's responsibility to pass a baseline where every possible `newName` key is
+// present (even if only as `undefined`), and `validateNoBreakingConfig` excludes these
+// `newName` options from its later pass so they aren't (mis-)evaluated a second time.
+export const applyConfigOptionAliases = (modifiedConfig: any, baseline: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach((opt) => {
     const { name, newName } = opt
 
-    if (!newName || !_.has(cfg, name)) {
+    if (!newName || !shouldFireBreakingOption(opt, modifiedConfig)) {
       return
     }
 
-    if (!_.has(cfg, newName)) {
-      cfg[newName] = cfg[name]
+    if (modifiedConfig[name] !== baseline[name] && modifiedConfig[newName] === baseline[newName]) {
+      modifiedConfig[newName] = modifiedConfig[name]
     }
 
-    fireBreakingOptionEvent(opt, cfg, onWarning, onErr, testingType)
+    fireBreakingOptionEvent(opt, modifiedConfig, onWarning, onErr, testingType)
   })
 
-  return cfg
+  return modifiedConfig
 }
 
 export const allowed = (obj = {}) => {

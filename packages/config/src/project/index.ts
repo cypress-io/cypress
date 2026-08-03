@@ -88,12 +88,12 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
   // Carry a deprecated option's value onto its replacement (and fire its warning) before
   // diffing against `cfg` below, otherwise a plugin that only sets the deprecated option
   // would never actually change the replacement's resolved value.
-  applyConfigOptionAliases(modifiedConfig, breakingOptions, errors.warning, (err, options) => {
+  applyConfigOptionAliases(modifiedConfig, cfg, breakingOptions, errors.warning, (err, options) => {
     throw makeSetupError(errors.get(err, options))
   }, testingType)
 
   if (modifiedConfig[testingType]) {
-    applyConfigOptionAliases(modifiedConfig[testingType], breakingOptions, errors.warning, (err, options) => {
+    applyConfigOptionAliases(modifiedConfig[testingType], cfg[testingType] ?? {}, breakingOptions, errors.warning, (err, options) => {
       throw makeSetupError(errors.get(err, {
         ...options,
         name: `${testingType}.${options.name}`,

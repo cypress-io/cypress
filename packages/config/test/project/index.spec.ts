@@ -202,6 +202,35 @@ describe('config/src/project/index', () => {
       })
     })
 
+    describe('experimentalMemoryManagement / manageBrowserMemory alias', () => {
+      it('carries the alias when setupNodeEvents mutates and returns the full config', () => {
+        const cfg = {
+          manageBrowserMemory: false,
+          experimentalMemoryManagement: false,
+          resolved: {
+            manageBrowserMemory: { value: false, from: 'default' },
+            experimentalMemoryManagement: { value: false, from: 'default' },
+          },
+        }
+
+        // simulates: setupNodeEvents(on, config) { config.experimentalMemoryManagement = true; return config }
+        const overrides = {
+          ...cfg,
+          experimentalMemoryManagement: true,
+        }
+
+        const warningSpy = vi.spyOn(errors, 'warning').mockImplementation(() => {})
+
+        const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
+
+        expect(updated.manageBrowserMemory).toEqual(true)
+        expect(warningSpy).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+        }))
+      })
+    })
+
     describe('numTestsKeptInMemory', () => {
       afterEach(() => {
         vi.unstubAllEnvs()

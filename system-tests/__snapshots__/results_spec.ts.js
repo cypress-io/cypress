@@ -27,6 +27,7 @@ exports['module api and after:run results'] = `
     "experimentalInteractiveRunEvents": false,
     "experimentalRunAllSpecs": false,
     "experimentalMemoryManagement": false,
+    "manageBrowserMemory": false,
     "experimentalModifyObstructiveThirdPartyCode": false,
     "injectDocumentDomain": false,
     "experimentalOriginDependencies": false,

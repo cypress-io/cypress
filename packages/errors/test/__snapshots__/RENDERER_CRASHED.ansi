@@ -6,7 +6,7 @@
 [31m[39m
 [31mIf you're running lots of tests on a memory intense application.[39m
 [31m  - Try increasing the CPU/memory on the machine you're running on.[39m
-[31m  - Try enabling [33mexperimentalMemoryManagement[39m[31m in your config file.[39m
+[31m  - Try enabling [33mmanageBrowserMemory[39m[31m in your config file.[39m
 [31m  - Try lowering [33mnumTestsKeptInMemory[39m[31m in your config file during 'cypress open'.[39m
 [31m[39m
 [31mYou can learn more here:[39m
