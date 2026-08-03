@@ -1407,7 +1407,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('uses the default alignment for axes missing from the config', { scrollBehavior: { inline: 'start' } }, () => {
+      it('omits axes missing from the config so the browser default applies', { scrollBehavior: { inline: 'start' } }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1415,11 +1415,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'start' })
+          expect(el[0].scrollIntoView).calledWith({ inline: 'start' })
         })
       })
 
-      it('uses the default alignment when scrollBehavior is false in config and only inline is specified', { scrollBehavior: false }, () => {
+      it('omits axes when scrollBehavior is false in config and only inline is specified', { scrollBehavior: false }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1427,7 +1427,26 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'start' })
+          expect(el[0].scrollIntoView).calledWith({ inline: 'start' })
+        })
+      })
+
+      // an omitted `block` relies on `scrollIntoView` defaulting it to `start`
+      it('aligns the block axis to the top when only inline is specified', () => {
+        cy.viewport(600, 400)
+
+        const $body = cy.$$('body')
+
+        $body.children().remove()
+
+        $('<div></div>').css({ height: '800px' }).appendTo($body)
+
+        const $target = $('<input id="below-fold" />').appendTo($body)
+
+        $('<div></div>').css({ height: '800px' }).appendTo($body)
+
+        cy.get('#below-fold').click({ scrollBehavior: { inline: 'nearest' } }).then(() => {
+          expect($target[0].getBoundingClientRect().top, 'target top').to.be.closeTo(0, 5)
         })
       })
 

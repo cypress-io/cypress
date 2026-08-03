@@ -41,8 +41,6 @@ const scrollBehaviorOptionsMap = {
   nearest: { block: 'nearest', inline: 'nearest' },
 }
 
-const defaultScrollBehavior = 'top'
-
 // `scrollBehavior` is either one of the alignments above or an explicit per-axis
 // `{ block, inline }` using the same values as the native `scrollIntoView`.
 const toScrollIntoViewOptions = (scrollBehavior) => {
@@ -52,12 +50,10 @@ const toScrollIntoViewOptions = (scrollBehavior) => {
 }
 
 // an axis the caller left out keeps whatever the configured behavior aligned it
-// to, so `{ inline: 'start' }` alone does not disturb vertical scrolling
+// to, and is omitted entirely when neither sets it so that `scrollIntoView`
+// applies its own default
 const getScrollIntoViewOptions = (scrollBehavior, configuredScrollBehavior) => {
   return {
-    ...scrollBehaviorOptionsMap[defaultScrollBehavior],
-    // a configured `false` turns scrolling off entirely, so it carries no
-    // alignment for a per-axis override to inherit
     ...toScrollIntoViewOptions(configuredScrollBehavior),
     ...toScrollIntoViewOptions(scrollBehavior),
   }
