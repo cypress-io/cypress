@@ -34,6 +34,28 @@ describe('src/cy/commands/location', () => {
       cy.url()
     })
 
+    context('when the AUT overwrites window.name', () => {
+      let seededName
+
+      beforeEach(() => {
+        cy.window().then((win) => {
+          seededName = win.name
+          win.name = 'application-window-123'
+        })
+      })
+
+      // the name outlives the test, so put back the one the runner seeded
+      afterEach(() => {
+        cy.window().then((win) => {
+          win.name = seededName
+        })
+      })
+
+      it('returns the location href', () => {
+        cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
+      })
+    })
+
     // https://github.com/cypress-io/cypress/issues/17399
     it('url decode option', () => {
       // encodeURI() is used below because we cannot visit the site without it.

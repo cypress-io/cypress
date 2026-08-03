@@ -8,6 +8,7 @@
 
 **Bugfixes:**
 
+- Fixed a regression in [15.19.0](#15-19-0) where commands that read from the application under test, such as [`cy.url()`](https://on.cypress.io/url), [`cy.title()`](https://on.cypress.io/title) and [`cy.reload()`](https://on.cypress.io/reload), targeted the command log instead of your application when the application set `window.name`. Fixes [#34435](https://github.com/cypress-io/cypress/issues/34435).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) routes specifying a numeric `port` (for example `port: 8080` or `port: [8080]`) did not match requests on non-default ports. Such routes now match as documented. Fixes [#17653](https://github.com/cypress-io/cypress/issues/17653). Fixed in [#34205](https://github.com/cypress-io/cypress/pull/34205).
 - Fixed an issue where inline source maps embedded without a `charset` (for example those emitted by esbuild) were not decoded and were silently dropped. These inline source maps are now decoded. Fixed in [#34204](https://github.com/cypress-io/cypress/pull/34204).
 - Fixed an issue where the TypeScript 7 support added in [15.18.0](#15-18-0) did not work: TypeScript spec and support files failed to compile with `Error: Cannot find module '@babel/preset-typescript'`. Fixes [#34359](https://github.com/cypress-io/cypress/issues/34359).
