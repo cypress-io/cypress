@@ -53,8 +53,18 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
+/**
+ * `headersReady` settles once the response pause has arrived and its headers
+ * are resolved. RESPONSE_PAUSE_TIMEOUT_MS is bounded on that rather than on the
+ * whole response so the body transfer, which can legitimately outlast the time
+ * the browser took to respond, is not charged against a pause that arrived.
+ */
+type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
+  headersReady: PromiseWithResolvers<void>
+}
+
 export class CdpFetchTransport {
-  private readonly inFlightRequests = new Map<string, PromiseWithResolvers<CdpFetchTransportResponse>>()
+  private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
 
   private isStarted = false
 
@@ -160,7 +170,7 @@ export class CdpFetchTransport {
     let response: CdpFetchTransportResponse | undefined
     let responseRequestId: string | undefined
     let responseSessionId: string | undefined
-    let deferred: PromiseWithResolvers<CdpFetchTransportResponse> | undefined
+    let deferred: ResponsePauseDeferred | undefined
 
     try {
       debug('intercepting request pause %s %s (fetchRequestId=%s, networkRequestId=%s, resourceType=%s)',
@@ -200,13 +210,18 @@ export class CdpFetchTransport {
         request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
       }
 
-      const responseDeferred = Promise.withResolvers<CdpFetchTransportResponse>()
+      const responseDeferred: ResponsePauseDeferred = {
+        ...Promise.withResolvers<CdpFetchTransportResponse>(),
+        headersReady: Promise.withResolvers<void>(),
+      }
 
       // reset()/stop() may reject this before the continue callback races on
       // it (e.g. a between-tests reset while request middleware is still
       // running); observe it so that never becomes an unhandled rejection.
+      // Releasing headersReady also ends a wait no pause will ever arrive for.
       responseDeferred.promise.catch((err: Error) => {
         debug('in-flight response deferred rejected for %s: %s', event.request.url, err.message)
+        responseDeferred.headersReady.resolve()
       })
 
       deferred = responseDeferred
@@ -239,14 +254,16 @@ export class CdpFetchTransport {
         let timeout: NodeJS.Timeout | undefined
 
         try {
-          const pausedResponse = await Promise.race([
-            responseDeferred.promise,
+          await Promise.race([
+            responseDeferred.headersReady.promise,
             new Promise<never>((_resolve, reject) => {
               timeout = setTimeout(() => {
                 reject(new Error(`Timed out waiting for CDP Fetch response pause for ${event.request.url}`))
               }, RESPONSE_PAUSE_TIMEOUT_MS)
             }),
           ])
+
+          const pausedResponse = await responseDeferred.promise
 
           responseRequestId = pausedResponse.requestId
           responseSessionId = pausedResponse.sessionId
@@ -371,6 +388,8 @@ export class CdpFetchTransport {
     debug('response pause for %s: status %s, header names %o', event.request.url, event.responseStatusCode, event.responseHeaders?.map(({ name }) => name))
 
     const responseHeaders = await this.withSetCookieHeaders(event, sessionId)
+
+    deferred.headersReady.resolve()
 
     let bodyStream: Readable
 
@@ -563,7 +582,7 @@ export class CdpFetchTransport {
   // Must NOT clear extraInfo tracking on success — the next response under a
   // reused network id may already be tracked, and CDPNetworkExtraInfo manages
   // its own lifecycle. Errored and unmatched flows clear at their own sites.
-  private cleanup (fetchRequestId: string, deferred?: PromiseWithResolvers<CdpFetchTransportResponse>): void {
+  private cleanup (fetchRequestId: string, deferred?: ResponsePauseDeferred): void {
     if (deferred && this.inFlightRequests.get(fetchRequestId) !== deferred) {
       return
     }
