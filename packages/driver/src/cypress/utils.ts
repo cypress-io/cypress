@@ -16,6 +16,13 @@ const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
+// `methods` derives its list from Node's `http.METHODS` when it is imported.
+// In the browser bundle there is no `http` module, so it falls back to a static
+// snapshot that predates newer standardized methods such as QUERY. Union those
+// in so validation matches regardless of the runtime doing the check.
+const additionalHttpMethods = ['query']
+const validHttpMethods = new Set([...methods, ...additionalHttpMethods].map((method) => method.toLowerCase()))
+
 const defaultOptions = {
   delay: 0,
   force: false,
@@ -341,7 +348,7 @@ export default {
   },
 
   isValidHttpMethod (str) {
-    return _.isString(str) && _.includes(methods, str.toLowerCase())
+    return _.isString(str) && validHttpMethods.has(str.toLowerCase())
   },
 
   addTwentyYears () {
