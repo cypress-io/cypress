@@ -1,5 +1,5 @@
 import type { SerializedTest } from '@packages/types'
-import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapConsoleProps, TapJsonValue } from './contract'
+import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapConsoleProps } from './contract'
 
 // The command-log and console-props result shapes are the cross-process
 // contract, so they live in `@packages/cypress-instances` alongside the CLI-side
@@ -11,8 +11,6 @@ export type CommandResult = TapCommandResult
 export type CommandHook = TapCommandHook
 
 export type ConsolePropsResult = TapConsoleProps
-
-export type { TapJsonValue }
 
 export interface TapTestsRunner {
   /** Serializes every test of the run, keyed by id. */

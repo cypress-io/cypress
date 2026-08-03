@@ -43,7 +43,7 @@ const INDICATORS: Record<NonNullable<TapNetworkInfo['indicator']>, string> = {
 // (route/agent/primitive) purple.
 const aliasColor = (aliasType: string | undefined) => (aliasType === 'dom' ? color.aliasDom : color.alias)
 
-export const aliasBadge = (alias: string, aliasType?: string): string => aliasColor(aliasType)(`@${alias}`)
+const aliasBadge = (alias: string, aliasType?: string): string => aliasColor(aliasType)(`@${alias}`)
 
 // Driver messages emphasize with markdown-style `**`; render the emphasis
 // instead of the markers, on one line.

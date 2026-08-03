@@ -822,6 +822,9 @@
     "cli/lib/tap/types.ts": [
       "types"
     ],
+    "packages/cypress-instances/lib/contracts/command.ts": [
+      "types"
+    ],
     "packages/server/lib/cypress-instances.ts": [
       "types"
     ],
