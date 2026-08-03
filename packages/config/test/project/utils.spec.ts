@@ -1327,6 +1327,27 @@ describe('config/src/project/utils', () => {
         expect(errors.warning).not.toBeCalledWith('RENAMED_CONFIG_OPTION', expect.anything())
       })
 
+      // CYPRESS_* overrides land on the config later in mergeDefaults than the config-file
+      // pass does, so they need an alias pass of their own.
+      it('aliases the option when it is set via a CYPRESS_ environment variable', async function () {
+        vi.stubEnv('CYPRESS_EXPERIMENTAL_MEMORY_MANAGEMENT', 'true')
+
+        await defaults('manageBrowserMemory', true, {})
+
+        expect(errors.warning).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
+          name: 'experimentalMemoryManagement',
+          newName: 'manageBrowserMemory',
+        }))
+      })
+
+      it('does not alias or warn when only the replacement is set via a CYPRESS_ environment variable', async function () {
+        vi.stubEnv('CYPRESS_MANAGE_BROWSER_MEMORY', 'true')
+
+        await defaults('manageBrowserMemory', true, {})
+
+        expect(errors.warning).not.toBeCalledWith('RENAMED_CONFIG_OPTION', expect.anything())
+      })
+
       it('aliases the option through a testing-type-scoped override', async function () {
         await defaults('manageBrowserMemory', true, {
           e2e: { experimentalMemoryManagement: true },

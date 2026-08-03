@@ -204,6 +204,25 @@ describe('config/src/project/index', () => {
     })
 
     describe('experimentalMemoryManagement / manageBrowserMemory alias', () => {
+      const renamedWarning = ['RENAMED_CONFIG_OPTION', expect.objectContaining({
+        name: 'experimentalMemoryManagement',
+        newName: 'manageBrowserMemory',
+      })] as const
+
+      // the config setupNodeEvents is handed, with defaults already merged in
+      const resolvedCfg = () => {
+        return {
+          manageBrowserMemory: false,
+          experimentalMemoryManagement: false,
+          viewportWidth: 1000,
+          resolved: {
+            manageBrowserMemory: { value: false, from: 'default' },
+            experimentalMemoryManagement: { value: false, from: 'default' },
+            viewportWidth: { value: 1000, from: 'default' },
+          },
+        }
+      }
+
       beforeEach(() => {
         resetIssuedWarnings()
       })
@@ -213,17 +232,10 @@ describe('config/src/project/index', () => {
       })
 
       it('carries the alias when setupNodeEvents returns the whole config it was given', () => {
-        const cfg = {
-          manageBrowserMemory: false,
-          experimentalMemoryManagement: false,
-          resolved: {
-            manageBrowserMemory: { value: false, from: 'default' },
-            experimentalMemoryManagement: { value: false, from: 'default' },
-          },
-        }
+        const cfg = resolvedCfg()
 
-        // setupNodeEvents is handed the resolved config and returns it with the deprecated
-        // option set. It arrives here as a separate object, deserialized across the plugins IPC.
+        // the plugin's return arrives here as a separate object, deserialized across the
+        // plugins IPC, so it carries every default it was handed
         const overrides = {
           ...cfg,
           experimentalMemoryManagement: true,
@@ -234,10 +246,26 @@ describe('config/src/project/index', () => {
         const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
 
         expect(updated.manageBrowserMemory).toEqual(true)
-        expect(warningSpy).toBeCalledWith('RENAMED_CONFIG_OPTION', expect.objectContaining({
-          name: 'experimentalMemoryManagement',
-          newName: 'manageBrowserMemory',
-        }))
+        expect(warningSpy).toBeCalledWith(...renamedWarning)
+      })
+
+      it('carries the alias when setupNodeEvents returns only the deprecated option', () => {
+        const warningSpy = vi.spyOn(errors, 'warning').mockImplementation(() => {})
+
+        const updated = updateWithPluginValues(resolvedCfg() as any, { experimentalMemoryManagement: true }, 'e2e')
+
+        expect(updated.manageBrowserMemory).toEqual(true)
+        expect(warningSpy).toBeCalledWith(...renamedWarning)
+      })
+
+      it('does not warn when setupNodeEvents returns the config without touching the deprecated option', () => {
+        const cfg = resolvedCfg()
+        const warningSpy = vi.spyOn(errors, 'warning').mockImplementation(() => {})
+
+        const updated = updateWithPluginValues(cfg as any, { ...cfg, viewportWidth: 1200 }, 'e2e')
+
+        expect(updated.manageBrowserMemory).toEqual(false)
+        expect(warningSpy).not.toBeCalledWith('RENAMED_CONFIG_OPTION', expect.anything())
       })
     })
 

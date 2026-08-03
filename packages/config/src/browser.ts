@@ -116,18 +116,12 @@ const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]
   })
 }
 
-// Carries a deprecated option's value onto its replacement (per `newName`) and fires
-// its breaking-option warning/error, for options that keep working as a functional
-// alias rather than being removed outright. This has to run before defaults are
-// deep-merged into `modifiedConfig` (see mergeDefaults) - otherwise the deprecated
-// option's own default value would already be present, making every config look like
-// it explicitly set the deprecated option. When defaults are already present (e.g. a
-// `setupNodeEvents` plugin that mutates and returns the full resolved config),
-// `baseline` is the pre-plugin config to diff against, so the alias only copies over
-// when the deprecated option actually changed and the replacement did not. It's the
-// caller's responsibility to pass a baseline where every possible `newName` key is
-// present (even if only as `undefined`), and `validateNoBreakingConfig` excludes these
-// `newName` options from its later pass so they aren't (mis-)evaluated a second time.
+// Carries a deprecated option's value onto its replacement (per `newName`) and fires its
+// breaking-option warning/error, for options that keep working as a functional alias
+// rather than being removed outright. `baseline` is the config as it stood before the
+// source being evaluated was applied; anything whose value differs from it was set by
+// that source. `validateNoBreakingConfig` excludes these `newName` options from its later
+// pass so they aren't (mis-)evaluated a second time.
 export const applyConfigOptionAliases = (modifiedConfig: any, baseline: any, breakingCfgOptions: Readonly<BreakingOption[]>, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
   breakingCfgOptions.forEach((opt) => {
     const { name, newName } = opt
@@ -136,7 +130,17 @@ export const applyConfigOptionAliases = (modifiedConfig: any, baseline: any, bre
       return
     }
 
-    if (modifiedConfig[name] !== baseline[name] && modifiedConfig[newName] === baseline[newName]) {
+    // Presence alone can't answer "was this option set?" - once defaults are merged the
+    // deprecated key is always there, so every config would look like it opted in. The
+    // baseline diff answers it instead; callers evaluating a config that has no defaults
+    // yet pass an empty baseline, where any value differs from `undefined`.
+    if (modifiedConfig[name] === baseline[name]) {
+      return
+    }
+
+    // An absent replacement counts as unset, so a partial override - the shape a
+    // `setupNodeEvents` plugin typically returns - still carries onto the replacement.
+    if (!_.has(modifiedConfig, newName) || modifiedConfig[newName] === baseline[newName]) {
       modifiedConfig[newName] = modifiedConfig[name]
     }
 

@@ -486,11 +486,21 @@ export function mergeDefaults (
     config[testingType].allowCypressEnv = config.allowCypressEnv
   }
 
+  // `parseEnv` is the first point at which `CYPRESS_*` overrides land on the config, so
+  // snapshot it beforehand to detect which options the environment goes on to change.
+  const configBeforeEnv = { ...config }
+
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
 
   config.expose = parseExposed(config, { ...cliConfig.expose, ...options.expose }, resolved)
+
+  // The alias pass above runs before `parseEnv`, so it cannot see a deprecated option set
+  // via `CYPRESS_*`. Re-run it against the pre-env snapshot to catch those.
+  applyConfigOptionAliases(config, configBeforeEnv, breakingOptions, errors.warning, (err, ...args) => {
+    throw makeConfigError(errors.get(err, ...args))
+  }, testingType)
 
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)
