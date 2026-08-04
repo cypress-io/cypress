@@ -24,6 +24,7 @@ import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { createWebsocket as createWebsocketIo } from '@packages/socket/browser/client'
 import type { AutomationElementId } from '@packages/types'
+import { SPEC_BRIDGE_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
@@ -193,7 +194,7 @@ async function teardown () {
  * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
-  const id = `Spec Bridge: ${location.origin}`
+  const id = `${SPEC_BRIDGE_FRAME_NAME_IDENTIFIER}: ${location.origin}`
 
   // if it already exists, don't add another one
   if (document.getElementById(id)) {
@@ -263,6 +264,7 @@ function addIframe ({ $container, id, src, className }) {
   const $addedIframe = document.createElement('iframe')
 
   $addedIframe.id = id,
+  $addedIframe.name = id,
   $addedIframe.className = className
 
   $container.appendChild($addedIframe)
@@ -326,7 +328,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   addIframe({
     $container,
     src: specSrc,
-    id: `Your Spec: '${specSrc}'`,
+    id: `${SPEC_FRAME_NAME_IDENTIFIER}: '${specSrc}'`,
     className: 'spec-iframe',
   })
 
