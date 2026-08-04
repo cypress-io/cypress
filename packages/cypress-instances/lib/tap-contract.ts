@@ -189,10 +189,9 @@ command. If no browser is open it launches one, switching to the spec's testing
 type when needed, then requests the run and returns immediately — returning does
 not mean the run has started, let alone finished.
 
-Poll the status command for run progress. The returned previousStartedAt is the
-startedAt status was reporting when the request was accepted: a status of passed
-or failed still carrying that same startedAt describes the run before this one,
-so wait for a verdict whose startedAt differs.`,
+Poll the status command for run progress. Read status first and keep its
+startedAt: a verdict still carrying that same startedAt describes the run before
+this one, so wait for a verdict whose startedAt differs.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
