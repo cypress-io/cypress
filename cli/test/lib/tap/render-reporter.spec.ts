@@ -81,9 +81,9 @@ describe('lib/tap/render/reporter', () => {
         stub-1  boop                 -
 
       ROUTES (2)
-        METHOD  MATCHER        STUBBED  ALIAS        #
-        GET     **/comments/*  no       @getComment  -
-        PUT     **/comments/*  yes      @putComment  1
+        METHOD  MATCHER        STUBBED  ALIAS       #
+        GET     **/comments/*  no       getComment  -
+        PUT     **/comments/*  yes      putComment  1
 
       BEFORE EACH · h1
          1  visit  http://localhost:8080/commands/network-requests
@@ -91,13 +91,13 @@ describe('lib/tap/render/reporter', () => {
       TEST BODY · r8
          1  get      .network-btn
          2  -click
-        e1    (xhr) ● GET 200 https://jsonplaceholder.cypress.io/comments/1  @getComment
+        e1    (xhr) ● GET 200 https://jsonplaceholder.cypress.io/comments/1  getComment
          3  wait     @getComment
          4  -assert  expected 200 to be one of [ 200, 304 ]
-        e2    (xhr) ● PUT 404 https://jsonplaceholder.cypress.io/comments/1  @putComment  (stubbed)
+        e2    (xhr) ● PUT 404 https://jsonplaceholder.cypress.io/comments/1  putComment  (stubbed)
          5  get      .network-put-comment ✖
          6    session  user
-        e3    (spy-1) beep()  @beep
+        e3    (spy-1) beep()  beep
          7  get      @beep
          8  wrap     { table: 1 }
          9  -as      table  @table

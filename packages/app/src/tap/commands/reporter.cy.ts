@@ -117,6 +117,18 @@ describe('tap/commands/reporter', () => {
       state: 'failed',
       err: { name: 500, message: 42, stack: { frames: [] } },
     },
+    // `.as()` writes the reporter's badge text onto the log it aliases, so
+    // `@firstBtn` is the exact string the driver stores for `.as('firstBtn')`.
+    r7: {
+      id: 'r7',
+      title: 'aliases a subject',
+      state: 'passed',
+      commands: [
+        { id: 'log-a1', name: 'find', message: 'button', state: 'passed', type: 'child', hookId: 'r7', alias: '@firstBtn', aliasType: 'dom' },
+        { id: 'log-a2', name: 'wrap', message: '{ foo: bar }', state: 'passed', type: 'parent', hookId: 'r7', alias: '@myObject', aliasType: 'primitive' },
+        { id: 'log-a3', name: 'get', message: '@firstBtn', state: 'passed', type: 'parent', hookId: 'r7', referencesAlias: { name: 'firstBtn' }, aliasType: 'dom' },
+      ],
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -218,6 +230,18 @@ describe('tap/commands/reporter', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r6' })
 
     expect((outcome as { result: { error: Record<string, unknown> } }).result.error).to.deep.eq({})
+  })
+
+  it('carries alias names, not the badge text `.as()` writes onto the log', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r7' })
+
+    expect((outcome as { result: { commands: Array<Record<string, unknown>> } }).result.commands).to.deep.eq([
+      { id: '1', name: 'find', message: 'button', state: 'passed', type: 'child', hookId: 'r7', aliases: ['firstBtn'], aliasType: 'dom' },
+      { id: '2', name: 'wrap', message: '{ foo: bar }', state: 'passed', type: 'parent', hookId: 'r7', aliases: ['myObject'], aliasType: 'primitive' },
+      { id: '3', name: 'get', message: '@firstBtn', state: 'passed', type: 'parent', hookId: 'r7', referencedAliases: ['firstBtn'], aliasType: 'dom' },
+    ])
   })
 
   it('reports an unreached test with empty collections and just the test-body pseudo-hook', async () => {

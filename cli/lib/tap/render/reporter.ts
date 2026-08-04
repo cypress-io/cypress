@@ -15,7 +15,13 @@ const INDICATORS: Record<NonNullable<TapNetworkInfo['indicator']>, string> = {
 // (route/agent/primitive) purple.
 const aliasColor = (aliasType: string | undefined) => (aliasType === 'dom' ? color.aliasDom : color.alias)
 
-const aliasBadge = (alias: string, aliasType?: string): string => aliasColor(aliasType)(`@${alias}`)
+// The reporter badges a `.as()` handle with the `@` you'd pass to `cy.get()`, and
+// leaves route and agent aliases bare.
+const aliasBadge = (alias: string, aliasType?: string): string => {
+  const handle = aliasType === 'route' || aliasType === 'agent' ? alias : `@${alias}`
+
+  return aliasColor(aliasType)(handle)
+}
 
 // Driver messages emphasize with markdown-style `**`; render the emphasis
 // instead of the markers, on one line.
@@ -112,7 +118,7 @@ const routesTable = (routes: TapReporterView['routes']): string[] => {
       route.method ?? '',
       route.url ?? '',
       route.stubbed ? 'yes' : 'no',
-      route.alias ? `@${route.alias}` : '',
+      route.alias ?? '',
       route.numResponses ? String(route.numResponses) : '-',
     ]
   })
@@ -158,9 +164,10 @@ const isEventRow = (command: TapReporterCommand): boolean => {
 // A row's alias badge(s): its own aliases (`.as()` definitions, spy/stub call
 // rows) or the alias its request matched.
 const aliasSuffix = (command: TapReporterCommand, network: TapNetworkInfo | undefined): string => {
-  const names = command.aliases ?? (network?.alias != null ? [network.alias] : [])
+  const badges = command.aliases?.map((name) => aliasBadge(name, command.aliasType))
+    ?? (network?.alias != null ? [aliasBadge(network.alias, 'route')] : [])
 
-  return names.length ? `  ${names.map((name) => aliasBadge(name, command.aliasType)).join(' ')}` : ''
+  return badges.length ? `  ${badges.join(' ')}` : ''
 }
 
 const networkSuffix = (network: TapNetworkInfo | undefined): string => {
