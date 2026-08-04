@@ -3,7 +3,7 @@ import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
 import type {
   CypressIncomingRequest,
-  CypressOutgoingResponse,
+  CypressOutgoingResponseLike,
 } from '@packages/proxy'
 import type {
   NetEvent,
@@ -40,7 +40,7 @@ export class InterceptedRequest {
    */
   continueResponse?: (newResStream?: Readable) => void
   req: CypressIncomingRequest
-  res: CypressOutgoingResponse
+  res: CypressOutgoingResponseLike
   state: NetStubbingState
   socket: SocketBroadcaster
 

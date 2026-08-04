@@ -30,7 +30,12 @@ interface RequestDetails {
  * @returns {boolean}
  */
 export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: ResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
-  if (!AUTUrl) return false
+  // no AUT URL means this is the first visit. cookies set by that AUT-frame document
+  // response must still land in the jar so they can be re-attached after a later
+  // cross-origin redirect back to the primary origin
+  if (!AUTUrl) {
+    return !!isAutFrame
+  }
 
   const siteContext = calculateSiteContext(requestUrl, AUTUrl)
 

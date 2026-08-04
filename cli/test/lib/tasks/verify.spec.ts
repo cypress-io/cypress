@@ -10,7 +10,7 @@ import { Console } from 'console'
 import fs from 'fs-extra'
 import si, { Systeminformation } from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import { Listr } from 'listr2'
 
 import util from '../../../lib/util'

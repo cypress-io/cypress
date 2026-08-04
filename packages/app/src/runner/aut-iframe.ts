@@ -1,4 +1,4 @@
-import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { AUT_FRAME_NAME_IDENTIFIER, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
@@ -50,9 +50,12 @@ export class AutIframe {
     // Create two iframes to facilitate before/after snapshot
     // rendering with a double buffer.
     this.$snapshotIframes = _.times(2, (index) => {
+      const snapshotName = `${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - ${index}: '${this.projectName}'`
+
       const $snapshotIframe = this.$('<iframe>', {
-        id: `AUT Snapshot - ${index}: '${this.projectName}'`,
-        title: `AUT Snapshot - ${index}: '${this.projectName}'`,
+        id: snapshotName,
+        name: snapshotName,
+        title: snapshotName,
         class: 'aut-snapshot-iframe',
         'data-snapshot-index': index,
       })

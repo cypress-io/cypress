@@ -70,6 +70,7 @@ describe('network stubbing', () => {
     })
     const httpIntercept = new HttpIntercept(proxy.codec)
 
+    httpIntercept.use(proxy.http.createLegacyProxyPipeline(proxy.codec))
     proxy.withIntercept(httpIntercept)
 
     app.use((req, res, next) => {

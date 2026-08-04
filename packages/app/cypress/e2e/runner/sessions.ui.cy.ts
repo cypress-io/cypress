@@ -48,9 +48,11 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['user1'])
+    cy.reporter().within(() => {
+      validateSessionsInstrumentPanel(['user1'])
+    })
 
-    cy.get('.command-name-session')
+    cy.reporter().find('.command-name-session')
     .within(() => {
       cy.get('.command-expander').first().click()
       cy.contains('user1')
@@ -61,8 +63,8 @@ describe('runner/cypress sessions.ui.spec', {
 
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-    cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
-    cy.get('.command').should('have.length', 2)
+    cy.reporter().find('.command-name-session').eq(0).find('.command-expander').first().click()
+    cy.reporter().find('.command').should('have.length', 2)
   })
 
   it('creates new session with validation', () => {
@@ -72,9 +74,11 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['blank_session'])
+    cy.reporter().within(() => {
+      validateSessionsInstrumentPanel(['blank_session'])
+    })
 
-    cy.get('.command-name-session')
+    cy.reporter().find('.command-name-session')
     .within(() => {
       cy.get('.command-expander').first().click()
       cy.contains('blank_session')
@@ -96,9 +100,9 @@ describe('runner/cypress sessions.ui.spec', {
 
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-    cy.get('.command-name-session').eq(0).get('.command-expander').first().click()
+    cy.reporter().find('.command-name-session').eq(0).find('.command-expander').first().click()
 
-    cy.get('.command').should('have.length', 2)
+    cy.reporter().find('.command').should('have.length', 2)
   })
 
   it('creates new session and fails validation', () => {
@@ -108,9 +112,11 @@ describe('runner/cypress sessions.ui.spec', {
       failCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['blank_session'])
+    cy.reporter().within(() => {
+      validateSessionsInstrumentPanel(['blank_session'])
+    })
 
-    cy.get('.command-name-session')
+    cy.reporter().find('.command-name-session')
     .first()
     .within(() => {
       cy.contains('blank_session')
@@ -130,7 +136,7 @@ describe('runner/cypress sessions.ui.spec', {
       .contains('runValidation')
     })
 
-    cy.contains('AssertionError')
+    cy.reporter().contains('AssertionError')
 
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
@@ -143,14 +149,16 @@ describe('runner/cypress sessions.ui.spec', {
       failCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['blank_session'])
+    cy.reporter().within(() => {
+      validateSessionsInstrumentPanel(['blank_session'])
+    })
 
-    cy.contains('Attempt 1').click()
-    cy.get('.attempt-item').eq(0).within(() => {
+    cy.reporter().contains('Attempt 1').click()
+    cy.reporter().find('.attempt-item').eq(0).within(() => {
       cy.contains('validation error')
     })
 
-    cy.get('.attempt-item').eq(1).within(() => {
+    cy.reporter().find('.attempt-item').eq(1).within(() => {
       cy.contains('validation error')
       // when we stored sessions pre-validation, the 2nd attempt would fail
       // with this error instead of the validation failing again
@@ -165,9 +173,11 @@ describe('runner/cypress sessions.ui.spec', {
       failCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['blank_session'])
+    cy.reporter().within(() => {
+      validateSessionsInstrumentPanel(['blank_session'])
+    })
 
-    cy.get('.attempt-item').eq(1).within(() => {
+    cy.reporter().find('.attempt-item').eq(1).within(() => {
       cy.contains('Create new session')
       // when we stored sessions pre-validation, the 2nd attempt would
       // say "Recreate session"
@@ -182,20 +192,20 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 2,
     })
 
-    cy.get('.test').each(($el, index) => {
+    cy.reporter().find('.test').each(($el, index) => {
       if (index < 5) { // don't click on failed test
         cy.wrap($el).click()
       }
     })
 
     cy.log('validate new session was created in first test')
-    cy.get('.test').eq(0).within(() => {
+    cy.reporter().find('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
       cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
-    cy.get('.test').eq(1).within(() => {
+    cy.reporter().find('.test').eq(1).within(() => {
       validateSessionsInstrumentPanel(['user1'])
       cy.get('.command-name-session')
       .within(() => {
@@ -233,17 +243,17 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 2,
     })
 
-    cy.get('.test').each(($el) => cy.wrap($el).click())
+    cy.reporter().find('.test').each(($el) => cy.wrap($el).click())
 
     cy.log('validate new session was created in first test')
-    cy.get('.test').eq(0).within(() => {
+    cy.reporter().find('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
-    cy.get('.test').eq(1).within(() => {
+    cy.reporter().find('.test').eq(1).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
@@ -296,14 +306,14 @@ describe('runner/cypress sessions.ui.spec', {
     })
 
     cy.log('validate new session was created in first test')
-    cy.get('.test').eq(0).click().within(() => {
+    cy.reporter().find('.test').eq(0).click().within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session').contains('created')
     })
 
     cy.log('validate saved session was used in second test')
-    cy.get('.test').eq(1).within(() => {
+    cy.reporter().find('.test').eq(1).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
@@ -350,7 +360,9 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['spec_session_1', 'spec_session_2', 'global_session_1'])
+    cy.reporter().within(() => {
+      validateSessionsInstrumentPanel(['spec_session_1', 'spec_session_2', 'global_session_1'])
+    })
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
@@ -371,7 +383,7 @@ describe('runner/cypress sessions.ui.spec', {
       })
 
       it('setup has failing Cypress command', () => {
-        cy.contains('.test', 'setup - has failing command').as('example_test')
+        cy.reporter().contains('.test', 'setup - has failing command').as('example_test')
         // test marked as failed and is expanded
         cy.get('@example_test').should('have.attr', 'data-model-state', 'failed')
         .children('.collapsible').should('have.class', 'is-open')
@@ -440,7 +452,7 @@ describe('runner/cypress sessions.ui.spec', {
           const { testCase, systemTestTitle, errMessage } = opts
 
           it(`has test error when validate ${testCase}`, () => {
-            cy.contains('.test', systemTestTitle).as('example_test')
+            cy.reporter().contains('.test', systemTestTitle).as('example_test')
             cy.get('@example_test')
             .should('have.attr', 'data-model-state', 'failed')
             .children('.collapsible')
@@ -613,7 +625,7 @@ describe('runner/cypress sessions.ui.spec', {
           }
 
           it(`has test error when validate ${testCase}`, () => {
-            cy.contains('.test', systemTestTitle).as('example_test')
+            cy.reporter().contains('.test', systemTestTitle).as('example_test')
 
             cy.get('@example_test').within(() => {
               assertRecreatedSession({
@@ -657,7 +669,7 @@ describe('runner/cypress sessions.ui.spec', {
         })
 
         it('setup has failing command', () => {
-          cy.contains('.test', 'setup - has failing command').as('example_test')
+          cy.reporter().contains('.test', 'setup - has failing command').as('example_test')
 
           cy.get('@example_test').within(() => {
             assertRecreatedSession({
@@ -710,7 +722,7 @@ describe('runner/cypress sessions.ui.spec', {
             },
           ].forEach(({ testCase, systemTestTitle, errMessage }) => {
             it(`has test error when validate ${testCase}`, () => {
-              cy.contains('.test', systemTestTitle).as('example_test')
+              cy.reporter().contains('.test', systemTestTitle).as('example_test')
 
               cy.get('@example_test').within(() => {
                 assertRecreatedSession({
@@ -748,17 +760,17 @@ describe('runner/cypress sessions.open_mode.spec', () => {
       passCount: 1,
     })
 
-    cy.get('.reporter-tag').should('contain', 'created').should('length', 3)
+    cy.reporter().find('.reporter-tag').should('contain', 'created').should('length', 3)
   })
 
   it('persists global and spec sessions when clicking "rerun all tests" button', () => {
-    cy.get('.restart').click()
+    cy.reporter().find('.restart').click()
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.reporter-tag').should('contain', 'restored').should('length', 3)
+    cy.reporter().find('.reporter-tag').should('contain', 'restored').should('length', 3)
   })
 
   it('persists global and spec sessions on refresh', () => {
@@ -768,11 +780,11 @@ describe('runner/cypress sessions.open_mode.spec', () => {
       passCount: 1,
     })
 
-    cy.get('.reporter-tag').should('contain', 'restored').should('length', 3)
+    cy.reporter().find('.reporter-tag').should('contain', 'restored').should('length', 3)
   })
 
   it('persists global session and does not persists spec session when selecting a different spec', () => {
-    cy.get('[data-cy="runnable-header"]').should('be.visible')
+    cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.get('div[title="blank_session.cy.js"]').click()
 
@@ -780,10 +792,10 @@ describe('runner/cypress sessions.open_mode.spec', () => {
       passCount: 1,
     })
 
-    cy.get('.command-name-session').eq(0).should('contain', 'spec_session')
+    cy.reporter().find('.command-name-session').eq(0).should('contain', 'spec_session')
     .find('.reporter-tag').should('contain', 'created')
 
-    cy.get('.command-name-session').eq(1).should('contain', 'global_session_1')
+    cy.reporter().find('.command-name-session').eq(1).should('contain', 'global_session_1')
     .find('.reporter-tag').should('contain', 'restored')
   })
 
@@ -794,17 +806,17 @@ describe('runner/cypress sessions.open_mode.spec', () => {
       passCount: 1,
     })
 
-    cy.get('.reporter-tag').should('contain', 'restored').should('length', 3)
+    cy.reporter().find('.reporter-tag').should('contain', 'restored').should('length', 3)
 
-    cy.contains('Clear All Sessions').click()
-
-    cy.contains('Your tests are loading...')
+    cy.reporter().contains('Clear All Sessions').click()
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.reporter-tag').should('contain', 'created').should('length', 3)
+    // clearing sessions triggers a rerun that recreates (rather than restores)
+    // the sessions; the tags flipping to 'created' proves the rerun happened
+    cy.reporter().find('.reporter-tag', { timeout: 15000 }).should('contain', 'created').should('length', 3)
   })
 })
 
@@ -823,7 +835,7 @@ describe('global sessions', () => {
   })
 
   it('creates global session', () => {
-    cy.contains('.test', 'creates global session').as('creates_global').click()
+    cy.reporter().contains('.test', 'creates global session').as('creates_global').click()
     cy.get('@creates_global').within(() => {
       cy.get('.command-name-session').should('contain', 'global_session_1')
       .find('.reporter-tag').should('contain', 'created')
@@ -831,7 +843,7 @@ describe('global sessions', () => {
   })
 
   it('restores global session', () => {
-    cy.contains('.test', 'restores global session').as('restores_global').click()
+    cy.reporter().contains('.test', 'restores global session').as('restores_global').click()
     cy.get('@restores_global').within(() => {
       cy.get('.command-name-session').should('contain', 'global_session_1')
       .find('.reporter-tag').should('contain', 'restored')

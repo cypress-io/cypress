@@ -2,6 +2,9 @@ import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
 import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
 import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
+import { HttpIntercept } from '@packages/network-interception'
+import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
   describe('_runStage', function () {
@@ -134,6 +137,16 @@ describe('http', function () {
       httpOpts = { config, middleware, request: { rp: vi.fn() } } as ServerCtx & { middleware?: HttpMiddlewareStacks } & { request: { rp: Mock } }
     })
 
+    function createHttp () {
+      const http = new Http(httpOpts)
+      const httpIntercept = new HttpIntercept(proxyHttpCodec)
+
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
+      http.networkInterception = httpIntercept
+
+      return http
+    }
+
     it('calls IncomingRequest stack, then IncomingResponse stack', async function () {
       incomingRequest.mockImplementation(function () {
         expect(incomingResponse).not.toHaveBeenCalled()
@@ -152,7 +165,7 @@ describe('http', function () {
       })
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({}, { on, off })
+      await createHttp().handleHttpRequest({}, { on, off })
 
       expect(incomingRequest, 'incomingRequest').toHaveBeenCalledOnce()
       expect(incomingResponse, 'incomingResponse').toHaveBeenCalledOnce()
@@ -172,7 +185,7 @@ describe('http', function () {
       })
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
       expect(error).toHaveBeenCalledOnce()
@@ -197,7 +210,7 @@ describe('http', function () {
         this.end()
       })
 
-      const http = new Http(httpOpts)
+      const http = createHttp()
 
       http.addPendingBrowserPreRequest = vi.fn()
 
@@ -226,7 +239,7 @@ describe('http', function () {
         this.end()
       })
 
-      const http = new Http(httpOpts)
+      const http = createHttp()
 
       http.addPendingBrowserPreRequest = vi.fn()
 
@@ -256,7 +269,7 @@ describe('http', function () {
         this.end()
       })
 
-      const http = new Http(httpOpts)
+      const http = createHttp()
 
       http.addPendingBrowserPreRequest = vi.fn()
 
@@ -286,7 +299,7 @@ describe('http', function () {
       })
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).toHaveBeenCalledOnce()
       expect(error).toHaveBeenCalledOnce()
@@ -360,7 +373,7 @@ describe('http', function () {
       middleware[HttpStages.Error].error2 = error2
 
       // @ts-expect-error
-      await new Http(httpOpts).handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       const middlewareFunctions = [
         incomingRequest, incomingRequest2,
         incomingResponse, incomingResponse2,
@@ -373,6 +386,25 @@ describe('http', function () {
 
       expect(on).toHaveBeenCalledTimes(2)
       expect(off).toHaveBeenCalledTimes(10)
+    })
+
+    it('does not forward to origin when request middleware already ended the client response', async function () {
+      const sendOutgoing = vi.spyOn(sendRequestOutgoingModule, 'sendRequestOutgoing')
+
+      incomingRequest.mockImplementation(function () {
+        this.res.headersSent = true
+        this.res.writableFinished = true
+        this.end()
+      })
+
+      // @ts-expect-error
+      await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+
+      expect(incomingRequest).toHaveBeenCalledOnce()
+      expect(incomingResponse).not.toHaveBeenCalled()
+      expect(sendOutgoing).not.toHaveBeenCalled()
+
+      sendOutgoing.mockRestore()
     })
   })
 

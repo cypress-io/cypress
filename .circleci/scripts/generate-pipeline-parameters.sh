@@ -33,9 +33,16 @@ npm_grep_tests=false
 npm_eslint_plugin_tests=false
 npm_schematic_tests=false
 
+# Opt-in only — never enabled by path filtering or emit_all_true. Set via
+# Trigger Pipeline → run-proxy-disabled-tests=true (setup config forwards it).
+run_proxy_disabled_tests=false
+if [[ "${RUN_PROXY_DISABLED_TESTS:-false}" == "true" || "${RUN_PROXY_DISABLED_TESTS:-}" == "1" ]]; then
+  run_proxy_disabled_tests=true
+fi
+
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests}
+{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "run-proxy-disabled-tests": $run_proxy_disabled_tests}
 EOF
 }
 

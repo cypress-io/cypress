@@ -36,8 +36,15 @@ describe('skip', () => {
   })
 
   context('02 - validations', () => {
+    // the reporter renders inside a same-origin iframe (#reporter-frame)
+    const reporterBody = () => {
+      const frame = window.top!.document.querySelector('#reporter-frame') as HTMLIFrameElement
+
+      return Cypress.$(frame.contentDocument!.body)
+    }
+
     const verifyWasSkipped = (title: string) => {
-      cy.wrap(Cypress.$(window.top!.document.body)).within(() => {
+      cy.wrap(reporterBody()).within(() => {
         return cy
         .contains(title)
         .parents('[data-model-state="pending"]') // Find parent row with class indicating test was skipped

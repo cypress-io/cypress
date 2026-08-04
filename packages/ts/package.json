@@ -6,7 +6,6 @@
   "scripts": {
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
     "test-unit": "node test",

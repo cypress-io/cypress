@@ -5,6 +5,7 @@
   >
     <Button
       size="lg"
+      data-cy="auth-try-again-button"
       @click="handleTryAgain"
     >
       <template
@@ -54,6 +55,7 @@
       ref="loginButtonRef"
       size="lg"
       variant="primary"
+      data-cy="auth-login-button"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
       :prefix-icon="buttonPrefixIcon"

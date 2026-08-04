@@ -4,6 +4,13 @@ import Context from './lib/Context.svelte'
 import Store from './lib/Store.svelte'
 import { messageStore } from './lib/store'
 
+// the reporter renders inside a same-origin iframe (#reporter-frame)
+const reporterBody = () => {
+  const frame = window.top!.document.querySelector('#reporter-frame') as HTMLIFrameElement
+
+  return Cypress.$(frame.contentDocument!.body)
+}
+
 describe('Svelte mount', () => {
   it('mounts', () => {
     cy.mount(Counter)
@@ -56,7 +63,7 @@ describe('Svelte mount', () => {
         log: true,
       })
 
-      cy.wrap(Cypress.$(window.top.document.body)).within(() => {
+      cy.wrap(reporterBody()).within(() => {
         return cy
         .contains('displays component name in mount log')
         .closest('.collapsible')
@@ -72,7 +79,7 @@ describe('Svelte mount', () => {
     it('does not display mount log', () => {
       cy.mount(Counter)
 
-      cy.wrap(Cypress.$(window.top.document.body)).within(() => {
+      cy.wrap(reporterBody()).within(() => {
         return cy
         .contains('does not display mount log')
         .closest('.collapsible')

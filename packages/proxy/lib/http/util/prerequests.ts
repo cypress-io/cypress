@@ -387,4 +387,13 @@ export class PreRequests {
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
     this.pendingPreRequestsToRemove = new Map()
   }
+
+  /**
+   * Stops the sweep timer. Call when abandoning this PreRequests instance
+   * (e.g. replacing NetworkProxy on the CDP Fetch path) so intervals do not leak.
+   */
+  dispose () {
+    clearInterval(this.sweepIntervalTimer)
+    this.reset()
+  }
 }

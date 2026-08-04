@@ -41,7 +41,7 @@ for (const project of NEXT_PROJECTS) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.get('.test-err-code-frame').should('be.visible')
+      cy.reporter().find('.test-err-code-frame').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const indexTestPath = ctx.path.join('pages', 'index.cy.js')
@@ -74,7 +74,7 @@ for (const project of NEXT_PROJECTS) {
 
       // The test should fail and the stack trace should appear in the command log
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
@@ -145,9 +145,9 @@ for (const project of NEXT_PROJECTS_TSCONFIG_TAILWIND) {
       cy.waitForSpecToFinish({ failCount: 1 })
       if (project !== 'next-15-tsconfig-tailwind' && project !== 'next-16-tsconfig-tailwind') {
         // code frames not fully working with next 15/16
-        cy.get('.test-err-code-frame').should('be.visible')
+        cy.reporter().find('.test-err-code-frame').should('be.visible')
       } else {
-        cy.get('.runnable-err-message').should('be.visible')
+        cy.reporter().find('.runnable-err-message').should('be.visible')
       }
 
       cy.withCtx(async (ctx) => {
@@ -181,7 +181,7 @@ for (const project of NEXT_PROJECTS_TSCONFIG_TAILWIND) {
 
       // The test should fail and the stack trace should appear in the command log
       cy.waitForSpecToFinish({ failCount: 1 })
-      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
+      cy.reporter().contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
 
     it('should detect new spec', { retries: 15 }, () => {

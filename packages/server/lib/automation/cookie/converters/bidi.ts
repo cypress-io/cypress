@@ -3,12 +3,14 @@ import toInteger from 'lodash/toInteger'
 import isNumber from 'lodash/isNumber'
 import type { NetworkCookie, NetworkSameSite } from 'webdriver/build/bidi/localTypes'
 import { isHostOnlyCookie } from '../util'
-import type { CyCookie } from '../util'
+import type { CyCookie, ExtensionSameSiteStatus } from '../util'
 
 const debugCookies = debugModule('cypress:server:browsers:bidi_automation:cookies')
 
+// BiDi reports 'unspecified' where the extension shape uses `undefined`, so this widens
+// CyCookie's sameSite back to the full extension vocabulary
 export type BidiCyCookie = Omit<CyCookie, 'sameSite'> & {
-  sameSite: 'no_restriction' | 'lax' | 'strict' | 'unspecified'
+  sameSite: ExtensionSameSiteStatus
 }
 
 // if the filter is not an exact match OR, if looselyMatchCookiePath is enabled, doesn't include the path.
@@ -35,30 +37,24 @@ function convertSameSiteBiDiToExtension (str: NetworkSameSite | 'default') {
   }
 
   if (str === 'default') {
-    // put firefox version check here, under 140 we need to return 'no_restriction'
     return 'unspecified'
   }
 
   return str
 }
 
-export function convertSameSiteExtensionToBiDi (str: BidiCyCookie['sameSite'], majorFirefoxVersion?: number) {
+// @see https://www.w3.org/TR/webdriver-bidi/#type-network-Cookie
+// BiDi expresses a cookie with no sameSite attribute as 'default'
+export function convertSameSiteExtensionToBiDi (str: BidiCyCookie['sameSite']) {
   if (str === 'no_restriction') {
     return 'none'
   }
 
-  if (str === 'unspecified') {
-    // put firefox version check here, under 140 we need to return 'no_restriction'
+  if (str === 'unspecified' || str === undefined) {
     return 'default'
   }
 
-  // @see https://www.w3.org/TR/webdriver-bidi/#type-network-Cookie
-  // in Firefox 140, BiDi added the 'default' value to be able to assign 'unspecified', which was also added in Firefox 140.
-  const defaultValue = majorFirefoxVersion && majorFirefoxVersion < 140 ? 'none' : 'default'
-
-  // if no value, default to 'none' as this is the browser default in firefox specifically.
-  // Every other browser defaults to 'lax'
-  return str === undefined ? defaultValue : str
+  return str
 }
 
 // used to normalize cookies to CyCookie before returning them through the automation client
@@ -80,7 +76,7 @@ export const convertBiDiCookieToCyCookie = (cookie: NetworkCookie): BidiCyCookie
   return cyCookie
 }
 
-export const convertCyCookieToBiDiCookie = (cookie: BidiCyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
+export const convertCyCookieToBiDiCookie = (cookie: BidiCyCookie): StoragePartialCookie => {
   const cookieToSet: StoragePartialCookie = {
     name: cookie.name,
     value: {
@@ -91,7 +87,7 @@ export const convertCyCookieToBiDiCookie = (cookie: BidiCyCookie, majorFirefoxVe
     path: cookie.path,
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
     // BiDi cookie expiry is in seconds from EPOCH, but sometimes the automation client feeds in a float and BiDi does not know how to handle it.
     // If trying to set a float on the expiry time in BiDi, the setting silently fails.
     expiry: (cookie.expirationDate === -Infinity ? 0 : (isNumber(cookie.expirationDate) ? toInteger(cookie.expirationDate) : null)) ?? undefined,

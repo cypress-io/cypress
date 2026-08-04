@@ -1,6 +1,6 @@
 # CircleCI Configuration
 
-Agent guidance for `.circleci/` — source configs under `src/` are packed into `packed/` at CI runtime. See [README.md](./README.md) for local CLI setup and the pre-commit `yarn pack-ci --verify` workflow.
+Agent guidance for `.circleci/` — source configs under `src/` are packed into `packed/` at CI runtime. See [README.md](./README.md) for local CLI setup and the pre-commit `yarn pack-ci --validate` workflow.
 
 ## Full CI branch allowlist
 
@@ -41,7 +41,7 @@ This gate turns on the main/multi-platform workflow graph — including `windows
 
 For typical v8 snapshot cache work, changes under `tooling/*` already enable `run-v8-tests` via path filtering, so **`&full-workflow-filters` alone is usually enough**.
 
-After editing `.circleci/src/`, run `yarn pack-ci --verify` before committing.
+After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 ### What runs with only `&full-workflow-filters`
 

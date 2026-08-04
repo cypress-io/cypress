@@ -52,7 +52,7 @@ describe('run-all-specs', () => {
     }, { specs: subDirectorySpecs, RUN_ALL_SPECS_KEY })
 
     for (const spec of subDirectorySpecs) {
-      cy.get('.runnable-title').contains(spec.name)
+      cy.reporter().find('.runnable-title').contains(spec.name)
     }
 
     // Verify "Run All Specs" with filter
@@ -72,7 +72,7 @@ describe('run-all-specs', () => {
     }, { specs: filteredSpecs })
 
     for (const spec of filteredSpecs) {
-      cy.get('.runnable-title').contains(spec.name)
+      cy.reporter().find('.runnable-title').contains(spec.name)
     }
 
     // Verify "Run All Specs" with filter + folder
@@ -92,7 +92,7 @@ describe('run-all-specs', () => {
     }, { specs: filteredWithSubDirectorySpecs })
 
     for (const spec of filteredWithSubDirectorySpecs) {
-      cy.get('.runnable-title').contains(spec.name)
+      cy.reporter().find('.runnable-title').contains(spec.name)
     }
 
     // Verify "Run All Specs" live-reload
@@ -109,7 +109,7 @@ describe('run-all-specs', () => {
     cy.waitForSpecToFinish({ passCount: 6 })
 
     for (const spec of Object.values(ALL_SPECS)) {
-      cy.get('.runnable-title').contains(spec.name)
+      cy.reporter().find('.runnable-title').contains(spec.name)
     }
 
     cy.withCtx(async (ctx, { spec }) => {

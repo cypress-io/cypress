@@ -57,8 +57,11 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel2>
-        <HideDuringScreenshot class="h-full">
+      <template #panel2="{ isDragging }">
+        <HideDuringScreenshot
+          class="h-full"
+          :class="{ 'pointer-events-none': isDragging }"
+        >
           <div
             v-if="!hideCommandLog"
             v-once

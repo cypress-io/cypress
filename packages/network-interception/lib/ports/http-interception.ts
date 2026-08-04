@@ -1,14 +1,22 @@
-export type HttpHeaders = Record<string, string | string[]>
+import type { Readable } from 'stream'
+
+export type HttpHeaders = Record<string, string | string[] | undefined>
+
+export type HttpBody = string | Buffer
 
 export type HttpRequest = {
   id: string
   url: string
+  method?: string
+  headers?: HttpHeaders
+  body?: HttpBody
 }
 
 export type HttpResponse = {
   id: string
   url: string
-  body?: string | Buffer
+  body?: HttpBody
+  bodyStream?: Readable
   headers?: HttpHeaders
   statusCode?: number
 }

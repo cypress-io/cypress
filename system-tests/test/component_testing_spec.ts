@@ -5,6 +5,8 @@ import Fixtures from '../lib/fixtures'
 describe('component testing projects', function () {
   systemTests.setup()
 
+  // Uses typescript@7, exercising vite component testing under the native
+  // compiler (which ships no TypeScript compiler API).
   systemTests.it('react-vite-ts-configured', {
     project: 'react-vite-ts-configured',
     testingType: 'component',
@@ -172,6 +174,7 @@ describe('experimentalSingleTabRunMode', function () {
     browser: 'chrome',
     snapshot: true,
     expectedExitCode: 2,
+    config: { screenshotOnRunFailure: false },
   })
 
   // https://github.com/cypress-io/cypress/issues/23815

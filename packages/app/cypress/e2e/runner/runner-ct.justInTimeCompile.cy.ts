@@ -17,8 +17,8 @@ for (const { bundler } of PROJECTS) {
     const visitComponentSpecAndVerifyPass = (specNumber: number) => {
       cy.contains(`Component-${specNumber}.cy.jsx`).click()
       cy.waitForSpecToFinish(undefined)
-      cy.get('[aria-label="Stats"] .passed > .num').should('contain', '1')
-      cy.get('[aria-label="Stats"] .failed > .num').should('contain', '--')
+      cy.reporter().find('[aria-label="Stats"] .passed > .num').should('contain', '1')
+      cy.reporter().find('[aria-label="Stats"] .failed > .num').should('contain', '--')
     }
 
     beforeEach(() => {

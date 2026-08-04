@@ -28,7 +28,7 @@ yarn clean              # Remove dist/
 - **`generator/`** — Snapshot script generation pipeline:
   - `snapshot-generator.ts` — Top-level orchestrator; exposes `makeAndInstallSnapshot` and related methods.
   - `create-snapshot-bundle.ts` / `create-snapshot-script.ts` — Invoke `@tooling/packherd` and wrap the bundle in the snapshot entry template.
-  - `snapshot-generate-entry-via-dependencies.ts` / `snapshot-generate-entry-via-yarn.ts` — Two strategies for generating the module entry list.
+  - `snapshot-generate-entry-via-dependencies.ts` — Generates the module entry list from the dependency graph.
   - `snapshot-verifier.ts` — Executes a snapshot script inside a Node.js VM to detect violations.
   - `blueprint.ts` — Assembles the final snapshot script from bundle + blueprint globals.
   - `snapshot-generator-flags.ts` / `write-config-json.ts` — CLI flags and config serialization.

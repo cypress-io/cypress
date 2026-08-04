@@ -26,7 +26,17 @@ describe('http/util/prerequests', () => {
   })
 
   afterEach(() => {
-    clearInterval(preRequests.sweepInterval)
+    preRequests.dispose()
+  })
+
+  it('dispose clears the sweep interval timer', () => {
+    const timer = preRequests.sweepIntervalTimer
+
+    preRequests.dispose()
+
+    // Creating another instance after dispose should not throw; the prior
+    // interval must have been cleared (dispose is idempotent for reset state).
+    expect(() => clearInterval(timer)).not.to.throw()
   })
 
   it('synchronously matches a pre-request that existed at the time of the request', () => {

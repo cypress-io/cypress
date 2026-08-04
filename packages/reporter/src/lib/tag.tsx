@@ -1,6 +1,6 @@
 import cs from 'classnames'
 import React from 'react'
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from './tooltip'
 
 interface TagProps {
   type?: 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status'

@@ -89,12 +89,12 @@ describe('Cypress Studio - Navigation and URL Management', () => {
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
-    cy.get('[data-cy="studio-back-button"]').click()
+    cy.reporter().find('[data-cy="studio-back-button"]').click()
 
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
 
-    cy.get('.runnable-title').eq(0).should('contain.text', 'studio functionality')
-    cy.get('.runnable-title').eq(1).should('contain.text', 'visits a basic html page')
+    cy.reporter().find('.runnable-title').eq(0).should('contain.text', 'studio functionality')
+    cy.reporter().find('.runnable-title').eq(1).should('contain.text', 'visits a basic html page')
   })
 
   it('updates the AUT url when navigating to a different page', () => {
@@ -169,7 +169,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
     // the studio url parameters should be removed
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
 
-    cy.get('.studio-single-test-container').should('be.visible')
+    cy.reporter().find('.studio-single-test-container').should('be.visible')
 
     cy.percySnapshot()
 
@@ -178,7 +178,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
 
     // the studio url parameters should be removed
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
-    cy.get('.studio-single-test-container').should('be.visible')
+    cy.reporter().find('.studio-single-test-container').should('be.visible')
   })
 
   it('does not remove the studio url parameters when saving test changes', () => {
@@ -235,7 +235,7 @@ describe('studio functionality', () => {
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
-    cy.get('[data-cy="studio-back-button"]').click()
+    cy.reporter().find('[data-cy="studio-back-button"]').click()
 
     cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
   })

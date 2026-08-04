@@ -4,12 +4,13 @@ import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import cs from 'classnames'
 
-import Tooltip from '@cypress/react-tooltip'
 import Button from '@cypress-design/react-button'
 import { IconActionAddMedium, IconWindowCodeEditor, IconMenuDotsVertical } from '@cypress-design/react-icon'
 import defaultEvents, { Events } from '../lib/events'
 import Switch from '../lib/switch'
 import appState from '../lib/app-state'
+import Tooltip from '../lib/tooltip'
+import { getReporterBody, getReporterDocument } from '../lib/reporter-document'
 
 interface Props {
   events?: Events
@@ -44,7 +45,10 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
 
       setPopoverPosition({
         top: rect.bottom + 4,
-        left: rect.right - 250, // 250px is the popover width
+        // the popover renders in the reporter iframe and cannot overflow
+        // it, so keep it inside the left edge when the panel is narrow
+        // (250px is the popover width)
+        left: Math.max(8, rect.right - 250),
       })
     }
 
@@ -113,14 +117,21 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
       }
     }
 
+    // the reporter renders into its own document (the iframe) while its JS runs
+    // in the top window, so listen on both documents to dismiss the popover on
+    // interactions anywhere in the app
+    const doc = getReporterDocument()
+    const docs = new Set([document, doc])
+    const wins = new Set([window, doc.defaultView ?? window])
+
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      window.addEventListener('scroll', handleScroll, true)
+      docs.forEach((d) => d.addEventListener('mousedown', handleClickOutside))
+      wins.forEach((w) => w.addEventListener('scroll', handleScroll, true))
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', handleScroll, true)
+      docs.forEach((d) => d.removeEventListener('mousedown', handleClickOutside))
+      wins.forEach((w) => w.removeEventListener('scroll', handleScroll, true))
     }
   }, [isOpen])
 
@@ -240,7 +251,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           )
         }
       </div>
-      {isOpen && createPortal(popoverContent, document.body)}
+      {isOpen && createPortal(popoverContent, getReporterBody())}
     </>
   )
 })

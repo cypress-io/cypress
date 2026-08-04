@@ -18,6 +18,7 @@ describe('@cypress/webpack-dev-server', function () {
         browser: 'chrome',
         snapshot: true,
         expectedExitCode: 7,
+        config: { screenshotOnRunFailure: false },
         onStdout: (stdout) => {
           return systemTests.normalizeWebpackErrors(stdout)
         },

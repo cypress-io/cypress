@@ -283,4 +283,84 @@ describe('lib/routes', () => {
       expect(cyPromptManager.initializeRoutes).to.be.calledWith(router)
     })
   })
+
+  describe('clientRoute non-proxied guard', () => {
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      sinon.restore()
+    })
+
+    function getClientRouteHandler (configOverrides: Partial<Cfg> = {}) {
+      const router = {
+        get: sinon.stub(),
+        post: sinon.stub(),
+        all: sinon.stub(),
+        use: sinon.spy(),
+      }
+      const Router = sinon.stub().returns(router)
+      const { createCommonRoutes } = proxyquire('../../lib/routes', {
+        'express': { Router },
+      })
+
+      createCommonRoutes({
+        config: {
+          clientRoute: '/__/',
+          namespace: '__cypress',
+          ...configOverrides,
+        } as Cfg,
+        getSpec: sinon.stub().returns({}),
+        // @ts-expect-error
+        networkProxy: {
+          handleHttpRequest: () => {},
+        } as NetworkProxy,
+        nodeProxy: {} as HttpProxy,
+        onError: () => {},
+        // @ts-expect-error
+        remoteStates: {
+          hasPrimary: sinon.stub().returns(false),
+        } as RemoteStates,
+        testingType: 'e2e',
+      })
+
+      const clientRouteCall = router.get.args.find((args) => args[0] === '/__/')
+
+      return clientRouteCall?.[1]
+    }
+
+    it('serves Whoops for path-only clientRoute when the HTTP proxy is enabled', async () => {
+      const handler = getClientRouteHandler()
+      const appHtml = sinon.stub(getCtx().html, 'appHtml').resolves('<html>whoops</html>')
+      const res = {
+        setHeader: sinon.stub(),
+        send: sinon.stub(),
+        status: sinon.stub().returnsThis(),
+      }
+
+      await handler({
+        proxiedUrl: '/__/',
+        headers: {},
+      }, res)
+
+      expect(appHtml).to.have.been.calledWith(true)
+    })
+
+    it('serves the runner app for path-only clientRoute when CDP replaces the HTTP proxy', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const handler = getClientRouteHandler()
+      const appHtml = sinon.stub(getCtx().html, 'appHtml').resolves('<html>runner</html>')
+      const res = {
+        setHeader: sinon.stub(),
+        send: sinon.stub(),
+        status: sinon.stub().returnsThis(),
+      }
+
+      await handler({
+        proxiedUrl: '/__/',
+        headers: {},
+      }, res)
+
+      expect(appHtml).to.have.been.calledWith(false)
+    })
+  })
 })

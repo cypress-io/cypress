@@ -23,6 +23,7 @@ describe('key:press automation command', () => {
   }
 
   describe('cdp', () => {
+    const activeElementExpression = `document.activeElement instanceof HTMLIFrameElement ? document.activeElement.name || document.activeElement.id : ''`
     let sendFn: Sinon.SinonStub<Parameters<SendDebuggerCommand>, ReturnType<SendDebuggerCommand>>
     const topFrameId = 'abc'
     const autFrameId = 'def'
@@ -71,14 +72,14 @@ describe('key:press automation command', () => {
     describe('when the aut frame does not have focus', () => {
       const topActiveElement: Protocol.Runtime.EvaluateResponse = {
         result: {
-          type: 'object',
-          description: 'a.some-link',
+          type: 'string',
+          value: '',
         },
       }
 
       beforeEach(() => {
         sendFn.withArgs('Runtime.evaluate', {
-          expression: 'document.activeElement',
+          expression: activeElementExpression,
           contextId: topExecutionContext.id,
         }).resolves(topActiveElement)
       })
@@ -118,7 +119,7 @@ describe('key:press automation command', () => {
           executionContexts.set(topExecutionContext.id, topExecutionContext)
           executionContexts.set(autExecutionContext.id, autExecutionContext)
           sendFn.withArgs('Runtime.evaluate', {
-            expression: 'document.activeElement',
+            expression: activeElementExpression,
             contextId: invalidExecutionContext.id,
           }).rejects(new Error('Cannot find context with specified id'))
         })
@@ -140,14 +141,14 @@ describe('key:press automation command', () => {
     describe('when the aut frame has focus', () => {
       const topActiveElement: Protocol.Runtime.EvaluateResponse = {
         result: {
-          type: 'object',
-          description: autFrame.frame.name,
+          type: 'string',
+          value: autFrame.frame.name,
         },
       }
 
       beforeEach(() => {
         sendFn.withArgs('Runtime.evaluate', {
-          expression: 'document.activeElement',
+          expression: activeElementExpression,
           contextId: topExecutionContext.id,
         }).resolves(topActiveElement)
       })

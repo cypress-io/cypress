@@ -8,7 +8,6 @@ import fetch, { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
-import getenv from 'getenv'
 import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
@@ -23,7 +22,7 @@ import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
-import { CLOUD_URLS } from '../util/cloudUrls'
+import { CLOUD_URLS, resolveCloudEnv } from '../util/cloudUrls'
 import type { CloudEnv } from '../util/cloudUrls'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
@@ -32,7 +31,7 @@ import { pathToArray } from 'graphql/jsutils/Path'
 export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
-const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as CloudEnv
+const cloudEnv = resolveCloudEnv()
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never

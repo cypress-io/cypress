@@ -46,8 +46,15 @@ describe('only', () => {
   })
 
   context.only('02 - validations', () => {
+    // the reporter renders inside a same-origin iframe (#reporter-frame)
+    const reporterBody = () => {
+      const frame = window.top!.document.querySelector('#reporter-frame') as HTMLIFrameElement
+
+      return Cypress.$(frame.contentDocument!.body)
+    }
+
     const verifyNotPresent = (title: string) => {
-      cy.wrap(Cypress.$(window.top!.document.body)).within(() => {
+      cy.wrap(reporterBody()).within(() => {
         return cy
         .contains(title)
         .should('not.exist')

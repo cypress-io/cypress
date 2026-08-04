@@ -5,10 +5,10 @@ const firefoxValidatorFn = (browser: FoundBrowser, platform: NodeJS.Platform): B
     if (browser.majorVersion) {
       const majorVersion = Number(browser.majorVersion)
 
-      if (majorVersion < 135) {
+      if (majorVersion < 140) {
         return {
           isSupported: false,
-          warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} due to lack of WebDriver BiDi support. To use ${browser.displayName} with Cypress, install version 135 or newer.`,
+          warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} due to an incomplete WebDriver BiDi implementation. To use ${browser.displayName} with Cypress, install version 140 or newer.`,
         }
       }
     }

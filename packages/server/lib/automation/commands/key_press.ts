@@ -59,9 +59,12 @@ export async function cdpKeyPress (
     throw new Error('Could not find AUT frame')
   }
 
-  const topActiveElement = await evaluateInFrameContext('document.activeElement', send, contexts, frameTree.frame)
+  const topActiveElement = await evaluateInFrameContext(
+    `document.activeElement instanceof HTMLIFrameElement ? document.activeElement.name || document.activeElement.id : ''`,
+    send, contexts, frameTree.frame,
+  )
 
-  const autFrameIsActive = topActiveElement.result.description && autFrame.frame.name && topActiveElement.result.description.includes(autFrame.frame.name)
+  const autFrameIsActive = typeof topActiveElement.result.value === 'string' && !!autFrame.frame.name && topActiveElement.result.value.includes(autFrame.frame.name)
 
   if (!autFrameIsActive) {
     await evaluateInFrameContext('window.focus()', send, contexts, autFrame.frame)
