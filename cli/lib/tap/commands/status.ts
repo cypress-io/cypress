@@ -21,6 +21,7 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
     startedAt: runState.startedAt ?? null,
     totalTests: runState.totalTests,
     results: runState.results,
+    ...(runState.error ? { error: runState.error } : {}),
     ...pinned,
   }
 }

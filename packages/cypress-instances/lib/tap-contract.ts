@@ -214,9 +214,10 @@ polling and "where am I?" checks. Always exits 0 for a determinable stage
 Stages: not connected, browser not selected, spec not selected, loading,
 running, passed, failed.
 
-Only passed and failed are verdicts. Loading is a selected spec waiting on its
-own build — one still compiling, or one that will never compile — and stays
-loading for as long as that takes, so a poller needs its own timeout.
+Only passed and failed are verdicts. Loading is a selected spec still building,
+and stays loading for as long as the build takes, so a poller needs its own
+timeout. A spec whose build fails reports failed and carries the reason as
+error — it ran no tests, so it reports no counts either.
 
 From loading onwards the output carries startedAt, the run every other field
 describes (null while loading). A rerun leaves the previous run's verdict
