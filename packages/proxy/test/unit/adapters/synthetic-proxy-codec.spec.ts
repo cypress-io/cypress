@@ -245,4 +245,53 @@ describe('createSyntheticProxyCodec', () => {
     expect(response.headers).to.deep.equal({ 'x-result': 'synthetic' })
     expect(response.body?.toString()).to.equal('final')
   })
+
+  it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
+    const { testMiddleware } = await import('../http/helpers')
+    const RequestMiddleware = (await import('../../../lib/http/request-middleware')).default
+    const { ExtractCypressMetadataHeaders } = RequestMiddleware
+
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+          debug: () => {},
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-extra',
+      url: 'https://example.test/download-basic-auth.csv',
+      method: 'GET',
+      headers: {
+        'x-cypress-is-from-extra-target': 'true',
+        accept: '*/*',
+      },
+    })
+
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal('true')
+    expect(ctx.req.isFromExtraTarget).to.equal(false)
+
+    let maybeSetBasicAuthHeadersRan = false
+    let skippedMiddlewareRan = false
+
+    await testMiddleware({
+      ExtractCypressMetadataHeaders,
+      MaybeSetBasicAuthHeaders () {
+        maybeSetBasicAuthHeadersRan = true
+        this.next()
+      },
+      MaybeSimulateSecHeaders () {
+        skippedMiddlewareRan = true
+        this.next()
+      },
+    }, ctx)
+
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.be.undefined
+    expect(ctx.req.isFromExtraTarget).to.equal(true)
+    expect(maybeSetBasicAuthHeadersRan).to.equal(true)
+    expect(skippedMiddlewareRan).to.equal(false)
+  })
 })

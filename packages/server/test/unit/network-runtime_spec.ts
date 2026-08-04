@@ -574,4 +574,68 @@ describe('lib/network-runtime', () => {
     await flush()
     await handled
   })
+
+  it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const detach = await runtime.attachExtraTarget(extraClient)
+
+    expect(extraClient.send).to.have.been.calledWith('Network.enable')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    })
+
+    expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
+    expect(extraClient.send.withArgs('Network.enable'))
+    .to.have.been.calledBefore(extraClient.send.withArgs('Fetch.enable'))
+
+    const transportReset = sinon.spy(runtime.fetchTransport, 'reset')
+
+    runtime.reset()
+
+    expect(transportReset).to.have.been.calledOnce
+
+    await detach()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+
+    await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime stop also stops attached extra-target transports', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+    await runtime.stop()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+  })
 })

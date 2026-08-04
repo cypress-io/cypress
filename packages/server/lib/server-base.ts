@@ -564,6 +564,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     await runtime.start()
   }
 
+  async attachCdpFetchExtraTarget (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+  ): Promise<(() => Promise<void>) | undefined> {
+    return this._cdpFetchRuntime?.attachExtraTarget(client)
+  }
+
   private resetCdpFetchRuntime () {
     try {
       this._cdpFetchRuntime?.reset()

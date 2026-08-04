@@ -8,7 +8,7 @@ import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
-import { AUT_FRAME_HEADER } from '../constants'
+import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -32,6 +32,13 @@ const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  /**
+   * When true, mark every paused request with X-Cypress-Is-From-Extra-Target
+   * so ExtractCypressMetadataHeaders can restrict the legacy pipeline to the
+   * minimal extra-target middleware (MaybeSetBasicAuthHeaders). Stripped
+   * before Fetch.continueRequest, same as the AUT frame marker.
+   */
+  isFromExtraTarget?: boolean
   /**
    * Pre-register a URL that will never receive Network.requestWillBeSent
    * (download-manager pauses omit networkId). Mirrors the MITM download-click
@@ -68,6 +75,13 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
 
 export class CdpFetchTransport {
   private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
+  /**
+   * Prefix for HttpIntercept / synthetic-codec request ids when this transport
+   * owns an extra-target session. CDP network/request ids are only unique per
+   * session; without a prefix, concurrent extra targets (or an extra target
+   * overlapping the main target) would collide in the shared intercept maps.
+   */
+  private readonly requestIdPrefix: string
 
   private isStarted = false
 
@@ -76,7 +90,11 @@ export class CdpFetchTransport {
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
     private readonly options: CdpFetchTransportOptions = {},
     private readonly networkExtraInfo: CDPNetworkExtraInfo = new CDPNetworkExtraInfo(client),
-  ) {}
+  ) {
+    this.requestIdPrefix = options.isFromExtraTarget
+      ? `extra-${Math.random().toString(36).slice(2)}:`
+      : ''
+  }
 
   /**
    * Enables the CDP Fetch domain and starts intercepting requests.
@@ -194,7 +212,7 @@ export class CdpFetchTransport {
         headers: {
           ...event.request.headers,
         },
-        id: networkRequestId,
+        id: `${this.requestIdPrefix}${networkRequestId}`,
         requestId: event.requestId,
         sessionId,
       }
@@ -211,6 +229,14 @@ export class CdpFetchTransport {
         // Node's IncomingMessage lowercases headers on the MITM path; the
         // synthetic CDP codec does not. Use the lowercase form ExtractCypressMetadataHeaders reads.
         request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
+      }
+
+      // Extra-target sessions (popups / _blank) share this transport with
+      // isFromExtraTarget so MaybeSetBasicAuthHeaders still runs under
+      // CYPRESS_INTERNAL_DISABLE_PROXY=1 (MITM never sees those requests).
+      if (this.options.isFromExtraTarget) {
+        debug('marking extra-target request %s', event.request.url)
+        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = 'true'
       }
 
       const responseDeferred: ResponsePauseDeferred = {
@@ -427,7 +453,7 @@ export class CdpFetchTransport {
 
     deferred.resolve({
       ...event.request,
-      id: networkRequestId,
+      id: `${this.requestIdPrefix}${networkRequestId}`,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
@@ -548,38 +574,46 @@ export class CdpFetchTransport {
 
   /**
    * Builds continueRequest headers when outbound headers differ from the pause
-   * (excluding X-Cypress-Is-AUT-Frame). That marker is injected onto the paused
-   * request for the intercept/legacy pipeline and must never be forwarded to
-   * the origin — parity with ExtractCypressMetadataHeaders on the MITM path.
+   * (excluding internal Cypress markers). AUT-frame and extra-target markers
+   * are injected onto the paused request for the intercept/legacy pipeline and
+   * must never be forwarded to the origin — parity with
+   * ExtractCypressMetadataHeaders on the MITM path.
    */
   private continueRequestHeaders = async (
     event: Protocol.Fetch.RequestPausedEvent,
     outbound: CdpFetchTransportRequest,
   ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const stripAut = (headers: Protocol.Network.Headers) => {
+    const internalMarkers = new Set([
+      AUT_FRAME_HEADER.toLowerCase(),
+      EXTRA_TARGET_HEADER.toLowerCase(),
+    ])
+
+    const stripInternalMarkers = (headers: Protocol.Network.Headers) => {
       return Object.fromEntries(
         Object.entries(headers).filter(([name]) => {
-          return name.toLowerCase() !== AUT_FRAME_HEADER.toLowerCase()
+          return !internalMarkers.has(name.toLowerCase())
         }),
       )
     }
 
-    const outboundWithoutAut = stripAut(outbound.headers ?? {})
-    const originalWithoutAut = stripAut(event.request.headers)
-    const originalHadAut = Object.keys(event.request.headers).some((name) => {
-      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
-    })
-    const outboundHadAut = Object.keys(outbound.headers ?? {}).some((name) => {
-      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
-    })
+    const hadInternalMarker = (headers: Protocol.Network.Headers) => {
+      return Object.keys(headers).some((name) => {
+        return internalMarkers.has(name.toLowerCase())
+      })
+    }
+
+    const outboundWithoutMarkers = stripInternalMarkers(outbound.headers ?? {})
+    const originalWithoutMarkers = stripInternalMarkers(event.request.headers)
+    const originalHadMarker = hadInternalMarker(event.request.headers)
+    const outboundHadMarker = hadInternalMarker(outbound.headers ?? {})
 
     // No meaningful header mutations and nothing to strip — omit headers from
     // continueRequest so CDP keeps the browser's original set.
-    if (!this.headersChanged(outboundWithoutAut, originalWithoutAut) && !originalHadAut && !outboundHadAut) {
+    if (!this.headersChanged(outboundWithoutMarkers, originalWithoutMarkers) && !originalHadMarker && !outboundHadMarker) {
       return
     }
 
-    return this.toContinueRequestHeaders(outboundWithoutAut)
+    return this.toContinueRequestHeaders(outboundWithoutMarkers)
   }
 
   // Must NOT clear extraInfo tracking on success — the next response under a

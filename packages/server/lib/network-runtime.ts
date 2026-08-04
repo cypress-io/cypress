@@ -12,6 +12,7 @@ import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
@@ -63,6 +64,12 @@ export type CdpFetchNetworkRuntime = {
   networkInterceptionCore: NetworkInterceptionCore
   networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
   fetchTransport: CdpFetchTransport
+  /**
+   * Attaches a CdpFetchTransport to an extra-target (popup / _blank) CDP
+   * session so its requests run the shared middleware onion with the
+   * extra-target marker. Returns detach() to stop that transport.
+   */
+  attachExtraTarget (client: Pick<ICriClient, 'send' | 'on' | 'off'>): Promise<() => Promise<void>>
   start (): Promise<void>
   reset (): void
   stop (): Promise<void>
@@ -211,6 +218,13 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
   })
 
+  // Extra-target transports share networkInterception so they cannot drift from
+  // the main-target middleware onion. Tracked so reset()/stop() cover them.
+  // request ids are namespaced inside each extra CdpFetchTransport so concurrent
+  // sessions cannot collide in the shared codec maps.
+  const extraTargetTransports = new Set<CdpFetchTransport>()
+  let stopped = false
+
   // Proxy parity: cookie simulation's simulated top, which nothing else
   // updates when the proxy is off. Sourced from navigation commits because
   // cache-served documents never produce a Fetch pause. Only http(s) commits
@@ -231,7 +245,42 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
+    async attachExtraTarget (client) {
+      if (stopped) {
+        throw new Error('Cannot attach extra target: CDP Fetch runtime has been stopped')
+      }
+
+      // CDPNetworkExtraInfo (used by CdpFetchTransport for Set-Cookie) requires
+      // Network on this session. The browser-level Network.enable in
+      // _onAttachToTarget does not apply to this dedicated extra-target CRI client.
+      await client.send('Network.enable', DEFAULT_NETWORK_ENABLE_OPTIONS)
+
+      const extraTransport = new CdpFetchTransport(client, networkInterception, {
+        isFromExtraTarget: true,
+      })
+
+      await extraTransport.start()
+
+      if (stopped) {
+        await extraTransport.stop().catch(() => {})
+
+        throw new Error('Cannot attach extra target: CDP Fetch runtime has been stopped')
+      }
+
+      extraTargetTransports.add(extraTransport)
+
+      return async () => {
+        extraTargetTransports.delete(extraTransport)
+
+        try {
+          await extraTransport.stop()
+        } catch {
+          // Extra-target sockets are usually already gone when detach runs.
+        }
+      }
+    },
     async start () {
+      stopped = false
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
       try {
@@ -247,10 +296,27 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
     reset () {
       fetchTransport.reset()
+
+      for (const extraTransport of extraTargetTransports) {
+        extraTransport.reset()
+      }
     },
-    stop () {
+    async stop () {
+      stopped = true
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
+
+      const extras = Array.from(extraTargetTransports)
+
+      extraTargetTransports.clear()
+
+      await Promise.all(extras.map(async (extraTransport) => {
+        try {
+          await extraTransport.stop()
+        } catch {
+          // Extra-target sockets are usually already gone.
+        }
+      }))
 
       return fetchTransport.stop()
     },

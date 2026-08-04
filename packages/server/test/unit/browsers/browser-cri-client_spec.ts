@@ -143,6 +143,7 @@ describe('lib/browsers/browser-cri-client', function () {
         },
         browserCriClient: {
           addExtraTargetClient: sinon.stub(),
+          getExtraTargetClient: sinon.stub().returns(undefined),
           currentlyAttachedTarget: {
             targetId: 'main-target-id',
           },
@@ -336,6 +337,75 @@ describe('lib/browsers/browser-cri-client', function () {
       })
     })
 
+    it('delegates Fetch ownership to onExtraTargetCriClientReady when provided', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+      const detach = sinon.stub().resolves()
+      const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
+      const tracked = { client: criClient, targetInfo: options.event.targetInfo }
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = onExtraTargetCriClientReady
+      options.browserCriClient.getExtraTargetClient.returns(tracked)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(onExtraTargetCriClientReady).to.be.calledOnceWith(criClient)
+      expect(tracked.detach).to.equal(detach)
+      expect(criClient.send).not.to.be.calledWith('Fetch.enable')
+      expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+    })
+
+    it('falls back to header-only continue when onExtraTargetCriClientReady throws', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = sinon.stub().rejects(new Error('attach failed'))
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+      criClient.send.withArgs('Fetch.enable').resolves()
+      criClient.send.withArgs('Fetch.continueRequest').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(criClient.send).to.be.calledWith('Fetch.enable')
+      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+
+      await criClient.on.lastCall.args[1]({
+        requestId: 'request-id',
+        request: { headers: {} },
+      })
+
+      expect(criClient.send).to.be.calledWith('Fetch.continueRequest', {
+        requestId: 'request-id',
+        headers: [
+          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+        ],
+      })
+    })
+
+    it('falls back to header-only continue when onExtraTargetCriClientReady returns undefined', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = sinon.stub().resolves(undefined)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+      criClient.send.withArgs('Fetch.enable').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(criClient.send).to.be.calledWith('Fetch.enable')
+      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+    })
+
     it('ignores any errors from continuing request', async () => {
       const criClient = {
         send: sinon.stub(),
@@ -403,6 +473,18 @@ describe('lib/browsers/browser-cri-client', function () {
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
+        expect(client.close).to.be.called
+      })
+
+      it('detaches the extra target Fetch transport when present', () => {
+        const detach = sinon.stub().resolves()
+        const client = { close: sinon.stub().resolves() }
+
+        options.browserCriClient.getExtraTargetClient.returns({ client, detach })
+
+        BrowserCriClient._onTargetDestroyed(options as any)
+
+        expect(detach).to.be.called
         expect(client.close).to.be.called
       })
 

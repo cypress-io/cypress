@@ -115,6 +115,9 @@ export class OpenProject extends EventEmitter {
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
+        onExtraTargetCriClientReady: (client) => {
+          return this.projectBase!.server.attachCdpFetchExtraTarget(client)
+        },
       }),
     }
 
