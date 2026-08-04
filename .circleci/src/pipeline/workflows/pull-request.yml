@@ -316,6 +316,28 @@ jobs:
       spec: cypress/e2e/choose-a-browser.cy.ts,cypress/e2e/open-mode.cy.ts
       requires:
         - ready-to-test
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-cdp-remediated
+      context: test-runner:cypress-record-key
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      record-group-suffix: '-remediated'
+      # #34465 extra-target shared middleware (basic-auth _blank download)
+      spec: cypress/e2e/cypress/downloads.cy.ts
+      requires:
+        - ready-to-test
+  - driver-integration-tests-electron:
+      name: driver-integration-tests-electron-cdp-remediated
+      context: test-runner:cypress-record-key
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      record-group-suffix: '-remediated'
+      # #34465 extra-target shared middleware (basic-auth _blank download)
+      spec: cypress/e2e/cypress/downloads.cy.ts
+      requires:
+        - ready-to-test
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
@@ -516,6 +538,8 @@ jobs:
         - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
         - run-launchpad-integration-tests-chrome-cdp-remediated
+        - driver-integration-tests-chrome-cdp-remediated
+        - driver-integration-tests-electron-cdp-remediated
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta
