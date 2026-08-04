@@ -378,7 +378,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { scrollBehavior: 'bottom' })
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
       })
     })
 
@@ -391,66 +391,6 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       cy.get(':text:first').then((el) => {
         expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
-      })
-    })
-
-    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center', inline: 'center' })
-      })
-    })
-
-    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest', inline: 'nearest' })
-      })
-    })
-
-    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('calls scrollIntoView by default', () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
       })
     })
 

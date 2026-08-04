@@ -29,11 +29,26 @@ const dispatchPrimedChangeEvents = function (state) {
   }
 }
 
+// `top` and `bottom` only describe the block axis, so they leave `inline` at the
+// browser default the way `scrollIntoView(alignToTop)` does. The rest name a
+// position either axis can take, so they apply to both.
 const scrollBehaviorOptionsMap = {
-  top: 'start',
-  bottom: 'end',
-  center: 'center',
-  nearest: 'nearest',
+  top: { block: 'start' },
+  bottom: { block: 'end' },
+  start: { block: 'start', inline: 'start' },
+  end: { block: 'end', inline: 'end' },
+  center: { block: 'center', inline: 'center' },
+  nearest: { block: 'nearest', inline: 'nearest' },
+}
+
+// `scrollBehavior` is either one of the alignments above or an explicit per-axis
+// `{ block, inline }` using the same values as the native `scrollIntoView`. An
+// axis the caller left out is omitted so that `scrollIntoView` applies its own
+// default.
+const toScrollIntoViewOptions = (scrollBehavior) => {
+  return _.isPlainObject(scrollBehavior)
+    ? _.pick(scrollBehavior, ['block', 'inline'])
+    : scrollBehaviorOptionsMap[scrollBehavior]
 }
 
 const getPositionFromArguments = function (positionOrX, y, options) {
@@ -531,12 +546,11 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
         if (options.scrollBehavior !== false) {
           // scroll the element into view
-          const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
+          const scrollIntoViewOptions = toScrollIntoViewOptions(options.scrollBehavior)
           const removeScrollBehaviorFix = addScrollBehaviorFix($el)
 
-          debug('scrollIntoView:', $el[0])
-          // Mirror the scroll behavior onto both axes.
-          $el.get(0).scrollIntoView({ block: scrollBehavior, inline: scrollBehavior })
+          debug('scrollIntoView:', $el[0], scrollIntoViewOptions)
+          $el.get(0).scrollIntoView(scrollIntoViewOptions)
 
           removeScrollBehaviorFix()
 
