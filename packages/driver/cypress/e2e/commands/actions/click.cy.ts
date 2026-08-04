@@ -1390,18 +1390,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
 
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ inline: 'start' })
-        })
-      })
-
-      it('replaces a per-axis config with per-axis options for a different axis', { scrollBehavior: { block: 'center' } }, () => {
-        cy.get('input:first').then((el) => {
-          cy.spy(el[0], 'scrollIntoView')
-        })
-
-        cy.get('input:first').click({ scrollBehavior: { inline: 'start' } })
-
+        // the configured block alignment is dropped, not inherited
         cy.get('input:first').then((el) => {
           expect(el[0].scrollIntoView).calledWith({ inline: 'start' })
         })
@@ -1518,6 +1507,20 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      // the scrollport of a container, asserted against instead of pixel counts
+      // since the offsets are subpixel-dependent across browsers
+      const scrollPort = ($container) => {
+        const el = $container[0]
+        const { left, top } = el.getBoundingClientRect()
+
+        return {
+          left: left + el.clientLeft,
+          right: left + el.clientLeft + el.clientWidth,
+          top: top + el.clientTop,
+          bottom: top + el.clientTop + el.clientHeight,
+        }
+      }
+
       describe('inline axis', () => {
         // a carousel-style container: it clips horizontally and positions its
         // slides itself, so a horizontal scroll leaves the layout broken
@@ -1591,20 +1594,11 @@ describe('src/cy/commands/actions/click', () => {
           return { $container, $target }
         }
 
-        // asserted against the live geometry rather than pixel counts, since the
-        // offsets are subpixel-dependent across browsers
-        const port = ($container) => {
-          const el = $container[0]
-          const left = el.getBoundingClientRect().left + el.clientLeft
-
-          return { left, right: left + el.clientWidth }
-        }
-
         it('inline: \'start\' aligns the target\'s left edge to the container', () => {
           const { $container, $target } = buildScroller()
 
           cy.get('#scroller-target').click({ scrollBehavior: { inline: 'start' } }).then(() => {
-            expect($target[0].getBoundingClientRect().left, 'target left').to.be.closeTo(port($container).left, 5)
+            expect($target[0].getBoundingClientRect().left, 'target left').to.be.closeTo(scrollPort($container).left, 5)
           })
         })
 
@@ -1612,7 +1606,7 @@ describe('src/cy/commands/actions/click', () => {
           const { $container, $target } = buildScroller()
 
           cy.get('#scroller-target').click({ scrollBehavior: { inline: 'end' } }).then(() => {
-            expect($target[0].getBoundingClientRect().right, 'target right').to.be.closeTo(port($container).right, 5)
+            expect($target[0].getBoundingClientRect().right, 'target right').to.be.closeTo(scrollPort($container).right, 5)
           })
         })
 
@@ -1621,7 +1615,7 @@ describe('src/cy/commands/actions/click', () => {
 
           cy.get('#scroller-target').click({ scrollBehavior: { inline: 'center' } }).then(() => {
             const rect = $target[0].getBoundingClientRect()
-            const { left, right } = port($container)
+            const { left, right } = scrollPort($container)
 
             expect((rect.left + rect.right) / 2, 'target center').to.be.closeTo((left + right) / 2, 5)
           })
@@ -1633,7 +1627,77 @@ describe('src/cy/commands/actions/click', () => {
           // the target is off screen to the right, so the minimum scroll brings its
           // right edge to the container's right edge
           cy.get('#scroller-target').click({ scrollBehavior: { inline: 'nearest' } }).then(() => {
-            expect($target[0].getBoundingClientRect().right, 'target right').to.be.closeTo(port($container).right, 5)
+            expect($target[0].getBoundingClientRect().right, 'target right').to.be.closeTo(scrollPort($container).right, 5)
+          })
+        })
+      })
+
+      describe('block axis', () => {
+        // a target below the fold of a scrollable container, so each block position
+        // lands it somewhere different
+        const buildScroller = () => {
+          const $body = cy.$$('body')
+
+          $body.children().remove()
+
+          const $container = $('<div></div>')
+          .attr('id', 'v-scroller')
+          .css({ width: '300px', height: '300px', overflowY: 'scroll' })
+          .appendTo($body)
+
+          $('<div></div>').css({ height: '600px' }).appendTo($container)
+
+          const $target = $('<button id="v-scroller-target">target</button>')
+          .css({ display: 'block', height: '40px' })
+          .appendTo($container)
+
+          $('<div></div>').css({ height: '900px' }).appendTo($container)
+
+          return { $container, $target }
+        }
+
+        it('the default aligns the target\'s top edge to the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#v-scroller-target').click().then(() => {
+            expect($target[0].getBoundingClientRect().top, 'target top').to.be.closeTo(scrollPort($container).top, 5)
+          })
+        })
+
+        it('block: \'start\' aligns the target\'s top edge to the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#v-scroller-target').click({ scrollBehavior: { block: 'start' } }).then(() => {
+            expect($target[0].getBoundingClientRect().top, 'target top').to.be.closeTo(scrollPort($container).top, 5)
+          })
+        })
+
+        it('block: \'end\' aligns the target\'s bottom edge to the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#v-scroller-target').click({ scrollBehavior: { block: 'end' } }).then(() => {
+            expect($target[0].getBoundingClientRect().bottom, 'target bottom').to.be.closeTo(scrollPort($container).bottom, 5)
+          })
+        })
+
+        it('block: \'center\' centers the target in the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#v-scroller-target').click({ scrollBehavior: { block: 'center' } }).then(() => {
+            const rect = $target[0].getBoundingClientRect()
+            const { top, bottom } = scrollPort($container)
+
+            expect((rect.top + rect.bottom) / 2, 'target center').to.be.closeTo((top + bottom) / 2, 5)
+          })
+        })
+
+        it('block: \'nearest\' scrolls an off-screen target the minimum amount', () => {
+          const { $container, $target } = buildScroller()
+
+          // the target is below the fold, so the minimum scroll brings its bottom
+          // edge to the container's bottom edge
+          cy.get('#v-scroller-target').click({ scrollBehavior: { block: 'nearest' } }).then(() => {
+            expect($target[0].getBoundingClientRect().bottom, 'target bottom').to.be.closeTo(scrollPort($container).bottom, 5)
           })
         })
       })
