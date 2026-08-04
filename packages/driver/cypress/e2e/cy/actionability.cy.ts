@@ -7,6 +7,46 @@ describe('src/cy/actionability', () => {
   })
 
   describe('scrollBehavior', () => {
+    // mirrors the alignment table in `src/cy/actionability.ts`. An axis missing
+    // from the expectation is left out of the call so `scrollIntoView` applies
+    // its own default.
+    const alignments = {
+      top: { block: 'start' },
+      bottom: { block: 'end' },
+      start: { block: 'start', inline: 'start' },
+      end: { block: 'end', inline: 'end' },
+      center: { block: 'center', inline: 'center' },
+      nearest: { block: 'nearest', inline: 'nearest' },
+    }
+
+    describe('alignments', () => {
+      _.each(alignments, (expected, alignment) => {
+        it(`resolves '${alignment}' in options`, () => {
+          cy.get('input:first').then((el) => {
+            cy.spy(el[0], 'scrollIntoView')
+          })
+
+          cy.get('input:first').click({ scrollBehavior: alignment as any })
+
+          cy.get('input:first').then((el) => {
+            expect(el[0].scrollIntoView).calledWith(expected)
+          })
+        })
+
+        it(`resolves '${alignment}' in config`, { scrollBehavior: alignment as any }, () => {
+          cy.get('input:first').then((el) => {
+            cy.spy(el[0], 'scrollIntoView')
+          })
+
+          cy.get('input:first').click()
+
+          cy.get('input:first').then((el) => {
+            expect(el[0].scrollIntoView).calledWith(expected)
+          })
+        })
+      })
+    })
+
     it('does not scroll when scrollBehavior is false in options', () => {
       cy.get('input:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
@@ -16,42 +56,6 @@ describe('src/cy/actionability', () => {
 
       cy.get('input:first').then((el) => {
         expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
-      cy.get('input:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get('input:first').click()
-
-      cy.get('input:first').then((el) => {
-        expect(el[0].scrollIntoView).calledWith({ block: 'end' })
-      })
-    })
-
-    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
-      cy.get('input:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get('input:first').click()
-
-      cy.get('input:first').then((el) => {
-        expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'center' })
-      })
-    })
-
-    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
-      cy.get('input:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get('input:first').click()
-
-      cy.get('input:first').then((el) => {
-        expect(el[0].scrollIntoView).calledWith({ block: 'nearest', inline: 'nearest' })
       })
     })
 
@@ -76,30 +80,6 @@ describe('src/cy/actionability', () => {
 
       cy.get('input:first').then((el) => {
         expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
-      })
-    })
-
-    it('applies scrollBehavior start to both axes', () => {
-      cy.get('input:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get('input:first').click({ scrollBehavior: 'start' })
-
-      cy.get('input:first').then((el) => {
-        expect(el[0].scrollIntoView).calledWith({ block: 'start', inline: 'start' })
-      })
-    })
-
-    it('applies scrollBehavior end to both axes', { scrollBehavior: 'end' }, () => {
-      cy.get('input:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get('input:first').click()
-
-      cy.get('input:first').then((el) => {
-        expect(el[0].scrollIntoView).calledWith({ block: 'end', inline: 'end' })
       })
     })
 
