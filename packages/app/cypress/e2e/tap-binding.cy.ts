@@ -160,6 +160,7 @@ describe('tap binding', () => {
       const specView = await reporterResult(binding)
 
       expect(specView.spec).to.eq('cypress/e2e/dom-content.spec.js')
+      expect(specView.startedAt, 'the run this overview describes').to.be.a('string')
       expect(specView.stats).to.include({ passed: 1, failed: 0 })
       // The fixture's one test lives in a suite, so the overview groups it there
       // rather than listing it at the root.
@@ -849,9 +850,9 @@ describe('tap binding run lifecycle', () => {
       // run they refuse outright instead of answering for the one being replaced.
       const binding = getBinding(win)
       const refused = await Promise.all([
-        binding.exec('tests'),
-        binding.exec('commands', {}, { test: 'r1' }),
         binding.exec('reporter'),
+        binding.exec('command', { test: 'r1', command: '1' }),
+        binding.exec('pin', { test: 'r1', command: '1' }),
       ])
 
       for (const outcome of refused) {

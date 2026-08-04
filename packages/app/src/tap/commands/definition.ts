@@ -20,8 +20,8 @@ export class TapCommandError extends Error {
 /**
  * The domain failure every command that reads a run reports when there is no
  * run to read: none has been requested, or the requested one has not started
- * yet (its spec is still building). Shared so the four read commands answer a
- * poller with one wording.
+ * yet (its spec is still building). Shared so every command that reads a run
+ * answers a poller with one wording.
  */
 export const noRunError = (): TapCommandError => {
   return new TapCommandError('NO_RUN', 'no run to read — no spec run has started yet; use the run command, then poll status until it reports running')

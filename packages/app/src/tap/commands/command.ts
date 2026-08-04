@@ -1,5 +1,5 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
-import { defineCommand, TapCommandError } from './definition'
+import { defineCommand, noRunError, TapCommandError } from './definition'
 import { attemptSelectionError, resolveCommand, selectTestAttempt } from '../test-state'
 import type { CommandEntry, ConsolePropsResult } from '../types'
 
@@ -14,7 +14,7 @@ export const commandCommand = defineCommand('command', async (_params, options):
   const runner = tapManagerDataSource.getRunner()
 
   if (!runner) {
-    throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')
+    throw noRunError()
   }
 
   const selection = selectTestAttempt(runner, test, attempt)
