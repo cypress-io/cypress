@@ -938,6 +938,18 @@ commands:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full package suite
+        type: string
+        default: ''
+      record-group-suffix:
+        description: optional Cypress Cloud group name suffix (after -cdp when set)
+        type: string
+        default: ''
       guard:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
@@ -947,6 +959,7 @@ commands:
           guard: << parameters.guard >>
       - halt-unless-proxy-disabled-enabled:
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -978,12 +991,23 @@ commands:
               export CYPRESS_INTERNAL_DISABLE_PROXY=1
             fi
 
+            SPEC="<< parameters.spec >>"
+            GROUP_SUFFIX="<< parameters.record-group-suffix >>"
+
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               GROUP="<<parameters.package>>-<<parameters.type>>"
               if << parameters.disable-proxy >> ; then
                 GROUP="${GROUP}-cdp"
+              fi
+              if [[ -n "$GROUP_SUFFIX" ]]; then
+                GROUP="${GROUP}${GROUP_SUFFIX}"
+              fi
+
+              SPEC_ARGS=()
+              if [[ -n "$SPEC" ]]; then
+                SPEC_ARGS=(--spec "$SPEC")
               fi
 
               DEBUG=<<parameters.debug>> \
@@ -993,14 +1017,16 @@ commands:
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group "$GROUP"
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group "$GROUP" "${SPEC_ARGS[@]}"
             else
               # external PR
 
               # To make `circleci tests` work correctly, we need to step into the package folder.
               cd packages/<<parameters.package>>
 
-              if [[ <<parameters.type>> == 'ct' ]]; then
+              if [[ -n "$SPEC" ]]; then
+                TESTFILES="$SPEC"
+              elif [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
                 TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -1051,11 +1077,20 @@ commands:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional space-separated system-test paths; empty runs the full suite
+        type: string
+        default: ''
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
       - halt-unless-proxy-disabled-enabled:
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - when:
@@ -1109,16 +1144,21 @@ commands:
               export CYPRESS_INTERNAL_DISABLE_PROXY=1
             fi
 
-            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
-            SPECS=
-            for file in $ALL_SPECS; do
-              # filter out non_root tests, they have their own stage
-              if [[ "$file" == *"non_root"* ]]; then
-                echo "Skipping $file"
-                continue
-              fi
-              SPECS="$SPECS $file"
-            done
+            SPEC="<< parameters.spec >>"
+            if [[ -n "$SPEC" ]]; then
+              SPECS="$SPEC"
+            else
+              ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
+              SPECS=
+              for file in $ALL_SPECS; do
+                # filter out non_root tests, they have their own stage
+                if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                SPECS="$SPECS $file"
+              done
+            fi
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
@@ -1740,8 +1780,9 @@ commands:
 
   # When a job is invoked with disable-proxy: true, skip unless the opt-in
   # pipeline parameter was set (Trigger Pipeline → run-proxy-disabled-tests).
-  # Focused jobs that are known-green for a specific fix can set
-  # require-opt-in: false to always run when their path filter matches.
+  # Known-green subsets use name: *-cdp-remediated with require-opt-in: false
+  # so they always run when their path filter matches. When remediations cover
+  # the full suite, flip *-cdp to require-opt-in: false and delete *-cdp-remediated.
   halt-unless-proxy-disabled-enabled:
     parameters:
       disable-proxy:
@@ -2336,66 +2377,6 @@ jobs:
           command: |
             yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --expose expectedBrowserProtocol=1.1
 
-  # Focused CDP coverage for upstream HTTP_PROXY / NO_PROXY translation (#34351).
-  # Runs always when system tests are selected — not gated on run-proxy-disabled-tests.
-  system-tests-upstream-proxy-cdp:
-    <<: *defaults
-    resource_class: medium+.gen2
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-system-tests >>
-      - restore_cached_workspace
-      - restore_cached_system_tests_deps
-      - install-browsers:
-          install-chrome: true
-      - run:
-          name: Upstream proxy system tests with MITM disabled (chrome)
-          environment:
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
-            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
-          command: |
-            yarn workspace @tooling/system-tests test:ci \
-              test/network_error_handling_spec.js --browser chrome
-      - run:
-          name: Upstream proxy system tests with MITM disabled (electron)
-          environment:
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
-            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
-          command: |
-            yarn workspace @tooling/system-tests test:ci \
-              test/network_error_handling_spec.js --browser electron
-      - sanitize-verify-and-store-mocha-results
-
-  # Focused CDP coverage for strategy:file / fixture downloads (#34271).
-  # Runs always when system tests are selected — not gated on run-proxy-disabled-tests.
-  system-tests-downloads-cdp:
-    <<: *defaults
-    resource_class: medium+.gen2
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-system-tests >>
-      - restore_cached_workspace
-      - restore_cached_system_tests_deps
-      - install-browsers:
-          install-chrome: true
-      - run:
-          name: Downloads system tests with MITM disabled (chrome)
-          environment:
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
-            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
-          command: |
-            yarn workspace @tooling/system-tests test:ci \
-              test/downloads_spec.ts --browser chrome
-      - run:
-          name: Downloads system tests with MITM disabled (electron)
-          environment:
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
-            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
-          command: |
-            yarn workspace @tooling/system-tests test:ci \
-              test/downloads_spec.ts --browser electron
-      - sanitize-verify-and-store-mocha-results
-
   system-tests-node-modules-install:
     <<: *defaults
     steps:
@@ -2500,12 +2481,25 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional space-separated system-test paths; empty runs the full suite
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 8
     resource_class: medium+.gen2
-    parallelism: 8
+    parallelism: << parameters.parallelism >>
     steps:
       - run-system-tests:
           browser: chrome
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
+          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-electron:
@@ -2516,12 +2510,25 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional space-separated system-test paths; empty runs the full suite
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 8
     resource_class: medium+.gen2
-    parallelism: 8
+    parallelism: << parameters.parallelism >>
     steps:
       - run-system-tests:
           browser: electron
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
+          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-firefox:
@@ -2605,8 +2612,23 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full launchpad e2e suite
+        type: string
+        default: ''
+      record-group-suffix:
+        description: optional Cypress Cloud group name suffix (after -cdp when set)
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 3
     resource_class: << parameters.resource_class >>
-    parallelism: 3
+    parallelism: << parameters.parallelism >>
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2615,6 +2637,9 @@ jobs:
           package: launchpad
           type: e2e
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
+          spec: << parameters.spec >>
+          record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-launchpad-tests >>
 
   run-app-component-tests-chrome:
@@ -2652,8 +2677,23 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full app e2e suite
+        type: string
+        default: ''
+      record-group-suffix:
+        description: optional Cypress Cloud group name suffix (after -cdp when set)
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 8
     resource_class: << parameters.resource_class >>
-    parallelism: 8
+    parallelism: << parameters.parallelism >>
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2662,6 +2702,9 @@ jobs:
           package: app
           type: e2e
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
+          spec: << parameters.spec >>
+          record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-app-ui-tests >>
 
   driver-integration-tests-chrome:
@@ -2684,7 +2727,10 @@ jobs:
         description: optional Cypress Cloud group name suffix
         type: string
         default: ''
-    parallelism: 5
+      parallelism:
+        type: integer
+        default: 5
+    parallelism: << parameters.parallelism >>
     resource_class: medium+.gen2
     steps:
       - run-driver-integration-tests:
@@ -2752,12 +2798,30 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
+      spec:
+        description: optional Cypress --spec glob(s); empty runs the full driver suite
+        type: string
+        default: ''
+      record-group-suffix:
+        description: optional Cypress Cloud group name suffix
+        type: string
+        default: ''
+      parallelism:
+        type: integer
+        default: 5
     resource_class: medium+.gen2
-    parallelism: 5
+    parallelism: << parameters.parallelism >>
     steps:
       - run-driver-integration-tests:
           browser: electron
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
+          spec: << parameters.spec >>
+          record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-webkit:

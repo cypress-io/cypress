@@ -272,23 +272,39 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Focused proxy-disabled jobs for known-green CDP Fetch remediations.
-  # Always run when their path filters match (not gated on run-proxy-disabled-tests).
-  - system-tests-upstream-proxy-cdp:
+  # Proxy-disabled CDP remediations (*-cdp-remediated): known-green subsets that
+  # always run when their path filters match (require-opt-in: false). Append
+  # specs here as fixes land. When a remediations list covers the full suite,
+  # flip the matching *-cdp job to always-on and delete *-cdp-remediated.
+  - system-tests-chrome:
+      name: system-tests-chrome-cdp-remediated
       context: test-runner:performance-tracking
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts
       requires:
         - system-tests-node-modules-install
-  - system-tests-downloads-cdp:
+  - system-tests-electron:
+      name: system-tests-electron-cdp-remediated
       context: test-runner:performance-tracking
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts
       requires:
         - system-tests-node-modules-install
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
 
-  # Full proxy-disabled (CDP Fetch) coverage — off by default.
+  # Full proxy-disabled (CDP Fetch) coverage (*-cdp) — off by default.
   # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
-  # Still omitted from all-jobs-passed so failures stay non-blocking when enabled.
+  # Omitted from all-jobs-passed so failures stay non-blocking when enabled.
+  # Promote known-green specs into *-cdp-remediated above rather than flipping
+  # these full suites on until remediations cover the entire suite.
   - driver-integration-tests-chrome:
       name: driver-integration-tests-chrome-cdp
       context: test-runner:cypress-record-key
@@ -454,7 +470,7 @@ jobs:
   # Required jobs fan into this one. Jobs that halt early (pipeline parameter
   # false) still complete successfully. Full proxy-disabled *-cdp jobs above are
   # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate;
-  # focused CDP jobs for known-green fixes are included.
+  # *-cdp-remediated known-green subsets are included.
   - all-jobs-passed:
       requires:
         # Always-run jobs
@@ -475,8 +491,8 @@ jobs:
         - system-tests-webkit
         - system-tests-non-root
         - h2-dual-stack-tests
-        - system-tests-upstream-proxy-cdp
-        - system-tests-downloads-cdp
+        - system-tests-chrome-cdp-remediated
+        - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
