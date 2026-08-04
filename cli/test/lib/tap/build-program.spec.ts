@@ -241,15 +241,15 @@ describe('lib/tap/build-program', () => {
     const help = subcommand(program, 'command').helpInformation()
 
     expect(help).toContain('--depth <depth>')
-    expect(help).toContain('--path <path>')
+    expect(help).not.toContain('--path')
 
-    program.parse(['command', '--test', 'r2', '--command', '3', '--depth', '2', '--path', 'Response>headers'], { from: 'user' })
+    program.parse(['command', '--test', 'r2', '--command', '3', '--depth', '2'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith(
       'command',
       {},
       { test: 'r2', command: '3' },
-      { depth: '2', path: 'Response>headers' },
+      { depth: '2' },
     )
   })
 

@@ -298,20 +298,5 @@ describe('lib/tap/render/command', () => {
             log      true"
       `)
     })
-
-    it('drills into one section of the properties with --path', () => {
-      expect(renderEntry(withProps, { path: 'Options' })).toMatchInlineSnapshot(`
-        "TEST BODY · r2
-        ✓  2  get  #user  passed
-
-        SNAPSHOTS (1)
-          #  NAME    TIME
-          1  before  14:03:22.481
-
-        CONSOLE PROPS › Options
-          timeout  4000
-          log      true"
-      `)
-    })
   })
 })

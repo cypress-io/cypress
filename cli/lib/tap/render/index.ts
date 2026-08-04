@@ -51,7 +51,6 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
     renderHuman: (result, options) => {
       return renderCommandHuman(result as TapCommandResult, {
         depth: options.depth,
-        path: options.path,
       })
     },
   },
