@@ -25,8 +25,6 @@ import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
 
-export { normalizeResourceType }
-
 export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
@@ -297,19 +295,21 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     return _.get(cookies, 0, null)
   }
 
-  private _updateFrameTree = (client: CriClient, eventName) => async () => {
-    debugVerbose(`update frame tree for ${eventName}`)
+  private _updateFrameTree = (client: CriClient, eventName) => {
+    return async () => {
+      debugVerbose(`update frame tree for ${eventName}`)
 
-    this.gettingFrameTree = (async () => {
-      try {
-        this.frameTree = (await client.send('Page.getFrameTree')).frameTree
-        debugVerbose('frame tree updated')
-      } catch (err) {
-        debugVerbose('failed to update frame tree:', err.stack)
-      } finally {
-        this.gettingFrameTree = null
-      }
-    })()
+      this.gettingFrameTree = (async () => {
+        try {
+          this.frameTree = (await client.send('Page.getFrameTree')).frameTree
+          debugVerbose('frame tree updated')
+        } catch (err) {
+          debugVerbose('failed to update frame tree:', err.stack)
+        } finally {
+          this.gettingFrameTree = null
+        }
+      })()
+    }
   }
 
   private _continueRequest = (client, params, header?) => {

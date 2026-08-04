@@ -395,11 +395,7 @@ describe('CdpFetchTransport', () => {
         return next(req)
       })
 
-      for (const [cdpType, expected] of [
-        ['XHR', 'xhr'],
-        ['Fetch', 'fetch'],
-        ['Document', 'other'],
-      ] as const) {
+      for (const cdpType of ['XHR', 'Fetch', 'Document'] as const) {
         const request = createPausedRequest({
           requestId: `fetch-${cdpType}`,
           networkId: `network-${cdpType}`,
@@ -417,9 +413,9 @@ describe('CdpFetchTransport', () => {
         await tick()
         await onRequestPaused(response)
         await handled
-
-        expect(seenResourceTypes).to.include(expected)
       }
+
+      expect(seenResourceTypes).to.deep.equal(['xhr', 'fetch', 'other'])
     })
 
     it('strips a previously injected AUT frame header on redirect re-pause', async () => {

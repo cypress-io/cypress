@@ -109,7 +109,7 @@ if (options.fgrep) {
   commandAndArguments.args.push(
     '--fgrep',
     // Shell-joined below; quote so multi-word filters stay one mocha arg.
-    `"${String(options.fgrep).replace(/"/g, '\\"')}"`,
+    `'${String(options.fgrep).replace(/'/g, `'\\''`)}'`,
   )
 }
 
