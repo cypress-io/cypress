@@ -2345,6 +2345,25 @@ jobs:
           command: |
             yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --expose expectedBrowserProtocol=1.1
 
+  # Focused CDP coverage for the Invalid InterceptionId body-stream crash (#34353).
+  # Runs always when launchpad tests are selected — not gated on run-proxy-disabled-tests.
+  launchpad-open-mode-cdp:
+    <<: *defaults
+    resource_class: large.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-launchpad-tests >>
+      - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Launchpad open-mode with MITM disabled (chrome)
+          environment:
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @packages/launchpad cypress:run:e2e --browser chrome \
+              --spec cypress/e2e/choose-a-browser.cy.ts,cypress/e2e/open-mode.cy.ts
+
   # Focused CDP coverage for upstream HTTP_PROXY / NO_PROXY translation (#34351).
   # Runs always when system tests are selected — not gated on run-proxy-disabled-tests.
   system-tests-upstream-proxy-cdp:
