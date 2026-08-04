@@ -1659,8 +1659,10 @@ describe('src/cy/commands/actions/click', () => {
           })
         })
 
+        // cast because the types already reject this; the assertion is that the
+        // runtime validation rejects it too
         it('rejects a block alignment on an axis', () => {
-          expect(() => Cypress.config('scrollBehavior', { block: 'top' }))
+          expect(() => Cypress.config('scrollBehavior', { block: 'top' } as any))
           .to.throw('Expected `scrollBehavior.block` to be one of these values: "center", "start", "end", "nearest" (use "start" instead of "top")')
         })
       })
