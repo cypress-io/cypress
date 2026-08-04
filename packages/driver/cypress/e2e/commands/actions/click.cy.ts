@@ -1563,6 +1563,106 @@ describe('src/cy/commands/actions/click', () => {
             expect($container[0].scrollLeft, 'container scrollLeft').to.be.greaterThan(0)
           })
         })
+
+        // a target off screen to the right of a scrollable container, so each inline
+        // position lands it somewhere different
+        const buildScroller = () => {
+          const $body = cy.$$('body')
+
+          $body.children().remove()
+
+          const $container = $('<div></div>')
+          .attr('id', 'scroller')
+          .css({ width: '400px', height: '120px', overflowX: 'scroll' })
+          .appendTo($body)
+
+          const $row = $('<div></div>')
+          .css({ width: '1600px', height: '90px', display: 'flex' })
+          .appendTo($container)
+
+          $('<div></div>').css({ width: '600px', flex: '0 0 600px' }).appendTo($row)
+
+          const $target = $('<button id="scroller-target">target</button>')
+          .css({ width: '100px', flex: '0 0 100px' })
+          .appendTo($row)
+
+          $('<div></div>').css({ width: '900px', flex: '0 0 900px' }).appendTo($row)
+
+          return { $container, $target }
+        }
+
+        // asserted against the live geometry rather than pixel counts, since the
+        // offsets are subpixel-dependent across browsers
+        const port = ($container) => {
+          const el = $container[0]
+          const left = el.getBoundingClientRect().left + el.clientLeft
+
+          return { left, right: left + el.clientWidth }
+        }
+
+        it('inline: \'start\' aligns the target\'s left edge to the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#scroller-target').click({ scrollBehavior: { inline: 'start' } }).then(() => {
+            expect($target[0].getBoundingClientRect().left, 'target left').to.be.closeTo(port($container).left, 5)
+          })
+        })
+
+        it('inline: \'end\' aligns the target\'s right edge to the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#scroller-target').click({ scrollBehavior: { inline: 'end' } }).then(() => {
+            expect($target[0].getBoundingClientRect().right, 'target right').to.be.closeTo(port($container).right, 5)
+          })
+        })
+
+        it('inline: \'center\' centers the target in the container', () => {
+          const { $container, $target } = buildScroller()
+
+          cy.get('#scroller-target').click({ scrollBehavior: { inline: 'center' } }).then(() => {
+            const rect = $target[0].getBoundingClientRect()
+            const { left, right } = port($container)
+
+            expect((rect.left + rect.right) / 2, 'target center').to.be.closeTo((left + right) / 2, 5)
+          })
+        })
+
+        it('inline: \'nearest\' scrolls an off-screen target the minimum amount', () => {
+          const { $container, $target } = buildScroller()
+
+          // the target is off screen to the right, so the minimum scroll brings its
+          // right edge to the container's right edge
+          cy.get('#scroller-target').click({ scrollBehavior: { inline: 'nearest' } }).then(() => {
+            expect($target[0].getBoundingClientRect().right, 'target right').to.be.closeTo(port($container).right, 5)
+          })
+        })
+      })
+
+      describe('Cypress.config', () => {
+        afterEach(() => {
+          Cypress.config('scrollBehavior', 'top')
+        })
+
+        it('accepts a per-axis value at runtime', () => {
+          Cypress.config('scrollBehavior', { block: 'center', inline: 'start' })
+
+          expect(Cypress.config('scrollBehavior')).to.deep.eq({ block: 'center', inline: 'start' })
+
+          cy.get('input:first').then((el) => {
+            cy.spy(el[0], 'scrollIntoView')
+          })
+
+          cy.get('input:first').click()
+
+          cy.get('input:first').then((el) => {
+            expect(el[0].scrollIntoView).calledWith({ block: 'center', inline: 'start' })
+          })
+        })
+
+        it('rejects a block alignment on an axis', () => {
+          expect(() => Cypress.config('scrollBehavior', { block: 'top' }))
+          .to.throw('Expected `scrollBehavior.block` to be one of these values: "center", "start", "end", "nearest" (use "start" instead of "top")')
+        })
       })
 
       it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
