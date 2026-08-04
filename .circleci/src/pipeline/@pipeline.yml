@@ -1824,8 +1824,9 @@ jobs:
             node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
 
-  lint:
+  check-lockfile:
     <<: *defaults
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - run:
@@ -1838,6 +1839,14 @@ jobs:
               echo "Run 'yarn-deduplicate --strategy=highest' and commit the resulting yarn.lock."
               exit 1
             fi
+      - run:
+          name: Check yarn.lock matches resolved dependencies 🔒
+          command: yarn check-lockfile-drift
+
+  lint:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
       - run:
           name: Linting 🧹
           command: |
