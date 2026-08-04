@@ -1,5 +1,5 @@
 import type { TapStatus } from '../types'
-import { color, countsLine, layout, stateBadge, titleLine } from './format'
+import { color, countsLine, layout, startedAtLabel, stateBadge, titleLine } from './format'
 import { instanceColumns } from './instances'
 import { pinnedBlock } from './pinned'
 
@@ -13,12 +13,17 @@ const PHASE = {
 
 const phaseOf = (status: string) => PHASE[status as keyof typeof PHASE] ?? { icon: color.muted('●'), tint: color.muted }
 
-// Where the instance is: the selected spec led by its phase icon, or — before a
-// spec is selected — the phase on its own.
+// Where the instance is: the selected spec led by its phase icon and trailed by
+// the run's start time, or — before a spec is selected — the phase on its own.
+// The icon carries the phase over a spec, so the line doesn't also spell it out.
 const phaseLine = (status: TapStatus): string => {
   const { icon, tint } = phaseOf(status.status)
 
-  return status.spec ? titleLine(icon, status.spec, tint(status.status)) : `${icon} ${tint(status.status)}`
+  if (!status.spec) {
+    return `${icon} ${tint(status.status)}`
+  }
+
+  return titleLine(icon, status.spec, status.startedAt ? startedAtLabel(status.startedAt) : undefined)
 }
 
 export const renderStatusHuman = (status: TapStatus): string => {

@@ -337,6 +337,18 @@ describe('tap/commands/reporter', () => {
       expect(suites[2].tests[0].state).to.eq('skipped')
     })
 
+    it('names the run the view describes with the driver’s start time', async () => {
+      const start = new Date('2026-01-01T00:00:00.000Z')
+
+      stubRunner(treeRunner({ getStartTime: () => start.toISOString() }))
+      stubSpec('cypress/e2e/actions.cy.js')
+      cy.stub(Date, 'now').returns(start.getTime() + 17400)
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
+
+      expect((outcome as { result: { startedAt: string } }).result.startedAt).to.eq('2026-01-01T00:00:00.000Z')
+    })
+
     it('measures a running spec’s duration from the run start to now', async () => {
       const start = new Date('2026-01-01T00:00:00.000Z')
 

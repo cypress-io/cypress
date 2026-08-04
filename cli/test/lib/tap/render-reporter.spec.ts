@@ -4,6 +4,10 @@ import stripAnsi from 'strip-ansi'
 import { renderReporterHuman, renderReporterSpecHuman } from '../../../lib/tap/render/reporter'
 import type { TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
 
+// The run start time renders against the terminal's own clock, so pin the zone
+// the snapshots are written in.
+process.env.TZ = 'UTC'
+
 // chalk's color level depends on where the suite runs, so strip any escape
 // codes before snapshotting — the assertions target the layout, not the colors.
 const renderPlain = (input: TapReporterView): string => stripAnsi(renderReporterHuman(input))
@@ -174,6 +178,7 @@ describe('lib/tap/render/reporter spec overview', () => {
   it('renders the spec header, stats, and the suite sections with per-state icons', () => {
     const view: TapReporterSpecView = {
       spec: 'cypress/e2e/actions.cy.js',
+      startedAt: '2026-07-29T10:15:00.000Z',
       stats: { passed: 2, failed: 1, pending: 1, skipped: 1, duration: 17400 },
       tests: [{ id: 't1', title: 'root test', state: 'passed', duration: 20 }],
       suites: [
@@ -204,7 +209,7 @@ describe('lib/tap/render/reporter spec overview', () => {
     }
 
     expect(renderSpecPlain(view)).toMatchInlineSnapshot(`
-      "cypress/e2e/actions.cy.js
+      "cypress/e2e/actions.cy.js  (started at 10:15:00 AM)
       ✓ 2  ✖ 1  ○ 1  - 1  00:17
 
          t1  ✓ root test  20ms
