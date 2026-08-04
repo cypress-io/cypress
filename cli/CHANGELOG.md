@@ -1,4 +1,11 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.20.1
+
+**Bugfixes:**
+
+- Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
+
+
 ## 15.20.0
 
 **Performance:**
