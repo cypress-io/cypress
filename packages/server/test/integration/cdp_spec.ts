@@ -6,7 +6,6 @@ import WebSocket from 'ws'
 import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp-protocol/cdp_automation'
 import { CriClient } from '../../lib/browsers/cdp-protocol/cri-client'
 import { expect, nock } from '../spec_helper'
-import pDefer from 'p-defer'
 import sinon from 'sinon'
 
 const debug = Debug('cypress:server:tests')
@@ -28,7 +27,7 @@ describe('CDP Clients', () => {
   let wsClient: WebSocket
   let messages: object[]
   let onMessage: sinon.SinonStub
-  let messageResponse: ReturnType<typeof pDefer> | undefined
+  let messageResponse: ReturnType<typeof Promise.withResolvers> | undefined
   let neverAck: boolean
 
   const startWsServer = async (onConnection?: OnWSConnection): Promise<WebSocket.Server> => {
@@ -122,11 +121,11 @@ describe('CDP Clients', () => {
   it('properly handles various ways to add event listeners', async () => {
     const sessionId = 'abc123'
     const method = `Network.responseReceived`
-    const sessionDeferred = pDefer<void>()
+    const sessionDeferred = Promise.withResolvers<void>()
     const sessionCb = sinon.stub().callsFake(sessionDeferred.resolve)
-    const eventDeferred = pDefer<void>()
+    const eventDeferred = Promise.withResolvers<void>()
     const eventCb = sinon.stub().callsFake(eventDeferred.resolve)
-    const globalDeferred = pDefer<void>()
+    const globalDeferred = Promise.withResolvers<void>()
     const globalCb = sinon.stub().callsFake(globalDeferred.resolve)
     const params = { foo: 'bar' }
 
@@ -268,8 +267,8 @@ describe('CDP Clients', () => {
         command: 'DOM.getDocument',
         params: { depth: -1 },
       }
-      let reconnectPromise = pDefer()
-      let commandSent = pDefer()
+      let reconnectPromise = Promise.withResolvers()
+      let commandSent = Promise.withResolvers()
       const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {
         wsSrv = await startWsServer((ws) => {
         })
@@ -295,7 +294,7 @@ describe('CDP Clients', () => {
       await commandSent.promise
       await Promise.all([clientDisconnected(), closeWsServer()])
 
-      commandSent = pDefer()
+      commandSent = Promise.withResolvers()
       onMessage.resetHistory()
 
       reconnectOnThirdTry.resetHistory()
@@ -306,10 +305,10 @@ describe('CDP Clients', () => {
 
       reconnectOnThirdTry.resetHistory()
 
-      reconnectPromise = pDefer()
+      reconnectPromise = Promise.withResolvers()
 
       // set up response value
-      messageResponse = pDefer()
+      messageResponse = Promise.withResolvers()
 
       neverAck = false
 
@@ -323,8 +322,8 @@ describe('CDP Clients', () => {
     })
 
     it('reattaches subscriptions, reenables enablements, and sends pending commands on reconnect', async () => {
-      let reconnectPromise = pDefer()
-      let commandSent = pDefer()
+      let reconnectPromise = Promise.withResolvers()
+      let commandSent = Promise.withResolvers()
       let wsClient
       const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {
         wsSrv = await startWsServer((ws) => {
@@ -388,7 +387,7 @@ describe('CDP Clients', () => {
       neverAck = true
       // send each command, and wait for them to be sent (but not responded to)
       for (let i = 0; i < commandsToEnqueue.length; i++) {
-        commandSent = pDefer()
+        commandSent = Promise.withResolvers()
         const command = commandsToEnqueue[i]
 
         commandsToEnqueue[i].promise = criClient.send(command.command, command.params)
@@ -434,7 +433,7 @@ describe('CDP Clients', () => {
       // for full integration, send events that should be subscribed to, and expect that subscription
       // callback to be called
       for (const { eventName, cb, mockEvent } of subscriptions) {
-        const deferred = pDefer()
+        const deferred = Promise.withResolvers()
 
         cb.onFirstCall().callsFake(deferred.resolve)
         wsClient.send(JSON.stringify({

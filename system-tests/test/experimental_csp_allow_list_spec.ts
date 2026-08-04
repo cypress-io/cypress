@@ -110,6 +110,7 @@ describe('e2e experimentalCspAllowList', () => {
         videoCompression: false,
         retries: 0,
         experimentalCspAllowList: ['form-action'],
+        screenshotOnRunFailure: false,
       },
     })
   })

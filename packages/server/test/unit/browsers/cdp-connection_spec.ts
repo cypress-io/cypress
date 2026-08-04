@@ -5,7 +5,6 @@ import type { CdpEvent, CdpCommand } from '../../../lib/browsers/cdp-protocol/cd
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { CDPTerminatedError, CDPAlreadyConnectedError, CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'
 import WebSocket from 'ws'
-import pDefer, { DeferredPromise } from 'p-defer'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
@@ -303,7 +302,7 @@ describe('CDPConnection', () => {
   })
 
   describe('when created with auto reconnect behavior enabled and disconnected', () => {
-    let deferredReconnection: DeferredPromise<any>
+    let deferredReconnection: PromiseWithResolvers<any>
 
     beforeEach(async () => {
       cdpConnection = new CDPConnection({
@@ -315,7 +314,7 @@ describe('CDPConnection', () => {
       cdpConnection.addConnectionEventListener('cdp-connection-reconnect-attempt', onReconnectAttemptCb)
       cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', onReconnectErrCb)
 
-      deferredReconnection = pDefer()
+      deferredReconnection = Promise.withResolvers()
       onReconnectCb.callsFake(() => deferredReconnection.resolve())
       onReconnectErrCb.callsFake(() => deferredReconnection.reject())
       CDPImport.withArgs({ target: DEBUGGER_URL, local: true }).resolves(stubbedCDPClient)

@@ -5,7 +5,7 @@ import humanInterval from 'human-interval'
 import _ from 'lodash'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import { connect } from '@packages/network'
 import * as protocol from '../../../lib/browsers/protocol'
 

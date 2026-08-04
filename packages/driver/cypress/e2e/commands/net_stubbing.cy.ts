@@ -315,6 +315,21 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.wait('@create')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/28282
+    it('QUERY method shorthand is treated as a method, not a url', () => {
+      cy.intercept('QUERY', '/query-only', { statusCode: 200, body: 'ok' }).as('query')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/query-only", {
+            method: 'QUERY',
+          });`,
+        )
+      })
+
+      cy.wait('@query').its('request.method').should('eq', 'QUERY')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/16117
     it('can statically stub a url response with headers', () => {
       cy.intercept('/url', { headers: { foo: 'bar' }, body: 'something' })
@@ -2213,6 +2228,7 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     context('body parsing', function () {
+      // `/post-only` is shared by other tests here, including one that fires a `GET /post-only`
       [
         ['application/json', '{"foo":"bar"}'],
         ['application/vnd.api+json', '{}'],
@@ -2220,7 +2236,7 @@ describe('network stubbing', { retries: 15 }, function () {
         it(`automatically parses ${contentType} request bodies`, function () {
           const p = Promise.defer()
 
-          cy.intercept('/post-only', (req) => {
+          cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
             expect(req.headers['content-type']).to.eq(contentType)
             expect(req.body).to.deep.eq({ foo: 'bar' })
 
@@ -2245,7 +2261,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
         const p = Promise.defer()
 
-        cy.intercept('/post-only', (req) => {
+        cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
           expect(req.body).to.deep.eq(JSON.stringify({ foo: 'bar' }))
 
           p.resolve()
@@ -2264,7 +2280,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('sets body to string if JSON is malformed', function () {
         const p = Promise.defer()
 
-        cy.intercept('/post-only*', (req) => {
+        cy.intercept({ method: 'POST', url: '/post-only*' }, (req) => {
           expect(req.body).to.deep.eq('{ foo::: }')
 
           p.resolve()

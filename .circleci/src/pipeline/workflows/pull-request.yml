@@ -60,6 +60,10 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
+  - check-lockfile:
+      requires:
+        - internal-pr-build
+        - external-pr-build
   - check-ts:
       requires:
         - internal-pr-build
@@ -296,6 +300,22 @@ jobs:
       spec: test/network_error_handling_spec.js test/downloads_spec.ts
       requires:
         - system-tests-node-modules-install
+  - run-launchpad-integration-tests-chrome:
+      name: run-launchpad-integration-tests-chrome-cdp-remediated
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      record-group-suffix: '-remediated'
+      # #34353 Invalid InterceptionId body-stream crash
+      spec: cypress/e2e/choose-a-browser.cy.ts,cypress/e2e/open-mode.cy.ts
+      requires:
+        - ready-to-test
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
@@ -475,6 +495,7 @@ jobs:
       requires:
         # Always-run jobs
         - linux-lint
+        - check-lockfile
         - check-ts
         - health-check
         - lint-types
@@ -494,6 +515,7 @@ jobs:
         - system-tests-chrome-cdp-remediated
         - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
+        - run-launchpad-integration-tests-chrome-cdp-remediated
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta
