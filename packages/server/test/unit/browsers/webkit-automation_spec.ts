@@ -2,6 +2,7 @@ import '../../spec_helper'
 import { expect } from 'chai'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import type { RunModeVideoApi } from '@packages/types'
+import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 // builds a minimal mock of the Playwright objects WebKitAutomation interacts with
 function createMockBrowser () {
@@ -220,6 +221,58 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
       expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+    })
+
+    const runnerFrame = (name: string): any => ({
+      name: () => name,
+      url: () => 'about:blank',
+      title: sinon.stub().resolves(''),
+      childFrames: () => [],
+    })
+
+    it('falls back to the only child frame the runner does not own', async () => {
+      const wk = await createAutomation()
+
+      const aut: any = {
+        name: () => '',
+        url: () => 'http://localhost:3000/fallback.html',
+        title: sinon.stub().resolves('Fallback'),
+        childFrames: () => [],
+      }
+
+      mock.getLastPage().mainFrame = () => ({
+        childFrames: () => [
+          runnerFrame(REPORTER_FRAME_NAME),
+          aut,
+          runnerFrame(`${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 0: 'some-project'`),
+          runnerFrame(`${SPEC_FRAME_NAME_IDENTIFIER}: '/__cypress/iframes/spec.js'`),
+        ],
+      })
+
+      expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
+      expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+    })
+
+    it('fails rather than picking a runner frame when the AUT frame is gone', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastPage().mainFrame = () => ({
+        childFrames: () => [
+          runnerFrame(REPORTER_FRAME_NAME),
+          runnerFrame(`${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - 0: 'some-project'`),
+          runnerFrame(`${SPEC_FRAME_NAME_IDENTIFIER}: '/__cypress/iframes/spec.js'`),
+        ],
+      })
+
+      let error: Error | undefined
+
+      try {
+        await wk.onRequest('get:aut:url', {})
+      } catch (err) {
+        error = err
+      }
+
+      expect(error?.message).to.include('Could not find AUT frame')
     })
 
     it('throws when no AUT frame can be found', async () => {

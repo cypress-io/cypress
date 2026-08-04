@@ -24,6 +24,8 @@ type Method =
   | 'PROPPATCH'
   | 'PURGE'
   | 'PUT'
+  // QUERY is not yet in the upstream DefinitelyTyped list; keep it when re-syncing.
+  | 'QUERY'
   | 'REBIND'
   | 'REPORT'
   | 'SEARCH'
@@ -58,6 +60,7 @@ type Method =
   | 'proppatch'
   | 'purge'
   | 'put'
+  | 'query'
   | 'rebind'
   | 'report'
   | 'search'
