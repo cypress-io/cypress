@@ -285,13 +285,26 @@ describe('lib/exec/tap', () => {
   })
 
   describe('help', () => {
-    it('prints the schema-derived overview for a bare invocation and exits 1', async () => {
+    it('prints the schema-derived overview for a bare invocation and exits 0', async () => {
       mockSession()
 
-      expect(await tap.start([], {})).toBe(1)
+      expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).toContain('health')
       expect(logger.print()).toContain('fake-command-for-testing [options] <spec>')
+    })
+
+    // A bare invocation and --help print the same help, so they answer the same.
+    it('answers a bare invocation exactly as it answers --help', async () => {
+      mockSession()
+      const bareCode = await tap.start([], {})
+      const bareOutput = logger.print()
+
+      logger.reset()
+      mockSession()
+
+      expect(await tap.start(['--help'], {})).toBe(bareCode)
+      expect(logger.print()).toBe(bareOutput)
     })
 
     it('prints the overview and exits 0 for an explicit --help', async () => {
@@ -1157,10 +1170,10 @@ describe('lib/exec/tap', () => {
       `)
     })
 
-    it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {
+    it('falls back to generic help (exit 0) for a bare invocation with no instance found', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
-      expect(await tap.start([], {})).toBe(1)
+      expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
@@ -1188,10 +1201,10 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).not.toContain('STALE_INSTANCE')
     })
 
-    it('falls back to generic help (exit 1) for a bare invocation when an instance is up but has no browser', async () => {
+    it('falls back to generic help (exit 0) for a bare invocation when an instance is up but has no browser', async () => {
       failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
-      expect(await tap.start([], {})).toBe(1)
+      expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
     })
