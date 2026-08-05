@@ -4,5 +4,8 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "resolutions": {
+    "form-data": "2.5.4"
+  }
 }
