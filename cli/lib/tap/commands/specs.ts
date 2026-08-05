@@ -16,6 +16,19 @@ export interface TapSpecEntry {
   lastModifiedTimestamp?: string
 }
 
+const modifiedAt = (spec: TapSpecEntry): number => {
+  const parsed = spec.lastModifiedTimestamp === undefined ? NaN : Date.parse(spec.lastModifiedTimestamp)
+
+  return Number.isNaN(parsed) ? -Infinity : parsed
+}
+
+const byMostRecentlyModified = (a: TapSpecEntry, b: TapSpecEntry): number => {
+  const left = modifiedAt(a)
+  const right = modifiedAt(b)
+
+  return left === right ? 0 : right - left
+}
+
 // `TapSpecsQuery` is the schema shape, but the value crosses the wire unvalidated,
 // so entries are guarded against nulls and non-string fields before rendering.
 const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
@@ -33,6 +46,7 @@ const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
         ...(typeof lastModifiedTimestamp === 'string' ? { lastModifiedTimestamp } : {}),
       }
     })
+    .sort(byMostRecentlyModified)
 }
 
 const listSpecs = async (options: TapCliOptions): Promise<number> => {

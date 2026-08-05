@@ -215,8 +215,9 @@ passed, failed.`,
 
 const specsMeta = {
   name: 'specs',
-  description: 'list the specs the running Cypress instance can run',
-  details: `Lists the specs the running Cypress instance can run. To find other testing types you must open a new cypress instance with that testing type specified.`,
+  description: 'list the specs the running Cypress instance can run, most recently modified first',
+  details: `Lists the specs the connected Cypress instance can run, in descending order by last modified. To find other testing types you must open a new
+cypress instance with that testing type specified.`,
 } as const satisfies TapNativeCommandSchema
 
 const domMeta = {

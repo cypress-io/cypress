@@ -54,7 +54,7 @@ const routesTable = (routes: TapReporterView['routes']): string[] => {
       route.method ?? '',
       route.url ?? '',
       route.stubbed ? 'yes' : 'no',
-      route.alias ? `@${route.alias}` : '',
+      route.alias ?? '',
       route.numResponses ? String(route.numResponses) : '-',
     ]
   })
@@ -273,11 +273,13 @@ const renderSpecTests = (tests: TapReporterSpecTest[], indent: string): string[]
 }
 
 // The app reporter renders each suite as its own section headed by the full
-// suite path — depth shows in the breadcrumb, not in indentation — styled here
-// like the single-test view's hook section titles. The wire shape is already
-// flattened that way: one entry per suite with direct tests, title pre-joined.
+// suite path — depth shows in the breadcrumb, not in indentation. The wire shape
+// is already flattened that way: one entry per suite with direct tests, title
+// pre-joined. Titles keep the case the spec wrote them in, so they can be pasted
+// into a case-sensitive search; only the hook sections are upper-cased, since
+// those names are ours rather than the author's.
 const specSuiteSections = (suites: TapReporterSuite[]): string[][] => {
-  return suites.map((suite) => [heading(suite.title.toUpperCase()), ...renderSpecTests(suite.tests, '  ')])
+  return suites.map((suite) => [heading(suite.title), ...renderSpecTests(suite.tests, '  ')])
 }
 
 export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {

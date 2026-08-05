@@ -81,9 +81,9 @@ describe('lib/tap/render/reporter', () => {
         stub-1  boop                 -
 
       ROUTES (2)
-        METHOD  MATCHER        STUBBED  ALIAS        #
-        GET     **/comments/*  no       @getComment  -
-        PUT     **/comments/*  yes      @putComment  1
+        METHOD  MATCHER        STUBBED  ALIAS       #
+        GET     **/comments/*  no       getComment  -
+        PUT     **/comments/*  yes      putComment  1
 
       BEFORE EACH · h1
          1  visit  http://localhost:8080/commands/network-requests
@@ -91,13 +91,13 @@ describe('lib/tap/render/reporter', () => {
       TEST BODY · r8
          1  get      .network-btn
          2  -click
-        e1    (xhr) ● GET 200 https://jsonplaceholder.cypress.io/comments/1  @getComment
+        e1    (xhr) ● GET 200 https://jsonplaceholder.cypress.io/comments/1  getComment
          3  wait     @getComment
          4  -assert  expected 200 to be one of [ 200, 304 ]
-        e2    (xhr) ● PUT 404 https://jsonplaceholder.cypress.io/comments/1  @putComment  (stubbed)
+        e2    (xhr) ● PUT 404 https://jsonplaceholder.cypress.io/comments/1  putComment  (stubbed)
          5  get      .network-put-comment ✖
          6    session  user
-        e3    (spy-1) beep()  @beep
+        e3    (spy-1) beep()  beep
          7  get      @beep
          8  wrap     { table: 1 }
          9  -as      table  @table
@@ -176,16 +176,18 @@ describe('lib/tap/render/reporter spec overview', () => {
       spec: 'cypress/e2e/actions.cy.js',
       stats: { passed: 2, failed: 1, pending: 1, skipped: 1, duration: 17400 },
       tests: [{ id: 't1', title: 'root test', state: 'passed', duration: 20 }],
+      // Mixed-case titles on purpose: a section head keeps the case the spec
+      // wrote, so it can be pasted into a case-sensitive search.
       suites: [
         {
-          title: 'A',
+          title: 'Actions',
           tests: [
             { id: 't2', title: 'a1', state: 'passed', duration: 10 },
             { id: 't4', title: 'a2', state: 'pending' },
           ],
         },
         {
-          title: 'A > B',
+          title: 'Actions > .type()',
           tests: [{
             id: 't3',
             title: 'b1',
@@ -199,7 +201,7 @@ describe('lib/tap/render/reporter spec overview', () => {
             ],
           }],
         },
-        { title: 'C', tests: [{ id: 't5', title: 'c1', state: 'skipped' }] },
+        { title: 'Cookies', tests: [{ id: 't5', title: 'c1', state: 'skipped' }] },
       ],
     }
 
@@ -209,17 +211,17 @@ describe('lib/tap/render/reporter spec overview', () => {
 
          t1  ✓ root test  20ms
 
-      A
+      Actions
          t2  ✓ a1  10ms
          t4  ○ a2
 
-      A > B
+      Actions > .type()
          t3  ✖ b1  30ms  (2 retries)
                ✖ attempt 1  4.5s
                ✖ attempt 2  4.4s
                ✖ attempt 3  30ms
 
-      C
+      Cookies
          t5  - c1"
     `)
   })

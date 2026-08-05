@@ -69,7 +69,7 @@ describe('lib/tap/render/command', () => {
 
       expect(renderEntry(entry)).toMatchInlineSnapshot(`
         "TEST BODY · r2
-        ✓  e2  request  ● PUT 404 https://jsonplaceholder.cypress.io/comments/1  @putComment  (stubbed)  passed
+        ✓  e2  request  ● PUT 404 https://jsonplaceholder.cypress.io/comments/1  putComment  (stubbed)  passed
 
         NETWORK
           METHOD     PUT
@@ -186,7 +186,7 @@ describe('lib/tap/render/command', () => {
 
       expect(renderEntry(entry)).toMatchInlineSnapshot(`
         "TEST BODY · r2
-        route  @getComment
+        route  getComment
 
         NETWORK
           METHOD   GET

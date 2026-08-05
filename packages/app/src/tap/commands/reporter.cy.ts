@@ -117,6 +117,24 @@ describe('tap/commands/reporter', () => {
       state: 'failed',
       err: { name: 500, message: 42, stack: { frames: [] } },
     },
+    // `.as()` writes the reporter's badge text onto the log it aliases, so
+    // `@firstBtn` is the exact string the driver stores for `.as('firstBtn')`.
+    r7: {
+      id: 'r7',
+      title: 'aliases a subject',
+      state: 'passed',
+      commands: [
+        { id: 'log-a1', name: 'find', message: 'button', state: 'passed', type: 'child', hookId: 'r7', alias: '@firstBtn', aliasType: 'dom' },
+        { id: 'log-a2', name: 'wrap', message: '{ foo: bar }', state: 'passed', type: 'parent', hookId: 'r7', alias: '@myObject', aliasType: 'primitive' },
+        { id: 'log-a3', name: 'get', message: '@firstBtn', state: 'passed', type: 'parent', hookId: 'r7', referencesAlias: { name: 'firstBtn' }, aliasType: 'dom' },
+        // A static alias carries the type in its badge text, and a name may
+        // contain `@` as long as it doesn't start with one.
+        { id: 'log-a4', name: 'wrap', message: '{ table: 1 }', state: 'passed', type: 'parent', hookId: 'r7', alias: '@table (static)', aliasType: 'primitive' },
+        { id: 'log-a5', name: 'wrap', message: '{ id: 1 }', state: 'passed', type: 'parent', hookId: 'r7', alias: '@user@example.com', aliasType: 'primitive' },
+        // An agent alias is stored bare, so it has no prefix to strip.
+        { id: 'log-a6', name: 'spy-1', displayName: 'spy-1', message: 'beep()', state: 'passed', type: 'parent', hookId: 'r7', event: true, alias: ['beep'], aliasType: 'agent' },
+      ],
+    },
   }
 
   // The spec's own window.Cypress is the instance running this test, so stub
@@ -218,6 +236,21 @@ describe('tap/commands/reporter', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r6' })
 
     expect((outcome as { result: { error: Record<string, unknown> } }).result.error).to.deep.eq({})
+  })
+
+  it('carries alias names, not the badge text `.as()` writes onto the log', async () => {
+    stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
+
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { test: 'r7' })
+
+    expect((outcome as { result: { commands: Array<Record<string, unknown>> } }).result.commands).to.deep.eq([
+      { id: '1', name: 'find', message: 'button', state: 'passed', type: 'child', hookId: 'r7', aliases: ['firstBtn'], aliasType: 'dom' },
+      { id: '2', name: 'wrap', message: '{ foo: bar }', state: 'passed', type: 'parent', hookId: 'r7', aliases: ['myObject'], aliasType: 'primitive' },
+      { id: '3', name: 'get', message: '@firstBtn', state: 'passed', type: 'parent', hookId: 'r7', referencedAliases: ['firstBtn'], aliasType: 'dom' },
+      { id: '4', name: 'wrap', message: '{ table: 1 }', state: 'passed', type: 'parent', hookId: 'r7', aliases: ['table (static)'], aliasType: 'primitive' },
+      { id: '5', name: 'wrap', message: '{ id: 1 }', state: 'passed', type: 'parent', hookId: 'r7', aliases: ['user@example.com'], aliasType: 'primitive' },
+      { id: 'e1', name: 'spy-1', displayName: 'spy-1', message: 'beep()', state: 'passed', type: 'parent', hookId: 'r7', event: true, aliases: ['beep'], aliasType: 'agent' },
+    ])
   })
 
   it('reports an unreached test with empty collections and just the test-body pseudo-hook', async () => {

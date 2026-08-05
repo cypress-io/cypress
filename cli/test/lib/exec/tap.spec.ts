@@ -313,13 +313,26 @@ describe('lib/exec/tap', () => {
   })
 
   describe('help', () => {
-    it('prints the schema-derived overview for a bare invocation and exits 1', async () => {
+    it('prints the schema-derived overview for a bare invocation and exits 0', async () => {
       mockSession()
 
-      expect(await tap.start([], {})).toBe(1)
+      expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).toContain('health')
       expect(logger.print()).toContain('fake-command-for-testing [options] <spec>')
+    })
+
+    // A bare invocation and --help print the same help, so they answer the same.
+    it('answers a bare invocation exactly as it answers --help', async () => {
+      mockSession()
+      const bareCode = await tap.start([], {})
+      const bareOutput = logger.print()
+
+      logger.reset()
+      mockSession()
+
+      expect(await tap.start(['--help'], {})).toBe(bareCode)
+      expect(logger.print()).toBe(bareOutput)
     })
 
     it('prints the overview and exits 0 for an explicit --help', async () => {
@@ -738,6 +751,35 @@ describe('lib/exec/tap', () => {
       ])
     })
 
+    // The data layer returns specs in path order; an agent wants the one it just
+    // edited first. The two timestamp shapes both appear in practice — git's `%ci`
+    // (`-0500`) and, for a file git has no commit for, a dayjs ctime (`-05:00`) —
+    // and offsets differ, so they are compared as instants rather than as text.
+    it('orders specs most recently modified first, listing specs git knows nothing about last', async () => {
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/older.cy.ts', gitInfo: { lastModifiedTimestamp: '2026-07-20 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/untracked-first.cy.ts', gitInfo: null },
+          // 09:30 -0500 is 14:30Z — later than the 15:00 +0200 (13:00Z) below,
+          // which text ordering would get backwards.
+          { relative: 'cypress/e2e/newest.cy.ts', gitInfo: { lastModifiedTimestamp: '2026-07-24 09:30:00 -05:00' } },
+          { relative: 'cypress/e2e/untracked-second.cy.ts', gitInfo: null },
+          { relative: 'cypress/e2e/middle.cy.ts', gitInfo: { lastModifiedTimestamp: '2026-07-24 15:00:00 +0200' } },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+
+      expect(JSON.parse(logger.print()).map((spec: { relativePath: string }) => spec.relativePath)).toEqual([
+        'cypress/e2e/newest.cy.ts',
+        'cypress/e2e/middle.cy.ts',
+        'cypress/e2e/older.cy.ts',
+        'cypress/e2e/untracked-first.cy.ts',
+        'cypress/e2e/untracked-second.cy.ts',
+      ])
+    })
+
     it('lists specs even when the instance has no browser attached', async () => {
       mockLiveResolved(liveInstance({ cdpBrowserWsUrl: null }))
       vi.mocked(queryInstanceGraphql).mockResolvedValue({
@@ -798,10 +840,11 @@ describe('lib/exec/tap', () => {
       })
 
       expect(await tap.start(['specs'], { json: true })).toBe(0)
-      // Non-string git fields are dropped, not rendered as junk.
+      // Non-string git fields are dropped, not rendered as junk — which leaves the
+      // entry with no usable time, so it orders after the one that has one.
       expect(JSON.parse(logger.print())).toEqual([
-        { relativePath: 'cypress/e2e/no-git.cy.ts' },
         { relativePath: 'cypress/e2e/ok.cy.ts', lastModified: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' },
+        { relativePath: 'cypress/e2e/no-git.cy.ts' },
       ])
     })
 
@@ -1116,7 +1159,7 @@ describe('lib/exec/tap', () => {
           status [options]                report where a running Cypress instance is
                                           in its lifecycle
           specs [options]                 list the specs the running Cypress instance
-                                          can run
+                                          can run, most recently modified first
           run [options] <spec>            run (or rerun) a spec by its
                                           project-relative path
           dom [options] [selector]        read the app-under-test DOM as HTML: the
@@ -1185,10 +1228,10 @@ describe('lib/exec/tap', () => {
       `)
     })
 
-    it('falls back to generic help (exit 1) for a bare invocation with no instance found', async () => {
+    it('falls back to generic help (exit 0) for a bare invocation with no instance found', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
-      expect(await tap.start([], {})).toBe(1)
+      expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
@@ -1216,10 +1259,10 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).not.toContain('STALE_INSTANCE')
     })
 
-    it('falls back to generic help (exit 1) for a bare invocation when an instance is up but has no browser', async () => {
+    it('falls back to generic help (exit 0) for a bare invocation when an instance is up but has no browser', async () => {
       failResolve(new CypressInstanceError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
-      expect(await tap.start([], {})).toBe(1)
+      expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
       expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
     })
