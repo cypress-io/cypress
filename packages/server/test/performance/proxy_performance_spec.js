@@ -116,7 +116,12 @@ const HTTP2_LATENCY_ORIGIN_PORT = 45333
 // delay (search lower) and a red run means MITM still wins (search higher).
 // Locally CDP wins even at 0ms, so this only tells us something on CI.
 // Ships as 50 on the real branch.
-const HTTP2_LATENCY_ORIGIN_DELAY_MS = 15
+//
+// Measured so far on CI (1000 images, paired, best available):
+//   15ms -> MITM 5292 / CDP 2681  (CDP wins 1.97x)
+// CDP is floor-bound at ~2.7s there, MITM climbs ~232ms per 1ms of delay from
+// a ~1.8s floor, which puts the crossing near 4ms.
+const HTTP2_LATENCY_ORIGIN_DELAY_MS = 5
 const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
 
 // Chrome's debug port is randomized per launch, so the range has to stay clear
