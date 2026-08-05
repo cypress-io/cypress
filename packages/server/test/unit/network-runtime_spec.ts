@@ -606,7 +606,6 @@ describe('lib/network-runtime', () => {
     expect(extraClient.send.withArgs('Network.enable'))
     .to.have.been.calledBefore(extraClient.send.withArgs('Fetch.enable'))
 
-    const { CdpFetchTransport } = require('../../lib/browsers/cdp-protocol/cdp-fetch-transport')
     const transportReset = sinon.spy(CdpFetchTransport.prototype, 'reset')
 
     runtime.reset()
