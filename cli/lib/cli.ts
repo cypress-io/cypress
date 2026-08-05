@@ -128,6 +128,7 @@ const descriptions: any = {
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
   instance: 'target a specific running Cypress instance by its server process id (pid)',
   json: 'print the raw JSON result instead of the human-readable rendering',
+  tapTimeout: 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
@@ -591,10 +592,11 @@ const cliModule = {
     .allowUnknownOption(true)
     .option('--instance <pid>', text('instance'), coerceAnyStringToInt)
     .option('--json', text('json'))
+    .option('--timeout <ms>', text('tapTimeout'), coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {
       try {
         const { default: tapModule } = await import('./exec/tap')
-        const code = await tapModule.start(args || [], _.pick(opts, ['instance', 'json']))
+        const code = await tapModule.start(args || [], _.pick(opts, ['instance', 'json', 'timeout']))
 
         process.exit(code)
       } catch (e: any) {

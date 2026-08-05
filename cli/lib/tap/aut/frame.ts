@@ -151,7 +151,7 @@ export const withResolvedAutFrame = async (
 
         throw err
       }
-    })
+    }, options.timeout)
   } catch (err: any) {
     if (err instanceof CypressInstanceError) {
       renderFailure(err)

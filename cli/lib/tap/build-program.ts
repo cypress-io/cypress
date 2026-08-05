@@ -44,11 +44,12 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
     }
   }
 
-  // Every tap command accepts `--instance` and `--json`; both are consumed by
-  // the top-level `cypress tap` command before a subprogram parses, so declaring
-  // them here is purely so they render in each command's generated help.
+  // Every tap command accepts `--instance`, `--json` and `--timeout`; all are
+  // consumed by the top-level `cypress tap` command before a subprogram parses,
+  // so declaring them here is purely so they render in each command's generated help.
   command.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
   command.option('--json', json?.description ?? JSON_DESCRIPTION)
+  command.option('--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)')
 }
 
 const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly string[]): Record<string, string> => {
@@ -140,12 +141,13 @@ const newProgram = (): commander.Command => {
 export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
   const program = newProgram()
 
-  // The outer `tap` command owns --instance/--json and parses them before this
-  // program runs, so they never reach here — declared only so help lists them.
-  // The outer command disables its own help, making this the sole place they
-  // surface.
+  // The outer `tap` command owns --instance/--json/--timeout and parses them
+  // before this program runs, so they never reach here — declared only so help
+  // lists them. The outer command disables its own help, making this the sole
+  // place they surface.
   program.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
   program.option('--json', JSON_DESCRIPTION)
+  program.option('--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)')
 
   for (const native of tapCliCommands) {
     declareCommand(program, native)

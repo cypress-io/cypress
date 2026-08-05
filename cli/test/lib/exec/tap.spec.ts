@@ -446,7 +446,9 @@ describe('lib/exec/tap', () => {
       ...overrides,
     })
 
-    it('renders the live instances as a table and exits 0, without opening a session', async () => {
+    // Reporting whether the runner page answers takes a session, so this command
+    // opens one — bounded, and only where there is a browser to ask.
+    it('renders the live instances as a table and exits 0, probing only an instance with a browser attached', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([
         liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
         liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
@@ -462,7 +464,7 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('Chrome')
       expect(() => JSON.parse(output)).toThrow()
 
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapSession).toHaveBeenCalledTimes(1)
     })
 
     it('prints the raw instance summaries with --json', async () => {
@@ -1210,6 +1212,8 @@ describe('lib/exec/tap', () => {
                                 server process id (pid)
           --json                print the raw JSON result instead of the human-readable
                                 rendering
+          --timeout <ms>        how long to wait on any single call into the running
+                                Cypress, in milliseconds (default 30000)
           -h, --help            display help for command
 
         Commands:
@@ -1279,6 +1283,8 @@ describe('lib/exec/tap', () => {
                                    human-readable rendering — every console property in
                                    full, however long, rather than the long ones named
                                    by their length
+          --timeout <ms>           how long to wait on any single call into the running
+                                   Cypress, in milliseconds (default 30000)
           -h, --help               display help for command
         "
       `)

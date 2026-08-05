@@ -2,6 +2,7 @@ import Debug from 'debug'
 import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
+import { boundCdpClient, cdpBounds, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
 import type { ReadyInstanceState } from '../cypress-instances'
 import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import type { TapExecResult } from '@packages/cypress-instances'
@@ -109,13 +110,22 @@ const evaluateBinding = (client: CRI.Client, sessionId: string) => {
   return client.Runtime.evaluate({ expression: `window.${TAP_BINDING_GLOBAL}` }, sessionId)
 }
 
-const probeForBinding = async (client: CRI.Client, sessionId: string): Promise<boolean> => {
-  const { result, exceptionDetails } = await evaluateBinding(client, sessionId)
+// Bounded tighter than the rest of the session: this runs once per page target
+// while scanning for the runner, so a target that cannot answer has to fall out
+// of the scan quickly instead of stalling it.
+const probeForBinding = async (client: CRI.Client, sessionId: string, discoveryMs: number): Promise<boolean> => {
+  const { result, exceptionDetails } = await withCdpDeadline(
+    evaluateBinding(client, sessionId),
+    'the runner-page probe',
+    discoveryMs,
+  )
 
   return !exceptionDetails && result.type !== 'undefined' && !!result.objectId
 }
 
-const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[]): Promise<string> => {
+const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], discoveryMs: number): Promise<string> => {
+  let unresponsive: unknown
+
   for (const target of targetInfos) {
     if (target.type !== 'page') {
       continue
@@ -126,18 +136,28 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
     try {
       sessionId = await attachToPage(client, target.targetId)
 
-      if (await probeForBinding(client, sessionId)) {
+      if (await probeForBinding(client, sessionId, discoveryMs)) {
         debug('matched runner page target %o', { targetId: target.targetId, url: target.url })
 
         return sessionId
       }
     } catch (err: any) {
+      if (isRendererUnresponsive(err)) {
+        unresponsive = err
+      }
+
       debug('probing target %s failed: %s', target.targetId, err.message)
     }
 
     if (sessionId) {
       await client.Target.detachFromTarget({ sessionId }).catch(() => {})
     }
+  }
+
+  // A page that never answered the probe is a different failure from a browser
+  // holding no runner page at all, and only the former is worth waiting longer on.
+  if (unresponsive) {
+    throw unresponsive
   }
 
   return throwTapError(errors.tapBindingNotFound, `Failed to connect to the runner page.`)
@@ -222,16 +242,22 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
 export const withTapSession = async <T> (
   instance: ReadyInstanceState,
   fn: (session: TapSession) => Promise<T>,
+  timeoutMs?: number,
 ): Promise<T> => {
-  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl })
+  const bounds = cdpBounds(timeoutMs)
 
-  const client = await connectToBrowser(instance.cdpBrowserWsUrl)
+  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, bounds })
+
+  const connection = await connectToBrowser(instance.cdpBrowserWsUrl)
+  // Every protocol call the session hands out is bounded; closing the connection
+  // is also what settles whatever a bound already gave up waiting on.
+  const client = boundCdpClient(connection, bounds.call)
 
   try {
     const attach = async (): Promise<string> => {
       const { targetInfos } = await listTargets(client)
 
-      return findRunnerPageSession(client, targetInfos)
+      return findRunnerPageSession(client, targetInfos, bounds.discovery)
     }
 
     let sessionId = await attach()
@@ -278,6 +304,6 @@ export const withTapSession = async <T> (
 
     return await fn(session)
   } finally {
-    await client.close().catch(() => {})
+    await connection.close().catch(() => {})
   }
 }
