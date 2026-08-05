@@ -91,11 +91,11 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
 // With no instance to query, fall back to the schema this CLI ships with so the
 // help listing still reflects every command the CLI knows — the query path stays
 // authoritative when an instance is attached (it may run a different version).
-const renderKnownSchema = (command: string | undefined, wantsHelp: boolean): number => {
+const renderKnownSchema = (command: string | undefined): number => {
   const schema = buildTapSchema(util.pkgVersion())
   const program = buildTapProgram(schema, () => {})
 
-  return renderStaticHelp(program, schema, command, wantsHelp)
+  return renderStaticHelp(program, schema, command)
 }
 
 const tapModule = {
@@ -122,7 +122,7 @@ const tapModule = {
         })
 
         if (wantsHelp || !command) {
-          return renderSchemaHelp(program, schema, selection, command, wantsHelp)
+          return renderSchemaHelp(program, schema, selection, command)
         }
 
         try {
@@ -140,7 +140,7 @@ const tapModule = {
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if (wantsHelp || !command) {
-          return renderKnownSchema(command, wantsHelp)
+          return renderKnownSchema(command)
         }
 
         debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)

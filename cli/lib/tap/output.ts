@@ -59,7 +59,7 @@ const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string
   return target
 }
 
-const renderHelp = (program: commander.Command, schema: TapSchema, command: string | undefined, wantsHelp: boolean, banner?: string): number => {
+const renderHelp = (program: commander.Command, schema: TapSchema, command: string | undefined, banner?: string): number => {
   const prefix = banner ? `${banner}\n\n` : ''
 
   if (command) {
@@ -87,13 +87,13 @@ const renderHelp = (program: commander.Command, schema: TapSchema, command: stri
 
   logger.always(`${prefix}${program.helpInformation()}`)
 
-  return wantsHelp ? 0 : 1
+  return 0
 }
 
-export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined, wantsHelp: boolean): number => {
-  return renderHelp(program, schema, command, wantsHelp, instanceBanner(schema, selection))
+export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined): number => {
+  return renderHelp(program, schema, command, instanceBanner(schema, selection))
 }
 
-export const renderStaticHelp = (program: commander.Command, schema: TapSchema, command: string | undefined, wantsHelp: boolean): number => {
-  return renderHelp(program, schema, command, wantsHelp)
+export const renderStaticHelp = (program: commander.Command, schema: TapSchema, command: string | undefined): number => {
+  return renderHelp(program, schema, command)
 }
