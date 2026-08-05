@@ -119,9 +119,12 @@ const HTTP2_LATENCY_ORIGIN_PORT = 45333
 //
 // Measured so far on CI (1000 images, paired, best available):
 //   15ms -> MITM 5292 / CDP 2681  (CDP wins 1.97x)
-// CDP is floor-bound at ~2.7s there, MITM climbs ~232ms per 1ms of delay from
-// a ~1.8s floor, which puts the crossing near 4ms.
-const HTTP2_LATENCY_ORIGIN_DELAY_MS = 5
+//    5ms -> MITM 3670 / CDP 2633  (CDP wins 1.39x)
+// CDP is floor-bound at ~2.65s there (flat across a 3x latency change) while
+// MITM climbs ~162ms per 1ms of delay, back-solving to a ~2.86s floor — already
+// above CDP's. 0ms is the decisive floor-vs-floor probe: if CDP still wins
+// there, there is no crossover on CI either.
+const HTTP2_LATENCY_ORIGIN_DELAY_MS = 0
 const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
 
 // Chrome's debug port is randomized per launch, so the range has to stay clear
