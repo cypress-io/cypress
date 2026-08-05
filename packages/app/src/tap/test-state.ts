@@ -2,8 +2,8 @@ import type { SerializedCommandLog, SerializedTest } from '@packages/types'
 import { TapCommandError } from './commands/definition'
 import { omitNullish } from './utils'
 
-import type { TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
-import type { CommandEntry, TapTestsRunner, TestError, TestStateValue } from './types'
+import type { TapCommandSnapshot, TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
+import type { CommandEntry, CommandHook, PinSnapshotEntry, PinSnapshotProps, TapTestsRunner, TestError, TestStateValue } from './types'
 
 // A test with no final status state set yet was never reached: 'pending' while
 // the run is still going, 'skipped' once it is complete (matching the driver's
@@ -11,6 +11,10 @@ import type { CommandEntry, TapTestsRunner, TestError, TestStateValue } from './
 const unreachedState = (runComplete: boolean): TestStateValue => {
   return runComplete ? 'skipped' : 'pending'
 }
+
+// The reporter's name for the section holding the test's own commands, which is
+// no real hook — the rows carry the test's id where a hook row carries a hookId.
+const TEST_BODY_HOOK = 'test body'
 
 const asString = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined)
 
@@ -137,14 +141,14 @@ const serializeNetworkInfo = (command: SerializedCommandLog): TapNetworkInfo | u
 // wire contract's optional fields absent-not-null. Its _hasBeenCleanedUp marker
 // is surfaced as `cleanedUp` so consumers can tell eviction apart from fields
 // that were never set.
-const serializeCommandEntry = (command: SerializedCommandLog, id: string | undefined): CommandEntry => {
+const serializeCommandEntry = (command: SerializedCommandLog, id: string | undefined): Omit<CommandEntry, 'hook'> => {
   const { name, message, state, type, _hasBeenCleanedUp } = command
 
   // Mirror the reporter's displayed row text: network rows leave the base
   // message empty and carry their summary (e.g. `GET 200 /api`) on renderProps.
   const displayMessage = (command.renderProps as NetworkRenderProps | undefined)?.message ?? message
 
-  return omitNullish<CommandEntry>({
+  return omitNullish<Omit<CommandEntry, 'hook'>>({
     id,
     name,
     message: displayMessage,
@@ -216,11 +220,6 @@ const tapCommandIds = (logs: SerializedCommandLog[]): Map<string, string> => {
 
 const hookIdOf = (log: SerializedCommandLog): string | undefined => (log as ReporterLog).hookId
 
-export interface ResolvedCommand {
-  logId: string
-  entry: CommandEntry
-}
-
 // Matches a displayed command id to its underlying log. The id is a row's
 // number as the reporter shows it (`12` or the event rows' `e3`), optionally
 // qualified with its hook section (`h1:12`) since the numbers restart per
@@ -256,23 +255,87 @@ const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], i
   throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
 }
 
-/**
- * Resolves a command id the way the reporter shows it — a row number, an
- * e-prefixed event id, or a hook-qualified `h1:3` — to the driver log id the
- * runner keys on plus the serialized entry to display. The one command-id
- * lookup the `command` and `pin` commands share, so both accept exactly the
- * ids the reporter emits.
- */
-export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: string): ResolvedCommand | undefined => {
+export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
   const logs = orderedAttemptLogs(attempt)
   const ids = tapCommandIds(logs)
-  const log = findCommandLog(attempt, logs, ids, tapId, testId)
 
-  return log ? { logId: log.id, entry: serializeCommandEntry(log, ids.get(log.id)) } : undefined
+  return findCommandLog(attempt, logs, ids, tapId, testId)?.id
 }
 
-export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
-  return resolveCommand(attempt, tapId, testId)?.logId
+export interface ResolvedCommand {
+  /** The driver's log id — the handle its per-log lookups (console props, snapshots) take. */
+  logId: string
+  entry: CommandEntry
+}
+
+// The hook a row ran in, named the way the reporter names its sections. A log
+// carries only its hookId, so the name comes from the attempt's hook timings;
+// the test's own commands carry the test id and read as the reporter's
+// synthesized test-body section.
+const commandHook = (attempt: SerializedTest, log: SerializedCommandLog, testId: string): CommandHook => {
+  const hookId = hookIdOf(log) ?? testId
+
+  if (hookId === testId) {
+    return { hookId, hookName: TEST_BODY_HOOK }
+  }
+
+  return omitNullish<CommandHook>({
+    hookId,
+    hookName: attemptHooks(attempt).find((hook) => hook.hookId === hookId)?.hookName,
+  })
+}
+
+/**
+ * Resolves a command handle to both the driver's log id and the serialized entry,
+ * for a caller that needs the row *and* the driver's own details for it. The
+ * handle follows `resolveCommandLogId`'s rules: the reporter's displayed row
+ * number, hook-qualifiable, test body winning a duplicate. The entry carries the
+ * hook the row ran in, which the numbers alone leave ambiguous.
+ */
+export const resolveCommand = (attempt: SerializedTest, tapId: string, testId: string): ResolvedCommand | undefined => {
+  const logId = resolveCommandLogId(attempt, tapId, testId)
+
+  if (logId === undefined) {
+    return undefined
+  }
+
+  const logs = orderedAttemptLogs(attempt)
+  const log = logs.find((entry) => entry.id === logId)
+
+  if (!log) {
+    return undefined
+  }
+
+  return {
+    logId,
+    entry: { ...serializeCommandEntry(log, tapCommandIds(logs).get(log.id)), hook: commandHook(attempt, log, testId) },
+  }
+}
+
+/**
+ * A log's snapshots as the runner still holds them. The driver's memory cleanup
+ * nulls entries in place rather than shortening the list, so the nulls drop out
+ * — leaving the ones a pin can actually restore.
+ */
+export const liveSnapshots = (props: PinSnapshotProps | undefined): PinSnapshotEntry[] => {
+  return (props?.snapshots ?? []).filter((entry): entry is PinSnapshotEntry => Boolean(entry))
+}
+
+/**
+ * The live snapshots projected onto the wire, in capture order, as `pin --at`
+ * addresses them: by 1-based position or by the driver's name for one.
+ */
+export const serializeCommandSnapshots = (snapshots: PinSnapshotEntry[]): TapCommandSnapshot[] => {
+  return snapshots.map((entry, index) => {
+    return omitNullish<TapCommandSnapshot>({
+      index: index + 1,
+      name: entry.name,
+      // The driver stamps sub-millisecond precision (`timeOrigin + now()`); the
+      // wire keeps whole milliseconds, which is what any consumer can line up
+      // against the log's own timestamps.
+      timestamp: entry.timestamp != null ? Math.round(entry.timestamp) : undefined,
+    })
+  })
 }
 
 // The display-level slice of a log's attrs the reporter panel reads beyond the
@@ -403,7 +466,7 @@ const serializeReporterHooks = (test: SerializedTest, attempt: SerializedTest): 
 
   return [
     ...hooks.slice(0, at),
-    { hookId: test.id, hookName: 'test body' },
+    { hookId: test.id, hookName: TEST_BODY_HOOK },
     ...hooks.slice(at),
   ]
 }

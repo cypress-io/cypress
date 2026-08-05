@@ -1,5 +1,16 @@
-import type { SerializedCommandLog, SerializedTest } from '@packages/types'
-import type { TapNetworkInfo } from './contract'
+import type { SerializedTest } from '@packages/types'
+import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapConsoleProps } from './contract'
+
+// The command-log and console-props result shapes are the cross-process
+// contract, so they live in `@packages/cypress-instances` alongside the CLI-side
+// rendering that consumes them; aliased here to the names the app uses.
+export type CommandEntry = TapCommandEntry
+
+export type CommandResult = TapCommandResult
+
+export type CommandHook = TapCommandHook
+
+export type ConsolePropsResult = TapConsoleProps
 
 export interface TapTestsRunner {
   /** Serializes every test of the run, keyed by id. */
@@ -9,9 +20,9 @@ export interface TapTestsRunner {
   /**
    * Returns one command's console properties projected for the JSON-only tap
    * transport. A value long enough to bury the rest of the payload is named by
-   * its length unless `fullReport` asks for every value in full.
+   * its length unless `full` asks for every value in full.
    */
-  getSerializedConsolePropsForLog (testId: string, logId: string, options?: { fullReport?: boolean }): ConsolePropsResult | undefined
+  getSerializedConsolePropsForLog (testId: string, logId: string, options?: { full?: boolean }): ConsolePropsResult | undefined
   isRunComplete (): boolean
   /** ISO start time of the run; null before the first test runs. */
   getStartTime (): string | null
@@ -25,6 +36,8 @@ export interface TapTestsRunner {
  */
 export interface PinSnapshotEntry {
   name?: string
+  /** Wall-clock capture time in ms, as the driver stamps it (`timeOrigin + now()`, hence fractional). */
+  timestamp?: number
 }
 
 export interface PinSnapshotProps {
@@ -36,10 +49,6 @@ export interface PinSnapshotRunner {
   getTestState (testId: string): SerializedTest | undefined
   getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
 }
-
-type TapJsonValue = null | boolean | number | string | TapJsonValue[] | { [key: string]: TapJsonValue }
-
-export type ConsolePropsResult = { [key: string]: TapJsonValue }
 
 /**
  * The slice of the AUT iframe the pin command drives directly. `detachDom`
@@ -60,39 +69,4 @@ export interface TestError {
   message?: string
   /** The stack trace as the driver captured it. */
   stack?: string
-}
-
-export interface CommandEntry {
-  /**
-   * The command id the pin command accepts. Numbered rows carry the exact
-   * number the app reporter shows (a per-hook-section counter, qualifiable as
-   * `<hookId>:<number>` when duplicated); event and system rows carry an
-   * attempt-wide `e1`..`eN` instead. Absent on `cy.intercept` registration
-   * rows — routes aren't commands.
-   */
-  id?: string
-  /** The command name as logged, e.g. `visit`, `get`, `assert`. */
-  name?: string
-  /**
-   * The reporter's display text for the row: the command arguments/assertion
-   * text, or — for a network row whose base message is empty — the request
-   * summary the reporter shows in its place (e.g. `GET 200 /api/users`).
-   */
-  message?: string
-  /** `pending` while the command runs, then `passed` or `failed`. */
-  state?: SerializedCommandLog['state']
-  /** `parent` starts a chain, `child` is chained off a subject, `system` is driver-emitted. */
-  type?: SerializedCommandLog['type']
-  /**
-   * High-level network detail — method, URL, status/indicator, stubbed flag,
-   * response count, alias — matching what the reporter renders inline on
-   * request / xhr / `cy.intercept` rows. Absent on ordinary command rows.
-   */
-  network?: TapNetworkInfo
-  /**
-   * Present (always `true`) only when the driver evicted this test's command
-   * details from memory (numTestsKeptInMemory), so scrubbed fields like
-   * `message` are absent because of the eviction, not because they were unset.
-   */
-  cleanedUp?: true
 }

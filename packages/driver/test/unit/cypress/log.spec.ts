@@ -248,7 +248,7 @@ describe('LogUtils.toSerializedConsoleProps', () => {
   }
 
   const withheld = (length: number): string => {
-    return `[${length.toLocaleString('en-US')} characters withheld — pass --full-report to include it]`
+    return `[${length.toLocaleString('en-US')} characters withheld — pass --json to include it]`
   }
 
   // 23,891 characters serialized: individually trivial entries that together
@@ -285,9 +285,9 @@ describe('LogUtils.toSerializedConsoleProps', () => {
     })
   })
 
-  it('returns every value in full for a full report', () => {
+  it('returns every value in full when asked for the full payload', () => {
     const consoleProps = responseConsoleProps()
-    const result = LogUtils.toSerializedConsoleProps(consoleProps, { fullReport: true })
+    const result = LogUtils.toSerializedConsoleProps(consoleProps, { full: true })
 
     expect(result).toEqual(consoleProps)
   })

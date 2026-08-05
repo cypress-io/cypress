@@ -49,6 +49,16 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
   return { wantsHelp, positionals, command }
 }
 
+// `--json` is parsed by the outer `cypress tap` command, so commander never
+// routes it to the command being run. A command that declares it in its own
+// schema needs it anyway — for that command the flag also changes what the
+// instance returns, not just how the CLI prints it — so it is handed over here.
+const withJson = (schema: TapSchema, name: string, options: Record<string, string>, json: boolean | undefined): Record<string, string> => {
+  const declared = schema.commands.find((command) => command.name === name)?.options.some((option) => option.name === 'json')
+
+  return json && declared ? { ...options, json: 'true' } : options
+}
+
 const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
   let dispatchCode: number | undefined
   const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
@@ -74,7 +84,7 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
   return dispatchCode ?? 1
 }
 
-const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined): Promise<number> => {
+const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined, renderOptions: Record<string, string>): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
@@ -83,7 +93,9 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
     return 1
   }
 
-  renderOutcome(command, outcome.result, json)
+  // The rendering reads both: the options that shaped the result and the ones
+  // that only shape its view.
+  renderOutcome(command, outcome.result, json, { ...commandOptions, ...renderOptions })
 
   return 0
 }
@@ -117,8 +129,8 @@ const tapModule = {
         const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
 
         let dispatchCode = 0
-        const program = buildTapProgram(schema, async (name, args, commandOptions) => {
-          dispatchCode = await execCommand(session, name, args, commandOptions, options.json)
+        const program = buildTapProgram(schema, async (name, args, commandOptions, renderOptions) => {
+          dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, renderOptions)
         })
 
         if (wantsHelp || !command) {

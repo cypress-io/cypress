@@ -79,6 +79,17 @@ export const emptyState = (message: string): string => chalk.dim(message)
 
 export const indent = (depth: number): string => '  '.repeat(depth)
 
+// The column count to lay a row out against, falling back to a readable width
+// when the output is piped and the terminal reports none.
+export const terminalWidth = (): number => process.stdout.columns || 120
+
+// Keep a value on its own row: a soft-wrapped line breaks out of the column it
+// was padded into, so anything longer than the room left for it ends in an
+// ellipsis. Clamp before coloring, the way the tables pad before coloring.
+export const clamp = (text: string, width: number): string => {
+  return text.length <= width ? text : `${text.slice(0, Math.max(1, width - 1))}…`
+}
+
 // Pad before coloring: the escape codes chalk adds would otherwise count
 // toward the column width. `colorize` styles the padded cells — it also gets the
 // row index, since a padded cell no longer compares equal to the value it holds
@@ -95,6 +106,15 @@ export const columns = (
     pad(header).map((cell) => chalk.dim(cell)).join('  '),
     ...rows.map((row, index) => colorize(pad(row), index).join('  ')),
   ]
+}
+
+// Columns rendered as a standalone nested block.
+export const tableRows = (
+  header: string[],
+  rows: string[][],
+  colorize?: (cells: string[], index: number) => string[],
+): string[] => {
+  return columns(header, rows, colorize).map((line) => `${indent(1)}${line}`)
 }
 
 // A counted panel title with its content indented beneath it. Content rendered
