@@ -16,6 +16,24 @@ export interface TapSpecEntry {
   lastModifiedTimestamp?: string
 }
 
+// The timestamp arrives as git's `%ci` (`-0500`) or, for a file git has no commit
+// for, as a dayjs-formatted ctime (`-05:00`); Date.parse reads both.
+const modifiedAt = (spec: TapSpecEntry): number => {
+  const parsed = spec.lastModifiedTimestamp === undefined ? NaN : Date.parse(spec.lastModifiedTimestamp)
+
+  return Number.isNaN(parsed) ? -Infinity : parsed
+}
+
+// Most recently modified first, so the spec just edited is the first one read.
+// Specs git knows nothing about sort last, keeping their original order — sort is
+// stable, and an unknown time should not outrank a known recent one.
+const byMostRecentlyModified = (a: TapSpecEntry, b: TapSpecEntry): number => {
+  const left = modifiedAt(a)
+  const right = modifiedAt(b)
+
+  return left === right ? 0 : right - left
+}
+
 // `TapSpecsQuery` is the schema shape, but the value crosses the wire unvalidated,
 // so entries are guarded against nulls and non-string fields before rendering.
 const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
@@ -33,6 +51,7 @@ const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
         ...(typeof lastModifiedTimestamp === 'string' ? { lastModifiedTimestamp } : {}),
       }
     })
+    .sort(byMostRecentlyModified)
 }
 
 const listSpecs = async (options: TapCliOptions): Promise<number> => {
