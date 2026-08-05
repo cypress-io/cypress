@@ -9,7 +9,7 @@ import { posixify } from '../../util'
 /** What `cypress tap run` returns once a spec is launched. */
 export interface TapRunResult {
   /** Project-relative path of the launched spec. */
-  relativePath: string
+  spec: string
   /** Testing type the run launched under. */
   testingType: string
   /** Display name of the browser the run launched in. */
@@ -41,7 +41,7 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
 
     if (result?.__typename === 'RunSpecResponse') {
       const launched: TapRunResult = {
-        relativePath: result.spec.relative.replace(/\\/g, '/'),
+        spec: posixify(result.spec.relative),
         testingType: result.testingType,
         browser: result.browser.displayName,
       }

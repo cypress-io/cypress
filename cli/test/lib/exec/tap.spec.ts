@@ -937,7 +937,7 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
-        relativePath: 'cypress/e2e/login.cy.ts',
+        spec: 'cypress/e2e/login.cy.ts',
         testingType: 'e2e',
         browser: 'Chrome',
       })

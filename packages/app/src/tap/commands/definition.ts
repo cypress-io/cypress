@@ -24,7 +24,7 @@ export class TapCommandError extends Error {
  * answers a poller with one wording.
  */
 export const noRunError = (): TapCommandError => {
-  return new TapCommandError('NO_RUN', 'no run to read — no spec run has started yet; use the run command, then poll status until it reports running')
+  return new TapCommandError('NO_RUN', 'No spec has been started yet. Use the run command to start a spec.')
 }
 
 type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[number], { name: N }>

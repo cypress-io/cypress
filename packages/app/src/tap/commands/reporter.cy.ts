@@ -131,7 +131,7 @@ describe('tap/commands/reporter', () => {
     expect(outcome).to.deep.eq({
       error: {
         code: 'NO_RUN',
-        message: 'no run to read — no spec run has started yet; use the run command, then poll status until it reports running',
+        message: 'No spec has been started yet. Use the run command to start a spec.',
       },
     })
   })
