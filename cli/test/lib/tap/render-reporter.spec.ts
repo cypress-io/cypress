@@ -176,16 +176,18 @@ describe('lib/tap/render/reporter spec overview', () => {
       spec: 'cypress/e2e/actions.cy.js',
       stats: { passed: 2, failed: 1, pending: 1, skipped: 1, duration: 17400 },
       tests: [{ id: 't1', title: 'root test', state: 'passed', duration: 20 }],
+      // Mixed-case titles on purpose: a section head keeps the case the spec
+      // wrote, so it can be pasted into a case-sensitive search.
       suites: [
         {
-          title: 'A',
+          title: 'Actions',
           tests: [
             { id: 't2', title: 'a1', state: 'passed', duration: 10 },
             { id: 't4', title: 'a2', state: 'pending' },
           ],
         },
         {
-          title: 'A > B',
+          title: 'Actions > .type()',
           tests: [{
             id: 't3',
             title: 'b1',
@@ -199,7 +201,7 @@ describe('lib/tap/render/reporter spec overview', () => {
             ],
           }],
         },
-        { title: 'C', tests: [{ id: 't5', title: 'c1', state: 'skipped' }] },
+        { title: 'Cookies', tests: [{ id: 't5', title: 'c1', state: 'skipped' }] },
       ],
     }
 
@@ -209,17 +211,17 @@ describe('lib/tap/render/reporter spec overview', () => {
 
          t1  ✓ root test  20ms
 
-      A
+      Actions
          t2  ✓ a1  10ms
          t4  ○ a2
 
-      A > B
+      Actions > .type()
          t3  ✖ b1  30ms  (2 retries)
                ✖ attempt 1  4.5s
                ✖ attempt 2  4.4s
                ✖ attempt 3  30ms
 
-      C
+      Cookies
          t5  - c1"
     `)
   })
