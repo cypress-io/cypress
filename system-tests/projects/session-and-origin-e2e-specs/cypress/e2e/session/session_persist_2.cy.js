@@ -26,9 +26,7 @@ it('restores global session from last spec', () => {
     }
   })
 
-  cy.getCookie('token').then((cookie) => {
-    expect(cookie.value).to.eq('1')
-  })
+  cy.getCookie('token').its('value').should('eq', '1')
 })
 
 it('creates spec session since it is a new spec', () => {
@@ -46,7 +44,5 @@ it('creates spec session since it is a new spec', () => {
     }
   })
 
-  cy.getCookie('token').then((cookie) => {
-    expect(cookie.value).to.eq('2')
-  })
+  cy.getCookie('token').its('value').should('eq', '2')
 })

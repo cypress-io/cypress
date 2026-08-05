@@ -28,7 +28,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo').its('hostOnly').should('eq', true)
     }
 
-    cy.getCookies().then((cookies) => {
+    cy.getCookies().should((cookies) => {
       expect(cookies).to.have.lengthOf(1)
 
       const cookie = cookies[0]
@@ -39,7 +39,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       }
     })
 
-    cy.getAllCookies().then((cookies) => {
+    cy.getAllCookies().should((cookies) => {
       expect(cookies).to.have.lengthOf(1)
 
       const cookie = cookies[0]
@@ -56,7 +56,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookies().then((cookies) => {
+      cy.getCookies().should((cookies) => {
         expect(cookies).to.have.length(2)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -73,7 +73,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies().then((cookies) => {
+        cy.getCookies().should((cookies) => {
           expect(cookies).to.have.length(1)
           expect(cookies[0].name).to.equal('key2')
           expect(cookies[0].domain).to.match(/\.?foobar\.com/)
@@ -84,7 +84,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     it('returns cookies from the subdomain and bare domain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       setCookies()
-      cy.getCookies().then((cookies) => {
+      cy.getCookies().should((cookies) => {
         expect(cookies).to.have.length(4)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -105,7 +105,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies().then((cookies) => {
+        cy.getCookies().should((cookies) => {
           const sortedCookies = Cypress._.sortBy(cookies, 'name')
 
           expect(sortedCookies).to.have.length(2)
@@ -121,7 +121,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+      cy.getCookies({ domain: 'www.foobar.com' }).should((cookies) => {
         expect(cookies).to.have.length(2)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -132,7 +132,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         expect(sortedCookies[1].domain).to.match(/\.?foobar\.com/)
       })
 
-      cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
+      cy.getCookies({ domain: 'barbaz.com' }).should((cookies) => {
         expect(cookies).to.have.length(2)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -149,7 +149,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies({ domain: 'www.barbaz.com' }).then((cookies) => {
+        cy.getCookies({ domain: 'www.barbaz.com' }).should((cookies) => {
           expect(cookies).to.have.length(4)
 
           const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -172,7 +172,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getAllCookies().then((cookies) => {
+      cy.getAllCookies().should((cookies) => {
         expect(cookies).to.have.length(8)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
@@ -195,7 +195,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
-        cy.getAllCookies().then((cookies) => {
+        cy.getAllCookies().should((cookies) => {
           expect(cookies).to.have.length(8)
 
           const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
@@ -228,7 +228,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookie('key').then((cookie) => {
+      cy.getCookie('key').should((cookie) => {
         expect(cookie.value).to.equal('barbaz.com value')
         expect(cookie.domain).to.match(/\.?barbaz\.com/)
       })
@@ -239,7 +239,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(cookie.value).to.equal('foobar.com value')
           expect(cookie.domain).to.match(/\.?foobar\.com/)
         })
@@ -250,7 +250,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
-      cy.getCookie('key').then((cookie) => {
+      cy.getCookie('key').should((cookie) => {
         expect(cookie.value).to.equal('www.barbaz.com value')
         expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
       })
@@ -262,7 +262,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(cookie.value).to.equal('www.foobar.com value')
           expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
         })
@@ -273,7 +273,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
 
-      cy.getCookie('key').then((cookie) => {
+      cy.getCookie('key').should((cookie) => {
         expect(cookie.value).to.equal('barbaz.com value')
         expect(cookie.domain).to.match(/\.?barbaz\.com/)
       })
@@ -285,7 +285,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(cookie.value).to.equal('foobar.com value')
           expect(cookie.domain).to.match(/\.?foobar\.com/)
         })
@@ -296,7 +296,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookie('key', { domain: 'www.foobar.com' }).then((cookie) => {
+      cy.getCookie('key', { domain: 'www.foobar.com' }).should((cookie) => {
         expect(cookie.value).to.equal('www.foobar.com value')
         expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
       })
@@ -307,7 +307,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookie('key', { domain: 'www.barbaz.com' }).then((cookie) => {
+        cy.getCookie('key', { domain: 'www.barbaz.com' }).should((cookie) => {
           expect(cookie.value).to.equal('www.barbaz.com value')
           expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
         })

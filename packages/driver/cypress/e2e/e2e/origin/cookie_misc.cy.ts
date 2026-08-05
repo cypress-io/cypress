@@ -10,7 +10,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     // does a 302 redirect back to www.foobar.com primary-origin page, but sets a sameSite=None cookie
     cy.get('[data-cy="cookie-cross-origin-redirects-host-only"]').click()
 
-    cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+    cy.getCookies({ domain: 'www.foobar.com' }).should((cookies) => {
       expect(cookies).to.have.length(1)
 
       const singleCookie = cookies[0]
@@ -27,7 +27,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     // does a 302 redirect back to www.foobar.com primary-origin page, but sets a sameSite=None cookie
     cy.get('[data-cy="cookie-cross-origin-redirects"]').click()
 
-    cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+    cy.getCookies({ domain: 'www.foobar.com' }).should((cookies) => {
       expect(cookies).to.have.length(1)
 
       const singleCookie = cookies[0]
