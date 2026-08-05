@@ -3,7 +3,7 @@ import { defineCommand, noRunError, TapCommandError } from './definition'
 import { attemptSelectionError, selectTestAttempt, serializeReporterSpecView, serializeReporterView } from '../test-state'
 import type { TapReporterSpecView, TapReporterView } from '../contract'
 
-export const reporterCommand = defineCommand('reporter', async (_params, { test, attempt }): Promise<TapReporterView | TapReporterSpecView> => {
+export const reporterCommand = defineCommand('reporter', async (_params, { testId: test, attempt }): Promise<TapReporterView | TapReporterSpecView> => {
   const runner = tapManagerDataSource.getRunner()
 
   if (!runner) {

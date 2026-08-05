@@ -54,6 +54,6 @@ export const extractDom = async (
   }
 }
 
-export const domCommand = defineNativeCommand('dom', (options, args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractDom(session, frame, args.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'))
+export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
+  return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'))
 }, 'dom'))

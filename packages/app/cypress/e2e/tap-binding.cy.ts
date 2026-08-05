@@ -39,7 +39,7 @@ const firstTestCommands = async (binding: TapBinding): Promise<{ testId: string,
   const tests = await specTests(binding)
   const testId = tests[0].id as string
 
-  return { testId, commands: await reporterCommands(binding, { test: testId }) }
+  return { testId, commands: await reporterCommands(binding, { testId }) }
 }
 
 const commandNamed = (commands: Array<Record<string, any>>, name: string): Record<string, any> => {
@@ -64,7 +64,7 @@ const leanEntries = async (binding: TapBinding, testId: string, rows: Array<Reco
   const entries: Array<Record<string, any>> = []
 
   for (const row of rows) {
-    const outcome = await binding.exec('command', {}, { test: testId, command: row.id as string })
+    const outcome = await binding.exec('command', {}, { testId, commandId: row.id as string })
 
     if (!('result' in outcome)) {
       throw new Error(`row ${row.id} is expected to resolve, got ${JSON.stringify(outcome)}`)
@@ -108,7 +108,7 @@ describe('tap binding', () => {
 
       expect((unknown as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
 
-      const commandWithoutCommandId = await binding.exec('command', {}, { test: 'r1' })
+      const commandWithoutCommandId = await binding.exec('command', {}, { testId: 'r1' })
 
       expect((commandWithoutCommandId as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
@@ -117,11 +117,11 @@ describe('tap binding', () => {
 
       expect((specViewBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      const commandBeforeRun = await binding.exec('command', {}, { test: 'r1', command: '1' })
+      const commandBeforeRun = await binding.exec('command', {}, { testId: 'r1', commandId: '1' })
 
       expect((commandBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
-      const reporterBeforeRun = await binding.exec('reporter', {}, { test: 'r1' })
+      const reporterBeforeRun = await binding.exec('reporter', {}, { testId: 'r1' })
 
       expect((reporterBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
@@ -179,7 +179,7 @@ describe('tap binding', () => {
 
       const testId = tests[0].id as string
 
-      const view = await reporterResult(binding, { test: testId })
+      const view = await reporterResult(binding, { testId })
 
       expect(view.test).to.deep.eq({
         id: testId,
@@ -193,7 +193,7 @@ describe('tap binding', () => {
       expect(view.hooks).to.deep.eq([{ hookId: testId, hookName: 'test body' }])
       expect(view.error).to.be.undefined
 
-      const missingTest = await binding.exec('reporter', {}, { test: 'not-a-test' })
+      const missingTest = await binding.exec('reporter', {}, { testId: 'not-a-test' })
 
       expect((missingTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
@@ -210,11 +210,11 @@ describe('tap binding', () => {
         expect(Object.keys(entry), `command ${entry.id}`).to.satisfy(withinKeys(ENTRY_KEYS))
       }
 
-      const missingCommandTest = await binding.exec('command', {}, { test: 'not-a-test', command: commands[0].id as string })
+      const missingCommandTest = await binding.exec('command', {}, { testId: 'not-a-test', commandId: commands[0].id as string })
 
       expect((missingCommandTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
-      const missingSelectedCommand = await binding.exec('command', {}, { test: testId, command: 'not-a-command' })
+      const missingSelectedCommand = await binding.exec('command', {}, { testId, commandId: 'not-a-command' })
 
       expect((missingSelectedCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
 
@@ -264,13 +264,13 @@ describe('tap binding with a retrying spec', () => {
       expect(tests[0].attempts).to.have.length(2)
       expect(tests[0].attempts.map((attempt: Record<string, unknown>) => attempt.state)).to.deep.eq(['failed', 'passed'])
 
-      const latest = await reporterResult(binding, { test: testId })
+      const latest = await reporterResult(binding, { testId })
 
       expect(latest.test.state).to.eq('passed')
       // The passing latest attempt has no error panel.
       expect(latest.error).to.be.undefined
 
-      const first = await reporterResult(binding, { test: testId, attempt: '1' })
+      const first = await reporterResult(binding, { testId, attempt: '1' })
 
       expect(first.test.id).to.eq(testId)
       expect(first.test.fullTitle).to.eq(latest.test.fullTitle)
@@ -278,11 +278,11 @@ describe('tap binding with a retrying spec', () => {
       expect(Object.keys(first.error)).to.satisfy(withinKeys(['name', 'message', 'stack', 'codeFrame']))
       expect(first.error.message).to.be.a('string')
 
-      const second = await reporterResult(binding, { test: testId, attempt: '2' })
+      const second = await reporterResult(binding, { testId, attempt: '2' })
 
       expect(second).to.deep.eq(latest)
 
-      const outOfRange = await binding.exec('reporter', {}, { test: testId, attempt: '3' })
+      const outOfRange = await binding.exec('reporter', {}, { testId, attempt: '3' })
 
       expect((outOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
 
@@ -301,8 +301,8 @@ describe('tap binding with a retrying spec', () => {
       expect(failedCommand, 'failed command from attempt 1').to.exist
 
       const firstAttemptCommand = await binding.exec('command', {}, {
-        test: testId,
-        command: failedCommand!.id as string,
+        testId,
+        commandId: failedCommand!.id as string,
         attempt: '1',
       })
 
@@ -315,7 +315,7 @@ describe('tap binding with a retrying spec', () => {
       // The console properties travel with the row, read from the same attempt.
       expect(entry.consoleProps).to.include({ name: failedCommand!.name, type: 'command' })
 
-      const attemptOutOfRange = await binding.exec('command', {}, { test: testId, command: failedCommand!.id as string, attempt: '3' })
+      const attemptOutOfRange = await binding.exec('command', {}, { testId, commandId: failedCommand!.id as string, attempt: '3' })
 
       expect((attemptOutOfRange as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     })
@@ -344,7 +344,7 @@ describe('tap binding console properties', () => {
 
       expect(getToggle, 'the get #toggle command').to.exist
 
-      const selectedCommand = await binding.exec('command', {}, { test: testId, command: getToggle!.id as string })
+      const selectedCommand = await binding.exec('command', {}, { testId, commandId: getToggle!.id as string })
 
       const selected = (selectedCommand as { result: Record<string, unknown> }).result
 
@@ -372,7 +372,7 @@ describe('tap binding console properties', () => {
         expect(snapshot.timestamp).to.be.a('number')
       })
 
-      const missingCommand = await binding.exec('command', {}, { test: testId })
+      const missingCommand = await binding.exec('command', {}, { testId })
 
       expect((missingCommand as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
@@ -392,7 +392,7 @@ describe('tap binding console properties', () => {
 
       // A row the driver holds no details for still reports its row, with no
       // console properties on it.
-      const unavailable = await binding.exec('command', {}, { test: testId, command: emptyConsoleProps.id as string })
+      const unavailable = await binding.exec('command', {}, { testId, commandId: emptyConsoleProps.id as string })
       const withoutProps = (unavailable as { result: Record<string, unknown> }).result
 
       expect(withoutProps).to.have.property('id', emptyConsoleProps.id)
@@ -410,7 +410,7 @@ describe('tap binding console properties', () => {
       const { testId, commands } = await firstTestCommands(binding)
       const commandId = commandNamed(commands, 'deep-console-props').id as string
       const propsOf = async (options: Record<string, string> = {}) => {
-        const result = await binding.exec('command', {}, { test: testId, command: commandId, ...options })
+        const result = await binding.exec('command', {}, { testId, commandId, ...options })
 
         return (result as { result: Record<string, any> }).result.consoleProps
       }
@@ -470,7 +470,7 @@ describe('tap binding pin lifecycle', () => {
       const binding = getBinding(win)
 
       const { testId, commands } = await firstTestCommands(binding)
-      const outcome = await binding.exec('pin', { test: testId, command: commandNamed(commands, 'click').id as string }, { at: 'before' })
+      const outcome = await binding.exec('pin', {}, { testId, commandId: commandNamed(commands, 'click').id as string, at: 'before' })
 
       expect('result' in outcome).to.eq(true)
     })
@@ -492,7 +492,7 @@ describe('tap binding pin lifecycle', () => {
 
       expect(clearNoop).to.deep.eq({ result: { cleared: false } })
 
-      const beforeRun = await binding.exec('pin', { test: 'r2', command: '1' })
+      const beforeRun = await binding.exec('pin', {}, { testId: 'r2', commandId: '1' })
 
       expect((beforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
     })
@@ -508,21 +508,21 @@ describe('tap binding pin lifecycle', () => {
       const { testId, commands } = await firstTestCommands(binding)
       const commandId = commandNamed(commands, 'click').id as string
 
-      const missingTest = await binding.exec('pin', { test: 'not-a-test', command: commandId })
+      const missingTest = await binding.exec('pin', {}, { testId: 'not-a-test', commandId })
 
       expect((missingTest as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
-      const missingCommand = await binding.exec('pin', { test: testId, command: 'not-a-command' })
+      const missingCommand = await binding.exec('pin', {}, { testId, commandId: 'not-a-command' })
 
       expect((missingCommand as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
 
-      const missingSnapshot = await binding.exec('pin', { test: testId, command: commandId }, { at: 'during' })
+      const missingSnapshot = await binding.exec('pin', {}, { testId, commandId, at: 'during' })
 
       expect((missingSnapshot as { error: { code: string } }).error.code).to.eq('SNAPSHOT_NOT_FOUND')
       expect((missingSnapshot as { error: { message: string } }).error.message).to.contain('"before" (1)')
 
       // The default pin lands on the click's final snapshot.
-      const pinOutcome = (await binding.exec('pin', { test: testId, command: commandId })) as { result: Record<string, any> }
+      const pinOutcome = (await binding.exec('pin', {}, { testId, commandId })) as { result: Record<string, any> }
 
       expect(Object.keys(pinOutcome.result)).to.satisfy((keys: string[]) => keys.every((key) => ['pinned', 'url'].includes(key)))
       expect(Object.keys(pinOutcome.result.pinned)).to.satisfy((keys: string[]) => keys.every((key) => ['test', 'command', 'hookName', 'at'].includes(key)))
@@ -535,7 +535,7 @@ describe('tap binding pin lifecycle', () => {
       expect(pinOutcome.result.pinned.at).to.deep.eq({ index: 2, total: 2, name: 'after' })
 
       // Re-running pin on the pinned command moves it in place.
-      const moved = (await binding.exec('pin', { test: testId, command: commandId }, { at: 'before' })) as { result: Record<string, any> }
+      const moved = (await binding.exec('pin', {}, { testId, commandId, at: 'before' })) as { result: Record<string, any> }
 
       expect(moved.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
 
@@ -671,14 +671,14 @@ describe('tap binding with network activity', () => {
     cy.window().then(async (win) => {
       const binding = getBinding(win)
 
-      const missing = await binding.exec('reporter', {}, { test: 'not-a-test' })
+      const missing = await binding.exec('reporter', {}, { testId: 'not-a-test' })
 
       expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
 
       const tests = await specTests(binding)
       const testId = tests[0].id as string
 
-      const view = await reporterResult(binding, { test: testId })
+      const view = await reporterResult(binding, { testId })
 
       expect(Object.keys(view)).to.deep.eq(['test', 'hooks', 'sessions', 'agents', 'routes', 'commands'])
       expect(view.test).to.deep.eq({
@@ -846,8 +846,8 @@ describe('tap binding run lifecycle', () => {
       const binding = getBinding(win)
       const refused = await Promise.all([
         binding.exec('reporter'),
-        binding.exec('command', {}, { test: 'r1', command: '1' }),
-        binding.exec('pin', { test: 'r1', command: '1' }),
+        binding.exec('command', {}, { testId: 'r1', commandId: '1' }),
+        binding.exec('pin', {}, { testId: 'r1', commandId: '1' }),
       ])
 
       for (const outcome of refused) {

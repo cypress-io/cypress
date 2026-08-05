@@ -198,26 +198,26 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'reporter').helpInformation()
 
-    expect(help).toContain('--test <test>')
+    expect(help).toContain('--testId <testId>')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['reporter', '--test', 'r2', '--attempt', '1'], { from: 'user' })
+    program.parse(['reporter', '--testId', 'r2', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { test: 'r2', attempt: '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { testId: 'r2', attempt: '1' }, {})
   })
 
-  it('declares and forwards command --command from the shared contract', () => {
+  it('declares and forwards command --commandId from the shared contract', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'command').helpInformation()
 
-    expect(help).toContain('--test <test>')
-    expect(help).toContain('--command <command>')
+    expect(help).toContain('--testId <testId>')
+    expect(help).toContain('--commandId <commandId>')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['command', '--test', 'r2', '--command', 'log-3', '--attempt', '1'], { from: 'user' })
+    program.parse(['command', '--testId', 'r2', '--commandId', 'log-3', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test': 'r2', 'command': 'log-3', 'attempt': '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'testId': 'r2', 'commandId': 'log-3', 'attempt': '1' }, {})
   })
 
   // `command` declares --json in its schema so the instance can be told, but the
@@ -228,7 +228,7 @@ describe('lib/tap/build-program', () => {
     const help = subcommand(program, 'command').helpInformation()
 
     expect(help.match(/--json/g)).toHaveLength(1)
-    expect(help).toContain('every console property in full')
+    expect(help.replace(/\s+/g, ' ')).toContain('every console property in full')
     expect(subcommand(program, 'reporter').helpInformation()).toContain('--json               print the raw JSON result')
   })
 
@@ -243,12 +243,12 @@ describe('lib/tap/build-program', () => {
     expect(help).toContain('--depth <depth>')
     expect(help).not.toContain('--path')
 
-    program.parse(['command', '--test', 'r2', '--command', '3', '--depth', '2'], { from: 'user' })
+    program.parse(['command', '--testId', 'r2', '--commandId', '3', '--depth', '2'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith(
       'command',
       {},
-      { test: 'r2', command: '3' },
+      { testId: 'r2', commandId: '3' },
       { depth: '2' },
     )
   })

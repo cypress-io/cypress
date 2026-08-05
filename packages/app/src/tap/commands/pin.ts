@@ -157,7 +157,7 @@ const clearPin = (): ClearResult => {
   return { cleared: true }
 }
 
-export const pinCommand = defineCommand('pin', async ({ test, command }, { at, clear, attempt }): Promise<PinResult | ClearResult> => {
+export const pinCommand = defineCommand('pin', async (_params, { testId: test, commandId: command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
   const runner = tapManagerDataSource.getSnapshotRunner()
 
   if (runner) {

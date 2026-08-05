@@ -21,7 +21,7 @@ const consolePropsOf = (props: ConsolePropsResult | undefined): ConsolePropsResu
 }
 
 export const commandCommand = defineCommand('command', async (_params, options): Promise<CommandResult> => {
-  const { test, attempt, command, json } = options
+  const { testId: test, attempt, commandId: command, json } = options
 
   const runner = tapManagerDataSource.getRunner()
 

@@ -225,8 +225,8 @@ describe('lib/exec/tap', () => {
       const consoleProps = { name: 'request', type: 'command', props: { body: 'x'.repeat(2_000) } }
       const call = mockSession(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
 
-      expect(await tap.start(['command', '--test', 'r2', '--command', '1'], { json: true })).toBe(0)
-      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test': 'r2', 'command': '1', 'json': 'true' }])
+      expect(await tap.start(['command', '--testId', 'r2', '--commandId', '1'], { json: true })).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'testId': 'r2', 'commandId': '1', 'json': 'true' }])
       expect(JSON.parse(logger.print()).consoleProps).toEqual(consoleProps)
     })
 
@@ -241,8 +241,8 @@ describe('lib/exec/tap', () => {
       const commandView = { id: '1', name: 'visit', hook: { hookId: 'r2', hookName: 'test body' }, snapshots: [] }
       const call = mockSession(buildTapSchema('15.0.0'), { result: commandView })
 
-      expect(await tap.start(['command', '--test', 'r2', '--command', '1'], {})).toBe(0)
-      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { test: 'r2', command: '1' }])
+      expect(await tap.start(['command', '--testId', 'r2', '--commandId', '1'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { testId: 'r2', commandId: '1' }])
     })
 
     it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
@@ -1081,7 +1081,7 @@ describe('lib/exec/tap', () => {
     it('routes dom to the AUT-frame reader with the top-level options and returns its exit code', async () => {
       vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
 
-      expect(await tap.start(['dom', '.foo'], { instance: 7 })).toBe(0)
+      expect(await tap.start(['dom', '--selector', '.foo'], { instance: 7 })).toBe(0)
 
       expect(withResolvedAutFrame).toHaveBeenCalledTimes(1)
       expect(vi.mocked(withResolvedAutFrame).mock.calls[0][0]).toEqual({ instance: 7 })
@@ -1109,7 +1109,7 @@ describe('lib/exec/tap', () => {
         return 0
       })
 
-      await tap.start(['dom', '.btn', '--max-chars', '50'], {})
+      await tap.start(['dom', '--selector', '.btn', '--max-chars', '50'], {})
 
       // selector and the coerced --max-chars reach the extractor as call arguments.
       expect(forwarded).toEqual([{ value: '.btn' }, { value: 50 }])
@@ -1117,7 +1117,7 @@ describe('lib/exec/tap', () => {
 
     it('rejects `inspect` with no selector, without reading the frame', async () => {
       expect(await tap.start(['inspect'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`missing required argument 'selector'`)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`required option '--selector <selector>' not specified`)
       expect(withResolvedAutFrame).not.toHaveBeenCalled()
     })
 
@@ -1206,40 +1206,35 @@ describe('lib/exec/tap', () => {
         Interacts with a running Cypress instance
 
         Options:
-          --instance <pid>                target a specific running Cypress instance by
-                                          its server process id (pid)
-          --json                          print the raw JSON result instead of the
-                                          human-readable rendering
-          -h, --help                      display help for command
+          --instance <pid>      target a specific running Cypress instance by its
+                                server process id (pid)
+          --json                print the raw JSON result instead of the human-readable
+                                rendering
+          -h, --help            display help for command
 
         Commands:
-          instances [options]             list the running Cypress instances this CLI
-                                          can reach
-          status [options]                report where a running Cypress instance is
-                                          in its lifecycle
-          specs [options]                 list the specs the running Cypress instance
-                                          can run, most recently modified first
-          run [options] <spec>            run (or rerun) a spec by its
-                                          project-relative path
-          dom [options] [selector]        read the app-under-test DOM as HTML: the
-                                          whole page, or each element matching a
-                                          selector (with its subtree)
-          aria [options] [selector]       read the accessibility (ARIA) tree of the
-                                          app-under-test frame, or the subtree at a
-                                          selector
-          inspect [options] <selector>    inspect the first element matching a
-                                          selector: its tag, attributes, computed
-                                          styles, box model, and accessibility node
-          command [options]               detail one command log entry of a test —
-                                          its reporter row, the DOM snapshots pinnable
-                                          on it, and its console properties
-          reporter [options]              render a test’s full reporter view — its
-                                          routes, hooks, and command log — or, without
-                                          --test, the spec-level overview: run stats
-                                          and every suite’s tests
-          pin [options] [test] [command]  pin a command’s DOM snapshot into the live
-                                          app-under-test frame so the dom/aria/inspect
-                                          commands can read it; pass --clear to release
+          instances [options]   list the running Cypress instances this CLI can reach
+          status [options]      report where a running Cypress instance is in its
+                                lifecycle
+          specs [options]       list the specs the running Cypress instance can run,
+                                most recently modified first
+          run [options] <spec>  run (or rerun) a spec by its project-relative path
+          dom [options]         read the app-under-test DOM as HTML: the whole page,
+                                or each element matching a selector (with its subtree)
+          aria [options]        read the accessibility (ARIA) tree of the
+                                app-under-test frame, or the subtree at a selector
+          inspect [options]     inspect the first element matching a selector: its
+                                tag, attributes, computed styles, box model, and
+                                accessibility node
+          command [options]     detail one command log entry of a test — its reporter
+                                row, the DOM snapshots pinnable on it, and its console
+                                properties
+          reporter [options]    render a test’s full reporter view — its routes,
+                                hooks, and command log — or, without --testId, the
+                                spec-level overview: run stats and every suite’s tests
+          pin [options]         pin a command’s DOM snapshot into the live
+                                app-under-test frame so the dom/aria/inspect commands
+                                can read it; pass --clear to release
         "
       `)
     })
@@ -1267,22 +1262,24 @@ describe('lib/exec/tap', () => {
         detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties
 
         Options:
-          --test <test>        test id, as listed by the reporter command
-          --command <command>  command id, as listed by the reporter command — a row
-                               number (test body first when duplicated), an e-prefixed
-                               event id, or hook-qualified like "h1:3"
-          --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to the
-                               latest
-          --depth <depth>      how many levels of nested console properties to expand
-                               before summarizing the rest as "{n keys}" / "[n items]":
-                               a number or "all" (default 3, and a section over 8 rows
-                               folds at any depth unless this is passed)
-          --instance <pid>     target a specific running Cypress instance by its server
-                               process id (pid)
-          --json               print the raw JSON result instead of the human-readable
-                               rendering — every console property in full, however
-                               long, rather than the long ones named by their length
-          -h, --help           display help for command
+          --testId <testId>        test id, as listed by the reporter command
+          --commandId <commandId>  command id, as listed by the reporter command — a
+                                   row number (test body first when duplicated), an
+                                   e-prefixed event id, or hook-qualified like "h1:3"
+          --attempt <attempt>      1-based attempt (attempt 1 = first run); defaults to
+                                   the latest
+          --depth <depth>          how many levels of nested console properties to
+                                   expand before summarizing the rest as "{n keys}" /
+                                   "[n items]": a number or "all" (default 3, and a
+                                   section over 8 rows folds at any depth unless this
+                                   is passed)
+          --instance <pid>         target a specific running Cypress instance by its
+                                   server process id (pid)
+          --json                   print the raw JSON result instead of the
+                                   human-readable rendering — every console property in
+                                   full, however long, rather than the long ones named
+                                   by their length
+          -h, --help               display help for command
         "
       `)
     })
