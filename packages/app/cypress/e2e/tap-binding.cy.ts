@@ -851,7 +851,7 @@ describe('tap binding run lifecycle', () => {
       const binding = getBinding(win)
       const refused = await Promise.all([
         binding.exec('reporter'),
-        binding.exec('command', { test: 'r1', command: '1' }),
+        binding.exec('command', {}, { test: 'r1', command: '1' }),
         binding.exec('pin', { test: 'r1', command: '1' }),
       ])
 
