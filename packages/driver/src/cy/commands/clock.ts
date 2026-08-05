@@ -4,8 +4,9 @@ import { create as createClock, Clock } from '../../cypress/clock'
 import $errUtils from '../../cypress/error_utils'
 
 type CyClock = Clock & {
-  tick(ms, options?: any): number
-  restore(options?: any): void
+  tick(ms: number | undefined, options?: Partial<Cypress.Loggable>): number
+  tickAsync(ms: number | undefined, options?: Partial<Cypress.Loggable>): Promise<number>
+  restore(options?: Partial<Cypress.Loggable>): void
 }
 
 // create a global clock
@@ -76,8 +77,10 @@ export default function (Commands, Cypress, cy, state) {
         log: true,
       })
 
+      let wrappedClock: CyClock
+
       const log = (name, shouldLog, message = '', snapshot = true, consoleProps = {}) => {
-        const details = clock!.details()
+        const details = wrappedClock.details()
         const logNow = details.now
         const logMethods = details.methods.slice()
 
@@ -97,60 +100,77 @@ export default function (Commands, Cypress, cy, state) {
         })
       }
 
-      clock = createClock(state('window'), now, methods)
+      const createdClock = createClock(state('window'), now, methods)
+      const { tick, tickAsync, restore } = createdClock
 
-      const { tick } = clock
+      const createTickLog = (ms: number | undefined, userOptions: Partial<Cypress.Loggable>) => {
+        const tickMs = ms ?? 0
 
-      clock.tick = function (ms, userOptions: Partial<Cypress.Loggable> = {}) {
-        if ((ms != null) && !_.isNumber(ms)) {
-          $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
+        if (!_.isNumber(tickMs) || Number.isNaN(tickMs)) {
+          const arg = Number.isNaN(ms) ? String(ms) : JSON.stringify(ms)
+
+          $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg } })
         }
 
-        if (ms == null) {
-          ms = 0
-        }
-
-        userOptions = _.defaults({}, userOptions, {
-          log: options.log,
+        const shouldLog = userOptions.log ?? options.log
+        const tickLog = log('tick', shouldLog, `${tickMs}ms`, false, {
+          'Now': wrappedClock.details().now + tickMs,
+          'Ticked': `${tickMs} milliseconds`,
         })
 
-        const theLog = log('tick', userOptions.log, `${ms}ms`, false, {
-          'Now': clock!.details().now + ms,
-          'Ticked': `${ms} milliseconds`,
-        })
-
-        if (theLog) {
-          theLog.snapshot('before', { next: 'after' })
+        if (tickLog) {
+          tickLog.snapshot('before', { next: 'after' })
         }
 
-        const ret = tick.apply(this, [ms])
-
-        if (theLog) {
-          theLog.snapshot().end()
-        }
-
-        return ret
+        return { tickLog, tickMs }
       }
 
-      const { restore } = clock
-
-      clock.restore = function (userOptions: Partial<Cypress.Loggable> = {}) {
-        const ret = restore.apply(this)
-
-        userOptions = _.defaults({}, userOptions, {
-          log: options.log,
-        })
-
-        log('restore', userOptions.log)
-
-        ctx.clock = null
-
-        clock = null
-
-        state('clock', clock)
-
-        return ret
+      const endTickLog = (tickLog: ReturnType<typeof log>) => {
+        if (tickLog) {
+          tickLog.snapshot().end()
+        }
       }
+
+      wrappedClock = {
+        ...createdClock,
+        tick (ms: number | undefined, userOptions: Partial<Cypress.Loggable> = {}) {
+          const { tickMs, tickLog } = createTickLog(ms, userOptions)
+          const result = tick.apply(this, [tickMs])
+
+          endTickLog(tickLog)
+
+          return result
+        },
+        tickAsync (ms: number | undefined, userOptions: Partial<Cypress.Loggable> = {}) {
+          const { tickMs, tickLog } = createTickLog(ms, userOptions)
+          const tickResult = tickAsync
+            ? tickAsync.apply(this, [tickMs])
+            : Promise.resolve().then(() => tick.apply(this, [tickMs]))
+
+          return Promise.resolve(tickResult).finally(() => {
+            endTickLog(tickLog)
+          })
+        },
+        restore (userOptions: Partial<Cypress.Loggable> = {}) {
+          const ret = restore.apply(this)
+
+          userOptions = _.defaults({}, userOptions, {
+            log: options.log,
+          })
+
+          log('restore', userOptions.log)
+
+          ctx.clock = null
+
+          clock = null
+
+          state('clock', clock)
+
+          return ret
+        },
+      }
+
+      clock = wrappedClock
 
       log('clock', options.log)
 
@@ -161,14 +181,17 @@ export default function (Commands, Cypress, cy, state) {
       return clock
     },
 
-    tick (subject, ms, options: Partial<Cypress.Loggable> = {}) {
+    tick (subject, ms: number | undefined, options?: Partial<Cypress.Loggable>) {
       if (!clock) {
         $errUtils.throwErrByPath('tick.no_clock')
+
+        return
       }
 
-      clock!.tick(ms, options)
+      const tickOptions = options ?? {}
+      const tickClock = clock
 
-      return clock
+      return tickClock.tickAsync(ms, tickOptions).then(() => tickClock)
     },
   })
 }

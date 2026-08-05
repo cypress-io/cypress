@@ -516,6 +516,27 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
+    it('should wait for timers queued from resolved promises during the same tick', () => {
+      const onLoaded = cy.spy().as('onLoaded')
+      const win = cy.state('window')
+
+      cy.clock().then(() => {
+        const getPromise = () => {
+          return new win.Promise((resolve) => {
+            win.setTimeout(resolve, 100)
+          })
+        }
+
+        win.setTimeout(() => {
+          getPromise().then(() => {
+            win.setTimeout(onLoaded, 100)
+          })
+        }, 100)
+      }).tick(2000)
+
+      cy.get('@onLoaded').should('have.been.calledOnce')
+    })
+
     context('errors', () => {
       it('throws if there is not a clock', (done) => {
         cy.on('fail', (err) => {

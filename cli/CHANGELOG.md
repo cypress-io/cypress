@@ -1,4 +1,11 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.20.1
+
+**Bugfixes:**
+
+- Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
+
+
 ## 15.20.0
 
 **Performance:**
@@ -164,6 +171,7 @@
 - Fixed an issue where clicking a [`cy.origin`](https://docs.cypress.io/api/commands/origin) command in the Command Log to print its details to the console threw an error when the callback yielded a value that could not be serialized across origins (for example, the page's `window` after a `cy.visit`). The command now prints its origin, arguments, and yielded subject to the console without erroring; an unserializable yielded subject is shown by its type instead of throwing. Fixes [#27385](https://github.com/cypress-io/cypress/issues/27385). Fixed in [#33983](https://github.com/cypress-io/cypress/pull/33983).
 - The internal `--dev`, `--inspect`, and `--inspect-brk` command line flags are no longer listed in the `cypress` CLI help output. These flags are only intended for developing Cypress itself and would error when used against an installed version, so they are no longer advertised to users. Fixes [#21320](https://github.com/cypress-io/cypress/issues/21320) and addresses [#23058](https://github.com/cypress-io/cypress/issues/23058).
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use. Fixed in [#33972](https://github.com/cypress-io/cypress/pull/33972).
+- Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
 
 **Misc:**
 
