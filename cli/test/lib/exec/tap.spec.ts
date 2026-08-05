@@ -295,6 +295,31 @@ describe('lib/exec/tap', () => {
     })
   })
 
+  describe('coded failures go to stderr', () => {
+    const stderr = (): string => vi.mocked(console.error).mock.calls.flat().join(' ')
+
+    it('prints an app-side domain failure on stderr, leaving stdout clean under --json', async () => {
+      mockSession(schema, {
+        error: {
+          code: 'INVALID_ARGUMENTS',
+          message: '<spec> must be a string, but number was given.',
+        },
+      })
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], { json: true })).toBe(1)
+      expect(stderr()).toContain('INVALID_ARGUMENTS: <spec> must be a string, but number was given.')
+      expect(console.log).not.toHaveBeenCalled()
+    })
+
+    it('prints a known tap error on stderr, leaving stdout clean under --json', async () => {
+      vi.mocked(withTapSession).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+
+      expect(await tap.start(['health'], { json: true })).toBe(1)
+      expect(stderr()).toContain(errors.tapBindingNotFound.description)
+      expect(console.log).not.toHaveBeenCalled()
+    })
+  })
+
   describe('commander validates the command against the live schema', () => {
     it('rejects a command the instance does not advertise, without reaching exec', async () => {
       const call = mockSession()
