@@ -27,6 +27,13 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
 }
 
 export const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
+  // A bound that expired already names what went unanswered and how to wait
+  // longer, and only its own `message` carries that — wrapping it would print
+  // generic prose about the browser instead.
+  if (isRendererUnresponsive(cause)) {
+    throw cause
+  }
+
   const err: any = new Error(message, cause === undefined ? undefined : { cause })
 
   err.details = details

@@ -71,6 +71,23 @@ const callOnce = (method = 'health', args: unknown[] = []) => {
 
 const staleError = () => new Error(CdpErrorMessage.objectNotFound)
 
+const UNRESPONSIVE_MS = 25
+
+const never = () => vi.fn().mockReturnValue(new Promise(() => {}))
+
+const callWithBound = () => {
+  return withTapSession(instance, (session) => session.call('health'), UNRESPONSIVE_MS)
+}
+
+const expectUnresponsive = async (promise: Promise<any>) => {
+  const err = await promise.catch((e) => e)
+
+  expect(err.code).toBe('RENDERER_UNRESPONSIVE')
+  expect(err.details).toBeUndefined()
+
+  return err
+}
+
 const expectError = async (promise: Promise<any>, details: unknown) => {
   const err = await promise.catch((e) => e)
 
@@ -435,6 +452,37 @@ describe('lib/tap/tap-session', () => {
     await expectError(callOnce(), errors.tapCdpUnreachable)
 
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledOnce()
+  })
+
+  it('surfaces RENDERER_UNRESPONSIVE when the binding call never answers', async () => {
+    setup(makeClient({ callFunctionOn: never() }))
+
+    await expectUnresponsive(callWithBound())
+  })
+
+  it('surfaces RENDERER_UNRESPONSIVE when resolving the binding never answers', async () => {
+    const evaluate = vi.fn()
+    .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
+    .mockReturnValue(new Promise(() => {}))
+
+    setup(makeClient({ evaluate }))
+
+    await expectUnresponsive(callWithBound())
+  })
+
+  it('surfaces RENDERER_UNRESPONSIVE rather than BINDING_NOT_FOUND when no page can be attached to', async () => {
+    setup(makeClient({
+      targetInfos: [pageTarget('T1'), pageTarget('T2')],
+      attachToTarget: never(),
+    }))
+
+    await expectUnresponsive(callWithBound())
+  })
+
+  it('surfaces RENDERER_UNRESPONSIVE when listing targets never answers', async () => {
+    setup(makeClient({ getTargets: never() }))
+
+    await expectUnresponsive(callWithBound())
   })
 
   it('attaches to the first page that probes positive when multiple pages have the binding', async () => {

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { CypressInstanceError } from '../../../lib/cypress-instances'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
 import type { TapSession } from '../../../lib/tap/tap-session'
 
@@ -20,7 +21,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
     selectorSubtype?: string
     throwOnEval?: boolean
     elementInfo?: unknown
-    axThrows?: boolean
+    axError?: unknown
     axNodes?: unknown[]
   } = {}) => {
     // callFunctionOn is used twice: first to querySelector (returns the element
@@ -36,8 +37,8 @@ describe('lib/tap/commands/inspect extractInspect', () => {
     .mockImplementationOnce(async () => ({ result: { value: opts.elementInfo ?? ELEMENT_INFO } }))
 
     const getPartialAXTree = vi.fn().mockImplementation(async () => {
-      if (opts.axThrows) {
-        throw new Error('no ax')
+      if (opts.axError) {
+        throw opts.axError
       }
 
       return { nodes: opts.axNodes ?? [{ role: { value: 'textbox' }, name: { value: 'Username' }, backendDOMNodeId: 40, properties: [{ name: 'disabled', value: { value: true } }] }] }
@@ -87,12 +88,21 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   })
 
   it('still returns the element when the accessibility node is unavailable', async () => {
-    const { session } = makeInspectSession({ selectorObjectId: 'obj-1', axThrows: true })
+    const { session } = makeInspectSession({ selectorObjectId: 'obj-1', axError: new Error('no ax') })
 
     const result = await extractInspect(session, frame, '.plain')
 
     expect(result.found).to.eq(true)
     expect(result.aria).to.be.undefined
     expect(result.tag).to.eq('input')
+  })
+
+  it('fails instead of reporting a partial element when the renderer stops answering', async () => {
+    const { session } = makeInspectSession({
+      selectorObjectId: 'obj-1',
+      axError: new CypressInstanceError('RENDERER_UNRESPONSIVE', 'Cypress did not answer Accessibility.getPartialAXTree within 30000ms.'),
+    })
+
+    await expect(extractInspect(session, frame, '.wedged')).rejects.toMatchObject({ code: 'RENDERER_UNRESPONSIVE' })
   })
 })

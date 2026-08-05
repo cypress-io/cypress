@@ -32,13 +32,13 @@ export interface TapInstanceSummary {
 // Bounded, and never throws: `instances` is what a caller reaches for when
 // everything else is failing, so an unanswered probe is a reported fact rather
 // than an error. Absent means there was nothing to ask, not that it went unasked.
-const probeRenderer = async (instance: LiveInstanceState): Promise<boolean | undefined> => {
+const probeRenderer = async (instance: LiveInstanceState, timeoutMs: number): Promise<boolean | undefined> => {
   if (instance.cdpBrowserWsUrl === null) {
     return undefined
   }
 
   try {
-    return await withTapSession(instance as ReadyInstanceState, async () => true, DISCOVERY_TIMEOUT_MS)
+    return await withTapSession(instance as ReadyInstanceState, async () => true, timeoutMs)
   } catch (err) {
     return isRendererUnresponsive(err) ? false : undefined
   }
@@ -53,7 +53,8 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     return 0
   }
 
-  const responsive = await Promise.all(instances.map(probeRenderer))
+  const timeoutMs = options.timeout ?? DISCOVERY_TIMEOUT_MS
+  const responsive = await Promise.all(instances.map((instance) => probeRenderer(instance, timeoutMs)))
 
   const summaries: TapInstanceSummary[] = instances.map((instance, index) => ({
     pid: instance.pid,
