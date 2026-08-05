@@ -287,7 +287,7 @@ jobs:
       require-opt-in: false
       parallelism: 1
       # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/proxy_correlation_spec.js test/form_submissions_spec.js test/page_loading_spec.js
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/proxy_correlation_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
@@ -297,7 +297,7 @@ jobs:
       require-opt-in: false
       parallelism: 1
       # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/proxy_correlation_spec.js test/form_submissions_spec.js test/page_loading_spec.js
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/proxy_correlation_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js
       requires:
         - system-tests-node-modules-install
   - run-launchpad-integration-tests-chrome:
