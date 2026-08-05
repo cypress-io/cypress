@@ -286,8 +286,8 @@ jobs:
       disable-proxy: true
       require-opt-in: false
       parallelism: 1
-      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts
+      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/proxy_correlation_spec.js test/form_submissions_spec.js test/page_loading_spec.js
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
@@ -296,8 +296,8 @@ jobs:
       disable-proxy: true
       require-opt-in: false
       parallelism: 1
-      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts
+      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/proxy_correlation_spec.js test/form_submissions_spec.js test/page_loading_spec.js
       requires:
         - system-tests-node-modules-install
   - run-launchpad-integration-tests-chrome:
@@ -314,6 +314,16 @@ jobs:
       record-group-suffix: '-remediated'
       # #34353 Invalid InterceptionId body-stream crash
       spec: cypress/e2e/choose-a-browser.cy.ts,cypress/e2e/open-mode.cy.ts
+      requires:
+        - ready-to-test
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-cdp-remediated
+      context: test-runner:cypress-record-key
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      # #34467 continue unmodified CDP Fetch responses
+      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js
       requires:
         - ready-to-test
   - unit-tests-proxy-disabled:
@@ -516,6 +526,7 @@ jobs:
         - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
         - run-launchpad-integration-tests-chrome-cdp-remediated
+        - driver-integration-tests-chrome-cdp-remediated
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta
