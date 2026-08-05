@@ -636,6 +636,27 @@ describe('lib/exec/tap', () => {
       })
     })
 
+    it('reports a spec that failed to build as failed, carrying the reason', async () => {
+      mockLiveResolved(liveInstance())
+      mockSession(schema, {
+        result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'failed', startedAt: '2026-07-29T10:15:00.000Z', error: 'Error: Webpack Compilation Error' },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'failed',
+        pid: 4242,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: true,
+        browserName: 'Chrome',
+        totalSpecs: 3,
+        spec: 'cypress/e2e/login.cy.ts',
+        startedAt: '2026-07-29T10:15:00.000Z',
+        error: 'Error: Webpack Compilation Error',
+      })
+    })
+
     it('reports a null startedAt for an instance whose binding does not name the run', async () => {
       mockLiveResolved(liveInstance())
       mockSession(schema, {

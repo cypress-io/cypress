@@ -66,6 +66,31 @@ describe('lib/tap/render/status', () => {
     ].join('\n'))
   })
 
+  it('renders a build failure as the reason under the spec, with no counts to read', () => {
+    const output = render({
+      status: 'failed',
+      pid: 4242,
+      projectRoot: '/projects/app',
+      testingType: 'e2e',
+      browserAttached: true,
+      browserName: 'Chrome',
+      totalSpecs: 3,
+      spec: 'cypress/e2e/login.cy.ts',
+      startedAt: '2026-07-29T10:15:00.000Z',
+      error: 'Error: Webpack Compilation Error\nSyntaxError: Unexpected token (4:2)',
+    })
+
+    expect(output).toBe([
+      'PID   PROJECT        TYPE  BROWSER',
+      '4242  /projects/app  e2e   Chrome',
+      '',
+      '✖ cypress/e2e/login.cy.ts  (started at 10:15:00 AM)',
+      '',
+      'Error: Webpack Compilation Error',
+      'SyntaxError: Unexpected token (4:2)',
+    ].join('\n'))
+  })
+
   it('renders a pre-spec phase as the instance row plus the phase on its own', () => {
     const output = render({
       status: 'browser not selected',

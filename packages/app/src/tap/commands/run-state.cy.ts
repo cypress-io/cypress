@@ -50,6 +50,7 @@ describe('tap/commands/run-state', () => {
   }
   const stubNoRunner = () => cy.stub(tapManagerDataSource, 'getRunner').returns(undefined)
   const stubActiveSpec = (relative: string | undefined) => cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns(relative)
+  const stubScriptError = (error: string) => cy.stub(tapManagerDataSource, 'getScriptError').returns(error)
 
   beforeEach(() => {
     window.__RUN_MODE_SPECS__ = RUN_MODE_SPECS
@@ -95,6 +96,40 @@ describe('tap/commands/run-state', () => {
         state: 'loading',
         startedAt: null,
       },
+    })
+  })
+
+  it('reports a spec that failed to build as failed, carrying the failure instead of counts', async () => {
+    // The runner is settled and empty — the shape a passing run of nothing has.
+    stubRunner({ getAllTestsState: cy.stub().returns({}), isRunComplete: () => true })
+    stubActiveSpec('cypress/e2e/login.cy.ts')
+    stubScriptError('Error: Webpack Compilation Error\nSyntaxError: Unexpected token (4:2)\n    at Watching.handle (/x/webpack.js:1:1)')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('run-state')).to.deep.eq({
+      result: {
+        spec: 'cypress/e2e/login.cy.ts',
+        totalSpecs: 2,
+        state: 'failed',
+        startedAt: STARTED_AT,
+        // No results to read as a clean sweep, and the compiler's own stack is
+        // dropped — what identifies the failure is kept.
+        error: 'Error: Webpack Compilation Error\nSyntaxError: Unexpected token (4:2)',
+      },
+    })
+  })
+
+  it('reports a build failure that kept the driver from booting at all', async () => {
+    stubNoRunner()
+    stubActiveSpec('cypress/e2e/login.cy.ts')
+    stubScriptError('Error: Webpack Compilation Error')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    // Terminal, not loading: this spec is never going to start.
+    expect(await manager.exec('run-state')).to.deep.eq({
+      result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 2, state: 'failed', startedAt: null, error: 'Error: Webpack Compilation Error' },
     })
   })
 

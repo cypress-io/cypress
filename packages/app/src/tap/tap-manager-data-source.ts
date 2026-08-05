@@ -88,6 +88,16 @@ export const tapManagerDataSource = {
     }
   },
 
+  // The spec's own build failure, as the app shows it over the AUT. Cleared at
+  // the start of every run, so it always belongs to the spec now selected.
+  getScriptError (): string | undefined {
+    try {
+      return useAutStore().scriptError?.error
+    } catch {
+      return undefined
+    }
+  },
+
   pinSnapshot (props: PinSnapshotProps, index: number, testId: string, logId: string): void {
     eventManager()?.localBus.emit('pin:snapshot', props)
 

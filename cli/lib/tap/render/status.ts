@@ -49,6 +49,12 @@ export const renderStatusHuman = (status: TapStatus): string => {
 
   const blocks = [instanceColumns([instance]), progress]
 
+  // A spec that failed to build has no results to show, so the failure is the
+  // only thing the run has to say.
+  if (status.error) {
+    blocks.push([color.fail(status.error)])
+  }
+
   if (status.pinned) {
     blocks.push(pinnedBlock(status.pinned))
   }

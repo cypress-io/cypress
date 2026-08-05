@@ -38,6 +38,8 @@ export interface TapRunState {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** Why the spec could not run, when it failed to build. */
+  error?: string
   /** The currently pinned command, if any. */
   pinned?: PinnedView
 }
@@ -73,6 +75,8 @@ export interface TapStatus {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
+  /** Why the spec could not run, when it failed to build. */
+  error?: string
   /** The currently pinned command, if any. */
   pinned?: PinnedView
 }
