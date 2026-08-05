@@ -386,11 +386,12 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
     delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
   }
 
+  const userDataDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))
   const args = _getArgs(browser, options, cdpPort).concat([
     // additionally...
     '--disable-background-networking',
     '--no-sandbox', // allows us to run as root, for CI
-    `--user-data-dir=${fse.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))}`,
+    `--user-data-dir=${userDataDir}`,
   ])
 
   if (testCase.disableHttp2) {
@@ -441,9 +442,35 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
 
   debug('Launching Chrome: ', cmd, args.join(' '))
 
+  // detached so the whole Chrome process tree can be signalled as a group:
+  // signalling the parent alone leaves the renderer/GPU/zygote children
+  // behind, and they accumulate across cases, starving later cases of CPU
   const proc = cp.spawn(cmd, args, {
     stdio: 'ignore',
+    detached: true,
   })
+
+  const reapBrowser = () => {
+    // SIGTERM the group first so Chrome closes its sockets cleanly — a hard
+    // kill RSTs hundreds of kept-alive loopback sockets at once and the resets
+    // surface as uncaught ECONNRESETs in the mocha process
+    const signalGroup = (signal) => {
+      try {
+        process.kill(-proc.pid, signal)
+      } catch (err) {
+        // ESRCH: already gone, nothing to reap
+      }
+    }
+
+    signalGroup('SIGTERM')
+
+    setTimeout(() => {
+      signalGroup('SIGKILL')
+      // each launch gets a throwaway profile; without this they accumulate at
+      // ~9MB apiece and fill the temp dir over a few hundred runs
+      fse.remove(userDataDir).catch(() => {})
+    }, 2000).unref()
+  }
 
   const storeHar = Promise.method((name, har) => {
     const artifacts = process.env.CIRCLE_ARTIFACTS
@@ -546,11 +573,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
         harCapturer.on('har', resolve)
       })
       .then((har) => {
-        // SIGTERM first so Chrome closes its sockets cleanly — a hard kill
-        // RSTs hundreds of kept-alive loopback sockets at once and the resets
-        // surface as uncaught ECONNRESETs in the mocha process
-        proc.kill()
-        setTimeout(() => proc.kill(9), 2000).unref()
+        reapBrowser()
         debug('Received HAR from Chrome')
         debug('wire protocol evidence: %o', wire)
 
@@ -570,6 +593,12 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
         debug('Chrome connection failed: ', err)
 
         return runHar()
+      })
+      .catch((err) => {
+        // a har-capturer 'fail' would otherwise leave this Chrome running
+        reapBrowser()
+
+        throw err
       })
     })
   }
