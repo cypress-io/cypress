@@ -425,6 +425,19 @@ export class BrowserCriClient {
       })
     }
 
+    // Fetch.enable + continue must stay paired — enabling without a continue
+    // handler pauses every popup request forever.
+    const fallbackToHeaderOnlyContinue = async () => {
+      try {
+        await extraTargetCriClient.send('Fetch.enable')
+      } catch (enableErr) {
+        // swallow this error so it doesn't crash Cypress
+        debug('Fetch.enable failed on extra target#%s: %s', targetId, enableErr)
+      }
+
+      attachHeaderOnlyContinue()
+    }
+
     const onExtraTargetReady = browserCriClient.onExtraTargetCriClientReady
 
     if (onExtraTargetReady) {
@@ -436,37 +449,24 @@ export class BrowserCriClient {
 
           if (tracked) {
             tracked.detach = detach
+          } else {
+            // Target was destroyed while attaching — release the transport now
+            // since _onTargetDestroyed could not call detach (not stored yet).
+            await Promise.resolve(detach()).catch((err) => {
+              debug('error detaching orphaned extra target Fetch transport %s: %o', targetId, err)
+            })
           }
         } else {
           // Hook present but no CDP Fetch runtime yet — keep requests flowing.
-          try {
-            await extraTargetCriClient.send('Fetch.enable')
-          } catch (enableErr) {
-            debug('Fetch.enable failed on extra target#%s: %s', targetId, enableErr)
-          }
-
-          attachHeaderOnlyContinue()
+          await fallbackToHeaderOnlyContinue()
         }
       } catch (err) {
         debug('onExtraTargetCriClientReady failed on extra target#%s: %s', targetId, err)
 
-        try {
-          await extraTargetCriClient.send('Fetch.enable')
-        } catch (enableErr) {
-          debug('Fetch.enable failed on extra target#%s: %s', targetId, enableErr)
-        }
-
-        attachHeaderOnlyContinue()
+        await fallbackToHeaderOnlyContinue()
       }
     } else {
-      try {
-        await extraTargetCriClient.send('Fetch.enable')
-      } catch (err) {
-        // swallow this error so it doesn't crash Cypress
-        debug('Fetch.enable failed on extra target#%s: %s', targetId, err)
-      }
-
-      attachHeaderOnlyContinue()
+      await fallbackToHeaderOnlyContinue()
     }
 
     await run()

@@ -1,8 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
 import { Readable } from 'stream'
-import { promisify } from 'util'
-import zlib from 'zlib'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
@@ -17,7 +15,6 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
-const brotliDecompress = promisify(zlib.brotliDecompress)
 
 // CDP refuses Fetch.getResponseBody for a pause in the redirect-received state,
 // and documents a redirect status plus a location header as the way to tell that
@@ -492,46 +489,9 @@ export class CdpFetchTransport {
       requestId: event.requestId,
     }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    const raw = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-    const body = await this.decodeUndeliveredEncodings(raw, event.responseHeaders)
+    const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
 
     return Readable.from(body.length ? [body] : [])
-  }
-
-  /**
-   * Fetch.getResponseBody delivers gzip/deflate content-decoded, but brotli
-   * arrives still encoded (and continueRequest cannot constrain
-   * accept-encoding — the network stack owns that header). Decode br here so
-   * the middleware's decoded-body premise holds. Falls back to the raw bytes
-   * if decompression fails, in case a newer CDP starts decoding br itself.
-   */
-  private decodeUndeliveredEncodings = async (body: Buffer, responseHeaders?: Protocol.Fetch.HeaderEntry[]): Promise<Buffer> => {
-    const contentEncoding = responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
-
-    if (!contentEncoding || !body.length) {
-      return body
-    }
-
-    // encodings are listed in the order applied, so decode in reverse;
-    // gzip/deflate layers were already decoded by CDP
-    const encodings = contentEncoding.split(',').map((token) => token.trim().toLowerCase()).reverse()
-    let decoded = body
-
-    for (const encoding of encodings) {
-      if (encoding !== 'br') {
-        continue
-      }
-
-      try {
-        decoded = await brotliDecompress(decoded)
-      } catch (err) {
-        debug('brotli decompression failed, using body as delivered: %s', (err as Error).message)
-
-        return body
-      }
-    }
-
-    return decoded
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {

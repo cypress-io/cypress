@@ -359,6 +359,28 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
     })
 
+    it('releases the transport when the extra target is destroyed during attach', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+      const detach = sinon.stub().resolves()
+      const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = onExtraTargetCriClientReady
+      // Target destroyed mid-await — tracker entry already removed
+      options.browserCriClient.getExtraTargetClient.returns(undefined)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(onExtraTargetCriClientReady).to.be.calledOnceWith(criClient)
+      expect(detach).to.be.calledOnce
+      expect(criClient.send).not.to.be.calledWith('Fetch.enable')
+      expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+    })
+
     it('falls back to header-only continue when onExtraTargetCriClientReady throws', async () => {
       const criClient = {
         send: sinon.stub(),

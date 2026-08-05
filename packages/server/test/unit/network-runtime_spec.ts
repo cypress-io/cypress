@@ -1,6 +1,7 @@
 import { NetworkProxy } from '@packages/proxy'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
+import { CdpFetchTransport } from '../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
@@ -605,11 +606,13 @@ describe('lib/network-runtime', () => {
     expect(extraClient.send.withArgs('Network.enable'))
     .to.have.been.calledBefore(extraClient.send.withArgs('Fetch.enable'))
 
-    const transportReset = sinon.spy(runtime.fetchTransport, 'reset')
+    const { CdpFetchTransport } = require('../../lib/browsers/cdp-protocol/cdp-fetch-transport')
+    const transportReset = sinon.spy(CdpFetchTransport.prototype, 'reset')
 
     runtime.reset()
 
-    expect(transportReset).to.have.been.calledOnce
+    // Main transport + attached extra-target transport
+    expect(transportReset).to.have.been.calledTwice
 
     await detach()
 
