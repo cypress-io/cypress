@@ -345,10 +345,11 @@ const testDuration = (duration: number | undefined): string => {
 
 const renderSpecTests = (tests: TapReporterSpecTest[], indent: string): string[] => {
   return tests.flatMap((test) => {
-    const retries = test.retries ? `  ${color.aborted(`(${test.retries} ${test.retries === 1 ? 'retry' : 'retries'})`)}` : ''
+    // Only a retried test carries attempts, so the count is always 2 or more.
+    const attempts = test.attempts?.length ? `  ${color.aborted(`(${test.attempts.length} attempts)`)}` : ''
 
     return [
-      `${indent}${chalk.dim(test.id.padStart(3))}  ${stateBadge[test.state].icon} ${test.title}${testDuration(test.duration)}${retries}`,
+      `${indent}${chalk.dim(test.id.padStart(3))}  ${stateBadge[test.state].icon} ${test.title}${testDuration(test.duration)}${attempts}`,
       // Nested under the title, the way the app reporter lists a retried
       // test's attempts; the id column stays empty so the rows read as one test.
       ...(test.attempts ?? []).map((attempt) => {

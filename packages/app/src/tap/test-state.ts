@@ -549,7 +549,6 @@ const serializeSpecTest = (test: SerializedTest, runComplete: boolean): TapRepor
     title: test.title,
     state: test.state ?? unreachedState(runComplete),
     duration: test.duration,
-    retries: test.currentRetry,
     attempts: serializeSpecAttempts(test, runComplete),
   })
 }
