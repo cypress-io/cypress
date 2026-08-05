@@ -389,6 +389,17 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'fetch-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').to.not.exist
   })
 
   it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {
@@ -573,5 +584,16 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'http-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
   })
 })

@@ -7,9 +7,11 @@ import type {
 } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
 import type {
+  BodyDigest,
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
 } from './cdp-fetch-transport'
+import { digestBody } from './cdp-fetch-transport'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp-fetch-codec')
 
@@ -209,7 +211,20 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       const response = httpResponse as CdpFetchHttpResponse
       const pausedResponse = inFlightResponses.get(httpResponse.id)
 
-      const fulfilled = response.body !== undefined
+      const isOriginBody = (body: string | Buffer, digest?: BodyDigest): boolean => {
+        const buffer = Buffer.isBuffer(body) ? body : Buffer.from(body)
+
+        return !!digest
+          && buffer.length === digest.length
+          && digestBody(buffer).sha256 === digest.sha256
+      }
+
+      // The intercept pipeline always materializes a body on the response path,
+      // so presence of body alone cannot decide fulfill vs continue.
+      const bodyModified = response.body !== undefined
+        && !isOriginBody(response.body, pausedResponse?.originalBodyDigest)
+
+      const fulfilled = pausedResponse ? bodyModified : true
       // Middleware headers describe the body the pipeline produced — including
       // any re-encoding by CompressBody — so keep their content-encoding and
       // only drop stale length headers. The pause-header fallback describes
@@ -222,13 +237,25 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
           ? stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
           : stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS)
       }
+      const continuedHeaders = (headers?: HttpHeaders, pauseHeaders?: CdpFetchTransportResponse['responseHeaders']) => {
+        const middlewareHeaders = toResponseHeaders(headers)
+
+        if (!middlewareHeaders) {
+          return pauseHeaders
+        }
+
+        return [
+          ...stripHeaderEntries(middlewareHeaders, WIRE_ENCODING_HEADERS)!,
+          ...(pauseHeaders?.filter(({ name }) => WIRE_ENCODING_HEADERS.has(name.toLowerCase())) ?? []),
+        ]
+      }
       const transportResponse = pausedResponse ? {
         ...pausedResponse,
         fulfilled,
         responseCode: response.statusCode ?? pausedResponse.responseCode,
         responseHeaders: fulfilled
           ? fulfilledHeaders(response.headers, pausedResponse.responseHeaders)
-          : pausedResponse.responseHeaders,
+          : continuedHeaders(response.headers, pausedResponse.responseHeaders),
         ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
       } : {
         // Middleware answered at the request stage, so no response pause exists —

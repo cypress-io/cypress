@@ -1,4 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
+import { createHash } from 'crypto'
 import debugModule from 'debug'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
@@ -44,10 +45,18 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   sessionId?: string
 }
 
+export type BodyDigest = { length: number, sha256: string }
+
+export const digestBody = (body: Buffer): BodyDigest => ({
+  length: body.length,
+  sha256: createHash('sha256').update(body).digest('hex'),
+})
+
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
   bodyStream?: Readable
   fulfilled?: boolean
+  originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
@@ -391,10 +400,10 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    let bodyStream: Readable
+    let originalBody: Buffer
 
     try {
-      bodyStream = await this.fetchResponseBody(event, sessionId)
+      originalBody = await this.fetchResponseBody(event, sessionId)
     } catch (err) {
       deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
@@ -428,7 +437,8 @@ export class CdpFetchTransport {
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
-      bodyStream,
+      bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
+      originalBodyDigest: digestBody(originalBody),
       sessionId,
     })
   }
@@ -454,18 +464,16 @@ export class CdpFetchTransport {
     ]
   }
 
-  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Readable> => {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {
     if (isRedirectPause(event)) {
-      return Readable.from([])
+      return Buffer.alloc(0)
     }
 
     const response = await this.client.send('Fetch.getResponseBody', {
       requestId: event.requestId,
     }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-
-    return Readable.from(body.length ? [body] : [])
+    return Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
