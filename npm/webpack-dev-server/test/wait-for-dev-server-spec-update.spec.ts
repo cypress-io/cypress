@@ -215,4 +215,37 @@ describe('waitForDevServerSpecUpdate', () => {
 
     expect(resolved).toBe(true)
   })
+
+  it('resolves on spec update when setImmediate is not a function', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+    const originalSetImmediate = globalThis.setImmediate
+
+    const brokenSetImmediate = {} as typeof setImmediate
+
+    Object.defineProperty(globalThis, 'setImmediate', {
+      configurable: true,
+      value: brokenSetImmediate,
+    })
+
+    try {
+      let resolved = false
+      const promise = waitForDevServerSpecUpdate(spec, events as any).then(() => {
+        resolved = true
+      })
+
+      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      expect(resolved).toBe(false)
+
+      events.emit('dev-server:on-spec-updated')
+      await promise
+
+      expect(resolved).toBe(true)
+    } finally {
+      Object.defineProperty(globalThis, 'setImmediate', {
+        configurable: true,
+        value: originalSetImmediate,
+      })
+    }
+  })
 })

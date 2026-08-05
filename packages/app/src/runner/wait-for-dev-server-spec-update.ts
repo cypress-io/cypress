@@ -115,15 +115,16 @@ export function waitForDevServerSpecUpdate (
       }
 
       // When bundler is unknown, defer resolving on spec-updated so webpack JIT
-      // events forwarded over IPC can arrive after the server ack.
+      // events forwarded over IPC can arrive after the server ack. Use setTimeout
+      // instead of setImmediate, which the app Vite bundle stubs out.
       if (bundler === undefined) {
-        setImmediate(() => {
-          setImmediate(() => {
+        setTimeout(() => {
+          setTimeout(() => {
             if (!webpackWaitActive) {
               tryResolve()
             }
-          })
-        })
+          }, 0)
+        }, 0)
 
         return
       }
