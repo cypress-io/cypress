@@ -172,10 +172,9 @@ describe('tap binding', () => {
       expect(tests).to.have.length.greaterThan(0)
 
       for (const test of tests) {
-        expect(Object.keys(test), `entry ${test.id}`).to.deep.eq(['id', 'title', 'state', 'duration', 'retries'])
+        expect(Object.keys(test), `entry ${test.id}`).to.deep.eq(['id', 'title', 'state', 'duration'])
         expect(test.state).to.eq('passed')
         expect(test.duration).to.be.a('number')
-        expect(test.retries).to.eq(0)
       }
 
       const testId = tests[0].id as string
@@ -262,7 +261,7 @@ describe('tap binding with a retrying spec', () => {
 
       // One retry was taken, so two attempts exist — the overview reports both.
       expect(tests[0].state).to.eq('passed')
-      expect(tests[0].retries).to.eq(1)
+      expect(tests[0].attempts).to.have.length(2)
       expect(tests[0].attempts.map((attempt: Record<string, unknown>) => attempt.state)).to.deep.eq(['failed', 'passed'])
 
       const latest = await reporterResult(binding, { test: testId })

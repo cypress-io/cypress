@@ -198,7 +198,6 @@ describe('lib/tap/render/reporter spec overview', () => {
             title: 'b1',
             state: 'failed',
             duration: 30,
-            retries: 2,
             attempts: [
               { attempt: 1, state: 'failed', duration: 4476 },
               { attempt: 2, state: 'failed', duration: 4400 },
@@ -221,7 +220,7 @@ describe('lib/tap/render/reporter spec overview', () => {
          t4  ○ a2
 
       Actions > .type()
-         t3  ✖ b1  30ms  (2 retries)
+         t3  ✖ b1  30ms  (3 attempts)
                ✖ attempt 1  4.5s
                ✖ attempt 2  4.4s
                ✖ attempt 3  30ms

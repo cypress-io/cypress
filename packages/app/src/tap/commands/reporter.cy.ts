@@ -340,7 +340,6 @@ describe('tap/commands/reporter', () => {
                 title: 'b1',
                 state: 'failed',
                 duration: 30,
-                retries: 2,
                 attempts: [
                   { attempt: 1, state: 'failed', duration: 12 },
                   { attempt: 2, state: 'failed', duration: 18 },

@@ -178,9 +178,10 @@ export interface TapReporterSpecTest {
   state: 'passed' | 'failed' | 'pending' | 'skipped'
   /** Wall-clock run time in ms; absent until the test has run. */
   duration?: number
-  /** Retries actually taken this run, not the configured maximum. */
-  retries?: number
-  /** Every attempt in run order, last one final; present only when the test was retried. */
+  /**
+   * Every attempt in run order, last one final; present only when the test was
+   * retried, so its length is the attempt count and is never 1.
+   */
   attempts?: TapReporterSpecAttempt[]
 }
 
