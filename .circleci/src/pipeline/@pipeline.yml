@@ -2307,14 +2307,19 @@ jobs:
   server-performance-tests:
     <<: *defaults
     steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-server-tests >>
+      # EXPERIMENT (branch bill/3708/h2-latency-15ms only): the run-server-tests
+      # halt guard is removed so a manually triggered pipeline always runs this
+      # job, the run is scoped to the two synthetic-latency-origin tests being
+      # bisected, and DEBUG is on so the paired MITM/CDP totals are printed
+      # rather than having to be read out of an assertion message.
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
-          install-firefox: true
       - run:
-          command: yarn workspace @packages/server test-performance
+          name: HTTP/2 latency-origin bisection
+          environment:
+            DEBUG: 'test:proxy-performance'
+          command: yarn workspace @packages/server test-performance proxy --fgrep 'delayed images'
       - store_artifacts:
           path: /tmp/artifacts
           when: always
