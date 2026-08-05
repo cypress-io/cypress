@@ -295,7 +295,7 @@ interface ReporterLog {
 // carries the name. `.as()` rejects a name starting with `@`, so stripping the
 // prefix is unambiguous.
 const aliasName = (alias: string): string => {
-  return alias.replace(/^@+/, '')
+  return alias.startsWith('@') ? alias.slice(1) : alias
 }
 
 const asArray = <T>(value: T | T[] | undefined): T[] | undefined => {
