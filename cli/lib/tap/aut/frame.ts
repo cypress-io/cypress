@@ -95,9 +95,10 @@ export const parsePositiveInt = (raw: string | undefined, fallback: number, labe
  * frame is only worth reading once a spec has settled: while a spec is running
  * the app is in flux — commands are still executing, snapshots are swapping,
  * the page may still be navigating — so a read captures a transient page; and
- * with no spec run the resolved frame is the runner shell, not any app under
- * test. Both are rejected with typed errors a poller can branch on, mirroring
- * the `status` lifecycle contract (wait until `passed`/`failed`).
+ * short of a verdict, with no run of its own to read, the resolved frame is the
+ * runner shell or the run this one displaces. Both are rejected with typed
+ * errors a poller can branch on, mirroring the `status` lifecycle contract
+ * (wait until `passed`/`failed`).
  */
 export const assertFrameReadable = async (session: TapSession): Promise<void> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
@@ -108,12 +109,12 @@ export const assertFrameReadable = async (session: TapSession): Promise<void> =>
 
   const { state } = outcome.result as TapRunState
 
-  if (state === undefined) {
-    throw new FrameCommandError('NO_RUN', 'no spec has run — run a spec first, then read the app under test once the run has completed (status passed or failed)')
-  }
-
   if (state === 'running') {
     throw new FrameCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
+  }
+
+  if (state !== 'passed' && state !== 'failed') {
+    throw new FrameCommandError('NO_RUN', 'no run has settled — run a spec first, then read the app under test once the run has completed (status passed or failed)')
   }
 }
 

@@ -1,5 +1,5 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
-import { defineCommand, TapCommandError } from './definition'
+import { defineCommand, noRunError, TapCommandError } from './definition'
 import { attemptSelectionError, selectTestAttempt, serializeReporterSpecView, serializeReporterView } from '../test-state'
 import type { TapReporterSpecView, TapReporterView } from '../contract'
 
@@ -7,7 +7,7 @@ export const reporterCommand = defineCommand('reporter', async (_params, { test,
   const runner = tapManagerDataSource.getRunner()
 
   if (!runner) {
-    throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')
+    throw noRunError()
   }
 
   if (test === undefined) {

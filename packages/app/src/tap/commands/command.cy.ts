@@ -57,7 +57,7 @@ describe('tap/commands/command', () => {
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { test: 'r2', command: '2' })).to.deep.eq({
       error: {
         code: 'NO_RUN',
-        message: 'no spec has been run yet — use the run command to run a spec first',
+        message: 'No spec has been started yet. Use the run command to start a spec.',
       },
     })
   })

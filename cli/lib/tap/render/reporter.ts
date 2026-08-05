@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapNetworkInfo, TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
-import { color, countsLine, emptyState, heading, layout, stateBadge, table, titleLine } from './format'
+import { color, countsLine, emptyState, heading, layout, startedAtLabel, stateBadge, table, titleLine } from './format'
 
 // The reporter's status dot for a network row.
 const INDICATORS: Record<NonNullable<TapNetworkInfo['indicator']>, string> = {
@@ -369,8 +369,10 @@ const specSuiteSections = (suites: TapReporterSuite[]): string[][] => {
 }
 
 export const renderReporterSpecHuman = (view: TapReporterSpecView): string => {
+  const specTitle = view.startedAt ? `${chalk.bold(view.spec)}  ${startedAtLabel(view.startedAt)}` : chalk.bold(view.spec)
+
   const header = [
-    ...(view.spec ? [chalk.bold(view.spec)] : []),
+    ...(view.spec ? [specTitle] : []),
     statsLine(view.stats),
   ]
 

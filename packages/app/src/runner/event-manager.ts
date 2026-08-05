@@ -432,6 +432,10 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    // This instance's run has not ended. The flag is module-scoped so it
+    // outlives the instance that set it, and would otherwise report the
+    // previous run's completion until this one emits run:start.
+    hasMochaRunEnded = false
     this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally

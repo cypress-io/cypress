@@ -217,6 +217,8 @@ export interface TapReporterStats {
 export interface TapReporterSpecView {
   /** Project-relative spec path; absent only if the active spec can't be read. */
   spec?: string
+  /** The run this view describes, named by the driver's own start time. */
+  startedAt?: string
   stats: TapReporterStats
   tests: TapReporterSpecTest[]
   suites: TapReporterSuite[]

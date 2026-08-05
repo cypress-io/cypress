@@ -89,6 +89,15 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     })
   })
 
+  it('rejects a spec still building with NO_RUN — loading is not a verdict, so there is no run to read', async () => {
+    const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'loading', startedAt: null } })
+
+    await expect(assertFrameReadable(session)).rejects.toMatchObject({
+      name: 'FrameCommandError',
+      code: 'NO_RUN',
+    })
+  })
+
   it('surfaces an app-side run-state error envelope as a FrameCommandError', async () => {
     const session = sessionForRunState({ error: { code: 'BOOM', message: 'run-state blew up' } })
 
