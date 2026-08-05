@@ -10,13 +10,13 @@ export const DEFAULT_CDP_TIMEOUT_MS = 30_000
  * these in milliseconds, so keeping them short is what lets the scan skip an
  * unresponsive target rather than stop on it.
  */
-export const DISCOVERY_TIMEOUT_MS = 2_000
+export const FIND_INSTANCE_TIMEOUT_MS = 2_000
 
 export interface CdpBounds {
   /** Bound for a protocol call, including one awaiting app-side work. */
   call: number
   /** Bound for locating the runner page. */
-  discovery: number
+  findInstance: number
 }
 
 /**
@@ -28,7 +28,7 @@ export interface CdpBounds {
 export const cdpBounds = (timeoutMs?: number): CdpBounds => {
   return {
     call: timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS,
-    discovery: timeoutMs ?? DISCOVERY_TIMEOUT_MS,
+    findInstance: timeoutMs ?? FIND_INSTANCE_TIMEOUT_MS,
   }
 }
 
@@ -72,13 +72,6 @@ const isProtocolName = (prop: string | symbol): prop is string => {
   return typeof prop === 'string' && /^[A-Z]/.test(prop)
 }
 
-/**
- * The CRI client with every protocol call bounded. Wrapping the client is what
- * makes the bound structural: a CDP call added later is covered without having
- * to remember to wrap it. Domain properties also expose event subscribers, which
- * return an unsubscribe function rather than a promise, so only thenables are
- * raced.
- */
 export const boundCdpClient = (client: CRI.Client, ms: number): CRI.Client => {
   const bind = (fn: (...args: unknown[]) => unknown, owner: object, what: string) => {
     return (...args: unknown[]) => {

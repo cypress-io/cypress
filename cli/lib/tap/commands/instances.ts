@@ -2,7 +2,7 @@ import { listLiveInstances } from '../../cypress-instances'
 import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-instances'
 import { renderOutcome, renderResult } from '../output'
 import { withTapSession } from '../tap-session'
-import { DISCOVERY_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
+import { FIND_INSTANCE_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
@@ -53,7 +53,7 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     return 0
   }
 
-  const timeoutMs = options.timeout ?? DISCOVERY_TIMEOUT_MS
+  const timeoutMs = options.timeout ?? FIND_INSTANCE_TIMEOUT_MS
   const responsive = await Promise.all(instances.map((instance) => probeRenderer(instance, timeoutMs)))
 
   const summaries: TapInstanceSummary[] = instances.map((instance, index) => ({

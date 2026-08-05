@@ -120,17 +120,17 @@ const evaluateBinding = (client: CRI.Client, sessionId: string) => {
 // Bounded tighter than the rest of the session: this runs once per page target
 // while scanning for the runner, so a target that cannot answer has to fall out
 // of the scan quickly instead of stalling it.
-const probeForBinding = async (client: CRI.Client, sessionId: string, discoveryMs: number): Promise<boolean> => {
+const probeForBinding = async (client: CRI.Client, sessionId: string, findInstanceMs: number): Promise<boolean> => {
   const { result, exceptionDetails } = await withCdpDeadline(
     evaluateBinding(client, sessionId),
     'the runner-page probe',
-    discoveryMs,
+    findInstanceMs,
   )
 
   return !exceptionDetails && result.type !== 'undefined' && !!result.objectId
 }
 
-const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], discoveryMs: number): Promise<string> => {
+const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], findInstanceMs: number): Promise<string> => {
   let unresponsive: unknown
 
   for (const target of targetInfos) {
@@ -143,7 +143,7 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
     try {
       sessionId = await attachToPage(client, target.targetId)
 
-      if (await probeForBinding(client, sessionId, discoveryMs)) {
+      if (await probeForBinding(client, sessionId, findInstanceMs)) {
         debug('matched runner page target %o', { targetId: target.targetId, url: target.url })
 
         return sessionId
@@ -264,7 +264,7 @@ export const withTapSession = async <T> (
     const attach = async (): Promise<string> => {
       const { targetInfos } = await listTargets(client)
 
-      return findRunnerPageSession(client, targetInfos, bounds.discovery)
+      return findRunnerPageSession(client, targetInfos, bounds.findInstance)
     }
 
     let sessionId = await attach()

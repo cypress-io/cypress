@@ -4,7 +4,7 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
-import { DISCOVERY_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
+import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapSession } from '../../../lib/tap/tap-session'
@@ -476,12 +476,12 @@ describe('lib/exec/tap', () => {
       expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), 5000)
     })
 
-    it('bounds the renderer probe with the discovery default when --timeout is absent', async () => {
+    it('bounds the renderer probe with the find-instance default when --timeout is absent', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111 })])
 
       expect(await tap.start(['instances'], {})).toBe(0)
 
-      expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), DISCOVERY_TIMEOUT_MS)
+      expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), FIND_INSTANCE_TIMEOUT_MS)
     })
 
     it('prints the raw instance summaries with --json', async () => {

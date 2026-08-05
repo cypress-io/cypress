@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   DEFAULT_CDP_TIMEOUT_MS,
-  DISCOVERY_TIMEOUT_MS,
+  FIND_INSTANCE_TIMEOUT_MS,
   boundCdpClient,
   cdpBounds,
   isRendererUnresponsive,
@@ -52,12 +52,12 @@ describe('lib/tap/cdp-timeout', () => {
 
   describe('cdpBounds', () => {
     it('defaults the two waits apart: locating the runner page is a round trip, calling into it can wait on a spec', () => {
-      expect(cdpBounds()).to.deep.eq({ call: DEFAULT_CDP_TIMEOUT_MS, discovery: DISCOVERY_TIMEOUT_MS })
-      expect(DISCOVERY_TIMEOUT_MS).to.be.lessThan(DEFAULT_CDP_TIMEOUT_MS)
+      expect(cdpBounds()).to.deep.eq({ call: DEFAULT_CDP_TIMEOUT_MS, findInstance: FIND_INSTANCE_TIMEOUT_MS })
+      expect(FIND_INSTANCE_TIMEOUT_MS).to.be.lessThan(DEFAULT_CDP_TIMEOUT_MS)
     })
 
     it('raises both waits together, so the shorter one cannot fail underneath an explicit --timeout', () => {
-      expect(cdpBounds(90_000)).to.deep.eq({ call: 90_000, discovery: 90_000 })
+      expect(cdpBounds(90_000)).to.deep.eq({ call: 90_000, findInstance: 90_000 })
     })
   })
 
