@@ -27,9 +27,6 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
 }
 
 export const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
-  // A bound that expired already names what went unanswered and how to wait
-  // longer, and only its own `message` carries that — wrapping it would print
-  // generic prose about the browser instead.
   if (isRendererUnresponsive(cause)) {
     throw cause
   }
@@ -117,9 +114,6 @@ const evaluateBinding = (client: CRI.Client, sessionId: string) => {
   return client.Runtime.evaluate({ expression: `window.${TAP_BINDING_GLOBAL}` }, sessionId)
 }
 
-// Bounded tighter than the rest of the session: this runs once per page target
-// while scanning for the runner, so a target that cannot answer has to fall out
-// of the scan quickly instead of stalling it.
 const probeForBinding = async (client: CRI.Client, sessionId: string, findInstanceMs: number): Promise<boolean> => {
   const { result, exceptionDetails } = await withCdpDeadline(
     evaluateBinding(client, sessionId),
@@ -251,10 +245,6 @@ export const withTapSession = async <T> (
   fn: (session: TapSession) => Promise<T>,
   timeoutMs?: number,
 ): Promise<T> => {
-  // The two defaults differ by an order of magnitude because the waits do: finding
-  // the runner page is a round trip, while calling into it can legitimately wait on
-  // a spec. `--timeout` is the one knob for "this is slow, wait longer", so it
-  // raises both rather than leaving the shorter one to fail underneath it.
   const callMs = timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS
   const findInstanceMs = timeoutMs ?? FIND_INSTANCE_TIMEOUT_MS
 
