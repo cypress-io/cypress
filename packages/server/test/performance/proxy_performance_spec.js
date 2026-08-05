@@ -110,7 +110,13 @@ const PROXY_DISABLED_CY_SERVER_PORT = 45682
 // per-request latency — near-zero on CI, so the hosted page can't show the win
 // there. This origin injects the latency as a per-response delay instead.
 const HTTP2_LATENCY_ORIGIN_PORT = 45333
-const HTTP2_LATENCY_ORIGIN_DELAY_MS = 50
+// EXPERIMENT — do not merge. Bisecting the latency at which proxy-disabled
+// (CDP, HTTP/2) overtakes the MITM proxy on CI hardware: the flagship latency
+// test asserts CDP < MITM, so a green run means CDP already wins at this
+// delay (search lower) and a red run means MITM still wins (search higher).
+// Locally CDP wins even at 0ms, so this only tells us something on CI.
+// Ships as 50 on the real branch.
+const HTTP2_LATENCY_ORIGIN_DELAY_MS = 15
 const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
 
 // Chrome's debug port is randomized per launch, so the range has to stay clear
