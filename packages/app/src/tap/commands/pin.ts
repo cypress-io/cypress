@@ -1,4 +1,4 @@
-import { defineCommand, TapCommandError } from './definition'
+import { defineCommand, noRunError, TapCommandError } from './definition'
 import { attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner, TapTestsRunner } from '../types'
@@ -179,7 +179,7 @@ export const pinCommand = defineCommand('pin', async ({ test, command }, { at, c
   }
 
   if (!runner) {
-    throw new TapCommandError('NO_RUN', 'no spec has been run yet — use the run command to run a spec first')
+    throw noRunError()
   }
 
   if (tapManagerDataSource.isRunning()) {

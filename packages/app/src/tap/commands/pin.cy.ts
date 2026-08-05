@@ -283,6 +283,7 @@ describe('tap/commands/pin', () => {
       getAllTestsState: () => ({}),
       getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
       isRunComplete: () => true,
+      getStartTime: () => '2026-07-29T10:15:00.000Z',
     })
 
     cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/login.cy.ts')

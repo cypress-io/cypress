@@ -18,6 +18,7 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
     status: runState.state,
     totalSpecs: runState.totalSpecs,
     ...(runState.spec !== null ? { spec: runState.spec } : {}),
+    startedAt: runState.startedAt ?? null,
     totalTests: runState.totalTests,
     results: runState.results,
     ...pinned,

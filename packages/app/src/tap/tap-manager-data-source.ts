@@ -27,6 +27,15 @@ export const tapManagerDataSource = {
         return undefined
       }
 
+      // A runner exists from the moment its spec is installed, but holds no test
+      // state until mocha starts it — and `runComplete` still describes the
+      // previous run until then. The driver's start time is the one signal that
+      // belongs to this runner alone, so gate on it: a readable run is a started
+      // one, and every command reports the run it names.
+      if (runner.getStartTime() == null) {
+        return undefined
+      }
+
       return {
         getAllTestsState: runner.getAllTestsState,
         getTestState: runner.getTestState,

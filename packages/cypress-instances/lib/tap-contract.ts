@@ -188,8 +188,12 @@ const runMeta = {
   description: 'run (or rerun) a spec by its project-relative path',
   details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
 command. If no browser is open it launches one, switching to the spec's testing
-type when needed, then starts the run and returns immediately — it does not wait
-for the run to finish. Poll the status command for run progress.`,
+type when needed, then requests the run and returns immediately — returning does
+not mean the run has started, let alone finished.
+
+Poll the status command for run progress. Read status first and keep its
+startedAt: a verdict still carrying that same startedAt describes the run before
+this one, so wait for a verdict whose startedAt differs.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
@@ -209,8 +213,17 @@ const statusMeta = {
 polling and "where am I?" checks. Always exits 0 for a determinable stage
 (including "not connected"); a poller branches on the \`status\` field.
 
-Stages: not connected, browser not selected, spec not selected, running,
-passed, failed.`,
+Stages: not connected, browser not selected, spec not selected, loading,
+running, passed, failed.
+
+Only passed and failed are verdicts. Loading is a selected spec waiting on its
+own build — one still compiling, or one that will never compile — and stays
+loading for as long as that takes, so a poller needs its own timeout.
+
+From loading onwards the output carries startedAt, the run every other field
+describes (null while loading). A rerun leaves the previous run's verdict
+readable until the incoming run starts, identical on every other field, so
+compare startedAt before believing a verdict.`,
 } as const satisfies TapNativeCommandSchema
 
 const specsMeta = {

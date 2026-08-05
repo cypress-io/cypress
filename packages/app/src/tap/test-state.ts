@@ -650,6 +650,7 @@ export const serializeReporterSpecView = (runner: TapTestsRunner, spec: string |
 
   return omitNullish({
     spec,
+    startedAt: runner.getStartTime() ?? undefined,
     stats: omitNullish({ ...results, duration: runDuration(runner, tests) }),
     tests: rootTests,
     suites: [...suites.values()],

@@ -41,7 +41,7 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
 
     if (result?.__typename === 'RunSpecResponse') {
       const launched: TapRunResult = {
-        spec: result.spec.relative.replace(/\\/g, '/'),
+        spec: posixify(result.spec.relative),
         testingType: result.testingType,
         browser: result.browser.displayName,
       }

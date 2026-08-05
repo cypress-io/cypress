@@ -68,6 +68,12 @@ export const titleLine = (icon: string, text: string, suffix?: string): string =
   return `${icon} ${chalk.bold(text)}${suffix ? `  ${suffix}` : ''}`
 }
 
+// The clock time a run started, trailing a spec title. Local time reads against
+// the terminal's own clock; the ISO instant stays in --json for machines.
+export const startedAtLabel = (startedAt: string): string => {
+  return color.muted(`(started at ${new Date(startedAt).toLocaleTimeString('en-US')})`)
+}
+
 // A dim note standing in for an absent panel, e.g. `No specs to run.`
 export const emptyState = (message: string): string => chalk.dim(message)
 
