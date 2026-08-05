@@ -412,7 +412,7 @@ describe('tap/commands/reporter', () => {
       expect((outcome as { result: { stats: { duration: number } } }).result.stats.duration).to.eq(10400)
     })
 
-    it('rejects --attempt without --test', async () => {
+    it('rejects --attempt without --testId', async () => {
       stubRunner(treeRunner())
 
       const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { attempt: '1' })
@@ -420,7 +420,7 @@ describe('tap/commands/reporter', () => {
       expect(outcome).to.deep.eq({
         error: {
           code: 'ATTEMPT_NOT_FOUND',
-          message: 'the --attempt option applies only when rendering a single test; pass --test <id>',
+          message: 'the --attempt option applies only when rendering a single test; pass --testId <id>',
         },
       })
     })

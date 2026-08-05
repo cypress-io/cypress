@@ -100,7 +100,7 @@ describe('tap binding', () => {
       expect(names).to.include.members(['command', 'reporter', 'pin', 'run-state'])
       expect(names).not.to.include('console-props')
       // The two list subcommands folded into reporter: its spec overview lists
-      // the run's tests, and its --test view lists one test's command log.
+      // the run's tests, and its --testId view lists one test's command log.
       expect(names).not.to.include('tests')
       expect(names).not.to.include('commands')
 

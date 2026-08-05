@@ -199,7 +199,7 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
   const logId = resolveCommandLogId(selection.attempt, command, test)
 
   if (logId === undefined) {
-    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --test) to list this test’s commands`)
+    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --testId) to list this test’s commands`)
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)

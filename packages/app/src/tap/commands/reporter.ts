@@ -12,7 +12,7 @@ export const reporterCommand = defineCommand('reporter', async (_params, { testI
 
   if (test === undefined) {
     if (attempt !== undefined) {
-      throw new TapCommandError('ATTEMPT_NOT_FOUND', 'the --attempt option applies only when rendering a single test; pass --test <id>')
+      throw new TapCommandError('ATTEMPT_NOT_FOUND', 'the --attempt option applies only when rendering a single test; pass --testId <id>')
     }
 
     return serializeReporterSpecView(runner, tapManagerDataSource.getActiveSpecRelative())

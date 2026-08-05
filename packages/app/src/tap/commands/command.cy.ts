@@ -191,7 +191,7 @@ describe('tap/commands/command', () => {
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { testId: 'r2', commandId: '9', attempt: '1' })).to.deep.eq({
       error: {
         code: 'COMMAND_NOT_FOUND',
-        message: 'no command of this test matches the id "9" — use the reporter command (with --test) to list this test’s commands',
+        message: 'no command of this test matches the id "9" — use the reporter command (with --testId) to list this test’s commands',
       },
     })
 
