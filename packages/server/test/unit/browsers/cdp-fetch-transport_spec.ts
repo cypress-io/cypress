@@ -217,6 +217,44 @@ describe('CdpFetchTransport', () => {
       expect(encoded.url).to.equal('https://example.test/response')
     })
 
+    // A body we cannot prove came from the origin has to be fulfilled, or a
+    // rewrite would be silently dropped in favor of the origin bytes.
+    it('fulfills a response pause with no origin body digest to compare against', () => {
+      const codec = createCdpFetchCodec()
+
+      codec.decodeRequest({
+        id: 'network-1',
+        requestId: 'fetch-request',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      const response = codec.decodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/plain',
+        }],
+      })
+
+      const encoded = codec.encodeResponse({
+        ...response,
+        body: 'origin',
+      })
+
+      expect(encoded).to.deep.include({
+        body: Buffer.from('origin').toString('base64'),
+        fulfilled: true,
+        responseCode: 200,
+      })
+    })
+
     it('encodes middleware short-circuits as fulfilled CDP responses', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
@@ -1898,6 +1936,7 @@ describe('CdpFetchTransport', () => {
 
       response.responseHeaders = [
         { name: 'Content-Encoding', value: 'gzip' },
+        { name: 'Content-Length', value: '26' },
         { name: 'Content-Type', value: 'text/html' },
       ]
 
@@ -1914,6 +1953,7 @@ describe('CdpFetchTransport', () => {
           body: await readStream(res.bodyStream!),
           headers: {
             'content-type': 'text/html',
+            'content-length': '6',
             'x-custom': '1',
           },
         }
@@ -1926,6 +1966,8 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
+      // the browser replays the origin's wire body, so the pause's encoding and
+      // length headers win over the ones describing the decoded middleware view
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
@@ -1938,6 +1980,9 @@ describe('CdpFetchTransport', () => {
         }, {
           name: 'Content-Encoding',
           value: 'gzip',
+        }, {
+          name: 'Content-Length',
+          value: '26',
         }],
       })
 

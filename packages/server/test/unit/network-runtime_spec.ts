@@ -38,19 +38,22 @@ describe('lib/network-runtime', () => {
     requestId: string
     networkId?: string
     url?: string
+    resourceType?: Protocol.Network.ResourceType
     responseStatusCode?: number
+    responseHeaders?: Protocol.Fetch.HeaderEntry[]
   }): Protocol.Fetch.RequestPausedEvent {
     return {
       requestId: options.requestId,
       networkId: options.networkId,
       frameId: 'frame-1',
-      resourceType: 'Document',
+      resourceType: options.resourceType ?? 'Document',
       request: {
         url: options.url ?? 'https://example.test/',
         method: 'GET',
         headers: {},
       },
       responseStatusCode: options.responseStatusCode,
+      responseHeaders: options.responseHeaders,
     } as Protocol.Fetch.RequestPausedEvent
   }
 
@@ -400,6 +403,67 @@ describe('lib/network-runtime', () => {
     })
 
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').to.not.exist
+  })
+
+  // The legacy pipeline hands every response body back through the synthetic
+  // Express context, so an asset it does not rewrite has to come out
+  // byte-identical for the transport to release the origin response.
+  it('createCdpFetchRuntime continues asset responses the legacy pipeline leaves byte-identical', async () => {
+    const assetBody = Buffer.from('body { color: red; }')
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: assetBody.toString('base64'), base64Encoded: true }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const pause = {
+      requestId: 'asset-request',
+      networkId: 'network-asset-1',
+      url: 'https://example.test/app.css',
+      resourceType: 'Stylesheet' as Protocol.Network.ResourceType,
+    }
+
+    const handled = onRequestPaused(createPausedRequest(pause))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      ...pause,
+      responseStatusCode: 200,
+      responseHeaders: [{
+        name: 'content-type',
+        value: 'text/css',
+      }, {
+        name: 'content-length',
+        value: String(assetBody.length),
+      }],
+    }))
+
+    await flush()
+    await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'asset-request',
+      responseCode: 200,
+    })
+
+    expect(continueResponseCall!.args[1].responseHeaders).to.deep.include({
+      name: 'content-length',
+      value: String(assetBody.length),
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').to.not.exist
   })
 
   it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {

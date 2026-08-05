@@ -6,12 +6,11 @@ import type {
   TransportCodecPort,
 } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
+import { isOriginBody } from './body-digest'
 import type {
-  BodyDigest,
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
 } from './cdp-fetch-transport'
-import { digestBody } from './cdp-fetch-transport'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp-fetch-codec')
 
@@ -89,8 +88,42 @@ function stripWireEncodingHeaders (headers?: HttpHeaders): HttpHeaders | undefin
   }, {})
 }
 
-function stripHeaderEntries (headers: CdpFetchTransportResponse['responseHeaders'], names: ReadonlySet<string>): CdpFetchTransportResponse['responseHeaders'] {
-  return headers?.filter(({ name }) => !names.has(name.toLowerCase()))
+function stripHeaderEntries (headers: Protocol.Fetch.HeaderEntry[], names: ReadonlySet<string>): Protocol.Fetch.HeaderEntry[] {
+  return headers.filter(({ name }) => !names.has(name.toLowerCase()))
+}
+
+/**
+ * Middleware headers describe the body the pipeline produced — including any
+ * re-encoding by CompressBody — so keep their content-encoding and only drop
+ * stale length headers. The pause-header fallback describes the wire body, not
+ * the decoded body we fulfill with, so its encoding headers are stripped too.
+ */
+function toFulfilledHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
+  const middlewareHeaders = toResponseHeaders(headers)
+
+  if (middlewareHeaders) {
+    return stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
+  }
+
+  return pauseHeaders ? stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS) : undefined
+}
+
+/**
+ * The browser replays the origin's own wire body on continueResponse, so the
+ * pause's wire encoding headers are the ones that still describe it. Carry them
+ * over the middleware view, which only ever saw the decoded body.
+ */
+function toContinuedHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
+  const middlewareHeaders = toResponseHeaders(headers)
+
+  if (!middlewareHeaders) {
+    return pauseHeaders
+  }
+
+  return [
+    ...stripHeaderEntries(middlewareHeaders, WIRE_ENCODING_HEADERS),
+    ...(pauseHeaders?.filter(({ name }) => WIRE_ENCODING_HEADERS.has(name.toLowerCase())) ?? []),
+  ]
 }
 
 function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
@@ -115,6 +148,29 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   }
 
   return typeof body === 'string' ? body : body.toString('utf8')
+}
+
+/**
+ * The intercept pipeline always materializes a body on the response path, so
+ * the presence of a body cannot decide fulfill vs continue on its own. Only a
+ * body that differs from the origin bytes needs Fetch.fulfillRequest; header,
+ * status, and spy-only intercepts release the origin body as it is.
+ */
+function encodePausedResponse (
+  { originalBodyDigest, ...pausedResponse }: CdpFetchTransportResponse,
+  response: CdpFetchHttpResponse,
+): CdpFetchTransportResponse {
+  const fulfilled = response.body !== undefined && !isOriginBody(response.body, originalBodyDigest)
+
+  return {
+    ...pausedResponse,
+    fulfilled,
+    responseCode: response.statusCode ?? pausedResponse.responseCode,
+    responseHeaders: fulfilled
+      ? toFulfilledHeaders(response.headers, pausedResponse.responseHeaders)
+      : toContinuedHeaders(response.headers, pausedResponse.responseHeaders),
+    ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
+  }
 }
 
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
@@ -210,60 +266,13 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
       const response = httpResponse as CdpFetchHttpResponse
       const pausedResponse = inFlightResponses.get(httpResponse.id)
-
-      const isOriginBody = (body: string | Buffer, digest?: BodyDigest): boolean => {
-        const buffer = Buffer.isBuffer(body) ? body : Buffer.from(body)
-
-        return !!digest
-          && buffer.length === digest.length
-          && digestBody(buffer).sha256 === digest.sha256
-      }
-
-      // The intercept pipeline always materializes a body on the response path,
-      // so presence of body alone cannot decide fulfill vs continue.
-      const bodyModified = response.body !== undefined
-        && !isOriginBody(response.body, pausedResponse?.originalBodyDigest)
-
-      const fulfilled = pausedResponse ? bodyModified : true
-      // Middleware headers describe the body the pipeline produced — including
-      // any re-encoding by CompressBody — so keep their content-encoding and
-      // only drop stale length headers. The pause-header fallback describes
-      // the wire body, not the decoded body we fulfill with, so its encoding
-      // headers are stripped too.
-      const fulfilledHeaders = (headers?: HttpHeaders, pauseHeaders?: CdpFetchTransportResponse['responseHeaders']) => {
-        const middlewareHeaders = toResponseHeaders(headers)
-
-        return middlewareHeaders
-          ? stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
-          : stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS)
-      }
-      const continuedHeaders = (headers?: HttpHeaders, pauseHeaders?: CdpFetchTransportResponse['responseHeaders']) => {
-        const middlewareHeaders = toResponseHeaders(headers)
-
-        if (!middlewareHeaders) {
-          return pauseHeaders
-        }
-
-        return [
-          ...stripHeaderEntries(middlewareHeaders, WIRE_ENCODING_HEADERS)!,
-          ...(pauseHeaders?.filter(({ name }) => WIRE_ENCODING_HEADERS.has(name.toLowerCase())) ?? []),
-        ]
-      }
-      const transportResponse = pausedResponse ? {
-        ...pausedResponse,
-        fulfilled,
-        responseCode: response.statusCode ?? pausedResponse.responseCode,
-        responseHeaders: fulfilled
-          ? fulfilledHeaders(response.headers, pausedResponse.responseHeaders)
-          : continuedHeaders(response.headers, pausedResponse.responseHeaders),
-        ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
-      } : {
+      const transportResponse = pausedResponse ? encodePausedResponse(pausedResponse, response) : {
         // Middleware answered at the request stage, so no response pause exists —
         // rebuild the fulfill params (requestId/sessionId) from the stashed request pause.
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,
-        responseHeaders: fulfilledHeaders(response.headers),
+        responseHeaders: toFulfilledHeaders(response.headers),
         body: toResponseBody(response.body),
       }
 
@@ -273,7 +282,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       if (debugVerbose.enabled) {
         debugVerbose('encodeResponse %s %o', httpResponse.url, {
           id: httpResponse.id,
-          fulfilled,
+          fulfilled: transportResponse.fulfilled,
           statusCode: transportResponse.responseCode,
           bodyBytes: transportResponse.body ? Buffer.from(transportResponse.body, 'base64').length : undefined,
           headerNames: transportResponse.responseHeaders?.map(({ name }) => name),

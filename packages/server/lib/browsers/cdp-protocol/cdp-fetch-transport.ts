@@ -1,9 +1,10 @@
 import type { Protocol } from 'devtools-protocol'
-import { createHash } from 'crypto'
 import debugModule from 'debug'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
+import type { BodyDigest } from './body-digest'
+import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
@@ -44,13 +45,6 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   requestId?: string
   sessionId?: string
 }
-
-export type BodyDigest = { length: number, sha256: string }
-
-export const digestBody = (body: Buffer): BodyDigest => ({
-  length: body.length,
-  sha256: createHash('sha256').update(body).digest('hex'),
-})
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
