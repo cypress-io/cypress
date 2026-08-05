@@ -291,6 +291,13 @@ interface ReporterLog {
   callCount?: number
 }
 
+// `.as()` stores the reporter's badge text on the log — `@name` — while the wire
+// carries the name. `.as()` rejects a name starting with `@`, so stripping the
+// prefix is unambiguous.
+const aliasName = (alias: string): string => {
+  return alias.startsWith('@') ? alias.slice(1) : alias
+}
+
 const asArray = <T>(value: T | T[] | undefined): T[] | undefined => {
   if (value == null) {
     return undefined
@@ -321,7 +328,7 @@ const serializeReporterCommand = (command: SerializedCommandLog, ids: Map<string
     // into the same tap id space the rows use.
     group: group != null ? ids.get(group) : undefined,
     groupLevel,
-    aliases: asArray(alias),
+    aliases: asArray(alias)?.map(aliasName),
     aliasType,
     referencedAliases: asArray(referencesAlias)?.map((ref) => ref.name),
     network: serializeNetworkInfo(command),
