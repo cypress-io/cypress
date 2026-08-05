@@ -3,6 +3,7 @@ import CRI from 'chrome-remote-interface'
 
 import type { ReadyInstanceState } from '../../../lib/cypress-instances'
 import { CdpErrorMessage, withTapSession } from '../../../lib/tap/tap-session'
+import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { errors } from '../../../lib/errors'
 
 vi.mock('chrome-remote-interface', () => ({ default: vi.fn() }))
@@ -26,18 +27,27 @@ interface FakeClientOverrides {
 }
 
 const makeClient = (overrides: FakeClientOverrides = {}) => {
-  const client = {
-    Target: {
-      getTargets: overrides.getTargets ?? vi.fn().mockResolvedValue({ targetInfos: overrides.targetInfos ?? [pageTarget()] }),
-      attachToTarget: overrides.attachToTarget ?? vi.fn().mockResolvedValue({ sessionId: 'SID1' }),
-      detachFromTarget: vi.fn().mockResolvedValue({}),
-    },
-    Runtime: {
-      evaluate: overrides.evaluate ?? vi.fn().mockResolvedValue({ result: { type: 'object', objectId: 'OBJ1' } }),
-      callFunctionOn: overrides.callFunctionOn ?? vi.fn().mockResolvedValue({ result: { type: 'string', value: 'ok' } }),
-    },
+  const behaviors: Record<string, ReturnType<typeof vi.fn>> = {
+    'Target.getTargets': overrides.getTargets ?? vi.fn().mockResolvedValue({ targetInfos: overrides.targetInfos ?? [pageTarget()] }),
+    'Target.attachToTarget': overrides.attachToTarget ?? vi.fn().mockResolvedValue({ sessionId: 'SID1' }),
+    'Target.detachFromTarget': vi.fn().mockResolvedValue({}),
+    'Runtime.evaluate': overrides.evaluate ?? vi.fn().mockResolvedValue({ result: { type: 'object', objectId: 'OBJ1' } }),
+    'Runtime.callFunctionOn': overrides.callFunctionOn ?? vi.fn().mockResolvedValue({ result: { type: 'string', value: 'ok' } }),
+  }
+
+  // Mirrors chrome-remote-interface, where every domain shorthand is generated as
+  // a `client.send` call — the seam the session installs its bound on.
+  const client: any = {
+    send: (command: string, ...args: unknown[]) => behaviors[command](...args),
     close: vi.fn().mockResolvedValue(undefined),
   }
+
+  Object.keys(behaviors).forEach((command) => {
+    const [domain, method] = command.split('.')
+
+    client[domain] = client[domain] ?? {}
+    client[domain][method] = vi.fn((...args: unknown[]) => client.send(command, ...args))
+  })
 
   return client
 }
@@ -481,6 +491,27 @@ describe('lib/tap/tap-session', () => {
 
   it('surfaces RENDERER_UNRESPONSIVE when listing targets never answers', async () => {
     setup(makeClient({ getTargets: never() }))
+
+    await expectUnresponsive(callWithBound())
+  })
+
+  it('bounds the runner-page probe on its own shorter default, so a stuck page falls out of the scan fast', async () => {
+    setup(makeClient({ evaluate: never() }))
+    vi.useFakeTimers()
+
+    try {
+      const settled = callOnce().catch((e) => e)
+
+      await vi.advanceTimersByTimeAsync(FIND_INSTANCE_TIMEOUT_MS)
+
+      expect((await settled as Error & { code: string }).code).toBe('RENDERER_UNRESPONSIVE')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('raises the probe bound along with the call bound, so the shorter one cannot fail underneath --timeout', async () => {
+    setup(makeClient({ evaluate: never() }))
 
     await expectUnresponsive(callWithBound())
   })

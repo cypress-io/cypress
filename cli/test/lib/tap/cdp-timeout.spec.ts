@@ -1,13 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
+import type CRI from 'chrome-remote-interface'
 
-import {
-  DEFAULT_CDP_TIMEOUT_MS,
-  FIND_INSTANCE_TIMEOUT_MS,
-  boundCdpClient,
-  cdpBounds,
-  isRendererUnresponsive,
-  withCdpDeadline,
-} from '../../../lib/tap/cdp-timeout'
+import { boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from '../../../lib/tap/cdp-timeout'
 
 // A CDP reply carries no timer of its own, so a target that stops answering
 // leaves the promise pending forever. These cover the bound that replaces that
@@ -50,17 +44,6 @@ describe('lib/tap/cdp-timeout', () => {
     })
   })
 
-  describe('cdpBounds', () => {
-    it('defaults the two waits apart: locating the runner page is a round trip, calling into it can wait on a spec', () => {
-      expect(cdpBounds()).to.deep.eq({ call: DEFAULT_CDP_TIMEOUT_MS, findInstance: FIND_INSTANCE_TIMEOUT_MS })
-      expect(FIND_INSTANCE_TIMEOUT_MS).to.be.lessThan(DEFAULT_CDP_TIMEOUT_MS)
-    })
-
-    it('raises both waits together, so the shorter one cannot fail underneath an explicit --timeout', () => {
-      expect(cdpBounds(90_000)).to.deep.eq({ call: 90_000, findInstance: 90_000 })
-    })
-  })
-
   describe('isRendererUnresponsive', () => {
     it('is false for anything that is not the timeout failure', () => {
       expect(isRendererUnresponsive(new Error('boom'))).to.eq(false)
@@ -69,19 +52,38 @@ describe('lib/tap/cdp-timeout', () => {
     })
   })
 
-  describe('boundCdpClient', () => {
-    const fakeClient = (overrides: Record<string, unknown> = {}) => {
-      return {
-        Runtime: { evaluate: () => never() },
-        Target: { getTargets: () => Promise.resolve({ targetInfos: [] }) },
-        close: () => Promise.resolve(),
-        host: '127.0.0.1',
-        ...overrides,
-      } as any
+  describe('boundCdpCalls', () => {
+    const unsubscribe = () => {}
+
+    // Mirrors chrome-remote-interface: the domain shorthands are generated as
+    // `client.send` calls, while events and `close` are their own members.
+    const fakeClient = (commands: Record<string, (...args: any[]) => unknown> = {}) => {
+      const behaviors: Record<string, (...args: any[]) => unknown> = {
+        'Runtime.evaluate': () => never(),
+        'Target.getTargets': () => Promise.resolve({ targetInfos: [] }),
+        ...commands,
+      }
+
+      const client: any = {
+        send: (command: string, ...args: unknown[]) => behaviors[command](...args),
+        close: () => never(),
+        Page: { loadEventFired: () => unsubscribe },
+      }
+
+      Object.keys(behaviors).forEach((command) => {
+        const [domain, method] = command.split('.')
+
+        client[domain] = client[domain] ?? {}
+        client[domain][method] = (...args: unknown[]) => client.send(command, ...args)
+      })
+
+      return client as CRI.Client
     }
 
     it('bounds a domain call that never answers', async () => {
-      const client = boundCdpClient(fakeClient(), BOUND)
+      const client = fakeClient()
+
+      boundCdpCalls(client, BOUND)
 
       const err = await client.Runtime.evaluate({ expression: '1' }).catch((e: unknown) => e)
 
@@ -90,35 +92,38 @@ describe('lib/tap/cdp-timeout', () => {
     })
 
     it('passes a domain call that answers straight through', async () => {
-      const client = boundCdpClient(fakeClient(), BOUND)
+      const client = fakeClient()
+
+      boundCdpCalls(client, BOUND)
 
       await expect(client.Target.getTargets()).resolves.to.deep.eq({ targetInfos: [] })
     })
 
-    it('forwards arguments and receiver to the underlying call', async () => {
+    it('forwards the params and session id to the underlying call', async () => {
       const evaluate = vi.fn().mockResolvedValue({ result: {} })
-      const client = boundCdpClient(fakeClient({ Runtime: { evaluate } }), BOUND)
+      const client = fakeClient({ 'Runtime.evaluate': evaluate })
+
+      boundCdpCalls(client, BOUND)
 
       await client.Runtime.evaluate({ expression: 'window.x' }, 'session-1')
 
       expect(evaluate).toHaveBeenCalledWith({ expression: 'window.x' }, 'session-1')
     })
 
-    // Domain properties double as event subscribers, which hand back an
-    // unsubscribe function rather than a promise — racing one would swap it for a
-    // promise and break the caller.
-    it('leaves a non-promise return value alone', () => {
-      const unsubscribe = () => {}
-      const client = boundCdpClient(fakeClient({ Page: { loadEventFired: () => unsubscribe } }), BOUND)
+    // An event subscriber hands back an unsubscribe function rather than a promise,
+    // so racing one would swap it for a promise and break the caller.
+    it('leaves event subscriptions alone', () => {
+      const client = fakeClient()
+
+      boundCdpCalls(client, BOUND)
 
       expect((client as any).Page.loadEventFired(() => {})).to.eq(unsubscribe)
     })
 
-    it('leaves the client’s own members alone, so closing the connection is never bounded', async () => {
-      const close = vi.fn().mockReturnValue(never())
-      const client = boundCdpClient(fakeClient({ close }), BOUND)
+    it('leaves closing the connection unbounded, since that is what settles an abandoned call', async () => {
+      const client = fakeClient()
 
-      expect((client as any).host).to.eq('127.0.0.1')
+      boundCdpCalls(client, BOUND)
 
       const settled = await Promise.race([
         client.close().then(() => 'closed'),
@@ -126,12 +131,6 @@ describe('lib/tap/cdp-timeout', () => {
       ])
 
       expect(settled).to.eq('still pending')
-    })
-
-    it('hands back the same proxy for a domain each time it is read', () => {
-      const client = boundCdpClient(fakeClient(), BOUND)
-
-      expect(client.Runtime).to.eq(client.Runtime)
     })
   })
 })

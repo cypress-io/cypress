@@ -2,7 +2,7 @@ import Debug from 'debug'
 import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
-import { boundCdpClient, cdpBounds, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
+import { DEFAULT_CDP_TIMEOUT_MS, FIND_INSTANCE_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
 import type { ReadyInstanceState } from '../cypress-instances'
 import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import type { TapExecResult } from '@packages/cypress-instances'
@@ -251,20 +251,24 @@ export const withTapSession = async <T> (
   fn: (session: TapSession) => Promise<T>,
   timeoutMs?: number,
 ): Promise<T> => {
-  const bounds = cdpBounds(timeoutMs)
+  // The two defaults differ by an order of magnitude because the waits do: finding
+  // the runner page is a round trip, while calling into it can legitimately wait on
+  // a spec. `--timeout` is the one knob for "this is slow, wait longer", so it
+  // raises both rather than leaving the shorter one to fail underneath it.
+  const callMs = timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS
+  const findInstanceMs = timeoutMs ?? FIND_INSTANCE_TIMEOUT_MS
 
-  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, bounds })
+  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, callMs, findInstanceMs })
 
-  const connection = await connectToBrowser(instance.cdpBrowserWsUrl)
-  // Every protocol call the session hands out is bounded; closing the connection
-  // is also what settles whatever a bound already gave up waiting on.
-  const client = boundCdpClient(connection, bounds.call)
+  const client = await connectToBrowser(instance.cdpBrowserWsUrl)
+
+  boundCdpCalls(client, callMs)
 
   try {
     const attach = async (): Promise<string> => {
       const { targetInfos } = await listTargets(client)
 
-      return findRunnerPageSession(client, targetInfos, bounds.findInstance)
+      return findRunnerPageSession(client, targetInfos, findInstanceMs)
     }
 
     let sessionId = await attach()
@@ -311,6 +315,6 @@ export const withTapSession = async <T> (
 
     return await fn(session)
   } finally {
-    await connection.close().catch(() => {})
+    await client.close().catch(() => {})
   }
 }
