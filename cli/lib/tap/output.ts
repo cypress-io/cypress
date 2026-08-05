@@ -59,8 +59,6 @@ const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string
   return target
 }
 
-// Printing help is a successful outcome however it was asked for, so a bare
-// `tap` exits 0 like `tap --help` does. An unknown command still fails below.
 const renderHelp = (program: commander.Command, schema: TapSchema, command: string | undefined, banner?: string): number => {
   const prefix = banner ? `${banner}\n\n` : ''
 
