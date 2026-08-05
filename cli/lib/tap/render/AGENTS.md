@@ -70,7 +70,7 @@ A command's console properties are the one result with no bounded shape — a
 Printing it whole is pages of indentation, so the renderer shows the **shape**
 first, the way the browser console panel does: a few levels expand, a section
 that is deeper — or too long to take in at a glance — reads as `{n keys}` /
-`[n items]`, and a footer names the two ways to open it (`--depth`, `--path`).
+`[n items]`, and a footer names the way to open it (`--depth all`).
 Depth and a per-section row budget are separate dials on purpose: depth alone
 either buries you in header maps or hides the nesting you came for, and an
 explicit `--depth` lifts the budget since it asked for levels, not for a
@@ -79,7 +79,7 @@ soft-wrapped line breaks the column it was padded into. Reach for the same
 three moves — summarize, offer the drill-down, clamp to width — for any future
 result whose depth the CLI does not control.
 
-`--depth` and `--path` are **view options**: declared by the rendering
+`--depth` is a **view option**: declared by the rendering
 (`TapCommandRendering.options`), rendered into the command's help like any other
 flag, but collected apart from the schema's and never sent to the instance. A
 flag that only changes how a result reads belongs there — it then works against

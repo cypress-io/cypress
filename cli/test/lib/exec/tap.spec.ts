@@ -1175,9 +1175,6 @@ describe('lib/exec/tap', () => {
                                before summarizing the rest as "{n keys}" / "[n items]":
                                a number or "all" (default 3, and a section over 8 rows
                                folds at any depth unless this is passed)
-          --path <path>        show one section of the console properties instead of
-                               the whole payload, addressed from the top level as
-                               "Response>headers" (case-insensitive, ">"-separated)
           --instance <pid>     target a specific running Cypress instance by its server
                                process id (pid)
           --json               print the raw JSON result instead of the human-readable
