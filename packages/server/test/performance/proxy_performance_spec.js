@@ -110,21 +110,13 @@ const PROXY_DISABLED_CY_SERVER_PORT = 45682
 // per-request latency — near-zero on CI, so the hosted page can't show the win
 // there. This origin injects the latency as a per-response delay instead.
 const HTTP2_LATENCY_ORIGIN_PORT = 45333
-// EXPERIMENT — do not merge. Bisecting the latency at which proxy-disabled
-// (CDP, HTTP/2) overtakes the MITM proxy on CI hardware: the flagship latency
-// test asserts CDP < MITM, so a green run means CDP already wins at this
-// delay (search lower) and a red run means MITM still wins (search higher).
-// Locally CDP wins even at 0ms, so this only tells us something on CI.
-// Ships as 50 on the real branch.
-//
-// Measured so far on CI (1000 images, paired, best available):
-//   15ms -> MITM 5292 / CDP 2681  (CDP wins 1.97x)
-//    5ms -> MITM 3670 / CDP 2633  (CDP wins 1.39x)
-// CDP is floor-bound at ~2.65s there (flat across a 3x latency change) while
-// MITM climbs ~162ms per 1ms of delay, back-solving to a ~2.86s floor — already
-// above CDP's. 0ms is the decisive floor-vs-floor probe: if CDP still wins
-// there, there is no crossover on CI either.
-const HTTP2_LATENCY_ORIGIN_DELAY_MS = 0
+// Latency-origin delay, at the value this branch ships. The CI bisection is
+// finished: proxy-disabled won at 15ms (5292/2681), 5ms (3670/2633) and 0ms
+// (3582/2520), so there is no crossover on that executor — CDP's floor
+// (~2.5s) sits below MITM's (~3.6s). The remaining question is whether the
+// original hosted-page inversion (MITM 2080 vs CDP 3071) was contention from
+// the Chrome process leak, which is what this run re-tests.
+const HTTP2_LATENCY_ORIGIN_DELAY_MS = 50
 const HTTP2_LATENCY_ORIGIN_URL = `https://localhost:${HTTP2_LATENCY_ORIGIN_PORT}/index1000.html`
 
 // Chrome's debug port is randomized per launch, so the range has to stay clear

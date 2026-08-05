@@ -2319,7 +2319,7 @@ jobs:
           name: HTTP/2 latency-origin bisection
           environment:
             DEBUG: 'test:proxy-performance'
-          command: yarn workspace @packages/server test-performance proxy --fgrep 'delayed images'
+          command: yarn workspace @packages/server test-performance proxy --fgrep 'preserves HTTP/2'
       - store_artifacts:
           path: /tmp/artifacts
           when: always
