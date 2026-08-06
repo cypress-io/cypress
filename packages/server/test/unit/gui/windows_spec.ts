@@ -26,6 +26,7 @@ describe('lib/gui/windows', () => {
     this.win.webContents.setWindowOpenHandler = sinon.stub()
     this.win.webContents.userAgent = DEFAULT_USER_AGENT
     this.win.isDestroyed = sinon.stub().returns(false)
+    this.win.focusOnWebView = sinon.stub()
   })
 
   afterEach(() => {
@@ -94,9 +95,81 @@ describe('lib/gui/windows', () => {
       expect(onNewWindow).to.be.calledOn(this.win)
       expect(onNewWindow).to.be.calledWith(details)
     })
-  })
 
-  // TODO: test everything else going on in this method!
+    it('applies the partition to webPreferences', function () {
+      const newBrowserWindow = sinon.stub().returns(this.win)
+
+      Windows.create('/foo/', { partition: 'persist:interactive' }, newBrowserWindow)
+
+      expect(newBrowserWindow.lastCall.args[0].webPreferences.partition).to.eq('persist:interactive')
+    })
+
+    // the webview loses focus on navigation, so a hidden window has to refocus it
+    // https://github.com/cypress-io/cypress/issues/2190
+    it('refocuses the webview when a hidden window navigates', function () {
+      Windows.create('/foo/', { show: false }, () => this.win)
+
+      this.win.webContents.emit('did-start-loading')
+
+      expect(this.win.focusOnWebView).to.be.called
+    })
+
+    it('does not refocus the webview once the window is destroyed', function () {
+      this.win.isDestroyed.returns(true)
+
+      Windows.create('/foo/', { show: false }, () => this.win)
+
+      this.win.webContents.emit('did-start-loading')
+
+      expect(this.win.focusOnWebView).not.to.be.called
+    })
+
+    it('does not refocus the webview when the window is shown', function () {
+      Windows.create('/foo/', { show: true }, () => this.win)
+
+      this.win.webContents.emit('did-start-loading')
+
+      expect(this.win.focusOnWebView).not.to.be.called
+    })
+
+    it('invokes onCrashed when the render process goes away', function () {
+      const onCrashed = sinon.stub()
+      const details = { reason: 'crashed' }
+
+      Windows.create('/foo/', { onCrashed }, () => this.win)
+
+      this.win.webContents.emit('render-process-gone', details)
+
+      expect(onCrashed).to.be.calledOn(this.win)
+      expect(onCrashed).to.be.calledWith(details)
+    })
+
+    it('invokes onFocus and onBlur on the window', function () {
+      const onFocus = sinon.stub()
+      const onBlur = sinon.stub()
+
+      Windows.create('/foo/', { onFocus, onBlur }, () => this.win)
+
+      this.win.emit('focus')
+      this.win.emit('blur')
+
+      expect(onFocus).to.be.calledOn(this.win)
+      expect(onBlur).to.be.calledOn(this.win)
+    })
+
+    it('removes the window listeners and invokes onClose once the window closes', function () {
+      const onClose = sinon.stub()
+
+      sinon.spy(this.win, 'removeAllListeners')
+
+      Windows.create('/foo/', { onClose }, () => this.win)
+
+      this.win.emit('closed')
+
+      expect(this.win.removeAllListeners).to.be.called
+      expect(onClose).to.be.calledOn(this.win)
+    })
+  })
 
   context('.trackState', () => {
     beforeEach(function () {
