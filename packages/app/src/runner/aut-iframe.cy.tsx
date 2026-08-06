@@ -1,6 +1,7 @@
 import { AutIframe } from './aut-iframe'
 import { createEventManager } from '../../cypress/component/support/ctSupport'
 import { getElementDimensions } from './dimensions'
+import { logger } from './logger'
 
 describe('AutIframe', () => {
   let autIframe: AutIframe
@@ -197,6 +198,65 @@ describe('AutIframe', () => {
 
     it('should throw error when destroy is called without create', () => {
       expect(() => autIframe.destroy()).to.throw('Cannot call #remove without first calling #create')
+    })
+  })
+
+  context('.doesAUTMatchTopSuperDomainOrigin', () => {
+    let iframe: HTMLIFrameElement
+
+    const attachIframe = (src?: string) => {
+      iframe = document.createElement('iframe')
+
+      if (src) {
+        iframe.src = src
+      }
+
+      document.body.appendChild(iframe)
+      autIframe.$iframe = Cypress.$(iframe) as JQuery<HTMLIFrameElement>
+    }
+
+    beforeEach(() => {
+      const eventManager = createEventManager()
+
+      eventManager._testingOnlySetCypress({ Location: Cypress.Location })
+      autIframe = new AutIframe('Test Project', eventManager, Cypress.$)
+    })
+
+    afterEach(() => {
+      iframe?.remove()
+    })
+
+    it('is true when the AUT is on about:blank', () => {
+      attachIframe()
+
+      expect(autIframe.doesAUTMatchTopSuperDomainOrigin()).to.be.true
+    })
+
+    it('is true when the AUT shares a super domain origin with top', () => {
+      attachIframe(window.location.href)
+
+      expect(autIframe.doesAUTMatchTopSuperDomainOrigin()).to.be.true
+    })
+  })
+
+  context('.restoreDom', () => {
+    it('does not wait on a load event that cannot fire when the AUT has no src to remove', () => {
+      const iframe = document.createElement('iframe')
+
+      document.body.appendChild(iframe)
+
+      autIframe.$iframe = Cypress.$(iframe) as JQuery<HTMLIFrameElement>
+      autIframe.doesAUTMatchTopSuperDomainOrigin = () => false
+
+      const logError = cy.stub(logger, 'logError')
+      const one = cy.spy(autIframe.$iframe, 'one')
+
+      autIframe.restoreDom({ body: { get: () => document.createElement('body') }, htmlAttrs: {} })
+
+      expect(one).not.to.be.called
+      expect(logError).to.be.calledOnce
+
+      iframe.remove()
     })
   })
 })
