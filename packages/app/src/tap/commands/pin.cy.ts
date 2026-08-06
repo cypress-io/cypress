@@ -435,6 +435,32 @@ describe('tap/commands/pin', () => {
       expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
     })
 
+    it('keeps tap’s captured DOM when its replaced command is evicted before --clear', async () => {
+      const getSnapshotPropsForLog = cy.stub().callsFake((_testId: string, logId: string) => {
+        return logId === 'log-1' ? SNAPSHOT_PROPS : { snapshots: [SNAPSHOTS[0]] }
+      })
+      const { restoreDom, pinInApp } = stubSource({ runner: {
+        getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
+        getSnapshotPropsForLog,
+      } })
+
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      await manager.exec('pin', { test: 'r2', command: '1' })
+      pinInApp('log-2')
+
+      // Only tap's superseded command is evicted; the reporter pin replacing it
+      // remains live and still needs tap's captured live DOM on release.
+      getSnapshotPropsForLog.callsFake((_testId: string, logId: string) => {
+        return logId === 'log-1' ? { snapshots: [null, null] } : { snapshots: [SNAPSHOTS[0]] }
+      })
+
+      const cleared = await manager.exec('pin', {}, { clear: 'true' })
+
+      expect(cleared).to.deep.eq({ result: { cleared: true } })
+      expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
+    })
+
     it('is not reported once the command it pinned has fallen out of memory', async () => {
       const { pinInApp } = stubSource({ runner: {
         getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],

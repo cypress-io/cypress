@@ -154,6 +154,13 @@ export const reconcilePin = (runner: PinSnapshotRunner): void => {
     return
   }
 
+  // A reporter pin can replace tap's pin without emitting an unpin event. If
+  // that replacement is still live, tap retains only the original DOM that
+  // belongs to it; eviction of tap's superseded snapshot must not discard it.
+  if (currentPin() !== pinned) {
+    return
+  }
+
   const stillLive = liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.logId)).includes(pinned.snapshot)
 
   if (!stillLive) {
