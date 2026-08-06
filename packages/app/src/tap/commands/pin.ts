@@ -12,7 +12,7 @@ interface CurrentPin {
   // The attempt the command id was resolved against — part of the pin's
   // identity, since per-attempt ids restart from 1 and the same number names
   // a different command on another attempt.
-  attempt: number | undefined
+  attempt: number
   // The driver's log id behind the tap command id — what the runner's
   // snapshot APIs key on.
   logId: string
@@ -170,6 +170,7 @@ export const reconcilePin = (runner: PinSnapshotRunner): void => {
 
   if (!tapPinIsLive(runner)) {
     releasePin()
+    tapManagerDataSource.unpinSnapshot()
   }
 }
 
@@ -273,12 +274,6 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
     throw new TapCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
   }
 
-  // A move switches the snapshot of the pin the app holds, so it needs tap's own
-  // record to still match the pin the app is showing.
-  if (pinned && current && samePin(current, pinned) && pinned.test === test && pinned.command === command && pinned.attempt === attempt) {
-    return movePin(runner, at)
-  }
-
   const selection = selectTestAttempt(runner, test, attempt)
 
   if ('error' in selection) {
@@ -289,6 +284,13 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
 
   if (logId === undefined) {
     throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --testId) to list this test’s commands`)
+  }
+
+  // A move switches the snapshot of the pin the app holds, so it needs tap's own
+  // record to still match the pin the app is showing and the concrete attempt
+  // selected by this invocation.
+  if (pinned && current && samePin(current, pinned) && pinned.test === test && pinned.command === command && pinned.attempt === selection.attemptNumber) {
+    return movePin(runner, at)
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)
@@ -316,7 +318,7 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
 
   const at_ = toRef(snapshots, index)
 
-  pinned = { test, command, attempt, logId, at: at_, original, snapshot: snapshots[index] }
+  pinned = { test, command, attempt: selection.attemptNumber, logId, at: at_, original, snapshot: snapshots[index] }
 
   return pinResult(runner, props)
 })

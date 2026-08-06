@@ -34,7 +34,7 @@ const attemptsOf = (test: SerializedTest): SerializedTest[] => {
 }
 
 type AttemptSelection =
-  | { test: SerializedTest, attempt: SerializedTest }
+  | { test: SerializedTest, attempt: SerializedTest, attemptNumber: number }
   | { error: 'TEST_NOT_FOUND' }
   | { error: 'ATTEMPT_NOT_FOUND', attempts: number }
 
@@ -52,14 +52,14 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
   const attempts = attemptsOf(test)
 
   if (attempt === undefined) {
-    return { test, attempt: attempts[attempts.length - 1] }
+    return { test, attempt: attempts[attempts.length - 1], attemptNumber: attempts.length }
   }
 
   if (!isAttemptInRange(attempt, attempts.length)) {
     return { error: 'ATTEMPT_NOT_FOUND', attempts: attempts.length }
   }
 
-  return { test, attempt: attempts[attempt - 1] }
+  return { test, attempt: attempts[attempt - 1], attemptNumber: attempt }
 }
 
 export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapCommandError => {

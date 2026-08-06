@@ -556,7 +556,10 @@ describe('tap/commands/pin', () => {
     })
 
     cy.stub(tapManagerDataSource, 'getPinnedSnapshot').callsFake(() => showing)
-    cy.stub(tapManagerDataSource, 'unpinSnapshot')
+    const unpinSnapshot = cy.stub(tapManagerDataSource, 'unpinSnapshot').callsFake(() => {
+      showing = undefined
+    })
+
     cy.stub(tapManagerDataSource, 'onSnapshotUnpinned').returns(cy.stub())
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -574,6 +577,7 @@ describe('tap/commands/pin', () => {
 
     expect(cleared).to.deep.eq({ result: { cleared: false } })
     expect(restoreDom).not.to.have.been.called // never a stale restore
+    expect(unpinSnapshot).to.have.been.calledOnce
   })
 
   it('drops a stale pin without restoring when an external unpin fires after a re-run', async () => {
