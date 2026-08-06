@@ -3,9 +3,7 @@ import EE from 'events'
 import * as util from '../util'
 import type { PluginChildIpc, PluginInvokeIds, PreprocessorFileObject } from './types'
 
-let fileObjects: Record<string, PreprocessorFileObject> = {}
-
-const ipcsWithCloseHandler = new WeakSet<PluginChildIpc>()
+const fileObjects: Record<string, PreprocessorFileObject> = {}
 
 export const wrap = (
   ipc: PluginChildIpc,
@@ -15,31 +13,6 @@ export const wrap = (
 ): void => {
   const file = _.pick(args[0], 'filePath', 'outputPath', 'shouldWatch')
   let childFile = fileObjects[file.filePath]
-
-  // https://github.com/cypress-io/cypress/issues/1305
-  // TODO: Move this to RunPlugins so we don't need to guard this way
-  if (!ipcsWithCloseHandler.has(ipc)) {
-    ipcsWithCloseHandler.add(ipc)
-    ipc.on('preprocessor:close', (filePath?: string) => {
-      // no filePath means close all
-      if (!filePath) {
-        Object.values(fileObjects).forEach((_child) => {
-          _child.emit('close')
-        })
-
-        fileObjects = {}
-      } else {
-        const _child = fileObjects[filePath]
-
-        if (!_child) {
-          return
-        }
-
-        delete fileObjects[filePath]
-        _child.emit('close')
-      }
-    })
-  }
 
   // the emitter methods don't come through from the parent process
   // so we have to re-apply them here
@@ -51,6 +24,28 @@ export const wrap = (
   }
 
   util.wrapChildPromise(ipc, invoke, ids, [childFile])
+}
+
+const closeFile = (filePath: string) => {
+  const file = fileObjects[filePath]
+
+  if (!file) {
+    return
+  }
+
+  delete fileObjects[filePath]
+  file.emit('close')
+}
+
+// no filePath means close all
+export const close = (filePath?: string): void => {
+  if (filePath) {
+    closeFile(filePath)
+
+    return
+  }
+
+  Object.keys(fileObjects).forEach((path) => closeFile(path))
 }
 
 export const _clearFiles = (): void => {

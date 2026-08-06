@@ -4,7 +4,7 @@
 import debugLib from 'debug'
 import Promise from 'bluebird'
 import _ from 'lodash'
-import { wrap as wrapPreprocessor } from './preprocessor'
+import { wrap as wrapPreprocessor, close as closePreprocessor } from './preprocessor'
 import { wrap as wrapDevServer } from './dev-server'
 import { typescript as resolveTypescript } from '../../util/resolve'
 import { wrapBefore as wrapBeforeBrowserLaunch } from './browser_launch'
@@ -52,6 +52,12 @@ export class RunPlugins {
 
     this.ipc.on('execute:plugins', (event: PluginExecuteEvent, ids: PluginInvokeIds, args: any[]) => {
       this.execute(event, ids, args)
+    })
+
+    // registered here rather than per-invocation in the preprocessor so a single
+    // listener covers every file @see https://github.com/cypress-io/cypress/issues/1305
+    this.ipc.on('preprocessor:close', (filePath?: string) => {
+      closePreprocessor(filePath)
     })
 
     return this.load(config, setupNodeEventsFn)
