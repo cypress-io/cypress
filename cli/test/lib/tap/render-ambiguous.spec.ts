@@ -34,7 +34,7 @@ describe('lib/tap/render/ambiguous', () => {
       ambiguous: true,
       selector: 'li',
       count: 4,
-      selectors: [{ index: 0, selector: '#first' }, { index: 2, selector: '#third' }, { index: 3, selector: '#fourth' }],
+      selectors: [{ index: 0, selector: '#first' }, { index: 1, selector: null }, { index: 2, selector: '#third' }, { index: 3, selector: '#fourth' }],
     })).toBe([
       '⚠ selector \'li\' matched 4 elements but must be unique',
       'provide --at with an index to select an element from the list or update the selector.',

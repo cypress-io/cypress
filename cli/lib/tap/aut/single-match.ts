@@ -1,5 +1,5 @@
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
-import type { ElementSelectorMatch, ElementSelectorsResult } from '@packages/cypress-instances'
+import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-instances'
 
 import { validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
@@ -24,11 +24,11 @@ export interface FrameAmbiguousResult {
   /** How many elements it matched. */
   count: number
   /**
-   * A selector unique to each match, in document order, each carrying the index
-   * of the match it names. May be shorter than `count`: a match no unique
-   * selector could be derived for is omitted.
+   * One entry per match, in document order, each carrying the index of the match
+   * it names and a selector unique to it — `null` where none could be derived.
+   * May be shorter than `count`: the instance only derives so many.
    */
-  selectors: ElementSelectorMatch[]
+  selectors: ResolveSelectorMatch[]
 }
 
 /**
@@ -39,11 +39,11 @@ export interface FrameAmbiguousResult {
  * can't reach its app under test (a secondary origin inside `cy.origin`) just
  * leaves the match count to speak for itself.
  */
-const disambiguatingSelectors = async (session: TapSession, selector: string): Promise<ElementSelectorMatch[]> => {
+const disambiguatingSelectors = async (session: TapSession, selector: string): Promise<ResolveSelectorMatch[]> => {
   try {
-    const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['element-selectors', { selector }, {}]))
+    const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['resolve-selector', { selector }, {}]))
 
-    return 'error' in outcome ? [] : (outcome.result as ElementSelectorsResult).selectors
+    return 'error' in outcome ? [] : (outcome.result as ResolveSelectorResult).selectors
   } catch {
     return []
   }

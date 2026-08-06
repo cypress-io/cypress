@@ -61,7 +61,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
       selectors,
     })
 
-    expect(call).toHaveBeenCalledWith('exec', ['element-selectors', { selector: '.item' }, {}])
+    expect(call).toHaveBeenCalledWith('exec', ['resolve-selector', { selector: '.item' }, {}])
   })
 
   it('still answers with the count when the instance could derive no selectors', async () => {
