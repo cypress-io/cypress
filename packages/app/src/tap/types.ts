@@ -67,7 +67,7 @@ interface TapAutElements {
 }
 
 /**
- * What the element-selectors command needs of the runner: the app under test's
+ * What the resolve-selector command needs of the runner: the app under test's
  * own view of its document, and the driver's selector generator — the same one
  * behind the Selector Playground, so a selector tap hands back is the selector
  * the app would show for that element.

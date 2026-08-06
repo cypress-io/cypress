@@ -97,7 +97,7 @@ describe('tap binding', () => {
       const names = schema.commands.map((command) => command.name)
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(names).to.include.members(['command', 'reporter', 'pin', 'run-state', 'element-selectors'])
+      expect(names).to.include.members(['command', 'reporter', 'pin', 'run-state', 'resolve-selector'])
       expect(names).not.to.include('console-props')
       // The two list subcommands folded into reporter: its spec overview lists
       // the run's tests, and its --test view lists one test's command log.
@@ -137,7 +137,7 @@ describe('tap binding', () => {
 
       // No app under test is mounted before a run, so there are no elements to
       // derive selectors from.
-      const selectorsBeforeRun = await binding.exec('element-selectors', { selector: 'li' })
+      const selectorsBeforeRun = await binding.exec('resolve-selector', { selector: 'li' })
 
       expect((selectorsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_AUT')
 
@@ -251,7 +251,7 @@ describe('tap binding', () => {
       // The fixture's three list items carry no ids, classes, or attributes, so
       // this exercises the generator's positional fallback — the hardest case,
       // and the one an ambiguous selector most often lands on.
-      const outcome = await binding.exec('element-selectors', { selector: '.list li' })
+      const outcome = await binding.exec('resolve-selector', { selector: '.list li' })
 
       expect('result' in outcome).to.eq(true)
 
@@ -277,20 +277,20 @@ describe('tap binding', () => {
         expect(resolved[0], `${selector} is match ${index}`).to.eq(matches[index])
       }
 
-      const single = await binding.exec('element-selectors', { selector: 'ul.list' })
+      const single = await binding.exec('resolve-selector', { selector: 'ul.list' })
 
       expect((single as { result: { selectors: unknown[] } }).result.selectors).to.have.length(1)
 
       // Matching nothing is an answer, not a failure.
-      const none = await binding.exec('element-selectors', { selector: '.not-in-the-fixture' })
+      const none = await binding.exec('resolve-selector', { selector: '.not-in-the-fixture' })
 
       expect((none as { result: { selectors: unknown[] } }).result.selectors).to.deep.eq([])
 
-      const invalid = await binding.exec('element-selectors', { selector: '>>bad' })
+      const invalid = await binding.exec('resolve-selector', { selector: '>>bad' })
 
       expect((invalid as { error: { code: string } }).error.code).to.eq('INVALID_SELECTOR')
 
-      const missingSelector = await binding.exec('element-selectors')
+      const missingSelector = await binding.exec('resolve-selector')
 
       expect((missingSelector as { error: { code: string } }).error.code).to.eq('INVALID_ARGUMENTS')
     })

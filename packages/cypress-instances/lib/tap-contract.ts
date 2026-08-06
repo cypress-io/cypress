@@ -143,8 +143,8 @@ const runStateMeta = {
   hidden: true,
 } as const satisfies TapCommandSchema
 
-const elementSelectorsMeta = {
-  name: 'element-selectors',
+const resolveSelectorMeta = {
+  name: 'resolve-selector',
   description: 'list a unique CSS selector for each element a selector matches, null for any match none could be derived for',
   params: [
     { name: 'selector', type: 'string', required: true, description: 'a CSS selector' },
@@ -162,7 +162,7 @@ export const TAP_COMMANDS = [
   reporterMeta,
   pinMeta,
   runStateMeta,
-  elementSelectorsMeta,
+  resolveSelectorMeta,
 ] as const satisfies readonly TapCommandSchema[]
 
 export type TapCommandName = typeof TAP_COMMANDS[number]['name']
@@ -299,4 +299,4 @@ export * from './contracts/pinned'
 
 export * from './contracts/pin'
 
-export * from './contracts/element-selectors'
+export * from './contracts/resolve-selector'

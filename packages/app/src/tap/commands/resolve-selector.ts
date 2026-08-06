@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand, TapCommandError } from './definition'
-import type { ElementSelectorMatch, ElementSelectorsResult } from '../contract'
+import type { ResolveSelectorMatch, ResolveSelectorResult } from '../contract'
 
 // A shadow-scoped selector is unique only within its own shadow root, so it can't
 // be passed back to a command that resolves selectors against the document —
@@ -14,7 +14,7 @@ const isDocumentScoped = (selector: string): boolean => !selector.startsWith(':h
 // many matches the list is no longer one a caller picks out of anyway.
 export const MAX_DERIVED_SELECTORS = 10
 
-export const elementSelectorsCommand = defineCommand('element-selectors', async ({ selector }): Promise<ElementSelectorsResult> => {
+export const resolveSelectorCommand = defineCommand('resolve-selector', async ({ selector }): Promise<ResolveSelectorResult> => {
   const source = tapManagerDataSource.getElementSelectorSource()
 
   if (!source) {
@@ -29,7 +29,7 @@ export const elementSelectorsCommand = defineCommand('element-selectors', async 
     throw new TapCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
   }
 
-  const selectors: ElementSelectorMatch[] = []
+  const selectors: ResolveSelectorMatch[] = []
   const derivable = Math.min(matched.length, MAX_DERIVED_SELECTORS)
 
   for (let index = 0; index < derivable; index++) {

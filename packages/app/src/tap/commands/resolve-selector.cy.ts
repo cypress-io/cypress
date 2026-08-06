@@ -1,11 +1,11 @@
-import { MAX_DERIVED_SELECTORS } from './element-selectors'
+import { MAX_DERIVED_SELECTORS } from './resolve-selector'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { TapManager } from '../tap-manager'
 import type { TapElementSelectorSource } from '../types'
 
 const CYPRESS_VERSION = '15.0.0'
 
-describe('tap/commands/element-selectors', () => {
+describe('tap/commands/resolve-selector', () => {
   // The spec's own window.Cypress is the instance running this test, so stub the
   // seam rather than reach for live runner state. Elements stand in as opaque
   // handles: the command only passes them back to the selector generator.
@@ -20,7 +20,7 @@ describe('tap/commands/element-selectors', () => {
     }
   }
 
-  const exec = (selector = '.item') => new TapManager(CYPRESS_VERSION).exec('element-selectors', { selector })
+  const exec = (selector = '.item') => new TapManager(CYPRESS_VERSION).exec('resolve-selector', { selector })
 
   it('returns a selector per match, in document order', async () => {
     stubSource(sourceOf(['a', 'b', 'c'], (element) => `li[data-i="${element}"]`))
@@ -101,7 +101,7 @@ describe('tap/commands/element-selectors', () => {
   it('fails with INVALID_ARGUMENTS when no selector is given', async () => {
     stubSource(sourceOf([], () => null))
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('element-selectors')
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('resolve-selector')
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_ARGUMENTS')
   })

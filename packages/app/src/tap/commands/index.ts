@@ -1,8 +1,8 @@
 import { commandCommand } from './command'
 import type { TapCommandDefinition } from './definition'
-import { elementSelectorsCommand } from './element-selectors'
 import { pinCommand } from './pin'
 import { reporterCommand } from './reporter'
+import { resolveSelectorCommand } from './resolve-selector'
 import { runStateCommand } from './run-state'
 import type { TapCommandName } from '../contract'
 
@@ -16,5 +16,5 @@ export const tapCommands: { [K in TapCommandName]: TapCommandDefinition & { name
   reporter: reporterCommand,
   pin: pinCommand,
   'run-state': runStateCommand,
-  'element-selectors': elementSelectorsCommand,
+  'resolve-selector': resolveSelectorCommand,
 }
