@@ -52,6 +52,10 @@ const restoreOriginal = (original: unknown): void => {
   tapManagerDataSource.getAutIframe()?.restoreDom(original)
 }
 
+const tapPinIsLive = (runner: PinSnapshotRunner): boolean => {
+  return !!pinned && liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.logId)).includes(pinned.snapshot)
+}
+
 const onExternalUnpin = (): void => {
   if (!pinned) {
     return
@@ -65,9 +69,9 @@ const onExternalUnpin = (): void => {
     return
   }
 
-  reconcilePin(runner)
+  if (!tapPinIsLive(runner)) {
+    releasePin()
 
-  if (!pinned) {
     return
   }
 
@@ -106,22 +110,21 @@ const uiPin = (): CurrentPin | undefined => {
   return { test: showing.testId, attempt, logId: showing.logId, at: toRef(snapshots, showing.index) }
 }
 
-// What the AUT is showing, whoever pinned it. A reporter click on another command
-// replaces tap's pin with no unpin event to hear, so the command showing then
-// comes from the app, while the captured DOM — tap's alone to put back — stays
-// with it.
+const samePin = (left: CurrentPin, right: CurrentPin): boolean => {
+  return left.test === right.test && left.attempt === right.attempt && left.logId === right.logId
+}
+
+// The app's snapshot store is authoritative for what the AUT is showing. Tap's
+// local state contributes only the live DOM it owns and must restore, including
+// when a reporter click replaces tap's command without first unpinning it.
 const currentPin = (): CurrentPin | undefined => {
   const showing = uiPin()
 
-  if (!pinned) {
-    return showing
+  if (!showing) {
+    return undefined
   }
 
-  if (showing && showing.logId !== pinned.logId) {
-    return { ...showing, original: pinned.original }
-  }
-
-  return pinned
+  return pinned ? { ...showing, original: pinned.original } : showing
 }
 
 // The pin as both `pin` and `status` report it. The reporter row is rebuilt from
@@ -150,16 +153,22 @@ export const reconcilePin = (runner: PinSnapshotRunner): void => {
     return
   }
 
-  // A reporter pin can replace tap's pin without emitting an unpin event. If
-  // that replacement is still live, tap retains only the original DOM that
-  // belongs to it; eviction of tap's superseded snapshot must not discard it.
-  if (currentPin() !== pinned) {
+  const showing = uiPin()
+
+  if (!showing) {
+    releasePin()
+
     return
   }
 
-  const stillLive = liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.logId)).includes(pinned.snapshot)
+  // A reporter pin can replace tap's pin without emitting an unpin event. If
+  // that replacement is still live, tap retains only the original DOM that
+  // belongs to it; eviction of tap's superseded snapshot must not discard it.
+  if (!samePin(showing, pinned)) {
+    return
+  }
 
-  if (!stillLive) {
+  if (!tapPinIsLive(runner)) {
     releasePin()
   }
 }
@@ -265,8 +274,8 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
   }
 
   // A move switches the snapshot of the pin the app holds, so it needs tap's own
-  // record to still be that pin — `current === pinned` is what says so.
-  if (pinned && current === pinned && pinned.test === test && pinned.command === command && pinned.attempt === attempt) {
+  // record to still match the pin the app is showing.
+  if (pinned && current && samePin(current, pinned) && pinned.test === test && pinned.command === command && pinned.attempt === attempt) {
     return movePin(runner, at)
   }
 

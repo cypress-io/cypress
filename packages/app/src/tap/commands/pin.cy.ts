@@ -432,6 +432,63 @@ describe('tap/commands/pin', () => {
       expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
     })
 
+    it('reports the app’s selected snapshot after a tap pin is changed in the UI', async () => {
+      const { pinInApp } = stubSource()
+
+      stubStatusRunner()
+
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+      pinInApp('log-1', 0)
+
+      const outcome = await manager.exec('run-state')
+
+      expect((outcome as { result: any }).result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
+    })
+
+    it('distinguishes a reporter pin from tap’s pin when another test reuses the same log id', async () => {
+      const otherTest = {
+        id: 'r3',
+        title: 'signs out',
+        state: 'passed',
+        commands: [
+          { id: 'log-1', name: 'get', message: '#account', state: 'passed', type: 'parent' },
+        ],
+      }
+      const testsState = { ...TESTS_STATE, r3: otherTest }
+      const getTestState = (id: string) => testsState[id as keyof typeof testsState]
+      const { restoreDom, pinInApp } = stubSource({ runner: {
+        getTestState,
+        getSnapshotPropsForLog: () => SNAPSHOT_PROPS,
+      } })
+
+      cy.stub(tapManagerDataSource, 'getRunner').returns({
+        getAllTestsState: () => testsState,
+        getTestState,
+        isRunComplete: () => true,
+        getStartTime: () => '2026-07-29T10:15:00.000Z',
+      })
+
+      cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/login.cy.ts')
+
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+      pinInApp('log-1', 0, 'r3')
+
+      const outcome = await manager.exec('run-state')
+
+      expect((outcome as { result: any }).result.pinned).to.deep.eq({
+        test: 'r3',
+        at: { index: 1, total: 2, name: 'before' },
+        command: { id: '1', name: 'get', message: '#account', state: 'passed', type: 'parent' },
+      })
+
+      await manager.exec('pin', {}, { clear: 'true' })
+      expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
+    })
+
     it('keeps tap’s captured DOM when its replaced command is evicted before --clear', async () => {
       const getSnapshotPropsForLog = cy.stub().callsFake((_testId: string, logId: string) => {
         return logId === 'log-1' ? SNAPSHOT_PROPS : { snapshots: [SNAPSHOTS[0]] }
@@ -493,8 +550,12 @@ describe('tap/commands/pin', () => {
     cy.stub(tapManagerDataSource, 'getAutIframe').returns({ detachDom: cy.stub().returns('ORIGINAL-DOM'), restoreDom })
     cy.stub(tapManagerDataSource, 'isRunning').returns(false)
 
-    const pinSnapshot = cy.stub(tapManagerDataSource, 'pinSnapshot')
+    let showing: { testId: string, logId: string, index: number } | undefined
+    const pinSnapshot = cy.stub(tapManagerDataSource, 'pinSnapshot').callsFake((_props, index, testId, logId) => {
+      showing = { testId, logId, index }
+    })
 
+    cy.stub(tapManagerDataSource, 'getPinnedSnapshot').callsFake(() => showing)
     cy.stub(tapManagerDataSource, 'unpinSnapshot')
     cy.stub(tapManagerDataSource, 'onSnapshotUnpinned').returns(cy.stub())
 
@@ -524,7 +585,14 @@ describe('tap/commands/pin', () => {
 
     cy.stub(tapManagerDataSource, 'getAutIframe').returns({ detachDom: cy.stub().returns('ORIGINAL-DOM'), restoreDom })
     cy.stub(tapManagerDataSource, 'isRunning').returns(false)
-    cy.stub(tapManagerDataSource, 'pinSnapshot')
+
+    let showing: { testId: string, logId: string, index: number } | undefined
+
+    cy.stub(tapManagerDataSource, 'pinSnapshot').callsFake((_props, index, testId, logId) => {
+      showing = { testId, logId, index }
+    })
+
+    cy.stub(tapManagerDataSource, 'getPinnedSnapshot').callsFake(() => showing)
     cy.stub(tapManagerDataSource, 'unpinSnapshot')
 
     const onUnpinned = cy.stub(tapManagerDataSource, 'onSnapshotUnpinned').returns(cy.stub())
