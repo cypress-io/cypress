@@ -7,23 +7,21 @@ export interface ElementSelectorMatch {
   /**
    * The element's position in the match list, so a caller indexing that list —
    * `--at` reads `document.querySelectorAll(selector)[index]` — lands on the
-   * element this selector names, whatever was omitted before it.
+   * element this entry names.
    */
   index: number
-  /** A selector resolving to exactly that element. */
-  selector: string
+  /** A selector resolving to exactly that element, `null` if none could be derived. */
+  selector: string | null
 }
 
 /** Unique CSS selectors for the elements a selector matched. */
 export interface ElementSelectorsResult {
   /**
-   * One entry per match, in document order. Best effort, and deliberately not a
-   * per-match verdict: a match no unique selector could be derived for is
-   * omitted rather than reported, and a selector matching far more elements than
-   * anyone would pick from is only derived up to a cap. So this may be shorter
-   * than the number of elements matched and its indexes may skip — a missing
-   * index is a match with no selector to offer, never a match that isn't there,
-   * which is why each entry carries the index it names.
+   * One entry per match, in document order. A match no unique selector could be
+   * derived for keeps its entry with a `null` selector, since `--at` reads it
+   * either way. Best effort in one respect: a selector matching far more elements
+   * than anyone would pick from is only derived up to a cap, so this can still be
+   * shorter than the number of elements matched.
    */
   selectors: ElementSelectorMatch[]
 }

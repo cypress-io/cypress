@@ -4,14 +4,15 @@ import type { ElementSelectorMatch, ElementSelectorsResult } from '../contract'
 
 // A shadow-scoped selector is unique only within its own shadow root, so it can't
 // be passed back to a command that resolves selectors against the document —
-// omit it rather than suggest one that would resolve to nothing.
+// report the match as having none rather than suggest one that would resolve to
+// nothing.
 const isDocumentScoped = (selector: string): boolean => !selector.startsWith(':host')
 
 // Deriving a unique selector walks up from the element testing each candidate
 // against the whole document, so deriving one per match for a selector as broad
 // as `*` would hold the app's main thread for the size of the page. Past this
 // many matches the list is no longer one a caller picks out of anyway.
-export const MAX_DERIVED_SELECTORS = 50
+export const MAX_DERIVED_SELECTORS = 10
 
 export const elementSelectorsCommand = defineCommand('element-selectors', async ({ selector }): Promise<ElementSelectorsResult> => {
   const source = tapManagerDataSource.getElementSelectorSource()
@@ -34,9 +35,7 @@ export const elementSelectorsCommand = defineCommand('element-selectors', async 
   for (let index = 0; index < derivable; index++) {
     const uniqueSelector = source.getSelector(matched.item(index))
 
-    if (uniqueSelector && isDocumentScoped(uniqueSelector)) {
-      selectors.push({ index, selector: uniqueSelector })
-    }
+    selectors.push({ index, selector: uniqueSelector && isDocumentScoped(uniqueSelector) ? uniqueSelector : null })
   }
 
   return { selectors }

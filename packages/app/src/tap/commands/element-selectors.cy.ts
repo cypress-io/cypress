@@ -36,18 +36,26 @@ describe('tap/commands/element-selectors', () => {
     })
   })
 
-  it('omits a match no unique selector could be derived for, without shifting the rest', async () => {
+  it('keeps a match no unique selector could be derived for, with a null selector', async () => {
     stubSource(sourceOf(['a', 'detached', 'c'], (element) => (element === 'detached' ? null : `#${element}`)))
 
     expect(await exec()).to.deep.eq({
-      result: { selectors: [{ index: 0, selector: '#a' }, { index: 2, selector: '#c' }] },
+      result: {
+        selectors: [
+          { index: 0, selector: '#a' },
+          { index: 1, selector: null },
+          { index: 2, selector: '#c' },
+        ],
+      },
     })
   })
 
-  it('omits a shadow-scoped selector, which resolves against no document', async () => {
+  it('reports a shadow-scoped selector as none, since it resolves against no document', async () => {
     stubSource(sourceOf(['shadowed', 'a'], (element) => (element === 'shadowed' ? ':host > button' : `#${element}`)))
 
-    expect(await exec()).to.deep.eq({ result: { selectors: [{ index: 1, selector: '#a' }] } })
+    expect(await exec()).to.deep.eq({
+      result: { selectors: [{ index: 0, selector: null }, { index: 1, selector: '#a' }] },
+    })
   })
 
   it('stops deriving at the cap, so a selector as broad as * cannot pin the app down', async () => {
