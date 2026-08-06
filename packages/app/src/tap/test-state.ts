@@ -548,26 +548,23 @@ export interface RunResults {
   skipped: number
 }
 
-export const aggregateResults = (runner: TapTestsRunner): { results: RunResults, totalTests: number } => {
-  const tests = Object.values(runner.getAllTestsState())
-  const runComplete = runner.isRunComplete()
+const countStates = (states: (TestStateValue | undefined)[], runComplete: boolean): RunResults => {
   const results: RunResults = { passed: 0, failed: 0, pending: 0, skipped: 0 }
 
-  for (const test of tests) {
-    const state = test.state ?? unreachedState(runComplete)
-
-    if (state === 'passed') {
-      results.passed++
-    } else if (state === 'failed') {
-      results.failed++
-    } else if (state === 'pending') {
-      results.pending++
-    } else {
-      results.skipped++
-    }
+  for (const state of states) {
+    results[state ?? unreachedState(runComplete)]++
   }
 
-  return { results, totalTests: tests.length }
+  return results
+}
+
+// Counts come off the states-only accessor: serializing the run to read one field
+// per test costs tens of seconds on a spec with a large command log, and blocks the
+// renderer for all of it.
+export const aggregateResults = (runner: TapTestsRunner): { results: RunResults, totalTests: number } => {
+  const states = Object.values(runner.getAllTestStates())
+
+  return { results: countStates(states, runner.isRunComplete()), totalTests: states.length }
 }
 
 const suitePathOf = (test: SerializedTest): string[] => {
@@ -635,7 +632,10 @@ const serializeSpecTest = (test: SerializedTest, runComplete: boolean): TapRepor
  * appearance reproduces the reporter's section order.
  */
 export const serializeReporterSpecView = (runner: TapTestsRunner, spec: string | undefined): TapReporterSpecView => {
-  const tests = Object.values(runner.getAllTestsState())
+  // The view reads only each test's own properties — id, title, state, duration,
+  // title path, wall clock — and never its logs, so it takes the summary. The logs
+  // are what make a whole-run serialization cost tens of seconds.
+  const tests = Object.values(runner.getAllTestsSummary())
   const runComplete = runner.isRunComplete()
   const rootTests: TapReporterSpecTest[] = []
   const suites = new Map<string, TapReporterSuite>()
@@ -655,7 +655,9 @@ export const serializeReporterSpecView = (runner: TapTestsRunner, spec: string |
     suite.tests.push(serializeSpecTest(test, runComplete))
   }
 
-  const { results } = aggregateResults(runner)
+  // Counted off the tests already serialized above, so the view serializes the run
+  // once rather than paying for it again through aggregateResults.
+  const results = countStates(tests.map((test) => test.state), runComplete)
 
   return omitNullish({
     spec,

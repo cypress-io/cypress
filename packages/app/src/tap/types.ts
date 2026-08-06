@@ -15,6 +15,10 @@ export type ConsolePropsResult = TapConsoleProps
 export interface TapTestsRunner {
   /** Serializes every test of the run, keyed by id. */
   getAllTestsState (): Record<string, SerializedTest>
+  /** Every test's state, keyed by id, without the whole-run serialization cost. */
+  getAllTestStates (): Record<string, SerializedTest['state']>
+  /** Every test's own properties, keyed by id, without its command logs. */
+  getAllTestsSummary (): Record<string, SerializedTest>
   /** Serializes one test by id lookup, skipping the whole-run serialization cost. */
   getTestState (testId: string): SerializedTest | undefined
   /**

@@ -1950,6 +1950,42 @@ export default {
         return tests
       },
 
+      // Counting test states must not pay for whole-run serialization:
+      // `serializeTest` stringifies DOM references and invokes the consoleProps
+      // builders of every command log, which runs into tens of seconds on a spec
+      // with a large log. Read the state off the raw runnable instead — it is the
+      // same value `getAllTestsState` would surface, since `state` is a
+      // RUNNABLE_PROPS passthrough.
+      getAllTestStates (): Record<string, SerializedTest['state']> {
+        const states: Record<string, SerializedTest['state']> = {}
+
+        for (let testRunnable of _tests) {
+          states[testRunnable.id] = testRunnable.state
+        }
+
+        return states
+      },
+
+      // A spec-level view needs each test's own properties but none of its logs,
+      // and the logs are the entire cost — `wrap` is the props-only reduction.
+      getAllTestsSummary (): Record<string, SerializedTest> {
+        const tests: Record<string, SerializedTest> = {}
+
+        for (let testRunnable of _tests) {
+          const test = wrap(testRunnable) as SerializedTest
+
+          // `_titlePath` is only stamped on the normalized runnable copy;
+          // `_tests` holds the raw runnables, so read it off the live runnable.
+          test._titlePath = testRunnable.titlePath()
+
+          test.prevAttempts = _.map(testRunnable.prevAttempts, wrap) as SerializedTest[]
+
+          tests[test.id] = test
+        }
+
+        return tests
+      },
+
       getTestState (testId: string): SerializedTest | undefined {
         const testRunnable = getTestById(testId)
 

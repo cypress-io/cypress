@@ -40,13 +40,26 @@ describe('tap/commands/run-state', () => {
     r5: { id: 'r5', title: 'has not run yet' },
   }
 
+  const ONE_PASSING = { r1: { id: 'r1', title: 'passes', state: 'passed' } }
+
   const STARTED_AT = '2026-07-29T10:15:00.000Z'
+
+  // Both accessors come off the same fixture so a test can assert run-state never
+  // reaches the serializing one.
+  const runnerFacade = (tests: Record<string, { id: string, title: string, state?: string }>, isRunComplete: () => boolean, startedAt = STARTED_AT) => {
+    return {
+      getAllTestsState: cy.stub().returns(tests),
+      getAllTestStates: () => Object.fromEntries(Object.entries(tests).map(([id, test]) => [id, test.state])),
+      isRunComplete,
+      getStartTime: () => startedAt,
+    }
+  }
 
   // The spec's own window.Cypress is the instance running this test, so stub
   // the seams rather than replace live state. `getRunner` only ever serves a
   // run that has started, so a stub always carries its start time.
-  const stubRunner = (runner: { getAllTestsState: () => unknown, isRunComplete: () => boolean }, startedAt = STARTED_AT) => {
-    return cy.stub(tapManagerDataSource, 'getRunner').returns({ ...runner, getStartTime: () => startedAt })
+  const stubRunner = (runner: ReturnType<typeof runnerFacade>) => {
+    return cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
   }
   const stubNoRunner = () => cy.stub(tapManagerDataSource, 'getRunner').returns(undefined)
   const stubActiveSpec = (relative: string | undefined) => cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns(relative)
@@ -101,7 +114,7 @@ describe('tap/commands/run-state', () => {
 
   it('reports a spec that failed to build as failed, carrying the failure instead of counts', async () => {
     // The runner is settled and empty — the shape a passing run of nothing has.
-    stubRunner({ getAllTestsState: cy.stub().returns({}), isRunComplete: () => true })
+    stubRunner(runnerFacade({}, () => true))
     stubActiveSpec('cypress/e2e/login.cy.ts')
     stubScriptError('Error: Webpack Compilation Error\nSyntaxError: Unexpected token (4:2)\n    at Watching.handle (/x/webpack.js:1:1)')
 
@@ -134,7 +147,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports a run in progress as running, with the active spec and partial results', async () => {
-    stubRunner({ getAllTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => false })
+    stubRunner(runnerFacade(TESTS_STATE, () => false))
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -153,7 +166,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports an unsettled run with no failures as running, never a premature passed', async () => {
-    stubRunner({ getAllTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => false })
+    stubRunner(runnerFacade(ONE_PASSING, () => false))
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -171,7 +184,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports a settled run with a failure as failed, counting never-run tests as skipped', async () => {
-    stubRunner({ getAllTestsState: cy.stub().returns(TESTS_STATE), isRunComplete: () => true })
+    stubRunner(runnerFacade(TESTS_STATE, () => true))
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -190,7 +203,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('reports a settled run with no failures as passed', async () => {
-    stubRunner({ getAllTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => true })
+    stubRunner(runnerFacade(ONE_PASSING, () => true))
     stubActiveSpec('cypress/e2e/login.cy.ts')
 
     const manager = new TapManager(CYPRESS_VERSION)
@@ -208,7 +221,7 @@ describe('tap/commands/run-state', () => {
   })
 
   it('names a verdict with the start time of the run it describes, so a superseded one is recognizable', async () => {
-    const settled = { getAllTestsState: cy.stub().returns({ r1: { id: 'r1', title: 'passes', state: 'passed' } }), isRunComplete: () => true }
+    const settled = runnerFacade(ONE_PASSING, () => true)
     const rerunStartedAt = '2026-07-29T10:16:30.000Z'
 
     stubRunner(settled).onSecondCall().returns({ ...settled, getStartTime: () => rerunStartedAt })
@@ -225,8 +238,27 @@ describe('tap/commands/run-state', () => {
     expect(second.result.startedAt).to.eq(rerunStartedAt)
   })
 
+  // Serializing the run to read one field per test walks every command log,
+  // stringifying DOM references and invoking consoleProps builders — tens of
+  // seconds on a real spec, all of it blocking the renderer. Status is a polling
+  // payload, so it must never do that.
+  it('counts test states without serializing the run', async () => {
+    const runner = runnerFacade(TESTS_STATE, () => true)
+
+    stubRunner(runner)
+    stubActiveSpec('cypress/e2e/login.cy.ts')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    const outcome = await manager.exec('run-state') as { result: { totalTests: number, results: Record<string, number> } }
+
+    expect(outcome.result.totalTests).to.eq(5)
+    expect(outcome.result.results).to.deep.eq({ passed: 1, failed: 1, pending: 1, skipped: 2 })
+    expect(runner.getAllTestsState).not.to.have.been.called
+  })
+
   it('reports a null spec when a run is readable but its path is not', async () => {
-    stubRunner({ getAllTestsState: cy.stub().returns({}), isRunComplete: () => false })
+    stubRunner(runnerFacade({}, () => false))
     stubActiveSpec(undefined)
 
     const manager = new TapManager(CYPRESS_VERSION)

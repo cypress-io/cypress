@@ -23,6 +23,8 @@ describe('tap/tap-manager-data-source', () => {
 
     const startedRunner = {
       getAllTestsState: () => ({}),
+      getAllTestStates: () => ({}),
+      getAllTestsSummary: () => ({}),
       getTestState: () => undefined,
       getStartTime: () => '2026-07-29T10:15:00.000Z',
     }

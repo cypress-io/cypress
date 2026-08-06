@@ -264,6 +264,8 @@ describe('tap/commands/pin', () => {
     stubSource()
     cy.stub(tapManagerDataSource, 'getRunner').returns({
       getAllTestsState: () => ({}),
+      getAllTestStates: () => ({}),
+      getAllTestsSummary: () => ({}),
       getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
       isRunComplete: () => true,
       getStartTime: () => '2026-07-29T10:15:00.000Z',
