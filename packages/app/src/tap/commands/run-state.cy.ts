@@ -44,11 +44,8 @@ describe('tap/commands/run-state', () => {
 
   const STARTED_AT = '2026-07-29T10:15:00.000Z'
 
-  // Both accessors come off the same fixture so a test can assert run-state never
-  // reaches the serializing one.
   const runnerFacade = (tests: Record<string, { id: string, title: string, state?: string }>, isRunComplete: () => boolean, startedAt = STARTED_AT) => {
     return {
-      getAllTestsState: cy.stub().returns(tests),
       getAllTestStates: () => Object.fromEntries(Object.entries(tests).map(([id, test]) => [id, test.state])),
       isRunComplete,
       getStartTime: () => startedAt,
@@ -236,25 +233,6 @@ describe('tap/commands/run-state', () => {
     // the whole of what tells them apart.
     expect(first.result.startedAt).to.eq(STARTED_AT)
     expect(second.result.startedAt).to.eq(rerunStartedAt)
-  })
-
-  // Serializing the run to read one field per test walks every command log,
-  // stringifying DOM references and invoking consoleProps builders — tens of
-  // seconds on a real spec, all of it blocking the renderer. Status is a polling
-  // payload, so it must never do that.
-  it('counts test states without serializing the run', async () => {
-    const runner = runnerFacade(TESTS_STATE, () => true)
-
-    stubRunner(runner)
-    stubActiveSpec('cypress/e2e/login.cy.ts')
-
-    const manager = new TapManager(CYPRESS_VERSION)
-
-    const outcome = await manager.exec('run-state') as { result: { totalTests: number, results: Record<string, number> } }
-
-    expect(outcome.result.totalTests).to.eq(5)
-    expect(outcome.result.results).to.deep.eq({ passed: 1, failed: 1, pending: 1, skipped: 2 })
-    expect(runner.getAllTestsState).not.to.have.been.called
   })
 
   it('reports a null spec when a run is readable but its path is not', async () => {

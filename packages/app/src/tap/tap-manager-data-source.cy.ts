@@ -35,6 +35,16 @@ describe('tap/tap-manager-data-source', () => {
       expect(tapManagerDataSource.getRunner()?.getStartTime()).to.eq('2026-07-29T10:15:00.000Z')
     })
 
+    // The driver carries it, but no tap command may reach it: it serializes every
+    // command log of every test, which costs tens of seconds on a real spec and
+    // blocks the renderer for all of it. Withholding it here is the guarantee.
+    it('withholds the whole-run serializing accessor', () => {
+      installRunner(startedRunner, false)
+
+      expect(startedRunner).to.have.property('getAllTestsState')
+      expect(tapManagerDataSource.getRunner()).not.to.have.property('getAllTestsState')
+    })
+
     it('withholds a runner whose spec is installed but whose run has not started, however the event manager reports completion', () => {
       // The state every rerun passes through: this runner holds no test state
       // yet, while `runComplete` still belongs to the run being replaced —

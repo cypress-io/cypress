@@ -263,7 +263,6 @@ describe('tap/commands/pin', () => {
   it('run-state reports the pin — with its reporter row — once verified against a live runner', async () => {
     stubSource()
     cy.stub(tapManagerDataSource, 'getRunner').returns({
-      getAllTestsState: () => ({}),
       getAllTestStates: () => ({}),
       getAllTestsSummary: () => ({}),
       getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],

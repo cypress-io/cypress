@@ -303,11 +303,8 @@ describe('tap/commands/reporter', () => {
 
     const stubSpec = (relative: string | undefined) => cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns(relative)
 
-    // The spec view takes the summary; the serializing accessor is stubbed so a
-    // test can assert the view never reaches for it.
     const treeRunner = (overrides: Record<string, unknown> = {}) => {
       return {
-        getAllTestsState: cy.stub().returns(TREE_STATE),
         getAllTestsSummary: () => TREE_STATE,
         isRunComplete: () => false,
         getStartTime: () => null,
@@ -413,20 +410,6 @@ describe('tap/commands/reporter', () => {
       const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
 
       expect((outcome as { result: { stats: { duration: number } } }).result.stats.duration).to.eq(10400)
-    })
-
-    // Serializing every command log to render a list of test titles and states is
-    // tens of seconds of blocked renderer on a real spec.
-    it('builds the overview without serializing the command logs', async () => {
-      const runner = treeRunner()
-
-      stubRunner(runner)
-      stubSpec('cypress/e2e/actions.cy.js')
-
-      const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter')
-
-      expect((outcome as { result: { stats: Record<string, number> } }).result.stats).to.deep.eq({ passed: 2, failed: 1, pending: 2, skipped: 0 })
-      expect(runner.getAllTestsState).not.to.have.been.called
     })
 
     it('rejects --attempt without --testId', async () => {
