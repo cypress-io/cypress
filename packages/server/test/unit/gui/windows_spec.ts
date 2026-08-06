@@ -70,6 +70,30 @@ describe('lib/gui/windows', () => {
 
       expect(this.win.webContents.openDevTools).not.to.be.calledTwice
     })
+
+    it('derives webPreferences.webSecurity from chromeWebSecurity', function () {
+      const newBrowserWindow = sinon.stub().returns(this.win)
+
+      Windows.create('/foo/', { chromeWebSecurity: true }, newBrowserWindow)
+      expect(newBrowserWindow.lastCall.args[0].webPreferences.webSecurity).to.be.true
+
+      Windows.create('/foo/', { chromeWebSecurity: false }, newBrowserWindow)
+
+      expect(newBrowserWindow.lastCall.args[0].webPreferences.webSecurity).to.be.false
+    })
+
+    it('denies the window open request and delegates to onNewWindow', function () {
+      const onNewWindow = sinon.stub()
+
+      Windows.create('/foo/', { onNewWindow }, () => this.win)
+
+      const handler = this.win.webContents.setWindowOpenHandler.lastCall.args[0]
+      const details = { url: 'some://other.url' }
+
+      expect(handler(details)).to.deep.eq({ action: 'deny' })
+      expect(onNewWindow).to.be.calledOn(this.win)
+      expect(onNewWindow).to.be.calledWith(details)
+    })
   })
 
   // TODO: test everything else going on in this method!

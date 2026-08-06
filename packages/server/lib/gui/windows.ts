@@ -12,6 +12,7 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   graphqlPort?: number
   contextMenu?: boolean
   partition?: string
+  chromeWebSecurity?: boolean
   /**
    * Synchronizes properties of browserwindow with local state
    */

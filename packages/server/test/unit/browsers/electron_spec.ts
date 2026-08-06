@@ -1118,6 +1118,20 @@ describe('lib/browsers/electron', () => {
 
     describe('.onNewWindow', () => {
       beforeEach(function () {
+        this.childWin = _.extend(new EE(), {
+          isDestroyed: sinon.stub().returns(false),
+          destroy: sinon.stub(),
+          webContents: {
+            getOSProcessId: sinon.stub().returns(ELECTRON_PID * 2),
+          },
+        })
+
+        this.openNewWindow = (parentWindow = new EE()) => {
+          const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options, this.automation)
+
+          return opts.onNewWindow.call(parentWindow, { url: this.url })
+        }
+
         return sinon.stub(electron, '_launchChild').resolves(this.win)
       })
 
@@ -1161,168 +1175,89 @@ describe('lib/browsers/electron', () => {
           })
         })
       })
+
+      it('destroys the child window when the parent window closes', async function () {
+        const parentWindow = new EE()
+
+        // @ts-expect-error
+        electron._launchChild.resolves(this.childWin)
+
+        await this.openNewWindow(parentWindow)
+        parentWindow.emit('close')
+
+        expect(this.childWin.destroy).to.be.called
+      })
+
+      it('does not destroy the child window when it is already destroyed', async function () {
+        const parentWindow = new EE()
+
+        this.childWin.isDestroyed.returns(true)
+        // @ts-expect-error
+        electron._launchChild.resolves(this.childWin)
+
+        await this.openNewWindow(parentWindow)
+        parentWindow.emit('close')
+
+        expect(this.childWin.destroy).not.to.be.called
+      })
+
+      it('swallows the error when the parent window is destroyed mid-launch', async function () {
+        // @ts-expect-error
+        electron._launchChild.rejects(new Error('Object has been destroyed'))
+
+        await this.openNewWindow()
+      })
+
+      it('swallows the error when the child window fails to load', async function () {
+        // @ts-expect-error
+        electron._launchChild.rejects(_.extend(new Error('ERR_FAILED'), { errno: -2, code: 'ERR_FAILED' }))
+
+        await this.openNewWindow()
+      })
+
+      it('rethrows any other error from launching the child window', async function () {
+        // @ts-expect-error
+        electron._launchChild.rejects(new Error('kaboom'))
+
+        await expect(this.openNewWindow()).to.be.rejectedWith('kaboom')
+      })
     })
   })
 
-  // TODO: these all need to be updated
-  context.skip('._launchChild', () => {
+  context('._launchChild', () => {
     beforeEach(function () {
-      this.childWin = _.extend(new EE(), {
-        close: sinon.stub(),
-        isDestroyed: sinon.stub().returns(false),
-        webContents: new EE(),
-      })
+      this.parent = { getPosition: () => [4, 2] }
 
-      // @ts-expect-error
-      Windows.create.onCall(1).resolves(this.childWin)
+      sinon.stub(Windows, 'create').returns({})
+      sinon.stub(electron, '_launch').resolves()
 
-      this.event = { preventDefault: sinon.stub() }
-      this.win.getPosition = () => {
-        return [4, 2]
+      this.launchChild = (options = {}) => {
+        // @ts-expect-error
+        return electron._launchChild(this.url, this.parent, this.options.projectRoot, this.state, _.extend({}, this.options, options), this.automation)
       }
 
-      this.openNewWindow = (options) => {
-        // @ts-expect-error
-        return launcher.launch('electron', this.url, options).then(() => {
-          return this.win.webContents.emit('new-window', this.event, 'some://other.url')
-        })
-      }
+      this.childOptions = () => (Windows.create as sinon.SinonStub).lastCall.args[1]
     })
 
-    it('prevents default', function () {
-      return this.openNewWindow().then(() => {
-        expect(this.event.preventDefault).to.be.called
+    // the parent window owns the saved geometry, so a child that tracked state
+    // would overwrite it in saved_state and move the window on the next open
+    it('does not track state for the child window', function () {
+      return this.launchChild().then(() => {
+        expect(this.childOptions().trackState).to.be.false
       })
     })
 
-    it('creates child window', function () {
-      return this.openNewWindow().then(() => {
-        // @ts-expect-error
-        const args = Windows.create.lastCall.args[0]
-
-        expect(Windows.create).to.be.calledTwice
-        expect(args.url).to.equal('some://other.url')
-        expect(args.minWidth).to.equal(100)
-
-        expect(args.minHeight).to.equal(100)
+    // otherwise `window.open` in the AUT pops a visible BrowserWindow during a run
+    // https://github.com/cypress-io/cypress/issues/123
+    it('hides the child window in run mode', function () {
+      return this.launchChild({ isTextTerminal: true }).then(() => {
+        expect(this.childOptions().show).to.be.false
       })
     })
 
-    it('offsets it from parent by 100px', function () {
-      return this.openNewWindow().then(() => {
-        // @ts-expect-error
-        const args = Windows.create.lastCall.args[0]
-
-        expect(args.x).to.equal(104)
-
-        expect(args.y).to.equal(102)
-      })
-    })
-
-    it('passes along web security', function () {
-      return this.openNewWindow({ chromeWebSecurity: false }).then(() => {
-        // @ts-expect-error
-        const args = Windows.create.lastCall.args[0]
-
-        expect(args.chromeWebSecurity).to.be.false
-      })
-    })
-
-    it('sets unique PROJECT type on each new window', function () {
-      return this.openNewWindow().then(() => {
-        // @ts-expect-error
-        const firstArgs = Windows.create.lastCall.args[0]
-
-        expect(firstArgs.type).to.match(/^PROJECT-CHILD-\d/)
-        this.win.webContents.emit('new-window', this.event, 'yet://another.url')
-        // @ts-expect-error
-        const secondArgs = Windows.create.lastCall.args[0]
-
-        expect(secondArgs.type).to.match(/^PROJECT-CHILD-\d/)
-
-        expect(firstArgs.type).not.to.equal(secondArgs.type)
-      })
-    })
-
-    it('set newGuest on child window', function () {
-      return this.openNewWindow()
-      .then(() => {
-        // @ts-expect-error
-        return Promise.delay(1)
-      }).then(() => {
-        expect(this.event.newGuest).to.equal(this.childWin)
-      })
-    })
-
-    it('sets menu with dev tools on creation', function () {
-      return this.openNewWindow().then(() => {
-        // once for main window, once for child
-        expect(menu.set).to.be.calledTwice
-
-        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
-      })
-    })
-
-    it('sets menu with dev tools on focus', function () {
-      return this.openNewWindow().then(() => {
-        // @ts-expect-error
-        Windows.create.lastCall.args[0].onFocus()
-        // once for main window, once for child, once for focus
-        expect(menu.set).to.be.calledThrice
-
-        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
-      })
-    })
-
-    it('it closes the child window when the parent window is closed', function () {
-      return this.openNewWindow()
-      .then(() => {
-        // @ts-expect-error
-        return Promise.delay(1)
-      }).then(() => {
-        this.win.emit('close')
-
-        expect(this.childWin.close).to.be.called
-      })
-    })
-
-    it('does not close the child window when it is already destroyed', function () {
-      return this.openNewWindow()
-      .then(() => {
-        // @ts-expect-error
-        return Promise.delay(1)
-      }).then(() => {
-        this.childWin.isDestroyed.returns(true)
-        this.win.emit('close')
-
-        expect(this.childWin.close).not.to.be.called
-      })
-    })
-
-    it('does the same things for children of the child window', function () {
-      this.grandchildWin = _.extend(new EE(), {
-        close: sinon.stub(),
-        isDestroyed: sinon.stub().returns(false),
-        webContents: new EE(),
-      })
-
-      // @ts-expect-error
-      Windows.create.onCall(2).resolves(this.grandchildWin)
-      this.childWin.getPosition = () => {
-        return [104, 102]
-      }
-
-      return this.openNewWindow().then(() => {
-        this.childWin.webContents.emit('new-window', this.event, 'yet://another.url')
-        // @ts-expect-error
-        const args = Windows.create.lastCall.args[0]
-
-        expect(Windows.create).to.be.calledThrice
-        expect(args.url).to.equal('yet://another.url')
-        expect(args.type).to.match(/^PROJECT-CHILD-\d/)
-        expect(args.x).to.equal(204)
-
-        expect(args.y).to.equal(202)
+    it('shows the child window in open mode', function () {
+      return this.launchChild({ isTextTerminal: false }).then(() => {
+        expect(this.childOptions().show).to.be.true
       })
     })
   })
