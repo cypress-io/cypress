@@ -28,7 +28,7 @@ export const resolveAmbiguity = async (
 ): Promise<FrameAmbiguousResult | undefined> => {
   if (selector === undefined) {
     if (at !== undefined) {
-      throw new FrameCommandError('INVALID_INDEX', 'at needs a selector to index into')
+      throw new FrameCommandError('INVALID_INDEX', '--at needs a selector to index into')
     }
 
     return undefined
@@ -54,7 +54,7 @@ export const resolveAmbiguity = async (
     throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
   }
 
-  // Nothing matched: each command reports that in its own shape, and an `at`
+  // Nothing matched: each command reports that in its own shape, and an `--at`
   // has no range to be out of.
   if (count === undefined || count === 0) {
     return undefined
@@ -62,7 +62,7 @@ export const resolveAmbiguity = async (
 
   if (at !== undefined) {
     if (at >= count) {
-      throw new FrameCommandError('INVALID_INDEX', `"${selector}" matched ${count} element${count === 1 ? '' : 's'}; pass at 0-${count - 1}`)
+      throw new FrameCommandError('INVALID_INDEX', `"${selector}" matched ${count} element${count === 1 ? '' : 's'}; pass --at 0-${count - 1}`)
     }
 
     return undefined

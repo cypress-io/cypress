@@ -49,22 +49,22 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     })
   })
 
-  it('lets an in-range at through', async () => {
+  it('lets an in-range --at through', async () => {
     const { session } = makeSession({ count: 3 })
 
     expect(await resolveAmbiguity(session, frame, '.item', 2)).to.be.undefined
   })
 
-  it('rejects an at past the last match, naming the valid range', async () => {
+  it('rejects an --at past the last match, naming the valid range', async () => {
     const { session } = makeSession({ count: 3 })
 
     await expect(resolveAmbiguity(session, frame, '.item', 3)).rejects.toMatchObject({
       code: 'INVALID_INDEX',
-      message: '".item" matched 3 elements; pass at 0-2',
+      message: '".item" matched 3 elements; pass --at 0-2',
     })
   })
 
-  it('rejects an at when nothing is there to index', async () => {
+  it('rejects an --at when nothing is there to index', async () => {
     const { session, callFunctionOn } = makeSession({ count: 1 })
 
     await expect(resolveAmbiguity(session, frame, undefined, 0)).rejects.toMatchObject({ code: 'INVALID_INDEX' })
@@ -72,7 +72,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     expect(callFunctionOn).not.toHaveBeenCalled()
   })
 
-  it('lets an at through when the selector matched nothing, leaving the read to report it', async () => {
+  it('lets an --at through when the selector matched nothing, leaving the read to report it', async () => {
     const { session } = makeSession({ count: 0 })
 
     expect(await resolveAmbiguity(session, frame, '.missing', 4)).to.be.undefined
