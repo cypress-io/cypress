@@ -332,8 +332,7 @@ describe('tap/commands/pin', () => {
   })
 
   // A pin made by hand in the reporter never reaches tap, so it is read back off
-  // the app: an agent that cannot see it has no way to tell the AUT frame is
-  // showing a past snapshot rather than the live app.
+  // the app — an agent that cannot see it reads the pinned DOM as the live app.
   describe('a pin made in the reporter UI', () => {
     const stubStatusRunner = () => {
       cy.stub(tapManagerDataSource, 'getRunner').returns({
@@ -381,8 +380,7 @@ describe('tap/commands/pin', () => {
 
       expect(cleared).to.deep.eq({ result: { cleared: true } })
       expect(unpinSnapshot).to.have.been.calledOnce
-      // Tap captured no DOM for this pin, so it has none to put back — restoring
-      // the live page is the app's, on the unpin above.
+      // Tap captured no DOM for this pin, so the unpin above is the whole restore.
       expect(restoreDom).not.to.have.been.called
     })
 
@@ -392,11 +390,11 @@ describe('tap/commands/pin', () => {
       pinInApp('log-2')
 
       const manager = new TapManager(CYPRESS_VERSION)
-      const outcome = await manager.exec('pin', { test: 'r2', command: '1' })
+      const outcome = await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
 
       expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
-      // Detaching now would capture the snapshot the app is showing and later
-      // restore it as if it were the live app.
+      // Detaching now would capture the snapshot the app is showing, then restore
+      // it as if it were the live app.
       expect(detachDom).not.to.have.been.called
 
       const cleared = await manager.exec('pin', {}, { clear: 'true' })
@@ -413,7 +411,7 @@ describe('tap/commands/pin', () => {
 
       const manager = new TapManager(CYPRESS_VERSION)
 
-      await manager.exec('pin', { test: 'r2', command: '1' })
+      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
       expect(detachDom).to.have.been.calledOnce
 
       // Clicking another command in the reporter re-pins with no unpin event for
@@ -425,13 +423,12 @@ describe('tap/commands/pin', () => {
       expect((outcome as { result: any }).result.pinned.command.id).to.eq('2')
 
       // A move would switch the snapshot of the app's pin, not the stale one.
-      await manager.exec('pin', { test: 'r2', command: '1' }, { at: 'before' })
+      await manager.exec('pin', {}, { testId: 'r2', commandId: '1', at: 'before' })
       expect(changeSnapshotState).not.to.have.been.called
 
       const cleared = await manager.exec('pin', {}, { clear: 'true' })
 
       expect(cleared).to.deep.eq({ result: { cleared: true } })
-      // The live DOM tap detached is still the one to put back.
       expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
     })
 
@@ -446,7 +443,7 @@ describe('tap/commands/pin', () => {
 
       const manager = new TapManager(CYPRESS_VERSION)
 
-      await manager.exec('pin', { test: 'r2', command: '1' })
+      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
       pinInApp('log-2')
 
       // Only tap's superseded command is evicted; the reporter pin replacing it

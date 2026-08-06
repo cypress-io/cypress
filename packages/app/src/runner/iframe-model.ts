@@ -3,9 +3,7 @@ import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 
 export interface AutSnapshot {
-  /** The driver's id for the log these snapshots belong to, e.g. `log-http://localhost:3000-4`. */
   id?: string
-  /** Id of the test that log belongs to — a log id resolves only within its test. */
   testId?: string
   name?: string
   $el: any

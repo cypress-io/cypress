@@ -50,9 +50,8 @@ describe('tap/tap-manager-data-source', () => {
     })
   })
 
-  // Read against the real snapshot store: it is the app's own record of what the
-  // AUT frame is showing, and the only trace of a pin made by hand in the
-  // reporter — which reaches no tap state at all.
+  // Read against the real snapshot store, since that store is the only trace of a
+  // pin made by hand in the reporter.
   describe('getPinnedSnapshot', () => {
     const PINNED_PROPS = { id: 'log-3', testId: 'r4', snapshots: [{ name: 'before' }, { name: 'after' }] } as AutSnapshot
     const autIframe = { restoreDom: () => {}, highlightEl: () => {}, removeHighlights: () => {} } as unknown as AutIframe

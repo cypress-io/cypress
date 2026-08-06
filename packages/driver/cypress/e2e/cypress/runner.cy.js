@@ -82,9 +82,6 @@ describe('getSnapshotPropsForLog', () => {
     const earlier = _.find(retried.prevAttempts[0].commands, { name: 'wrap' })
     const latest = _.find(retried.commands, { name: 'wrap' })
 
-    // The props name their test as well as their log: a consumer holding a
-    // pinned snapshot (the app's snapshot store) has only these props to say
-    // which command is pinned.
     expect(Cypress.runner.getSnapshotPropsForLog(retried.id, latest.id), 'latest attempt').to.include({ id: latest.id, testId: retried.id })
     expect(Cypress.runner.getSnapshotPropsForLog(retried.id, earlier.id), 'earlier attempt').to.include({ id: earlier.id, testId: retried.id })
   })

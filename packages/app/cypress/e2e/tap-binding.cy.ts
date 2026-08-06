@@ -631,9 +631,7 @@ describe('tap binding pin lifecycle', () => {
   })
 
   // A pin made by hand in the reporter reaches no tap state at all, so it is read
-  // back off the app: without it, an agent has no way to tell the AUT frame is
-  // showing a past snapshot rather than the live app, and `dom`/`aria` quietly
-  // read the pinned DOM.
+  // back off the app — otherwise `dom`/`aria` read the pinned DOM as the live app.
   it('reports and releases a pin made by clicking a command in the reporter', () => {
     runPinTargetSpec()
 
@@ -667,7 +665,6 @@ describe('tap binding pin lifecycle', () => {
       expect(runState.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
     })
 
-    // Switching snapshots in the app moves the pin status reports.
     cy.get('[data-cy=snapshot-toggle]').contains('after').click()
     expectAutStatus('clicked')
 
@@ -695,7 +692,6 @@ describe('tap binding pin lifecycle', () => {
       expect(Object.keys(afterClear.result)).to.not.include('pinned')
     })
 
-    // The app's unpin puts back the live page it detached on hover.
     cy.get('[data-testid=snapshot-controls]').should('not.exist')
     expectAutStatus('clicked')
   })

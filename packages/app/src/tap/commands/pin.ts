@@ -20,8 +20,7 @@ interface CurrentPin {
   /**
    * The live DOM this pin replaced, put back on release. Held only for a pin made
    * over an app showing the live page: with a snapshot already pinned, detaching
-   * would capture that snapshot instead, and the live DOM is the app's own to
-   * restore through its unpin.
+   * would capture that snapshot instead, and restoring the live page is the app's.
    */
   original?: unknown
 }
@@ -81,8 +80,7 @@ const onExternalUnpin = (): void => {
 // The pin the app is showing that tap did not make — a command pinned by hand in
 // the reporter, which reaches no tap state at all. Derived on every read rather
 // than tracked, so a pin (or an unpin) made in the UI between two tap commands is
-// accounted for by construction. The reporter names only the log it pinned, so
-// the attempt behind it is resolved here.
+// accounted for by construction.
 const uiPin = (): CurrentPin | undefined => {
   const showing = tapManagerDataSource.getPinnedSnapshot()
   const runner = tapManagerDataSource.getSnapshotRunner()
@@ -100,8 +98,7 @@ const uiPin = (): CurrentPin | undefined => {
 
   const snapshots = liveSnapshots(runner.getSnapshotPropsForLog(showing.testId, showing.logId))
 
-  // The snapshot showing must still be one the runner holds — a memory-evicted
-  // command is no longer a pin any command can report or release.
+  // A memory-evicted command is no longer a pin any command can report or release.
   if (!snapshots[showing.index]) {
     return undefined
   }
@@ -109,11 +106,10 @@ const uiPin = (): CurrentPin | undefined => {
   return { test: showing.testId, attempt, logId: showing.logId, at: toRef(snapshots, showing.index) }
 }
 
-// What the AUT is showing, whoever pinned it. Tap's own record wins while it is
-// the pin showing, since it alone carries the DOM to restore; a reporter click on
-// another command replaces that pin with no unpin event to hear, so the command
-// showing then comes from the app while the captured DOM — tap's to put back —
-// stays with it.
+// What the AUT is showing, whoever pinned it. A reporter click on another command
+// replaces tap's pin with no unpin event to hear, so the command showing then
+// comes from the app, while the captured DOM — tap's alone to put back — stays
+// with it.
 const currentPin = (): CurrentPin | undefined => {
   const showing = uiPin()
 
@@ -230,7 +226,7 @@ const clearPin = (current: CurrentPin | undefined): ClearResult => {
 
   releasePin()
   restoreOriginal(original)
-  // Also the restore for a pin tap did not capture the DOM of: the app's unpin
+  // For a pin tap captured no DOM of, this is also the restore: the app's unpin
   // puts back the live page it detached when the reporter row was hovered.
   tapManagerDataSource.unpinSnapshot()
 

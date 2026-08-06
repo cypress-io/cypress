@@ -128,8 +128,7 @@ export const tapManagerDataSource = {
 
   // The command whose snapshot the app is showing, however it came to be pinned:
   // the snapshot store is where the tap pin command and a click on a command in
-  // the reporter both land, and the props it holds name their log and test (see
-  // the driver's SNAPSHOT_PROPS). `index` is the snapshot of that command showing.
+  // the reporter both land.
   getPinnedSnapshot (): { testId: string, logId: string, index: number } | undefined {
     try {
       const store = useSnapshotStore()
