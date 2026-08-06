@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.20.1
+
+**Bugfixes:**
+
+- Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+
 ## 15.20.0
 
 **Performance:**
