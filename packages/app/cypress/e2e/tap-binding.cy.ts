@@ -630,19 +630,14 @@ describe('tap binding pin lifecycle', () => {
     expectAutStatus('clicked')
   })
 
-  // A pin made by hand in the reporter reaches no tap state at all, so it is read
-  // back off the app — otherwise `dom`/`aria` read the pinned DOM as the live app.
+  // A pin made by hand in the reporter is read back off the app, the one place
+  // every pin lands — otherwise `dom`/`aria` read the pinned DOM as the live app.
   it('reports and releases a pin made by clicking a command in the reporter', () => {
     runPinTargetSpec()
 
     expectAutStatus('clicked')
 
     const clickRow = () => cy.reporter().contains('li.command-name-click', 'click')
-
-    // Hover before clicking, as a user does: the app detaches the live page when a
-    // row is hovered, and that is the DOM its own unpin puts back.
-    clickRow().find('.command-wrapper-text').first().trigger('mouseover')
-    cy.get('[data-testid=snapshot-controls]').should('be.visible')
 
     clickRow().find('.command-pin-target').first().click()
     clickRow().find('.command-wrapper').should('have.class', 'command-is-pinned')
@@ -696,12 +691,10 @@ describe('tap binding pin lifecycle', () => {
     expectAutStatus('clicked')
   })
 
-  it('restores the captured DOM when the pin is released from the app UI', () => {
+  it('releases a tap pin from the app UI, restoring the live page it displaced', () => {
     runPinTargetSpec()
 
-    const expectReleased = () => {
-      expectAutStatus('clicked')
-
+    const expectNoPinReported = () => {
       cy.window().then(async (win) => {
         const runState = (await getBinding(win).exec('run-state')) as { result: Record<string, unknown> }
 
@@ -709,16 +702,29 @@ describe('tap binding pin lifecycle', () => {
       })
     }
 
-    // The unpin control over the AUT.
+    // The unpin control over the AUT, which hides the snapshot as it unpins.
     pinClickAtBefore()
     cy.get('[data-testid=unpin]').click()
-    expectReleased()
+    expectNoPinReported()
+    expectAutStatus('clicked')
 
-    // Clicking the pinned command in the reporter unpins through a different
-    // event path than the control above — it must restore the DOM all the same.
+    // Clicking the pinned command in the reporter unpins through a different event
+    // path: it leaves the row hovered, so the app keeps previewing that snapshot
+    // and puts the live page back on mouse-out, exactly as for a pin made by hand.
     pinClickAtBefore()
-    cy.reporter().contains('li.command-name-click', 'click').find('.command-pin-target').first().click()
-    expectReleased()
+
+    const clickRow = () => cy.reporter().contains('li.command-name-click', 'click')
+
+    clickRow().find('.command-pin-target').first().click()
+    expectNoPinReported()
+
+    // Unpinned but still previewing: the pin controls are gone while the snapshot
+    // message stays — proof both hover timers have settled before the mouse leaves.
+    cy.get('[data-testid=snapshot-controls]').should('be.visible')
+    cy.get('[data-testid=unpin]').should('not.exist')
+
+    clickRow().find('.command-wrapper-text').first().trigger('mouseout')
+    expectAutStatus('clicked')
   })
 })
 

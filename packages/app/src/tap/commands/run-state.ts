@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { getPinnedView, reconcilePin } from './pin'
+import { getPinnedView } from './pin'
 import { aggregateResults } from '../test-state'
 import type { RunResults } from '../test-state'
 import type { PinnedView } from '../contract'
@@ -61,14 +61,6 @@ export const runStateCommand = defineCommand('run-state', async (): Promise<RunS
 
   if (!runner) {
     return { spec, totalSpecs, state: 'loading', startedAt: null }
-  }
-
-  // Release a stale pin (from a previous run) so status never reports one that
-  // no longer exists.
-  const snapshotRunner = tapManagerDataSource.getSnapshotRunner()
-
-  if (snapshotRunner) {
-    reconcilePin(snapshotRunner)
   }
 
   const pinned = getPinnedView(runner)

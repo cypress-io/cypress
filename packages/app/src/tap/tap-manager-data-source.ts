@@ -4,7 +4,7 @@ import { posixify } from '../paths'
 import { getAutIframeModel } from '../runner'
 import { useSnapshotStore } from '../runner/snapshot-store'
 import { useAutStore } from '../store'
-import type { PinAutIframe, PinSnapshotProps, PinSnapshotRunner, TapElementSelectorSource, TapTestsRunner } from './types'
+import type { PinSnapshotProps, PinSnapshotRunner, TapElementSelectorSource, TapTestsRunner } from './types'
 
 // The runner-page event manager, reached through the app's own window binding —
 // never `window.Cypress`, which is the outer driver in cypress-in-cypress.
@@ -70,14 +70,6 @@ export const tapManagerDataSource = {
 
   getRunnableSpecs (): FoundSpec[] {
     return (window.__RUN_MODE_SPECS__ ?? []) as FoundSpec[]
-  },
-
-  getAutIframe (): PinAutIframe | undefined {
-    try {
-      return getAutIframeModel() as unknown as PinAutIframe
-    } catch {
-      return undefined
-    }
   },
 
   getElementSelectorSource (): TapElementSelectorSource | undefined {
@@ -159,23 +151,5 @@ export const tapManagerDataSource = {
 
   unpinSnapshot (): void {
     eventManager()?.snapshotUnpinned()
-  },
-
-  onSnapshotUnpinned (handler: () => void): () => void {
-    const em = eventManager()
-
-    if (!em) {
-      return () => {}
-    }
-
-    // localBus `unpin:snapshot` is the one event every app-side unpin funnels
-    // through — the ✕ over the AUT and clicking the pinned command in the
-    // reporter; the reporterBus `reporter:snapshot:unpinned` event only fires
-    // for the ✕, so listening there would miss the reporter-click unpin.
-    em.localBus.on('unpin:snapshot', handler)
-
-    return () => {
-      em.localBus.off('unpin:snapshot', handler)
-    }
   },
 }

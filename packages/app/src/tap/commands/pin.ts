@@ -1,7 +1,7 @@
 import { defineCommand, noRunError, TapCommandError } from './definition'
 import { attemptOfLog, attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
-import type { PinSnapshotEntry, PinSnapshotProps, PinSnapshotRunner, TapTestsRunner } from '../types'
+import type { PinSnapshotEntry, TapTestsRunner } from '../types'
 import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
 import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
@@ -9,83 +9,21 @@ import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contrac
 // in the reporter.
 interface CurrentPin {
   test: string
-  // The attempt the command id was resolved against — part of the pin's
-  // identity, since per-attempt ids restart from 1 and the same number names
-  // a different command on another attempt.
+  // The attempt the pinned log belongs to — part of the pin's identity, since
+  // per-attempt ids restart from 1 and the same number names a different command
+  // on another attempt.
   attempt: number
   // The driver's log id behind the tap command id — what the runner's
   // snapshot APIs key on.
   logId: string
   at: SnapshotRef
-  /**
-   * The live DOM this pin replaced, put back on release. Held only for a pin made
-   * over an app showing the live page: with a snapshot already pinned, detaching
-   * would capture that snapshot instead, and restoring the live page is the app's.
-   */
-  original?: unknown
 }
 
-interface PinnedState extends CurrentPin {
-  command: string
-  snapshot: PinSnapshotEntry
-}
-
-let pinned: PinnedState | undefined
-
-let stopListeningForUnpin: (() => void) | undefined
-
-const releasePin = (): void => {
-  stopListeningForUnpin?.()
-  stopListeningForUnpin = undefined
-  pinned = undefined
-}
-
-export const resetPinState = (): void => {
-  releasePin()
-}
-
-const restoreOriginal = (original: unknown): void => {
-  if (original == null) {
-    return
-  }
-
-  tapManagerDataSource.getAutIframe()?.restoreDom(original)
-}
-
-const tapPinIsLive = (runner: PinSnapshotRunner): boolean => {
-  return !!pinned && liveSnapshots(runner.getSnapshotPropsForLog(pinned.test, pinned.logId)).includes(pinned.snapshot)
-}
-
-const onExternalUnpin = (): void => {
-  if (!pinned) {
-    return
-  }
-
-  const runner = tapManagerDataSource.getSnapshotRunner()
-
-  if (!runner || tapManagerDataSource.isRunning()) {
-    releasePin()
-
-    return
-  }
-
-  if (!tapPinIsLive(runner)) {
-    releasePin()
-
-    return
-  }
-
-  const { original } = pinned
-
-  releasePin()
-  restoreOriginal(original)
-}
-
-// The pin the app is showing that tap did not make — a command pinned by hand in
-// the reporter, which reaches no tap state at all. Derived on every read rather
-// than tracked, so a pin (or an unpin) made in the UI between two tap commands is
-// accounted for by construction.
-const uiPin = (): CurrentPin | undefined => {
+// The pin the app is showing, read off its snapshot store — the one place tap's
+// pin and a command pinned by hand in the reporter both land. Derived on every
+// read rather than tracked, so a pin (or an unpin) made in the UI between two tap
+// commands is accounted for by construction.
+const currentPin = (): CurrentPin | undefined => {
   const showing = tapManagerDataSource.getPinnedSnapshot()
   const runner = tapManagerDataSource.getSnapshotRunner()
 
@@ -110,23 +48,6 @@ const uiPin = (): CurrentPin | undefined => {
   return { test: showing.testId, attempt, logId: showing.logId, at: toRef(snapshots, showing.index) }
 }
 
-const samePin = (left: CurrentPin, right: CurrentPin): boolean => {
-  return left.test === right.test && left.attempt === right.attempt && left.logId === right.logId
-}
-
-// The app's snapshot store is authoritative for what the AUT is showing. Tap's
-// local state contributes only the live DOM it owns and must restore, including
-// when a reporter click replaces tap's command without first unpinning it.
-const currentPin = (): CurrentPin | undefined => {
-  const showing = uiPin()
-
-  if (!showing) {
-    return undefined
-  }
-
-  return pinned ? { ...showing, original: pinned.original } : showing
-}
-
 // The pin as both `pin` and `status` report it. The reporter row is rebuilt from
 // the attempt each time rather than captured at pin time, so a row whose state
 // or message moved on (a retried attempt, a settled assertion) reads current.
@@ -146,32 +67,6 @@ export const getPinnedView = (runner: Pick<TapTestsRunner, 'getTestState'>): Pin
   const row = serializeReporterRow(selection.test, selection.attempt, current.logId)
 
   return row && { test: current.test, at: current.at, ...row }
-}
-
-export const reconcilePin = (runner: PinSnapshotRunner): void => {
-  if (!pinned) {
-    return
-  }
-
-  const showing = uiPin()
-
-  if (!showing) {
-    releasePin()
-
-    return
-  }
-
-  // A reporter pin can replace tap's pin without emitting an unpin event. If
-  // that replacement is still live, tap retains only the original DOM that
-  // belongs to it; eviction of tap's superseded snapshot must not discard it.
-  if (!samePin(showing, pinned)) {
-    return
-  }
-
-  if (!tapPinIsLive(runner)) {
-    releasePin()
-    tapManagerDataSource.unpinSnapshot()
-  }
 }
 
 const toRef = (snapshots: PinSnapshotEntry[], index: number): SnapshotRef => {
@@ -202,64 +97,19 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
   throw new TapCommandError('SNAPSHOT_NOT_FOUND', `no snapshot of this command matches "${at}" — available snapshots: ${available}`)
 }
 
-const movePin = (runner: PinSnapshotRunner, at: string | undefined): PinResult => {
-  const current = pinned!
-  const props = runner.getSnapshotPropsForLog(current.test, current.logId)
-  const snapshots = liveSnapshots(props)
-  const index = resolveAt(snapshots, at)
-
-  tapManagerDataSource.changeSnapshotState(index)
-
-  const at_ = toRef(snapshots, index)
-
-  pinned = { ...current, at: at_, snapshot: snapshots[index] }
-
-  return pinResult(runner, props)
-}
-
-// What both `pin` and `status` report about the pin, so a fresh pin, a snapshot
-// move, and a later status all read the same. The row resolves — the pin was
-// just verified against this attempt.
-const pinResult = (runner: PinSnapshotRunner, props: PinSnapshotProps | undefined): PinResult => {
-  return {
-    pinned: getPinnedView(runner) as PinnedView,
-    ...(props?.url !== undefined ? { url: props.url } : {}),
-  }
-}
-
-const clearPin = (current: CurrentPin | undefined): ClearResult => {
-  if (!current) {
-    return { cleared: false }
-  }
-
-  const { original } = current
-
-  releasePin()
-  restoreOriginal(original)
-  // For a pin tap captured no DOM of, this is also the restore: the app's unpin
-  // puts back the live page it detached when the reporter row was hovered.
-  tapManagerDataSource.unpinSnapshot()
-
-  return { cleared: true }
-}
-
 export const pinCommand = defineCommand('pin', async (_params, { testId: test, commandId: command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
   const runner = tapManagerDataSource.getSnapshotRunner()
 
-  if (runner) {
-    reconcilePin(runner)
-  }
-
-  const current = currentPin()
-
   if (clear) {
-    if (!runner || tapManagerDataSource.isRunning()) {
-      releasePin()
-
+    if (!runner || tapManagerDataSource.isRunning() || !currentPin()) {
       return { cleared: false }
     }
 
-    return clearPin(current)
+    // The app's own unpin is the whole release: it restores the page the pin
+    // detached, whether tap pinned it or the reporter did.
+    tapManagerDataSource.unpinSnapshot()
+
+    return { cleared: true }
   }
 
   if (test === undefined || command === undefined) {
@@ -286,13 +136,6 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
     throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --testId) to list this test’s commands`)
   }
 
-  // A move switches the snapshot of the pin the app holds, so it needs tap's own
-  // record to still match the pin the app is showing and the concrete attempt
-  // selected by this invocation.
-  if (pinned && current && samePin(current, pinned) && pinned.test === test && pinned.command === command && pinned.attempt === selection.attemptNumber) {
-    return movePin(runner, at)
-  }
-
   const props = runner.getSnapshotPropsForLog(test, logId)
   const snapshots = liveSnapshots(props)
 
@@ -302,23 +145,20 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
 
   const index = resolveAt(snapshots, at)
 
-  const autIframe = tapManagerDataSource.getAutIframe()
-
-  if (!autIframe) {
-    throw new TapCommandError('NO_AUT', 'the app under test is not available to pin a snapshot into')
+  // Landing on the command already pinned switches which of its snapshots is
+  // showing; anything else replaces the pin.
+  if (currentPin()?.logId === logId) {
+    tapManagerDataSource.changeSnapshotState(index)
+  } else {
+    tapManagerDataSource.pinSnapshot({ ...props, snapshots }, index, test, logId)
   }
 
-  const original = current ? current.original : autIframe.detachDom()
+  const pinned = getPinnedView(runner)
 
-  tapManagerDataSource.pinSnapshot({ ...props, snapshots }, index, test, logId)
-
+  // The app is the record of the pin, so a pin it did not take is not a result.
   if (!pinned) {
-    stopListeningForUnpin = tapManagerDataSource.onSnapshotUnpinned(onExternalUnpin)
+    throw new TapCommandError('SNAPSHOT_UNAVAILABLE', 'the app under test did not take the pin — this command’s snapshots may have just fallen out of memory (numTestsKeptInMemory)')
   }
 
-  const at_ = toRef(snapshots, index)
-
-  pinned = { test, command, attempt: selection.attemptNumber, logId, at: at_, original, snapshot: snapshots[index] }
-
-  return pinResult(runner, props)
+  return { pinned, ...(props?.url !== undefined ? { url: props.url } : {}) }
 })
