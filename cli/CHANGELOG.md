@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the application preview pane permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the preview pane. Addressed in [#PR_NUMBER](https://github.com/cypress-io/cypress/pull/PR_NUMBER).
+- Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the application preview pane permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the preview pane. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
 ## 15.20.0
 
