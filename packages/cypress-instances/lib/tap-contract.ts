@@ -80,12 +80,15 @@ export type TapRawParams<P extends readonly TapCommandParamSchema[]> =
 export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
   SchemaObject<O, { required: true, type: 'string' | 'number' }, RawScalars>
 
-// Params/options that recur across commands, defined once so their name, type,
-// and help text can't drift between the commands that expose them. `test` is
-// required in some commands and optional in others, so each use spreads it and
-// sets `required`; `attempt` is identical everywhere and used directly.
-const testIdField = { name: 'test', type: 'string', description: 'test id, as listed by the reporter command' } as const
+// Options that recur across commands, defined once so their name, type, and help
+// text can't drift between the commands that expose them. `testId` and
+// `commandId` are required in some commands and optional in others, so each use
+// spreads it and sets `required`; the rest are identical everywhere and used
+// directly.
+const testIdField = { name: 'testId', type: 'string', description: 'test id, as listed by the reporter command' } as const
+const commandIdField = { name: 'commandId', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
 const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
+const selectorField = { name: 'selector', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' } as const
 
 const commandMeta = {
   name: 'command',
@@ -93,7 +96,7 @@ const commandMeta = {
   params: [],
   options: [
     { ...testIdField, required: true },
-    { name: 'command', type: 'string', required: true, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
+    { ...commandIdField, required: true },
     // `--json` is the CLI's own flag, but this command declares it because it
     // also changes what the command returns: nothing is withheld from a payload
     // that is not being rendered for reading room.
@@ -104,15 +107,15 @@ const commandMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test, the spec-level overview: run stats and every suite’s tests',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --testId, the spec-level overview: run stats and every suite’s tests',
   details: `Shows test results the way the Cypress app's reporter panel does, right in
-your terminal. Pass --test <id> (test ids come from the spec overview this
-same command prints with no --test) to see one
+your terminal. Pass --testId <id> (test ids come from the spec overview this
+same command prints with no --testId) to see one
 test's full story: its network routes, the hooks that ran, the complete
 command log, and the failure output when something went wrong. Add --attempt
 to view an earlier retry.
 
-Leave --test off to get the spec-level overview instead: the run's pass/fail
+Leave --testId off to get the spec-level overview instead: the run's pass/fail
 stats and every suite's tests at a glance.`,
   params: [],
   options: [
@@ -124,11 +127,10 @@ stats and every suite's tests at a glance.`,
 const pinMeta = {
   name: 'pin',
   description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
-  params: [
-    { ...testIdField, required: false },
-    { name: 'command', type: 'string', required: false, description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' },
-  ],
+  params: [],
   options: [
+    { ...testIdField, required: false },
+    { ...commandIdField, required: false },
     attemptField,
     { name: 'at', type: 'string', required: false, description: 'which snapshot to pin: a name like "before"/"after" or a 1-based index; defaults to the last (the command’s final state). Re-run on the pinned command to switch snapshots without releasing the pin' },
     { name: 'clear', type: 'boolean', required: false, description: 'release the current pin and restore the app to its pre-pin state' },
@@ -162,7 +164,7 @@ export const buildTapSchema = (cypressVersion: string): TapSchema => {
       name: command.name,
       description: command.description,
       ...('details' in command ? { details: command.details } : {}),
-      params: command.params.map((param) => ({ ...param })),
+      params: (command.params as readonly TapCommandParamSchema[]).map((param) => ({ ...param })),
       options: command.options.map((option) => ({ ...option })),
       ...('hidden' in command && command.hidden ? { hidden: true } : {}),
     }
@@ -240,8 +242,11 @@ const domMeta = {
   details: `Reads the app-under-test DOM as HTML: the whole page, or the outerHTML of
 each element matching a CSS selector (each match includes its full subtree).
 Output is capped browser-side so a heavy page never ships megabytes at once.`,
-  params: [{ name: 'selector', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' }],
-  options: [{ name: 'max-chars', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' }],
+  params: [],
+  options: [
+    selectorField,
+    { name: 'max-chars', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' },
+  ],
 } as const satisfies TapNativeCommandSchema
 
 const ariaMeta = {
@@ -250,8 +255,11 @@ const ariaMeta = {
   details: `Reads the accessibility (ARIA) tree of the app-under-test frame, or the
 subtree rooted at a CSS selector. Structural and text-only roles are dropped,
 leaving the compact role/name/state tree DevTools shows.`,
-  params: [{ name: 'selector', type: 'string', required: false, description: 'a CSS selector to root the tree at; omit for the whole frame' }],
-  options: [{ name: 'max-nodes', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' }],
+  params: [],
+  options: [
+    { ...selectorField, description: 'a CSS selector to root the tree at; omit for the whole frame' },
+    { name: 'max-nodes', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' },
+  ],
 } as const satisfies TapNativeCommandSchema
 
 const inspectMeta = {
@@ -259,7 +267,8 @@ const inspectMeta = {
   description: 'inspect the first element matching a selector: its tag, attributes, computed styles, box model, and accessibility node',
   details: `Inspects the first element matching the selector: its tag, attributes,
 curated computed styles, box model, and accessibility node.`,
-  params: [{ name: 'selector', type: 'string', required: true, description: 'a CSS selector identifying the element to inspect' }],
+  params: [],
+  options: [{ ...selectorField, required: true, description: 'a CSS selector identifying the element to inspect' }],
 } as const satisfies TapNativeCommandSchema
 
 // CLI-native tap commands: implemented entirely in the CLI (instance discovery

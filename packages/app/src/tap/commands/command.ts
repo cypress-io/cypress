@@ -21,7 +21,7 @@ const consolePropsOf = (props: ConsolePropsResult | undefined): ConsolePropsResu
 }
 
 export const commandCommand = defineCommand('command', async (_params, options): Promise<CommandResult> => {
-  const { test, attempt, command, json } = options
+  const { testId: test, attempt, commandId: command, json } = options
 
   const runner = tapManagerDataSource.getRunner()
 
@@ -41,7 +41,7 @@ export const commandCommand = defineCommand('command', async (_params, options):
   const resolved = resolveCommand(selection.attempt, command, test)
 
   if (!resolved) {
-    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --test) to list this test’s commands`)
+    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --testId) to list this test’s commands`)
   }
 
   const snapshotProps = tapManagerDataSource.getSnapshotRunner()?.getSnapshotPropsForLog(test, resolved.logId)
