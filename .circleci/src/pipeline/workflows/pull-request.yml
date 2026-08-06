@@ -323,7 +323,9 @@ jobs:
       require-opt-in: false
       parallelism: 1
       record-group-suffix: '-remediated'
-      # #34465 extra-target shared middleware (basic-auth _blank download)
+      # #34465 extra-target shared middleware. Excludes
+      # downloads_basic_auth.cy.ts — #34512 Network.enable never settles on the
+      # extra target's session. Add it here once that is fixed.
       spec: cypress/e2e/cypress/downloads.cy.ts
       requires:
         - ready-to-test
@@ -334,7 +336,9 @@ jobs:
       require-opt-in: false
       parallelism: 1
       record-group-suffix: '-remediated'
-      # #34465 extra-target shared middleware (basic-auth _blank download)
+      # #34465 extra-target shared middleware. Excludes
+      # downloads_basic_auth.cy.ts — #34512 Network.enable never settles on the
+      # extra target's session. Add it here once that is fixed.
       spec: cypress/e2e/cypress/downloads.cy.ts
       requires:
         - ready-to-test
