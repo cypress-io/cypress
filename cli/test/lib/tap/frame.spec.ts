@@ -1,7 +1,24 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import stripAnsi from 'strip-ansi'
 
-import { resolveAutFrame, assertFrameReadable, parsePositiveInt, FrameCommandError } from '../../../lib/tap/aut/frame'
+import logger from '../../../lib/logger'
+import { resolveInstance } from '../../../lib/cypress-instances'
+import { withTapSession } from '../../../lib/tap/tap-session'
+import { resolveAutFrame, assertFrameReadable, parsePositiveInt, withResolvedAutFrame, FrameCommandError } from '../../../lib/tap/aut/frame'
 import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapCliOptions } from '../../../lib/tap/types'
+
+vi.mock('../../../lib/cypress-instances', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
+
+  return { ...actual, resolveInstance: vi.fn() }
+})
+
+vi.mock('../../../lib/tap/tap-session', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/tap/tap-session')>()
+
+  return { ...actual, withTapSession: vi.fn() }
+})
 
 const SESSION_ID = 'S1'
 
@@ -106,6 +123,53 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
       code: 'BOOM',
       message: 'run-state blew up',
     })
+  })
+})
+
+describe('lib/tap/aut/frame withResolvedAutFrame', () => {
+  const stdout = (): string => vi.mocked(console.log).mock.calls.flat().join(' ')
+  const stderr = (): string => vi.mocked(console.error).mock.calls.flat().join(' ')
+
+  beforeEach(() => {
+    const session = {
+      call: vi.fn().mockResolvedValue({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'passed' } }),
+      client: makePageClient(frameTree()),
+      sessionId: SESSION_ID,
+    } as unknown as TapSession
+
+    vi.mocked(resolveInstance).mockResolvedValue({ instance: {}, reason: 'only', candidateCount: 1 } as any)
+    vi.mocked(withTapSession).mockImplementation((_instance: any, use: any) => use(session))
+
+    logger.reset()
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  const read = async (result: unknown, options: TapCliOptions = { json: true } as TapCliOptions): Promise<number> => {
+    return withResolvedAutFrame(options, async () => result, 'dom')
+  }
+
+  it('prints the read and exits 0', async () => {
+    expect(await read({ found: true, html: '<p>hi</p>' })).to.eq(0)
+    expect(stdout()).toContain('"html": "<p>hi</p>"')
+  })
+
+  it('exits 1 on an ambiguous selector — the read that was asked for did not happen', async () => {
+    expect(await read({ ambiguous: true, selector: '.item', count: 2 })).to.eq(1)
+  })
+
+  it('still prints the ambiguity answer as a result, so the matches to choose between survive the non-zero exit', async () => {
+    await read({ ambiguous: true, selector: '.item', count: 2 })
+
+    expect(JSON.parse(stdout())).to.deep.eq({ ambiguous: true, selector: '.item', count: 2 })
+    expect(stderr()).to.eq('')
+  })
+
+  it('renders the ambiguity for a human on stdout too, exiting 1 all the same', async () => {
+    expect(await read({ ambiguous: true, selector: '.item', count: 2 }, {} as TapCliOptions)).to.eq(1)
+
+    expect(stripAnsi(stdout())).toContain('matched 2 elements but must be unique')
+    expect(stderr()).to.eq('')
   })
 })
 

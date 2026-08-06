@@ -6,6 +6,7 @@ import { withTapSession, validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
 import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
+import type { FrameAmbiguousResult } from './single-match'
 import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
@@ -153,9 +154,14 @@ export const withResolvedAutFrame = async (
 
         const frame = await resolveAutFrame(session.client, session.sessionId)
 
-        renderOutcome(command, await read(session, frame), options.json)
+        const result = await read(session, frame)
 
-        return 0
+        renderOutcome(command, result, options.json)
+
+        // The ambiguity answer is still a result — it names the matches to
+        // choose between, so it prints on stdout like any other. But it is not
+        // the read that was asked for, and the exit code has to say so.
+        return (result as FrameAmbiguousResult).ambiguous ? 1 : 0
       } catch (err: any) {
         if (err instanceof FrameCommandError) {
           renderFailure({ code: err.code, message: err.message })

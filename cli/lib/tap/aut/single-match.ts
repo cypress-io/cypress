@@ -7,9 +7,9 @@ import type { MatchCountResult } from './scripts'
 
 /**
  * What a selector-taking AUT read returns in place of the read when the selector
- * matched more than one element: how many it matched. Not a failure — it is the
- * answer to "which one did you mean?", so it exits 0 and honors `--json` like
- * any other result.
+ * matched more than one element: how many it matched. It is the answer to "which
+ * one did you mean?", so it prints and honors `--json` like any other result —
+ * but the read never happened, so the command exits 1.
  */
 export interface FrameAmbiguousResult {
   /** Always `true` — marks this as the ambiguity answer rather than a read. */
