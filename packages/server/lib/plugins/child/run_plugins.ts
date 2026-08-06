@@ -54,8 +54,6 @@ export class RunPlugins {
       this.execute(event, ids, args)
     })
 
-    // registered here rather than per-invocation in the preprocessor so a single
-    // listener covers every file @see https://github.com/cypress-io/cypress/issues/1305
     this.ipc.on('preprocessor:close', (filePath?: string) => {
       closePreprocessor(filePath)
     })
