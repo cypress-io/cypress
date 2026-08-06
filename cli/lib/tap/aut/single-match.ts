@@ -20,7 +20,7 @@ export interface FrameAmbiguousResult {
   count: number
 }
 
-export const resolveMatch = async (
+export const resolveAmbiguity = async (
   session: TapSession,
   frame: AutFrame,
   selector: string | undefined,
@@ -28,7 +28,7 @@ export const resolveMatch = async (
 ): Promise<FrameAmbiguousResult | undefined> => {
   if (selector === undefined) {
     if (at !== undefined) {
-      throw new FrameCommandError('INVALID_INDEX', 'at needs a selector to index into — without one there is only the one frame to read')
+      throw new FrameCommandError('INVALID_INDEX', 'at needs a selector to index into')
     }
 
     return undefined
@@ -62,7 +62,7 @@ export const resolveMatch = async (
 
   if (at !== undefined) {
     if (at >= count) {
-      throw new FrameCommandError('INVALID_INDEX', `at ${at} is out of range: "${selector}" matched ${count} element${count === 1 ? '' : 's'}, so the index must be 0-${count - 1}`)
+      throw new FrameCommandError('INVALID_INDEX', `"${selector}" matched ${count} element${count === 1 ? '' : 's'}; pass at 0-${count - 1}`)
     }
 
     return undefined
@@ -82,7 +82,7 @@ export const withAmbiguous = async <T>(
   at: number | undefined,
   read: () => Promise<T>,
 ): Promise<T | FrameAmbiguousResult> => {
-  const ambiguous = await resolveMatch(session, frame, selector, at)
+  const ambiguous = await resolveAmbiguity(session, frame, selector, at)
 
   return ambiguous ?? read()
 }
