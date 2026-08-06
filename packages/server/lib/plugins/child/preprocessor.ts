@@ -39,13 +39,9 @@ const closeFile = (filePath: string) => {
 
 // no filePath means close all
 export const close = (filePath?: string): void => {
-  if (filePath) {
-    closeFile(filePath)
+  const filePaths = filePath ? [filePath] : Object.keys(fileObjects)
 
-    return
-  }
-
-  Object.keys(fileObjects).forEach((path) => closeFile(path))
+  filePaths.forEach((path) => closeFile(path))
 }
 
 export const _clearFiles = (): void => {
