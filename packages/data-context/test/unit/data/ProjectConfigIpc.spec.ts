@@ -248,5 +248,110 @@ describe('ProjectConfigIpc', () => {
         })
       })
     })
+
+    describe('node path', () => {
+      const MOCK_NODE_PATH = '/Users/foo/.nvm/versions/node/v22.15.0/bin/node'
+      const MOCK_NODE_VERSION = '22.15.0'
+
+      beforeEach(() => {
+        // @ts-expect-error - mock
+        childProcess.fork.mockImplementation(() => {
+          return {
+            on: jest.fn(),
+            once: jest.fn(),
+            emit: jest.fn(),
+            kill: jest.fn(),
+            removeAllListeners: jest.fn(),
+          }
+        })
+      })
+
+      const forkWithNodePath = async (nodePath: string | null, nodeVersion: string | undefined) => {
+        const projectPath = await scaffoldProject('config-cjs-and-esm/config-with-cjs')
+        const configFilePath = path.join(projectPath, 'cypress.config.cjs')
+
+        projectConfigIpc = new ProjectConfigIpc(
+          nodePath,
+          nodeVersion,
+          projectPath,
+          configFilePath,
+          false,
+          (error) => {},
+          () => {},
+          () => {},
+        )
+      }
+
+      it('uses the system Node when one is available', async () => {
+        await forkWithNodePath(MOCK_NODE_PATH, MOCK_NODE_VERSION)
+
+        expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+          execPath: MOCK_NODE_PATH,
+        }))
+      }, 30000)
+
+      it('uses the bundled Node when a system Node cannot be found', async () => {
+        await forkWithNodePath(null, undefined)
+
+        expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+          execPath: undefined,
+        }))
+      }, 30000)
+    })
+
+    describe('NODE_OPTIONS', () => {
+      let envBefore: NodeJS.ProcessEnv
+
+      beforeEach(() => {
+        envBefore = { ...process.env }
+        // the CLI moves the user's NODE_OPTIONS here so they do not apply to
+        // the Cypress process itself - the config child process gets them back
+        process.env.ORIGINAL_NODE_OPTIONS = '--max-old-space-size=8192'
+        process.env.NODE_OPTIONS = '--internal-cypress-option'
+
+        // @ts-expect-error - mock
+        childProcess.fork.mockImplementation(() => {
+          return {
+            on: jest.fn(),
+            once: jest.fn(),
+            emit: jest.fn(),
+            kill: jest.fn(),
+            removeAllListeners: jest.fn(),
+          }
+        })
+      })
+
+      afterEach(() => {
+        process.env = envBefore
+      })
+
+      it('restores the user\'s NODE_OPTIONS for the child process', async () => {
+        const projectPath = await scaffoldProject('config-cjs-and-esm/config-with-cjs')
+        const configFilePath = path.join(projectPath, 'cypress.config.cjs')
+
+        projectConfigIpc = new ProjectConfigIpc(
+          undefined,
+          undefined,
+          projectPath,
+          configFilePath,
+          false,
+          (error) => {},
+          () => {},
+          () => {},
+        )
+
+        expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+          env: expect.objectContaining({
+            NODE_OPTIONS: expect.stringContaining('--max-old-space-size=8192'),
+          }),
+        }))
+
+        expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+          env: expect.not.objectContaining({
+            NODE_OPTIONS: expect.stringContaining('--internal-cypress-option'),
+          }),
+        }))
+      }, 30000)
+    })
   })
 })
