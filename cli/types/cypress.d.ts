@@ -2999,6 +2999,11 @@ declare namespace Cypress {
      */
     numTestsKeptInMemory: number
     /**
+     * Enables improved memory management within Chromium-based browsers.
+     * @default true
+     */
+    manageBrowserMemory: boolean
+    /**
      * Port used to host Cypress. Normally this is a randomly generated port
      * @default null
      */
@@ -3245,11 +3250,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalWebKitSupport: boolean
-    /**
-     * Enables support for improved memory management within Chromium-based browsers.
-     * @default false
-     */
-    experimentalMemoryManagement: boolean
     /**
      * Determines which visibility algorithm Cypress uses to check element visibility.
      * `'modern'` uses a performance-optimized algorithm based on `checkVisibility()`.

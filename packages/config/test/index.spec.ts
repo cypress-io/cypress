@@ -148,6 +148,16 @@ describe('config/src/index', () => {
       expect(errorFn).toHaveBeenCalledTimes(0)
     })
 
+    it('calls error callback if manageBrowserMemory is not a boolean', () => {
+      const errorFn = vi.fn()
+
+      configUtil.validate({
+        manageBrowserMemory: 'true',
+      }, errorFn, 'e2e')
+
+      expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({ key: 'manageBrowserMemory', type: 'a boolean' }))
+    })
+
     it('calls error callback if config is invalid', () => {
       const errorFn = vi.fn()
 
@@ -212,6 +222,26 @@ describe('config/src/index', () => {
 
       expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_SOURCE_REWRITING_REMOVED', {
         name: 'experimentalSourceRewriting',
+        newName: undefined,
+        value: undefined,
+        testingType: 'e2e',
+        configFile: 'config.js',
+      })
+
+      expect(errorFn).toHaveBeenCalledTimes(0)
+    })
+
+    it('calls warning callback if config contains experimentalMemoryManagement', () => {
+      const warningFn = vi.fn()
+      const errorFn = vi.fn()
+
+      configUtil.validateNoBreakingConfig({
+        experimentalMemoryManagement: false,
+        configFile: 'config.js',
+      }, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED', {
+        name: 'experimentalMemoryManagement',
         newName: undefined,
         value: undefined,
         testingType: 'e2e',
