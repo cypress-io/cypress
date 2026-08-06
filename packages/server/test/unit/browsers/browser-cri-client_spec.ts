@@ -364,7 +364,10 @@ describe('lib/browsers/browser-cri-client', function () {
         send: sinon.stub(),
         on: sinon.stub(),
       }
-      const detach = sinon.stub().resolves()
+      // a detach that never settles models an extra target whose own CDP
+      // connection is already gone — if _onAttachToTarget awaited this, the
+      // test would time out instead of completing
+      const detach = sinon.stub().returns(new Promise(() => {}))
       const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
 
       options.CriConstructor.returns(criClient)

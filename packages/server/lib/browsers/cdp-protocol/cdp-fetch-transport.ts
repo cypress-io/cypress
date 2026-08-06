@@ -27,6 +27,36 @@ const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
     && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
 }
 
+// Internal Cypress markers injected onto paused requests for the
+// intercept/legacy pipeline. Must never be forwarded to the origin — parity
+// with ExtractCypressMetadataHeaders on the MITM path.
+const INTERNAL_MARKER_HEADERS = new Set([
+  AUT_FRAME_HEADER.toLowerCase(),
+  EXTRA_TARGET_HEADER.toLowerCase(),
+])
+
+// Splits internal Cypress markers out of a header set in a single pass,
+// reporting whether any were present.
+const partitionInternalMarkers = (headers: Protocol.Network.Headers) => {
+  const kept: Protocol.Network.Headers = {}
+  let hadMarker = false
+
+  for (const [name, value] of Object.entries(headers)) {
+    if (INTERNAL_MARKER_HEADERS.has(name.toLowerCase())) {
+      hadMarker = true
+    } else {
+      kept[name] = value
+    }
+  }
+
+  return { kept, hadMarker }
+}
+
+// Unique per transport instance in this process — only needs to disambiguate
+// concurrent extra-target sessions sharing one HttpIntercept, not to be
+// globally unpredictable.
+let extraTargetTransportCount = 0
+
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
   /**
@@ -89,7 +119,7 @@ export class CdpFetchTransport {
     private readonly networkExtraInfo: CDPNetworkExtraInfo = new CDPNetworkExtraInfo(client),
   ) {
     this.requestIdPrefix = options.isFromExtraTarget
-      ? `extra-${Math.random().toString(36).slice(2)}:`
+      ? `extra-${++extraTargetTransportCount}:`
       : ''
   }
 
@@ -533,47 +563,23 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Builds continueRequest headers when outbound headers differ from the pause
-   * (excluding internal Cypress markers). AUT-frame and extra-target markers
-   * are injected onto the paused request for the intercept/legacy pipeline and
-   * must never be forwarded to the origin — parity with
-   * ExtractCypressMetadataHeaders on the MITM path.
+   * Builds continueRequest headers when outbound headers differ from the pause,
+   * excluding internal Cypress markers (see partitionInternalMarkers).
    */
   private continueRequestHeaders = async (
     event: Protocol.Fetch.RequestPausedEvent,
     outbound: CdpFetchTransportRequest,
   ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const internalMarkers = new Set([
-      AUT_FRAME_HEADER.toLowerCase(),
-      EXTRA_TARGET_HEADER.toLowerCase(),
-    ])
-
-    const stripInternalMarkers = (headers: Protocol.Network.Headers) => {
-      return Object.fromEntries(
-        Object.entries(headers).filter(([name]) => {
-          return !internalMarkers.has(name.toLowerCase())
-        }),
-      )
-    }
-
-    const hadInternalMarker = (headers: Protocol.Network.Headers) => {
-      return Object.keys(headers).some((name) => {
-        return internalMarkers.has(name.toLowerCase())
-      })
-    }
-
-    const outboundWithoutMarkers = stripInternalMarkers(outbound.headers ?? {})
-    const originalWithoutMarkers = stripInternalMarkers(event.request.headers)
-    const originalHadMarker = hadInternalMarker(event.request.headers)
-    const outboundHadMarker = hadInternalMarker(outbound.headers ?? {})
+    const original = partitionInternalMarkers(event.request.headers)
+    const withoutMarkers = partitionInternalMarkers(outbound.headers ?? {})
 
     // No meaningful header mutations and nothing to strip — omit headers from
     // continueRequest so CDP keeps the browser's original set.
-    if (!this.headersChanged(outboundWithoutMarkers, originalWithoutMarkers) && !originalHadMarker && !outboundHadMarker) {
+    if (!this.headersChanged(withoutMarkers.kept, original.kept) && !original.hadMarker && !withoutMarkers.hadMarker) {
       return
     }
 
-    return this.toContinueRequestHeaders(outboundWithoutMarkers)
+    return this.toContinueRequestHeaders(withoutMarkers.kept)
   }
 
   // Must NOT clear extraInfo tracking on success — the next response under a

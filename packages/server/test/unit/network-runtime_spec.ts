@@ -610,8 +610,12 @@ describe('lib/network-runtime', () => {
 
     runtime.reset()
 
-    // Main transport + attached extra-target transport
+    // Asserts the extra transport itself reset, not just that reset() fired
+    // twice — a call count alone would also pass if the main transport's
+    // reset ran twice and the extra transport's never ran.
     expect(transportReset).to.have.been.calledTwice
+    expect(transportReset.thisValues).to.include(runtime.fetchTransport)
+    expect(transportReset.thisValues.filter((transport) => transport !== runtime.fetchTransport)).to.have.length(1)
 
     await detach()
 
@@ -631,6 +635,32 @@ describe('lib/network-runtime', () => {
       on: sinon.stub(),
       off: sinon.stub(),
     }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+    await runtime.stop()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  it('createCdpFetchRuntime stop does not hang on an extra-target transport that never answers Fetch.disable', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // models an extra target whose own CDP connection is already gone —
+    // Fetch.disable is sent but never answered
+    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
 
     await runtime.start()

@@ -4,6 +4,8 @@ import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
+import RequestMiddleware from '../../../lib/http/request-middleware'
+import { testMiddleware } from '../http/helpers'
 
 async function readStream (stream: Readable): Promise<string> {
   const chunks: Buffer[] = []
@@ -509,8 +511,6 @@ describe('createSyntheticProxyCodec', () => {
   })
 
   it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
-    const { testMiddleware } = await import('../http/helpers')
-    const RequestMiddleware = (await import('../../../lib/http/request-middleware')).default
     const { ExtractCypressMetadataHeaders } = RequestMiddleware
 
     const codec = createSyntheticProxyCodec({

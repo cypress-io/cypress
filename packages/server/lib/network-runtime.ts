@@ -9,7 +9,7 @@ import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './automation/cookie/jar'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
-import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import type { FoundBrowser, ProtocolManagerShape, ExtraTargetDetach } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-client'
@@ -69,7 +69,7 @@ export type CdpFetchNetworkRuntime = {
    * session so its requests run the shared middleware onion with the
    * extra-target marker. Returns detach() to stop that transport.
    */
-  attachExtraTarget (client: Pick<ICriClient, 'send' | 'on' | 'off'>): Promise<() => Promise<void>>
+  attachExtraTarget (client: Pick<ICriClient, 'send' | 'on' | 'off'>): Promise<ExtraTargetDetach>
   start (): Promise<void>
   reset (): void
   stop (): Promise<void>
@@ -137,6 +137,8 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     },
   }
 }
+
+const RUNTIME_STOPPED_ERROR = 'Cannot attach extra target: CDP Fetch runtime has been stopped'
 
 /**
  * Composition-root factory for the CDP Fetch network runtime used when the
@@ -247,7 +249,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     fetchTransport,
     async attachExtraTarget (client) {
       if (stopped) {
-        throw new Error('Cannot attach extra target: CDP Fetch runtime has been stopped')
+        throw new Error(RUNTIME_STOPPED_ERROR)
       }
 
       // CDPNetworkExtraInfo (used by CdpFetchTransport for Set-Cookie) requires
@@ -264,7 +266,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       if (stopped) {
         await extraTransport.stop().catch(() => {})
 
-        throw new Error('Cannot attach extra target: CDP Fetch runtime has been stopped')
+        throw new Error(RUNTIME_STOPPED_ERROR)
       }
 
       extraTargetTransports.add(extraTransport)
@@ -280,7 +282,6 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       }
     },
     async start () {
-      stopped = false
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
       try {
@@ -306,17 +307,17 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 
-      const extras = Array.from(extraTargetTransports)
+      // Not awaited, for the same reason _onTargetDestroyed and
+      // closeExtraTargets do not await detach: a dead extra-target socket may
+      // never answer Fetch.disable, and stop() runs ahead of HTTP server
+      // teardown — it must not be able to hang that.
+      for (const extraTransport of extraTargetTransports) {
+        extraTransport.stop().catch(() => {
+          // Extra-target sockets are usually already gone.
+        })
+      }
 
       extraTargetTransports.clear()
-
-      await Promise.all(extras.map(async (extraTransport) => {
-        try {
-          await extraTransport.stop()
-        } catch {
-          // Extra-target sockets are usually already gone.
-        }
-      }))
 
       return fetchTransport.stop()
     },
