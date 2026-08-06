@@ -867,6 +867,21 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-2' })
       // error is caught or else the test would fail
     })
+
+    it('does not wait on the extra target Fetch transport detaching', async () => {
+      const browserClient = await getClient() as any
+
+      browserClient.browserClient.send = sinon.stub().resolves()
+
+      browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
+      // a detach that never settles models an extra target whose own CDP
+      // connection is already gone
+      browserClient.getExtraTargetClient('target-id-1').detach = sinon.stub().returns(new Promise(() => {}))
+
+      await browserClient.closeExtraTargets()
+
+      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
+    })
   })
 
   context('#close', function () {

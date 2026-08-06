@@ -756,15 +756,14 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
+  // Detaching the Fetch transport is left to `Target.targetDestroyed`: detach
+  // sends `Fetch.disable` over the extra target's own connection, which never
+  // resolves once that connection is gone (extra targets do not reconnect, so
+  // the command is enqueued indefinitely). This runs before every test, so
+  // waiting on it here would make teardown hang on a dead popup.
   async closeExtraTargets () {
-    await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId, extra]) => {
+    await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId]) => {
       debug('Close extra target (id: %s)', targetId)
-
-      try {
-        await extra.detach?.()
-      } catch (err: any) {
-        debug('Detaching extra target Fetch transport errored: %s', err?.stack || err)
-      }
 
       try {
         await this.browserClient.send('Target.closeTarget', { targetId })
