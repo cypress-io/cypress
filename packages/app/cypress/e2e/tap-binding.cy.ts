@@ -568,6 +568,76 @@ describe('tap binding pin lifecycle', () => {
     expectAutStatus('clicked')
   })
 
+  // A pin made by hand in the reporter reaches no tap state at all, so it is read
+  // back off the app: without it, an agent has no way to tell the AUT frame is
+  // showing a past snapshot rather than the live app, and `dom`/`aria` quietly
+  // read the pinned DOM.
+  it('reports and releases a pin made by clicking a command in the reporter', () => {
+    runPinTargetSpec()
+
+    expectAutStatus('clicked')
+
+    const clickRow = () => cy.reporter().contains('li.command-name-click', 'click')
+
+    // Hover before clicking, as a user does: the app detaches the live page when a
+    // row is hovered, and that is the DOM its own unpin puts back.
+    clickRow().find('.command-wrapper-text').first().trigger('mouseover')
+    cy.get('[data-testid=snapshot-controls]').should('be.visible')
+
+    clickRow().find('.command-pin-target').first().click()
+    clickRow().find('.command-wrapper').should('have.class', 'command-is-pinned')
+
+    // The app's pin lands on the command's first snapshot — the pre-click DOM.
+    expectAutStatus('ready')
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+      const { testId, commands } = await firstTestCommands(binding)
+      const commandId = commandNamed(commands, 'click').id as string
+
+      const runState = (await binding.exec('run-state')) as { result: Record<string, any> }
+
+      expect(Object.keys(runState.result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'totalTests', 'results', 'pinned'])
+      expect(runState.result.pinned.test).to.eq(testId)
+      expect(runState.result.pinned.command.id).to.eq(commandId)
+      expect(runState.result.pinned.command.name).to.eq('click')
+      expect(runState.result.pinned.hookName).to.eq('test body')
+      expect(runState.result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
+    })
+
+    // Switching snapshots in the app moves the pin status reports.
+    cy.get('[data-cy=snapshot-toggle]').contains('after').click()
+    expectAutStatus('clicked')
+
+    cy.window().then(async (win) => {
+      const runState = (await getBinding(win).exec('run-state')) as { result: Record<string, any> }
+
+      expect(runState.result.pinned.at).to.deep.eq({ index: 2, total: 2, name: 'after' })
+    })
+
+    // Back to the pre-click snapshot, so the live page restored below is the only
+    // thing that can read as "clicked".
+    cy.get('[data-cy=snapshot-toggle]').contains('before').click()
+    expectAutStatus('ready')
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      // Clear releases a pin it did not make, rather than reporting nothing pinned.
+      const cleared = await binding.exec('pin', {}, { clear: 'true' })
+
+      expect(cleared).to.deep.eq({ result: { cleared: true } })
+
+      const afterClear = (await binding.exec('run-state')) as { result: Record<string, unknown> }
+
+      expect(Object.keys(afterClear.result)).to.not.include('pinned')
+    })
+
+    // The app's unpin puts back the live page it detached on hover.
+    cy.get('[data-testid=snapshot-controls]').should('not.exist')
+    expectAutStatus('clicked')
+  })
+
   it('restores the captured DOM when the pin is released from the app UI', () => {
     runPinTargetSpec()
 

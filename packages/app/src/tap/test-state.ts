@@ -255,6 +255,18 @@ const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], i
   throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
 }
 
+/**
+ * Which attempt of a test a driver log id belongs to, 1-based. The attempt is
+ * part of a command's identity — per-attempt ids restart from 1 — so a pin known
+ * only by its log id (one made in the reporter, which names no attempt) has to be
+ * placed on an attempt before it can be read as a row.
+ */
+export const attemptOfLog = (test: SerializedTest, logId: string): number | undefined => {
+  const index = attemptsOf(test).findIndex((attempt) => orderedAttemptLogs(attempt).some((log) => log.id === logId))
+
+  return index === -1 ? undefined : index + 1
+}
+
 export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {
   const logs = orderedAttemptLogs(attempt)
   const ids = tapCommandIds(logs)

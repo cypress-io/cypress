@@ -35,13 +35,28 @@ describe('tap/commands/pin', () => {
 
     const isRunning = cy.stub(tapManagerDataSource, 'isRunning').returns(over.running ?? false)
 
-    const pinSnapshot = cy.stub(tapManagerDataSource, 'pinSnapshot')
-    const changeSnapshotState = cy.stub(tapManagerDataSource, 'changeSnapshotState')
-    const unpinSnapshot = cy.stub(tapManagerDataSource, 'unpinSnapshot')
+    // Stands in for the app's snapshot store, which every pin lands in and is the
+    // only trace of one made by hand in the reporter — `pinInApp` is that click.
+    let showing: { testId: string, logId: string, index: number } | undefined
+
+    const pinInApp = (logId: string, index = 0, testId = 'r2') => {
+      showing = { testId, logId, index }
+    }
+
+    const unpinInApp = () => {
+      showing = undefined
+    }
+
+    cy.stub(tapManagerDataSource, 'getPinnedSnapshot').callsFake(() => showing)
+
+    const pinSnapshot = cy.stub(tapManagerDataSource, 'pinSnapshot').callsFake((_props, index, testId, logId) => pinInApp(logId, index, testId))
+    const changeSnapshotState = cy.stub(tapManagerDataSource, 'changeSnapshotState').callsFake((index) => showing && pinInApp(showing.logId, index, showing.testId))
+    const unpinSnapshot = cy.stub(tapManagerDataSource, 'unpinSnapshot').callsFake(unpinInApp)
+
     const stopListening = cy.stub()
     const onUnpinned = cy.stub(tapManagerDataSource, 'onSnapshotUnpinned').returns(stopListening)
 
-    return { getRunner, detachDom, restoreDom, pinSnapshot, changeSnapshotState, unpinSnapshot, onUnpinned, stopListening, isRunning }
+    return { getRunner, detachDom, restoreDom, pinSnapshot, changeSnapshotState, unpinSnapshot, onUnpinned, stopListening, isRunning, pinInApp, unpinInApp }
   }
 
   beforeEach(() => {
@@ -193,15 +208,17 @@ describe('tap/commands/pin', () => {
   })
 
   it('restores the captured DOM and drops the pin when the runner unpins externally (the ✕)', async () => {
-    const { restoreDom, unpinSnapshot, onUnpinned } = stubSource()
+    const { restoreDom, unpinSnapshot, onUnpinned, unpinInApp } = stubSource()
 
     const manager = new TapManager(CYPRESS_VERSION)
 
     await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
 
-    // Fire the handler the pin registered, as the runner's ✕ unpin would.
+    // Fire the handler the pin registered, as the runner's ✕ unpin would — the
+    // store has already reset itself by the time it runs.
     const onExternalUnpin = onUnpinned.firstCall.args[0] as () => void
 
+    unpinInApp()
     onExternalUnpin()
 
     expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
@@ -248,7 +265,7 @@ describe('tap/commands/pin', () => {
   })
 
   it('drops the pin without restoring when an external unpin fires while a spec is running', async () => {
-    const { restoreDom, onUnpinned, isRunning } = stubSource()
+    const { restoreDom, onUnpinned, isRunning, unpinInApp } = stubSource()
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -257,13 +274,14 @@ describe('tap/commands/pin', () => {
 
     const onExternalUnpin = onUnpinned.firstCall.args[0] as () => void
 
+    unpinInApp()
     onExternalUnpin()
 
     expect(restoreDom).not.to.have.been.called
   })
 
   it('drops the pin without restoring when an external unpin fires while the runner is being replaced', async () => {
-    const { getRunner, restoreDom, onUnpinned } = stubSource()
+    const { getRunner, restoreDom, onUnpinned, unpinInApp } = stubSource()
 
     const manager = new TapManager(CYPRESS_VERSION)
 
@@ -272,6 +290,7 @@ describe('tap/commands/pin', () => {
 
     const onExternalUnpin = onUnpinned.firstCall.args[0] as () => void
 
+    unpinInApp()
     onExternalUnpin()
 
     expect(restoreDom).not.to.have.been.called
@@ -310,6 +329,125 @@ describe('tap/commands/pin', () => {
     await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
 
     expect(await manager.exec('run-state')).to.deep.eq({ result: { spec: null, totalSpecs: 0 } })
+  })
+
+  // A pin made by hand in the reporter never reaches tap, so it is read back off
+  // the app: an agent that cannot see it has no way to tell the AUT frame is
+  // showing a past snapshot rather than the live app.
+  describe('a pin made in the reporter UI', () => {
+    const stubStatusRunner = () => {
+      cy.stub(tapManagerDataSource, 'getRunner').returns({
+        getAllTestsState: () => TESTS_STATE,
+        getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
+        isRunComplete: () => true,
+        getStartTime: () => '2026-07-29T10:15:00.000Z',
+      })
+
+      cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/login.cy.ts')
+    }
+
+    it('is reported by run-state as its own reporter row', async () => {
+      const { pinInApp } = stubSource()
+
+      stubStatusRunner()
+      pinInApp('log-2')
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('run-state')
+
+      expect((outcome as { result: any }).result.pinned).to.deep.eq({
+        test: 'r2',
+        at: { index: 1, total: 2, name: 'before' },
+        command: { id: '2', name: 'click', message: '', state: 'passed', type: 'child' },
+      })
+    })
+
+    it('follows the snapshot the app is showing of it', async () => {
+      const { pinInApp } = stubSource()
+
+      stubStatusRunner()
+      pinInApp('log-1', 1)
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('run-state')
+
+      expect((outcome as { result: any }).result.pinned.at).to.deep.eq({ index: 2, total: 2, name: 'after' })
+    })
+
+    it('is released by --clear through the app’s own unpin, which restores the DOM it detached', async () => {
+      const { restoreDom, unpinSnapshot, pinInApp } = stubSource()
+
+      pinInApp('log-1')
+
+      const cleared = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { clear: 'true' })
+
+      expect(cleared).to.deep.eq({ result: { cleared: true } })
+      expect(unpinSnapshot).to.have.been.calledOnce
+      // Tap captured no DOM for this pin, so it has none to put back — restoring
+      // the live page is the app's, on the unpin above.
+      expect(restoreDom).not.to.have.been.called
+    })
+
+    it('is not mistaken for the live page when tap pins over it', async () => {
+      const { detachDom, restoreDom, unpinSnapshot, pinInApp } = stubSource()
+
+      pinInApp('log-2')
+
+      const manager = new TapManager(CYPRESS_VERSION)
+      const outcome = await manager.exec('pin', { test: 'r2', command: '1' })
+
+      expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
+      // Detaching now would capture the snapshot the app is showing and later
+      // restore it as if it were the live app.
+      expect(detachDom).not.to.have.been.called
+
+      const cleared = await manager.exec('pin', {}, { clear: 'true' })
+
+      expect(cleared).to.deep.eq({ result: { cleared: true } })
+      expect(restoreDom).not.to.have.been.called
+      expect(unpinSnapshot).to.have.been.calledOnce
+    })
+
+    it('replaces tap’s pin when it lands on another command, keeping tap’s captured DOM to restore', async () => {
+      const { detachDom, restoreDom, changeSnapshotState, pinInApp } = stubSource()
+
+      stubStatusRunner()
+
+      const manager = new TapManager(CYPRESS_VERSION)
+
+      await manager.exec('pin', { test: 'r2', command: '1' })
+      expect(detachDom).to.have.been.calledOnce
+
+      // Clicking another command in the reporter re-pins with no unpin event for
+      // tap to hear, so the pin tap holds no longer describes the AUT.
+      pinInApp('log-2')
+
+      const outcome = await manager.exec('run-state')
+
+      expect((outcome as { result: any }).result.pinned.command.id).to.eq('2')
+
+      // A move would switch the snapshot of the app's pin, not the stale one.
+      await manager.exec('pin', { test: 'r2', command: '1' }, { at: 'before' })
+      expect(changeSnapshotState).not.to.have.been.called
+
+      const cleared = await manager.exec('pin', {}, { clear: 'true' })
+
+      expect(cleared).to.deep.eq({ result: { cleared: true } })
+      // The live DOM tap detached is still the one to put back.
+      expect(restoreDom).to.have.been.calledOnceWith('ORIGINAL-DOM')
+    })
+
+    it('is not reported once the command it pinned has fallen out of memory', async () => {
+      const { pinInApp } = stubSource({ runner: {
+        getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
+        getSnapshotPropsForLog: () => ({ snapshots: [null, null] }),
+      } })
+
+      stubStatusRunner()
+      pinInApp('log-1')
+
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('run-state')
+
+      expect((outcome as { result: any }).result).to.not.have.property('pinned')
+    })
   })
 
   it('treats --clear with nothing pinned as an idempotent no-op', async () => {
