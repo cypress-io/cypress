@@ -6,11 +6,11 @@ import type { InstanceSelection } from '../cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 
 export const renderFailure = (err: { code: string, message: string }): void => {
-  logger.error(`${err.code}: ${err.message}`)
+  logger.errorToStderr(`${err.code}: ${err.message}`)
 }
 
 export const renderKnownFailure = (err: { details: { description: string, solution: string } }): void => {
-  logger.error(`${err.details.description}\n\n${err.details.solution}`)
+  logger.errorToStderr(`${err.details.description}\n\n${err.details.solution}`)
 }
 
 export const renderResult = (result: unknown): void => {

@@ -5,6 +5,8 @@ export interface TapCliOptions {
   instance?: number
   /** Print the raw JSON result even when the command has a human-readable rendering. */
   json?: boolean
+  /** How long to wait on any single CDP call, in milliseconds. */
+  timeout?: number
 }
 
 /**

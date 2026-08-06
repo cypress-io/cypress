@@ -1,9 +1,7 @@
 import chalk from 'chalk'
 
 import type { FrameInspectResult } from '../commands/inspect'
-import { color, definitionList, heading, layout } from './format'
-
-const urlSuffix = (url?: string): string => (url ? `  ${color.muted(url)}` : '')
+import { color, definitionList, heading, layout, quoted } from './format'
 
 // A record renders as a counted heading over an aligned key/value list; an empty
 // or absent record contributes no block.
@@ -31,11 +29,10 @@ const boxBlock = (box: FrameInspectResult['box']): string[][] => {
 
 export const renderInspectHuman = (result: FrameInspectResult): string => {
   if (!result.found) {
-    return `${chalk.bold(result.selector)}  ${color.muted('not found')}${urlSuffix(result.url)}`
+    return `${chalk.bold(quoted(result.selector))}  ${color.muted('not found')}`
   }
 
   return layout([
-    [`${chalk.bold(result.tag ?? '?')}  ${result.selector}${urlSuffix(result.url)}`],
     ...recordBlock('ATTRIBUTES', result.attributes),
     ...ariaBlock(result.aria),
     ...boxBlock(result.box),

@@ -1,38 +1,39 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { FrameCommandError, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { FrameCommandError, parseIndex, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
 import { createFrameIsolatedWorld } from '../aut/cdp'
+import { withAmbiguous } from '../aut/single-match'
+import type { FrameAmbiguousResult } from '../aut/single-match'
 import { readDom } from '../aut/scripts'
 import type { DomReadResult } from '../aut/scripts'
 import { defineNativeCommand } from './definition'
 
 const DEFAULT_MAX_CHARS = 30000
 
-/** What `cypress tap dom` returns: the whole document, or per-selector matches. */
+/** What `cypress tap dom` returns: the whole document, or the matched element. */
 export interface FrameDomResult {
-  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
-  url?: string
-  /** The document's outerHTML — present in whole-page mode. */
+  /** Whether the selector matched — present only in selector mode. */
+  found?: boolean
+  /** The matched element's outerHTML, or the whole document in whole-page mode. */
   html?: string
-  /** Per-match outerHTML — present in selector mode. */
-  matches?: { count: number, html: string[] }
   /** Present (always `true`) when the browser-side cap clipped the output. */
   truncated?: true
 }
 
-export const extractDom = async (
+export const extractDom = (
   session: TapSession,
   frame: AutFrame,
   selector: string | undefined,
   maxChars: number,
-): Promise<FrameDomResult> => {
+  at?: number,
+): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameDomResult> => {
   const { client, sessionId } = session
   const executionContextId = await createFrameIsolatedWorld(session, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: readDom.toString(),
     executionContextId,
-    arguments: [{ value: selector ?? null }, { value: maxChars }],
+    arguments: [{ value: selector ?? null }, { value: maxChars }, { value: at ?? 0 }],
     returnByValue: true,
   }, sessionId)
 
@@ -47,13 +48,12 @@ export const extractDom = async (
   }
 
   return {
-    ...(frame.url ? { url: frame.url } : {}),
-    ...(value.matches ? { matches: value.matches } : {}),
+    ...(value.found !== undefined ? { found: value.found } : {}),
     ...(value.html !== undefined ? { html: value.html } : {}),
     ...(value.truncated ? { truncated: true } : {}),
   }
-}
+})
 
 export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'))
+  return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'), parseIndex(commandOptions.at))
 }, 'dom'))

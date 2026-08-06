@@ -2,6 +2,7 @@ import Debug from 'debug'
 import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
+import { DEFAULT_CDP_TIMEOUT_MS, FIND_INSTANCE_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
 import type { ReadyInstanceState } from '../cypress-instances'
 import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import type { TapExecResult } from '@packages/cypress-instances'
@@ -26,6 +27,10 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
 }
 
 export const throwTapError = (details: { description: string, solution: string }, message: string, cause?: unknown): never => {
+  if (isRendererUnresponsive(cause)) {
+    throw cause
+  }
+
   const err: any = new Error(message, cause === undefined ? undefined : { cause })
 
   err.details = details
@@ -109,13 +114,19 @@ const evaluateBinding = (client: CRI.Client, sessionId: string) => {
   return client.Runtime.evaluate({ expression: `window.${TAP_BINDING_GLOBAL}` }, sessionId)
 }
 
-const probeForBinding = async (client: CRI.Client, sessionId: string): Promise<boolean> => {
-  const { result, exceptionDetails } = await evaluateBinding(client, sessionId)
+const probeForBinding = async (client: CRI.Client, sessionId: string, findInstanceMs: number): Promise<boolean> => {
+  const { result, exceptionDetails } = await withCdpDeadline(
+    evaluateBinding(client, sessionId),
+    'the runner-page probe',
+    findInstanceMs,
+  )
 
   return !exceptionDetails && result.type !== 'undefined' && !!result.objectId
 }
 
-const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[]): Promise<string> => {
+const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], findInstanceMs: number): Promise<string> => {
+  let unresponsive: unknown
+
   for (const target of targetInfos) {
     if (target.type !== 'page') {
       continue
@@ -126,18 +137,28 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
     try {
       sessionId = await attachToPage(client, target.targetId)
 
-      if (await probeForBinding(client, sessionId)) {
+      if (await probeForBinding(client, sessionId, findInstanceMs)) {
         debug('matched runner page target %o', { targetId: target.targetId, url: target.url })
 
         return sessionId
       }
     } catch (err: any) {
+      if (isRendererUnresponsive(err)) {
+        unresponsive = err
+      }
+
       debug('probing target %s failed: %s', target.targetId, err.message)
     }
 
     if (sessionId) {
       await client.Target.detachFromTarget({ sessionId }).catch(() => {})
     }
+  }
+
+  // A page that never answered the probe is a different failure from a browser
+  // holding no runner page at all, and only the former is worth waiting longer on.
+  if (unresponsive) {
+    throw unresponsive
   }
 
   return throwTapError(errors.tapBindingNotFound, `Failed to connect to the runner page.`)
@@ -222,16 +243,22 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
 export const withTapSession = async <T> (
   instance: ReadyInstanceState,
   fn: (session: TapSession) => Promise<T>,
+  timeoutMs?: number,
 ): Promise<T> => {
-  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl })
+  const callMs = timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS
+  const findInstanceMs = timeoutMs ?? FIND_INSTANCE_TIMEOUT_MS
+
+  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, callMs, findInstanceMs })
 
   const client = await connectToBrowser(instance.cdpBrowserWsUrl)
+
+  boundCdpCalls(client, callMs)
 
   try {
     const attach = async (): Promise<string> => {
       const { targetInfos } = await listTargets(client)
 
-      return findRunnerPageSession(client, targetInfos)
+      return findRunnerPageSession(client, targetInfos, findInstanceMs)
     }
 
     let sessionId = await attach()

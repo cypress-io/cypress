@@ -1,31 +1,36 @@
 import type { FrameDomResult } from '../commands/dom'
-import { color, emptyState, heading, layout } from './format'
+import { color, emptyState, layout } from './format'
 
-// The frame URL trails the panel title in muted text, the way the reporter dims
-// contextual detail.
-const urlSuffix = (url?: string): string => (url ? `  ${color.muted(url)}` : '')
+/**
+ * `outerHTML` starts at the element but its inner lines keep the indentation
+ * they had in the document, so a deeply nested element arrives ragged — first
+ * line at the margin, the rest pushed right. Removing the smallest indent they
+ * all share pulls the markup back to the margin without touching its internal
+ * shape. Rendering-only: `--json` keeps the document's own whitespace.
+ */
+const dedent = (html: string): string => {
+  const [first, ...rest] = html.split('\n')
+  const shared = rest
+  .filter((line) => line.trim().length)
+  .reduce((min, line) => Math.min(min, line.length - line.trimStart().length), Infinity)
 
-// Selector mode prints each match's outerHTML as its own block under a counted
-// title; whole-page mode prints the single document. A browser-side clip adds a
-// muted trailer either way.
+  if (!rest.length || shared === Infinity || shared === 0) {
+    return html
+  }
+
+  return [first, ...rest.map((line) => line.slice(shared))].join('\n')
+}
+
+// Nothing but the HTML — no title framing it, so the output reads (and pipes)
+// as the markup it is. A browser-side clip still adds a muted trailer, since
+// silently handing back half a document would be worse than a little furniture.
 export const renderDomHuman = (result: FrameDomResult): string => {
-  const truncation = result.truncated ? [[color.muted('(output truncated)')]] : []
-
-  if (result.matches) {
-    if (result.matches.count === 0) {
-      return emptyState('No elements matched the selector.')
-    }
-
-    return layout([
-      [`${heading('MATCHES', result.matches.count)}${urlSuffix(result.url)}`],
-      ...result.matches.html.map((html) => [html]),
-      ...truncation,
-    ])
+  if (result.found === false) {
+    return emptyState('No element matched the selector.')
   }
 
   return layout([
-    [`${heading('DOM')}${urlSuffix(result.url)}`],
-    ...(result.html !== undefined ? [[result.html]] : []),
-    ...truncation,
+    ...(result.html !== undefined ? [[dedent(result.html)]] : []),
+    ...(result.truncated ? [[color.muted('(output truncated)')]] : []),
   ])
 }

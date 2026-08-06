@@ -247,16 +247,38 @@ const specsMeta = {
 cypress instance with that testing type specified.`,
 } as const satisfies TapNativeCommandSchema
 
+// Every selector these three take must resolve to exactly one element, so a
+// reader is never silently shown one of several matches. Their help says so in
+// the same words, and names the remedy the ambiguity error offers.
+const SINGLE_ELEMENT_SELECTOR = 'a CSS selector matching exactly one element'
+
+const AMBIGUOUS_SELECTOR_HELP = `The selector must match exactly one element. When it matches more, nothing is
+read: the command answers with a numbered list of the matches, each with a
+unique selector. Re-run with --at <index> to read one of them, or with whichever
+selector you meant.`
+
+// Shared by the three selector-taking reads, so the way you pick one match out
+// of several is identical across them.
+const atField = {
+  name: 'at',
+  type: 'string',
+  required: false,
+  description: '0-based index of the match to read, as listed by the index column when a selector matches several',
+} as const satisfies TapCommandOptionSchema
+
 const domMeta = {
   name: 'dom',
-  description: 'read the app-under-test DOM as HTML: the whole page, or each element matching a selector (with its subtree)',
-  details: `Reads the app-under-test DOM as HTML: the whole page, or the outerHTML of
-each element matching a CSS selector (each match includes its full subtree).
-Output is capped browser-side so a heavy page never ships megabytes at once.`,
+  description: 'read the app-under-test DOM as HTML: the whole page, or the one element a selector matches (with its subtree)',
+  details: `Reads the app-under-test DOM as HTML: the whole page, or the outerHTML of the
+element a CSS selector matches (including its full subtree). Output is capped
+browser-side so a heavy page never ships megabytes at once.
+
+${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    selectorField,
+    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR}; omit to read the whole document` },
     { name: 'max-chars', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' },
+    atField,
   ],
 } as const satisfies TapNativeCommandSchema
 
@@ -265,21 +287,29 @@ const ariaMeta = {
   description: 'read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector',
   details: `Reads the accessibility (ARIA) tree of the app-under-test frame, or the
 subtree rooted at a CSS selector. Structural and text-only roles are dropped,
-leaving the compact role/name/state tree DevTools shows.`,
+leaving the compact role/name/state tree DevTools shows.
+
+${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    { ...selectorField, description: 'a CSS selector to root the tree at; omit for the whole frame' },
+    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at; omit for the whole frame` },
     { name: 'max-nodes', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' },
+    atField,
   ],
 } as const satisfies TapNativeCommandSchema
 
 const inspectMeta = {
   name: 'inspect',
-  description: 'inspect the first element matching a selector: its tag, attributes, computed styles, box model, and accessibility node',
-  details: `Inspects the first element matching the selector: its tag, attributes,
-curated computed styles, box model, and accessibility node.`,
+  description: 'inspect the element a selector matches: its tag, attributes, computed styles, box model, and accessibility node',
+  details: `Inspects the element the selector matches: its tag, attributes, curated
+computed styles, box model, and accessibility node.
+
+${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
-  options: [{ ...selectorField, required: true, description: 'a CSS selector identifying the element to inspect' }],
+  options: [
+    { ...selectorField, required: true, description: `${SINGLE_ELEMENT_SELECTOR}, identifying the element to inspect` },
+    atField,
+  ],
 } as const satisfies TapNativeCommandSchema
 
 // CLI-native tap commands: implemented entirely in the CLI (instance discovery

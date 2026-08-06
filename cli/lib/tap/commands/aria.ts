@@ -1,8 +1,10 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { parseIndex, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXProperty, AXValue } from '../aut/cdp'
+import { withAmbiguous } from '../aut/single-match'
+import type { FrameAmbiguousResult } from '../aut/single-match'
 import { defineNativeCommand } from './definition'
 
 // The accessibility tree of a real app is deep; cap the projection so it stays
@@ -40,8 +42,6 @@ export interface AriaNodeOut {
 
 /** What `cypress tap aria` returns: the projected accessibility tree. */
 export interface FrameAriaResult {
-  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
-  url?: string
   nodes: AriaNodeOut[]
   /** Number of nodes returned (`nodes.length`, before any client-side view). */
   nodeCount: number
@@ -127,9 +127,10 @@ const resolveSelectorBackendNodeId = async (
   session: TapSession,
   frame: AutFrame,
   selector: string,
+  index: number,
 ): Promise<number | undefined> => {
   const { client, sessionId } = session
-  const objectId = await querySelectorObjectId(session, frame, selector)
+  const objectId = await querySelectorObjectId(session, frame, selector, index)
 
   if (objectId === undefined) {
     return undefined
@@ -140,61 +141,65 @@ const resolveSelectorBackendNodeId = async (
   return node.backendNodeId
 }
 
-export const extractAria = async (
+export const extractAria = (
   session: TapSession,
   frame: AutFrame,
   selector: string | undefined,
   maxNodes: number,
-): Promise<FrameAriaResult> => {
-  const { client, sessionId } = session
+  at?: number,
+): Promise<FrameAriaResult | FrameAmbiguousResult> => {
+  // Ahead of the tree fetch: an ambiguous selector shouldn't cost a full AX tree.
+  return withAmbiguous(session, frame, selector, at, async (): Promise<FrameAriaResult> => {
+    const { client, sessionId } = session
 
-  await client.DOM.enable({}, sessionId)
-  await client.Accessibility.enable(sessionId)
+    await client.DOM.enable({}, sessionId)
+    await client.Accessibility.enable(sessionId)
 
-  const { nodes: axNodes } = await client.Accessibility.getFullAXTree({ frameId: frame.frameId }, sessionId)
+    const { nodes: axNodes } = await client.Accessibility.getFullAXTree({ frameId: frame.frameId }, sessionId)
 
-  const byId = new Map<string, AXNode>()
+    const byId = new Map<string, AXNode>()
 
-  for (const node of axNodes as AXNode[]) {
-    byId.set(node.nodeId, node)
-  }
-
-  const base: FrameAriaResult = { ...(frame.url ? { url: frame.url } : {}), nodes: [], nodeCount: 0 }
-
-  let rootId: string | undefined
-
-  if (selector !== undefined) {
-    const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector)
-
-    if (backendNodeId === undefined) {
-      // Selector matched nothing, or the match is absent from the a11y tree.
-      return base
+    for (const node of axNodes as AXNode[]) {
+      byId.set(node.nodeId, node)
     }
 
-    rootId = (axNodes as AXNode[]).find((node) => node.backendDOMNodeId === backendNodeId)?.nodeId
+    const base: FrameAriaResult = { nodes: [], nodeCount: 0 }
+
+    let rootId: string | undefined
+
+    if (selector !== undefined) {
+      const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector, at ?? 0)
+
+      if (backendNodeId === undefined) {
+        // Selector matched nothing, or the match is absent from the a11y tree.
+        return base
+      }
+
+      rootId = (axNodes as AXNode[]).find((node) => node.backendDOMNodeId === backendNodeId)?.nodeId
+
+      if (rootId === undefined) {
+        return base
+      }
+    } else {
+      // The frame root is the sole node with no parent (the RootWebArea).
+      rootId = (axNodes as AXNode[]).find((node) => node.parentId === undefined)?.nodeId ?? (axNodes as AXNode[])[0]?.nodeId
+    }
 
     if (rootId === undefined) {
       return base
     }
-  } else {
-    // The frame root is the sole node with no parent (the RootWebArea).
-    rootId = (axNodes as AXNode[]).find((node) => node.parentId === undefined)?.nodeId ?? (axNodes as AXNode[])[0]?.nodeId
-  }
 
-  if (rootId === undefined) {
-    return base
-  }
+    const { nodes, truncated } = projectTree(byId, rootId, maxNodes)
 
-  const { nodes, truncated } = projectTree(byId, rootId, maxNodes)
-
-  return {
-    ...base,
-    nodes,
-    nodeCount: nodes.length,
-    ...(truncated ? { truncated: true } : {}),
-  }
+    return {
+      ...base,
+      nodes,
+      nodeCount: nodes.length,
+      ...(truncated ? { truncated: true } : {}),
+    }
+  })
 }
 
 export const ariaCommand = defineNativeCommand('aria', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'))
+  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'), parseIndex(commandOptions.at))
 }, 'aria'))

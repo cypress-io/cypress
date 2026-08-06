@@ -21,50 +21,53 @@
 
 export interface DomReadResult {
   html?: string
-  matches?: { count: number, html: string[] }
+  found?: boolean
   truncated?: boolean
   invalidSelector?: boolean
 }
 
-// Caps output while walking, so a heavy page never serializes megabytes across
-// CDP. Returns a tagged object rather than throwing, so a bad selector
-// round-trips as data instead of a CDP exception.
-export function readDom (selector: string | null, maxChars: number): DomReadResult {
+// Caps output, so a heavy page never serializes megabytes across CDP. Returns a
+// tagged object rather than throwing, so a bad selector round-trips as data
+// instead of a CDP exception. `index` picks one of several matches (`--at`); the
+// caller has already checked it against the match count.
+export function readDom (selector: string | null, maxChars: number, index: number): DomReadResult {
   if (selector === null) {
     const html = document.documentElement ? document.documentElement.outerHTML : ''
 
     return html.length > maxChars ? { html: html.slice(0, maxChars), truncated: true } : { html }
   }
 
-  let els: Element[]
+  let el: Element | undefined
 
   try {
-    els = Array.from(document.querySelectorAll(selector))
+    el = document.querySelectorAll(selector)[index]
   } catch (_e) {
     return { invalidSelector: true }
   }
 
-  const out: string[] = []
-  let remaining = maxChars
-  let truncated = false
-
-  for (const el of els) {
-    const html = el.outerHTML
-
-    if (html.length > remaining) {
-      if (remaining > 0) {
-        out.push(html.slice(0, remaining))
-      }
-
-      truncated = true
-      break
-    }
-
-    out.push(html)
-    remaining -= html.length
+  if (!el) {
+    return { found: false }
   }
 
-  return { matches: { count: els.length, html: out }, truncated }
+  const html = el.outerHTML
+
+  return html.length > maxChars ? { found: true, html: html.slice(0, maxChars), truncated: true } : { found: true, html }
+}
+
+export interface MatchCountResult {
+  count?: number
+  invalidSelector?: boolean
+}
+
+// Counts matches without serializing any of them, so the single-element guard
+// costs one number however heavy the page. Tags a bad selector as data, the way
+// `readDom` does.
+export function countMatches (selector: string): MatchCountResult {
+  try {
+    return { count: document.querySelectorAll(selector).length }
+  } catch (_e) {
+    return { invalidSelector: true }
+  }
 }
 
 export interface ElementInfo {
