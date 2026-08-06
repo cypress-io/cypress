@@ -3,8 +3,7 @@ import EE from 'events'
 import * as util from '../../../../lib/plugins/util'
 import * as preprocessor from '../../../../lib/plugins/child/preprocessor'
 
-// NOTE: todo come back to this
-describe.skip('lib/plugins/child/preprocessor', () => {
+describe('lib/plugins/child/preprocessor', () => {
   beforeEach(function () {
     this.ipc = {
       send: sinon.spy(),
@@ -28,11 +27,11 @@ describe.skip('lib/plugins/child/preprocessor', () => {
 
     sinon.stub(util, 'wrapChildPromise')
 
-    return preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file])
+    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file])
   })
 
   afterEach(() => {
-    return preprocessor._clearFiles()
+    preprocessor._clearFiles()
   })
 
   it('passes through ipc, invoke function, and ids', function () {
@@ -105,5 +104,13 @@ describe.skip('lib/plugins/child/preprocessor', () => {
     const files = preprocessor._getFiles()
 
     expect(Object.keys(files).length).to.equal(0)
+  })
+
+  // https://github.com/cypress-io/cypress/issues/1305
+  it('only listens for \'preprocessor:close\' once per ipc', function () {
+    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file])
+    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2])
+
+    expect(this.ipc.on.withArgs('preprocessor:close')).to.be.calledOnce
   })
 })

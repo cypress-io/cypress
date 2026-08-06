@@ -5,7 +5,7 @@ import type { PluginChildIpc, PluginInvokeIds, PreprocessorFileObject } from './
 
 let fileObjects: Record<string, PreprocessorFileObject> = {}
 
-let wrappedClose = false
+const ipcsWithCloseHandler = new WeakSet<PluginChildIpc>()
 
 export const wrap = (
   ipc: PluginChildIpc,
@@ -18,8 +18,8 @@ export const wrap = (
 
   // https://github.com/cypress-io/cypress/issues/1305
   // TODO: Move this to RunPlugins so we don't need to guard this way
-  if (!wrappedClose) {
-    wrappedClose = true
+  if (!ipcsWithCloseHandler.has(ipc)) {
+    ipcsWithCloseHandler.add(ipc)
     ipc.on('preprocessor:close', (filePath?: string) => {
       // no filePath means close all
       if (!filePath) {
