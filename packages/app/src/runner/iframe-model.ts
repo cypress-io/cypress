@@ -222,6 +222,17 @@ export class IframeModel {
 
     clearInterval(this.intervalId)
 
+    // A pin driven from outside the reporter (the tap CLI) has no hover in front
+    // of it to have captured the live page, and a click faster than the hover
+    // debounce has none either — without this, the unpin has nothing to restore.
+    if (!this.originalState) {
+      this._storeOriginalState()
+    }
+
+    // Claim the pending restore of any preview this pin replaced, so its deferred
+    // `hide:snapshot` cannot put the live page back over the pin.
+    this.detachedId = snapshotProps.id
+
     this._restoreDom(snapshots[0], snapshotProps)
   }
 
