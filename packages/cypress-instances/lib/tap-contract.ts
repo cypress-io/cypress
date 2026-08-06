@@ -143,6 +143,16 @@ const runStateMeta = {
   hidden: true,
 } as const satisfies TapCommandSchema
 
+const elementSelectorsMeta = {
+  name: 'element-selectors',
+  description: 'list a unique CSS selector for each element a selector matches',
+  params: [
+    { name: 'selector', type: 'string', required: true, description: 'a CSS selector' },
+  ],
+  options: [],
+  hidden: true,
+} as const satisfies TapCommandSchema
+
 // The canonical command metadata, the single source both sides build a schema
 // from: the running instance advertises it over the binding (see the app's
 // TapManager), and the CLI stamps it with its own version to render help with no
@@ -152,6 +162,7 @@ export const TAP_COMMANDS = [
   reporterMeta,
   pinMeta,
   runStateMeta,
+  elementSelectorsMeta,
 ] as const satisfies readonly TapCommandSchema[]
 
 export type TapCommandName = typeof TAP_COMMANDS[number]['name']
@@ -287,3 +298,5 @@ export * from './contracts/command'
 export * from './contracts/pinned'
 
 export * from './contracts/pin'
+
+export * from './contracts/element-selectors'

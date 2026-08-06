@@ -22,6 +22,8 @@ export type {
   TapSchema,
   TapExecResult,
   ClearResult,
+  ElementSelectorMatch,
+  ElementSelectorsResult,
   PinnedView,
   PinResult,
   SnapshotRef,
