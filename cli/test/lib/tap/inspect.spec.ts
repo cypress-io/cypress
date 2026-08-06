@@ -97,6 +97,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
       ambiguous: true,
       selector: '.item',
       count: 4,
+      selectors: [],
     })
   })
 

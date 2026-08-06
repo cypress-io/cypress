@@ -1,3 +1,7 @@
+import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import type { ElementSelectorMatch, ElementSelectorsResult } from '@packages/cypress-instances'
+
+import { validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
 import { createFrameIsolatedWorld } from './cdp'
 import { FrameCommandError } from './frame'
@@ -7,9 +11,10 @@ import type { MatchCountResult } from './scripts'
 
 /**
  * What a selector-taking AUT read returns in place of the read when the selector
- * matched more than one element: how many it matched. It is the answer to "which
- * one did you mean?", so it prints and honors `--json` like any other result —
- * but the read never happened, so the command exits 1.
+ * matched more than one element: how many it matched, and a selector unique to
+ * each, to re-run with. It is the answer to "which one did you mean?", so it
+ * prints and honors `--json` like any other result — but the read never
+ * happened, so the command exits 1.
  */
 export interface FrameAmbiguousResult {
   /** Always `true` — marks this as the ambiguity answer rather than a read. */
@@ -18,6 +23,30 @@ export interface FrameAmbiguousResult {
   selector: string
   /** How many elements it matched. */
   count: number
+  /**
+   * A selector unique to each match, in document order, each carrying the index
+   * of the match it names. May be shorter than `count`: a match no unique
+   * selector could be derived for is omitted.
+   */
+  selectors: ElementSelectorMatch[]
+}
+
+/**
+ * A unique selector for each match, to offer in place of the ambiguous one.
+ * Best effort: these come from the instance itself, which derives them the way
+ * its Selector Playground does — so they honor any selectorPriority the project
+ * configured, and are selectors the user's own tests would use. An instance that
+ * can't reach its app under test (a secondary origin inside `cy.origin`) just
+ * leaves the match count to speak for itself.
+ */
+const disambiguatingSelectors = async (session: TapSession, selector: string): Promise<ElementSelectorMatch[]> => {
+  try {
+    const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['element-selectors', { selector }, {}]))
+
+    return 'error' in outcome ? [] : (outcome.result as ElementSelectorsResult).selectors
+  } catch {
+    return []
+  }
 }
 
 export const resolveAmbiguity = async (
@@ -72,7 +101,12 @@ export const resolveAmbiguity = async (
     return undefined
   }
 
-  return { ambiguous: true, selector, count }
+  return {
+    ambiguous: true,
+    selector,
+    count,
+    selectors: await disambiguatingSelectors(session, selector),
+  }
 }
 
 export const withAmbiguous = async <T>(
