@@ -43,14 +43,24 @@
               </span>
             </div>
             <div class="children:mb-[16px]">
-              <!-- TODO: Replace with approved v16 launch copy. -->
               <p>
-                Cypress 16 is here. This version includes breaking changes that may require updates to your project.
+                <strong>Cypress 16 supports HTTP/2.</strong> Your application is now tested over the same protocol it uses in production — multiplexed requests, no six-connection ceiling — so modern apps load faster under test and behave the way your users actually experience them.
               </p>
               <p>
-                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
+                <strong>Your tests are faster and more reliable out of the box.</strong> Visibility checks now delegate to the browser’s native <InlineCodeFragment>Element.checkVisibility()</InlineCodeFragment>, <ExternalLink href="https://on.cypress.io/type">
+                  <InlineCodeFragment>cy.type()</InlineCodeFragment>
+                </ExternalLink> no longer pauses between keystrokes, and <ExternalLink href="https://on.cypress.io/getcookie">
+                  <InlineCodeFragment>cy.getCookie()</InlineCodeFragment>
+                </ExternalLink>, <InlineCodeFragment>cy.getAllCookies()</InlineCodeFragment>, <InlineCodeFragment>cy.getAllLocalStorage()</InlineCodeFragment>, and <InlineCodeFragment>cy.getAllSessionStorage()</InlineCodeFragment> have become query commands that retry until your assertions pass — so cookies and storage that arrive asynchronously no longer flake your tests.
+              </p>
+              <p>
+                This release also includes breaking changes that may require updates to your project — most notably the removal of <InlineCodeFragment>Cypress.env()</InlineCodeFragment> in favor of <ExternalLink href="https://on.cypress.io/expose">
+                  <InlineCodeFragment>Cypress.expose()</InlineCodeFragment>
+                </ExternalLink> and <InlineCodeFragment>cy.env()</InlineCodeFragment>, and the deprecation of Electron as a test browser. See the <ExternalLink href="https://on.cypress.io/cypress-env-migration">
+                  migration guide
+                </ExternalLink> and our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink>.
+                  changelog</ExternalLink> for the full list.
               </p>
             </div>
           </div>
