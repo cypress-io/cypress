@@ -145,7 +145,7 @@ const runStateMeta = {
 
 const elementSelectorsMeta = {
   name: 'element-selectors',
-  description: 'list a unique CSS selector for each element a selector matches',
+  description: 'list a unique CSS selector for each element a selector matches, skipping any match none could be derived for',
   params: [
     { name: 'selector', type: 'string', required: true, description: 'a CSS selector' },
   ],

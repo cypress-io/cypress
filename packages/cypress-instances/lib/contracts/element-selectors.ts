@@ -17,9 +17,13 @@ export interface ElementSelectorMatch {
 /** Unique CSS selectors for the elements a selector matched. */
 export interface ElementSelectorsResult {
   /**
-   * One entry per match, in document order. A match no unique selector could be
-   * derived for is omitted, so this may be shorter than the number of elements
-   * matched and its indexes may skip.
+   * One entry per match, in document order. Best effort, and deliberately not a
+   * per-match verdict: a match no unique selector could be derived for is
+   * omitted rather than reported, and a selector matching far more elements than
+   * anyone would pick from is only derived up to a cap. So this may be shorter
+   * than the number of elements matched and its indexes may skip — a missing
+   * index is a match with no selector to offer, never a match that isn't there,
+   * which is why each entry carries the index it names.
    */
   selectors: ElementSelectorMatch[]
 }

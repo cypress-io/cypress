@@ -7,6 +7,12 @@ import type { ElementSelectorMatch, ElementSelectorsResult } from '../contract'
 // omit it rather than suggest one that would resolve to nothing.
 const isDocumentScoped = (selector: string): boolean => !selector.startsWith(':host')
 
+// Deriving a unique selector walks up from the element testing each candidate
+// against the whole document, so deriving one per match for a selector as broad
+// as `*` would hold the app's main thread for the size of the page. Past this
+// many matches the list is no longer one a caller picks out of anyway.
+export const MAX_DERIVED_SELECTORS = 50
+
 export const elementSelectorsCommand = defineCommand('element-selectors', async ({ selector }): Promise<ElementSelectorsResult> => {
   const source = tapManagerDataSource.getElementSelectorSource()
 
@@ -23,12 +29,13 @@ export const elementSelectorsCommand = defineCommand('element-selectors', async 
   }
 
   const selectors: ElementSelectorMatch[] = []
+  const derivable = Math.min(matched.length, MAX_DERIVED_SELECTORS)
 
-  for (let index = 0; index < matched.length; index++) {
-    const unique = source.getSelector(matched.item(index))
+  for (let index = 0; index < derivable; index++) {
+    const uniqueSelector = source.getSelector(matched.item(index))
 
-    if (unique && isDocumentScoped(unique)) {
-      selectors.push({ index, selector: unique })
+    if (uniqueSelector && isDocumentScoped(uniqueSelector)) {
+      selectors.push({ index, selector: uniqueSelector })
     }
   }
 

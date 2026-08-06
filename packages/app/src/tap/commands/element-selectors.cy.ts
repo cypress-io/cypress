@@ -1,3 +1,4 @@
+import { MAX_DERIVED_SELECTORS } from './element-selectors'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { TapManager } from '../tap-manager'
 import type { TapElementSelectorSource } from '../types'
@@ -47,6 +48,19 @@ describe('tap/commands/element-selectors', () => {
     stubSource(sourceOf(['shadowed', 'a'], (element) => (element === 'shadowed' ? ':host > button' : `#${element}`)))
 
     expect(await exec()).to.deep.eq({ result: { selectors: [{ index: 1, selector: '#a' }] } })
+  })
+
+  it('stops deriving at the cap, so a selector as broad as * cannot pin the app down', async () => {
+    const derive = cy.stub().callsFake((element: unknown) => `#e${element}`)
+    const elements = Array.from({ length: MAX_DERIVED_SELECTORS + 5 }, (_, index) => String(index))
+
+    stubSource(sourceOf(elements, derive))
+
+    const { selectors } = (await exec('*') as { result: { selectors: { index: number }[] } }).result
+
+    expect(selectors).to.have.length(MAX_DERIVED_SELECTORS)
+    expect(selectors[selectors.length - 1].index).to.eq(MAX_DERIVED_SELECTORS - 1)
+    expect(derive, 'no work is done for the matches past the cap').to.have.callCount(MAX_DERIVED_SELECTORS)
   })
 
   it('returns no selectors when the selector matched nothing', async () => {
