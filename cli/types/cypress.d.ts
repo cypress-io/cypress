@@ -3568,6 +3568,14 @@ declare namespace Cypress {
     detectors: CypressComponentDependency[]
 
     /**
+     * For frameworks that support more than one bundler, infers which bundler
+     * the project uses (e.g. Angular on @angular-devkit/build-angular (webpack)
+     * vs @angular/build (vite)). Used to preselect the bundler when the
+     * framework is auto-detected.
+     */
+    detectBundler?: (projectPath: string) => Promise<'webpack' | 'vite'>
+
+    /**
      * Array of required dependencies. This could be the bundler and JavaScript library.
      */
     dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
@@ -3648,7 +3656,7 @@ declare namespace Cypress {
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
-    framework: 'react' | 'vue' | 'svelte'
+    framework: 'react' | 'vue' | 'svelte' | 'angular'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack'

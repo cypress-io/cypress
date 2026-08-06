@@ -100,6 +100,49 @@ describe('detectFramework', () => {
     })
   })
 
+  it('Angular with @angular-devkit/build-angular infers webpack', async () => {
+    const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { dependency: '@angular/cli', version: '21.0.0' },
+      { devDependency: '@angular-devkit/build-angular', version: '21.0.0' },
+    ])
+
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
+
+    expect(actual.framework?.type).toEqual('angular')
+    expect(actual.bundler).toEqual('webpack')
+  })
+
+  it('Angular with @angular/build infers vite', async () => {
+    const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { dependency: '@angular/cli', version: '21.0.0' },
+      { devDependency: '@angular/build', version: '21.0.0' },
+    ])
+
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
+
+    expect(actual.framework?.type).toEqual('angular')
+    expect(actual.bundler).toEqual('vite')
+  })
+
+  it('Angular with both builders installed prefers webpack', async () => {
+    const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { dependency: '@angular/cli', version: '21.0.0' },
+      { devDependency: '@angular-devkit/build-angular', version: '21.0.0' },
+      { devDependency: '@angular/build', version: '21.0.0' },
+    ])
+
+    const actual = await detectFramework(projectPath, resolvedCtFrameworks)
+
+    expect(actual.framework?.type).toEqual('angular')
+    expect(actual.bundler).toEqual('webpack')
+  })
+
   ;['8.0.0'].forEach((v) => {
     it(`Svelte and Vite v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')

@@ -100,6 +100,24 @@ export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
   minVersion: '^21.0.0 || ^22.0.0',
 } as const
 
+export const WIZARD_DEPENDENCY_ANGULAR_BUILD = {
+  type: 'angular-build',
+  name: 'Angular Build',
+  package: '@angular/build',
+  installer: '@angular/build',
+  description: 'Official Angular build system, based on esbuild and vite',
+  minVersion: '^21.0.0 || ^22.0.0',
+} as const
+
+export const WIZARD_DEPENDENCY_ANALOG_ANGULAR_VITE_PLUGIN = {
+  type: 'analog-angular-vite-plugin',
+  name: 'Analog Vite Plugin for Angular',
+  package: '@analogjs/vite-plugin-angular',
+  installer: '@analogjs/vite-plugin-angular',
+  description: 'Vite plugin that compiles Angular components in the vite transform pipeline',
+  minVersion: '^2.0.0',
+} as const
+
 export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER = {
   type: 'angular',
   name: 'Angular Platform Browser',
@@ -128,6 +146,8 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_VUE_3,
   WIZARD_DEPENDENCY_ANGULAR_CLI,
   WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
+  WIZARD_DEPENDENCY_ANGULAR_BUILD,
+  WIZARD_DEPENDENCY_ANALOG_ANGULAR_VITE_PLUGIN,
   WIZARD_DEPENDENCY_ANGULAR_CORE,
   WIZARD_DEPENDENCY_ANGULAR_COMMON,
   WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER,
@@ -142,6 +162,8 @@ export const WIZARD_BUNDLERS = [
 const componentDependenciesOfInterest = [
   '@angular/cli',
   '@angular-devkit/build-angular',
+  '@angular/build',
+  '@analogjs/vite-plugin-angular',
   '@angular/core',
   '@angular/common',
   '@angular/platform-browser',

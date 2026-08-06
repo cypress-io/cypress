@@ -37,15 +37,24 @@ export async function detectFramework (projectPath: string, frameworks: Cypress.
   for (const framework of frameworks.filter((x) => x.category === 'template')) {
     const hasAllDeps = await areAllDepsSatisfied(projectPath, framework)
 
-    // so far all the templates we support only have 1 bundler,
-    // but we want to consider in the future, tools like Nuxt ship
-    // both a webpack and vite dev-env.
-    // if we support this, we will also need to attempt to infer the dev server of choice.
-    if (hasAllDeps && framework.supportedBundlers.length === 1) {
+    if (!hasAllDeps) {
+      continue
+    }
+
+    if (framework.supportedBundlers.length === 1) {
       return {
         framework,
         bundler: framework.supportedBundlers[0],
       }
+    }
+
+    // Templates that ship more than one dev-env (e.g. Angular on webpack or
+    // vite) infer the dev server of choice from the project's dependencies.
+    const bundler = await framework.detectBundler?.(projectPath)
+
+    return {
+      framework,
+      bundler: bundler && framework.supportedBundlers.includes(bundler) ? bundler : undefined,
     }
   }
 

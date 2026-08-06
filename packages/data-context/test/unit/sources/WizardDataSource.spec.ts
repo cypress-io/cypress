@@ -79,6 +79,38 @@ describe('packagesToInstall', () => {
     expect(actual).toEqual(`npm install -D vite vue`)
   })
 
+  it('angular project with webpack', async () => {
+    const ctx = createTestDataContext()
+
+    const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
+
+    ctx.update((coreData) => {
+      coreData.currentProject = projectPath
+      coreData.wizard.chosenFramework = findFramework('angular')
+      coreData.wizard.chosenBundler = findBundler('webpack')
+    })
+
+    const actual = await ctx.wizard.installDependenciesCommand()
+
+    expect(actual).toEqual(`npm install -D @angular/cli @angular-devkit/build-angular @angular/core @angular/common @angular/platform-browser`)
+  })
+
+  it('angular project with vite', async () => {
+    const ctx = createTestDataContext()
+
+    const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
+
+    ctx.update((coreData) => {
+      coreData.currentProject = projectPath
+      coreData.wizard.chosenFramework = findFramework('angular')
+      coreData.wizard.chosenBundler = findBundler('vite')
+    })
+
+    const actual = await ctx.wizard.installDependenciesCommand()
+
+    expect(actual).toEqual(`npm install -D vite @analogjs/vite-plugin-angular @angular/cli @angular/build @angular/core @angular/common @angular/platform-browser`)
+  })
+
   it('nextjs-unconfigured', async () => {
     const ctx = createTestDataContext()
 

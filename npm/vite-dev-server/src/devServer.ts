@@ -6,7 +6,7 @@ import type { UserConfig } from 'vite-8'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
-const ALL_FRAMEWORKS = ['react', 'vue'] as const
+const ALL_FRAMEWORKS = ['react', 'vue', 'angular'] as const
 
 type ConfigHandler = UserConfig | (() => UserConfig | Promise<UserConfig>)
 export type ViteDevServerConfig = {

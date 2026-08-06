@@ -63,6 +63,66 @@ describe('@cypress/schematic: ng-add', () => {
     })
   })
 
+  const setBuilderDevDependencies = (tree: UnitTestTree, deps: Record<string, string>) => {
+    const pkgJson = tree.readJson('/package.json') as JsonObject
+    const devDependencies = { ...(pkgJson.devDependencies as JsonObject) }
+
+    delete devDependencies['@angular-devkit/build-angular']
+    delete devDependencies['@angular/build']
+
+    tree.overwrite('/package.json', JSON.stringify({
+      ...pkgJson,
+      devDependencies: { ...devDependencies, ...deps },
+    }, null, 2))
+  }
+
+  it('should scaffold component testing with the webpack bundler when @angular-devkit/build-angular is installed', async () => {
+    setBuilderDevDependencies(appTree, { '@angular-devkit/build-angular': '^21.0.0' })
+
+    const tree = await schematicRunner.runSchematic('ng-add', { 'component': true }, appTree)
+    const cypressConfig = tree.readContent('/projects/sandbox/cypress.config.ts')
+    const pkgJson = tree.readJson('/package.json') as JsonObject
+    const devDependencies = pkgJson.devDependencies as JsonObject
+
+    expect(cypressConfig).to.contain(`bundler: 'webpack'`)
+    expect(devDependencies['@analogjs/vite-plugin-angular']).to.be.undefined
+  })
+
+  it('should scaffold component testing with the vite bundler when only @angular/build is installed', async () => {
+    setBuilderDevDependencies(appTree, { '@angular/build': '^21.0.0' })
+
+    const tree = await schematicRunner.runSchematic('ng-add', { 'component': true }, appTree)
+    const cypressConfig = tree.readContent('/projects/sandbox/cypress.config.ts')
+    const pkgJson = tree.readJson('/package.json') as JsonObject
+    const devDependencies = pkgJson.devDependencies as JsonObject
+
+    expect(cypressConfig).to.contain(`bundler: 'vite'`)
+    expect(devDependencies['vite']).to.not.be.undefined
+    expect(devDependencies['@analogjs/vite-plugin-angular']).to.not.be.undefined
+  })
+
+  it('should prefer the webpack bundler when both builder packages are installed', async () => {
+    setBuilderDevDependencies(appTree, {
+      '@angular-devkit/build-angular': '^21.0.0',
+      '@angular/build': '^21.0.0',
+    })
+
+    const tree = await schematicRunner.runSchematic('ng-add', { 'component': true }, appTree)
+    const cypressConfig = tree.readContent('/projects/sandbox/cypress.config.ts')
+
+    expect(cypressConfig).to.contain(`bundler: 'webpack'`)
+  })
+
+  it('should not add vite dependencies when component testing is not included', async () => {
+    setBuilderDevDependencies(appTree, { '@angular/build': '^21.0.0' })
+
+    const tree = await schematicRunner.runSchematic('ng-add', { 'component': false }, appTree)
+    const pkgJson = tree.readJson('/package.json') as JsonObject
+    const devDependencies = pkgJson.devDependencies as JsonObject
+
+    expect(devDependencies['@analogjs/vite-plugin-angular']).to.be.undefined
+  })
+
   it('should add @cypress/schematic to the schemaCollections array', async () => {
     const tree = await schematicRunner.runSchematic('ng-add', { 'component': true }, appTree)
     const angularJson = readAngularJson(tree)

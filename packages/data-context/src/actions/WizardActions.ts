@@ -43,7 +43,7 @@ export class WizardActions {
 
     const prevFramework = this.ctx.coreData.wizard.chosenFramework?.type ?? null
 
-    if (!prevFramework || doesNotSupportChosenBundler || !['react', 'vue'].includes(prevFramework)) {
+    if (!prevFramework || doesNotSupportChosenBundler || !['react', 'vue', 'angular'].includes(prevFramework)) {
       this.setBundler(null)
     }
   }

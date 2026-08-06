@@ -41,7 +41,11 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     const configFile = await findUp(configFiles, { cwd: projectRoot })
 
     if (!configFile) {
-      if (config.onConfigNotFound) {
+      // Angular CLI projects have no vite config file — the framework preset
+      // below supplies the base config instead.
+      if (config.framework === 'angular') {
+        resolvedOverrides = { configFile: false }
+      } else if (config.onConfigNotFound) {
         config.onConfigNotFound('vite', projectRoot, configFiles)
         // The config process will be killed from the parent, but we want to early exit so we don't get
         // any additional errors related to not having a config
@@ -49,11 +53,19 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
       } else {
         throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
       }
+    } else {
+      debug('Resolved config file at', configFile, 'using root', projectRoot)
+
+      resolvedOverrides = { configFile }
     }
+  }
 
-    debug('Resolved config file at', configFile, 'using root', projectRoot)
+  if (config.framework === 'angular') {
+    const { angularHandler } = await import('./helpers/angularHandler.js')
 
-    resolvedOverrides = { configFile }
+    // The preset is merged first so anything the user supplies (inline
+    // viteConfig or a vite config file) takes precedence over it.
+    resolvedOverrides = vite.mergeConfig(await angularHandler(config), resolvedOverrides)
   }
 
   const finalConfig = vite.mergeConfig(

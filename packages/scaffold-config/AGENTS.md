@@ -31,7 +31,7 @@ yarn workspace @packages/scaffold-config check-ts
 - The `browser/dependencies` output is NOT used in the production binary; it exists for internal testing purposes only.
 - The ESM build is compiled but not currently consumed; production usage is CJS only.
 - When adding a new framework, you must also add a `<name>-configured` and `<name>-unconfigured` system-test project and wire it into `component_testing_spec.ts`.
-- New dependencies must be declared in `src/constants.ts` with descriptions.
+- New dependencies must be declared in `src/dependencies.ts` with descriptions (there is no `src/constants.ts`).
 
 **Integration Points**
 

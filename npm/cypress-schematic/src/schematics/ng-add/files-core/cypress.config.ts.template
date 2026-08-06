@@ -10,7 +10,7 @@ export default defineConfig({
   component: {
     devServer: {
       framework: 'angular',
-      bundler: 'webpack',
+      bundler: '<%= bundler %>',
     },
     specPattern: '**/*.cy.ts'
   }

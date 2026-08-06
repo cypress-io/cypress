@@ -101,6 +101,26 @@ export function getBundler (bundler: WizardBundler['type']): WizardBundler {
 
 const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
+// The builder package is the bundler signal for Angular: @angular-devkit/build-angular
+// drives webpack, @angular/build drives vite. Devkit wins when both are installed so
+// existing projects (including ones that installed devkit alongside @angular/build to
+// keep webpack CT working) do not silently change dev servers.
+const detectAngularBundler = async (projectPath: string): Promise<WizardBundler['type']> => {
+  const devkit = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR, projectPath)
+
+  if (devkit.detectedVersion) {
+    return 'webpack'
+  }
+
+  const angularBuild = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_BUILD, projectPath)
+
+  if (angularBuild.detectedVersion) {
+    return 'vite'
+  }
+
+  return 'webpack'
+}
+
 export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefinition['supportStatus'][]> = ['alpha', 'beta', 'full', 'community'] as const
 
 export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
@@ -176,8 +196,21 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
     category: 'template',
     name: 'Angular',
     detectors: [dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI],
-    supportedBundlers: ['webpack'],
+    supportedBundlers: ['webpack', 'vite'],
+    detectBundler: detectAngularBundler,
     dependencies: (bundler: WizardBundler['type']): Cypress.CypressComponentDependency[] => {
+      if (bundler === 'vite') {
+        return [
+          dependencies.WIZARD_DEPENDENCY_VITE,
+          dependencies.WIZARD_DEPENDENCY_ANALOG_ANGULAR_VITE_PLUGIN,
+          dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI,
+          dependencies.WIZARD_DEPENDENCY_ANGULAR_BUILD,
+          dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE,
+          dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON,
+          dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER,
+        ]
+      }
+
       return [
         dependencies.WIZARD_DEPENDENCY_ANGULAR_CLI,
         dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,

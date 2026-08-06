@@ -34,16 +34,38 @@ type HandleFilesType = {
 
 export default function (_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
+    const options = { ..._options, bundler: getComponentBundler(tree) }
+
     return chain([
-      updateDependencies(),
-      addCypressCoreFiles(_options),
-      addCypressComponentTestingFiles(_options),
-      addCtSpecs(_options),
+      updateDependencies(options),
+      addCypressCoreFiles(options),
+      addCypressComponentTestingFiles(options),
+      addCtSpecs(options),
       addCypressTestScriptsToPackageJson(),
-      modifyAngularJson(_options),
+      modifyAngularJson(options),
       addDefaultSchematic(),
     ])(tree, _context)
   }
+}
+
+// The installed builder package determines the component testing bundler:
+// @angular-devkit/build-angular drives webpack, @angular/build drives vite.
+// Devkit wins when both are present so existing projects keep their dev server.
+export function getComponentBundler (tree: Tree): 'webpack' | 'vite' {
+  const pkgJson = new JSONFile(tree, '/package.json')
+  const hasDependency = (name: string) => {
+    return Boolean(pkgJson.get(['dependencies', name]) ?? pkgJson.get(['devDependencies', name]))
+  }
+
+  if (hasDependency('@angular-devkit/build-angular')) {
+    return 'webpack'
+  }
+
+  if (hasDependency('@angular/build')) {
+    return 'vite'
+  }
+
+  return 'webpack'
 }
 
 function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue) {
@@ -52,12 +74,19 @@ function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue)
   json.modify(path, value)
 }
 
-function updateDependencies (): Rule {
+function updateDependencies (options: any): Rule {
   return (tree: Tree, context: SchematicContext): any => {
     context.logger.debug('Updating dependencies...')
     context.addTask(new NodePackageInstallTask({ allowScripts: true }))
 
-    const addDependencies = of('cypress').pipe(
+    const packages = ['cypress']
+
+    // The vite dev server sources both packages from the user's project.
+    if (options.component && options.bundler === 'vite') {
+      packages.push('vite', '@analogjs/vite-plugin-angular')
+    }
+
+    const addDependencies = of(...packages).pipe(
       concatMap((packageName: string) => getLatestNodeVersion(packageName)),
       map((packageFromRegistry: NodePackage) => {
         const { name, version } = packageFromRegistry
