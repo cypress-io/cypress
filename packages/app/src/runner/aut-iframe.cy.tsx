@@ -218,7 +218,8 @@ describe('AutIframe', () => {
     beforeEach(() => {
       const eventManager = createEventManager()
 
-      eventManager._testingOnlySetCypress({ Location: Cypress.Location })
+      // Location is a driver internal, so it is absent from the public Cypress types
+      eventManager._testingOnlySetCypress({ Location: (Cypress as any).Location })
       autIframe = new AutIframe('Test Project', eventManager, Cypress.$)
     })
 
