@@ -6,6 +6,7 @@ import { withTapSession, validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
 import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
+import type { FrameAmbiguousResult } from './single-match'
 import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
@@ -29,7 +30,6 @@ export class FrameCommandError extends Error {
 export interface AutFrame {
   /** CDP frameId — scopes `Accessibility.getFullAXTree` and `Page.createIsolatedWorld`. */
   frameId: string
-  url: string
 }
 
 interface FrameNode {
@@ -73,7 +73,33 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
 
   debug('resolved AUT frame %o', found)
 
-  return { frameId: found.id, url: found.url }
+  return { frameId: found.id }
+}
+
+const WHOLE_NUMBER = /^\d+$/
+
+const parseWholeNumber = (raw: unknown): number | undefined => {
+  if (typeof raw !== 'string' || !WHOLE_NUMBER.test(raw)) {
+    return undefined
+  }
+
+  const value = Number(raw)
+
+  return Number.isSafeInteger(value) ? value : undefined
+}
+
+export const parseIndex = (raw: string | undefined): number | undefined => {
+  if (raw === undefined) {
+    return undefined
+  }
+
+  const value = parseWholeNumber(raw)
+
+  if (value === undefined) {
+    throw new FrameCommandError('INVALID_INDEX', '--at must be a 0-based index: a whole number, 0 or greater')
+  }
+
+  return value
 }
 
 export const parsePositiveInt = (raw: string | undefined, fallback: number, label: string): number => {
@@ -81,9 +107,9 @@ export const parsePositiveInt = (raw: string | undefined, fallback: number, labe
     return fallback
   }
 
-  const value = Number(raw)
+  const value = parseWholeNumber(raw)
 
-  if (!Number.isInteger(value) || value <= 0) {
+  if (value === undefined || value <= 0) {
     throw new FrameCommandError('INVALID_LIMIT', `${label} must be a positive integer`)
   }
 
@@ -139,9 +165,14 @@ export const withResolvedAutFrame = async (
 
         const frame = await resolveAutFrame(session.client, session.sessionId)
 
-        renderOutcome(command, await read(session, frame), options.json)
+        const result = await read(session, frame)
 
-        return 0
+        renderOutcome(command, result, options.json)
+
+        // The ambiguity answer is still a result — it names the matches to
+        // choose between, so it prints on stdout like any other. But it is not
+        // the read that was asked for, and the exit code has to say so.
+        return (result as FrameAmbiguousResult).ambiguous ? 1 : 0
       } catch (err: any) {
         if (err instanceof FrameCommandError) {
           renderFailure({ code: err.code, message: err.message })

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { readDom, readElementInfo } from '../../../lib/tap/aut/scripts'
+import { countMatches, readDom, readElementInfo } from '../../../lib/tap/aut/scripts'
 
 // These run in the AUT frame over CDP; here we call the real functions with the
 // handful of DOM globals they touch stubbed, so the logic is tested without a
@@ -15,34 +15,43 @@ describe('lib/tap/aut/scripts readDom', () => {
   it('returns the whole-document HTML when no selector is given', () => {
     stubDocument({ documentElement: { outerHTML: '<html>hi</html>' } })
 
-    expect(readDom(null, 30000)).to.deep.eq({ html: '<html>hi</html>' })
+    expect(readDom(null, 30000, 0)).to.deep.eq({ html: '<html>hi</html>' })
   })
 
   it('truncates and flags the whole-document HTML past the cap', () => {
     stubDocument({ documentElement: { outerHTML: '<html>too long</html>' } })
 
-    expect(readDom(null, 4)).to.deep.eq({ html: '<htm', truncated: true })
+    expect(readDom(null, 4, 0)).to.deep.eq({ html: '<htm', truncated: true })
   })
 
   it('returns an empty string when there is no documentElement', () => {
     stubDocument({ documentElement: null })
 
-    expect(readDom(null, 30000)).to.deep.eq({ html: '' })
+    expect(readDom(null, 30000, 0)).to.deep.eq({ html: '' })
   })
 
-  it('returns each match in selector mode', () => {
-    stubDocument({ querySelectorAll: () => [{ outerHTML: '<a>' }, { outerHTML: '<b>' }] })
+  it('returns the matched element in selector mode', () => {
+    stubDocument({ querySelectorAll: () => [{ outerHTML: '<a></a>' }] })
 
-    expect(readDom('.x', 100)).to.deep.eq({ matches: { count: 2, html: ['<a>', '<b>'] }, truncated: false })
+    expect(readDom('.x', 100, 0)).to.deep.eq({ found: true, html: '<a></a>' })
   })
 
-  it('caps across matches, keeping the partial element that overflows', () => {
-    stubDocument({ querySelectorAll: () => [{ outerHTML: '<a>' }, { outerHTML: '<bbbb>' }] })
+  it('reads the match the index names, not the first', () => {
+    stubDocument({ querySelectorAll: () => [{ outerHTML: '<a></a>' }, { outerHTML: '<b></b>' }, { outerHTML: '<c></c>' }] })
 
-    const result = readDom('.x', 5)
+    expect(readDom('.x', 100, 2)).to.deep.eq({ found: true, html: '<c></c>' })
+  })
 
-    expect(result.matches).to.deep.eq({ count: 2, html: ['<a>', '<b'] })
-    expect(result.truncated).to.eq(true)
+  it('truncates and flags the matched element past the cap', () => {
+    stubDocument({ querySelectorAll: () => [{ outerHTML: '<a>too long</a>' }] })
+
+    expect(readDom('.x', 3, 0)).to.deep.eq({ found: true, html: '<a>', truncated: true })
+  })
+
+  it('reports found:false when the selector matches nothing', () => {
+    stubDocument({ querySelectorAll: () => [] })
+
+    expect(readDom('.missing', 100, 0)).to.deep.eq({ found: false })
   })
 
   it('tags an invalid selector rather than throwing', () => {
@@ -50,7 +59,23 @@ describe('lib/tap/aut/scripts readDom', () => {
       throw new Error('bad selector')
     } })
 
-    expect(readDom('>>bad', 100)).to.deep.eq({ invalidSelector: true })
+    expect(readDom('>>bad', 100, 0)).to.deep.eq({ invalidSelector: true })
+  })
+})
+
+describe('lib/tap/aut/scripts countMatches', () => {
+  it('counts the matches without reading any of them', () => {
+    stubDocument({ querySelectorAll: () => ({ length: 3 }) })
+
+    expect(countMatches('.x')).to.deep.eq({ count: 3 })
+  })
+
+  it('tags an invalid selector rather than throwing', () => {
+    stubDocument({ querySelectorAll: () => {
+      throw new Error('bad selector')
+    } })
+
+    expect(countMatches('>>bad')).to.deep.eq({ invalidSelector: true })
   })
 })
 

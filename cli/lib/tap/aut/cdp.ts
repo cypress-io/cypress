@@ -18,8 +18,9 @@ export const createFrameIsolatedWorld = async (session: TapSession, frame: AutFr
 }
 
 /**
- * Resolves a CSS selector to the matched element's CDP objectId, running
- * `querySelector` in an isolated world on the AUT frame. Throws
+ * Resolves a CSS selector to the matched element's CDP objectId, querying in an
+ * isolated world on the AUT frame. `index` picks one of several matches
+ * (`--at`), already checked against the match count by the caller. Throws
  * `INVALID_SELECTOR` when the selector is malformed; returns undefined when the
  * selector is valid but nothing matched.
  */
@@ -27,14 +28,15 @@ export const querySelectorObjectId = async (
   session: TapSession,
   frame: AutFrame,
   selector: string,
+  index: number,
 ): Promise<string | undefined> => {
   const { client, sessionId } = session
   const executionContextId = await createFrameIsolatedWorld(session, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
-    functionDeclaration: 'function (selector) { return document.querySelector(selector) }',
+    functionDeclaration: 'function (selector, index) { return document.querySelectorAll(selector)[index] }',
     executionContextId,
-    arguments: [{ value: selector }],
+    arguments: [{ value: selector }, { value: index }],
   }, sessionId)
 
   if (exceptionDetails) {

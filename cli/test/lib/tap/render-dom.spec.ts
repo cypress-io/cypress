@@ -7,27 +7,43 @@ import type { FrameDomResult } from '../../../lib/tap/commands/dom'
 const render = (result: FrameDomResult): string => stripAnsi(renderDomHuman(result))
 
 describe('lib/tap/render/dom', () => {
-  it('renders the whole document under a DOM header with the url', () => {
-    expect(render({ url: 'http://localhost:5555/', html: '<html></html>' })).toBe([
-      'DOM  http://localhost:5555/',
-      '',
-      '<html></html>',
-    ].join('\n'))
+  it('renders the whole document as bare HTML, with nothing framing it', () => {
+    expect(render({ html: '<html></html>' })).toBe('<html></html>')
   })
 
-  it('renders each selector match as its own block under a counted header, and notes truncation', () => {
-    expect(render({ url: 'http://localhost:5555/', matches: { count: 2, html: ['<a></a>', '<b></b>'] }, truncated: true })).toBe([
-      'MATCHES (2)  http://localhost:5555/',
-      '',
+  it('renders the matched element the same way, and notes truncation', () => {
+    expect(render({ found: true, html: '<a></a>', truncated: true })).toBe([
       '<a></a>',
-      '',
-      '<b></b>',
       '',
       '(output truncated)',
     ].join('\n'))
   })
 
+  it('pulls a nested element back to the margin, keeping its internal shape', () => {
+    // outerHTML as the document had it: the element starts at the margin, its
+    // body carries the depth it sat at.
+    const html = [
+      '<button type="button">',
+      '          <span class="icon-bar"></span>',
+      '            <em>x</em>',
+      '        </button>',
+    ].join('\n')
+
+    expect(render({ found: true, html })).toBe([
+      '<button type="button">',
+      '  <span class="icon-bar"></span>',
+      '    <em>x</em>',
+      '</button>',
+    ].join('\n'))
+  })
+
+  it('leaves markup that already sits at the margin alone', () => {
+    const html = '<ul>\n<li>a</li>\n</ul>'
+
+    expect(render({ found: true, html })).toBe(html)
+  })
+
   it('notes when a selector matched nothing', () => {
-    expect(render({ url: 'http://x/', matches: { count: 0, html: [] } })).toBe('No elements matched the selector.')
+    expect(render({ found: false })).toBe('No element matched the selector.')
   })
 })

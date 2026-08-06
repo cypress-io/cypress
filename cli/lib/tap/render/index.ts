@@ -6,6 +6,8 @@ import type { TapStatus } from '../types'
 import type { FrameDomResult } from '../commands/dom'
 import type { FrameAriaResult } from '../commands/aria'
 import type { FrameInspectResult } from '../commands/inspect'
+import type { FrameAmbiguousResult } from '../aut/single-match'
+import { renderAmbiguousHuman } from './ambiguous'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
 import { renderRunHuman } from './run'
 import { renderInstancesHuman } from './instances'
@@ -37,6 +39,16 @@ export interface TapCommandRendering {
   options?: readonly TapCommandOptionSchema[]
 }
 
+// The selector-taking AUT reads answer an ambiguous selector in place of the
+// read they were asked for, so each one renders that answer instead of its own.
+const orAmbiguous = <T>(render: (result: T) => string) => {
+  return (result: unknown): string => {
+    const ambiguous = result as FrameAmbiguousResult
+
+    return ambiguous.ambiguous ? renderAmbiguousHuman(ambiguous) : render(result as T)
+  }
+}
+
 const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapCommandRendering>> = {
   reporter: {
     renderHuman: (result) => {
@@ -58,9 +70,9 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
   instances: { renderHuman: (result) => renderInstancesHuman(result as TapInstanceSummary[]) },
   specs: { renderHuman: (result) => renderSpecsHuman(result as TapSpecEntry[]) },
   status: { renderHuman: (result) => renderStatusHuman(result as TapStatus) },
-  dom: { renderHuman: (result) => renderDomHuman(result as FrameDomResult) },
-  aria: { renderHuman: (result) => renderAriaHuman(result as FrameAriaResult) },
-  inspect: { renderHuman: (result) => renderInspectHuman(result as FrameInspectResult) },
+  dom: { renderHuman: orAmbiguous<FrameDomResult>(renderDomHuman) },
+  aria: { renderHuman: orAmbiguous<FrameAriaResult>(renderAriaHuman) },
+  inspect: { renderHuman: orAmbiguous<FrameInspectResult>(renderInspectHuman) },
   pin: { renderHuman: (result) => renderPinHuman(result as PinResult | ClearResult) },
 }
 

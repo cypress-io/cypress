@@ -19,6 +19,7 @@ export const color = {
   failStrong: chalk.hex('#f59aa9'), // $red-300
   errHeaderText: chalk.hex('#f59aa9'), // $err-header-text = $red-300
   aborted: chalk.hex('#db7903'), // $orange-400
+  warn: chalk.hex('#edbb4a'), // $warn-text = $orange-300
   bad: chalk.hex('#c62b49'), // $red-500
   pending: chalk.hex('#6470f3'), // $indigo-400
   alias: chalk.hex('#c8a7f5'), // $purple-300
@@ -76,6 +77,11 @@ export const startedAtLabel = (startedAt: string): string => {
 
 // A dim note standing in for an absent panel, e.g. `No specs to run.`
 export const emptyState = (message: string): string => chalk.dim(message)
+
+// A selector, quoted so it pastes straight back into a shell as one argument.
+// Single quotes throughout, since attribute selectors carry double ones
+// (`[data-test="x"]`); a single quote in the value becomes `'\''`.
+export const quoted = (selector: string): string => `'${selector.split('\'').join('\'\\\'\'')}'`
 
 export const indent = (depth: number): string => '  '.repeat(depth)
 

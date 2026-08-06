@@ -7,9 +7,8 @@ import type { FrameInspectResult } from '../../../lib/tap/commands/inspect'
 const render = (result: FrameInspectResult): string => stripAnsi(renderInspectHuman(result))
 
 describe('lib/tap/render/inspect', () => {
-  it('renders a found element as header + attribute/accessibility/box/style sections', () => {
+  it('renders a found element as attribute/accessibility/box/style sections', () => {
     const output = render({
-      url: 'http://localhost:3000',
       selector: '[data-testid=username]',
       found: true,
       tag: 'input',
@@ -20,8 +19,6 @@ describe('lib/tap/render/inspect', () => {
     })
 
     expect(output).toBe([
-      'input  [data-testid=username]  http://localhost:3000',
-      '',
       'ATTRIBUTES (2)',
       '  data-testid  username',
       '  name         username',
@@ -41,7 +38,7 @@ describe('lib/tap/render/inspect', () => {
   })
 
   it('renders a not-found result on a single line', () => {
-    expect(render({ url: 'http://x/', selector: '.missing', found: false })).toBe('.missing  not found  http://x/')
+    expect(render({ selector: '.missing', found: false })).toBe('\'.missing\'  not found')
   })
 
   it('omits the accessibility block when there is no aria node', () => {
