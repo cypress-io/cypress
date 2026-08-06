@@ -20,13 +20,6 @@ export interface FrameAmbiguousResult {
   count: number
 }
 
-/**
- * Resolves what a selector-taking AUT read should do: `undefined` to go ahead —
- * the selector matched one element, or none (which each command reports in its
- * own shape), or `at` named which match to read — or the ambiguity answer to
- * return in place of the read, so a reader is never silently shown one arbitrary
- * match of several.
- */
 export const resolveMatch = async (
   session: TapSession,
   frame: AutFrame,
@@ -80,4 +73,16 @@ export const resolveMatch = async (
   }
 
   return { ambiguous: true, selector, count }
+}
+
+export const withAmbiguous = async <T>(
+  session: TapSession,
+  frame: AutFrame,
+  selector: string | undefined,
+  at: number | undefined,
+  read: () => Promise<T>,
+): Promise<T | FrameAmbiguousResult> => {
+  const ambiguous = await resolveMatch(session, frame, selector, at)
+
+  return ambiguous ?? read()
 }

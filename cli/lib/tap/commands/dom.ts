@@ -2,7 +2,7 @@ import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
 import { FrameCommandError, parseIndex, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
 import { createFrameIsolatedWorld } from '../aut/cdp'
-import { resolveMatch } from '../aut/single-match'
+import { withAmbiguous } from '../aut/single-match'
 import type { FrameAmbiguousResult } from '../aut/single-match'
 import { readDom } from '../aut/scripts'
 import type { DomReadResult } from '../aut/scripts'
@@ -20,20 +20,14 @@ export interface FrameDomResult {
   truncated?: true
 }
 
-export const extractDom = async (
+export const extractDom = (
   session: TapSession,
   frame: AutFrame,
   selector: string | undefined,
   maxChars: number,
   at?: number,
-): Promise<FrameDomResult | FrameAmbiguousResult> => {
+): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameDomResult> => {
   const { client, sessionId } = session
-  const ambiguous = await resolveMatch(session, frame, selector, at)
-
-  if (ambiguous) {
-    return ambiguous
-  }
-
   const executionContextId = await createFrameIsolatedWorld(session, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
@@ -58,7 +52,7 @@ export const extractDom = async (
     ...(value.html !== undefined ? { html: value.html } : {}),
     ...(value.truncated ? { truncated: true } : {}),
   }
-}
+})
 
 export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
   return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'), parseIndex(commandOptions.at))

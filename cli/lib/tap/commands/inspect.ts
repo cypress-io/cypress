@@ -4,7 +4,7 @@ import { FrameCommandError, parseIndex, withResolvedAutFrame } from '../aut/fram
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXValue } from '../aut/cdp'
 import { isRendererUnresponsive } from '../cdp-timeout'
-import { resolveMatch } from '../aut/single-match'
+import { withAmbiguous } from '../aut/single-match'
 import type { FrameAmbiguousResult } from '../aut/single-match'
 import { readElementInfo } from '../aut/scripts'
 import type { ElementInfo } from '../aut/scripts'
@@ -88,19 +88,13 @@ const readAriaNode = async (session: TapSession, objectId: string): Promise<Fram
   }
 }
 
-export const extractInspect = async (
+export const extractInspect = (
   session: TapSession,
   frame: AutFrame,
   selector: string,
   at?: number,
-): Promise<FrameInspectResult | FrameAmbiguousResult> => {
+): Promise<FrameInspectResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameInspectResult> => {
   const { client, sessionId } = session
-
-  const ambiguous = await resolveMatch(session, frame, selector, at)
-
-  if (ambiguous) {
-    return ambiguous
-  }
 
   await client.DOM.enable({}, sessionId)
   await client.Accessibility.enable(sessionId)
@@ -135,7 +129,7 @@ export const extractInspect = async (
     box,
     styles,
   }
-}
+})
 
 export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
   return extractInspect(session, frame, commandOptions.selector, parseIndex(commandOptions.at))
