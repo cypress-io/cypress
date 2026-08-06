@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
-import { countsLine, definitionList, emptyState, heading, indent, layout, stateBadge, table, titleLine } from '../../../lib/tap/render/format'
+import { countsLine, definitionList, emptyState, heading, indent, layout, quoted, stateBadge, table, titleLine } from '../../../lib/tap/render/format'
 
 // chalk's color level depends on where the suite runs, so strip escape codes
 // before asserting — these target the shared layout, not the colors.
@@ -55,6 +55,17 @@ describe('lib/tap/render/format', () => {
         '  pid           4242',
         '  testing type  e2e',
       ])
+    })
+  })
+
+  describe('quoted', () => {
+    it('single-quotes a selector, leaving its double-quoted attribute values alone', () => {
+      expect(quoted(String.raw`[data-test="x"]`)).toBe(String.raw`'[data-test="x"]'`)
+    })
+
+    it('escapes a single quote so the whole selector stays one shell argument', () => {
+      expect(quoted(String.raw`[data-cy="Bob's item"]`)).toBe(String.raw`'[data-cy="Bob'\''s item"]'`)
+      expect(quoted(String.raw`[title='x']`)).toBe(String.raw`'[title='\''x'\'']'`)
     })
   })
 

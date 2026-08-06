@@ -7,9 +7,8 @@ import type { FrameAriaResult } from '../../../lib/tap/commands/aria'
 const render = (result: FrameAriaResult): string => stripAnsi(renderAriaHuman(result))
 
 describe('lib/tap/render/aria', () => {
-  it('renders an indented role tree with names, values, states, and a truncation note', () => {
+  it('renders a role tree rooted flush, with names, values, states, and a truncation note', () => {
     const output = render({
-      url: 'http://localhost:3000',
       nodeCount: 4,
       nodes: [
         { depth: 0, role: 'RootWebArea', name: 'Login' },
@@ -21,11 +20,10 @@ describe('lib/tap/render/aria', () => {
     })
 
     expect(output).toBe([
-      'ARIA (4)  http://localhost:3000',
-      '  RootWebArea  Login',
-      '    heading  Sign in',
-      '    textbox  Username = ada  [disabled]',
-      '    button  Submit',
+      'RootWebArea  Login',
+      '  heading  Sign in',
+      '  textbox  Username = ada  [disabled]',
+      '  button  Submit',
       '',
       '(output truncated)',
     ].join('\n'))

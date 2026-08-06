@@ -96,7 +96,7 @@ any instance version that has the command at all.
 - **Muted for secondary, `—` for absent.** Missing testing type, no attached
   browser, no timestamp — a muted em dash, never blank or "null".
 - **Guard/lifecycle messages are their own thing.** A "no instance / no browser"
-  guard is the discovery layer speaking, not the command's empty rendering;
+  guard is the find-instance layer speaking, not the command's empty rendering;
   don't dress it up as data.
 - **One thing, one rendering.** When two commands report the same thing, they
   share the block that renders it — the pinned command reads identically from

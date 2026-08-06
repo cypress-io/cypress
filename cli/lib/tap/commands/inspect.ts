@@ -1,8 +1,11 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
+import { FrameCommandError, parseIndex, withResolvedAutFrame } from '../aut/frame'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXValue } from '../aut/cdp'
+import { isRendererUnresponsive } from '../cdp-timeout'
+import { withAmbiguous } from '../aut/single-match'
+import type { FrameAmbiguousResult } from '../aut/single-match'
 import { readElementInfo } from '../aut/scripts'
 import type { ElementInfo } from '../aut/scripts'
 import { defineNativeCommand } from './definition'
@@ -26,10 +29,8 @@ interface AXNode {
   backendDOMNodeId?: number
 }
 
-/** What `cypress tap inspect` returns for the first element matching a selector. */
+/** What `cypress tap inspect` returns for the element a selector matches. */
 export interface FrameInspectResult {
-  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
-  url?: string
   /** The CSS selector that was inspected. */
   selector: string
   /** Whether an element matched. */
@@ -78,23 +79,28 @@ const readAriaNode = async (session: TapSession, objectId: string): Promise<Fram
     const axNodes = nodes as AXNode[]
 
     return projectAria(axNodes.find((candidate) => candidate.backendDOMNodeId === node.backendNodeId) ?? axNodes[0])
-  } catch {
+  } catch (err) {
+    if (isRendererUnresponsive(err)) {
+      throw err
+    }
+
     return undefined
   }
 }
 
-export const extractInspect = async (
+export const extractInspect = (
   session: TapSession,
   frame: AutFrame,
   selector: string,
-): Promise<FrameInspectResult> => {
+  at?: number,
+): Promise<FrameInspectResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameInspectResult> => {
   const { client, sessionId } = session
 
   await client.DOM.enable({}, sessionId)
   await client.Accessibility.enable(sessionId)
 
-  const base: FrameInspectResult = { ...(frame.url ? { url: frame.url } : {}), selector, found: false }
-  const objectId = await querySelectorObjectId(session, frame, selector)
+  const base: FrameInspectResult = { selector, found: false }
+  const objectId = await querySelectorObjectId(session, frame, selector, at ?? 0)
 
   if (!objectId) {
     return base
@@ -123,8 +129,8 @@ export const extractInspect = async (
     box,
     styles,
   }
-}
+})
 
 export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractInspect(session, frame, commandOptions.selector)
+  return extractInspect(session, frame, commandOptions.selector, parseIndex(commandOptions.at))
 }, 'inspect'))

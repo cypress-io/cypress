@@ -1,5 +1,8 @@
 import { listLiveInstances } from '../../cypress-instances'
+import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-instances'
 import { renderOutcome, renderResult } from '../output'
+import { withTapSession } from '../tap-session'
+import { FIND_INSTANCE_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
@@ -17,6 +20,28 @@ export interface TapInstanceSummary {
   browserAttached: boolean
   /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
   browserName: string | null
+  /**
+   * Whether the runner page answered. `browserAttached` only says the browser
+   * process is reachable, so this is what separates a healthy instance from one
+   * whose page is wedged — the state in which every other command fails. Absent
+   * when there is no runner page to ask.
+   */
+  rendererResponsive?: boolean
+}
+
+// Bounded, and never throws: `instances` is what a caller reaches for when
+// everything else is failing, so an unanswered probe is a reported fact rather
+// than an error. Absent means there was nothing to ask, not that it went unasked.
+const probeRenderer = async (instance: LiveInstanceState, timeoutMs: number): Promise<boolean | undefined> => {
+  if (instance.cdpBrowserWsUrl === null) {
+    return undefined
+  }
+
+  try {
+    return await withTapSession(instance as ReadyInstanceState, async () => true, timeoutMs)
+  } catch (err) {
+    return isRendererUnresponsive(err) ? false : undefined
+  }
 }
 
 const listInstances = async (options: TapCliOptions): Promise<number> => {
@@ -28,12 +53,16 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     return 0
   }
 
-  const summaries: TapInstanceSummary[] = instances.map((instance) => ({
+  const timeoutMs = options.timeout ?? FIND_INSTANCE_TIMEOUT_MS
+  const responsive = await Promise.all(instances.map((instance) => probeRenderer(instance, timeoutMs)))
+
+  const summaries: TapInstanceSummary[] = instances.map((instance, index) => ({
     pid: instance.pid,
     projectRoot: instance.projectRoot,
     testingType: instance.testingType,
     browserAttached: instance.cdpBrowserWsUrl !== null,
     browserName: instance.browserName,
+    ...(responsive[index] === undefined ? {} : { rendererResponsive: responsive[index] }),
   }))
 
   renderOutcome('instances', summaries, options.json)

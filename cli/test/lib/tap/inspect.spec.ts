@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { CypressInstanceError } from '../../../lib/cypress-instances'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
 import type { TapSession } from '../../../lib/tap/tap-session'
 
 const SESSION_ID = 'S1'
 
 describe('lib/tap/commands/inspect extractInspect', () => {
-  const frame = { frameId: 'aut-frame-id', url: 'http://localhost:5555/index.html' }
+  const frame = { frameId: 'aut-frame-id' }
 
   const ELEMENT_INFO = {
     tag: 'input',
@@ -18,26 +19,23 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   const makeInspectSession = (opts: {
     selectorObjectId?: string
     selectorSubtype?: string
-    throwOnEval?: boolean
+    matchCount?: number
+    invalidSelector?: boolean
     elementInfo?: unknown
-    axThrows?: boolean
+    axError?: unknown
     axNodes?: unknown[]
   } = {}) => {
-    // callFunctionOn is used twice: first to querySelector (returns the element
-    // objectId), then to read the element's info by value.
+    // callFunctionOn is used three times: the single-element guard's match count,
+    // then querySelector (returns the element objectId), then the element's info
+    // by value.
     const callFunctionOn = vi.fn()
-    .mockImplementationOnce(async () => {
-      if (opts.throwOnEval) {
-        return { exceptionDetails: { text: 'bad selector' } }
-      }
-
-      return { result: { objectId: opts.selectorObjectId, subtype: opts.selectorSubtype } }
-    })
+    .mockImplementationOnce(async () => ({ result: { value: opts.invalidSelector ? { invalidSelector: true } : { count: opts.matchCount ?? 1 } } }))
+    .mockImplementationOnce(async () => ({ result: { objectId: opts.selectorObjectId, subtype: opts.selectorSubtype } }))
     .mockImplementationOnce(async () => ({ result: { value: opts.elementInfo ?? ELEMENT_INFO } }))
 
     const getPartialAXTree = vi.fn().mockImplementation(async () => {
-      if (opts.axThrows) {
-        throw new Error('no ax')
+      if (opts.axError) {
+        throw opts.axError
       }
 
       return { nodes: opts.axNodes ?? [{ role: { value: 'textbox' }, name: { value: 'Username' }, backendDOMNodeId: 40, properties: [{ name: 'disabled', value: { value: true } }] }] }
@@ -59,10 +57,22 @@ describe('lib/tap/commands/inspect extractInspect', () => {
     return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapSession }
   }
 
+  // A read returns the element; an ambiguous selector returns the candidates
+  // instead, which only the dedicated test below expects.
+  const readInspect = async (...args: Parameters<typeof extractInspect>) => {
+    const result = await extractInspect(...args)
+
+    if ('ambiguous' in result) {
+      throw new Error(`expected a read, got the ambiguity answer: ${JSON.stringify(result)}`)
+    }
+
+    return result
+  }
+
   it('returns tag, attributes, curated styles, box, and the ax node for a match', async () => {
     const { session } = makeInspectSession({ selectorObjectId: 'obj-1' })
 
-    const result = await extractInspect(session, frame, '[data-testid=username-input]')
+    const result = await readInspect(session, frame, '[data-testid=username-input]')
 
     expect(result.found).to.eq(true)
     expect(result.tag).to.eq('input')
@@ -73,26 +83,45 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   })
 
   it('returns found:false when the selector matches nothing', async () => {
-    const { session } = makeInspectSession({ selectorObjectId: undefined, selectorSubtype: 'null' })
+    const { session } = makeInspectSession({ matchCount: 0, selectorObjectId: undefined, selectorSubtype: 'null' })
 
     const result = await extractInspect(session, frame, '.missing')
 
-    expect(result).to.deep.eq({ url: 'http://localhost:5555/index.html', selector: '.missing', found: false })
+    expect(result).to.deep.eq({ selector: '.missing', found: false })
+  })
+
+  it('answers a selector matching more than one element instead of reading', async () => {
+    const { session } = makeInspectSession({ matchCount: 4 })
+
+    expect(await extractInspect(session, frame, '.item')).to.deep.eq({
+      ambiguous: true,
+      selector: '.item',
+      count: 4,
+    })
   })
 
   it('maps a bad selector to INVALID_SELECTOR', async () => {
-    const { session } = makeInspectSession({ throwOnEval: true })
+    const { session } = makeInspectSession({ invalidSelector: true })
 
     await expect(extractInspect(session, frame, '>>bad')).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
   })
 
   it('still returns the element when the accessibility node is unavailable', async () => {
-    const { session } = makeInspectSession({ selectorObjectId: 'obj-1', axThrows: true })
+    const { session } = makeInspectSession({ selectorObjectId: 'obj-1', axError: new Error('no ax') })
 
-    const result = await extractInspect(session, frame, '.plain')
+    const result = await readInspect(session, frame, '.plain')
 
     expect(result.found).to.eq(true)
     expect(result.aria).to.be.undefined
     expect(result.tag).to.eq('input')
+  })
+
+  it('fails instead of reporting a partial element when the renderer stops answering', async () => {
+    const { session } = makeInspectSession({
+      selectorObjectId: 'obj-1',
+      axError: new CypressInstanceError('RENDERER_UNRESPONSIVE', 'The targeted Cypress instance did not answer Accessibility.getPartialAXTree within 30000ms.'),
+    })
+
+    await expect(extractInspect(session, frame, '.wedged')).rejects.toMatchObject({ code: 'RENDERER_UNRESPONSIVE' })
   })
 })

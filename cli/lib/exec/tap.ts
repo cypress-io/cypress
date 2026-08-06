@@ -148,7 +148,7 @@ const tapModule = {
         }
 
         return dispatchCode
-      })
+      }, options.timeout)
     } catch (err: any) {
       if (err instanceof CypressInstanceError) {
         if (wantsHelp || !command) {

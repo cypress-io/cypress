@@ -63,7 +63,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   try {
     const outcome = await withTapSession(instance as ReadyInstanceState, async (session) => {
       return validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
-    })
+    }, options.timeout)
 
     if ('error' in outcome) {
       renderFailure(outcome.error)
@@ -75,6 +75,14 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
 
     return 0
   } catch (err: any) {
+    // A degraded instance reached this far carries a code (e.g. an unresponsive
+    // renderer); the earlier catch only covers instances that never resolved.
+    if (err instanceof CypressInstanceError) {
+      renderFailure(err)
+
+      return 1
+    }
+
     if (err.known && err.details) {
       renderKnownFailure(err)
 

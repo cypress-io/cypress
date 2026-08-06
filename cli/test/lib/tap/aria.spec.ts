@@ -28,12 +28,14 @@ describe('lib/tap/commands/aria extractAria', () => {
     }),
   ]
 
-  const makeAxSession = (opts: { axNodes?: unknown[], selectorObjectId?: string | undefined, selectorSubtype?: string, backendNodeId?: number, throwOnEval?: boolean } = {}) => {
-    const callFunctionOn = vi.fn().mockImplementation(async () => {
-      if (opts.throwOnEval) {
-        return { exceptionDetails: { text: 'bad selector' } }
-      }
-
+  const makeAxSession = (opts: { axNodes?: unknown[], selectorObjectId?: string | undefined, selectorSubtype?: string, backendNodeId?: number, matchCount?: number, invalidSelector?: boolean } = {}) => {
+    // In selector mode the single-element guard counts matches first; the
+    // selector is only resolved to an element once it matched exactly one.
+    const callFunctionOn = vi.fn()
+    .mockImplementationOnce(async () => {
+      return { result: { value: opts.invalidSelector ? { invalidSelector: true } : { count: opts.matchCount ?? 1 } } }
+    })
+    .mockImplementation(async () => {
       return { result: { objectId: opts.selectorObjectId, subtype: opts.selectorSubtype } }
     })
 
@@ -53,14 +55,25 @@ describe('lib/tap/commands/aria extractAria', () => {
     return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapSession, client }
   }
 
-  const frame = { frameId: 'aut-frame-id', url: 'http://localhost:5555/index.html' }
+  const frame = { frameId: 'aut-frame-id' }
+
+  // A read returns the tree; an ambiguous selector returns the candidates
+  // instead, which only the dedicated test below expects.
+  const readAria = async (...args: Parameters<typeof extractAria>) => {
+    const result = await extractAria(...args)
+
+    if ('ambiguous' in result) {
+      throw new Error(`expected a tree, got the ambiguity answer: ${JSON.stringify(result)}`)
+    }
+
+    return result
+  }
 
   it('projects the whole tree, collapsing noise roles and reporting states/value', async () => {
     const { session } = makeAxSession()
 
-    const result = await extractAria(session, frame, undefined, 200)
+    const result = await readAria(session, frame, undefined, 200)
 
-    expect(result.url).to.eq('http://localhost:5555/index.html')
     expect(result.nodeCount).to.eq(3)
     // The generic node is dropped; the heading and textbox promote under the root.
     expect(result.nodes).to.deep.eq([
@@ -73,7 +86,7 @@ describe('lib/tap/commands/aria extractAria', () => {
   it('roots the tree at the selector match via its backend node id', async () => {
     const { session } = makeAxSession({ selectorObjectId: 'obj-1', backendNodeId: 99 })
 
-    const result = await extractAria(session, frame, '[data-testid=username]', 200)
+    const result = await readAria(session, frame, '[data-testid=username]', 200)
 
     expect(result.nodes).to.deep.eq([
       { depth: 0, role: 'textbox', name: 'Username', value: 'ada', states: ['disabled'] },
@@ -81,15 +94,22 @@ describe('lib/tap/commands/aria extractAria', () => {
   })
 
   it('returns an empty tree when the selector matches nothing', async () => {
-    const { session } = makeAxSession({ selectorObjectId: undefined, selectorSubtype: 'null' })
+    const { session } = makeAxSession({ matchCount: 0, selectorObjectId: undefined, selectorSubtype: 'null' })
 
-    const result = await extractAria(session, frame, '.missing', 200)
+    const result = await readAria(session, frame, '.missing', 200)
 
-    expect(result).to.deep.eq({ url: 'http://localhost:5555/index.html', nodes: [], nodeCount: 0 })
+    expect(result).to.deep.eq({ nodes: [], nodeCount: 0 })
+  })
+
+  it('answers a selector matching more than one element without fetching the tree', async () => {
+    const { session, client } = makeAxSession({ matchCount: 2 })
+
+    expect(await extractAria(session, frame, '.item', 200)).to.deep.include({ ambiguous: true, selector: '.item', count: 2 })
+    expect(client.Accessibility.getFullAXTree).not.toHaveBeenCalled()
   })
 
   it('maps a bad selector to INVALID_SELECTOR', async () => {
-    const { session } = makeAxSession({ throwOnEval: true })
+    const { session } = makeAxSession({ invalidSelector: true })
 
     await expect(extractAria(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
   })
@@ -97,7 +117,7 @@ describe('lib/tap/commands/aria extractAria', () => {
   it('caps the tree at max-nodes and flags truncation', async () => {
     const { session } = makeAxSession()
 
-    const result = await extractAria(session, frame, undefined, 2)
+    const result = await readAria(session, frame, undefined, 2)
 
     expect(result.nodeCount).to.eq(2)
     expect(result.truncated).to.eq(true)
