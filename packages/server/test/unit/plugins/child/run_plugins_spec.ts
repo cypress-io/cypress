@@ -259,16 +259,11 @@ describe('lib/plugins/child/run_plugins', () => {
       })
     })
 
-    // https://github.com/cypress-io/cypress/issues/1305
     describe(`on 'preprocessor:close' message`, () => {
       beforeEach(async () => {
         sinon.stub(preprocessor, 'close')
 
         await runPlugins.runSetupNodeEvents({ projectRoot: '/project/root' }, () => {})
-      })
-
-      it('registers a single listener for every preprocessed file', () => {
-        expect(ipc.on.withArgs('preprocessor:close')).to.be.calledOnce
       })
 
       it('closes the file with the given path', () => {

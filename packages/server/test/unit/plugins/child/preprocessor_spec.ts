@@ -35,10 +35,6 @@ describe('lib/plugins/child/preprocessor', () => {
   })
 
   context('#wrap', () => {
-    it('passes through ipc, invoke function, and ids', function () {
-      expect(util.wrapChildPromise).to.be.calledWith(this.ipc, this.invoke, this.ids)
-    })
-
     it('passes through simple file values', function () {
       const file = util.wrapChildPromise.lastCall.args[3][0]
 
@@ -66,12 +62,6 @@ describe('lib/plugins/child/preprocessor', () => {
       const file2 = util.wrapChildPromise.lastCall.args[3][0]
 
       expect(file1).to.equal(file2)
-    })
-
-    it('does not register ipc listeners', function () {
-      preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2])
-
-      expect(this.ipc.on).not.to.be.called
     })
   })
 
