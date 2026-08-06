@@ -4,7 +4,7 @@ import { posixify } from '../paths'
 import { getAutIframeModel } from '../runner'
 import { useSnapshotStore } from '../runner/snapshot-store'
 import { useAutStore } from '../store'
-import type { PinAutIframe, PinSnapshotProps, PinSnapshotRunner, TapTestsRunner } from './types'
+import type { PinAutIframe, PinSnapshotProps, PinSnapshotRunner, TapElementSelectorSource, TapTestsRunner } from './types'
 
 // The runner-page event manager, reached through the app's own window binding —
 // never `window.Cypress`, which is the outer driver in cypress-in-cypress.
@@ -75,6 +75,24 @@ export const tapManagerDataSource = {
   getAutIframe (): PinAutIframe | undefined {
     try {
       return getAutIframeModel() as unknown as PinAutIframe
+    } catch {
+      return undefined
+    }
+  },
+
+  getElementSelectorSource (): TapElementSelectorSource | undefined {
+    try {
+      const autDocument = (getAutIframeModel() as unknown as { _document (): Document | undefined })._document()
+      const elementSelector = eventManager()?.getCypress()?.ElementSelector
+
+      if (!autDocument || !elementSelector) {
+        return undefined
+      }
+
+      return {
+        find: (selector) => autDocument.querySelectorAll(selector),
+        getSelector: (element) => elementSelector._getSelector(window.UnifiedRunner.CypressJQuery(element)),
+      }
     } catch {
       return undefined
     }

@@ -60,6 +60,25 @@ export interface PinAutIframe {
   restoreDom (snapshot: unknown): void
 }
 
+/** The app-under-test elements a selector matched, narrowed to what we read. */
+interface TapAutElements {
+  length: number
+  item (index: number): unknown
+}
+
+/**
+ * What the resolve-selector command needs of the runner: the app under test's
+ * own view of its document, and the driver's selector generator — the same one
+ * behind the Selector Playground, so a selector tap hands back is the selector
+ * the app would show for that element.
+ */
+export interface TapElementSelectorSource {
+  /** Matches in document order. Throws on a selector the browser rejects. */
+  find (selector: string): TapAutElements
+  /** A selector unique to this element, or null when none could be derived. */
+  getSelector (element: unknown): string | null
+}
+
 export type TestStateValue = 'passed' | 'failed' | 'pending' | 'skipped'
 
 export interface TestError {
