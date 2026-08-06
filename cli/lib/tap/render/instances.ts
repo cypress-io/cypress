@@ -9,6 +9,25 @@ export interface InstanceRow {
   projectRoot: string
   testingType: 'e2e' | 'component' | null
   browserName: string | null
+  rendererResponsive?: boolean
+}
+
+const browserCell = (instance: InstanceRow): string => {
+  if (instance.browserName === null) {
+    return '—'
+  }
+
+  // A browser that is attached but whose page will not answer is the state every
+  // other command fails in, so it reads differently from a healthy one.
+  return instance.rendererResponsive === false ? `${instance.browserName} (not responding)` : instance.browserName
+}
+
+const browserColor = (instance: InstanceRow) => {
+  if (instance.browserName === null) {
+    return color.muted
+  }
+
+  return instance.rendererResponsive === false ? color.aborted : color.pass
 }
 
 // One row per instance. PID is bold — it's the handle the other tap commands
@@ -19,14 +38,14 @@ export const instanceColumns = (instances: InstanceRow[]): string[] => {
     String(instance.pid),
     instance.projectRoot,
     instance.testingType ?? '—',
-    instance.browserName ?? '—',
+    browserCell(instance),
   ])
 
   return columns(['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells, index) => [
     chalk.bold(cells[0]),
     cells[1],
     cells[2],
-    instances[index].browserName === null ? color.muted(cells[3]) : color.pass(cells[3]),
+    browserColor(instances[index])(cells[3]),
   ])
 }
 

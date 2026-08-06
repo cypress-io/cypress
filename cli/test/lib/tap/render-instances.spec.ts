@@ -20,4 +20,20 @@ describe('lib/tap/render/instances', () => {
       '  222  /projects/other  —     —',
     ].join('\n'))
   })
+
+  // An attached browser whose page will not answer is the state every other
+  // command fails in, so the row has to say so rather than read as healthy.
+  it('marks an attached browser whose renderer is not answering', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', rendererResponsive: false },
+      { pid: 222, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', rendererResponsive: true },
+    ])
+
+    expect(output).toBe([
+      'INSTANCES (2)',
+      '  PID  PROJECT        TYPE  BROWSER',
+      '  111  /projects/app  e2e   Chrome (not responding)',
+      '  222  /projects/app  e2e   Chrome',
+    ].join('\n'))
+  })
 })

@@ -3,6 +3,7 @@ import type { AutFrame } from '../aut/frame'
 import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXValue } from '../aut/cdp'
+import { isRendererUnresponsive } from '../cdp-timeout'
 import { readElementInfo } from '../aut/scripts'
 import type { ElementInfo } from '../aut/scripts'
 import { defineNativeCommand } from './definition'
@@ -78,7 +79,11 @@ const readAriaNode = async (session: TapSession, objectId: string): Promise<Fram
     const axNodes = nodes as AXNode[]
 
     return projectAria(axNodes.find((candidate) => candidate.backendDOMNodeId === node.backendNodeId) ?? axNodes[0])
-  } catch {
+  } catch (err) {
+    if (isRendererUnresponsive(err)) {
+      throw err
+    }
+
     return undefined
   }
 }

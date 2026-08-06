@@ -4,6 +4,7 @@ import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
+import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapSession } from '../../../lib/tap/tap-session'
@@ -294,6 +295,31 @@ describe('lib/exec/tap', () => {
     })
   })
 
+  describe('coded failures go to stderr', () => {
+    const stderr = (): string => vi.mocked(console.error).mock.calls.flat().join(' ')
+
+    it('prints an app-side domain failure on stderr, leaving stdout clean under --json', async () => {
+      mockSession(schema, {
+        error: {
+          code: 'INVALID_ARGUMENTS',
+          message: '<spec> must be a string, but number was given.',
+        },
+      })
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], { json: true })).toBe(1)
+      expect(stderr()).toContain('INVALID_ARGUMENTS: <spec> must be a string, but number was given.')
+      expect(console.log).not.toHaveBeenCalled()
+    })
+
+    it('prints a known tap error on stderr, leaving stdout clean under --json', async () => {
+      vi.mocked(withTapSession).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+
+      expect(await tap.start(['health'], { json: true })).toBe(1)
+      expect(stderr()).toContain(errors.tapBindingNotFound.description)
+      expect(console.log).not.toHaveBeenCalled()
+    })
+  })
+
   describe('commander validates the command against the live schema', () => {
     it('rejects a command the instance does not advertise, without reaching exec', async () => {
       const call = mockSession()
@@ -446,7 +472,9 @@ describe('lib/exec/tap', () => {
       ...overrides,
     })
 
-    it('renders the live instances as a table and exits 0, without opening a session', async () => {
+    // Reporting whether the runner page answers takes a session, so this command
+    // opens one — bounded, and only where there is a browser to ask.
+    it('renders the live instances as a table and exits 0, probing only an instance with a browser attached', async () => {
       vi.mocked(listLiveInstances).mockResolvedValue([
         liveInstance({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
         liveInstance({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
@@ -462,7 +490,23 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('Chrome')
       expect(() => JSON.parse(output)).toThrow()
 
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapSession).toHaveBeenCalledTimes(1)
+    })
+
+    it('bounds the renderer probe with --timeout', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111 })])
+
+      expect(await tap.start(['instances'], { timeout: 5000 })).toBe(0)
+
+      expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), 5000)
+    })
+
+    it('bounds the renderer probe with the find-instance default when --timeout is absent', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([liveInstance({ pid: 111 })])
+
+      expect(await tap.start(['instances'], {})).toBe(0)
+
+      expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), FIND_INSTANCE_TIMEOUT_MS)
     })
 
     it('prints the raw instance summaries with --json', async () => {
@@ -1210,6 +1254,8 @@ describe('lib/exec/tap', () => {
                                 server process id (pid)
           --json                print the raw JSON result instead of the human-readable
                                 rendering
+          --timeout <ms>        how long to wait on any single call into the running
+                                Cypress, in milliseconds (default 30000)
           -h, --help            display help for command
 
         Commands:
@@ -1279,6 +1325,8 @@ describe('lib/exec/tap', () => {
                                    human-readable rendering — every console property in
                                    full, however long, rather than the long ones named
                                    by their length
+          --timeout <ms>           how long to wait on any single call into the running
+                                   Cypress, in milliseconds (default 30000)
           -h, --help               display help for command
         "
       `)
