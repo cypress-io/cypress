@@ -82,7 +82,15 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
 const WHOLE_NUMBER = /^\d+$/
 
 const parseWholeNumber = (raw: unknown): number | undefined => {
-  return typeof raw === 'string' && WHOLE_NUMBER.test(raw) ? Number(raw) : undefined
+  if (typeof raw !== 'string' || !WHOLE_NUMBER.test(raw)) {
+    return undefined
+  }
+
+  // A run of digits still overflows: past 2^53 `Number` silently rounds, and
+  // far enough past it returns Infinity, which would disable the caps entirely.
+  const value = Number(raw)
+
+  return Number.isSafeInteger(value) ? value : undefined
 }
 
 /** `--at`: which match to read, 0-based. Absent means "the only match". */
