@@ -32,6 +32,12 @@
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
 ## 15.19.1
+## 15.20.1
+
+**Bugfixes:**
+
+- Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+
 ## 15.20.0
 
 **Performance:**
