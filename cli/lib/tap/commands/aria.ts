@@ -1,6 +1,7 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { parseIndex, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { withResolvedAutFrame } from '../aut/frame'
+import { parseIndex, parsePositiveInt } from '../utils'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXProperty, AXValue } from '../aut/cdp'
 import { withAmbiguous } from '../aut/single-match'

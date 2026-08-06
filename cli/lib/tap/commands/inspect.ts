@@ -1,6 +1,7 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { FrameCommandError, parseIndex, withResolvedAutFrame } from '../aut/frame'
+import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
+import { parseIndex } from '../utils'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXValue } from '../aut/cdp'
 import { isRendererUnresponsive } from '../cdp-timeout'
