@@ -90,9 +90,6 @@ export const tapManagerDataSource = {
       }
 
       return {
-        // Query natively, as the dom, aria, and inspect reads do — jQuery's tokenizer
-        // accepts selectors the browser rejects (`>>bad` matches nothing instead of
-        // throwing), so its match list can disagree with the one `--at` indexes.
         find: (selector) => autDocument.querySelectorAll(selector),
         getSelector: (element) => elementSelector._getSelector(window.UnifiedRunner.CypressJQuery(element)),
       }
