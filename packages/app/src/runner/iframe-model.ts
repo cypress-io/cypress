@@ -222,9 +222,6 @@ export class IframeModel {
 
     clearInterval(this.intervalId)
 
-    // A pin driven from outside the reporter (the tap CLI) has no hover in front
-    // of it to have captured the live page, and a click faster than the hover
-    // debounce has none either — without this, the unpin has nothing to restore.
     if (!this.originalState) {
       this._storeOriginalState()
     }
