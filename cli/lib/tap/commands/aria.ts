@@ -1,8 +1,10 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { parseIndex, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXProperty, AXValue } from '../aut/cdp'
+import { resolveMatch } from '../aut/single-match'
+import type { FrameAmbiguousResult } from '../aut/single-match'
 import { defineNativeCommand } from './definition'
 
 // The accessibility tree of a real app is deep; cap the projection so it stays
@@ -40,8 +42,6 @@ export interface AriaNodeOut {
 
 /** What `cypress tap aria` returns: the projected accessibility tree. */
 export interface FrameAriaResult {
-  /** The app-under-test frame's URL; absent if it couldn't be resolved. */
-  url?: string
   nodes: AriaNodeOut[]
   /** Number of nodes returned (`nodes.length`, before any client-side view). */
   nodeCount: number
@@ -127,9 +127,10 @@ const resolveSelectorBackendNodeId = async (
   session: TapSession,
   frame: AutFrame,
   selector: string,
+  index: number,
 ): Promise<number | undefined> => {
   const { client, sessionId } = session
-  const objectId = await querySelectorObjectId(session, frame, selector)
+  const objectId = await querySelectorObjectId(session, frame, selector, index)
 
   if (objectId === undefined) {
     return undefined
@@ -145,8 +146,16 @@ export const extractAria = async (
   frame: AutFrame,
   selector: string | undefined,
   maxNodes: number,
-): Promise<FrameAriaResult> => {
+  at?: number,
+): Promise<FrameAriaResult | FrameAmbiguousResult> => {
   const { client, sessionId } = session
+
+  // Ahead of the tree fetch: an ambiguous selector shouldn't cost a full AX tree.
+  const ambiguous = await resolveMatch(session, frame, selector, at)
+
+  if (ambiguous) {
+    return ambiguous
+  }
 
   await client.DOM.enable({}, sessionId)
   await client.Accessibility.enable(sessionId)
@@ -159,12 +168,12 @@ export const extractAria = async (
     byId.set(node.nodeId, node)
   }
 
-  const base: FrameAriaResult = { ...(frame.url ? { url: frame.url } : {}), nodes: [], nodeCount: 0 }
+  const base: FrameAriaResult = { nodes: [], nodeCount: 0 }
 
   let rootId: string | undefined
 
   if (selector !== undefined) {
-    const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector)
+    const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector, at ?? 0)
 
     if (backendNodeId === undefined) {
       // Selector matched nothing, or the match is absent from the a11y tree.
@@ -196,5 +205,5 @@ export const extractAria = async (
 }
 
 export const ariaCommand = defineNativeCommand('aria', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'))
+  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'), parseIndex(commandOptions.at))
 }, 'aria'))

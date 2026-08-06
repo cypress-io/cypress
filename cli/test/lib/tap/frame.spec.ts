@@ -33,7 +33,7 @@ describe('lib/tap/aut/frame resolveAutFrame', () => {
 
     const frame = await resolveAutFrame(client as any, SESSION_ID)
 
-    expect(frame).to.deep.eq({ frameId: 'aut-frame-id', url: 'http://localhost:5555/index.html' })
+    expect(frame).to.deep.eq({ frameId: 'aut-frame-id' })
     // getFrameTree takes no params — CRI routes the session id by type.
     expect(client.Page.getFrameTree).toHaveBeenCalledWith(SESSION_ID)
   })

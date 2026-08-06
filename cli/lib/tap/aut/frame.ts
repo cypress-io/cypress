@@ -29,7 +29,6 @@ export class FrameCommandError extends Error {
 export interface AutFrame {
   /** CDP frameId — scopes `Accessibility.getFullAXTree` and `Page.createIsolatedWorld`. */
   frameId: string
-  url: string
 }
 
 interface FrameNode {
@@ -73,7 +72,22 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
 
   debug('resolved AUT frame %o', found)
 
-  return { frameId: found.id, url: found.url }
+  return { frameId: found.id }
+}
+
+/** `--at`: which match to read, 0-based. Absent means "the only match". */
+export const parseIndex = (raw: string | undefined): number | undefined => {
+  if (raw === undefined) {
+    return undefined
+  }
+
+  const value = Number(raw)
+
+  if (!Number.isInteger(value) || value < 0) {
+    throw new FrameCommandError('INVALID_INDEX', 'at must be a 0-based index: a whole number, 0 or greater')
+  }
+
+  return value
 }
 
 export const parsePositiveInt = (raw: string | undefined, fallback: number, label: string): number => {
