@@ -97,7 +97,7 @@ describe('tap binding', () => {
       const names = schema.commands.map((command) => command.name)
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(names).to.include.members(['command', 'reporter', 'pin', 'run-state'])
+      expect(names).to.include.members(['command', 'reporter', 'pin', 'run-state', 'resolve-selector'])
       expect(names).not.to.include('console-props')
       // The two list subcommands folded into reporter: its spec overview lists
       // the run's tests, and its --testId view lists one test's command log.
@@ -134,6 +134,12 @@ describe('tap binding', () => {
       const runOutcome = await binding.exec('run', { spec: 'cypress/e2e/dom-content.spec.js' })
 
       expect((runOutcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
+
+      // No app under test is mounted before a run, so there are no elements to
+      // derive selectors from.
+      const selectorsBeforeRun = await binding.exec('resolve-selector', { selector: 'li' })
+
+      expect((selectorsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_AUT')
 
       // With no run yet there is no runner to read, so run-state omits the run-only fields.
       const runStateBeforeRun = await binding.exec('run-state')
@@ -231,6 +237,62 @@ describe('tap binding', () => {
       expect(Object.keys(runState.results)).to.deep.eq(['passed', 'failed', 'pending', 'skipped'])
       expect(runState.results.passed).to.eq(tests.length)
       expect(runState.results.failed).to.eq(0)
+    })
+  })
+
+  it('derives a unique selector for each element a selector matches', () => {
+    cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js')
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.window().then(async (win) => {
+      const binding = getBinding(win)
+
+      // The fixture's three list items carry no ids, classes, or attributes, so
+      // this exercises the generator's positional fallback — the hardest case,
+      // and the one an ambiguous selector most often lands on.
+      const outcome = await binding.exec('resolve-selector', { selector: '.list li' })
+
+      expect('result' in outcome).to.eq(true)
+
+      const result = (outcome as { result: Record<string, any> }).result
+
+      expect(Object.keys(result)).to.deep.eq(['selectors'])
+
+      const selectors = result.selectors as { index: number, selector: string }[]
+
+      expect(selectors).to.have.length(3)
+      expect(new Set(selectors.map(({ selector }) => selector)).size, 'each match gets its own selector').to.eq(3)
+
+      // Every selector must be usable as-is by the commands that take one, which
+      // resolve against the app-under-test document — and must name the element
+      // its reported index picks out of that same match list, the way `--at` does.
+      const autDocument = (win.document.querySelector('iframe.aut-iframe') as HTMLIFrameElement).contentDocument!
+      const matches = autDocument.querySelectorAll('.list li')
+
+      for (const { index, selector } of selectors) {
+        const resolved = autDocument.querySelectorAll(selector)
+
+        expect(resolved, selector).to.have.length(1)
+        expect(resolved[0], `${selector} is match ${index}`).to.eq(matches[index])
+      }
+
+      const single = await binding.exec('resolve-selector', { selector: 'ul.list' })
+
+      expect((single as { result: { selectors: unknown[] } }).result.selectors).to.have.length(1)
+
+      // Matching nothing is an answer, not a failure.
+      const none = await binding.exec('resolve-selector', { selector: '.not-in-the-fixture' })
+
+      expect((none as { result: { selectors: unknown[] } }).result.selectors).to.deep.eq([])
+
+      const invalid = await binding.exec('resolve-selector', { selector: '>>bad' })
+
+      expect((invalid as { error: { code: string } }).error.code).to.eq('INVALID_SELECTOR')
+
+      const missingSelector = await binding.exec('resolve-selector')
+
+      expect((missingSelector as { error: { code: string } }).error.code).to.eq('INVALID_ARGUMENTS')
     })
   })
 })

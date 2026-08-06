@@ -24,6 +24,8 @@ export type {
   ClearResult,
   PinnedView,
   PinResult,
+  ResolveSelectorMatch,
+  ResolveSelectorResult,
   SnapshotRef,
   TapNetworkInfo,
   TapCommandEntry,
