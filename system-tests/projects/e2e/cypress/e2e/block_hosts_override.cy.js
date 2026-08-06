@@ -1,20 +1,12 @@
 /* eslint-disable no-undef */
-// https://github.com/cypress-io/cypress/issues/21151
-// `blockHosts` is configured globally to block localhost:3131. A test-level
-// override must be able to unblock it at runtime, and the override must not
-// leak into sibling tests.
-const requestReq = (win) => {
-  return new Promise((resolve) => {
-    const xhr = new win.XMLHttpRequest
-
-    xhr.open('GET', 'http://localhost:3131/req')
-    xhr.setRequestHeader('Content-Type', 'text/plain')
-    xhr.send()
-    xhr.onload = () => resolve(xhr)
-    // a request blocked by the proxy returns a 503 without CORS headers, which
-    // the cross-origin XHR surfaces as a zero status
-    xhr.onerror = () => resolve(xhr)
-  })
+// `blockHosts` is configured globally to block localhost:3131. A test-level override
+// must be able to change what is blocked at runtime, and must not leak into sibling
+// tests.
+const requestStatus = (win, port) => {
+  // a blocked request comes back as a 503 with no CORS headers, so the cross-origin
+  // fetch rejects rather than resolving with a readable response
+  return win.fetch(`http://localhost:${port}/req`)
+  .then((res) => res.status, () => 'blocked')
 }
 
 describe('blockHosts test config override', () => {
@@ -23,16 +15,34 @@ describe('blockHosts test config override', () => {
   })
 
   it('blocks the configured host by default', () => {
-    cy.window().then(requestReq).its('status').should('eq', 0)
+    cy.window().then((win) => requestStatus(win, 3131)).should('eq', 'blocked')
   })
 
-  describe('with a blockHosts override', { blockHosts: null }, () => {
-    it('no longer blocks the host', () => {
-      cy.window().then(requestReq).its('status').should('eq', 200)
+  it('allows an unconfigured host by default', () => {
+    cy.window().then((win) => requestStatus(win, 3333)).should('eq', 200)
+  })
+
+  describe('overridden to null', { blockHosts: null }, () => {
+    it('no longer blocks the configured host', () => {
+      cy.window().then((win) => requestStatus(win, 3131)).should('eq', 200)
     })
   })
 
-  it('restores blocking after the override suite', () => {
-    cy.window().then(requestReq).its('status').should('eq', 0)
+  describe('overridden to a different host', { blockHosts: 'localhost:3333' }, () => {
+    it('blocks the host named by the override', () => {
+      cy.window().then((win) => requestStatus(win, 3333)).should('eq', 'blocked')
+    })
+
+    it('no longer blocks the project-level host', () => {
+      cy.window().then((win) => requestStatus(win, 3131)).should('eq', 200)
+    })
+  })
+
+  it('restores blocking of the configured host after the override suites', () => {
+    cy.window().then((win) => requestStatus(win, 3131)).should('eq', 'blocked')
+  })
+
+  it('still allows the unconfigured host after the override suites', () => {
+    cy.window().then((win) => requestStatus(win, 3333)).should('eq', 200)
   })
 })

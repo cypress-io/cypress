@@ -205,6 +205,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // MITM proxy is disabled) still receives protocol / pre-request settings.
   private _protocolManager?: ProtocolManagerShape
   private _preRequestTimeout?: number
+  // Tests can override `blockHosts` at runtime, so hold the project-level value to
+  // restore between specs. Kept here rather than in the network runtime, which is
+  // rebuilt mid-run and would snapshot an active override.
+  private _projectBlockHosts?: Cfg['blockHosts']
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -285,10 +289,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   setPreRequestTimeout (timeout: number) {
     this._preRequestTimeout = timeout
     this._networkProxy?.setPreRequestTimeout(timeout)
-  }
-
-  updateBlockHosts (blockHosts: string | string[] | null) {
-    this._networkProxy?.updateBlockHosts(blockHosts)
   }
 
   setupCrossOriginRequestHandling () {
@@ -381,6 +381,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('server open')
     this.testingType = testingType
     this._openConfig = config
+    this._projectBlockHosts = config.blockHosts
     this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -630,15 +631,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
-    options.onResetServerState = () => {
+    options.onResetServerState = ({ blockHosts }: { blockHosts?: Cfg['blockHosts'] } = {}) => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
       this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
-    }
 
-    options.onUpdateBlockHosts = (blockHosts) => this.updateBlockHosts(blockHosts)
+      // only apply blockHosts when the caller explicitly sent a value. the config object
+      // is shared with every network runtime and read at enforcement time, so assigning
+      // it here is enough for both current and later-created runtimes to see it.
+      if (blockHosts !== undefined && this._openConfig) {
+        this._openConfig.blockHosts = blockHosts
+      }
+    }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
 
@@ -813,6 +819,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resetCdpFetchRuntime()
     this._networkProxy?.clearCredentials()
+
+    // discard any per-test blockHosts override so it can't leak into the next spec
+    if (this._openConfig) {
+      this._openConfig.blockHosts = this._projectBlockHosts
+    }
+
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)

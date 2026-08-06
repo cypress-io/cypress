@@ -104,10 +104,6 @@ export class NetworkProxy {
     this.http.setPreRequestTimeout(timeout)
   }
 
-  updateBlockHosts (blockHosts: string | string[] | null) {
-    this.http.updateBlockHosts(blockHosts)
-  }
-
   setCredentials ({ url, resourceType, credentialStatus }: {
     url: string
     resourceType: ResourceType

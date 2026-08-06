@@ -291,13 +291,12 @@ describe('lib/socket', () => {
       })
     })
 
-    // https://github.com/cypress-io/cypress/issues/21151
-    describe('on(backend:request, update:block:hosts)', () => {
-      it('calls options.onUpdateBlockHosts with the new blockHosts value', function (done) {
-        sinon.stub(this.options, 'onUpdateBlockHosts')
+    describe('on(backend:request, reset:server:state)', () => {
+      it('forwards the per-test options to options.onResetServerState', function (done) {
+        sinon.stub(this.options, 'onResetServerState')
 
-        return this.client.emit('backend:request', 'update:block:hosts', ['*.pendo.io'], (resp) => {
-          expect(this.options.onUpdateBlockHosts).to.be.calledWith(['*.pendo.io'])
+        return this.client.emit('backend:request', 'reset:server:state', { blockHosts: ['*.pendo.io'] }, (resp) => {
+          expect(this.options.onResetServerState).to.be.calledWith({ blockHosts: ['*.pendo.io'] })
           expect(resp.response).to.be.undefined
 
           return done()

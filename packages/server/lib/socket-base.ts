@@ -150,7 +150,6 @@ export class SocketBase implements SocketBroadcaster {
     _.defaults(options, {
       socketId: null,
       onResetServerState () {},
-      onUpdateBlockHosts () {},
       onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
       onConnect () {},
@@ -533,9 +532,7 @@ export class SocketBase implements SocketBroadcaster {
               case 'http:request':
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
-                return options.onResetServerState()
-              case 'update:block:hosts':
-                return options.onUpdateBlockHosts(args[0])
+                return options.onResetServerState(args[0])
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':

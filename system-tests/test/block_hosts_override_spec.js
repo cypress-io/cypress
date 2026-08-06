@@ -6,15 +6,14 @@ const onServer = function (app) {
   })
 
   return app.get('/req', (req, res) => {
-    // allow the cross-origin XHR to read the response so an unblocked request
-    // (200) is distinguishable from a proxy-blocked one (503 -> status 0)
+    // allow the cross-origin fetch to read the response so an allowed request is
+    // distinguishable from a blocked one, which has no CORS headers
     res.header('Access-Control-Allow-Origin', '*')
 
     return res.sendStatus(200)
   })
 }
 
-// https://github.com/cypress-io/cypress/issues/21151
 describe('e2e blockHosts test config override', () => {
   systemTests.setup({
     servers: [{
@@ -22,6 +21,9 @@ describe('e2e blockHosts test config override', () => {
       onServer,
     }, {
       port: 3232,
+      onServer,
+    }, {
+      port: 3333,
       onServer,
     }],
     settings: {

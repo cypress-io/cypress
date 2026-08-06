@@ -356,22 +356,6 @@ describe('lib/server-base', () => {
     })
   })
 
-  describe('#updateBlockHosts', () => {
-    it('delegates the new blockHosts value to the network proxy', function () {
-      this.server._networkProxy = { updateBlockHosts: sinon.stub() }
-
-      this.server.updateBlockHosts(['*.pendo.io'])
-
-      expect(this.server._networkProxy.updateBlockHosts).to.be.calledOnceWith(['*.pendo.io'])
-    })
-
-    it('is a no-op when the network proxy has not been created', function () {
-      this.server._networkProxy = undefined
-
-      expect(() => this.server.updateBlockHosts(null)).not.to.throw()
-    })
-  })
-
   describe('#createServer', () => {
     beforeEach(function () {
       this.port = 54321
@@ -596,6 +580,48 @@ describe('lib/server-base', () => {
       })
     })
 
+    describe('onResetServerState', () => {
+      beforeEach(function () {
+        this.config.blockHosts = 'localhost:3131'
+
+        return this.server.open(this.config, getOpenOptions())
+        .then(() => {
+          this.websocketOptions = {} as Record<string, any>
+          this.server.startWebsockets(1, 2, this.websocketOptions)
+        })
+      })
+
+      it('applies the blockHosts value the driver resolved for the upcoming test', function () {
+        this.websocketOptions.onResetServerState({ blockHosts: ['*.pendo.io'] })
+
+        expect(this.server._openConfig.blockHosts).to.deep.eq(['*.pendo.io'])
+      })
+
+      it('applies null so an override can clear blocking', function () {
+        this.websocketOptions.onResetServerState({ blockHosts: null })
+
+        expect(this.server._openConfig.blockHosts).to.be.null
+      })
+
+      it('leaves blockHosts alone when the payload omits it', function () {
+        this.websocketOptions.onResetServerState({})
+
+        expect(this.server._openConfig.blockHosts).to.eq('localhost:3131')
+      })
+
+      it('leaves blockHosts alone when there is no payload', function () {
+        this.websocketOptions.onResetServerState()
+
+        expect(this.server._openConfig.blockHosts).to.eq('localhost:3131')
+      })
+
+      it('is read by the network runtime, which shares the config object', function () {
+        this.websocketOptions.onResetServerState({ blockHosts: ['*.pendo.io'] })
+
+        expect(this.server._networkProxy.http.config.blockHosts).to.deep.eq(['*.pendo.io'])
+      })
+    })
+
     it('falls back to an empty rendered-HTML-origins map when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
       process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
 
@@ -628,6 +654,15 @@ describe('lib/server-base', () => {
       this.server.reset()
 
       expect(this.buffers.reset).to.be.called
+    })
+
+    it('restores the project-level blockHosts so an override cannot leak into the next spec', function () {
+      this.server._projectBlockHosts = 'localhost:3131'
+      this.server._openConfig.blockHosts = null
+
+      this.server.reset()
+
+      expect(this.server._openConfig.blockHosts).to.eq('localhost:3131')
     })
 
     it('sets the domain to the previous base url if set', function () {
