@@ -164,6 +164,37 @@ describe('tap/commands/pin', () => {
     expect(changeSnapshotState).not.to.have.been.called
   })
 
+  it('re-pinning the same log id on another test starts a fresh pin, not a move', async () => {
+    const testsState = {
+      ...TESTS_STATE,
+      r3: {
+        id: 'r3',
+        title: 'signs out',
+        state: 'passed',
+        commands: [{ id: 'log-1', name: 'get', message: '#account', state: 'passed', type: 'parent' }],
+      },
+    }
+    const getTestState = (id: string) => testsState[id as keyof typeof testsState]
+    const { pinSnapshot, changeSnapshotState } = stubSource({ runner: { getTestState, getSnapshotPropsForLog: () => SNAPSHOT_PROPS } })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await manager.exec('pin', {}, { testId: 'r3', commandId: '1' })
+
+    // A log id names a row only within its test, so the app pin has to be
+    // re-keyed onto the other test rather than moved within the one it holds.
+    expect(changeSnapshotState).not.to.have.been.called
+    expect(pinSnapshot).to.have.been.calledTwice
+    expect(pinSnapshot.secondCall.args[2]).to.eq('r3')
+
+    expect((outcome as { result: any }).result.pinned).to.deep.eq({
+      test: 'r3',
+      at: { index: 2, total: 2, name: 'after' },
+      command: { id: '1', name: 'get', message: '#account', state: 'passed', type: 'parent' },
+    })
+  })
+
   it('clears a pin through the app’s own unpin, then a fresh pin lands', async () => {
     const { unpinSnapshot } = stubSource()
 

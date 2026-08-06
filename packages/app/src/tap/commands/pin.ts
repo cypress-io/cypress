@@ -145,9 +145,12 @@ export const pinCommand = defineCommand('pin', async (_params, { testId: test, c
 
   const index = resolveAt(snapshots, at)
 
+  const showing = currentPin()
+
   // Landing on the command already pinned switches which of its snapshots is
-  // showing; anything else replaces the pin.
-  if (currentPin()?.logId === logId) {
+  // showing; anything else replaces the pin. A log id names a row only within
+  // its test, so both halves identify the command.
+  if (showing?.test === test && showing.logId === logId) {
     tapManagerDataSource.changeSnapshotState(index)
   } else {
     tapManagerDataSource.pinSnapshot({ ...props, snapshots }, index, test, logId)
