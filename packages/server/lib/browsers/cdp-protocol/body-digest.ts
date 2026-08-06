@@ -2,6 +2,9 @@ import { createHash } from 'crypto'
 
 export type BodyDigest = { length: number, sha256: string }
 
+// Runs once per response body (twice when lengths match, behind the length
+// short-circuit). sha256 sustains ~GB/s, so even rare multi-MB bodies add
+// negligible drag next to the base64 decode the CDP transit already costs.
 export const digestBody = (body: Buffer): BodyDigest => ({
   length: body.length,
   sha256: createHash('sha256').update(body).digest('hex'),
