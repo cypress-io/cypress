@@ -27,9 +27,9 @@ describe('lib/tap/render/ambiguous', () => {
     ].join('\n'))
   })
 
-  it('numbers each row by the match it names, not its position in the table', () => {
-    // The second of four matches had no unique selector, so the rows skip 1 —
-    // printing 0-2 here would have --at read a different element than shown.
+  it('keeps a row for a match no selector could be derived for', () => {
+    // The second of four matches had no unique selector, but --at still reads it,
+    // so it keeps its index and the dash stands in for the selector it lacks.
     expect(render({
       ambiguous: true,
       selector: 'li',
@@ -40,15 +40,19 @@ describe('lib/tap/render/ambiguous', () => {
       'provide --at with an index to select an element from the list or update the selector.',
       'index  selector',
       '0      \'#first\'',
+      '1      -',
       '2      \'#third\'',
       '3      \'#fourth\'',
     ].join('\n'))
   })
 
-  it('points at --at when no selector could be derived for any match', () => {
+  it('numbers every match when no selector could be derived for any of them', () => {
     expect(render({ ambiguous: true, selector: '.item', count: 2, selectors: [] })).toBe([
       '⚠ selector \'.item\' matched 2 elements but must be unique',
-      'pass --at <index> to read one of them (0-1)',
+      'provide --at with an index to select an element from the list or update the selector.',
+      'index  selector',
+      '0      -',
+      '1      -',
     ].join('\n'))
   })
 })
