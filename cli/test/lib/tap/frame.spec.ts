@@ -149,24 +149,31 @@ describe('lib/tap/aut/frame withResolvedAutFrame', () => {
     return withResolvedAutFrame(options, async () => result, 'dom')
   }
 
+  const ambiguous = {
+    ambiguous: true,
+    selector: '.item',
+    count: 2,
+    selectors: [{ index: 0, selector: '#first' }, { index: 1, selector: '#second' }],
+  }
+
   it('prints the read and exits 0', async () => {
     expect(await read({ found: true, html: '<p>hi</p>' })).to.eq(0)
     expect(stdout()).toContain('"html": "<p>hi</p>"')
   })
 
   it('exits 1 on an ambiguous selector — the read that was asked for did not happen', async () => {
-    expect(await read({ ambiguous: true, selector: '.item', count: 2 })).to.eq(1)
+    expect(await read(ambiguous)).to.eq(1)
   })
 
   it('still prints the ambiguity answer as a result, so the matches to choose between survive the non-zero exit', async () => {
-    await read({ ambiguous: true, selector: '.item', count: 2 })
+    await read(ambiguous)
 
-    expect(JSON.parse(stdout())).to.deep.eq({ ambiguous: true, selector: '.item', count: 2 })
+    expect(JSON.parse(stdout())).to.deep.eq(ambiguous)
     expect(stderr()).to.eq('')
   })
 
   it('renders the ambiguity for a human on stdout too, exiting 1 all the same', async () => {
-    expect(await read({ ambiguous: true, selector: '.item', count: 2 }, {} as TapCliOptions)).to.eq(1)
+    expect(await read(ambiguous, {} as TapCliOptions)).to.eq(1)
 
     expect(stripAnsi(stdout())).toContain('matched 2 elements but must be unique')
     expect(stderr()).to.eq('')
