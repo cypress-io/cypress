@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { parseIndex, parsePositiveInt } from '../../../lib/tap/utils'
 import { FrameCommandError } from '../../../lib/tap/aut/frame'
 
-// Every input shape that is not a plain run of digits, shared by both parsers
-// so they reject the same class. `Number()` coerces most of these to a number
-// that passes an isInteger check, which is what makes the whole list necessary.
-const MALFORMED = ['', ' ', '   ', '\t', '\n', 'abc', '1.5', '-1', '-5', '0x10', '1e3', '  7  ', '+3', 'Infinity', 'NaN', null, ['1', '2'], ['5'], 7, {}]
+// Every input shape both parsers must reject, shared so they reject the same
+// class: text `Number()` coerces to a number that passes an isInteger check,
+// and runs of digits long enough to leave the safe-integer range.
+const MALFORMED = ['', ' ', '   ', '\t', '\n', 'abc', '1.5', '-1', '-5', '0x10', '1e3', '  7  ', '+3', 'Infinity', 'NaN', '9007199254740993', '9'.repeat(400), null, ['1', '2'], ['5'], 7, {}]
 
 describe('lib/tap/utils parseIndex', () => {
   it('reads no index when the flag is absent', () => {
@@ -30,8 +30,9 @@ describe('lib/tap/utils parsePositiveInt', () => {
     expect(parsePositiveInt(undefined, 200, 'max-nodes')).to.eq(200)
   })
 
-  it('parses a positive integer', () => {
+  it('parses a positive integer, up to the largest one that survives the round trip', () => {
     expect(parsePositiveInt('50', 200, 'max-nodes')).to.eq(50)
+    expect(parsePositiveInt('9007199254740991', 200, 'max-nodes')).to.eq(Number.MAX_SAFE_INTEGER)
   })
 
   it('rejects zero and every malformed value with INVALID_LIMIT', () => {
