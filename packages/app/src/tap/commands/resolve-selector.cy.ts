@@ -1,4 +1,4 @@
-import { MAX_DERIVED_SELECTORS } from './resolve-selector'
+import { MAX_DERIVED_SELECTORS } from '../contract'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { TapManager } from '../tap-manager'
 import type { TapElementSelectorSource } from '../types'

@@ -1,4 +1,5 @@
 import chalk from 'chalk'
+import { MAX_DERIVED_SELECTORS } from '@packages/cypress-instances'
 
 import type { FrameAmbiguousResult } from '../aut/single-match'
 import { color, columns, layout, quoted } from './format'
@@ -10,11 +11,22 @@ export const renderAmbiguousHuman = (result: FrameAmbiguousResult): string => {
   const headline = color.warn(`⚠ selector ${chalk.bold(quoted(result.selector))} matched ${chalk.bold(result.count)} elements but must be unique`)
   const note = color.warn(`provide ${chalk.bold('--at')} with an index to select an element from the list or update the selector.`)
 
+  // Number no further than the instance derives selectors for: `*` on a real
+  // page matches thousands, and every row past the cap could only ever be a
+  // bare index. --at still reads any of them, so say what the list leaves out.
+  const numbered = Math.min(result.count, MAX_DERIVED_SELECTORS)
+
   // A match no unique selector could be derived for still keeps its row, since
   // --at reads it either way.
   const derived = new Map(result.selectors.flatMap(({ index, selector }) => (selector ? [[index, quoted(selector)] as const] : [])))
-  const rows = Array.from({ length: result.count }, (_, index) => [String(index), derived.get(index) ?? '-'])
+  const rows = Array.from({ length: numbered }, (_, index) => [String(index), derived.get(index) ?? '-'])
   const colorize = (cells: string[], index: number) => (derived.has(index) ? cells : [cells[0], color.muted(cells[1])])
 
-  return layout([[headline, note, ...columns(['index', 'selector'], rows, colorize)]])
+  const table = [headline, note, ...columns(['index', 'selector'], rows, colorize)]
+
+  if (numbered === result.count) {
+    return layout([table])
+  }
+
+  return layout([table, [color.muted(`showing the first ${numbered} of ${result.count} matches — --at takes any index up to ${result.count - 1}.`)]])
 }

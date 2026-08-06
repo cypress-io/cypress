@@ -55,4 +55,31 @@ describe('lib/tap/render/ambiguous', () => {
       '1      -',
     ].join('\n'))
   })
+
+  it('stops numbering at the cap the instance derives to, saying how much of the match list is shown', () => {
+    expect(render({ ambiguous: true, selector: '*', count: 5000, selectors: numbered('.a', '.b') })).toBe([
+      '⚠ selector \'*\' matched 5000 elements but must be unique',
+      'provide --at with an index to select an element from the list or update the selector.',
+      'index  selector',
+      '0      \'.a\'',
+      '1      \'.b\'',
+      '2      -',
+      '3      -',
+      '4      -',
+      '5      -',
+      '6      -',
+      '7      -',
+      '8      -',
+      '9      -',
+      '',
+      'showing the first 10 of 5000 matches — --at takes any index up to 4999.',
+    ].join('\n'))
+  })
+
+  it('stays bounded for a selector matching a whole document, rather than building a row per match', () => {
+    const rendered = render({ ambiguous: true, selector: '*', count: 1_000_000, selectors: [] })
+
+    expect(rendered.split('\n')).to.have.length(15)
+    expect(rendered).toContain('showing the first 10 of 1000000 matches')
+  })
 })
