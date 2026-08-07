@@ -30,7 +30,7 @@ const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readabl
 // Every tap command accepts `--instance`, `--json` and `--timeout`; all are
 // consumed by the top-level `cypress tap` command before a subprogram parses, so
 // declaring them on a command is purely so they render in its generated help.
-// `--timeout` keeps no alias: `-t` is worth more to `--testId`, which is typed
+// `--timeout` keeps no alias: `-t` is worth more to `--test-id`, which is typed
 // far more often, and the shared flags have to spell the same on every command.
 const declareSharedOptions = (command: commander.Command, jsonDescription: string): void => {
   command.option('-i, --instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')

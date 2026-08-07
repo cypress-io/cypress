@@ -65,12 +65,12 @@ describe('cypress-instances contract', () => {
   })
 
   describe('tap command contract', () => {
-    it('lists reporter as a command taking --testId and --attempt, advertised on the wire schema', () => {
+    it('lists reporter as a command taking --test-id and --attempt, advertised on the wire schema', () => {
       const reporter = TAP_COMMANDS.find(({ name }) => name === 'reporter')!
 
       expect(reporter.params).toEqual([])
       expect(reporter.options.map(({ name, required }) => ({ name, required }))).toEqual([
-        { name: 'testId', required: false },
+        { name: 'test-id', required: false },
         { name: 'attempt', required: false },
       ])
 

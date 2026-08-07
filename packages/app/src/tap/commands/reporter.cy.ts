@@ -144,7 +144,7 @@ describe('tap/commands/reporter', () => {
   it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r2' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r2' })
 
     expect(outcome).to.deep.eq({
       error: {
@@ -157,7 +157,7 @@ describe('tap/commands/reporter', () => {
   it('fails with TEST_NOT_FOUND when no test of the run has that id', async () => {
     stubRunner({ getTestState: () => undefined, isRunComplete: () => false })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'nope' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'nope' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
   })
@@ -165,7 +165,7 @@ describe('tap/commands/reporter', () => {
   it('returns the full reporter view: test header, hooks with a synthesized test body, routes, and enriched commands', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => false })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r2' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r2' })
 
     expect(outcome).to.deep.eq({
       result: {
@@ -215,7 +215,7 @@ describe('tap/commands/reporter', () => {
   it('carries a failed attempt’s error panel — messaging fields and code frame, extras trimmed', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r4' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r4' })
 
     expect((outcome as { result: Record<string, unknown> }).result.error).to.deep.eq({
       name: 'AssertionError',
@@ -233,7 +233,7 @@ describe('tap/commands/reporter', () => {
   it('drops non-string error fields from a non-Error throw', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r6' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r6' })
 
     expect((outcome as { result: { error: Record<string, unknown> } }).result.error).to.deep.eq({})
   })
@@ -241,7 +241,7 @@ describe('tap/commands/reporter', () => {
   it('carries alias names, not the badge text `.as()` writes onto the log', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r7' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r7' })
 
     expect((outcome as { result: { commands: Array<Record<string, unknown>> } }).result.commands).to.deep.eq([
       { id: '1', name: 'find', message: 'button', state: 'passed', type: 'child', hookId: 'r7', aliases: ['firstBtn'], aliasType: 'dom' },
@@ -256,7 +256,7 @@ describe('tap/commands/reporter', () => {
   it('reports an unreached test with empty collections and just the test-body pseudo-hook', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r3' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r3' })
 
     expect(outcome).to.deep.eq({
       result: {
@@ -273,7 +273,7 @@ describe('tap/commands/reporter', () => {
   it('orders the synthesized test body between the before and after hooks', async () => {
     stubRunner({ getTestState: (id: string) => TESTS_STATE[id], isRunComplete: () => true })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { testId: 'r5' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r5' })
 
     expect((outcome as { result: { hooks: unknown } }).result.hooks).to.deep.eq([
       { hookId: 'h-ba', hookName: 'before all' },
@@ -412,7 +412,7 @@ describe('tap/commands/reporter', () => {
       expect((outcome as { result: { stats: { duration: number } } }).result.stats.duration).to.eq(10400)
     })
 
-    it('rejects --attempt without --testId', async () => {
+    it('rejects --attempt without --test-id', async () => {
       stubRunner(treeRunner())
 
       const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { attempt: '1' })
@@ -420,7 +420,7 @@ describe('tap/commands/reporter', () => {
       expect(outcome).to.deep.eq({
         error: {
           code: 'ATTEMPT_NOT_FOUND',
-          message: 'the --attempt option applies only when rendering a single test; pass --testId <id>',
+          message: 'the --attempt option applies only when rendering a single test; pass --test-id <id>',
         },
       })
     })

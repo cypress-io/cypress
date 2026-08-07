@@ -17,7 +17,7 @@ export interface TapCommandParamSchema {
 
 export interface TapCommandOptionSchema {
   name: string
-  // A single letter, rendered by the CLI as `-t, --testId <testId>`. Commander
+  // A single letter, rendered by the CLI as `-t, --test-id <test-id>`. Commander
   // accepts a letter claimed twice within one command and silently lets the last
   // declaration win, so an alias must be unique across the command's own options,
   // the CLI's view-only ones, and the `--instance` every command shares.
@@ -85,12 +85,12 @@ export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
   SchemaObject<O, { required: true, type: 'string' | 'number' }, RawScalars>
 
 // Options that recur across commands, defined once so their name, type, and help
-// text can't drift between the commands that expose them. `testId` and
-// `commandId` are required in some commands and optional in others, so each use
+// text can't drift between the commands that expose them. `test-id` and
+// `command-id` are required in some commands and optional in others, so each use
 // spreads it and sets `required`; the rest are identical everywhere and used
 // directly.
-const testIdField = { name: 'testId', alias: 't', type: 'string', description: 'test id, as listed by the reporter command' } as const
-const commandIdField = { name: 'commandId', alias: 'c', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
+const testIdField = { name: 'test-id', alias: 't', type: 'string', description: 'test id, as listed by the reporter command' } as const
+const commandIdField = { name: 'command-id', alias: 'c', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
 const attemptField = { name: 'attempt', alias: 'a', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
 const selectorField = { name: 'selector', alias: 's', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' } as const
 
@@ -111,15 +111,15 @@ const commandMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --testId, the spec-level overview: run stats and every suite’s tests',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: run stats and every suite’s tests',
   details: `Shows test results the way the Cypress app's reporter panel does, right in
-your terminal. Pass --testId <id> (test ids come from the spec overview this
-same command prints with no --testId) to see one
+your terminal. Pass --test-id <id> (test ids come from the spec overview this
+same command prints with no --test-id) to see one
 test's full story: its network routes, the hooks that ran, the complete
 command log, and the failure output when something went wrong. Add --attempt
 to view an earlier retry.
 
-Leave --testId off to get the spec-level overview instead: the run's pass/fail
+Leave --test-id off to get the spec-level overview instead: the run's pass/fail
 stats and every suite's tests at a glance.`,
   params: [],
   options: [

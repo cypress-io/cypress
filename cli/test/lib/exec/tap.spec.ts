@@ -226,8 +226,8 @@ describe('lib/exec/tap', () => {
       const consoleProps = { name: 'request', type: 'command', props: { body: 'x'.repeat(2_000) } }
       const call = mockSession(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
 
-      expect(await tap.start(['command', '--testId', 'r2', '--commandId', '1'], { json: true })).toBe(0)
-      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'testId': 'r2', 'commandId': '1', 'json': 'true' }])
+      expect(await tap.start(['command', '--test-id', 'r2', '--command-id', '1'], { json: true })).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1', 'json': 'true' }])
       expect(JSON.parse(logger.print()).consoleProps).toEqual(consoleProps)
     })
 
@@ -242,8 +242,8 @@ describe('lib/exec/tap', () => {
       const commandView = { id: '1', name: 'visit', hook: { hookId: 'r2', hookName: 'test body' }, snapshots: [] }
       const call = mockSession(buildTapSchema('15.0.0'), { result: commandView })
 
-      expect(await tap.start(['command', '--testId', 'r2', '--commandId', '1'], {})).toBe(0)
-      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { testId: 'r2', commandId: '1' }])
+      expect(await tap.start(['command', '--test-id', 'r2', '--command-id', '1'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1' }])
     })
 
     it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
@@ -1280,7 +1280,7 @@ describe('lib/exec/tap', () => {
                                 row, the DOM snapshots pinnable on it, and its console
                                 properties
           reporter [options]    render a test’s full reporter view — its routes,
-                                hooks, and command log — or, without --testId, the
+                                hooks, and command log — or, without --test-id, the
                                 spec-level overview: run stats and every suite’s tests
           pin [options]         pin a command’s DOM snapshot into the live
                                 app-under-test frame so the dom/aria/inspect commands
@@ -1312,27 +1312,28 @@ describe('lib/exec/tap', () => {
         detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties
 
         Options:
-          -t, --testId <testId>        test id, as listed by the reporter command
-          -c, --commandId <commandId>  command id, as listed by the reporter command —
-                                       a row number (test body first when duplicated),
-                                       an e-prefixed event id, or hook-qualified like
-                                       "h1:3"
-          -a, --attempt <attempt>      1-based attempt (attempt 1 = first run);
-                                       defaults to the latest
-          -d, --depth <depth>          how many levels of nested console properties to
-                                       expand before summarizing the rest as "{n keys}"
-                                       / "[n items]": a number or "all" (default 3, and
-                                       a section over 8 rows folds at any depth unless
-                                       this is passed)
-          -i, --instance <pid>         target a specific running Cypress instance by
-                                       its server process id (pid)
-          --json                       print the raw JSON result instead of the
-                                       human-readable rendering — every console
-                                       property in full, however long, rather than the
-                                       long ones named by their length
-          --timeout <ms>               how long to wait on any single call into the
-                                       running Cypress, in milliseconds (default 30000)
-          -h, --help                   display help for command
+          -t, --test-id <test-id>        test id, as listed by the reporter command
+          -c, --command-id <command-id>  command id, as listed by the reporter command
+                                         — a row number (test body first when
+                                         duplicated), an e-prefixed event id, or
+                                         hook-qualified like "h1:3"
+          -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
+                                         defaults to the latest
+          -d, --depth <depth>            how many levels of nested console properties
+                                         to expand before summarizing the rest as "{n
+                                         keys}" / "[n items]": a number or "all"
+                                         (default 3, and a section over 8 rows folds at
+                                         any depth unless this is passed)
+          -i, --instance <pid>           target a specific running Cypress instance by
+                                         its server process id (pid)
+          --json                         print the raw JSON result instead of the
+                                         human-readable rendering — every console
+                                         property in full, however long, rather than
+                                         the long ones named by their length
+          --timeout <ms>                 how long to wait on any single call into the
+                                         running Cypress, in milliseconds (default
+                                         30000)
+          -h, --help                     display help for command
         "
       `)
     })
