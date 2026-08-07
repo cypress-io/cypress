@@ -87,7 +87,7 @@ export async function syncRemoteGraphQL () {
   }
 
   try {
-    const body = await rp.get(`${ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
+    const body = await rp.get(`${CLOUD_URLS[DEFAULT_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
 
     // TODO(tim): fix
     await fs.ensureDir(path.join(monorepoPaths.pkgDataContext, 'src/gen'))
