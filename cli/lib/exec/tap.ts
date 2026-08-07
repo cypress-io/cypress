@@ -7,13 +7,59 @@ import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
+import { beginTapTrace, noteTapCommand, noteTapFailure, recordTapEvent } from '../tap/events'
+import { renderOptionsFor } from '../tap/render'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
-import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
-import type { TapSchema } from '@packages/cypress-instances'
+import { TAP_COMMANDS, TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
+import type { TapCommandOptionSchema, TapSchema } from '@packages/cypress-instances'
 import util from '../util'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
+
+const INVALID_USAGE = 'INVALID_USAGE'
+const UNHANDLED = 'UNHANDLED'
+
+const knownCommands = new Set<string>([
+  ...tapCliCommands.map(({ name }) => name),
+  ...TAP_COMMANDS.map(({ name }) => name),
+])
+
+// A name this CLI does not know is whatever the user typed, so it is reported
+// as unknown rather than sent verbatim.
+const reportedCommand = (command: string | undefined): string => {
+  if (!command) {
+    return 'none'
+  }
+
+  return knownCommands.has(command) ? command : 'unknown'
+}
+
+const declaredOptions: readonly TapCommandOptionSchema[] = [...tapCliCommands, ...TAP_COMMANDS].flatMap(({ name, options = [] }) => {
+  return [...options, ...renderOptionsFor(name)]
+})
+
+// Both spellings of every option resolve to the canonical name, so `-b` and
+// `--browser` report as one flag.
+const knownFlags = new Map<string, string>([
+  ...['instance', 'json', 'timeout', 'help'].map((name): [string, string] => [name, name]),
+  ['h', 'help'],
+  ...declaredOptions.flatMap(({ name, alias }): [string, string][] => alias ? [[name, name], [alias, name]] : [[name, name]]),
+])
+
+// Names only: an option's value carries selectors, spec paths and test titles.
+// An undeclared flag is whatever the user typed, so it reports as unknown.
+// --instance/--json/--timeout are parsed off by the outer `cypress tap` command
+// and never reach the operands, so they are read from the options it passes on.
+const reportedFlags = (operands: string[], options: TapCliOptions): string[] => {
+  const named = operands
+  .filter((operand) => operand.startsWith('-'))
+  .map((operand) => knownFlags.get(operand.replace(/^-+/, '').split('=')[0]) ?? 'unknown')
+
+  const topLevel = Object.entries(options).filter(([, value]) => value !== undefined).map(([name]) => name)
+
+  return [...new Set([...named, ...topLevel])]
+}
 
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
@@ -75,6 +121,8 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
     await program.parseAsync(positionals, { from: 'user' })
   } catch (err: any) {
     if (err instanceof commander.CommanderError) {
+      noteTapFailure(INVALID_USAGE)
+
       return 1
     }
 
@@ -110,65 +158,88 @@ const renderKnownSchema = (command: string | undefined): number => {
   return renderStaticHelp(program, schema, command)
 }
 
+const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options: TapCliOptions): Promise<number> => {
+  const native = tapCliCommands.find(({ name }) => name === command)
+
+  if (native) {
+    return runNativeCommand(native, positionals, options, wantsHelp)
+  }
+
+  try {
+    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+
+    return await withTapSession(selection.instance, async (session) => {
+      const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
+
+      let dispatchCode = 0
+      const program = buildTapProgram(schema, async (name, args, commandOptions, renderOptions) => {
+        noteTapCommand(name)
+        dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, renderOptions)
+      })
+
+      if (wantsHelp || !command) {
+        return renderSchemaHelp(program, schema, selection, command)
+      }
+
+      try {
+        await program.parseAsync(positionals, { from: 'user' })
+      } catch (err: any) {
+        if (err instanceof commander.CommanderError) {
+          noteTapFailure(INVALID_USAGE)
+
+          return 1
+        }
+
+        throw err
+      }
+
+      return dispatchCode
+    }, options.timeout)
+  } catch (err: any) {
+    if (err instanceof CypressInstanceError) {
+      if (wantsHelp || !command) {
+        return renderKnownSchema(command)
+      }
+
+      debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
+      renderFailure(err)
+
+      return 1
+    }
+
+    if (err.known && err.details) {
+      debug('tap %s failed: %s', command || '(help)', err.message)
+      renderKnownFailure(err)
+
+      return 1
+    }
+
+    throw err
+  }
+}
+
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
 
-    const { wantsHelp, positionals, command } = buildCommandInfo(operands)
+    const info = buildCommandInfo(operands)
+    const startedAt = Date.now()
+    let exitCode = 1
 
-    const native = tapCliCommands.find(({ name }) => name === command)
+    beginTapTrace(reportedCommand(info.command), reportedFlags(operands, options))
 
-    if (native) {
-      return runNativeCommand(native, positionals, options, wantsHelp)
-    }
-
+    // The CLI exits the moment this returns, so the event is reported before it
+    // does rather than left in flight.
     try {
-      const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+      exitCode = await runTap(info, options)
 
-      return await withTapSession(selection.instance, async (session) => {
-        const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
-
-        let dispatchCode = 0
-        const program = buildTapProgram(schema, async (name, args, commandOptions, renderOptions) => {
-          dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, renderOptions)
-        })
-
-        if (wantsHelp || !command) {
-          return renderSchemaHelp(program, schema, selection, command)
-        }
-
-        try {
-          await program.parseAsync(positionals, { from: 'user' })
-        } catch (err: any) {
-          if (err instanceof commander.CommanderError) {
-            return 1
-          }
-
-          throw err
-        }
-
-        return dispatchCode
-      }, options.timeout)
+      return exitCode
     } catch (err: any) {
-      if (err instanceof CypressInstanceError) {
-        if (wantsHelp || !command) {
-          return renderKnownSchema(command)
-        }
-
-        debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
-        renderFailure(err)
-
-        return 1
-      }
-
-      if (err.known && err.details) {
-        debug('tap %s failed: %s', command || '(help)', err.message)
-        renderKnownFailure(err)
-
-        return 1
-      }
+      noteTapFailure(UNHANDLED)
 
       throw err
+    } finally {
+      await recordTapEvent(exitCode, Date.now() - startedAt)
     }
   },
 }

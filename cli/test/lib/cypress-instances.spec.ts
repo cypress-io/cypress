@@ -14,6 +14,7 @@ import {
   listLiveInstances,
   getInstancesDir,
   pruneDeadInstanceRecords,
+  resolvedInstanceId,
   CypressInstanceError,
 } from '../../lib/cypress-instances'
 
@@ -304,6 +305,17 @@ describe('lib/cypress-instances', () => {
       stubKill({ alive: [111] })
 
       await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+    })
+
+    it('remembers the id of the instance it selected', async () => {
+      const port = await startReadyInstance(INSTANCE_ID)
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      await resolveInstance({ cwd: PROJECT })
+
+      expect(resolvedInstanceId()).toBe(INSTANCE_ID)
     })
 
     it('reaps the leftover record and throws NO_INSTANCE when the only match’s process is dead', async () => {

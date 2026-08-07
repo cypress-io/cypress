@@ -68,6 +68,12 @@ export interface ResolveInstanceOptions {
   probeTimeoutMs?: number
 }
 
+let lastResolvedInstanceId: string | null = null
+
+// Read rather than threaded through every caller: each tap command resolves its
+// own instance, several of them below this module.
+export const resolvedInstanceId = (): string | null => lastResolvedInstanceId
+
 const describeFilter = (instance: number | undefined): string => {
   if (instance !== undefined) {
     return ` with pid ${instance}`
@@ -130,6 +136,8 @@ export const resolveLiveInstance = async (options: ResolveInstanceOptions): Prom
 
   const { instance, reason } = selectInstance(live, options)
 
+  lastResolvedInstanceId = instance.instanceId
+
   return { instance, reason, candidateCount: live.length }
 }
 
@@ -154,6 +162,8 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
   }
 
   const { instance: selected, reason } = selectInstance(ready, options)
+
+  lastResolvedInstanceId = selected.instanceId
 
   return { instance: selected, reason, candidateCount: ready.length }
 }
