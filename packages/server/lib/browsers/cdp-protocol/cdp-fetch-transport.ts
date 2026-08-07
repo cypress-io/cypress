@@ -3,10 +3,12 @@ import debugModule from 'debug'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
+import type { ResourceType } from '@packages/proxy'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
+import { normalizeResourceType } from './normalize-resource-type'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -78,6 +80,7 @@ type CdpFetchTransportOptions = {
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
   requestId?: string
+  resourceType?: ResourceType
   sessionId?: string
 }
 
@@ -241,6 +244,7 @@ export class CdpFetchTransport {
         },
         id: `${this.requestIdPrefix}${networkRequestId}`,
         requestId: event.requestId,
+        resourceType: normalizeResourceType(event.resourceType),
         sessionId,
       }
 

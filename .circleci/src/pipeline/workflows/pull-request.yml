@@ -280,6 +280,9 @@ jobs:
   # always run when their path filters match (require-opt-in: false). Append
   # specs here as fixes land. When a remediations list covers the full suite,
   # flip the matching *-cdp job to always-on and delete *-cdp-remediated.
+  # #34464 cookie coverage that stays green under DISABLE_PROXY is jar sync +
+  # OAuth only (system-tests-cookies-cdp). The full e2e cookies 80/443 matrix
+  # is deferred to #34508 (under #34353).
   - system-tests-chrome:
       name: system-tests-chrome-cdp-remediated
       context: test-runner:performance-tracking
@@ -288,6 +291,10 @@ jobs:
       parallelism: 1
       # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads
       spec: test/network_error_handling_spec.js test/downloads_spec.ts
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-cookies-cdp:
+      context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
@@ -539,6 +546,7 @@ jobs:
         - system-tests-non-root
         - h2-dual-stack-tests
         - system-tests-chrome-cdp-remediated
+        - system-tests-cookies-cdp
         - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
         - run-launchpad-integration-tests-chrome-cdp-remediated
