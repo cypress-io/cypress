@@ -187,6 +187,13 @@ const CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_CAPTURE_TIMEOUT) || 150
 // diagnostic has to name what actually loaded.
 const REPORTED_URL_COUNT = 5
 
+// The fixture initiates all 1000 `fetch()` calls from an inline script during parse, so a
+// good load has already started them by the time `postHook` runs. A page that has not is
+// not the fixture and never will be, so there is nothing to wait for - fail immediately and
+// let the retry pick up a load that got the real page. This beat covers initiation lagging
+// the load event.
+const BAD_PAGE_GRACE_MS = 1000
+
 const createHarCaptureHooks = () => {
   const started = new Set()
   const finished = new Set()
@@ -227,17 +234,32 @@ const createHarCaptureHooks = () => {
     // Waiting instead for every request to settle would let a single straggler out of a
     // thousand hold the capture open for the full timeout.
     waitForEnoughRequests: () => {
-      return new Promise((resolve, reject) => {
-        if (finished.size >= EXPECTED_IMAGE_COUNT) return resolve()
+      const describeCapture = () => {
+        return `${started.size} started, ${finished.size} finished, ${failed.size} failed. First ${REPORTED_URL_COUNT} requested: ${startedUrls.slice(0, REPORTED_URL_COUNT).join(', ')}`
+      }
 
-        const timeout = setTimeout(() => {
-          reject(new Error(`Timed out after ${CAPTURE_TIMEOUT_MS}ms waiting for ${EXPECTED_IMAGE_COUNT} requests to finish loading. ${started.size} started, ${finished.size} finished, ${failed.size} failed. First ${REPORTED_URL_COUNT} requested: ${startedUrls.slice(0, REPORTED_URL_COUNT).join(', ')}`))
-        }, CAPTURE_TIMEOUT_MS)
+      return Promise.try(() => {
+        if (started.size >= EXPECTED_IMAGE_COUNT) return
 
-        onTargetReached = () => {
-          clearTimeout(timeout)
-          resolve()
-        }
+        return Promise.delay(BAD_PAGE_GRACE_MS).then(() => {
+          if (started.size < EXPECTED_IMAGE_COUNT) {
+            throw new Error(`The page under test never requested ${EXPECTED_IMAGE_COUNT} images, so it is not the fixture. ${describeCapture()}`)
+          }
+        })
+      })
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          if (finished.size >= EXPECTED_IMAGE_COUNT) return resolve()
+
+          const timeout = setTimeout(() => {
+            reject(new Error(`Timed out after ${CAPTURE_TIMEOUT_MS}ms waiting for ${EXPECTED_IMAGE_COUNT} requests to finish loading. ${describeCapture()}`))
+          }, CAPTURE_TIMEOUT_MS)
+
+          onTargetReached = () => {
+            clearTimeout(timeout)
+            resolve()
+          }
+        })
       })
       // chrome-har-capturer surfaces whatever `postHook` returns as `log.pages[0]._user`
       .then(() => ({ requestsStarted: started.size }))
@@ -522,6 +544,10 @@ describe('Proxy Performance', function () {
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
     describe(urlUnderTest, function () {
+      // the fixture host does not always serve the fixture, and a load that missed it is
+      // rejected in about a second, so retrying freely is what gets a run past a bad patch
+      this.retries(15)
+
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 
