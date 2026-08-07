@@ -31,6 +31,7 @@ import browsers from './browsers'
 import devServer from './plugins/dev-server'
 import { remoteSchemaWrapped } from '@packages/data-context/graphql'
 import { GracefulExit } from './util/graceful-exit'
+import type { ExitStepKey } from './util/graceful-exit'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -52,6 +53,11 @@ async function resolveAuthRemoteOrigin (): Promise<string | undefined> {
   return commitInfo.getRemoteOrigin(projectRoot)
     .then((value) => value ?? undefined)
 }
+
+// The teardown step below destroys whatever context is currently set, so a replaced
+// context must not leave its step behind — every stale copy is another concurrent
+// `clearCtx()` racing the same global context during graceful exit.
+let clearCtxStepKey: ExitStepKey | undefined
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
@@ -253,7 +259,11 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
     },
   })
 
-  GracefulExit.addStep(async () => {
+  if (clearCtxStepKey) {
+    GracefulExit.removeStep(clearCtxStepKey)
+  }
+
+  clearCtxStepKey = GracefulExit.addStep(async () => {
     await clearCtx()
   }, 'clear data context')
 
