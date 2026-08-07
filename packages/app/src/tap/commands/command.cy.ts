@@ -295,8 +295,8 @@ describe('tap/commands/command', () => {
     stubTests(getSerializedConsolePropsForLog)
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('command', {}, {
-      'testId': 'r2',
-      'commandId': '1',
+      'test-id': 'r2',
+      'command-id': '1',
       'json': 'true',
     })
 
