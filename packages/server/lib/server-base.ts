@@ -17,8 +17,8 @@ import { getRoutesForRequest } from '@packages/network-interception'
 import { DriverInterceptRegistrationAdapter, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
-import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
-import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort, RemoteStates } from '@packages/network-tools'
+import type { NetworkProxy, BrowserPreRequest, ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
 import { Request } from './request'
@@ -32,7 +32,6 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
 import * as fileServer from './file_server'
@@ -48,14 +47,13 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookie/automation'
-import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-runtime'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -1191,6 +1189,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           agent: null,
           headers: {
             'x-cypress-resolving-url': '1',
+            // With the MITM proxy disabled the server is not a proxy — the
+            // token lets the direct-origin catch-all recognize this forced
+            // loopback and route it through the interception pipeline so the
+            // stub can reply. Gated so proxy-on wire traffic is unchanged.
+            ...(isProxyDisabled() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
           },
         })
       }

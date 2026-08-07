@@ -23,7 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { isProxyDisabled } from './util/is-proxy-disabled'
-import { resolveProxyUrlBase } from './adapters/internal-routes'
+import { isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -362,12 +362,27 @@ export const createCommonRoutes = ({
   if (isProxyDisabled() && (getNetworkProxy || networkProxy)) {
     router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
       const proxy = resolveNetworkProxy()
+
+      if (!proxy) {
+        return next()
+      }
+
+      // Intercept-matched cy.visit() pre-flights: _onResolveUrl forces its
+      // request through this server proxy-style (absolute request-target) with
+      // the per-process token. Serve it through the interception pipeline —
+      // without URL rewriting — so net-stubbing can match and reply.
+      if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && /^https?:\/\//.test(req.proxiedUrl)) {
+        await proxy.handleHttpRequest(req, res)
+
+        return
+      }
+
       // Resolve against our own configured origin rather than the
       // client-controlled Host header — every request here arrived at this
       // server by definition.
       const absoluteUrl = new URL(req.url, resolveProxyUrlBase(config)).href
 
-      if (!proxy || !toFileServerUrl(absoluteUrl, remoteStates.current())) {
+      if (!toFileServerUrl(absoluteUrl, remoteStates.current())) {
         return next()
       }
 
