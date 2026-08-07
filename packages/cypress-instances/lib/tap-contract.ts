@@ -332,6 +332,40 @@ export const TAP_NATIVE_COMMANDS = [
 
 export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
 
+/**
+ * View-only options: flags the CLI declares on a command on top of the ones its
+ * schema advertises, parsed and rendered into its help like any other but never
+ * forwarded to the instance, since they only shape how the result reads. They
+ * live here so one place holds every name a tap invocation can carry.
+ */
+export const TAP_VIEW_OPTIONS: Partial<Record<TapCommandName | TapNativeCommandName, readonly TapCommandOptionSchema[]>> = {
+  command: [
+    { name: 'depth', alias: 'd', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
+  ],
+}
+
+const allTapCommands: readonly (TapCommandSchema | TapNativeCommandSchema)[] = [...TAP_NATIVE_COMMANDS, ...TAP_COMMANDS]
+
+/** Every command name this CLI ships, whether it dispatches to the instance or handles it itself. */
+export const KNOWN_COMMANDS: ReadonlySet<string> = new Set(allTapCommands.map(({ name }) => name))
+
+const declaredOptions: readonly TapCommandOptionSchema[] = [
+  ...allTapCommands.flatMap(({ options = [] }) => [...options]),
+  ...Object.values(TAP_VIEW_OPTIONS).flatMap((options) => options ?? []),
+]
+
+/**
+ * Every option name this CLI declares, mapped to its canonical spelling so `-h`
+ * and `--help` report as the one flag `help`. The seeded names belong to
+ * `cypress tap` itself rather than to any command, so no command's options
+ * carry them.
+ */
+export const KNOWN_FLAGS: ReadonlyMap<string, string> = new Map<string, string>([
+  ...['instance', 'json', 'timeout', 'help'].map((name): [string, string] => [name, name]),
+  ['h', 'help'],
+  ...declaredOptions.flatMap(({ name, alias }): [string, string][] => alias ? [[name, name], [alias, name]] : [[name, name]]),
+])
+
 // Per-command result contracts live in `./contracts/`; re-exported here so the
 // app's deep import of this module and the package barrel both reach them.
 export * from './contracts/reporter'
