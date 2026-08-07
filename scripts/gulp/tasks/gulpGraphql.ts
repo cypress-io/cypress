@@ -5,6 +5,7 @@ import chalk from 'chalk'
 import fs from 'fs-extra'
 import { buildSchema, extendSchema, GraphQLSchema, introspectionFromSchema, isObjectType, parse } from 'graphql'
 import { minifyIntrospectionQuery } from '@urql/introspection'
+import { CLOUD_URLS } from '@packages/cloud-urls'
 
 import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
@@ -80,15 +81,9 @@ export async function graphqlCodegenWatch () {
   return dfd.promise
 }
 
-const ENV_MAP = {
-  development: 'http://localhost:3000',
-  staging: 'https://cloud-staging.cypress.io',
-  production: 'https://cloud.cypress.io',
-}
-
 export async function syncRemoteGraphQL () {
-  if (!ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV]) {
-    throw new Error(`Expected --env to be one of ${Object.keys(ENV_MAP).join(', ')}`)
+  if (!CLOUD_URLS[DEFAULT_INTERNAL_CLOUD_ENV]) {
+    throw new Error(`Expected --env to be one of ${Object.keys(CLOUD_URLS).join(', ')}`)
   }
 
   try {

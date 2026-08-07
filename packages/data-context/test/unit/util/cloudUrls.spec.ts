@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
-import { resolveCloudEnv } from '../../../src/util/cloudUrls'
+import { resolveCloudEnv } from '@packages/cloud-urls'
 
 describe('resolveCloudEnv', () => {
   it('returns CYPRESS_INTERNAL_CLOUD_ENV when it is set', () => {

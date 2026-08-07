@@ -2,7 +2,7 @@ import type { Request } from 'express'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import { isLocalhost } from '@packages/network-tools'
 
-import { CLOUD_URLS } from '../src/util/cloudUrls'
+import { CLOUD_URLS } from '@packages/cloud-urls'
 
 const CYPRESS_CLOUD_ORIGINS: ReadonlySet<string> = new Set([
   CLOUD_URLS.development,

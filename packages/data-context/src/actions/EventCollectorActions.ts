@@ -1,4 +1,5 @@
 import { gql } from '@urql/core'
+import { eventCollectorEnv, eventCollectorUrl } from '@packages/cloud-urls'
 import type { DataContext } from '..'
 import Debug from 'debug'
 import type { LocalTestCountsInput } from '../gen/nxs.gen'
@@ -20,21 +21,14 @@ type EventInputs = {
   localTestCounts?: LocalTestCountsInput
 }
 
-/**
- * Defaults to staging when doing development. To override to production for development,
- * explicitly set process.env.CYPRESS_INTERNAL_ENV to 'production`
- */
-const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'production') as 'development' | 'staging' | 'production'
-
 export class EventCollectorActions {
   constructor (private ctx: DataContext) {
-    debug('Using %s environment for Event Collection', cloudEnv)
+    debug('Using %s environment for Event Collection', eventCollectorEnv())
   }
 
   async recordEvent (event: CollectibleEvent, includeMachineId: boolean): Promise<boolean> {
     try {
-      const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
-      const eventUrl = includeMachineId ? `${cloudUrl}/machine-collect` : `${cloudUrl}/anon-collect`
+      const eventUrl = eventCollectorUrl(includeMachineId)
       const headers = {
         'Content-Type': 'application/json',
         'x-cypress-version': pkg.version,

@@ -1,0 +1,27 @@
+{
+  "name": "@packages/cloud-urls",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn clean && tsc",
+    "clean": "rimraf -rf ./{dist,coverage}",
+    "lint": "eslint",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "@types/node": "^22.18.7",
+    "eslint": "^9.22.0",
+    "rimraf": "^6.1.1",
+    "typescript": "^5.8.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  }
+}
