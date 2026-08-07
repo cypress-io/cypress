@@ -14,6 +14,10 @@ export const parseTitleGrep = (s: string): TitleGrep | null => {
   }
 
   s = s.trim()
+  if (!s) {
+    return null
+  }
+
   if (s.startsWith('-')) {
     return {
       title: s.substring(1),
@@ -32,7 +36,7 @@ export const parseFullTitleGrep = (s: string): TitleGrep[] => {
     return []
   }
 
-  return s.split(';').map(parseTitleGrep)
+  return s.split(';').map(parseTitleGrep).filter((g): g is TitleGrep => g !== null)
 }
 
 export const parseTagsGrep = (s?: string): TagGrep[][] => {
