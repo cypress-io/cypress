@@ -276,124 +276,60 @@ jobs:
       requires:
         - system-tests-node-modules-install
 
-  # Proxy-disabled CDP remediations (*-cdp-remediated): known-green subsets that
-  # always run when their path filters match (require-opt-in: false). Append
-  # specs here as fixes land. When a remediations list covers the full suite,
-  # flip the matching *-cdp job to always-on and delete *-cdp-remediated.
+  # bugbash/cdp-full-suite: *-cdp-remediated jobs disabled; full *-cdp suites
+  # always-on (require-opt-in: false). Restore remediations before merging.
   # #34464 cookie coverage that stays green under DISABLE_PROXY is jar sync +
   # OAuth only (system-tests-cookies-cdp). The full e2e cookies 80/443 matrix
   # is deferred to #34508 (under #34353).
-  - system-tests-chrome:
-      name: system-tests-chrome-cdp-remediated
-      context: test-runner:performance-tracking
-      disable-proxy: true
-      require-opt-in: false
-      parallelism: 1
-      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses.
-      # proxy_correlation_spec omitted: Chrome CI flakes on CorrelateBrowserPreRequest timeouts under
-      # concurrent large-body CDP Fetch (47 unmatched localhost requests); Electron was green.
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js
-      requires:
-        - system-tests-node-modules-install
   - system-tests-cookies-cdp:
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
-  - system-tests-electron:
-      name: system-tests-electron-cdp-remediated
-      context: test-runner:performance-tracking
-      disable-proxy: true
-      require-opt-in: false
-      parallelism: 1
-      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses.
-      # proxy_correlation_spec omitted — see chrome-cdp-remediated note above.
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js
-      requires:
-        - system-tests-node-modules-install
-  - run-launchpad-integration-tests-chrome:
-      name: run-launchpad-integration-tests-chrome-cdp-remediated
-      context:
-        [
-          test-runner:cypress-record-key,
-          test-runner:launchpad-tests,
-          test-runner:percy
-        ]
-      disable-proxy: true
-      require-opt-in: false
-      parallelism: 1
-      record-group-suffix: '-remediated'
-      # #34353 Invalid InterceptionId body-stream crash
-      spec: cypress/e2e/choose-a-browser.cy.ts,cypress/e2e/open-mode.cy.ts
-      requires:
-        - ready-to-test
-  - driver-integration-tests-chrome:
-      name: driver-integration-tests-chrome-cdp-remediated
-      context: test-runner:cypress-record-key
-      disable-proxy: true
-      require-opt-in: false
-      parallelism: 1
-      record-group-suffix: '-remediated'
-      # #34467 continue unmodified CDP Fetch responses; #34465 extra-target shared
-      # middleware. Excludes downloads_basic_auth.cy.ts — #34512 Network.enable
-      # never settles on the extra target's session. Add it here once that is fixed.
-      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts
-      requires:
-        - ready-to-test
-  - driver-integration-tests-electron:
-      name: driver-integration-tests-electron-cdp-remediated
-      context: test-runner:cypress-record-key
-      disable-proxy: true
-      require-opt-in: false
-      parallelism: 1
-      record-group-suffix: '-remediated'
-      # #34465 extra-target shared middleware. Excludes
-      # downloads_basic_auth.cy.ts — #34512 Network.enable never settles on the
-      # extra target's session. Add it here once that is fixed.
-      spec: cypress/e2e/cypress/downloads.cy.ts
-      requires:
-        - ready-to-test
   - unit-tests-proxy-disabled:
       requires:
         - ready-to-test
 
-  # Full proxy-disabled (CDP Fetch) coverage (*-cdp) — off by default.
-  # Enable with Trigger Pipeline → run-proxy-disabled-tests=true.
-  # Omitted from all-jobs-passed so failures stay non-blocking when enabled.
-  # Promote known-green specs into *-cdp-remediated above rather than flipping
-  # these full suites on until remediations cover the entire suite.
+  # Full proxy-disabled (CDP Fetch) coverage (*-cdp) — always-on for this bugbash.
+  # Omitted from all-jobs-passed so failures stay non-blocking.
   - driver-integration-tests-chrome:
       name: driver-integration-tests-chrome-cdp
       context: test-runner:cypress-record-key
       disable-proxy: true
+      require-opt-in: false
       requires:
         - ready-to-test
   - driver-integration-tests-chrome-inject-document-domain:
       name: driver-integration-tests-chrome-inject-document-domain-cdp
       context: test-runner:cypress-record-key
       disable-proxy: true
+      require-opt-in: false
       requires:
         - ready-to-test
   - driver-integration-tests-electron:
       name: driver-integration-tests-electron-cdp
       context: test-runner:cypress-record-key
       disable-proxy: true
+      require-opt-in: false
       requires:
         - ready-to-test
   - driver-integration-memory-tests:
       name: driver-integration-memory-tests-cdp
       disable-proxy: true
+      require-opt-in: false
       requires:
         - ready-to-test
   - system-tests-chrome:
       name: system-tests-chrome-cdp
       context: test-runner:performance-tracking
       disable-proxy: true
+      require-opt-in: false
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
       name: system-tests-electron-cdp
       context: test-runner:performance-tracking
       disable-proxy: true
+      require-opt-in: false
       requires:
         - system-tests-node-modules-install
   - run-app-integration-tests-chrome:
@@ -405,6 +341,7 @@ jobs:
           test-runner:percy
         ]
       disable-proxy: true
+      require-opt-in: false
       requires:
         - ready-to-test
   - run-launchpad-integration-tests-chrome:
@@ -416,6 +353,7 @@ jobs:
           test-runner:percy
         ]
       disable-proxy: true
+      require-opt-in: false
       requires:
         - ready-to-test
 
@@ -525,8 +463,7 @@ jobs:
   # Fan-in aggregator — the only required GitHub status check for PRs.
   # Required jobs fan into this one. Jobs that halt early (pipeline parameter
   # false) still complete successfully. Full proxy-disabled *-cdp jobs above are
-  # opt-in (run-proxy-disabled-tests) and intentionally omitted from this gate;
-  # *-cdp-remediated known-green subsets are included.
+  # always-on for this bugbash but intentionally omitted from this gate.
   - all-jobs-passed:
       requires:
         # Always-run jobs
@@ -548,13 +485,8 @@ jobs:
         - system-tests-webkit
         - system-tests-non-root
         - h2-dual-stack-tests
-        - system-tests-chrome-cdp-remediated
         - system-tests-cookies-cdp
-        - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
-        - run-launchpad-integration-tests-chrome-cdp-remediated
-        - driver-integration-tests-chrome-cdp-remediated
-        - driver-integration-tests-electron-cdp-remediated
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta

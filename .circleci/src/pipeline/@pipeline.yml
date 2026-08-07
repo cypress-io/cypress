@@ -2117,6 +2117,10 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -2124,6 +2128,7 @@ jobs:
           guard: << pipeline.parameters.run-driver-tests >>
       - halt-unless-proxy-disabled-enabled:
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -2792,6 +2797,10 @@ jobs:
         description: run with the MITM proxy disabled (CDP Fetch network interception path)
         type: boolean
         default: false
+      require-opt-in:
+        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
+        type: boolean
+        default: true
     parallelism: 5
     resource_class: medium+.gen2
     steps:
@@ -2800,6 +2809,7 @@ jobs:
           install-chrome-channel: stable
           inject-document-domain: true
           disable-proxy: << parameters.disable-proxy >>
+          require-opt-in: << parameters.require-opt-in >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-beta:
