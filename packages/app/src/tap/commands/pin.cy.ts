@@ -301,7 +301,8 @@ describe('tap/commands/pin', () => {
   describe('a pin made in the reporter UI', () => {
     const stubStatusRunner = () => {
       cy.stub(tapManagerDataSource, 'getRunner').returns({
-        getAllTestsState: () => TESTS_STATE,
+        getAllTestStates: () => Object.fromEntries(Object.entries(TESTS_STATE).map(([id, test]) => [id, test.state])),
+        getAllTestsSummary: () => TESTS_STATE,
         getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
         isRunComplete: () => true,
         getStartTime: () => '2026-07-29T10:15:00.000Z',
@@ -368,7 +369,8 @@ describe('tap/commands/pin', () => {
       const { unpinSnapshot, pinInApp } = stubSource({ runner: { getTestState, getSnapshotPropsForLog: () => SNAPSHOT_PROPS } })
 
       cy.stub(tapManagerDataSource, 'getRunner').returns({
-        getAllTestsState: () => testsState,
+        getAllTestStates: () => Object.fromEntries(Object.entries(testsState).map(([id, test]) => [id, test.state])),
+        getAllTestsSummary: () => testsState,
         getTestState,
         isRunComplete: () => true,
         getStartTime: () => '2026-07-29T10:15:00.000Z',
