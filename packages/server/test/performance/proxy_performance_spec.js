@@ -435,7 +435,6 @@ const runBrowserTest = (urlUnderTest, testCase) => {
         harCapturer.on('har', resolve)
       })
       .then((har) => {
-        proc.kill(9)
         debug('Received HAR from Chrome')
         const results = getResultsFromHar(har)
 
@@ -453,7 +452,10 @@ const runBrowserTest = (urlUnderTest, testCase) => {
     })
   }
 
-  return runHar()
+  // every exit path has to reap Chrome, not just the one where a HAR arrives - a capture
+  // that times out or fails would otherwise leave a process behind on each of the retries.
+  // The ECONNREFUSED path reconnects to this same process, so this runs once it has settled.
+  return runHar().finally(() => proc.kill(9))
 }
 
 let cyServer
