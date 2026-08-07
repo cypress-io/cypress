@@ -122,25 +122,6 @@ describe('app state', () => {
     })
   })
 
-  context('#toggleAutoScrolling', () => {
-    it('toggles autoScrollingEnabled', () => {
-      const instance = new AppState()
-
-      instance.toggleAutoScrolling()
-      expect(instance.autoScrollingEnabled).to.be.false
-      instance.toggleAutoScrolling()
-      expect(instance.autoScrollingEnabled).to.be.true
-    })
-
-    it('sets reset value for autoScrollingEnabled', () => {
-      const instance = new AppState()
-
-      instance.toggleAutoScrolling()
-      instance.reset()
-      expect(instance.autoScrollingEnabled).to.be.false
-    })
-  })
-
   context('#setStudioActive', () => {
     it('sets studioActive', () => {
       const instance = new AppState()
@@ -192,10 +173,10 @@ describe('app state', () => {
       expect(instance.autoScrollingEnabled).to.be.true
     })
 
-    it('does not reset autoScrollingEnabled when it has been toggled', () => {
+    it('does not reset autoScrollingEnabled when it has been explicitly set', () => {
       const instance = new AppState()
 
-      instance.toggleAutoScrolling()
+      instance.setAutoScrolling(false)
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.false
     })
@@ -244,24 +225,17 @@ describe('app state', () => {
       const instance = new AppState()
 
       // intentionally excluded from reset defaults
-      instance.setCyPromptActionsEnabled(false)
+      instance.cyPromptActionsEnabled = false
       instance.reset()
       expect(instance.cyPromptActionsEnabled).to.be.false
     })
   })
 
-  context('#setCyPromptActionsEnabled', () => {
+  context('#cyPromptActionsEnabled', () => {
     it('defaults to true', () => {
       const instance = new AppState()
 
       expect(instance.cyPromptActionsEnabled).to.be.true
-    })
-
-    it('sets cyPromptActionsEnabled', () => {
-      const instance = new AppState()
-
-      instance.setCyPromptActionsEnabled(false)
-      expect(instance.cyPromptActionsEnabled).to.be.false
     })
   })
 })

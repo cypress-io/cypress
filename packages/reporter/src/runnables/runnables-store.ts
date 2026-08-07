@@ -222,10 +222,6 @@ export class RunnablesStore {
     })
   }
 
-  testById (id: string) {
-    return this._tests[id]
-  }
-
   addLog (props: LogProps) {
     this._withTest(props.testId, (test) => {
       test.addLog(props)

@@ -92,10 +92,6 @@ class AppState {
     }
   }
 
-  toggleAutoScrolling () {
-    this.setAutoScrolling(!this.autoScrollingEnabled)
-  }
-
   /**
    * Toggles the auto-scrolling user preference to true|false. This method should only be called from the
    * preferences menu itself.
@@ -154,10 +150,6 @@ class AppState {
 
   setShowFetchRequests (showFetchRequests: boolean) {
     this.showFetchRequests = showFetchRequests
-  }
-
-  setCyPromptActionsEnabled (cyPromptActionsEnabled: boolean) {
-    this.cyPromptActionsEnabled = cyPromptActionsEnabled
   }
 
   reset () {

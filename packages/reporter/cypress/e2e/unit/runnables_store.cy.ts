@@ -207,13 +207,6 @@ describe('runnables store', () => {
     })
   })
 
-  context('#testByid', () => {
-    it('returns the test with the given id', () => {
-      instance.setRunnables({ tests: [createTest('1'), createTest('3')], suites: [] })
-      expect(instance.testById('3').title).to.be.equal('test 3')
-    })
-  })
-
   context('#addLog', () => {
     it('adds the log', () => {
       const test = createTest('1')
@@ -223,10 +216,10 @@ describe('runnables store', () => {
       instance.setRunnables({ tests: [test] })
 
       instance.addLog(createCommand(1, '1', 'h1'))
-      expect(instance.testById('1').lastAttempt.commands.length).to.equal(1)
+      expect(instance._tests['1'].lastAttempt.commands.length).to.equal(1)
 
       instance.addLog(createCommand(2, '1', 'h1'))
-      expect(instance.testById('1').lastAttempt.commands.length).to.equal(2)
+      expect(instance._tests['1'].lastAttempt.commands.length).to.equal(2)
     })
   })
 
@@ -240,7 +233,7 @@ describe('runnables store', () => {
 
       instance.addLog(createCommand(1, '1', 'h1'))
       instance.updateLog({ id: 1, testId: '1', name: 'new name' } as LogProps)
-      expect(instance.testById('1').lastAttempt.commands[0].name).to.equal('new name')
+      expect(instance._tests['1'].lastAttempt.commands[0].name).to.equal('new name')
     })
   })
 
@@ -254,11 +247,11 @@ describe('runnables store', () => {
 
       instance.addLog(createCommand(1, '1', 'h1'))
       instance.addLog(createCommand(2, '1', 'h1'))
-      expect(instance.testById('1').lastAttempt.commands.length).to.equal(2)
+      expect(instance._tests['1'].lastAttempt.commands.length).to.equal(2)
 
       instance.removeLog(createCommand(1, '1', 'h1'))
-      expect(instance.testById('1').lastAttempt.commands.length).to.equal(1)
-      expect(instance.testById('1').lastAttempt.commands[0].id).to.equal(2)
+      expect(instance._tests['1'].lastAttempt.commands.length).to.equal(1)
+      expect(instance._tests['1'].lastAttempt.commands[0].id).to.equal(2)
     })
   })
 
@@ -301,7 +294,7 @@ describe('runnables store', () => {
     it('resets tests', () => {
       instance.setRunnables({ tests: [createTest('1')] })
       instance.reset()
-      expect(instance.testById('1')).to.be.undefined
+      expect(instance._tests['1']).to.be.undefined
     })
 
     it('resets runnablesHistory', () => {

@@ -51,7 +51,6 @@ type RunnablesStoreStub = RunnablesStore & {
   runnableFinished: SinonSpy
   setInitialScrollTop: SinonStub
   setRunnables: SinonSpy
-  testById: SinonStub
   updateLog: SinonSpy
   removeLog: SinonSpy
 }
@@ -64,7 +63,6 @@ const runnablesStoreStub = () => {
     runnableFinished: sinon.spy(),
     setInitialScrollTop: sinon.stub(),
     setRunnables: sinon.spy(),
-    testById: sinon.stub(),
     updateLog: sinon.spy(),
     removeLog: sinon.spy(),
   } as RunnablesStoreStub
@@ -322,7 +320,6 @@ describe('events', () => {
     it('emits runner:console:error with error, test id and command id on show:error ', () => {
       const test = { err: { isCommandErr: true }, commandId: 'matching command id', testId: 'test' }
 
-      runnablesStore.testById.returns(test)
       events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,

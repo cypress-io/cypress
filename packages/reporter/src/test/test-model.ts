@@ -147,10 +147,6 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
-  isLastAttempt (attemptModel: Attempt) {
-    return this.lastAttempt === attemptModel
-  }
-
   addLog = (props: LogProps) => {
     // NOTE: The 'testCurrentRetry' prop may be zero, which means we really care about nullish coalescing the value
     // to make sure logs on the first attempt are still accounted for even if the attempt has finished.

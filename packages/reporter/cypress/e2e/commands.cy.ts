@@ -1364,7 +1364,7 @@ describe('cy.prompt command buttons', { viewportHeight: 1000 }, () => {
   it('hides the buttons when cy.prompt actions are disabled (e.g. test replay)', () => {
     // command.tsx reads the reporter's appState singleton, exposed as window.state
     cy.window().then((win) => {
-      win.state.setCyPromptActionsEnabled(false)
+      win.state.cyPromptActionsEnabled = false
       addPromptCommand()
     })
 
