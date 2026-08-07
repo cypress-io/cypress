@@ -31,7 +31,6 @@
         "@percy/cli",
         "bytenode",
         "chai-as-promised",
-        "detect-port",
         "mobx",
         "mocha-banner",
         "mocha-junit-reporter",
