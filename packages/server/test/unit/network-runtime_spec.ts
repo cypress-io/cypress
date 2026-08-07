@@ -412,12 +412,13 @@ describe('lib/network-runtime', () => {
       shouldCorrelatePreRequests: () => true,
     })
     const seenResourceTypes: Array<string | undefined> = []
-    const originalCreateMiddlewareContext = runtime.networkProxy.http.createMiddlewareContext.bind(runtime.networkProxy.http)
 
-    sinon.stub(runtime.networkProxy.http, 'createMiddlewareContext').callsFake((req, res) => {
+    // Registered after the legacy pipeline (which runs CorrelateBrowserPreRequest),
+    // so this observes req.resourceType post-fallback rather than pre-middleware.
+    runtime.networkInterception.use((req, next) => {
       seenResourceTypes.push(req.resourceType)
 
-      return originalCreateMiddlewareContext(req, res)
+      return next(req)
     })
 
     // Resolve correlation immediately with no browserPreRequest so the
