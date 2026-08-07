@@ -236,6 +236,12 @@ describe('setupNodeEvents', () => {
   })
 
   it('handles multiple config errors and then recovers', () => {
+    // Each 'Try again' fires this mutation to reset the error and reload the config. The
+    // old error stays mounted with identical markup until the mutation resolves, so waiting
+    // on it anchors the recovery assertions to the reloaded state instead of racing against
+    // the stale error DOM.
+    cy.intercept('mutation-Main_ResetErrorsAndLoadConfig').as('resetErrorsAndLoadConfig')
+
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
@@ -253,6 +259,7 @@ describe('setupNodeEvents', () => {
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
+    cy.wait('@resetErrorsAndLoadConfig')
     cy.get('[data-cy-testingType=e2e]').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is invalid when set from the root of the config object')
@@ -262,6 +269,7 @@ describe('setupNodeEvents', () => {
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
+    cy.wait('@resetErrorsAndLoadConfig')
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })

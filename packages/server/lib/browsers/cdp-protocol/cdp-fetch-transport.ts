@@ -1,9 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
-import pDefer from 'p-defer'
 import { Readable } from 'stream'
-import { promisify } from 'util'
-import zlib from 'zlib'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ICriClient } from './cri-client'
@@ -17,10 +14,28 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
-const brotliDecompress = promisify(zlib.brotliDecompress)
+const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
+
+// CDP refuses Fetch.getResponseBody for a pause in the redirect-received state,
+// and documents a redirect status plus a location header as the way to tell that
+// state apart from response-received. Drift from MITM: redirect bodies are
+// therefore empty to middleware under proxy-disabled mode — CDP cannot provide
+// them — so 3xx handling differs from the MITM path, which may still surface
+// whatever the origin sent.
+const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+  return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
+    && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
+}
 
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  /**
+   * Pre-register a URL that will never receive Network.requestWillBeSent
+   * (download-manager pauses omit networkId). Mirrors the MITM download-click
+   * path so CorrelateBrowserPreRequest resolves immediately instead of waiting
+   * the full pre-request timeout.
+   */
+  addPendingUrlWithoutPreRequest?: (url: string) => void
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -38,8 +53,18 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
+/**
+ * `headersReady` settles once the response pause has arrived and its headers
+ * are resolved. RESPONSE_PAUSE_TIMEOUT_MS is bounded on that rather than on the
+ * whole response so the body transfer, which can legitimately outlast the time
+ * the browser took to respond, is not charged against a pause that arrived.
+ */
+type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
+  headersReady: PromiseWithResolvers<void>
+}
+
 export class CdpFetchTransport {
-  private readonly inFlightRequests = new Map<string, pDefer.DeferredPromise<CdpFetchTransportResponse>>()
+  private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
 
   private isStarted = false
 
@@ -64,9 +89,12 @@ export class CdpFetchTransport {
    */
   async start (): Promise<void> {
     if (this.isStarted) {
+      debug('start skipped (already started)')
+
       return
     }
 
+    debug('starting CDP Fetch transport')
     this.client.on('Fetch.requestPaused', this.interceptRequest)
     this.client.on('Fetch.requestPaused', this.resolveResponse)
     // Set-Cookie never appears on Fetch response pauses — the raw cookie
@@ -82,6 +110,8 @@ export class CdpFetchTransport {
           requestStage: 'Response',
         }],
       })
+
+      debug('CDP Fetch transport started')
     } catch (err) {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
@@ -97,14 +127,19 @@ export class CdpFetchTransport {
    * Used between tests so the next test still receives paused traffic.
    */
   reset (): void {
+    debug('resetting CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
     this.rejectAll(new Error('CDP Fetch transport reset'))
     this.networkExtraInfo.flush()
   }
 
   async stop (): Promise<void> {
     if (!this.isStarted) {
+      debug('stop skipped (not started)')
+
       return
     }
+
+    debug('stopping CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
 
     try {
       await this.client.send('Fetch.disable')
@@ -114,6 +149,7 @@ export class CdpFetchTransport {
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
       this.isStarted = false
+      debug('CDP Fetch transport stopped')
     }
   }
 
@@ -122,31 +158,40 @@ export class CdpFetchTransport {
       return
     }
 
-    let networkId: string | undefined
+    // Fetch.requestId is unique per redirect hop and stable across that hop's
+    // request-stage and response-stage pauses — it keys pause pairing only.
+    // networkId (Network.requestWillBeSent id) is optional and shared across
+    // hops; it joins Network-domain state (pre-requests, extraInfo), not the
+    // in-flight Fetch map. Pre-request correlation is handled separately by the
+    // addPendingUrlWithoutPreRequest registration below when networkId is absent.
+    const fetchRequestId = event.requestId
+    const networkRequestId = event.networkId ?? event.requestId
     let requestContinued = false
     let response: CdpFetchTransportResponse | undefined
     let responseRequestId: string | undefined
     let responseSessionId: string | undefined
-    let deferred: pDefer.DeferredPromise<CdpFetchTransportResponse> | undefined
+    let deferred: ResponsePauseDeferred | undefined
 
     try {
-      if (!event.networkId) {
-        debug('continuing request pause without network id: %s', event.request.url)
-        await this.safeSend('Fetch.continueRequest', {
-          requestId: event.requestId,
-          ...(await this.autFrameHeader(event)),
-        }, sessionId)
+      debug('intercepting request pause %s %s (fetchRequestId=%s, networkRequestId=%s, resourceType=%s)',
+        event.request.method,
+        event.request.url,
+        fetchRequestId,
+        networkRequestId,
+        event.resourceType)
 
-        return
+      // Without networkId there will never be a matching browser pre-request.
+      // Register the URL so CorrelateBrowserPreRequest does not burn ~2s waiting.
+      if (!event.networkId) {
+        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
       }
 
-      networkId = event.networkId
       const request: CdpFetchTransportRequest = {
         ...event.request,
         headers: {
           ...event.request.headers,
         },
-        id: networkId,
+        id: networkRequestId,
         requestId: event.requestId,
         sessionId,
       }
@@ -159,26 +204,42 @@ export class CdpFetchTransport {
         : false
 
       if (markAsAUTFrame) {
+        debug('marking AUT frame document %s', event.request.url)
         // Node's IncomingMessage lowercases headers on the MITM path; the
         // synthetic CDP codec does not. Use the lowercase form ExtractCypressMetadataHeaders reads.
         request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
       }
 
-      const responseDeferred = pDefer<CdpFetchTransportResponse>()
+      const responseDeferred: ResponsePauseDeferred = {
+        ...Promise.withResolvers<CdpFetchTransportResponse>(),
+        headersReady: Promise.withResolvers<void>(),
+      }
 
       // reset()/stop() may reject this before the continue callback races on
       // it (e.g. a between-tests reset while request middleware is still
       // running); observe it so that never becomes an unhandled rejection.
+      // Releasing headersReady also ends a wait no pause will ever arrive for.
       responseDeferred.promise.catch((err: Error) => {
         debug('in-flight response deferred rejected for %s: %s', event.request.url, err.message)
+        responseDeferred.headersReady.resolve()
       })
 
       deferred = responseDeferred
 
-      this.inFlightRequests.set(networkId, deferred)
+      this.inFlightRequests.set(fetchRequestId, deferred)
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
         const headers = await this.continueRequestHeaders(event, outbound)
+
+        debug('continuing request %s %s %o',
+          outbound.method ?? event.request.method,
+          outbound.url,
+          {
+            urlChanged: outbound.url !== event.request.url,
+            methodChanged: outbound.method !== event.request.method,
+            postDataChanged: outbound.postData !== event.request.postData,
+            headersChanged: !!headers,
+          })
 
         await this.client.send('Fetch.continueRequest', {
           requestId: event.requestId,
@@ -193,14 +254,16 @@ export class CdpFetchTransport {
         let timeout: NodeJS.Timeout | undefined
 
         try {
-          const pausedResponse = await Promise.race([
-            responseDeferred.promise,
+          await Promise.race([
+            responseDeferred.headersReady.promise,
             new Promise<never>((_resolve, reject) => {
               timeout = setTimeout(() => {
                 reject(new Error(`Timed out waiting for CDP Fetch response pause for ${event.request.url}`))
               }, RESPONSE_PAUSE_TIMEOUT_MS)
             }),
           ])
+
+          const pausedResponse = await responseDeferred.promise
 
           responseRequestId = pausedResponse.requestId
           responseSessionId = pausedResponse.sessionId
@@ -225,6 +288,8 @@ export class CdpFetchTransport {
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
       } else {
+        debug('continuing response %s: status %s', event.request.url, response.responseCode)
+
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
           responseCode: response.responseCode,
@@ -232,17 +297,18 @@ export class CdpFetchTransport {
         }, response.sessionId)
       }
 
-      this.cleanup(networkId, deferred)
+      this.cleanup(fetchRequestId, deferred)
     } catch (err) {
-      if (networkId) {
-        if (requestContinued) {
-          deferred?.reject(err as Error)
-        }
+      if (requestContinued) {
+        deferred?.reject(err as Error)
+      }
 
-        this.cleanup(networkId, deferred)
+      this.cleanup(fetchRequestId, deferred)
+
+      if (event.networkId) {
         // an errored flow gets no more pauses, so nothing will consume its
         // extraInfo tracking — clear it here
-        this.networkExtraInfo.clear(networkId, sessionId)
+        this.networkExtraInfo.clear(event.networkId, sessionId)
       }
 
       if (!requestContinued) {
@@ -268,7 +334,10 @@ export class CdpFetchTransport {
       return
     }
 
-    const deferred = event.networkId ? this.inFlightRequests.get(event.networkId) : undefined
+    // Same Fetch.requestId as the request-stage pause for this hop.
+    const fetchRequestId = event.requestId
+    const networkRequestId = event.networkId ?? event.requestId
+    const deferred = this.inFlightRequests.get(fetchRequestId)
 
     if (!deferred) {
       // No flow ever consumes extraInfo tracking for an unmatched pause —
@@ -284,7 +353,7 @@ export class CdpFetchTransport {
           errorReason: event.responseErrorReason,
         }, sessionId)
       } else {
-        debug('continuing unmatched response pause: %s', event.request.url)
+        debug('continuing unmatched response pause: %O', event)
         await this.safeSend('Fetch.continueResponse', {
           requestId: event.requestId,
         }, sessionId)
@@ -294,6 +363,7 @@ export class CdpFetchTransport {
     }
 
     if (event.responseErrorReason) {
+      debug('response error pause for matched request %s: %s', event.request.url, event.responseErrorReason)
       deferred.reject(new Error(`CDP Fetch response failed for ${event.request.url}: ${event.responseErrorReason}`))
 
       await this.safeSend('Fetch.failRequest', {
@@ -305,6 +375,7 @@ export class CdpFetchTransport {
     }
 
     if (typeof event.responseStatusCode !== 'number') {
+      debug('response pause missing status code for matched request %s', event.request.url)
       deferred.reject(new Error(`CDP Fetch response did not include a status code for ${event.request.url}`))
 
       await this.safeSend('Fetch.continueResponse', {
@@ -318,11 +389,15 @@ export class CdpFetchTransport {
 
     const responseHeaders = await this.withSetCookieHeaders(event, sessionId)
 
-    // reset() may have rejected this flow while the merge awaited extraInfo.
-    // The resolve below would be a no-op and nothing else owns this pause —
-    // release it, or the browser stays paused (reset keeps Fetch enabled).
-    if (this.inFlightRequests.get(event.networkId!) !== deferred) {
-      debug('releasing response pause rejected during set-cookie merge: %s', event.request.url)
+    deferred.headersReady.resolve()
+
+    let bodyStream: Readable
+
+    try {
+      bodyStream = await this.fetchResponseBody(event, sessionId)
+    } catch (err) {
+      deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
+
       await this.safeSend('Fetch.continueResponse', {
         requestId: event.requestId,
       }, sessionId)
@@ -330,11 +405,26 @@ export class CdpFetchTransport {
       return
     }
 
-    const bodyStream = this.createResponseBodyStream(event.requestId, event.responseHeaders, sessionId)
+    // reset() may have rejected this flow while the merge/fetch awaited CDP.
+    // The resolve below would be a no-op and nothing else owns this pause —
+    // release it, or the browser stays paused (reset keeps Fetch enabled).
+    if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
+      debug('releasing response pause rejected while awaiting CDP: %s', event.request.url)
+      await this.safeSend('Fetch.continueResponse', {
+        requestId: event.requestId,
+      }, sessionId)
+
+      return
+    }
+
+    debug('resolved response pause for %s: status %s, set-cookie count %d',
+      event.request.url,
+      event.responseStatusCode,
+      responseHeaders?.filter(({ name }) => name.toLowerCase() === 'set-cookie').length ?? 0)
 
     deferred.resolve({
       ...event.request,
-      id: event.networkId!,
+      id: networkRequestId,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
@@ -356,82 +446,26 @@ export class CdpFetchTransport {
       return event.responseHeaders
     }
 
+    debug('merged %d set-cookie header(s) from Network extraInfo for %s', setCookieValues.length, event.request.url)
+
     return [
       ...(event.responseHeaders ?? []).filter(({ name }) => name.toLowerCase() !== 'set-cookie'),
       ...setCookieValues.map((value) => ({ name: 'set-cookie', value })),
     ]
   }
 
-  private createResponseBodyStream = (requestId: string, responseHeaders?: Protocol.Fetch.HeaderEntry[], sessionId?: string): Readable => {
-    let reading = false
-    let bodyStream: Readable
-
-    bodyStream = new Readable({
-      read: () => {
-        if (reading) {
-          return
-        }
-
-        reading = true
-
-        void (async () => {
-          try {
-            const response = await this.client.send('Fetch.getResponseBody', {
-              requestId,
-            }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
-
-            const raw = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-            const body = await this.decodeUndeliveredEncodings(raw, responseHeaders)
-
-            if (body.length) {
-              bodyStream.push(body)
-            }
-
-            bodyStream.push(null)
-          } catch (err) {
-            bodyStream.destroy(err as Error)
-          }
-        })()
-      },
-    })
-
-    return bodyStream
-  }
-
-  /**
-   * Fetch.getResponseBody delivers gzip/deflate content-decoded, but brotli
-   * arrives still encoded (and continueRequest cannot constrain
-   * accept-encoding — the network stack owns that header). Decode br here so
-   * the middleware's decoded-body premise holds. Falls back to the raw bytes
-   * if decompression fails, in case a newer CDP starts decoding br itself.
-   */
-  private decodeUndeliveredEncodings = async (body: Buffer, responseHeaders?: Protocol.Fetch.HeaderEntry[]): Promise<Buffer> => {
-    const contentEncoding = responseHeaders?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
-
-    if (!contentEncoding || !body.length) {
-      return body
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Readable> => {
+    if (isRedirectPause(event)) {
+      return Readable.from([])
     }
 
-    // encodings are listed in the order applied, so decode in reverse;
-    // gzip/deflate layers were already decoded by CDP
-    const encodings = contentEncoding.split(',').map((token) => token.trim().toLowerCase()).reverse()
-    let decoded = body
+    const response = await this.client.send('Fetch.getResponseBody', {
+      requestId: event.requestId,
+    }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    for (const encoding of encodings) {
-      if (encoding !== 'br') {
-        continue
-      }
+    const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
 
-      try {
-        decoded = await brotliDecompress(decoded)
-      } catch (err) {
-        debug('brotli decompression failed, using body as delivered: %s', (err as Error).message)
-
-        return body
-      }
-    }
-
-    return decoded
+    return Readable.from(body.length ? [body] : [])
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
@@ -470,21 +504,6 @@ export class CdpFetchTransport {
     } catch (err) {
       debug('CDP Fetch send failed: %s', (err as Error).message)
     }
-  }
-
-  private autFrameHeader = async (
-    event: Protocol.Fetch.RequestPausedEvent,
-    outbound: CdpFetchTransportRequest = {
-      ...event.request,
-      id: event.networkId ?? event.requestId,
-      requestId: event.requestId,
-    },
-  ): Promise<Pick<Protocol.Fetch.ContinueRequestRequest, 'headers'>> => {
-    // Requests without a networkId skip the intercept pipeline, so there is no
-    // middleware to consume/strip the AUT marker. Never send it upstream.
-    const headers = await this.continueRequestHeaders(event, outbound)
-
-    return headers ? { headers } : {}
   }
 
   /**
@@ -526,18 +545,24 @@ export class CdpFetchTransport {
   // Must NOT clear extraInfo tracking on success — the next response under a
   // reused network id may already be tracked, and CDPNetworkExtraInfo manages
   // its own lifecycle. Errored and unmatched flows clear at their own sites.
-  private cleanup (networkId: string, deferred?: pDefer.DeferredPromise<CdpFetchTransportResponse>): void {
-    if (deferred && this.inFlightRequests.get(networkId) !== deferred) {
+  private cleanup (fetchRequestId: string, deferred?: ResponsePauseDeferred): void {
+    if (deferred && this.inFlightRequests.get(fetchRequestId) !== deferred) {
       return
     }
 
-    this.inFlightRequests.delete(networkId)
+    this.inFlightRequests.delete(fetchRequestId)
   }
 
   private rejectAll (err: Error): void {
-    for (const [networkId, deferred] of this.inFlightRequests) {
+    if (!this.inFlightRequests.size) {
+      return
+    }
+
+    debug('rejecting %d in-flight request(s): %s', this.inFlightRequests.size, err.message)
+
+    for (const [fetchRequestId, deferred] of this.inFlightRequests) {
       deferred.reject(err)
-      this.cleanup(networkId, deferred)
+      this.cleanup(fetchRequestId, deferred)
     }
   }
 }

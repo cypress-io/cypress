@@ -1,5 +1,4 @@
 import { launchStudio, loadProjectAndRunSpec } from './helper'
-import pDefer from 'p-defer'
 
 describe('Cypress Studio - UI and Panel Management', () => {
   it('shows Run test button label in single-test mode', () => {
@@ -75,7 +74,7 @@ describe('studio functionality', () => {
   })
 
   it('immediately loads the studio panel from existing test', () => {
-    const deferred = pDefer()
+    const deferred = Promise.withResolvers<void>()
 
     loadProjectAndRunSpec()
 

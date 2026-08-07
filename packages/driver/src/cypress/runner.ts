@@ -524,9 +524,12 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         const shouldAlwaysResetPage = isRunMode && !isHeadedNoExit
         const isLastTestThatWillRunInSuite = test.final && lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
 
-        // If we're not in open mode or we're in open mode and not the last test we reset state.
-        // The last test will needs to stay so that the user can see what the end result of the AUT was.
-        if (shouldAlwaysResetPage || !isLastTestThatWillRunInSuite) {
+        // In open mode the page is left alone once nothing else will run, so the user can see what
+        // the end result of the AUT was. That is true after the last test and equally true after
+        // the user stops the run — stopping is how they ask to look at the application.
+        const shouldResetPage = shouldAlwaysResetPage || (!isLastTestThatWillRunInSuite && !_runner.stopped)
+
+        if (shouldResetPage) {
           let nextTestHasTestIsolationOn
 
           if (!isLastTestThatWillRunInSuite) {

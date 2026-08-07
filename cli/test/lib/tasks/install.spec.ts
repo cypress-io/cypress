@@ -2,7 +2,7 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import timers from 'timers/promises'
 import fs from 'fs-extra'
 import si, { Systeminformation } from 'systeminformation'
@@ -162,7 +162,7 @@ const PRE_RELEASE_DOWNLOAD_URL =
   `https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/${PRE_RELEASE_BRANCH}-${PRE_RELEASE_COMMIT_SHA}/cypress.zip`
 
 /**
- * stdout capture: listr2/chalk emit ANSI; assertions use strip-ansi + toContain so tests stay stable across OS/CI.
+ * stdout capture: listr2/chalk emit ANSI; assertions strip ANSI + toContain so tests stay stable across OS/CI.
  *
  * @see https://listr2.kilic.dev/renderer/renderer.html#frontmatter-title
  */

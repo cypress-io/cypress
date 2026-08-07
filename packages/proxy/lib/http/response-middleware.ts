@@ -202,6 +202,7 @@ const FilterNonProxiedResponse: ResponseMiddleware = function () {
       'MaybeSendRedirectToClient',
       'CopyResponseStatusCode',
       'MaybeEndWithEmptyBody',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -619,9 +620,11 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   })
 }
 
-const CompressBody: ResponseMiddleware = async function () {
-  await this.networkInterceptionCore.notifyResponseStreamReceived(this)
+const NotifyResponseStreamReceived: ResponseMiddleware = function () {
+  return this.networkInterceptionCore.notifyResponseStreamReceived(this)
+}
 
+const CompressBody: ResponseMiddleware = function () {
   // Re-compress in the same order as the original content-encoding (innermost first).
   const order = this.contentEncodingOrder ?? []
 
@@ -687,6 +690,7 @@ export default {
   MaybeInjectHtml,
   MaybeRemoveSecurity,
   MaybeInjectServiceWorker,
+  NotifyResponseStreamReceived,
   CompressBody,
   SendResponseBodyToClient,
 }

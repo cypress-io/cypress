@@ -1,6 +1,5 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import zlib from 'zlib'
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
@@ -30,8 +29,15 @@ function createPausedRequest (options: {
 }
 
 function createClient () {
+  const send = sinon.stub().resolves({})
+
+  // resolveResponse eagerly fetches the body for every response pause;
+  // give it a decodable default so tests that don't care about body content
+  // don't have to stub it themselves
+  send.withArgs('Fetch.getResponseBody').resolves({ body: '', base64Encoded: false })
+
   return {
-    send: sinon.stub().resolves({}),
+    send,
     on: sinon.stub(),
     off: sinon.stub(),
   }
@@ -52,9 +58,13 @@ function createNetworkExtraInfo () {
 function createTransport (client: ReturnType<typeof createClient>, options: {
   httpIntercept?: HttpIntercept<any, any>
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  addPendingUrlWithoutPreRequest?: (url: string) => void
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
-  const transport = new CdpFetchTransport(client as any, options.httpIntercept, { isAUTFrame: options.isAUTFrame }, networkExtraInfo as any)
+  const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
+    isAUTFrame: options.isAUTFrame,
+    addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
+  }, networkExtraInfo as any)
 
   return { transport, networkExtraInfo }
 }
@@ -177,7 +187,7 @@ describe('CdpFetchTransport', () => {
         url: 'https://example.test/',
         method: 'GET',
         headers: {},
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'content-type',
@@ -277,7 +287,7 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       const handled = onRequestPaused(request)
@@ -292,7 +302,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
       })
     })
@@ -304,7 +314,7 @@ describe('CdpFetchTransport', () => {
       const seenIsAutFrameHeader = sinon.stub()
       const { transport } = createTransport(client, { httpIntercept, isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       request.request.headers = {
@@ -341,7 +351,7 @@ describe('CdpFetchTransport', () => {
       const isAUTFrame = sinon.stub().resolves(true)
       const { transport } = createTransport(client, { isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'XHR' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', resourceType: 'XHR', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'XHR', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       const handled = onRequestPaused(request)
@@ -362,7 +372,7 @@ describe('CdpFetchTransport', () => {
       const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
       const { transport } = createTransport(client, { isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       request.request.headers = {
@@ -392,7 +402,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept, isAUTFrame })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       request.request.headers = {
@@ -433,7 +443,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
       response.responseHeaders = [
         { name: 'Content-Encoding', value: 'gzip' },
@@ -462,7 +472,7 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'content-type',
@@ -472,16 +482,15 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('normalizes pipeline re-encoded fulfilled bodies to identity', async () => {
+    // Identity for fulfilled bodies is guaranteed upstream by the synthetic
+    // proxy codec's decodeResponse, so the transport fulfills verbatim.
+    it('fulfills pipeline bodies verbatim', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
-      const gzippedBody = zlib.gzipSync(Buffer.from('<html>compressed</html>'))
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
-      // the legacy pipeline (CompressBody) may re-encode the outgoing body;
-      // fulfillRequest delivers bodies as-is, so it must go out as identity
       httpIntercept.use(async (req, next) => {
         const res = await next(req)
 
@@ -489,10 +498,9 @@ describe('CdpFetchTransport', () => {
           ...res,
           headers: {
             'content-type': 'text/html',
-            'content-encoding': 'gzip',
             'content-length': '9999',
           },
-          body: gzippedBody,
+          body: Buffer.from('<html>plain</html>'),
         }
       })
 
@@ -504,50 +512,13 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
         }],
-        body: Buffer.from('<html>compressed</html>').toString('base64'),
-      })
-    })
-
-    it('keeps the body and header pair when a fulfilled encoding cannot be decoded', async () => {
-      const client = createClient()
-      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const { transport } = createTransport(client, { httpIntercept })
-      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
-
-      httpIntercept.use(async (req, next) => {
-        const res = await next(req)
-
-        return {
-          ...res,
-          headers: {
-            'content-encoding': 'zstd',
-          },
-          body: Buffer.from('opaque-bytes'),
-        }
-      })
-
-      const onRequestPaused = await startTransport(transport, client)
-      const handled = onRequestPaused(request)
-
-      await tick()
-      await onRequestPaused(response)
-      await handled
-
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
-        responseCode: 200,
-        responseHeaders: [{
-          name: 'content-encoding',
-          value: 'zstd',
-        }],
-        body: Buffer.from('opaque-bytes').toString('base64'),
+        body: Buffer.from('<html>plain</html>').toString('base64'),
       })
     })
 
@@ -555,7 +526,7 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
       response.responseHeaders = [
         { name: 'Content-Encoding', value: 'gzip' },
@@ -570,7 +541,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'Content-Encoding',
@@ -582,20 +553,20 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('matches request and response pauses by network id', async () => {
+    it('matches request and response pauses by fetch request id', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
       const onRequestPaused = await startTransport(transport, client)
 
       const handled = onRequestPaused(createPausedRequest({
-        requestId: 'request-pause-id',
+        requestId: 'shared.0',
         networkId: 'shared-network-id',
       }))
 
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'response-pause-id',
+        requestId: 'shared.0',
         networkId: 'shared-network-id',
         responseStatusCode: 200,
       }))
@@ -603,9 +574,79 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'response-pause-id',
+        requestId: 'shared.0',
         responseCode: 200,
       })
+    })
+
+    it('correlates request and response pauses by request id when network id is absent', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenIds: string[] = []
+      const addPendingUrlWithoutPreRequest = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, addPendingUrlWithoutPreRequest })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        seenIds.push(req.id)
+
+        return next(req)
+      })
+
+      // Downloads omit networkId; Chromium still reuses the Fetch requestId across both pauses.
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'download-pause-id',
+        url: 'https://example.test/cypress/fixtures/records.csv',
+      }))
+
+      await tick()
+
+      expect(addPendingUrlWithoutPreRequest).to.have.been.calledOnceWith(
+        'https://example.test/cypress/fixtures/records.csv',
+      )
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'download-pause-id',
+      })
+
+      expect(seenIds).to.deep.equal(['download-pause-id'])
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'download-pause-id',
+        url: 'https://example.test/cypress/fixtures/records.csv',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'download-pause-id',
+        responseCode: 200,
+      })
+    })
+
+    it('does not pre-register urls when network id is present', async () => {
+      const client = createClient()
+      const addPendingUrlWithoutPreRequest = sinon.stub()
+      const { transport } = createTransport(client, { addPendingUrlWithoutPreRequest })
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      expect(addPendingUrlWithoutPreRequest).not.to.have.been.called
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
     })
 
     it('keeps concurrent requests isolated by network id', async () => {
@@ -625,13 +666,13 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'second-response-pause-id',
+        requestId: 'second-request-pause-id',
         networkId: 'second-network-id',
         responseStatusCode: 201,
       }))
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'first-response-pause-id',
+        requestId: 'first-request-pause-id',
         networkId: 'first-network-id',
         responseStatusCode: 200,
       }))
@@ -639,17 +680,17 @@ describe('CdpFetchTransport', () => {
       await Promise.all([firstHandled, secondHandled])
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'first-response-pause-id',
+        requestId: 'first-request-pause-id',
         responseCode: 200,
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'second-response-pause-id',
+        requestId: 'second-request-pause-id',
         responseCode: 201,
       })
     })
 
-    it('does not let a timed out redirect hop reject a newer flow with the same network id', async () => {
+    it('does not let a timed out redirect hop reject a newer hop with a distinct fetch request id', async () => {
       const clock = sinon.useFakeTimers()
       const client = createClient()
       const { transport } = createTransport(client)
@@ -675,7 +716,7 @@ describe('CdpFetchTransport', () => {
       await firstHandled
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'second-response-pause-id',
+        requestId: 'second-request-pause-id',
         networkId: 'shared-network-id',
         url: 'https://example.test/final',
         responseStatusCode: 200,
@@ -684,7 +725,7 @@ describe('CdpFetchTransport', () => {
       await secondHandled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'second-response-pause-id',
+        requestId: 'second-request-pause-id',
         responseCode: 200,
       })
     })
@@ -728,14 +769,14 @@ describe('CdpFetchTransport', () => {
       const onRequestPaused = await startTransport(transport, client)
 
       const handled = onRequestPaused(createPausedRequest({
-        requestId: 'request-pause-id',
+        requestId: 'shared.0',
         networkId: 'shared-network-id',
       }))
 
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'response-pause-id',
+        requestId: 'shared.0',
         networkId: 'shared-network-id',
         responseStatusCode: 0,
       }))
@@ -743,7 +784,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'response-pause-id',
+        requestId: 'shared.0',
         responseCode: 0,
       })
     })
@@ -752,7 +793,7 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const { transport, networkExtraInfo } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
       response.responseHeaders = [
         { name: 'Content-Type', value: 'text/plain' },
@@ -778,7 +819,7 @@ describe('CdpFetchTransport', () => {
       expect(networkExtraInfo.responseExtraInfo).to.have.been.calledOnceWith('network-1', 'session-1')
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'Content-Type',
@@ -798,7 +839,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport, networkExtraInfo } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
       response.responseHeaders = [{ name: 'Content-Type', value: 'text/plain' }]
 
@@ -832,7 +873,7 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'content-type',
@@ -852,7 +893,7 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const { transport, networkExtraInfo } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
 
       response.responseHeaders = [{ name: 'Content-Type', value: 'text/plain' }]
 
@@ -871,7 +912,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
         responseHeaders: [{
           name: 'Content-Type',
@@ -903,7 +944,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       const responseHandled = onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseStatusCode: 200,
       }))
@@ -917,7 +958,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
       })
     })
 
@@ -934,7 +975,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'shared-network-id',
         responseStatusCode: 302,
       }))
@@ -959,7 +1000,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseErrorReason: 'Failed',
       }))
@@ -994,7 +1035,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       httpIntercept.use((req, next) => {
@@ -1023,7 +1064,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       httpIntercept.use((req, next) => {
@@ -1068,7 +1109,7 @@ describe('CdpFetchTransport', () => {
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       request.request.headers = {
@@ -1103,10 +1144,10 @@ describe('CdpFetchTransport', () => {
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 
-      client.send.onCall(1).rejects(new Error('continueResponse failed'))
+      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200 }).rejects(new Error('continueResponse failed'))
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
-      const response = createPausedRequest({ requestId: 'fetch-response', networkId: 'network-1', responseStatusCode: 200 })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
       const onRequestPaused = await startTransport(transport, client)
 
       const handled = onRequestPaused(request)
@@ -1116,12 +1157,12 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 200,
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
       })
     })
 
@@ -1182,28 +1223,72 @@ describe('CdpFetchTransport', () => {
       expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
     })
 
-    it('decompresses brotli response bodies before middleware reads them', async () => {
+    it('continues the response pause without running the intercept pipeline when the eager body fetch fails', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const middlewareSawResponse = sinon.stub()
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
+      const unhandled = sinon.stub()
 
-      client.send.withArgs('Fetch.getResponseBody').resolves({
-        body: zlib.brotliCompressSync(Buffer.from('<html>origin</html>')).toString('base64'),
-        base64Encoded: true,
-      })
-
-      let seenBody
+      client.send.withArgs('Fetch.getResponseBody').rejects(new Error('Invalid InterceptionId.'))
 
       httpIntercept.use(async (req, next) => {
         const response = await next(req)
 
-        seenBody = await readStream(response.bodyStream!)
+        middlewareSawResponse(response)
 
-        return {
-          ...response,
-          body: `${seenBody}-rewritten`,
-        }
+        return response
+      })
+
+      process.on('unhandledRejection', unhandled)
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await tick()
+
+        await onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await handled
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(unhandled).not.to.have.been.called
+      } finally {
+        process.removeListener('unhandledRejection', unhandled)
+      }
+
+      // the eager fetch rejects before deferred.resolve, so the response never
+      // reaches the intercept pipeline
+      expect(middlewareSawResponse).not.to.have.been.called
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
+    it('hands middleware an empty body for redirect pauses instead of asking CDP for one', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const middlewareSawBody = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        middlewareSawBody(await readStream(response.bodyStream!))
+
+        return response
       })
 
       const handled = onRequestPaused(createPausedRequest({
@@ -1214,57 +1299,39 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       const response = createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
-        responseStatusCode: 200,
+        responseStatusCode: 302,
       })
 
-      response.responseHeaders = [
-        { name: 'Content-Encoding', value: 'br' },
-        { name: 'Content-Type', value: 'text/html' },
-      ]
+      response.responseHeaders = [{ name: 'location', value: 'https://example.test/next' }]
 
       await onRequestPaused(response)
+
       await handled
 
-      expect(seenBody).to.equal('<html>origin</html>')
+      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+      expect(middlewareSawBody).to.have.been.calledWith('')
 
-      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
-        responseCode: 200,
-        responseHeaders: [{
-          name: 'content-type',
-          value: 'text/html',
-        }],
-        body: Buffer.from('<html>origin</html>-rewritten').toString('base64'),
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 302,
+        responseHeaders: [{ name: 'location', value: 'https://example.test/next' }],
       })
     })
 
-    it('falls back to the delivered body when brotli decompression fails', async () => {
+    it('fetches the response body while the pause is still valid, even when nothing reads it', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
-      // headers claim br but the body is already plaintext (e.g. a newer CDP
-      // that decodes br itself)
       client.send.withArgs('Fetch.getResponseBody').resolves({
-        body: Buffer.from('<html>already decoded</html>').toString('base64'),
+        body: Buffer.from('origin').toString('base64'),
         base64Encoded: true,
       })
 
-      let seenBody
-
-      httpIntercept.use(async (req, next) => {
-        const response = await next(req)
-
-        seenBody = await readStream(response.bodyStream!)
-
-        return {
-          ...response,
-          body: seenBody,
-        }
-      })
+      httpIntercept.use(async (req, next) => next(req))
 
       const handled = onRequestPaused(createPausedRequest({
         requestId: 'fetch-request',
@@ -1273,20 +1340,62 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      const response = createPausedRequest({
-        requestId: 'fetch-response',
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseStatusCode: 200,
-      })
+      }))
 
-      response.responseHeaders = [
-        { name: 'Content-Encoding', value: 'br' },
-      ]
-
-      await onRequestPaused(response)
       await handled
 
-      expect(seenBody).to.equal('<html>already decoded</html>')
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-request',
+      })
+    })
+
+    it('does not charge the response body transfer against the response pause timeout', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      const slowBody = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.getResponseBody').returns(slowBody.promise)
+
+      httpIntercept.use(async (req, next) => next(req))
+
+      const clock = sinon.useFakeTimers({ shouldAdvanceTime: false })
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await clock.tickAsync(0)
+
+        const responded = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        // the pause already arrived, so a body slower than the 30s pause
+        // timeout must not fail the flow
+        await clock.tickAsync(31000)
+
+        slowBody.resolve({ body: '', base64Encoded: false })
+
+        await responded
+        await handled
+      } finally {
+        clock.restore()
+      }
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+      })
     })
 
     it('exposes response pause bodies as a stream for middleware rewrites', async () => {
@@ -1321,7 +1430,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseStatusCode: 200,
       }))
@@ -1329,13 +1438,13 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.takeResponseBodyAsStream')
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 202,
         responseHeaders: [{
           name: 'content-type',
@@ -1377,7 +1486,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseStatusCode: 204,
       }))
@@ -1385,11 +1494,11 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         responseCode: 204,
         responseHeaders: [{
           name: 'content-type',
@@ -1412,7 +1521,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseErrorReason: 'Aborted',
       }))
@@ -1420,7 +1529,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         errorReason: 'Aborted',
       })
 
@@ -1442,7 +1551,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         networkId: 'network-1',
         responseErrorReason: 'Aborted',
       }))
@@ -1450,7 +1559,7 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
-        requestId: 'fetch-response',
+        requestId: 'fetch-request',
         errorReason: 'Aborted',
       })
     })
@@ -1549,7 +1658,7 @@ describe('CdpFetchTransport', () => {
       })
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'fetch-response-2',
+        requestId: 'fetch-request-2',
         networkId: 'network-2',
         responseStatusCode: 200,
       }))

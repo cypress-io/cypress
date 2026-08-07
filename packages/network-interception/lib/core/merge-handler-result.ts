@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { debug } from '../debug'
 import type { CyHttpMessages } from '../types/external-types'
 import { SERIALIZABLE_REQ_PROPS } from '../types/internal-types'
 
@@ -39,6 +40,7 @@ export function mergeIncomingRequestChanges (
     after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
   }
 
+  const previousUrl = before.url
   const resolvedUrl = options.resolveUrl(options.baseUrl, after.url)
 
   after.url = resolvedUrl
@@ -46,6 +48,10 @@ export function mergeIncomingRequestChanges (
   mergeWithPreservedBuffers(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
 
   mergeDeletedHeaders(before, after)
+
+  if (resolvedUrl !== previousUrl) {
+    debug.core('merged incoming request changes %s -> %s', previousUrl, resolvedUrl)
+  }
 
   return resolvedUrl
 }

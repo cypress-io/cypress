@@ -778,6 +778,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.visitApp()
         cy.specsPageIsVisible()
         moveToRunsPage()
+        cy.findByText('fix: using Git data CANCELLED').should('be.visible')
         cy.get('[data-cy="runs"]')
       })
 
@@ -787,24 +788,22 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         cy.specsPageIsVisible()
         moveToRunsPage()
 
-        cy.findByText('fix: using Git data CANCELLED')
-        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first().within(() => {
-          cy.get('[data-cy="runNumber-status-CANCELLED"]')
-        })
+        cy.findByText('fix: using Git data CANCELLED').should('be.visible')
+
+        cy.get('[href^="http://dummy.cypress.io/runs/0"]').first()
+        .find('[data-cy="runNumber-status-CANCELLED"]')
 
         cy.get('[data-cy="runCard-status-CANCELLED"]').first().as('firstRun')
 
-        cy.get('@firstRun').within(() => {
-          cy.get('[data-cy="runCard-author"]').contains('John Appleseed')
-          cy.get('[data-cy="runCard-avatar"]')
-          cy.get('[data-cy="runCard-branchName"]').contains('main')
-          cy.get('[data-cy="runCard-createdAt"]').contains('01m 00s (an hour ago)')
+        cy.get('@firstRun').find('[data-cy="runCard-author"]').should('contain', 'John Appleseed')
+        cy.get('@firstRun').find('[data-cy="runCard-avatar"]')
+        cy.get('@firstRun').find('[data-cy="runCard-branchName"]').should('contain', 'main')
+        cy.get('@firstRun').find('[data-cy="runCard-createdAt"]').should('contain', '01m 00s (an hour ago)')
 
-          cy.contains('span', 'skipped')
-          cy.get('span').contains('pending')
-          cy.get('span').contains('passed')
-          cy.get('span').contains('failed')
-        })
+        cy.get('@firstRun').contains('span', 'skipped')
+        cy.get('@firstRun').find('span').contains('pending')
+        cy.get('@firstRun').find('span').contains('passed')
+        cy.get('@firstRun').find('span').contains('failed')
       })
 
       it('opens the run page if a run is clicked', () => {

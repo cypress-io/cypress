@@ -205,7 +205,7 @@ jobs:
         shell: bash
       - name: Commit snapshot update via API
         if: ${{ steps.stage.outputs.has_changes == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           SNAPSHOT_FILES: ${{ steps.stage.outputs.files }}
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
@@ -232,7 +232,7 @@ jobs:
             })
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |

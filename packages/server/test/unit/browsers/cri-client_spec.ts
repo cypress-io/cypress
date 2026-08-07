@@ -2,7 +2,6 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
 import { ProtocolManagerShape } from '@packages/types'
 import type { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
-import pDefer from 'p-defer'
 import type Protocol from 'devtools-protocol'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -345,7 +344,7 @@ describe('lib/browsers/cri-client', function () {
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
 
-      const reconnection = pDefer()
+      const reconnection = Promise.withResolvers()
 
       onReconnect.callsFake(() => reconnection.resolve())
       await reconnection.promise
@@ -371,7 +370,7 @@ describe('lib/browsers/cri-client', function () {
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
 
-      const reconnection = pDefer()
+      const reconnection = Promise.withResolvers()
 
       onReconnect.callsFake(() => reconnection.resolve())
       await reconnection.promise
@@ -396,7 +395,7 @@ describe('lib/browsers/cri-client', function () {
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
 
-      const reconnection = pDefer()
+      const reconnection = Promise.withResolvers()
 
       onReconnect.callsFake(() => reconnection.resolve())
       await reconnection.promise

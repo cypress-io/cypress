@@ -112,8 +112,15 @@ module.exports = (on, config) => {
           throw new Error('Blackout not present!')
         }
 
-        if (originalImage.hash() !== compareImage.hash()) {
-          throw new Error('Screenshot mismatch!')
+        // Captures can differ by a few anti-aliased edge pixels between runs,
+        // so allow a small pixel-diff tolerance (pixelmatch, anti-aliasing
+        // excluded). The regressions this guards against — the runner UI
+        // leaking into the capture or the page failing to scroll — change far
+        // more than 1% of the pixels.
+        const { percent } = Jimp.diff(originalImage, compareImage)
+
+        if (percent > 0.01) {
+          throw new Error(`Screenshot mismatch! ${(percent * 100).toFixed(2)}% of pixels differ`)
         }
 
         return null

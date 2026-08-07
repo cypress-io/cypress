@@ -1916,23 +1916,27 @@ describe('src/cy/commands/navigation', () => {
 
       let expected = false
 
-      cy.on('window:before:unload', () => {
-        expected = true
-
-        expect(Cookie.get('__cypress.initial')).to.eq('true')
-      })
-
-      // this navigates us to a new page so
-      // we should be setting the initial cookie
       cy
       .visit('/fixtures/form.html')
       .then(() => {
+        // bind after the visit so the assertion only runs for the anchor
+        // click below. `__cypress.initial` can't be set or read on an
+        // opaque origin like `about:blank`, which a prior test may leave in
+        // the AUT, so asserting on the visit's own unload flakes as `undefined`.
+        cy.once('window:before:unload', () => {
+          expected = true
+
+          expect(Cookie.get('__cypress.initial')).to.eq('true')
+        })
+
         cy.once('window:unload', () => {
           expect(cy.state('onPageLoadErr')).to.be.a('function')
         })
 
         return null
       })
+      // clicking this anchor navigates us to a new page so
+      // we should be setting the initial cookie
       .get('a:first').click().then(() => {
         const listeners = cy.listeners('window:load')
 

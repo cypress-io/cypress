@@ -49,6 +49,7 @@ yarn workspace @packages/server build-prod
 - E2E/system tests have moved to `system-tests/`; only unit and integration tests live in `test/unit` and `test/integration`.
 - `better-sqlite3` requires native compilation; run `yarn workspace @packages/server rebuild-better-sqlite3` after an Electron version upgrade.
 - Several dependencies (e.g., `axios`, `devtools-protocol`, `geckodriver`) are nohoisted to avoid version conflicts.
+- **The config/plugins child runs under the user's Node, not the bundled/dev Node.** `lib/plugins/child/require_async_child.ts` (and everything reachable from it) is forked with the user's resolved Node; its supported range is `engines.node` in `cli/package.json`, which is lower than the dev floor (`.node-version`) or the bundled Electron. Do not use runtime APIs newer than that floor in this path — the rest of the server runs in the bundled Electron main process. See root `AGENTS.md` → Runtime targets.
 
 **Integration Points**
 

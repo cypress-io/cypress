@@ -8,6 +8,7 @@ describe('e2e return value', () => {
       spec: 'return_value.cy.js',
       snapshot: true,
       expectedExitCode: 3,
+      config: { screenshotOnRunFailure: false },
     })
   })
 })
