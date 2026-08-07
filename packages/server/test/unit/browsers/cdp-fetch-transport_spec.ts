@@ -58,11 +58,13 @@ function createNetworkExtraInfo () {
 function createTransport (client: ReturnType<typeof createClient>, options: {
   httpIntercept?: HttpIntercept<any, any>
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  isFromExtraTarget?: boolean
   addPendingUrlWithoutPreRequest?: (url: string) => void
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
   const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
     isAUTFrame: options.isAUTFrame,
+    isFromExtraTarget: options.isFromExtraTarget,
     addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
   }, networkExtraInfo as any)
 
@@ -115,7 +117,21 @@ describe('CdpFetchTransport', () => {
         id: 'network-1',
         method: 'GET',
         url: 'https://example.test/',
+        resourceType: undefined,
       })
+    })
+
+    it('copies transport resourceType onto the neutral request', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        resourceType: 'xhr' as const,
+      }
+
+      expect(codec.decodeRequest(transportRequest).resourceType).to.equal('xhr')
     })
 
     it('encodes neutral request URL mutations onto the CDP transport context', () => {
@@ -405,6 +421,42 @@ describe('CdpFetchTransport', () => {
       await handled
     })
 
+    it('normalizes CDP Fetch resourceType onto the transport request for cookie middleware', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenResourceTypes: Array<string | undefined> = []
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use((req, next) => {
+        seenResourceTypes.push(req.resourceType)
+
+        return next(req)
+      })
+
+      for (const cdpType of ['XHR', 'Fetch', 'Document'] as const) {
+        const request = createPausedRequest({
+          requestId: `fetch-${cdpType}`,
+          networkId: `network-${cdpType}`,
+          resourceType: cdpType,
+        })
+        const response = createPausedRequest({
+          requestId: `fetch-${cdpType}`,
+          networkId: `network-${cdpType}`,
+          resourceType: cdpType,
+          responseStatusCode: 200,
+        })
+
+        const handled = onRequestPaused(request)
+
+        await tick()
+        await onRequestPaused(response)
+        await handled
+      }
+
+      expect(seenResourceTypes).to.deep.equal(['xhr', 'fetch', 'other'])
+    })
+
     it('strips a previously injected AUT frame header on redirect re-pause', async () => {
       const client = createClient()
       const isAUTFrame = sinon.stub().withArgs('frame-1').resolves(true)
@@ -471,6 +523,125 @@ describe('CdpFetchTransport', () => {
           value: '1',
         }],
       })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('marks extra-target requests for the intercept pipeline without sending the header upstream', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenExtraTargetHeader = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, isFromExtraTarget: true })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Foo': 'Bar',
+      }
+
+      httpIntercept.use((req, next) => {
+        seenExtraTargetHeader(req.headers?.['x-cypress-is-from-extra-target'])
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(seenExtraTargetHeader).to.have.been.calledWith('true')
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'X-Foo',
+          value: 'Bar',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('does not mark requests with the extra-target header when isFromExtraTarget is unset', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenExtraTargetHeader = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use((req, next) => {
+        seenExtraTargetHeader(req.headers?.['x-cypress-is-from-extra-target'])
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(seenExtraTargetHeader).to.have.been.calledWith(undefined)
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('strips a previously injected extra-target header on continueRequest', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client, { isFromExtraTarget: true })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      request.request.headers = {
+        'X-Cypress-Is-From-Extra-Target': 'true',
+        'X-Foo': 'Bar',
+      }
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+        headers: [{
+          name: 'X-Foo',
+          value: 'Bar',
+        }],
+      })
+
+      await onRequestPaused(response)
+      await handled
+    })
+
+    it('namespaces HttpIntercept request ids for extra-target transports', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const seenIds: string[] = []
+      const { transport } = createTransport(client, { httpIntercept, isFromExtraTarget: true })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use((req, next) => {
+        seenIds.push(req.id)
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(request)
+
+      await tick()
+
+      expect(seenIds).to.have.length(1)
+      expect(seenIds[0]).to.match(/^extra-[a-z0-9]+:network-1$/)
+      expect(seenIds[0]).not.to.equal('network-1')
 
       await onRequestPaused(response)
       await handled

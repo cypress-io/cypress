@@ -748,6 +748,7 @@ export = {
       protocolManager: options.protocolManager,
       fullyManageTabs: true,
       onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
+      onExtraTargetCriClientReady: options.onExtraTargetCriClientReady,
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
