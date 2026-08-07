@@ -4,6 +4,8 @@ import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
+import RequestMiddleware from '../../../lib/http/request-middleware'
+import { testMiddleware } from '../http/helpers'
 
 async function readStream (stream: Readable): Promise<string> {
   const chunks: Buffer[] = []
@@ -39,6 +41,16 @@ describe('createSyntheticExpressContext', () => {
     expect(req.headers['content-type']).to.equal('application/x-www-form-urlencoded')
     expect(req.cookies).to.deep.equal({ a: '1', b: 'two words' })
     expect(await readStream(req)).to.equal('name=value')
+  })
+
+  it('copies resourceType from the neutral request onto req', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+      resourceType: 'xhr',
+    })
+
+    expect(req.resourceType).to.equal('xhr')
   })
 
   it('lowercases request header keys like Node IncomingMessage', () => {
@@ -506,5 +518,52 @@ describe('createSyntheticProxyCodec', () => {
     expect(outbound.headers).to.not.have.property('accept-encoding')
     // the middleware's own view stays intact
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
+  })
+
+  it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
+    const { ExtractCypressMetadataHeaders } = RequestMiddleware
+
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+          debug: () => {},
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-extra',
+      url: 'https://example.test/download-basic-auth.csv',
+      method: 'GET',
+      headers: {
+        'x-cypress-is-from-extra-target': 'true',
+        accept: '*/*',
+      },
+    })
+
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal('true')
+    expect(ctx.req.isFromExtraTarget).to.equal(false)
+
+    let maybeSetBasicAuthHeadersRan = false
+    let skippedMiddlewareRan = false
+
+    await testMiddleware({
+      ExtractCypressMetadataHeaders,
+      MaybeSetBasicAuthHeaders () {
+        maybeSetBasicAuthHeadersRan = true
+        this.next()
+      },
+      MaybeSimulateSecHeaders () {
+        skippedMiddlewareRan = true
+        this.next()
+      },
+    }, ctx)
+
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.be.undefined
+    expect(ctx.req.isFromExtraTarget).to.equal(true)
+    expect(maybeSetBasicAuthHeadersRan).to.equal(true)
+    expect(skippedMiddlewareRan).to.equal(false)
   })
 })
