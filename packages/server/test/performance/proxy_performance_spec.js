@@ -179,18 +179,20 @@ const EXPECTED_IMAGE_COUNT = 1000
 // elements, so `Page.loadEventFired` - the only completion signal chrome-har-capturer waits
 // for - lands while every image is still outstanding. Requests that have not produced a
 // `Network.loadingFinished` by the time capture stops are dropped from the HAR rather than
-// recorded as failures, so capture has to stay open until the page reports its own
-// completion and the network has drained.
-const CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_CAPTURE_TIMEOUT) || 45000
-const CAPTURE_POLL_INTERVAL_MS = 250
+// recorded as failures, so capture has to stay open until enough of them have landed.
+const CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_CAPTURE_TIMEOUT) || 15000
 
-// The fixture sets this element's text from the `.then()` of its `Promise.all` over all
-// 1000 fetches, which is the page's own "everything arrived" signal.
-const PAGE_COMPLETE_EXPRESSION = `!!document.querySelector('#seconds-counter')?.innerText`
+// When the fixture host serves something other than the fixture - a GitHub Pages error
+// page, say - the symptom is an oddly small request count with nothing pending, so the
+// diagnostic has to name what actually loaded.
+const REPORTED_URL_COUNT = 5
 
 const createHarCaptureHooks = () => {
-  const inFlight = new Set()
-  let requestsStarted = 0
+  const started = new Set()
+  const finished = new Set()
+  const failed = new Set()
+  const startedUrls = []
+  let onTargetReached = _.noop
 
   const onCdpEvent = ({ method, params }) => {
     switch (method) {
@@ -198,12 +200,17 @@ const createHarCaptureHooks = () => {
         // chrome-har-capturer does not create an entry for a data URI, so neither do we
         if (params.request.url.startsWith('data:')) return
 
-        requestsStarted++
-        inFlight.add(params.requestId)
+        started.add(params.requestId)
+        startedUrls.push(params.request.url)
+        break
+      case 'Network.loadingFailed':
+        failed.add(params.requestId)
         break
       case 'Network.loadingFinished':
-      case 'Network.loadingFailed':
-        inFlight.delete(params.requestId)
+        finished.add(params.requestId)
+
+        if (finished.size >= EXPECTED_IMAGE_COUNT) onTargetReached()
+
         break
       default:
     }
@@ -215,28 +222,25 @@ const createHarCaptureHooks = () => {
     trackNetworkActivity: (cdp) => {
       cdp.on('event', onCdpEvent)
     },
-    waitForPageToFinish: async (cdp) => {
-      const deadline = Date.now() + CAPTURE_TIMEOUT_MS
-      let pageReportedComplete = false
+    // Waiting on `Network.loadingFinished` counts is the same condition `getResultsFromHar`
+    // asserts on, so capture stops exactly when the HAR is known to be complete enough.
+    // Waiting instead for every request to settle would let a single straggler out of a
+    // thousand hold the capture open for the full timeout.
+    waitForEnoughRequests: () => {
+      return new Promise((resolve, reject) => {
+        if (finished.size >= EXPECTED_IMAGE_COUNT) return resolve()
 
-      while (true) {
-        if (!pageReportedComplete) {
-          const { result } = await cdp.Runtime.evaluate({ expression: PAGE_COMPLETE_EXPRESSION })
+        const timeout = setTimeout(() => {
+          reject(new Error(`Timed out after ${CAPTURE_TIMEOUT_MS}ms waiting for ${EXPECTED_IMAGE_COUNT} requests to finish loading. ${started.size} started, ${finished.size} finished, ${failed.size} failed. First ${REPORTED_URL_COUNT} requested: ${startedUrls.slice(0, REPORTED_URL_COUNT).join(', ')}`))
+        }, CAPTURE_TIMEOUT_MS)
 
-          pageReportedComplete = result.value === true
+        onTargetReached = () => {
+          clearTimeout(timeout)
+          resolve()
         }
-
-        if (pageReportedComplete && !inFlight.size) break
-
-        if (Date.now() > deadline) {
-          throw new Error(`Timed out after ${CAPTURE_TIMEOUT_MS}ms waiting for the page to finish loading. ${requestsStarted} requests started, ${inFlight.size} still in flight, page ${pageReportedComplete ? 'did' : 'did not'} report completion.`)
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, CAPTURE_POLL_INTERVAL_MS))
-      }
-
+      })
       // chrome-har-capturer surfaces whatever `postHook` returns as `log.pages[0]._user`
-      return { requestsStarted }
+      .then(() => ({ requestsStarted: started.size }))
     },
   }
 }
@@ -420,10 +424,10 @@ const runBrowserTest = (urlUnderTest, testCase) => {
             })
           })
         },
-        // capture stays open past the load event until every request has settled
+        // capture stays open past the load event until enough requests have landed
         // https://github.com/cyrus-and/chrome-har-capturer/issues/59
-        postHook: (_, cdp) => {
-          return captureHooks.waitForPageToFinish(cdp)
+        postHook: () => {
+          return captureHooks.waitForEnoughRequests()
         },
       })
 
@@ -518,8 +522,6 @@ describe('Proxy Performance', function () {
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
     describe(urlUnderTest, function () {
-      this.retries(15)
-
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 
@@ -548,7 +550,7 @@ describe('Proxy Performance', function () {
 
           // On retry, re-measure baseline so the ratio stays paired in time with this
           // scenario. The `before`-hook baseline can drift relative to current machine
-          // load on shared CI; without re-measuring, all 15 retries compare against the
+          // load on shared CI; without re-measuring, every retry compares against the
           // same stale baseline. Scoped locally so it doesn't leak to sibling tests.
           // Inside `it`, the running test is `this.test` (not `this.currentTest`,
           // which is only defined in hooks).
