@@ -41,6 +41,7 @@ describe('lib/network-runtime', () => {
     url?: string
     resourceType?: Protocol.Network.ResourceType
     responseStatusCode?: number
+    responseHeaders?: Protocol.Fetch.HeaderEntry[]
   }): Protocol.Fetch.RequestPausedEvent {
     return {
       requestId: options.requestId,
@@ -53,6 +54,7 @@ describe('lib/network-runtime', () => {
         headers: {},
       },
       responseStatusCode: options.responseStatusCode,
+      responseHeaders: options.responseHeaders,
     } as Protocol.Fetch.RequestPausedEvent
   }
 
@@ -391,6 +393,77 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'fetch-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').to.not.exist
+  })
+
+  // The legacy pipeline hands every response body back through the synthetic
+  // Express context, so an asset it does not rewrite has to come out
+  // byte-identical for the transport to release the origin response.
+  it('createCdpFetchRuntime continues asset responses the legacy pipeline leaves byte-identical', async () => {
+    const assetBody = Buffer.from('body { color: red; }')
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: assetBody.toString('base64'), base64Encoded: true }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const pause = {
+      requestId: 'asset-request',
+      networkId: 'network-asset-1',
+      url: 'https://example.test/app.css',
+      resourceType: 'Stylesheet' as Protocol.Network.ResourceType,
+    }
+
+    const handled = onRequestPaused(createPausedRequest(pause))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      ...pause,
+      responseStatusCode: 200,
+      responseHeaders: [{
+        name: 'content-type',
+        value: 'text/css',
+      }, {
+        name: 'content-length',
+        value: String(assetBody.length),
+      }],
+    }))
+
+    await flush()
+    await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'asset-request',
+      responseCode: 200,
+    })
+
+    // The pipeline left the headers alone, so the origin's own content-length
+    // survives by omitting responseHeaders rather than resending a copy of it.
+    expect(continueResponseCall!.args[1]).to.not.have.property('responseHeaders')
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').to.not.exist
   })
 
   it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {
@@ -634,6 +707,17 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'http-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
   })
 
   it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {

@@ -4,6 +4,8 @@ import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
 import type { ResourceType } from '@packages/proxy'
+import type { BodyDigest } from './body-digest'
+import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
@@ -23,7 +25,9 @@ const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 // state apart from response-received. Drift from MITM: redirect bodies are
 // therefore empty to middleware under proxy-disabled mode — CDP cannot provide
 // them — so 3xx handling differs from the MITM path, which may still surface
-// whatever the origin sent.
+// whatever the origin sent. That empty buffer is also the origin digest source,
+// so an untouched 3xx continues natively while a middleware that writes a body
+// onto one falls back to fulfill.
 const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
     && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
@@ -88,6 +92,7 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
   bodyStream?: Readable
   fulfilled?: boolean
+  originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
@@ -451,10 +456,10 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    let bodyStream: Readable
+    let originalBody: Buffer
 
     try {
-      bodyStream = await this.fetchResponseBody(event, sessionId)
+      originalBody = await this.fetchResponseBody(event, sessionId)
     } catch (err) {
       deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
@@ -488,7 +493,8 @@ export class CdpFetchTransport {
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
-      bodyStream,
+      bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
+      originalBodyDigest: digestBody(originalBody),
       sessionId,
     })
   }
@@ -514,18 +520,16 @@ export class CdpFetchTransport {
     ]
   }
 
-  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Readable> => {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {
     if (isRedirectPause(event)) {
-      return Readable.from([])
+      return Buffer.alloc(0)
     }
 
     const response = await this.client.send('Fetch.getResponseBody', {
       requestId: event.requestId,
     }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-
-    return Readable.from(body.length ? [body] : [])
+    return Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
