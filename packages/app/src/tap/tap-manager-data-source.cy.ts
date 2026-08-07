@@ -1,5 +1,8 @@
 import { EventEmitter } from 'events'
 import { tapManagerDataSource } from './tap-manager-data-source'
+import { useSnapshotStore } from '../runner/snapshot-store'
+import type { AutIframe } from '../runner/aut-iframe'
+import type { AutSnapshot } from '../runner/iframe-model'
 
 describe('tap/tap-manager-data-source', () => {
   describe('getRunner', () => {
@@ -44,6 +47,39 @@ describe('tap/tap-manager-data-source', () => {
       installRunner(undefined, true)
 
       expect(tapManagerDataSource.getRunner()).to.eq(undefined)
+    })
+  })
+
+  // Read against the real snapshot store, since that store is the only trace of a
+  // pin made by hand in the reporter.
+  describe('getPinnedSnapshot', () => {
+    const PINNED_PROPS = { id: 'log-3', testId: 'r4', snapshots: [{ name: 'before' }, { name: 'after' }] } as AutSnapshot
+    const autIframe = { restoreDom: () => {}, highlightEl: () => {}, removeHighlights: () => {} } as unknown as AutIframe
+
+    it('reports nothing while the app is showing the live page', () => {
+      expect(tapManagerDataSource.getPinnedSnapshot()).to.eq(undefined)
+    })
+
+    it('names the pinned command and the snapshot of it showing', () => {
+      const store = useSnapshotStore()
+
+      store.pinSnapshot(PINNED_PROPS)
+
+      expect(tapManagerDataSource.getPinnedSnapshot()).to.deep.eq({ testId: 'r4', logId: 'log-3', index: 0 })
+
+      store.changeState(1, autIframe)
+
+      expect(tapManagerDataSource.getPinnedSnapshot()?.index).to.eq(1)
+
+      store.unpinSnapshot()
+
+      expect(tapManagerDataSource.getPinnedSnapshot()).to.eq(undefined)
+    })
+
+    it('reports nothing for a snapshot whose props name no log', () => {
+      useSnapshotStore().pinSnapshot({ ...PINNED_PROPS, id: undefined, testId: undefined })
+
+      expect(tapManagerDataSource.getPinnedSnapshot()).to.eq(undefined)
     })
   })
 

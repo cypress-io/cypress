@@ -3,7 +3,8 @@ import type { CloudRunStatus } from '../../src/generated/graphql-test'
 import type { AutSnapshot } from '../../src/runner/iframe-model'
 
 export const autSnapshot: AutSnapshot = {
-  id: 1,
+  id: 'log-http://localhost:3000-1',
+  testId: 'r3',
   name: 'DOM Test Snapshot',
   $el: null,
   coords: [0, 0],

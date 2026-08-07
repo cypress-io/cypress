@@ -82,8 +82,8 @@ describe('getSnapshotPropsForLog', () => {
     const earlier = _.find(retried.prevAttempts[0].commands, { name: 'wrap' })
     const latest = _.find(retried.commands, { name: 'wrap' })
 
-    expect(Cypress.runner.getSnapshotPropsForLog(retried.id, latest.id), 'latest attempt').to.include({ id: latest.id })
-    expect(Cypress.runner.getSnapshotPropsForLog(retried.id, earlier.id), 'earlier attempt').to.include({ id: earlier.id })
+    expect(Cypress.runner.getSnapshotPropsForLog(retried.id, latest.id), 'latest attempt').to.include({ id: latest.id, testId: retried.id })
+    expect(Cypress.runner.getSnapshotPropsForLog(retried.id, earlier.id), 'earlier attempt').to.include({ id: earlier.id, testId: retried.id })
   })
 })
 

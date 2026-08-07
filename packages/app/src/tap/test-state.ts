@@ -34,7 +34,7 @@ const attemptsOf = (test: SerializedTest): SerializedTest[] => {
 }
 
 type AttemptSelection =
-  | { test: SerializedTest, attempt: SerializedTest }
+  | { test: SerializedTest, attempt: SerializedTest, attemptNumber: number }
   | { error: 'TEST_NOT_FOUND' }
   | { error: 'ATTEMPT_NOT_FOUND', attempts: number }
 
@@ -52,14 +52,14 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
   const attempts = attemptsOf(test)
 
   if (attempt === undefined) {
-    return { test, attempt: attempts[attempts.length - 1] }
+    return { test, attempt: attempts[attempts.length - 1], attemptNumber: attempts.length }
   }
 
   if (!isAttemptInRange(attempt, attempts.length)) {
     return { error: 'ATTEMPT_NOT_FOUND', attempts: attempts.length }
   }
 
-  return { test, attempt: attempts[attempt - 1] }
+  return { test, attempt: attempts[attempt - 1], attemptNumber: attempt }
 }
 
 export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapCommandError => {
@@ -253,6 +253,16 @@ const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], i
   })
 
   throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
+}
+
+/**
+ * Which attempt of a test a driver log id belongs to, 1-based — how a pin known
+ * only by its log id (one made in the reporter) finds the attempt to read it as.
+ */
+export const attemptOfLog = (test: SerializedTest, logId: string): number | undefined => {
+  const index = attemptsOf(test).findIndex((attempt) => orderedAttemptLogs(attempt).some((log) => log.id === logId))
+
+  return index === -1 ? undefined : index + 1
 }
 
 export const resolveCommandLogId = (attempt: SerializedTest, tapId: string, testId: string): string | undefined => {

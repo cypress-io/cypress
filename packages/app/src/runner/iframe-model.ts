@@ -3,7 +3,8 @@ import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
 
 export interface AutSnapshot {
-  id?: number
+  id?: string
+  testId?: string
   name?: string
   $el: any
   snapshot?: AutSnapshot
@@ -26,7 +27,7 @@ export interface AutSnapshot {
 export class IframeModel {
   isSnapshotPinned: boolean = false
   originalState?: AutSnapshot
-  detachedId?: number
+  detachedId?: string
   intervalId?: number
 
   constructor (
