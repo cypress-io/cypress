@@ -65,5 +65,25 @@ describe('EventCollectorActions', () => {
 
       expect(result).toBe(false)
     })
+
+    // The module itself is initialized while the V8 snapshot is built, where this variable
+    // is absent. Reading it any earlier than the request freezes the wrong url into the binary.
+    it('resolves the environment when the event is recorded, not when the module loads', async () => {
+      const original = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
+
+      process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'staging'
+
+      try {
+        await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
+      } finally {
+        if (original === undefined) {
+          delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
+        } else {
+          process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = original
+        }
+      }
+
+      expect(ctx.util.fetch).toHaveBeenNthCalledWith(1, 'https://cloud-staging.cypress.io/anon-collect', expect.anything())
+    })
   })
 })
