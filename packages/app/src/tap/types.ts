@@ -50,16 +50,6 @@ export interface PinSnapshotRunner {
   getSnapshotPropsForLog (testId: string, logId: string): PinSnapshotProps | undefined
 }
 
-/**
- * The slice of the AUT iframe the pin command drives directly. `detachDom`
- * captures (and detaches) the current body so it can be put back on release —
- * the reliable restore the app's own unpin can't give a cold pin (see below).
- */
-export interface PinAutIframe {
-  detachDom (): unknown
-  restoreDom (snapshot: unknown): void
-}
-
 /** The app-under-test elements a selector matched, narrowed to what we read. */
 interface TapAutElements {
   length: number

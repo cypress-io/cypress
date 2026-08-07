@@ -222,6 +222,14 @@ export class IframeModel {
 
     clearInterval(this.intervalId)
 
+    if (!this.originalState) {
+      this._storeOriginalState()
+    }
+
+    // Claim the pending restore of any preview this pin replaced, so its deferred
+    // `hide:snapshot` cannot put the live page back over the pin.
+    this.detachedId = snapshotProps.id
+
     this._restoreDom(snapshots[0], snapshotProps)
   }
 
