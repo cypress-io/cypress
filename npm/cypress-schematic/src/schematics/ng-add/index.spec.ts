@@ -63,6 +63,12 @@ describe('@cypress/schematic: ng-add', () => {
     })
   })
 
+  it('should create component specs alongside components when addCtSpecs is set', async () => {
+    const tree = await schematicRunner.runSchematic('ng-add', { 'component': true, 'addCtSpecs': true }, appTree)
+
+    expect(tree.files).to.contain('/projects/sandbox/src/app/fake-component.component.cy.ts')
+  })
+
   it('should add @cypress/schematic to the schemaCollections array', async () => {
     const tree = await schematicRunner.runSchematic('ng-add', { 'component': true }, appTree)
     const angularJson = readAngularJson(tree)

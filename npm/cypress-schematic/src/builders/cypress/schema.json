@@ -76,7 +76,7 @@
       "type": "string",
       "description": "A built-in, custom, or third-party Mocha reporter"
     },
-    "reporter-options": {
+    "reporterOptions": {
       "type": "object",
       "description": "A key-value pair of options that will be passed to the specified Mocha reporter"
     },

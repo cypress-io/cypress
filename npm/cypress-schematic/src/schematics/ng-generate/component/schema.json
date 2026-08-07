@@ -109,11 +109,6 @@
       "description": "Adds a developer-defined type to the filename, in the format \"name.type.ts\".",
       "default": "Component"
     },
-    "skipTests": {
-      "type": "boolean",
-      "description": "Do not create \"spec.ts\" test files for the new component.",
-      "default": false
-    },
     "flat": {
       "type": "boolean",
       "description": "Create the new files at the top level of the current project.",

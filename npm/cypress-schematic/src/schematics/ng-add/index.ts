@@ -171,7 +171,7 @@ function addCtSpecs (options: any): Rule {
 
       Object.keys(projects).map((name) => {
         const project = projects[name]
-        const appPath = `${project.root}/${project.sourceRoot}/${project.prefix}`
+        const appPath = `${project.sourceRoot}/${project.prefix}`
 
         return getDirectoriesAndCreateSpecs({ tree, appPath })
       })
