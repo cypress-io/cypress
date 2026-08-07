@@ -15,8 +15,6 @@ import type { StateFunc } from './state'
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
-// `testId` rides along because every per-log lookup is keyed by (testId, logId);
-// a log id alone cannot be resolved back to a test.
 const SNAPSHOT_PROPS = 'id testId snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount defaultCollapsedState displayName end err event functionName groupLevel hookId instrument isStubbed group hidden message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
