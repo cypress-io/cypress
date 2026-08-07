@@ -1,3 +1,4 @@
+import '../../../spec_helper'
 import _ from 'lodash'
 import * as preprocessor from '../../../../lib/plugins/child/preprocessor'
 import * as util from '../../../../lib/plugins/util'
