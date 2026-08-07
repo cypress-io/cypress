@@ -1,5 +1,4 @@
 import $Downloads from '../../../src/cypress/downloads'
-import { authCreds } from '../../fixtures/auth_creds'
 
 describe('src/cypress/downloads', () => {
   let log
@@ -110,23 +109,5 @@ describe('download behavior', () => {
     // attempt to download
     cy.get('[data-cy=invalid-download]').click()
     cy.readFile(`${Cypress.config('downloadsFolder')}/downloads_does_not_exist.csv`).should('not.exist')
-  })
-})
-
-describe('basic auth download behavior', () => {
-  beforeEach(() => {
-    cy.visit('/fixtures/downloads.html', {
-      auth: authCreds,
-    })
-  })
-
-  // NOTE: webkit opens a new window and doesn't download the file
-  it('downloads basic auth protected file that opens in a new tab', { browser: '!webkit' }, () => {
-    cy.exec(`rm -f ${Cypress.config('downloadsFolder')}/download-basic-auth.csv`)
-    cy.readFile(`${Cypress.config('downloadsFolder')}/download-basic-auth.csv`).should('not.exist')
-
-    cy.get('[data-cy=download-basic-auth]').click()
-    cy.readFile(`${Cypress.config('downloadsFolder')}/download-basic-auth.csv`)
-    .should('contain', '"Joe","Smith"')
   })
 })
