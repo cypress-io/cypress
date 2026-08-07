@@ -264,7 +264,11 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       await extraTransport.start()
 
       if (stopped) {
-        await extraTransport.stop().catch(() => {})
+        // Not awaited, for the same reason stop() itself does not await extras:
+        // a dead extra-target socket may never answer Fetch.disable, and this
+        // must reject promptly so _onAttachToTarget's caller reaches its
+        // fallback instead of suspending the Target.attachedToTarget handler.
+        extraTransport.stop().catch(() => {})
 
         throw new Error(RUNTIME_STOPPED_ERROR)
       }

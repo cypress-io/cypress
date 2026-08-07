@@ -670,4 +670,41 @@ describe('lib/network-runtime', () => {
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
     expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
   })
+
+  it('createCdpFetchRuntime attachExtraTarget rejects promptly when stop() lands mid-attach', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // park attachExtraTarget inside extraTransport.start() until we release it
+    const fetchEnableGate = Promise.withResolvers<void>()
+
+    extraClient.send.withArgs('Fetch.enable').returns(fetchEnableGate.promise)
+    // models a dead-but-open extra-target socket — Fetch.disable is sent but
+    // never answered, same as the sibling stop()/detach paths
+    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const attach = runtime.attachExtraTarget(extraClient)
+
+    await flush()
+
+    // stop() lands while attach is still awaiting Fetch.enable inside start()
+    await runtime.stop()
+
+    fetchEnableGate.resolve()
+
+    await expect(attach).to.be.rejectedWith('CDP Fetch runtime has been stopped')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+  })
 })
