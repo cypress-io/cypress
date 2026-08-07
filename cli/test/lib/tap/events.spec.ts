@@ -42,7 +42,7 @@ describe('lib/tap/events', () => {
     vi.mocked(resolvedInstanceId).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
     dateNow.mockReturnValue(1_000)
-    beginTapTrace('status', ['json'])
+    beginTapTrace({ command: 'status', flags: ['json'] })
   })
 
   afterEach(() => {
@@ -124,7 +124,7 @@ describe('lib/tap/events', () => {
 
   it('starts a trace with no failure carried over from the previous command', async () => {
     noteTapFailure('NO_INSTANCE')
-    beginTapTrace('specs', [])
+    beginTapTrace({ command: 'specs', flags: [] })
 
     await reportTapTrace(0)
 
@@ -134,7 +134,7 @@ describe('lib/tap/events', () => {
 
   it('mints a message id per trace', async () => {
     await reportTapTrace(0)
-    beginTapTrace('specs', [])
+    beginTapTrace({ command: 'specs', flags: [] })
     await reportTapTrace(0)
 
     const [first, second] = fetchMock.mock.calls.map(([, request]: any) => JSON.parse(request.body))
@@ -143,7 +143,7 @@ describe('lib/tap/events', () => {
   })
 
   it('reports the command as none until a trace names one', async () => {
-    beginTapTrace(undefined, ['help'])
+    beginTapTrace({ command: undefined, flags: ['help'] })
 
     await reportTapTrace(0)
 

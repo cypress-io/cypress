@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import util from '../util'
 import { resolvedInstanceId } from '../cypress-instances'
 import { detectAgent } from '@packages/agent-info'
+import type { ReportedInvocation } from './reported-invocation'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -47,7 +48,7 @@ const newTrace = (command = 'none', flags: string[] = []): TapTrace => ({
 
 let trace = newTrace()
 
-export const beginTapTrace = (command: string | undefined, flags: string[]): void => {
+export const beginTapTrace = ({ command, flags }: ReportedInvocation): void => {
   trace = newTrace(command, flags)
 }
 
