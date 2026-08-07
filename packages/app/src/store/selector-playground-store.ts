@@ -6,7 +6,6 @@ interface SelectorPlaygroundStore {
   getSelector: string
   containsSelector: string
   isShowingHighlight: boolean
-  isOpen: boolean
   isEnabled: boolean
   isValid: boolean
   numElements: number
@@ -22,7 +21,6 @@ export const useSelectorPlaygroundStore = defineStore({
       getSelector: 'body',
       containsSelector: 'Hello, World',
       isShowingHighlight: false,
-      isOpen: false,
       isEnabled: false,
       isValid: true,
       numElements: 0,
@@ -35,26 +33,12 @@ export const useSelectorPlaygroundStore = defineStore({
       this.show = show
     },
 
-    toggleMethod () {
-      this.method = this.method === 'get' ? 'contains' : 'get'
-    },
-
     setEnabled (isEnabled: boolean) {
       this.isEnabled = isEnabled
 
       if (!this.isEnabled) {
         this.isShowingHighlight = false
       }
-    },
-
-    toggleOpen () {
-      this.setOpen(!this.isOpen)
-    },
-
-    setOpen (isOpen: boolean) {
-      this.isOpen = isOpen
-
-      this.setEnabled(this.isOpen)
     },
 
     setSelector (selector: SelectorMethod) {
@@ -89,14 +73,6 @@ export const useSelectorPlaygroundStore = defineStore({
   getters: {
     selector (state) {
       return state.method === 'get' ? state.getSelector : state.containsSelector
-    },
-
-    infoHelp (state) {
-      if (!state.isValid) {
-        return 'Invalid selector'
-      }
-
-      return state.numElements === 1 ? '1 matched element' : `${state.numElements} matched elements`
     },
 
     command (state): string {

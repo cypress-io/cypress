@@ -433,7 +433,7 @@ export class EventManager {
     // expose Cypress globally
     window.Cypress = Cypress
 
-    this.studioStore.setup(config)
+    this.studioStore.setup()
 
     const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
 

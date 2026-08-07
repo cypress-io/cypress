@@ -52,6 +52,7 @@ src/
 - The `test` script is a no-op (`echo 'ok'`) — use `cypress:run:ct` or `cypress:run:e2e` directly.
 - Module Federation (`@module-federation/runtime`) is used to load the runner and reporter bundles at runtime.
 - `CYPRESS_SNAPSHOT_UPDATE=1` triggers mocha event snapshot updates during the dedicated snapshot E2E run.
+- **Some app code has no caller in this repo and is still live.** The cloud-delivered `studio` and `cy-prompt` bundles call into the app at runtime — the `studio` bundle reaches the Pinia studio store via `eventManager.studioStore` (e.g. `_openAssertionsMenu`, `_isAssertionsMenu`, `_closeAssertionsMenu`) and receives props typed by the vendored `src/studio/studio-app-types.ts` / `src/prompt/prompt-app-types.ts`. Those vendored files are owned by the bundles and copied in; do not edit them here. Before deleting anything that looks unreferenced under `src/studio/`, `src/prompt/`, `src/runner/studio/`, or `src/store/studio-store.ts`, check the bundle-side contracts in `cypress-services` (`app/packages/studio/src/types/types.ts`, `app/packages/cy-prompt/src/app/types.ts`) and grep that repo for the symbol. A passing E2E suite is not proof the app-side code runs — the bundle may be supplying the behaviour.
 
 ## Integration Points
 

@@ -1,4 +1,4 @@
-import type { FileDetails, Instrument, TestState } from '@packages/types/src'
+import type { Instrument, TestState } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
@@ -38,16 +38,11 @@ interface StudioRecorderState {
   url?: string
   _initialUrl?: string
 
-  fileDetails?: FileDetails
-  absoluteFile?: string
-  runnableTitle?: string
-
   canAccessStudioAI: boolean
   showUrlPrompt: boolean
   sessionId?: string
   _isStudioCreatedTest: boolean
   newTestLineNumber?: number
-  _originalGrepSettings: Record<string, string>
   entrySource?: EntrySource
 }
 
@@ -82,7 +77,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       sessionId: persistedSessionId,
       newTestLineNumber: undefined,
       _isStudioCreatedTest: false,
-      _originalGrepSettings: {},
       entrySource: undefined,
     }
   },
@@ -159,7 +153,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isFailed = true
     },
 
-    setup (config) {
+    setup () {
       const studio = this.getUrlParams()
 
       if (studio.newTestLineNumber) {
@@ -185,7 +179,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       // if we have an existing test or are creating a new test, we need to start loading
       // otherwise if we have a suite, we can just set the studio active
       if (this.testId || studio.newTestLineNumber) {
-        this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
       } else if (this.suiteId) {
         this.setActive(true)
@@ -210,14 +203,6 @@ export const useStudioStore = defineStore('studioRecorder', {
         this._isStudioCreatedTest = true
         this.setTestId(test.id)
         getCypress().runner.setIsStudioCreatedTest(true)
-      }
-
-      if (this.testId) {
-        if (test.invocationDetails) {
-          this.setFileDetails(test.invocationDetails)
-        }
-
-        this.setRunnableTitle(test.title)
       }
     },
 
@@ -250,7 +235,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isFailed = false
       this.showUrlPrompt = true
       this._isStudioCreatedTest = false
-      this._originalGrepSettings = {}
       this.entrySource = undefined
 
       this._maybeResetRunnables()
@@ -262,18 +246,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._removeUrlParams()
       this._initialUrl = undefined
       this.clearSessionId()
-    },
-
-    setFileDetails (fileDetails) {
-      this.fileDetails = fileDetails
-    },
-
-    setAbsoluteFile (absoluteFile: string) {
-      this.absoluteFile = absoluteFile
-    },
-
-    setRunnableTitle (runnableTitle) {
-      this.runnableTitle = runnableTitle
     },
 
     _maybeResetRunnables () {
@@ -332,6 +304,11 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
+    // The `_*AssertionsMenu` actions below have no caller in this repo. They are
+    // invoked at runtime by the cloud-delivered `studio` bundle, which reaches
+    // them through `eventManager.studioStore` and declares them in its own
+    // `StudioStore` contract type. Removing them breaks Studio's right-click
+    // assertions menu, which no static analysis of this repo will catch.
     _isAssertionsMenu ($el) {
       return $el.hasClass('__cypress-studio-assertions-menu')
     },
