@@ -99,7 +99,7 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   )
 }
 
-export function startDevServer ({
+function startDevServer ({
   devServerTarget,
   watch,
   context }: CypressStartDevServerProps): Observable<string> {

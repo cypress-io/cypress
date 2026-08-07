@@ -1,7 +1,8 @@
 import { readdirSync } from 'fs'
+import type { Dirent } from 'fs'
 import { resolve } from 'path'
 import { getSystemPath, normalize, strings } from '@angular-devkit/core'
-import { Tree, apply, url, applyTemplates, move, Rule } from '@angular-devkit/schematics'
+import { Tree, apply, url, applyTemplates, move } from '@angular-devkit/schematics'
 import { get } from 'https'
 import { Schema } from '../ng-generate/cypress-test/schema'
 import { minVersion as semverMinVersion } from 'semver'
@@ -18,15 +19,12 @@ export interface NodePackage {
 export function getAngularSemverVersion (tree: Tree): SemVer | null {
   const packageNode = getPackageJsonDependency(tree, '@angular/core')
 
-  try {
-    if (packageNode !== null) {
-      const version: SemVer | null = packageNode && packageNode.version ?
-        semverMinVersion(packageNode.version) : null
-
-      return version
-    }
-
+  if (!packageNode?.version) {
     return null
+  }
+
+  try {
+    return semverMinVersion(packageNode.version)
   } catch (e) {
     return null
   }
@@ -73,41 +71,29 @@ const ctSpecContent = ({ componentName, componentFilename }: { componentName: st
   `
 }
 
-function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: any }): Rule | void {
-  const buffer = tree.read(`${appPath}/${component['name']}`)
+function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: Dirent }): void {
+  const buffer = tree.read(`${appPath}/${component.name}`)
   const componentString = buffer?.toString()
   const componentMatch = componentString?.match(/(?<=class )\S+/g)
-  const componentFilename = component['name'].split('.')[0]
+  const componentFilename = component.name.split('.')[0]
   const componentName = componentMatch ? componentMatch[0] : componentFilename
 
   console.log(`Creating new component spec for: ${componentName}\n`)
 
-  return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ componentName, componentFilename }))
+  tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ componentName, componentFilename }))
 }
 
 export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree }) {
-  let components = []
-  let directories = []
-
   const projectPath = resolve(getSystemPath(normalize('')))
   const contents = readdirSync(resolve(`${projectPath}/${appPath}`), { withFileTypes: true })
 
-  if (contents) {
-    components = contents.filter((file) => file['name'].endsWith(`component.ts`))
-    directories = contents.filter((file) => file.isDirectory())
+  contents
+  .filter((file) => file.name.endsWith('component.ts'))
+  .forEach((component) => generateCTSpec({ tree, appPath, component }))
 
-    if (components) {
-      components.map((component) => {
-        return generateCTSpec({ tree, appPath, component })
-      })
-    }
-
-    if (directories) {
-      directories.forEach((directory: any) => {
-        return getDirectoriesAndCreateSpecs({ tree, appPath: `${appPath}/${directory['name']}` })
-      })
-    }
-  }
+  contents
+  .filter((file) => file.isDirectory())
+  .forEach((directory) => getDirectoriesAndCreateSpecs({ tree, appPath: `${appPath}/${directory.name}` }))
 }
 
 export function createTemplate ({ templatePath, options }: { templatePath: string, options: Schema }): any {

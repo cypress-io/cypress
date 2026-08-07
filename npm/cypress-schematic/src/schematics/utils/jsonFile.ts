@@ -19,8 +19,6 @@ import {
   printParseErrorCode,
 } from 'jsonc-parser'
 
-export type InsertionIndex = (properties: string[]) => number
-
 export type JSONPath = (string | number)[]
 
 /** @internal */
@@ -77,7 +75,7 @@ export class JSONFile {
 
   modify (
     jsonPath: JSONPath,
-    value: JsonValue | undefined,
+    value: JsonValue,
   ): void {
     let updatedValue = value
 
@@ -98,11 +96,5 @@ export class JSONFile {
     this.content = applyEdits(this.content, edits)
     this.host.overwrite(this.path, this.content)
     this._jsonAst = undefined
-  }
-
-  remove (jsonPath: JSONPath): void {
-    if (this.get(jsonPath) !== undefined) {
-      this.modify(jsonPath, undefined)
-    }
   }
 }

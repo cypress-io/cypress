@@ -4,12 +4,6 @@
   "title": "Cypress E2E Spec Options Schema",
   "type": "object",
   "properties": {
-    "path": {
-      "type": "string",
-      "format": "path",
-      "description": "The path where the spec will be created.",
-      "visible": false
-    },
     "project": {
       "type": "string",
       "description": "The name of the project.",

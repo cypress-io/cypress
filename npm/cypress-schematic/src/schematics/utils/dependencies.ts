@@ -48,18 +48,6 @@ export function addPackageJsonDependency (
   }
 }
 
-export function removePackageJsonDependency (
-  tree: Tree,
-  name: string,
-  pkgJsonPath = PKG_JSON_PATH,
-): void {
-  const json = new JSONFile(tree, pkgJsonPath)
-
-  for (const depType of ALL_DEPENDENCY_TYPE) {
-    json.remove([depType, name])
-  }
-}
-
 export function getPackageJsonDependency (
   tree: Tree,
   name: string,

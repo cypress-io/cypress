@@ -345,7 +345,7 @@ function addDefaultSchematic (): Rule {
   }
 }
 
-export const getCypressConfigFile = (angularJsonVal: any, projectName: string) => {
+const getCypressConfigFile = (angularJsonVal: any, projectName: string) => {
   const project = angularJsonVal.projects[projectName]
   const tsConfig = project?.architect?.lint?.options?.tsConfig
 
@@ -356,7 +356,7 @@ export const getCypressConfigFile = (angularJsonVal: any, projectName: string) =
   return null
 }
 
-export const addCypressTsConfig = (tree: Tree, angularJsonVal: any, projectName: string) => {
+const addCypressTsConfig = (tree: Tree, angularJsonVal: any, projectName: string) => {
   const project = angularJsonVal.projects[projectName]
   let tsConfig = project?.architect?.lint?.options?.tsConfig
 
@@ -377,7 +377,7 @@ export const addCypressTsConfig = (tree: Tree, angularJsonVal: any, projectName:
   return tree.overwrite('./angular.json', JSON.stringify(angularJsonVal, null, 2))
 }
 
-export const removeE2ELinting = (tree: Tree, angularJsonVal: any, project: string) => {
+const removeE2ELinting = (tree: Tree, angularJsonVal: any, project: string) => {
   const projectLintOptionsJson = angularJsonVal.projects[project]?.architect?.lint?.options
 
   if (projectLintOptionsJson) {
