@@ -486,7 +486,13 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
 let cyServer
 
-describe('Proxy Performance', function () {
+// TODO: re-enable once the fixture is served from somewhere that tolerates the load this
+// suite generates - 1000 requests and ~15MB per capture, 16 captures per run, on every PR.
+// GitHub Pages appears to throttle it: single requests to test-page-speed.cypress.io are
+// reliable, but a capture intermittently receives a Pages error page instead of the fixture
+// and then records 5 requests instead of 1001. Unarchiving cypress-fetch-page and rebuilding
+// it did not help. https://github.com/cypress-io/cypress/issues/TODO
+describe.skip('Proxy Performance', function () {
   // a retried test re-measures the baseline, so this has to cover two full captures
   this.timeout(2 * CAPTURE_TIMEOUT_MS + (30 * 1000))
   this.retries(3)
