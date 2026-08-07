@@ -286,8 +286,11 @@ jobs:
       disable-proxy: true
       require-opt-in: false
       parallelism: 1
-      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts
+      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads;
+      # #34514 strategy:file origin serving (visits, web security, service
+      # workers, proxying). proxy_correlation_spec excluded: non-deterministic
+      # proxy-off under the 50-request burst — see #34514.
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/base_url_spec.js test/visit_spec.js test/web_security_spec.js test/service_worker_spec.js test/service_worker_protocol_spec.js test/proxying_spec.ts
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:

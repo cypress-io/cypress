@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { domainPropsToHostname } from '@packages/network-tools'
+import { domainPropsToHostname, toFileServerUrl } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -23,6 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { isProxyDisabled } from './util/is-proxy-disabled'
+import { resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -352,11 +353,36 @@ export const createCommonRoutes = ({
     })
   }
 
+  // Direct-origin catch-all: with the MITM proxy disabled the browser fetches
+  // the AUT origin itself, and some requests never pass CDP Fetch interception
+  // at all (service-worker scripts come from the SW target). Serve anything
+  // the token-guarded file server can resolve through the legacy pipeline;
+  // everything else falls through — proxying arbitrary URLs addressed to our
+  // own origin through fetch-origin would loop.
+  if (isProxyDisabled() && (getNetworkProxy || networkProxy)) {
+    router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
+      const proxy = resolveNetworkProxy()
+      // Resolve against our own configured origin rather than the
+      // client-controlled Host header — every request here arrived at this
+      // server by definition.
+      const absoluteUrl = new URL(req.url, resolveProxyUrlBase(config)).href
+
+      if (!proxy || !toFileServerUrl(absoluteUrl, remoteStates.current())) {
+        return next()
+      }
+
+      req.proxiedUrl = absoluteUrl
+      await proxy.handleHttpRequest(req, res)
+    })
+  }
+
   // when we experience uncaught errors
   // during routing just log them out to
   // the console and send 500 status
   // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
+  // Express dispatches error middleware by arity — the unused `next` keeps
+  // this from running as a regular handler on every unmatched request.
+  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)

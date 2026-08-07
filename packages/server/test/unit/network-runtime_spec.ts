@@ -391,14 +391,13 @@ describe('lib/network-runtime', () => {
     await handled
   })
 
-  it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {
+  it('createCdpFetchRuntime passes strategy:file URLs through untouched so the Cypress origin serves them', async () => {
     const client = {
       send: sinon.stub().resolves({}),
       on: sinon.stub(),
       off: sinon.stub(),
     }
     const deps = baseDeps()
-    const fileBody = Buffer.from('"Joe","Smith"')
 
     deps.remoteStates.current = sinon.stub().returns({
       origin: 'http://localhost:2020',
@@ -410,14 +409,7 @@ describe('lib/network-runtime', () => {
 
     deps.request = {
       rp: sinon.stub(),
-      create: sinon.stub().resolves({
-        statusCode: 200,
-        headers: {
-          'content-type': 'text/csv',
-          'content-disposition': 'attachment; filename="records.csv"',
-        },
-        body: fileBody,
-      }),
+      create: sinon.stub(),
     } as any
 
     const runtime = createCdpFetchRuntime({ ...deps, client })
@@ -431,27 +423,34 @@ describe('lib/network-runtime', () => {
 
     await flush()
 
-    expect(deps.request.create).to.have.been.calledWithMatch({
-      url: 'http://localhost:2021/cypress/fixtures/records.csv',
-      headers: {
-        'x-cypress-authorization': 'token',
-      },
-    }, true)
+    // No Node-side file-server fetch — the request stays on the wire and the
+    // Express direct-origin catch-all serves it.
+    expect(deps.request.create).to.not.have.been.called
 
     const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
     const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
 
-    expect(continueCall, 'expected no Fetch.continueRequest').to.not.exist
-    expect(fulfillCall, 'expected Fetch.fulfillRequest').to.exist
-    expect(fulfillCall!.args[1]).to.include({
-      requestId: 'file-request',
-      responseCode: 200,
-    })
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(continueCall!.args[1]).to.deep.equal({ requestId: 'file-request' })
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest').to.not.exist
 
-    expect(fulfillCall!.args[1].body).to.equal(fileBody.toString('base64'))
+    // The response pause for a passed-through request is released untouched.
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse').to.exist
+    expect(continueResponseCall!.args[1]).to.deep.equal({ requestId: 'file-request' })
   })
 
-  it('createCdpFetchRuntime fulfills download pauses without networkId without waiting for pre-request timeout', async function () {
+  it('createCdpFetchRuntime passes download pauses without networkId through without waiting for pre-request timeout', async function () {
     this.timeout(5000)
 
     const clock = sinon.useFakeTimers({
@@ -496,8 +495,8 @@ describe('lib/network-runtime', () => {
       const addPendingSpy = sinon.spy(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
       const onRequestPaused = await startCdpRuntime(runtime, client)
 
-      // Downloads omit networkId — without pre-registration CorrelateBrowserPreRequest
-      // would wait the default 2000ms pre-request timeout before file-server-origin runs.
+      // Downloads omit networkId — without pre-registration the Express-side
+      // CorrelateBrowserPreRequest would wait the default 2000ms pre-request timeout.
       const handled = onRequestPaused(createPausedRequest({
         requestId: 'download-file-request',
         url: downloadUrl,
@@ -507,16 +506,15 @@ describe('lib/network-runtime', () => {
       await clock.tickAsync(0)
       await flush()
 
+      // Pre-registration still happens for pass-through pauses so the
+      // Express-side CorrelateBrowserPreRequest resolves immediately.
       expect(addPendingSpy).to.have.been.calledOnceWith(downloadUrl)
-      expect(deps.request.create).to.have.been.calledOnce
+      expect(deps.request.create).to.not.have.been.called
 
-      const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+      const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
 
-      expect(fulfillCall, 'expected Fetch.fulfillRequest before pre-request timeout').to.exist
-      expect(fulfillCall!.args[1]).to.include({
-        requestId: 'download-file-request',
-        responseCode: 200,
-      })
+      expect(continueCall, 'expected Fetch.continueRequest before pre-request timeout').to.exist
+      expect(continueCall!.args[1]).to.deep.equal({ requestId: 'download-file-request' })
 
       await handled
     } finally {

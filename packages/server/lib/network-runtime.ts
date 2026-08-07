@@ -6,6 +6,7 @@ import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkI
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
+import { toFileServerUrl } from '@packages/network-tools'
 import type { CookieJar } from './automation/cookie/jar'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
@@ -15,7 +16,6 @@ import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
-import { createFileServerOriginMiddleware } from './adapters/file-server-origin'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 
 export type CreateProxyRuntimeDeps = {
@@ -196,19 +196,16 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     }),
   )
 
-  // CDP Fetch continues to the browser origin, so strategy:file URLs need a
-  // Node-side file-server origin after the legacy pipeline (see file-server-origin).
-  networkInterception.use(createFileServerOriginMiddleware({
-    remoteStates: deps.remoteStates,
-    getFileServerToken: deps.getFileServerToken,
-    request: deps.request,
-  }))
-
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
     // Download-manager pauses omit networkId and never emit requestWillBeSent;
     // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
+    // strategy:file URLs are served MITM-style by the Cypress origin itself
+    // (routes.ts direct-origin catch-all). Releasing both pauses untouched
+    // runs the pipeline exactly once (Express side) and keeps the request on
+    // the wire — Network.*ExtraInfo events and HTTP caching stay intact.
+    shouldPassThrough: (url) => !!toFileServerUrl(url, deps.remoteStates.current()),
   })
 
   // Proxy parity: cookie simulation's simulated top, which nothing else

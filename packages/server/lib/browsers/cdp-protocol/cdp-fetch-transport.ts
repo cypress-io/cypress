@@ -36,6 +36,13 @@ type CdpFetchTransportOptions = {
    * the full pre-request timeout.
    */
   addPendingUrlWithoutPreRequest?: (url: string) => void
+  /**
+   * When true for a URL, the transport releases both pauses untouched
+   * (continueRequest / continueResponse) and runs no middleware. Used for
+   * URLs the Cypress origin serves MITM-style itself (strategy:file) so the
+   * pipeline runs exactly once — on the Express side.
+   */
+  shouldPassThrough?: (url: string) => boolean
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -65,6 +72,10 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
 
 export class CdpFetchTransport {
   private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
+
+  // Fetch.requestIds continued untouched at the request stage; their response
+  // pauses must also be released untouched (see options.shouldPassThrough).
+  private readonly passThroughRequests = new Set<string>()
 
   private isStarted = false
 
@@ -129,6 +140,8 @@ export class CdpFetchTransport {
   reset (): void {
     debug('resetting CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
     this.rejectAll(new Error('CDP Fetch transport reset'))
+    // Aborted pass-through flows (navigation away) never see a response pause.
+    this.passThroughRequests.clear()
     this.networkExtraInfo.flush()
   }
 
@@ -155,6 +168,24 @@ export class CdpFetchTransport {
 
   private interceptRequest = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
     if (event.responseErrorReason || typeof event.responseStatusCode === 'number') {
+      return
+    }
+
+    if (this.options.shouldPassThrough?.(event.request.url)) {
+      debug('passing through %s — the Cypress origin serves it directly', event.request.url)
+
+      // The Express-side pipeline still runs pre-request correlation for the
+      // direct request, so pauses without networkId (download-manager) must be
+      // pre-registered here just like intercepted ones.
+      if (!event.networkId) {
+        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
+      }
+
+      this.passThroughRequests.add(event.requestId)
+      await this.safeSend('Fetch.continueRequest', {
+        requestId: event.requestId,
+      }, sessionId)
+
       return
     }
 
@@ -331,6 +362,28 @@ export class CdpFetchTransport {
 
   private resolveResponse = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
     if (!event.responseErrorReason && typeof event.responseStatusCode !== 'number') {
+      return
+    }
+
+    if (this.passThroughRequests.delete(event.requestId)) {
+      debug('releasing pass-through response pause for %s', event.request.url)
+
+      // Nothing consumes extraInfo tracking for a pass-through flow.
+      if (event.networkId) {
+        this.networkExtraInfo.clear(event.networkId, sessionId)
+      }
+
+      if (event.responseErrorReason) {
+        await this.safeSend('Fetch.failRequest', {
+          requestId: event.requestId,
+          errorReason: event.responseErrorReason,
+        }, sessionId)
+      } else {
+        await this.safeSend('Fetch.continueResponse', {
+          requestId: event.requestId,
+        }, sessionId)
+      }
+
       return
     }
 
