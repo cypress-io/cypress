@@ -48,7 +48,7 @@ describe('lib/plugins/child/preprocessor', () => {
       expect(util.wrapChildPromise.lastCall.args[3][0]).to.be.an.instanceOf(EE)
     })
 
-    it('sends \'preprocessor:rerun\' through ipc on \'rerun\' event', function () {
+    it(`sends 'preprocessor:rerun' through ipc on 'rerun' event`, function () {
       const file = util.wrapChildPromise.lastCall.args[3][0]
 
       file.emit('rerun')
@@ -66,7 +66,7 @@ describe('lib/plugins/child/preprocessor', () => {
   })
 
   context('#close', () => {
-    it('emits \'close\' on the file with the given path', function () {
+    it(`emits 'close' on the file with the given path`, function () {
       const file = util.wrapChildPromise.lastCall.args[3][0]
       const handler = sinon.spy()
 
@@ -97,7 +97,7 @@ describe('lib/plugins/child/preprocessor', () => {
       expect(files[this.file.filePath]).to.be.undefined
     })
 
-    it('emits \'close\' on every file when given no file path', function () {
+    it(`emits 'close' on every file when given no file path`, function () {
       const file = util.wrapChildPromise.lastCall.args[3][0]
 
       preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2])
