@@ -24,9 +24,10 @@ export const renderAmbiguousHuman = (result: FrameAmbiguousResult): string => {
 
   const table = [headline, note, ...columns(['index', 'selector'], rows, colorize)]
 
-  if (numbered === result.count) {
-    return layout([table])
-  }
+  const notes = [
+    ...(numbered === result.count ? [] : [`showing the first ${numbered} of ${result.count} matches — --at takes any index up to ${result.count - 1}.`]),
+    ...(derived.size === numbered ? [] : ['- means no unique selector could be derived for that match — you may need to adjust your Cypress.ElementSelector config, or the element may be one no standard CSS selector can identify.']),
+  ].map((line) => color.muted(line))
 
-  return layout([table, [color.muted(`showing the first ${numbered} of ${result.count} matches — --at takes any index up to ${result.count - 1}.`)]])
+  return layout(notes.length ? [table, notes] : [table])
 }

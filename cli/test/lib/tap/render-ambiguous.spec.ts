@@ -8,6 +8,8 @@ const render = (result: FrameAmbiguousResult): string => stripAnsi(renderAmbiguo
 
 const numbered = (...selectors: string[]) => selectors.map((selector, index) => ({ index, selector }))
 
+const undeliverable = '- means no unique selector could be derived for that match — you may need to adjust your Cypress.ElementSelector config, or the element may be one no standard CSS selector can identify.'
+
 describe('lib/tap/render/ambiguous', () => {
   it('states what went wrong, then numbers a selector per match', () => {
     expect(render({
@@ -27,7 +29,7 @@ describe('lib/tap/render/ambiguous', () => {
     ].join('\n'))
   })
 
-  it('keeps a row for a match no selector could be derived for', () => {
+  it('keeps a row for a match no selector could be derived for, saying what the dash means', () => {
     // The second of four matches had no unique selector, but --at still reads it,
     // so it keeps its index and the dash stands in for the selector it lacks.
     expect(render({
@@ -43,6 +45,8 @@ describe('lib/tap/render/ambiguous', () => {
       '1      -',
       '2      \'#third\'',
       '3      \'#fourth\'',
+      '',
+      undeliverable,
     ].join('\n'))
   })
 
@@ -53,6 +57,8 @@ describe('lib/tap/render/ambiguous', () => {
       'index  selector',
       '0      -',
       '1      -',
+      '',
+      undeliverable,
     ].join('\n'))
   })
 
@@ -73,13 +79,14 @@ describe('lib/tap/render/ambiguous', () => {
       '9      -',
       '',
       'showing the first 10 of 5000 matches — --at takes any index up to 4999.',
+      undeliverable,
     ].join('\n'))
   })
 
   it('stays bounded for a selector matching a whole document, rather than building a row per match', () => {
     const rendered = render({ ambiguous: true, selector: '*', count: 1_000_000, selectors: [] })
 
-    expect(rendered.split('\n')).to.have.length(15)
+    expect(rendered.split('\n')).to.have.length(16)
     expect(rendered).toContain('showing the first 10 of 1000000 matches')
   })
 })
