@@ -206,6 +206,14 @@ while IFS= read -r file; do
       system_tests=true
       unit_tests=true
       ;;
+    packages/cloud-urls/*)
+      # data-context is the only consumer with CI jobs — mirror its mapping.
+      app_ui_tests=true
+      launchpad_tests=true
+      server_tests=true
+      system_tests=true
+      unit_tests=true
+      ;;
     packages/runner/*)
       driver_tests=true
       app_ui_tests=true
