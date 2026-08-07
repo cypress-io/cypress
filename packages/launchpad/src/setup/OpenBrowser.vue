@@ -8,7 +8,6 @@
       :description="headingDescription"
     />
     <OpenBrowserList
-      variant=""
       :gql="query.data.value.currentProject"
       @navigated-back="backFn"
       @launch="launch"

@@ -44,14 +44,12 @@ import { ref } from 'vue'
 import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   title: string
   code: string
   listItems: string[]
   codeFragment: string
-}>(), {
-  code: '',
-})
+}>()
 
 const localCode = ref(props.code)
 </script>

@@ -93,7 +93,6 @@ fragment GlobalProjectCard on GlobalProject {
 `
 
 const emit = defineEmits<{
-  (event: 'projectSelected', project: GlobalProjectCardFragment): void
   (event: 'removeProject', path: string): void
   (event: 'openInIDE', path: string): void
   (event: 'openInFinder', path: string): void

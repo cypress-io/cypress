@@ -31,18 +31,12 @@ describe('<WizardLayout />', () => {
     cy.contains('button', defaultMessages.setupPage.step.skip).should('be.visible')
   })
 
-  it('renders buttons with custom text', () => {
+  it('renders the next button with custom text', () => {
     const nextFn = () => {}
     const next = 'Custom next'
 
-    const backFn = () => {}
-    const back = 'Custom back'
-
-    const skipFn = () => {}
-    const skip = 'Custom skip'
-
     cy.mount(() => (
-      <WizardLayout backFn={backFn} back={back} nextFn={nextFn} next={next} skipFn={skipFn} skip={skip}>
+      <WizardLayout nextFn={nextFn} next={next}>
         <div class="h-20 border-jade-600 border flex items-center justify-center">
           content
         </div>
@@ -50,8 +44,6 @@ describe('<WizardLayout />', () => {
     ))
 
     cy.contains('button', next).should('be.visible')
-    cy.contains('button', back).should('be.visible')
-    cy.contains('button', skip).should('be.visible')
   })
 
   it('renders accessory slot', () => {

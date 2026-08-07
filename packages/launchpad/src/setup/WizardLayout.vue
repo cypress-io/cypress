@@ -14,13 +14,10 @@
         :next-fn="props.nextFn"
         :can-navigate-forward="canNavigateForward"
         :back-fn="backFn"
-        :alt-fn="altFn"
         :next="nextLabel"
-        :show-next="showNext"
-        :back="backLabel"
-        :alt="alt"
+        :back="t('setupPage.step.back')"
         :main-variant="mainButtonVariant"
-        :skip="skipLabel"
+        :skip="t('setupPage.step.skip')"
         :skip-fn="skipFn"
       >
         <slot name="button-bar" />
@@ -40,24 +37,14 @@ const { t } = useI18n()
 const props = withDefaults(
   defineProps<{
     next?: string
-    back?: string
-    skip?: string
-    alt?: string
-    showNext?: boolean
     canNavigateForward?: boolean
-    altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any
     backFn?: (...args: unknown[]) => any
     skipFn?: (...args: unknown[]) => any
     mainButtonVariant?: ButtonVariants
   }>(), {
     next: undefined,
-    showNext: true,
-    back: undefined,
-    skip: undefined,
-    alt: undefined,
     canNavigateForward: undefined,
-    altFn: undefined,
     nextFn: undefined,
     backFn: undefined,
     skipFn: undefined,
@@ -66,7 +53,5 @@ const props = withDefaults(
 )
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
-const backLabel = computed(() => props.back || t('setupPage.step.back'))
-const skipLabel = computed(() => props.skip || t('setupPage.step.skip'))
 
 </script>

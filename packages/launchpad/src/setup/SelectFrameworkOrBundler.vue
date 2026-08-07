@@ -12,12 +12,6 @@
         <span :id="props.selectorType">
           {{ props.label }}
         </span>
-        <span
-          v-if="props.description"
-          class="ml-[4px] text-gray-500"
-        >
-          {{ props.description }}
-        </span>
       </div>
     </template>
     <template
@@ -104,13 +98,11 @@ const props = withDefaults(defineProps<{
   placeholder?: string
   options: readonly Option[]
   label?: string
-  description?: string
   selectorType: 'framework' | 'bundler'
 }>(), {
   value: undefined,
   placeholder: undefined,
   label: undefined,
-  description: undefined,
 })
 
 const emit = defineEmits<{

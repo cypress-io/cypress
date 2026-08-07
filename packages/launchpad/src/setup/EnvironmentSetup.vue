@@ -122,12 +122,6 @@ fragment EnvironmentSetup on Wizard {
     category
     icon
   }
-  allBundlers {
-    id
-    name
-    type
-    isDetected
-  }
   erroredFrameworks {
     id
     path

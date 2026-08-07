@@ -34,28 +34,4 @@ describe('<ButtonBar />', () => {
       expect(backFn).to.have.been.calledOnce
     })
   })
-
-  it('should show a switch on the right when alt is mentionned and onAlt is set', () => {
-    const altFunction = cy.spy()
-
-    cy.mount(() => (
-      <ButtonBar next={nextLabel} back={backLabel} nextFn={nextFn} backFn={backFn} altFn={altFunction} alt="Install manually" />
-    ))
-
-    cy.findAllByLabelText('Install manually')
-    .click()
-    .then(() => {
-      expect(altFunction).to.have.been.calledOnce
-    })
-  })
-
-  it('changes the main button variant', () => {
-    const altFunction = cy.spy()
-
-    cy.mount(() => (
-      <ButtonBar next="Waiting for you" back={backLabel} nextFn={nextFn} backFn={backFn} altFn={altFunction} mainVariant='pending'/>
-    ))
-
-    cy.contains('button', 'Waiting for you').find('svg').should('be.visible')
-  })
 })

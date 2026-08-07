@@ -421,8 +421,6 @@
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
       "bundlerPlaceholder": "Pick a bundler",
-      "languageLabel": "Language",
-      "configFileLanguageLabel": "Cypress config file",
       "detected": "(detected)",
       "browseIntegrations": "Browse our list of third-party framework integrations",
       "communityFrameworkDefinitionProblem": "Community framework definition problem",
@@ -437,7 +435,6 @@
       "skip": "Skip"
     },
     "configFile": {
-      "createManually": "Create file manually",
       "skippedLabel": "Skipped",
       "changesRequiredLabel": "Changes required",
       "changesRequiredBadge": "Changes required",
@@ -476,7 +473,6 @@
   },
   "welcomePage": {
     "review": "Review the differences between each testing type",
-    "codeExample": "Code example",
     "compareTypes": {
       "content": {
         "e2eTitle": "End-to-end tests",

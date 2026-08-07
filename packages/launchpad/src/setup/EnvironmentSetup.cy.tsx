@@ -1,3 +1,4 @@
+import { allBundlers } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-Wizard'
 import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
@@ -67,7 +68,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       onResult: (res) => {
         res.framework = {
           ...res.frameworks[1],
-          supportedBundlers: res.allBundlers,
+          supportedBundlers: allBundlers,
         }
       },
       render: (gqlVal) => (
