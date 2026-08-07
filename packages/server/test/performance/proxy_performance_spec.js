@@ -173,6 +173,74 @@ const TEST_CASES = [
   })
 })
 
+const EXPECTED_IMAGE_COUNT = 1000
+
+// The fixture fires 1000 `fetch()` calls from an inline script and contains no `<img>`
+// elements, so `Page.loadEventFired` - the only completion signal chrome-har-capturer waits
+// for - lands while every image is still outstanding. Requests that have not produced a
+// `Network.loadingFinished` by the time capture stops are dropped from the HAR rather than
+// recorded as failures, so capture has to stay open until the page reports its own
+// completion and the network has drained.
+const CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_CAPTURE_TIMEOUT) || 45000
+const CAPTURE_POLL_INTERVAL_MS = 250
+
+// The fixture sets this element's text from the `.then()` of its `Promise.all` over all
+// 1000 fetches, which is the page's own "everything arrived" signal.
+const PAGE_COMPLETE_EXPRESSION = `!!document.querySelector('#seconds-counter')?.innerText`
+
+const createHarCaptureHooks = () => {
+  const inFlight = new Set()
+  let requestsStarted = 0
+
+  const onCdpEvent = ({ method, params }) => {
+    switch (method) {
+      case 'Network.requestWillBeSent':
+        // chrome-har-capturer does not create an entry for a data URI, so neither do we
+        if (params.request.url.startsWith('data:')) return
+
+        requestsStarted++
+        inFlight.add(params.requestId)
+        break
+      case 'Network.loadingFinished':
+      case 'Network.loadingFailed':
+        inFlight.delete(params.requestId)
+        break
+      default:
+    }
+  }
+
+  return {
+    // `preHook` runs before the page is navigated, so counting starts with the document
+    // request; by the time `postHook` runs the fetches are already in flight.
+    trackNetworkActivity: (cdp) => {
+      cdp.on('event', onCdpEvent)
+    },
+    waitForPageToFinish: async (cdp) => {
+      const deadline = Date.now() + CAPTURE_TIMEOUT_MS
+      let pageReportedComplete = false
+
+      while (true) {
+        if (!pageReportedComplete) {
+          const { result } = await cdp.Runtime.evaluate({ expression: PAGE_COMPLETE_EXPRESSION })
+
+          pageReportedComplete = result.value === true
+        }
+
+        if (pageReportedComplete && !inFlight.size) break
+
+        if (Date.now() > deadline) {
+          throw new Error(`Timed out after ${CAPTURE_TIMEOUT_MS}ms waiting for the page to finish loading. ${requestsStarted} requests started, ${inFlight.size} still in flight, page ${pageReportedComplete ? 'did' : 'did not'} report completion.`)
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, CAPTURE_POLL_INTERVAL_MS))
+      }
+
+      // chrome-har-capturer surfaces whatever `postHook` returns as `log.pages[0]._user`
+      return { requestsStarted }
+    },
+  }
+}
+
 const average = (arr) => {
   return _.sum(arr) / arr.length
 }
@@ -187,6 +255,16 @@ const getResultsFromHar = (har) => {
   // HAR 1.2 Spec: http://www.softwareishard.com/blog/har-12-spec/
   const { entries } = har.log
   const results = {}
+
+  const requestsStarted = _.get(har, 'log.pages[0]._user.requestsStarted')
+  const diagnosis = requestsStarted >= EXPECTED_IMAGE_COUNT
+    ? 'capture ended while requests were still in flight - an entry with no `Network.loadingFinished` is dropped from the HAR, not recorded as a failure'
+    : 'the page did not start the expected number of requests'
+
+  expect(
+    entries.length,
+    `${requestsStarted} requests started, ${entries.length} recorded in the HAR - ${diagnosis}`,
+  ).to.be.at.least(EXPECTED_IMAGE_COUNT)
 
   const first = entries[0]
   const last = entries[entries.length - 1]
@@ -235,8 +313,6 @@ const getResultsFromHar = (har) => {
   }
 
   results['Min'] = mins.total
-
-  expect(timings.total.length).to.be.at.least(1000)
 
   ;[1, 5, 25, 50, 75, 95, 99, 99.7].forEach((p) => {
     results[`${p}% <=`] = percentile(timings.total, p)
@@ -320,6 +396,8 @@ const runBrowserTest = (urlUnderTest, testCase) => {
     return Promise.delay(500).then(() => {
       debug('Trying to connect to Chrome...')
 
+      const captureHooks = createHarCaptureHooks()
+
       const harCapturer = HarCapturer.run([
         urlUnderTest,
       ], {
@@ -328,6 +406,8 @@ const runBrowserTest = (urlUnderTest, testCase) => {
         // https://github.com/cyrus-and/chrome-har-capturer/blob/587550508bddc23b7f4b4328c158322be4749298/bin/cli.js#L60
         preHook: (_, cdp) => {
           const { Security } = cdp
+
+          captureHooks.trackNetworkActivity(cdp)
 
           return Security.enable().then(() => {
             return Security.setOverrideCertificateErrors({ override: true })
@@ -340,20 +420,10 @@ const runBrowserTest = (urlUnderTest, testCase) => {
             })
           })
         },
-        // wait til all data is done before finishing
+        // capture stays open past the load event until every request has settled
         // https://github.com/cyrus-and/chrome-har-capturer/issues/59
         postHook: (_, cdp) => {
-          let timeout
-
-          return new Promise((resolve) => {
-            cdp.on('event', (message) => {
-              if (message.method === 'Network.dataReceived') {
-                // reset timer
-                clearTimeout(timeout)
-                timeout = setTimeout(resolve, 1000)
-              }
-            })
-          })
+          return captureHooks.waitForPageToFinish(cdp)
         },
       })
 
@@ -389,7 +459,8 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 let cyServer
 
 describe('Proxy Performance', function () {
-  this.timeout(60 * 1000)
+  // a retried test re-measures the baseline, so this has to cover two full captures
+  this.timeout(2 * CAPTURE_TIMEOUT_MS + (30 * 1000))
   this.retries(3)
 
   beforeEach(function () {
