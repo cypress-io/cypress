@@ -7,7 +7,7 @@ import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
-import { beginTapTrace, noteTapCommand, noteTapFailure, recordTapEvent } from '../tap/events'
+import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../tap/events'
 import { renderOptionsFor } from '../tap/render'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
 import { TAP_COMMANDS, TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
@@ -20,27 +20,27 @@ const debug = Debug('cypress:cli:tap')
 const INVALID_USAGE = 'INVALID_USAGE'
 const UNHANDLED = 'UNHANDLED'
 
-const knownCommands = new Set<string>([
-  ...tapCliCommands.map(({ name }) => name),
-  ...TAP_COMMANDS.map(({ name }) => name),
-])
+const allTapCommands = [...tapCliCommands, ...TAP_COMMANDS]
+
+const knownCommands = new Set<string>(allTapCommands.map(({ name }) => name))
 
 // A name this CLI does not know is whatever the user typed, so it is reported
 // as unknown rather than sent verbatim.
-const reportedCommand = (command: string | undefined): string => {
+const reportedCommand = (command: string | undefined): string | undefined => {
   if (!command) {
-    return 'none'
+    return undefined
   }
 
   return knownCommands.has(command) ? command : 'unknown'
 }
 
-const declaredOptions: readonly TapCommandOptionSchema[] = [...tapCliCommands, ...TAP_COMMANDS].flatMap(({ name, options = [] }) => {
+const declaredOptions: readonly TapCommandOptionSchema[] = allTapCommands.flatMap(({ name, options = [] }) => {
   return [...options, ...renderOptionsFor(name)]
 })
 
 // Both spellings of every option resolve to the canonical name, so `-b` and
-// `--browser` report as one flag.
+// `--browser` report as one flag. The names seeded here belong to `cypress tap`
+// itself rather than to any command, so `declaredOptions` does not carry them.
 const knownFlags = new Map<string, string>([
   ...['instance', 'json', 'timeout', 'help'].map((name): [string, string] => [name, name]),
   ['h', 'help'],
@@ -56,7 +56,9 @@ const reportedFlags = (operands: string[], options: TapCliOptions): string[] => 
   .filter((operand) => operand.startsWith('-'))
   .map((operand) => knownFlags.get(operand.replace(/^-+/, '').split('=')[0]) ?? 'unknown')
 
-  const topLevel = Object.entries(options).filter(([, value]) => value !== undefined).map(([name]) => name)
+  const topLevel = Object.entries(options)
+  .filter(([name, value]) => value !== undefined && knownFlags.has(name))
+  .map(([name]) => name)
 
   return [...new Set([...named, ...topLevel])]
 }
@@ -223,12 +225,11 @@ const tapModule = {
     debug('tap invocation %o with options %o', operands, options)
 
     const info = buildCommandInfo(operands)
-    const startedAt = Date.now()
     let exitCode = 1
 
     beginTapTrace(reportedCommand(info.command), reportedFlags(operands, options))
 
-    // The CLI exits the moment this returns, so the event is reported before it
+    // The CLI exits the moment this returns, so the trace is reported before it
     // does rather than left in flight.
     try {
       exitCode = await runTap(info, options)
@@ -239,7 +240,7 @@ const tapModule = {
 
       throw err
     } finally {
-      await recordTapEvent(exitCode, Date.now() - startedAt)
+      await reportTapTrace(exitCode)
     }
   },
 }

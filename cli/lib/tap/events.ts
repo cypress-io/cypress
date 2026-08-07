@@ -26,42 +26,57 @@ const eventCollectorUrl = (includeMachineId = false): string => {
   return `${cloudUrl}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
 }
 
-const messageId = randomUUID()
+// What the invocation turned out to be, accumulated as it runs. `beginTapTrace`
+// opens one the moment the CLI knows what was typed, the `note` calls refine it
+// as the command resolves and fails, and `reportTapTrace` posts it once, just
+// before the process exits.
+interface TapTrace {
+  messageId: string
+  startedAt: number
+  command: string
+  flags: string[]
+  errorCode?: string
+}
 
-let command = 'none'
-let flags: string[] = []
-let errorCode: string | undefined
+const newTrace = (command = 'none', flags: string[] = []): TapTrace => ({
+  messageId: randomUUID(),
+  startedAt: Date.now(),
+  command,
+  flags,
+})
 
-export const beginTapTrace = (invoked: string, invokedFlags: string[]): void => {
-  command = invoked
-  flags = invokedFlags
-  errorCode = undefined
+let trace = newTrace()
+
+export const beginTapTrace = (command: string | undefined, flags: string[]): void => {
+  trace = newTrace(command, flags)
 }
 
 export const noteTapCommand = (dispatched: string): void => {
-  command = dispatched
+  trace.command = dispatched
 }
 
 export const noteTapFailure = (code: string): void => {
-  errorCode = code
+  trace.errorCode = code
 }
 
 // Tap error messages interpolate selectors, spec paths and project roots, and so
-// do option values, so the payload is a fixed field list of names and codes.
-export const recordTapEvent = async (exitCode: number, durationMs: number): Promise<void> => {
+// do option values, so the payload is a fixed field list of names and codes —
+// spelled out here rather than spread from the trace, so a new trace field
+// cannot silently become a new wire field.
+export const reportTapTrace = async (exitCode: number): Promise<void> => {
   if (process.env.CYPRESS_CRASH_REPORTS === '0') {
     return
   }
 
   const cypressVersion = util.pkgVersion()
   const payload = {
-    command,
-    flags,
+    command: trace.command,
+    flags: trace.flags,
     agent: detectAgent(),
     instanceId: resolvedInstanceId() ?? undefined,
     exitCode,
-    errorCode,
-    durationMs,
+    errorCode: trace.errorCode,
+    durationMs: Date.now() - trace.startedAt,
     cypressVersion,
   }
 
@@ -72,7 +87,7 @@ export const recordTapEvent = async (exitCode: number, durationMs: number): Prom
         'Content-Type': 'application/json',
         'x-cypress-version': cypressVersion,
       },
-      body: JSON.stringify({ campaign: CAMPAIGN, medium: MEDIUM, messageId, payload }),
+      body: JSON.stringify({ campaign: CAMPAIGN, medium: MEDIUM, messageId: trace.messageId, payload }),
       signal: AbortSignal.timeout(POST_TIMEOUT_MS),
     })
 

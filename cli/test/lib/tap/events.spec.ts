@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { beginTapTrace, noteTapFailure, recordTapEvent } from '../../../lib/tap/events'
+import { beginTapTrace, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
 import { resolvedInstanceId } from '../../../lib/cypress-instances'
 import { detectAgent } from '@packages/agent-info'
 
@@ -30,6 +30,7 @@ const posted = (fetchMock: ReturnType<typeof vi.fn>) => {
 
 describe('lib/tap/events', () => {
   const fetchMock = vi.fn()
+  const dateNow = vi.spyOn(Date, 'now')
   const originalEnv = { ...process.env }
 
   beforeEach(() => {
@@ -40,6 +41,7 @@ describe('lib/tap/events', () => {
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     vi.mocked(resolvedInstanceId).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
+    dateNow.mockReturnValue(1_000)
     beginTapTrace('status', ['json'])
   })
 
@@ -48,7 +50,9 @@ describe('lib/tap/events', () => {
   })
 
   it('posts an anonymous event describing the invocation', async () => {
-    await recordTapEvent(0, 42)
+    dateNow.mockReturnValue(1_042)
+
+    await reportTapTrace(0)
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
 
@@ -76,13 +80,13 @@ describe('lib/tap/events', () => {
   it('carries the id of the instance the command resolved', async () => {
     vi.mocked(resolvedInstanceId).mockReturnValue('a1b2c3d4-0000-4000-8000-000000000000')
 
-    await recordTapEvent(0, 1)
+    await reportTapTrace(0)
 
     expect(posted(fetchMock).payload).toMatchObject({ instanceId: 'a1b2c3d4-0000-4000-8000-000000000000' })
   })
 
   it('omits the instance id when the command never resolved one', async () => {
-    await recordTapEvent(1, 1)
+    await reportTapTrace(1)
 
     expect(posted(fetchMock).payload).not.toHaveProperty('instanceId')
   })
@@ -90,13 +94,13 @@ describe('lib/tap/events', () => {
   it('carries the agent that invoked the command', async () => {
     vi.mocked(detectAgent).mockReturnValue('claude')
 
-    await recordTapEvent(0, 1)
+    await reportTapTrace(0)
 
     expect(posted(fetchMock).payload).toMatchObject({ agent: 'claude' })
   })
 
   it('omits the agent when the environment names none', async () => {
-    await recordTapEvent(0, 1)
+    await reportTapTrace(0)
 
     expect(posted(fetchMock).payload).not.toHaveProperty('agent')
   })
@@ -104,14 +108,14 @@ describe('lib/tap/events', () => {
   it('carries the noted failure code', async () => {
     noteTapFailure('NO_INSTANCE')
 
-    await recordTapEvent(1, 7)
+    await reportTapTrace(1)
 
     expect(posted(fetchMock).payload).toMatchObject({ exitCode: 1, errorCode: 'NO_INSTANCE' })
   })
 
   it('reuses one message id across the events of an invocation', async () => {
-    await recordTapEvent(0, 1)
-    await recordTapEvent(0, 2)
+    await reportTapTrace(0)
+    await reportTapTrace(0)
 
     const [first, second] = fetchMock.mock.calls.map(([, request]: any) => JSON.parse(request.body))
 
@@ -122,16 +126,34 @@ describe('lib/tap/events', () => {
     noteTapFailure('NO_INSTANCE')
     beginTapTrace('specs', [])
 
-    await recordTapEvent(0, 1)
+    await reportTapTrace(0)
 
     expect(posted(fetchMock).payload).toMatchObject({ command: 'specs' })
     expect(posted(fetchMock).payload).not.toHaveProperty('errorCode')
   })
 
+  it('mints a message id per trace', async () => {
+    await reportTapTrace(0)
+    beginTapTrace('specs', [])
+    await reportTapTrace(0)
+
+    const [first, second] = fetchMock.mock.calls.map(([, request]: any) => JSON.parse(request.body))
+
+    expect(first.messageId).not.toBe(second.messageId)
+  })
+
+  it('reports the command as none until a trace names one', async () => {
+    beginTapTrace(undefined, ['help'])
+
+    await reportTapTrace(0)
+
+    expect(posted(fetchMock).payload).toMatchObject({ command: 'none', flags: ['help'] })
+  })
+
   it('reports to the collector environment the app uses', async () => {
     process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'development'
 
-    await recordTapEvent(0, 1)
+    await reportTapTrace(0)
 
     expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/anon-collect')
   })
@@ -139,7 +161,7 @@ describe('lib/tap/events', () => {
   it('falls back to production for an unrecognized collector environment', async () => {
     process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'nonsense'
 
-    await recordTapEvent(0, 1)
+    await reportTapTrace(0)
 
     expect(fetchMock.mock.calls[0][0]).toBe('https://cloud.cypress.io/anon-collect')
   })
@@ -147,7 +169,7 @@ describe('lib/tap/events', () => {
   it('sends nothing when crash reports are turned off', async () => {
     process.env.CYPRESS_CRASH_REPORTS = '0'
 
-    await recordTapEvent(1, 1)
+    await reportTapTrace(1)
 
     expect(fetchMock).not.toHaveBeenCalled()
   })
@@ -155,6 +177,6 @@ describe('lib/tap/events', () => {
   it('stays silent when the collector cannot be reached', async () => {
     fetchMock.mockRejectedValue(new Error('socket hang up'))
 
-    await expect(recordTapEvent(0, 1)).resolves.toBeUndefined()
+    await expect(reportTapTrace(0)).resolves.toBeUndefined()
   })
 })
