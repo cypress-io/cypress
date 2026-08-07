@@ -1164,7 +1164,7 @@ describe('lib/exec/tap', () => {
 
     it('rejects `inspect` with no selector, without reading the frame', async () => {
       expect(await tap.start(['inspect'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`required option '--selector <selector>' not specified`)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`required option '-s, --selector <selector>' not specified`)
       expect(withResolvedAutFrame).not.toHaveBeenCalled()
     })
 
@@ -1253,7 +1253,7 @@ describe('lib/exec/tap', () => {
         Interacts with a running Cypress instance
 
         Options:
-          --instance <pid>      target a specific running Cypress instance by its
+          -i, --instance <pid>  target a specific running Cypress instance by its
                                 server process id (pid)
           --json                print the raw JSON result instead of the human-readable
                                 rendering
@@ -1312,26 +1312,27 @@ describe('lib/exec/tap', () => {
         detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties
 
         Options:
-          --testId <testId>        test id, as listed by the reporter command
-          --commandId <commandId>  command id, as listed by the reporter command — a
-                                   row number (test body first when duplicated), an
-                                   e-prefixed event id, or hook-qualified like "h1:3"
-          --attempt <attempt>      1-based attempt (attempt 1 = first run); defaults to
-                                   the latest
-          --depth <depth>          how many levels of nested console properties to
-                                   expand before summarizing the rest as "{n keys}" /
-                                   "[n items]": a number or "all" (default 3, and a
-                                   section over 8 rows folds at any depth unless this
-                                   is passed)
-          --instance <pid>         target a specific running Cypress instance by its
-                                   server process id (pid)
-          --json                   print the raw JSON result instead of the
-                                   human-readable rendering — every console property in
-                                   full, however long, rather than the long ones named
-                                   by their length
-          --timeout <ms>           how long to wait on any single call into the running
-                                   Cypress, in milliseconds (default 30000)
-          -h, --help               display help for command
+          -t, --testId <testId>        test id, as listed by the reporter command
+          -c, --commandId <commandId>  command id, as listed by the reporter command —
+                                       a row number (test body first when duplicated),
+                                       an e-prefixed event id, or hook-qualified like
+                                       "h1:3"
+          -a, --attempt <attempt>      1-based attempt (attempt 1 = first run);
+                                       defaults to the latest
+          -d, --depth <depth>          how many levels of nested console properties to
+                                       expand before summarizing the rest as "{n keys}"
+                                       / "[n items]": a number or "all" (default 3, and
+                                       a section over 8 rows folds at any depth unless
+                                       this is passed)
+          -i, --instance <pid>         target a specific running Cypress instance by
+                                       its server process id (pid)
+          --json                       print the raw JSON result instead of the
+                                       human-readable rendering — every console
+                                       property in full, however long, rather than the
+                                       long ones named by their length
+          --timeout <ms>               how long to wait on any single call into the
+                                       running Cypress, in milliseconds (default 30000)
+          -h, --help                   display help for command
         "
       `)
     })

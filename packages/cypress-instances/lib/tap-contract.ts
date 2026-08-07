@@ -17,6 +17,10 @@ export interface TapCommandParamSchema {
 
 export interface TapCommandOptionSchema {
   name: string
+  // A single letter, rendered by the CLI as `-t, --testId <testId>`. Commander
+  // accepts a letter claimed twice within one command and silently lets the last
+  // declaration win, so an alias must be unique across the command's own options,
+  // the CLI's view-only ones, and the `--instance` every command shares.
   alias?: string
   type: 'string' | 'number' | 'boolean'
   required: boolean
@@ -85,10 +89,10 @@ export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
 // `commandId` are required in some commands and optional in others, so each use
 // spreads it and sets `required`; the rest are identical everywhere and used
 // directly.
-const testIdField = { name: 'testId', type: 'string', description: 'test id, as listed by the reporter command' } as const
-const commandIdField = { name: 'commandId', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
-const attemptField = { name: 'attempt', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
-const selectorField = { name: 'selector', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' } as const
+const testIdField = { name: 'testId', alias: 't', type: 'string', description: 'test id, as listed by the reporter command' } as const
+const commandIdField = { name: 'commandId', alias: 'c', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
+const attemptField = { name: 'attempt', alias: 'a', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
+const selectorField = { name: 'selector', alias: 's', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' } as const
 
 const commandMeta = {
   name: 'command',
@@ -277,7 +281,7 @@ ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
     { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR}; omit to read the whole document` },
-    { name: 'max-chars', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' },
+    { name: 'max-chars', alias: 'm', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' },
     atField,
   ],
 } as const satisfies TapNativeCommandSchema
@@ -293,7 +297,7 @@ ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
     { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at; omit for the whole frame` },
-    { name: 'max-nodes', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' },
+    { name: 'max-nodes', alias: 'm', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' },
     atField,
   ],
 } as const satisfies TapNativeCommandSchema

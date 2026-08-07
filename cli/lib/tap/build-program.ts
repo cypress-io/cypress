@@ -27,6 +27,17 @@ const argumentDescriptions = (params: readonly TapCommandParamSchema[]): Record<
 
 const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readable rendering'
 
+// Every tap command accepts `--instance`, `--json` and `--timeout`; all are
+// consumed by the top-level `cypress tap` command before a subprogram parses, so
+// declaring them on a command is purely so they render in its generated help.
+// `--timeout` keeps no alias: `-t` is worth more to `--testId`, which is typed
+// far more often, and the shared flags have to spell the same on every command.
+const declareSharedOptions = (command: commander.Command, jsonDescription: string): void => {
+  command.option('-i, --instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
+  command.option('--json', jsonDescription)
+  command.option('--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)')
+}
+
 const declareOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): void => {
   // A command that declares `--json` in its schema does so to receive it, not to
   // add a second flag — it is declared below with the ones every command shares,
@@ -44,12 +55,7 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
     }
   }
 
-  // Every tap command accepts `--instance`, `--json` and `--timeout`; all are
-  // consumed by the top-level `cypress tap` command before a subprogram parses,
-  // so declaring them here is purely so they render in each command's generated help.
-  command.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
-  command.option('--json', json?.description ?? JSON_DESCRIPTION)
-  command.option('--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)')
+  declareSharedOptions(command, json?.description ?? JSON_DESCRIPTION)
 }
 
 const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly string[]): Record<string, string> => {
@@ -145,9 +151,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
   // before this program runs, so they never reach here — declared only so help
   // lists them. The outer command disables its own help, making this the sole
   // place they surface.
-  program.option('--instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
-  program.option('--json', JSON_DESCRIPTION)
-  program.option('--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)')
+  declareSharedOptions(program, JSON_DESCRIPTION)
 
   for (const native of tapCliCommands) {
     declareCommand(program, native)
