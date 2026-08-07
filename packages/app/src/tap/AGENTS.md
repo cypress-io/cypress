@@ -28,9 +28,14 @@ Rules:
   failure code — MUST be asserted in `tap-binding.cy.ts` against the real binding,
   with no stubbing or mocking of the runner seam.** This is the only layer that
   proves the coupling to Cypress internals (`getEventManager`, `getCypress().runner`,
-  `getAllTestsState`, `eventManager.runComplete`, and the
+  `getAllTestStates`, `getAllTestsSummary`, `eventManager.runComplete`, and the
   runtime `SerializedTest` shape) still holds. Those internals are not ours; only an
   unmocked end-to-end run catches them drifting.
+- The runner seam deliberately withholds the driver's `getAllTestsState`: it
+  serializes every command log of every test, which costs tens of seconds on a real
+  spec and blocks the renderer for all of it. Read states through
+  `getAllTestStates` and per-test properties through `getAllTestsSummary`; only a
+  single-test view (`getTestState`) may pay for logs, because it renders them.
 - Adding or changing a subcommand is not done until its happy path **and** its
   domain-failure codes are covered by real `exec(...)` calls in that spec.
 - Assert the **exact** key set of every result (e.g. `expect(Object.keys(entry)).to.deep.eq([...])`),
