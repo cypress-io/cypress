@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { beginTapTrace, noteTapFailure, recordTapEvent } from '../../../lib/tap/events'
 import { resolvedInstanceId } from '../../../lib/cypress-instances'
+import { detectAgent } from '@packages/agent-info'
 
 vi.mock('../../../lib/cypress-instances', async (importActual) => {
   const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
@@ -9,6 +10,17 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
   return {
     ...actual,
     resolvedInstanceId: vi.fn().mockReturnValue(null),
+  }
+})
+
+// These tests are themselves usually run by an agent, so detection is stubbed rather
+// than driven through process.env — the payload must not depend on who ran the suite.
+vi.mock('@packages/agent-info', async (importActual) => {
+  const actual = await importActual<typeof import('@packages/agent-info')>()
+
+  return {
+    ...actual,
+    detectAgent: vi.fn().mockReturnValue(undefined),
   }
 })
 
@@ -27,6 +39,7 @@ describe('lib/tap/events', () => {
     delete process.env.CYPRESS_CRASH_REPORTS
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     vi.mocked(resolvedInstanceId).mockReturnValue(null)
+    vi.mocked(detectAgent).mockReturnValue(undefined)
     beginTapTrace('status', ['json'])
   })
 
@@ -72,6 +85,20 @@ describe('lib/tap/events', () => {
     await recordTapEvent(1, 1)
 
     expect(posted(fetchMock).payload).not.toHaveProperty('instanceId')
+  })
+
+  it('carries the agent that invoked the command', async () => {
+    vi.mocked(detectAgent).mockReturnValue('claude')
+
+    await recordTapEvent(0, 1)
+
+    expect(posted(fetchMock).payload).toMatchObject({ agent: 'claude' })
+  })
+
+  it('omits the agent when the environment names none', async () => {
+    await recordTapEvent(0, 1)
+
+    expect(posted(fetchMock).payload).not.toHaveProperty('agent')
   })
 
   it('carries the noted failure code', async () => {

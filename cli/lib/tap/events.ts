@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 
 import util from '../util'
 import { resolvedInstanceId } from '../cypress-instances'
+import { detectAgent } from '@packages/agent-info'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -56,6 +57,7 @@ export const recordTapEvent = async (exitCode: number, durationMs: number): Prom
   const payload = {
     command,
     flags,
+    agent: detectAgent(),
     instanceId: resolvedInstanceId() ?? undefined,
     exitCode,
     errorCode,
