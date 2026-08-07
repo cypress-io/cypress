@@ -419,6 +419,11 @@ describe('lib/cloud/api', () => {
 
     describe('errors', () => {
       it('[F1] POST /preflight TimeoutError', () => {
+        // Unlike its siblings this exercises `api` rather than `prodApi`, so drop the
+        // production override the surrounding beforeEach sets. The parent afterEach
+        // restores it.
+        delete process.env.CYPRESS_CONFIG_ENV
+
         preflightNock(API_BASEURL)
         .times(2)
         .delayConnection(5000)

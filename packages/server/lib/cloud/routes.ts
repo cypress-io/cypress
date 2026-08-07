@@ -3,7 +3,15 @@ import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
 
-export const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
+/**
+ * Read on each call rather than at module scope. This module is only kept out of the V8
+ * snapshot by its place in the generated deferred list, which is rebuilt from scratch
+ * whenever yarn.lock changes; a module-level value would freeze into the binary as
+ * `development` the moment that classification shifts.
+ */
+export const getApiUrl = (): string => {
+  return app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
+}
 
 const CLOUD_ENDPOINTS = {
   api: '',
@@ -42,10 +50,10 @@ const parseArgs = function (url, args: any[] = []) {
   return url
 }
 
-const _makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
+const _makeRoutes = (baseUrl: string | (() => string), routes: typeof CLOUD_ENDPOINTS) => {
   return _.reduce(routes, (memo, value, key) => {
     memo[key] = function (...args: any[]) {
-      let url = new UrlParse(baseUrl, true)
+      let url = new UrlParse(typeof baseUrl === 'function' ? baseUrl() : baseUrl, true)
 
       if (value) {
         url.set('pathname', value)
@@ -62,6 +70,6 @@ const _makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-export const apiRoutes = _makeRoutes(apiUrl, CLOUD_ENDPOINTS)
+export const apiRoutes = _makeRoutes(getApiUrl, CLOUD_ENDPOINTS)
 
 export const makeRoutes = (baseUrl) => _makeRoutes(baseUrl, CLOUD_ENDPOINTS)

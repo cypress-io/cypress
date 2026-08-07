@@ -96,5 +96,21 @@ describe('lib/cloud/routes', () => {
 
       expect(routes().apiRoutes.api()).to.eq('https://api-staging.cypress.io/')
     })
+
+    // Deliberately reuses one already-loaded module. This module is only kept out of the
+    // V8 snapshot by the generated deferred list, so the url has to be resolved per call
+    // rather than when the module is first evaluated.
+    it('resolves per call rather than when the module is evaluated', () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'staging'
+
+      const loaded = routes()
+
+      expect(loaded.apiRoutes.api()).to.eq('https://api-staging.cypress.io/')
+
+      process.env.CYPRESS_INTERNAL_ENV = 'production'
+
+      expect(loaded.apiRoutes.api()).to.eq('https://api.cypress.io/')
+      expect(loaded.getApiUrl()).to.eq('https://api.cypress.io/')
+    })
   })
 })
