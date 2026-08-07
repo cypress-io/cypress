@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import { randomUUID } from 'crypto'
 
-import util from '../util'
+import util, { DEVELOPMENT_VERSION } from '../util'
 import { resolvedInstanceId } from '../cypress-instances'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
@@ -11,11 +11,6 @@ const debug = Debug('cypress:cli:tap')
 const CAMPAIGN = 'Tap Command'
 const MEDIUM = 'cli'
 const POST_TIMEOUT_MS = 2000
-
-// The version a source checkout reports, which publishing replaces with the
-// released one. Nothing else tells the CLI it is running from the repo: gulp
-// hands the app a collector environment, but nothing launches the CLI.
-const DEVELOPMENT_VERSION = '0.0.0-development'
 
 // The same map the app reads through @packages/data-context; the CLI cannot reach
 // that package, so the three URLs are duplicated here.
