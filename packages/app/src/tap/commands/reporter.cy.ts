@@ -305,7 +305,7 @@ describe('tap/commands/reporter', () => {
 
     const treeRunner = (overrides: Record<string, unknown> = {}) => {
       return {
-        getAllTestsState: () => TREE_STATE,
+        getAllTestsSummary: () => TREE_STATE,
         isRunComplete: () => false,
         getStartTime: () => null,
         ...overrides,
@@ -397,7 +397,7 @@ describe('tap/commands/reporter', () => {
       stubRunner(treeRunner({
         isRunComplete: () => true,
         getStartTime: () => '2026-01-01T00:00:00.000Z',
-        getAllTestsState: () => {
+        getAllTestsSummary: () => {
           return {
             t1: { ...TREE_STATE.t1, wallClockStartedAt: '2026-01-01T00:00:05.000Z', wallClockDuration: 1000 },
             t2: { ...TREE_STATE.t2, wallClockStartedAt: '2026-01-01T00:00:10.000Z', wallClockDuration: 400 },

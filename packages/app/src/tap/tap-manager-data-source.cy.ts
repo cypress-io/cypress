@@ -23,6 +23,8 @@ describe('tap/tap-manager-data-source', () => {
 
     const startedRunner = {
       getAllTestsState: () => ({}),
+      getAllTestStates: () => ({}),
+      getAllTestsSummary: () => ({}),
       getTestState: () => undefined,
       getStartTime: () => '2026-07-29T10:15:00.000Z',
     }
@@ -31,6 +33,13 @@ describe('tap/tap-manager-data-source', () => {
       installRunner(startedRunner, false)
 
       expect(tapManagerDataSource.getRunner()?.getStartTime()).to.eq('2026-07-29T10:15:00.000Z')
+    })
+
+    it('withholds the whole-run serializing accessor', () => {
+      installRunner(startedRunner, false)
+
+      expect(startedRunner).to.have.property('getAllTestsState')
+      expect(tapManagerDataSource.getRunner()).not.to.have.property('getAllTestsState')
     })
 
     it('withholds a runner whose spec is installed but whose run has not started, however the event manager reports completion', () => {

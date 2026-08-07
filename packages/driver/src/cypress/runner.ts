@@ -1950,6 +1950,32 @@ export default {
         return tests
       },
 
+      getAllTestStates (): Record<string, SerializedTest['state']> {
+        const states: Record<string, SerializedTest['state']> = {}
+
+        for (let testRunnable of _tests) {
+          states[testRunnable.id] = testRunnable.state
+        }
+
+        return states
+      },
+
+      getAllTestsSummary (): Record<string, SerializedTest> {
+        const tests: Record<string, SerializedTest> = {}
+
+        for (let testRunnable of _tests) {
+          const test = wrap(testRunnable) as SerializedTest
+
+          test._titlePath = testRunnable.titlePath()
+
+          test.prevAttempts = _.map(testRunnable.prevAttempts, wrap) as SerializedTest[]
+
+          tests[test.id] = test
+        }
+
+        return tests
+      },
+
       getTestState (testId: string): SerializedTest | undefined {
         const testRunnable = getTestById(testId)
 

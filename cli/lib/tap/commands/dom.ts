@@ -1,6 +1,7 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { FrameCommandError, parseIndex, parsePositiveInt, withResolvedAutFrame } from '../aut/frame'
+import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
+import { parseIndex, parsePositiveInt } from '../utils'
 import { createFrameIsolatedWorld } from '../aut/cdp'
 import { withAmbiguous } from '../aut/single-match'
 import type { FrameAmbiguousResult } from '../aut/single-match'
