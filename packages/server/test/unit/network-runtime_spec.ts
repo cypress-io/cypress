@@ -779,6 +779,60 @@ describe('lib/network-runtime', () => {
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
   })
 
+  it('createCdpFetchRuntime attachExtraTarget transports redirect strategy:file URLs like the main transport', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    const runtime = createCdpFetchRuntime({ ...deps, client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+
+    const onRequestPaused = (event: Protocol.Fetch.RequestPausedEvent) => {
+      return Promise.all(extraClient.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
+        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent) => void)(event)
+      }))
+    }
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'popup-file-request',
+      networkId: 'network-popup-1',
+      url: 'http://localhost:2020/cypress/fixtures/popup.html',
+    }))
+
+    await flush()
+
+    // Popup file traffic reaches Express either way — released untouched so
+    // the pipeline runs once there, not on the CDP side first.
+    const continueCall = extraClient.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(continueCall!.args[1].url).to.eq('http://localhost:2020/cypress/fixtures/popup.html')
+    expect(continueCall!.args[1].headers.map((h: { name: string }) => h.name))
+    .to.include('x-cypress-internal-loopback-token')
+
+    await runtime.stop()
+  })
+
   it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {
     const mainClient = {
       send: sinon.stub().resolves({}),
