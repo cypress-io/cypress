@@ -38,13 +38,14 @@ describe('lib/network-runtime', () => {
     requestId: string
     networkId?: string
     url?: string
+    resourceType?: Protocol.Network.ResourceType
     responseStatusCode?: number
   }): Protocol.Fetch.RequestPausedEvent {
     return {
       requestId: options.requestId,
       networkId: options.networkId,
       frameId: 'frame-1',
-      resourceType: 'Document',
+      resourceType: options.resourceType ?? 'Document',
       request: {
         url: options.url ?? 'https://example.test/',
         method: 'GET',
@@ -389,6 +390,65 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+  })
+
+  it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      // Exercise the correlation fallback path: no pre-request arrives, so the
+      // transport-normalized resourceType must survive onto req.
+      shouldCorrelatePreRequests: () => true,
+    })
+    const seenResourceTypes: Array<string | undefined> = []
+
+    // Registered after the legacy pipeline (which runs CorrelateBrowserPreRequest),
+    // so this observes req.resourceType post-fallback rather than pre-middleware.
+    runtime.networkInterception.use((req, next) => {
+      seenResourceTypes.push(req.resourceType)
+
+      return next(req)
+    })
+
+    // Resolve correlation immediately with no browserPreRequest so the
+    // transport value is the only source of resourceType.
+    sinon.stub(runtime.networkProxy.http.preRequests, 'get').callsFake((_req, _debug, cb) => {
+      cb({ browserPreRequest: undefined })
+
+      return undefined
+    })
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'fetch-xhr',
+      networkId: 'network-xhr',
+      resourceType: 'XHR',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'fetch-xhr',
+      networkId: 'network-xhr',
+      resourceType: 'XHR',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+    await handled
+
+    expect(seenResourceTypes).to.include('xhr')
   })
 
   it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {

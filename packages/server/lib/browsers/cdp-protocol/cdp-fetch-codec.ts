@@ -155,6 +155,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         method: transportRequest.method,
         headers: transportRequest.headers,
         body: transportRequest.postData,
+        resourceType: transportRequest.resourceType,
       }
     },
 
