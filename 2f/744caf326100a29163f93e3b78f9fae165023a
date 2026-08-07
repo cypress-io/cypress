@@ -1,0 +1,19 @@
+packages/server/test/performance/proxy_performance_spec.js
+  s_6702cd18ea31f4::t_9b4e61438c857f 214-218,222-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2f744caf326100a29163f93e3b78f9fae165023a",
+  "prompts": {},
+  "sessions": {
+    "s_6702cd18ea31f4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "705fe1b1-a18e-464a-b1b7-d2e92d2f0ea6",
+        "model": "default"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
