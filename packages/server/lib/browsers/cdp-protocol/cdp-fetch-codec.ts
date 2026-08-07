@@ -92,6 +92,28 @@ function stripHeaderEntries (headers: Protocol.Fetch.HeaderEntry[], names: Reado
   return headers.filter(({ name }) => !names.has(name.toLowerCase()))
 }
 
+function pickHeaderEntries (headers: Protocol.Fetch.HeaderEntry[], names: ReadonlySet<string>): Protocol.Fetch.HeaderEntry[] {
+  return headers.filter(({ name }) => names.has(name.toLowerCase()))
+}
+
+function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protocol.Fetch.HeaderEntry[]): boolean {
+  // Compare case-insensitively on name and order-insensitively overall — CDP
+  // pause events and the middleware view can fold the same headers back in a
+  // different order and casing without that being a meaningful change.
+  const normalize = (entries: Protocol.Fetch.HeaderEntry[]) => {
+    return entries.map(({ name, value }) => `${name.toLowerCase()}: ${value}`).sort()
+  }
+
+  const leftNorm = normalize(left)
+  const rightNorm = normalize(right)
+
+  if (leftNorm.length !== rightNorm.length) {
+    return true
+  }
+
+  return leftNorm.some((entry, index) => entry !== rightNorm[index])
+}
+
 /**
  * Middleware headers describe the body the pipeline produced — including any
  * re-encoding by CompressBody — so keep their content-encoding and only drop
@@ -110,20 +132,29 @@ function toFulfilledHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetc
 
 /**
  * The browser replays the origin's own wire body on continueResponse, so the
- * pause's wire encoding headers are the ones that still describe it. Carry them
- * over the middleware view, which only ever saw the decoded body.
+ * pause's wire encoding headers still describe it and are carried over the
+ * middleware view, which only ever saw the decoded body. An unchanged set is
+ * omitted entirely so CDP keeps the browser's original headers rather than a
+ * lowercased, re-folded reconstruction — the same "don't override what you
+ * didn't touch" rule continueRequestHeaders applies at the request stage.
  */
 function toContinuedHeaders (headers?: HttpHeaders, pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   const middlewareHeaders = toResponseHeaders(headers)
 
   if (!middlewareHeaders) {
-    return pauseHeaders
+    return undefined
   }
 
-  return [
+  const continuedHeaders = [
     ...stripHeaderEntries(middlewareHeaders, WIRE_ENCODING_HEADERS),
-    ...(pauseHeaders?.filter(({ name }) => WIRE_ENCODING_HEADERS.has(name.toLowerCase())) ?? []),
+    ...pickHeaderEntries(pauseHeaders ?? [], WIRE_ENCODING_HEADERS),
   ]
+
+  if (!headerEntriesChanged(continuedHeaders, pauseHeaders ?? [])) {
+    return undefined
+  }
+
+  return continuedHeaders
 }
 
 function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {

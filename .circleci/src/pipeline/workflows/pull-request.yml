@@ -325,6 +325,7 @@ jobs:
       disable-proxy: true
       require-opt-in: false
       parallelism: 1
+      record-group-suffix: '-remediated'
       # #34467 continue unmodified CDP Fetch responses
       spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js
       requires:

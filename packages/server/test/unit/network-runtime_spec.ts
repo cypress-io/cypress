@@ -458,10 +458,9 @@ describe('lib/network-runtime', () => {
       responseCode: 200,
     })
 
-    expect(continueResponseCall!.args[1].responseHeaders).to.deep.include({
-      name: 'content-length',
-      value: String(assetBody.length),
-    })
+    // The pipeline left the headers alone, so the origin's own content-length
+    // survives by omitting responseHeaders rather than resending a copy of it.
+    expect(continueResponseCall!.args[1]).to.not.have.property('responseHeaders')
 
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').to.not.exist
   })
