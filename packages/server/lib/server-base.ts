@@ -767,7 +767,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this.socketAllowed.isRequestAllowed(req)) {
+      // Without the proxy, upgrades arrive on direct connections the CONNECT
+      // port allow-list never saw — a loopback remoteAddress is the only
+      // available gate (see #34513).
+      const isAllowed = isProxyDisabled()
+        ? this.socketAllowed.isRequestFromLocalhost(req)
+        : this.socketAllowed.isRequestAllowed(req)
+
+      if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }
