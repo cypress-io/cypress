@@ -209,6 +209,24 @@ describe('cli', () => {
 
       expect(result).toMatchSnapshot()
     })
+
+    // The patch above exits the process, which skips whatever the command still
+    // had to do. `tap` takes exitOverride() so it can report the invocation on
+    // its way out, and only a spawned binary loads the patch at all — the unit
+    // tests import lib/exec/tap directly and never see it.
+    it('leaves a command that took exitOverride to finish its own failure', async () => {
+      const options = {
+        env: { DEBUG: 'cypress:cli:tap' },
+        filter: ['code', 'stdout', 'stderr'],
+      }
+
+      const result = await execa('bin/cypress', ['tap', 'status', '--fake'], options)
+
+      expect(result).toContain('unknown option: --fake')
+      expect(result).toContain('code: 1')
+      // Only printed from the reporting that the exit would have skipped.
+      expect(result).toContain('skipped tap event')
+    })
   })
 
   describe('help command', () => {
