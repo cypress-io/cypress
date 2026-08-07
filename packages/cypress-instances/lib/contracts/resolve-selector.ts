@@ -2,6 +2,13 @@
 // lives here in `contracts/`, next to the command metadata in `../tap-contract`,
 // so the app-side command and the CLI-side rendering type against the same shape.
 
+// Deriving a unique selector walks up from the element testing each candidate
+// against the whole document, so deriving one per match for a selector as broad
+// as `*` would hold the app's main thread for the size of the page. Past this
+// many matches the list is no longer one a caller picks out of anyway — so the
+// app derives up to here, and the CLI numbers up to here.
+export const MAX_DERIVED_SELECTORS = 10
+
 /** A unique CSS selector for one of the elements a selector matched. */
 export interface ResolveSelectorMatch {
   /**

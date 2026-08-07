@@ -76,46 +76,6 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
   return { frameId: found.id }
 }
 
-const WHOLE_NUMBER = /^\d+$/
-
-const parseWholeNumber = (raw: unknown): number | undefined => {
-  if (typeof raw !== 'string' || !WHOLE_NUMBER.test(raw)) {
-    return undefined
-  }
-
-  const value = Number(raw)
-
-  return Number.isSafeInteger(value) ? value : undefined
-}
-
-export const parseIndex = (raw: string | undefined): number | undefined => {
-  if (raw === undefined) {
-    return undefined
-  }
-
-  const value = parseWholeNumber(raw)
-
-  if (value === undefined) {
-    throw new FrameCommandError('INVALID_INDEX', '--at must be a 0-based index: a whole number, 0 or greater')
-  }
-
-  return value
-}
-
-export const parsePositiveInt = (raw: string | undefined, fallback: number, label: string): number => {
-  if (raw === undefined) {
-    return fallback
-  }
-
-  const value = parseWholeNumber(raw)
-
-  if (value === undefined || value <= 0) {
-    throw new FrameCommandError('INVALID_LIMIT', `${label} must be a positive integer`)
-  }
-
-  return value
-}
-
 /**
  * Gates the AUT-frame reads on the same run lifecycle `status` reports. The
  * frame is only worth reading once a spec has settled: while a spec is running
