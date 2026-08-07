@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
 ## 15.20.0
@@ -19,7 +20,6 @@
 
 **Bugfixes:**
 
-- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed a regression in [15.18.1](#15-18-1) where action commands scrolled an already-visible element's container horizontally. The [`scrollBehavior`](https://docs.cypress.io/app/references/configuration#Actionability) values `'top'` and `'bottom'` revert to aligning only the vertical axis; use `'start'` or `'end'` to align both. Fixes [#34460](https://github.com/cypress-io/cypress/issues/34460).
 - Fixed a regression in [15.19.0](#15-19-0) where commands that read from the application under test, such as [`cy.url()`](https://on.cypress.io/url), [`cy.title()`](https://on.cypress.io/title) and [`cy.reload()`](https://on.cypress.io/reload), targeted the command log instead of your application when the application set `window.name`. Fixes [#34435](https://github.com/cypress-io/cypress/issues/34435).
 - Fixed an issue where a `cy.*` command error message that interpolated a value containing a `$` character could render incorrectly, with a leaked `{{...}}` placeholder or duplicated or dropped surrounding text. Such values are now inserted verbatim. Fixed in [#34221](https://github.com/cypress-io/cypress/pull/34221).
