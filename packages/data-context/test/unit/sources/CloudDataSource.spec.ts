@@ -348,4 +348,39 @@ describe('CloudDataSource', () => {
       expect(fetchStub).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe('cloud url', () => {
+    const originalEnv = process.env.CYPRESS_INTERNAL_ENV
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.CYPRESS_INTERNAL_ENV
+      } else {
+        process.env.CYPRESS_INTERNAL_ENV = originalEnv
+      }
+    })
+
+    // The module itself is initialized while the V8 snapshot is built, where
+    // CYPRESS_INTERNAL_ENV is always 'development'. Reading it any earlier than this
+    // freezes the wrong url into the binary.
+    it('resolves the environment when the client is created, not when the module loads', async () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'production'
+
+      const source = new CloudDataSource({
+        fetch: fetchStub,
+        getUser: getUserStub,
+        logout: logoutStub,
+        invalidateClientUrqlCache: invalidateCacheStub,
+      })
+
+      await source.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
+        operationType: 'query',
+      })
+
+      expect(fetchStub).toHaveBeenCalledWith('https://cloud.cypress.io/test-runner-graphql', expect.anything())
+    })
+  })
 })
