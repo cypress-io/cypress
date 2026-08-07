@@ -46,7 +46,6 @@ mutation Promo_PromoSeen($campaign: String!, $messageId: String!, $medium: Strin
 const props = defineProps<{
   campaign: string
   medium: string
-  cohort?: string
   instanceId?: string
 }>()
 
@@ -63,7 +62,7 @@ useQuery({ query: PromoDocument })
     promoSeenMutation.executeMutation({
       campaign: props.campaign,
       medium: props.medium,
-      cohort: props.cohort ?? null,
+      cohort: null,
       messageId: promoInstanceId,
     })
   }

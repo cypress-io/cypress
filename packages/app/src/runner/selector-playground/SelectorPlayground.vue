@@ -123,7 +123,6 @@
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
-import type { EventManager } from '../event-manager'
 import { openPlayground, closePlayground, SELECTOR_METHODS, getMethodPrefixLength } from './utils'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
@@ -134,7 +133,6 @@ import SelectorPlaygroundTooltip from './SelectorPlaygroundTooltip.vue'
 const { t } = useI18n()
 
 const props = defineProps<{
-  eventManager: EventManager
   getAutIframe: () => AutIframe
 }>()
 

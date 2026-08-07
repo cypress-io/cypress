@@ -1,4 +1,4 @@
-import { createEventManager, createTestAutIframe } from '../../../cypress/component/support/ctSupport'
+import { createTestAutIframe } from '../../../cypress/component/support/ctSupport'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import { Clipboard_CopyToClipboardDocument } from '../../generated/graphql-test'
 import SelectorPlayground from './SelectorPlayground.vue'
@@ -6,7 +6,6 @@ import { logger } from '../logger'
 
 describe('SelectorPlayground', () => {
   const mountSelectorPlayground = (
-    eventManager = createEventManager(),
     autIframe = createTestAutIframe(),
   ) => {
     return {
@@ -14,7 +13,6 @@ describe('SelectorPlayground', () => {
       element: cy.mount(() => (
         <div class="py-[64px]">
           <SelectorPlayground
-            eventManager={eventManager}
             getAutIframe={() => autIframe}
           />
         </div>
@@ -44,7 +42,7 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     cy.spy(selectorPlaygroundStore, 'setShowingHighlight')
 
-    mountSelectorPlayground(createEventManager(), autIframe)
+    mountSelectorPlayground(autIframe)
 
     // When the playground component is mounted (visible), it should automatically be enabled
     // and initialize highlighting functionality

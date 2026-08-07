@@ -96,7 +96,6 @@
     <SelectorPlayground
       v-if="selectorPlaygroundStore.show"
       :get-aut-iframe="getAutIframe"
-      :event-manager="eventManager"
     />
     <Alert
       v-model="showAlert"
