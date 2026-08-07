@@ -13,7 +13,7 @@ interface DetectFramework {
   bundler?: WizardBundler['type']
 }
 
-export async function areAllDepsSatisfied (projectPath: string, framework: Cypress.ResolvedComponentFrameworkDefinition) {
+async function areAllDepsSatisfied (projectPath: string, framework: Cypress.ResolvedComponentFrameworkDefinition) {
   for (const dep of framework.detectors) {
     const result = await isDependencyInstalled(dep, projectPath)
 
