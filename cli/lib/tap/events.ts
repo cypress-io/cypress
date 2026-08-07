@@ -12,6 +12,11 @@ const CAMPAIGN = 'Tap Command'
 const MEDIUM = 'cli'
 const POST_TIMEOUT_MS = 2000
 
+// The version a source checkout reports, which publishing replaces with the
+// released one. Nothing else tells the CLI it is running from the repo: gulp
+// hands the app a collector environment, but nothing launches the CLI.
+const DEVELOPMENT_VERSION = '0.0.0-development'
+
 // The same map the app reads through @packages/data-context; the CLI cannot reach
 // that package, so the three URLs are duplicated here.
 const CLOUD_URLS = {
@@ -70,6 +75,15 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
   }
 
   const cypressVersion = util.pkgVersion()
+
+  // Local development reports nothing unless it names the collector to use, so
+  // working on tap cannot put its own traffic in the production analytics.
+  if (cypressVersion === DEVELOPMENT_VERSION && !process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV) {
+    debug('skipped tap event: development build')
+
+    return
+  }
+
   const payload = {
     command: trace.command,
     flags: trace.flags,
@@ -81,8 +95,10 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
     cypressVersion,
   }
 
+  const url = eventCollectorUrl()
+
   try {
-    await fetch(eventCollectorUrl(), {
+    await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -92,8 +108,8 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
       signal: AbortSignal.timeout(POST_TIMEOUT_MS),
     })
 
-    debug('recorded tap event %o', payload)
+    debug('recorded tap event to %s %o', url, payload)
   } catch (err) {
-    debug('failed to record tap event %o due to error %o', payload, err)
+    debug('failed to record tap event to %s %o due to error %o', url, payload, err)
   }
 }

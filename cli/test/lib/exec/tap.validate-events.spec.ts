@@ -30,6 +30,16 @@ vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
   return { ...await importActual<typeof import('../../../lib/tap/aut/frame')>(), withResolvedAutFrame: vi.fn() }
 })
 
+// These specs assert what an invocation reports, which a source checkout's
+// version would otherwise stop it from sending at all.
+vi.mock('../../../lib/util', async (importActual) => {
+  const actual = await importActual<{ default: typeof import('../../../lib/util').default }>()
+
+  return {
+    default: { ...actual.default, pkgVersion: vi.fn().mockReturnValue('15.0.0') },
+  }
+})
+
 describe('lib/exec/tap reporting the invocation', () => {
   beforeEach(resetTapMocks)
 

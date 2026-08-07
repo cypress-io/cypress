@@ -3,6 +3,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { beginTapTrace, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
 import { resolvedInstanceId } from '../../../lib/cypress-instances'
 import { detectAgent } from '@packages/agent-info'
+import util from '../../../lib/util'
+
+// The suite runs from a source checkout, whose version tells the reporter to stay
+// off the collector entirely, so every test states the version it is reporting as.
+vi.mock('../../../lib/util', async (importActual) => {
+  const actual = await importActual<{ default: typeof import('../../../lib/util').default }>()
+
+  return {
+    default: { ...actual.default, pkgVersion: vi.fn().mockReturnValue('15.0.0') },
+  }
+})
 
 vi.mock('../../../lib/cypress-instances', async (importActual) => {
   const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
@@ -41,6 +52,7 @@ describe('lib/tap/events', () => {
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     vi.mocked(resolvedInstanceId).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
+    vi.mocked(util.pkgVersion).mockReturnValue('15.0.0')
     dateNow.mockReturnValue(1_000)
     beginTapTrace({ command: 'status', flags: ['json'] })
   })
@@ -164,6 +176,23 @@ describe('lib/tap/events', () => {
     await reportTapTrace(0)
 
     expect(fetchMock.mock.calls[0][0]).toBe('https://cloud.cypress.io/anon-collect')
+  })
+
+  it('sends nothing from a development build', async () => {
+    vi.mocked(util.pkgVersion).mockReturnValue('0.0.0-development')
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('reports from a development build that names a collector environment', async () => {
+    vi.mocked(util.pkgVersion).mockReturnValue('0.0.0-development')
+    process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'staging'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://cloud-staging.cypress.io/anon-collect')
   })
 
   it('sends nothing when crash reports are turned off', async () => {
