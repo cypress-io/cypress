@@ -54,7 +54,7 @@ describe('tap/commands/pin', () => {
   it('pins the last snapshot by default, driving the app pin', async () => {
     const { pinSnapshot } = stubSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     // Default --at is the last snapshot (the command's final state), index 1.
     // The tap id '1' resolved to the driver log id, which is what the app pin
@@ -78,7 +78,7 @@ describe('tap/commands/pin', () => {
   it('pins a named snapshot via --at', async () => {
     const { pinSnapshot } = stubSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1', at: 'before' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'before' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 0, 'r2', 'log-1')
     expect((outcome as { result: any }).result.pinned.at).to.deep.eq({ index: 1, total: 2, name: 'before' })
@@ -87,7 +87,7 @@ describe('tap/commands/pin', () => {
   it('fails with SNAPSHOT_NOT_FOUND when --at matches nothing, without driving the app pin', async () => {
     const { pinSnapshot } = stubSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1', at: 'during' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect(outcome).to.deep.eq({
       error: { code: 'SNAPSHOT_NOT_FOUND', message: 'no snapshot of this command matches "during" — available snapshots: "before" (1), "after" (2)' },
@@ -101,8 +101,8 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
-    const switched = await manager.exec('pin', {}, { testId: 'r2', commandId: '2' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
+    const switched = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '2' })
 
     expect((switched as { result: any }).result.pinned.command.id).to.eq('2')
     expect(pinSnapshot).to.have.been.calledTwice
@@ -117,8 +117,8 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
-    const failed = await manager.exec('pin', {}, { testId: 'r2', commandId: '2', at: 'during' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
+    const failed = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '2', at: 'during' })
 
     expect((failed as { error: { code: string } }).error.code).to.eq('SNAPSHOT_NOT_FOUND')
 
@@ -136,8 +136,8 @@ describe('tap/commands/pin', () => {
     const manager = new TapManager(CYPRESS_VERSION)
 
     // First pin lands on the last snapshot (index 1, "after").
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
-    const moved = await manager.exec('pin', {}, { testId: 'r2', commandId: '1', at: 'before' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
+    const moved = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'before' })
 
     // The move re-selects the snapshot in place: no re-pin, only a state switch
     // to "before" (index 0).
@@ -156,8 +156,8 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
-    const outcome = await manager.exec('pin', {}, { testId: 'r2', commandId: '1', at: 'during' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
+    const outcome = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('SNAPSHOT_NOT_FOUND')
     // The pin never moved, so no state switch happened.
@@ -179,8 +179,8 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
-    const outcome = await manager.exec('pin', {}, { testId: 'r3', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
+    const outcome = await manager.exec('pin', {}, { 'test-id': 'r3', 'command-id': '1' })
 
     // A log id names a row only within its test, so the app pin has to be
     // re-keyed onto the other test rather than moved within the one it holds.
@@ -200,7 +200,7 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
     const cleared = await manager.exec('pin', {}, { clear: 'true' })
 
     // The app's unpin is the whole release — it restores the page the pin
@@ -208,7 +208,7 @@ describe('tap/commands/pin', () => {
     expect(unpinSnapshot).to.have.been.calledOnce
     expect(cleared).to.deep.eq({ result: { cleared: true } })
 
-    const outcome = await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
   })
@@ -218,7 +218,7 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
     unpinInApp()
 
     const cleared = await manager.exec('pin', {}, { clear: 'true' })
@@ -227,7 +227,7 @@ describe('tap/commands/pin', () => {
     // Already released app-side — unpinning again would be the command's own doing.
     expect(unpinSnapshot).not.to.have.been.called
 
-    const outcome = await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
   })
@@ -237,7 +237,7 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
     isRunning.returns(true)
 
     const cleared = await manager.exec('pin', {}, { clear: 'true' })
@@ -251,7 +251,7 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
     getRunner.returns(undefined)
 
     const cleared = await manager.exec('pin', {}, { clear: 'true' })
@@ -274,7 +274,7 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     const outcome = await manager.exec('run-state')
 
@@ -291,7 +291,7 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     expect(await manager.exec('run-state')).to.deep.eq({ result: { spec: null, totalSpecs: 0 } })
   })
@@ -344,7 +344,7 @@ describe('tap/commands/pin', () => {
 
       const manager = new TapManager(CYPRESS_VERSION)
 
-      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+      await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
       // The snapshot toggle over the AUT selects "before" — the app's index is the
       // one to report, whoever last set it.
@@ -380,7 +380,7 @@ describe('tap/commands/pin', () => {
 
       const manager = new TapManager(CYPRESS_VERSION)
 
-      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+      await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
       // A log id resolves only within its test, so the pin is the other test's row.
       pinInApp('log-1', 0, 'r3')
 
@@ -412,7 +412,7 @@ describe('tap/commands/pin', () => {
 
       pinInApp('log-1', 1)
 
-      const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1', at: 'before' })
+      const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'before' })
 
       // The pin the app holds is the pin, whoever made it, so --at moves this one
       // rather than replacing it.
@@ -428,7 +428,7 @@ describe('tap/commands/pin', () => {
 
       const manager = new TapManager(CYPRESS_VERSION)
 
-      await manager.exec('pin', {}, { testId: 'r2', commandId: '1' })
+      await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
       // Clicking another command in the reporter re-pins with no unpin event, so
       // the command that was pinned no longer describes the AUT.
@@ -440,7 +440,7 @@ describe('tap/commands/pin', () => {
 
       // --at on the superseded command is a fresh pin of it, not a move of the
       // command the app is showing.
-      await manager.exec('pin', {}, { testId: 'r2', commandId: '1', at: 'before' })
+      await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'before' })
       expect(changeSnapshotState).not.to.have.been.called
       expect(pinSnapshot).to.have.been.calledTwice
 
@@ -477,7 +477,7 @@ describe('tap/commands/pin', () => {
   it('requires a test and command (or --clear) before attempting a pin', async () => {
     const { pinSnapshot } = stubSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('PIN_TARGET_REQUIRED')
     // A malformed pin never drives the app pin.
@@ -487,7 +487,7 @@ describe('tap/commands/pin', () => {
   it('fails with NO_RUN when no runner has mounted', async () => {
     stubSource({ runner: undefined })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('NO_RUN')
   })
@@ -495,7 +495,7 @@ describe('tap/commands/pin', () => {
   it('refuses to pin while a spec is running', async () => {
     stubSource({ running: true })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     expect((outcome as { error: { code: string, message: string } }).error).to.deep.eq({
       code: 'RUN_IN_PROGRESS',
@@ -508,8 +508,8 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    expect((await manager.exec('pin', {}, { testId: 'nope', commandId: '1' }) as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
-    expect((await manager.exec('pin', {}, { testId: 'r2', commandId: '9' }) as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
+    expect((await manager.exec('pin', {}, { 'test-id': 'nope', 'command-id': '1' }) as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+    expect((await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '9' }) as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
   })
 
   // Numbers restart per hook section, so a plain handle can be duplicated —
@@ -541,7 +541,7 @@ describe('tap/commands/pin', () => {
   it('resolves a duplicated plain number to the test body row', async () => {
     const { pinSnapshot } = stubHookedSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r5', commandId: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r5', 'command-id': '1' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r5', 'log-t1')
     expect((outcome as { result: any }).result.pinned.command.id).to.eq('1')
@@ -550,7 +550,7 @@ describe('tap/commands/pin', () => {
   it('resolves a hook-qualified handle to that section’s row', async () => {
     const { pinSnapshot } = stubHookedSource()
 
-    await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r5', commandId: 'h2:1' })
+    await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r5', 'command-id': 'h2:1' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r5', 'log-h2a')
   })
@@ -558,7 +558,7 @@ describe('tap/commands/pin', () => {
   it('refuses to guess between hooks: a number duplicated outside the test body is AMBIGUOUS_COMMAND', async () => {
     const { pinSnapshot } = stubHookedSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r5', commandId: '2' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r5', 'command-id': '2' })
 
     expect(outcome).to.deep.eq({
       error: {
@@ -573,7 +573,7 @@ describe('tap/commands/pin', () => {
   it('fails with COMMAND_NOT_FOUND for a qualifier that matches no section', async () => {
     stubHookedSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r5', commandId: 'h9:1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r5', 'command-id': 'h9:1' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('COMMAND_NOT_FOUND')
   })
@@ -584,7 +584,7 @@ describe('tap/commands/pin', () => {
       getSnapshotPropsForLog: () => ({ snapshots: null }),
     } })
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r2', commandId: '1' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('SNAPSHOT_UNAVAILABLE')
   })
@@ -614,7 +614,7 @@ describe('tap/commands/pin', () => {
   it('resolves command ids against the latest attempt by default', async () => {
     const { pinSnapshot } = stubRetriedSource()
 
-    await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r6', commandId: '1' })
+    await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r6', 'command-id': '1' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r6', 'log-a2')
   })
@@ -622,7 +622,7 @@ describe('tap/commands/pin', () => {
   it('resolves command ids against the attempt named by --attempt', async () => {
     const { pinSnapshot } = stubRetriedSource()
 
-    await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r6', commandId: '1', attempt: '1' })
+    await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r6', 'command-id': '1', attempt: '1' })
 
     expect(pinSnapshot).to.have.been.calledOnceWith({ url: SNAPSHOT_PROPS.url, snapshots: SNAPSHOTS }, 1, 'r6', 'log-a1')
   })
@@ -630,7 +630,7 @@ describe('tap/commands/pin', () => {
   it('fails with ATTEMPT_NOT_FOUND when --attempt is out of range', async () => {
     const { pinSnapshot } = stubRetriedSource()
 
-    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { testId: 'r6', commandId: '1', attempt: '5' })
+    const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r6', 'command-id': '1', attempt: '5' })
 
     expect((outcome as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
     expect(pinSnapshot).not.to.have.been.called
@@ -641,8 +641,8 @@ describe('tap/commands/pin', () => {
 
     const manager = new TapManager(CYPRESS_VERSION)
 
-    await manager.exec('pin', {}, { testId: 'r6', commandId: '1', attempt: '1' })
-    await manager.exec('pin', {}, { testId: 'r6', commandId: '1', attempt: '2' })
+    await manager.exec('pin', {}, { 'test-id': 'r6', 'command-id': '1', attempt: '1' })
+    await manager.exec('pin', {}, { 'test-id': 'r6', 'command-id': '1', attempt: '2' })
 
     // Each attempt has its own log, so this is a fresh pin, not a snapshot move.
     expect(changeSnapshotState).not.to.have.been.called

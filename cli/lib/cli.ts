@@ -590,7 +590,7 @@ const cliModule = {
     .description('Interacts with a running Cypress instance')
     .helpOption(false)
     .allowUnknownOption(true)
-    .option('--instance <pid>', text('instance'), coerceAnyStringToInt)
+    .option('-i, --instance <pid>', text('instance'), coerceAnyStringToInt)
     .option('--json', text('json'))
     .option('--timeout <ms>', text('tapTimeout'), coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {

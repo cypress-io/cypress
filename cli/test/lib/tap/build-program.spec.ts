@@ -198,26 +198,26 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'reporter').helpInformation()
 
-    expect(help).toContain('--testId <testId>')
+    expect(help).toContain('--test-id <test-id>')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['reporter', '--testId', 'r2', '--attempt', '1'], { from: 'user' })
+    program.parse(['reporter', '--test-id', 'r2', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { testId: 'r2', attempt: '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { 'test-id': 'r2', attempt: '1' }, {})
   })
 
-  it('declares and forwards command --commandId from the shared contract', () => {
+  it('declares and forwards command --command-id from the shared contract', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'command').helpInformation()
 
-    expect(help).toContain('--testId <testId>')
-    expect(help).toContain('--commandId <commandId>')
+    expect(help).toContain('--test-id <test-id>')
+    expect(help).toContain('--command-id <command-id>')
     expect(help).toContain('--attempt <attempt>')
 
-    program.parse(['command', '--testId', 'r2', '--commandId', 'log-3', '--attempt', '1'], { from: 'user' })
+    program.parse(['command', '--test-id', 'r2', '--command-id', 'log-3', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'testId': 'r2', 'commandId': 'log-3', 'attempt': '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': 'log-3', 'attempt': '1' }, {})
   })
 
   // `command` declares --json in its schema so the instance can be told, but the
@@ -229,7 +229,7 @@ describe('lib/tap/build-program', () => {
 
     expect(help.match(/--json/g)).toHaveLength(1)
     expect(help.replace(/\s+/g, ' ')).toContain('every console property in full')
-    expect(subcommand(program, 'reporter').helpInformation()).toContain('--json               print the raw JSON result')
+    expect(subcommand(program, 'reporter').helpInformation().replace(/\s+/g, ' ')).toContain('--json print the raw JSON result')
   })
 
   // The CLI's own view options ride in the schema commands' help, but they shape
@@ -243,12 +243,12 @@ describe('lib/tap/build-program', () => {
     expect(help).toContain('--depth <depth>')
     expect(help).not.toContain('--path')
 
-    program.parse(['command', '--testId', 'r2', '--commandId', '3', '--depth', '2'], { from: 'user' })
+    program.parse(['command', '--test-id', 'r2', '--command-id', '3', '--depth', '2'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith(
       'command',
       {},
-      { testId: 'r2', commandId: '3' },
+      { 'test-id': 'r2', 'command-id': '3' },
       { depth: '2' },
     )
   })
@@ -260,6 +260,36 @@ describe('lib/tap/build-program', () => {
     program.parse(['launch', 'a.cy.js', '-b', 'firefox'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'firefox' }, {})
+  })
+
+  it('resolves the shared contract’s aliases, schema and view options alike', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
+
+    program.parse(['command', '-t', 'r2', '-c', '3', '-a', '1', '-d', '2'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': '3', attempt: '1' }, { depth: '2' })
+  })
+
+  it('renders each alias alongside its long spelling in the generated help', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+
+    expect(subcommand(program, 'command').helpInformation()).toContain('-t, --test-id <test-id>')
+    expect(subcommand(program, 'aria').helpInformation()).toContain('-s, --selector <selector>')
+    expect(subcommand(program, 'status').helpInformation()).toContain('-i, --instance <pid>')
+  })
+
+  // Commander accepts a short flag claimed twice within one command and silently
+  // lets the last declaration win, so nothing but this catches an alias that
+  // collides with another option, with a view-only one, or with -h.
+  it('claims each short flag at most once per command', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+
+    for (const command of [program, ...program.commands]) {
+      const shorts = ['-h', ...command.options.map((option) => option.short).filter(Boolean)]
+
+      expect(new Set(shorts).size, `${command.name()} declares a short flag twice`).toBe(shorts.length)
+    }
   })
 
   it('omits options the user did not supply', () => {

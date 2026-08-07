@@ -30,7 +30,7 @@ const MIN_VALUE_WIDTH = 24
 const MAX_KEY_WIDTH = 32
 
 export const consolePropsOptions: readonly TapCommandOptionSchema[] = [
-  { name: 'depth', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
+  { name: 'depth', alias: 'd', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
 ]
 
 export interface ConsolePropsOptions {
