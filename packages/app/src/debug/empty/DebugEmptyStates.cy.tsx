@@ -3,6 +3,7 @@ import DebugNoProject from './DebugNoProject.vue'
 import DebugNoRuns from './DebugNoRuns.vue'
 import DebugLoading from './DebugLoading.vue'
 import DebugError from './DebugError.vue'
+import DebugEmptyView from './DebugEmptyView.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { Promo_PromoSeenDocument, _PromoFragmentDoc } from '../../generated/graphql-test'
 import { DEBUG_PROMO_CAMPAIGNS, DEBUG_TAB_MEDIUM } from '../utils/constants'
@@ -24,6 +25,22 @@ function mountWithGql (component: JSX.Element) {
 }
 
 describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
+  context('empty view', () => {
+    it('renders with slot', () => {
+      const slotVariableStub = cy.stub().as('slot')
+
+      mountWithGql(
+        <DebugEmptyView title="My Title" cohort="Z">
+          {{
+            cta: slotVariableStub,
+          }}
+        </DebugEmptyView>,
+      )
+
+      cy.get('@slot').should('be.calledWith', { utmContent: 'Z' })
+    })
+  })
+
   context('not logged in', () => {
     it('renders', () => {
       const userProjectStatusStore = useUserProjectStatusStore()

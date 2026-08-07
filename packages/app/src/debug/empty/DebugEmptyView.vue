@@ -36,6 +36,10 @@
           </span>
         </div>
       </div>
+      <slot
+        name="cta"
+        :utm-content="cohort"
+      />
     </div>
 
     <slot />
@@ -60,6 +64,7 @@ const props = defineProps<{
   helpLinkHref?: string
   helpLinkSrText?: string
   utm?: { utm_campaign: string }
+  cohort?: string
 }>()
 
 const helpLink = getUrlWithParams({
