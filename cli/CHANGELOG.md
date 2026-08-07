@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where Chrome could silently upgrade a top-level [`cy.visit()`](https://on.cypress.io/visit) from `http://` to `https://` for real hostnames on the default ports 80/443 (Chrome's HTTPS-Upgrades feature). That left Cypress on an origin the test never requested, so visits that followed cross-origin `http://` redirects never settled. Fixes [#34508](https://github.com/cypress-io/cypress/issues/34508).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
 ## 15.20.0
