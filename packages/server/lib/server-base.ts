@@ -30,7 +30,7 @@ import { SocketAllowed } from './util/socket_allowed'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
@@ -557,6 +557,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     await runtime.start()
+  }
+
+  async attachCdpFetchExtraTarget (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+  ): Promise<ExtraTargetDetach | undefined> {
+    return this._cdpFetchRuntime?.attachExtraTarget(client)
   }
 
   private resetCdpFetchRuntime () {
