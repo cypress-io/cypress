@@ -211,9 +211,16 @@ const createHarCaptureHooks = () => {
         startedUrls.push(params.request.url)
         break
       case 'Network.loadingFailed':
+        // Only count IDs we tracked in `started` - data: URLs are skipped there to match
+        // chrome-har-capturer, but still emit loadingFailed/loadingFinished and would
+        // otherwise inflate finished past EXPECTED_IMAGE_COUNT and end capture early.
+        if (!started.has(params.requestId)) return
+
         failed.add(params.requestId)
         break
       case 'Network.loadingFinished':
+        if (!started.has(params.requestId)) return
+
         finished.add(params.requestId)
 
         if (finished.size >= EXPECTED_IMAGE_COUNT) onTargetReached()
