@@ -8,7 +8,7 @@ const render = (result: FrameAmbiguousResult): string => stripAnsi(renderAmbiguo
 
 const numbered = (...selectors: string[]) => selectors.map((selector, index) => ({ index, selector }))
 
-const undeliverable = '- means no unique selector could be derived for that match — you may need to adjust your Cypress.ElementSelector config, or the element may be one no standard CSS selector can identify.'
+const underivable = '- means no unique selector could be derived for that match — you may need to adjust your Cypress.ElementSelector config, or the element may be one no standard CSS selector can identify.'
 
 describe('lib/tap/render/ambiguous', () => {
   it('states what went wrong, then numbers a selector per match', () => {
@@ -46,24 +46,27 @@ describe('lib/tap/render/ambiguous', () => {
       '2      \'#third\'',
       '3      \'#fourth\'',
       '',
-      undeliverable,
+      underivable,
     ].join('\n'))
   })
 
-  it('numbers every match when no selector could be derived for any of them', () => {
+  it('numbers every match when the instance named none of them, without blaming the selector config', () => {
+    // An empty list means the lookup never answered — the instance could not be
+    // reached, or could not reach its app under test. It says nothing about why
+    // any one match has no selector, so the dashes go unexplained.
     expect(render({ ambiguous: true, selector: '.item', count: 2, selectors: [] })).toBe([
       '⚠ selector \'.item\' matched 2 elements but must be unique',
       'provide --at with an index to select an element from the list or update the selector.',
       'index  selector',
       '0      -',
       '1      -',
-      '',
-      undeliverable,
     ].join('\n'))
   })
 
   it('stops numbering at the cap the instance derives to, saying how much of the match list is shown', () => {
-    expect(render({ ambiguous: true, selector: '*', count: 5000, selectors: numbered('.a', '.b') })).toBe([
+    const derived = [...numbered('.a', '.b'), ...Array.from({ length: 8 }, (_, offset) => ({ index: offset + 2, selector: null }))]
+
+    expect(render({ ambiguous: true, selector: '*', count: 5000, selectors: derived })).toBe([
       '⚠ selector \'*\' matched 5000 elements but must be unique',
       'provide --at with an index to select an element from the list or update the selector.',
       'index  selector',
@@ -79,14 +82,21 @@ describe('lib/tap/render/ambiguous', () => {
       '9      -',
       '',
       'showing the first 10 of 5000 matches — --at takes any index up to 4999.',
-      undeliverable,
+      underivable,
     ].join('\n'))
+  })
+
+  it('leaves a list the instance answered short of the cap unexplained', () => {
+    // Two entries for ten rows is not the instance reporting eight underivable
+    // matches, so the rows it never spoke for get no explanation either.
+    expect(render({ ambiguous: true, selector: '*', count: 5000, selectors: numbered('.a', '.b') })).not.toContain(underivable)
   })
 
   it('stays bounded for a selector matching a whole document, rather than building a row per match', () => {
     const rendered = render({ ambiguous: true, selector: '*', count: 1_000_000, selectors: [] })
 
-    expect(rendered.split('\n')).to.have.length(16)
+    expect(rendered.split('\n')).to.have.length(15)
     expect(rendered).toContain('showing the first 10 of 1000000 matches')
+    expect(rendered).not.toContain(underivable)
   })
 })
