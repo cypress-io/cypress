@@ -55,7 +55,7 @@ import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-r
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -1214,6 +1214,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           agent: null,
           headers: {
             'x-cypress-resolving-url': '1',
+            // With the MITM proxy disabled, the server is not a proxy. The
+            // `proxy` option above still delivers this request in absolute form,
+            // so it lands on the direct-origin catch-all in routes.ts — the token
+            // is what marks it as our own loopback there, letting the catch-all
+            // route it through the interception pipeline so the stub can reply.
+            // Gated so proxy-on wire traffic is unchanged.
+            ...(isProxyDisabled() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
           },
         })
       }
