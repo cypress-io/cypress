@@ -1,0 +1,14 @@
+packages/net-stubbing/lib/server/index.ts
+  h_5f6e5bd5f4342d 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "ef0d47bee6050ad282aa66505c14b0927ca885aa",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
