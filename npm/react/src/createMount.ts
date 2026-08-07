@@ -2,7 +2,6 @@ import * as React from 'react'
 import getDisplayName from './getDisplayName'
 import {
   getContainerEl,
-  ROOT_SELECTOR,
   setupHooks,
 } from '@cypress/mount-utils'
 import type { InternalMountOptions, MountOptions, MountReturn, UnmountArgs } from './types'
@@ -36,14 +35,6 @@ export const makeMountFn = (
     const reactDomToUse = internalMountOptions.reactDom
 
     const el = getContainerEl()
-
-    if (!el) {
-      throw new Error(
-        [
-          `[@cypress/react] 🔥 Hmm, cannot find root element to mount the component. Searched for ${ROOT_SELECTOR}`,
-        ].join(' '),
-      )
-    }
 
     const key = rerenderKey ??
         // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests

@@ -1,4 +1,3 @@
-// CommonJS to easily share across packages
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
@@ -39,14 +38,11 @@ export function createEntries (options) {
               target: 'es6',
               module: format === 'cjs' ? 'es2015' : 'esnext',
             },
-            exclude: ['tests'],
           },
         }),
       ],
       output: {
         banner,
-        name: 'CypressReact',
-        file: pkg.unpkg,
         format,
       },
     }

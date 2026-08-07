@@ -80,7 +80,6 @@
       "social": "@_JessicaSachs"
     }
   ],
-  "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",
   "peerDependenciesMeta": {
     "@types/react": {
