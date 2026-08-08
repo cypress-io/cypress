@@ -350,23 +350,25 @@ describe('lib/open_project', () => {
   })
 
   describe('#closeActiveProject', () => {
-    // The project teardown is intentionally fire-and-forget: blocking on the full
-    // projectBase.close() (server + proxy shutdown) regresses Firefox's process exit,
-    // so closeActiveProject only awaits the browser close.
-    it('initiates the project teardown without blocking on it', async () => {
-      let closeResolved = false
-
-      sinon.stub(browsers, 'close').resolves()
-      sinon.stub(ProjectBase.prototype, 'close').callsFake(async () => {
-        await Bluebird.delay(20)
-        closeResolved = true
+    it('awaits projectBase.close before resetting and closing the browser', async function () {
+      let resolveClose
+      const closePromise = new Promise((resolve) => {
+        resolveClose = resolve
       })
+      const closeStub = sinon.stub(ProjectBase.prototype, 'close').returns(closePromise)
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
 
-      await openProject.closeActiveProject()
+      const closing = openProject.closeActiveProject()
 
-      expect(ProjectBase.prototype.close).to.have.been.calledOnce
-      // resolved before the slow projectBase.close() finished
-      expect(closeResolved).to.be.false
+      expect(closeStub).to.have.been.calledOnce
+      expect(closeBrowserStub).not.to.have.been.called
+      expect(openProject.getProject()).to.not.be.null
+
+      resolveClose()
+      await closing
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(openProject.getProject()).to.be.null
     })
   })
 })

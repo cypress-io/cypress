@@ -33,7 +33,7 @@ import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { INSTANCES_ROUTE_PREFIX, INSTANCE_ID_HEADER } from '@packages/cypress-instances'
 import { cypressInstances } from './cypress-instances'
-import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
@@ -228,6 +228,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: GraphqlWsHandle
+  private _closing?: Bluebird<any>
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -583,6 +584,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     await runtime.start()
   }
 
+  async attachCdpFetchExtraTarget (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+  ): Promise<ExtraTargetDetach | undefined> {
+    return this._cdpFetchRuntime?.attachExtraTarget(client)
+  }
+
   private resetCdpFetchRuntime () {
     try {
       this._cdpFetchRuntime?.reset()
@@ -852,6 +859,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
+    if (this._closing) {
+      return this._closing
+    }
+
     // graphql-ws clients must be closed before the HTTP server is destroyed.
     const graphqlDispose = this._graphqlWS?.dispose
       ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
@@ -861,7 +872,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
       : Bluebird.resolve()
 
-    return graphqlDispose.then(() => {
+    this._closing = graphqlDispose.then(() => {
       return Bluebird.all([
         this._close(),
         this._socket?.close(),
@@ -874,6 +885,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       return res
     })
+    .finally(() => {
+      this._closing = undefined
+    })
+
+    return this._closing
   }
 
   end () {

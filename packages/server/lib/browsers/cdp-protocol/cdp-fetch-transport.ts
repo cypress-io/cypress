@@ -3,10 +3,14 @@ import debugModule from 'debug'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
+import type { ResourceType } from '@packages/proxy'
+import type { BodyDigest } from './body-digest'
+import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
-import { AUT_FRAME_HEADER } from '../constants'
+import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
+import { normalizeResourceType } from './normalize-resource-type'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -21,14 +25,53 @@ const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 // state apart from response-received. Drift from MITM: redirect bodies are
 // therefore empty to middleware under proxy-disabled mode — CDP cannot provide
 // them — so 3xx handling differs from the MITM path, which may still surface
-// whatever the origin sent.
+// whatever the origin sent. That empty buffer is also the origin digest source,
+// so an untouched 3xx continues natively while a middleware that writes a body
+// onto one falls back to fulfill.
 const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
     && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
 }
 
+// Internal Cypress markers injected onto paused requests for the
+// intercept/legacy pipeline. Must never be forwarded to the origin — parity
+// with ExtractCypressMetadataHeaders on the MITM path.
+const INTERNAL_MARKER_HEADERS = new Set([
+  AUT_FRAME_HEADER.toLowerCase(),
+  EXTRA_TARGET_HEADER.toLowerCase(),
+])
+
+// Splits internal Cypress markers out of a header set in a single pass,
+// reporting whether any were present.
+const partitionInternalMarkers = (headers: Protocol.Network.Headers) => {
+  const kept: Protocol.Network.Headers = {}
+  let hadMarker = false
+
+  for (const [name, value] of Object.entries(headers)) {
+    if (INTERNAL_MARKER_HEADERS.has(name.toLowerCase())) {
+      hadMarker = true
+    } else {
+      kept[name] = value
+    }
+  }
+
+  return { kept, hadMarker }
+}
+
+// Unique per transport instance in this process — only needs to disambiguate
+// concurrent extra-target sessions sharing one HttpIntercept, not to be
+// globally unpredictable.
+let extraTargetTransportCount = 0
+
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  /**
+   * When true, mark every paused request with X-Cypress-Is-From-Extra-Target
+   * so ExtractCypressMetadataHeaders can restrict the legacy pipeline to the
+   * minimal extra-target middleware (MaybeSetBasicAuthHeaders). Stripped
+   * before Fetch.continueRequest, same as the AUT frame marker.
+   */
+  isFromExtraTarget?: boolean
   /**
    * Pre-register a URL that will never receive Network.requestWillBeSent
    * (download-manager pauses omit networkId). Mirrors the MITM download-click
@@ -41,6 +84,7 @@ type CdpFetchTransportOptions = {
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
   requestId?: string
+  resourceType?: ResourceType
   sessionId?: string
 }
 
@@ -48,6 +92,7 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
   bodyStream?: Readable
   fulfilled?: boolean
+  originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
@@ -65,6 +110,13 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
 
 export class CdpFetchTransport {
   private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
+  /**
+   * Prefix for HttpIntercept / synthetic-codec request ids when this transport
+   * owns an extra-target session. CDP network/request ids are only unique per
+   * session; without a prefix, concurrent extra targets (or an extra target
+   * overlapping the main target) would collide in the shared intercept maps.
+   */
+  private readonly requestIdPrefix: string
 
   private isStarted = false
 
@@ -73,7 +125,11 @@ export class CdpFetchTransport {
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
     private readonly options: CdpFetchTransportOptions = {},
     private readonly networkExtraInfo: CDPNetworkExtraInfo = new CDPNetworkExtraInfo(client),
-  ) {}
+  ) {
+    this.requestIdPrefix = options.isFromExtraTarget
+      ? `extra-${++extraTargetTransportCount}:`
+      : ''
+  }
 
   /**
    * Enables the CDP Fetch domain and starts intercepting requests.
@@ -191,8 +247,9 @@ export class CdpFetchTransport {
         headers: {
           ...event.request.headers,
         },
-        id: networkRequestId,
+        id: `${this.requestIdPrefix}${networkRequestId}`,
         requestId: event.requestId,
+        resourceType: normalizeResourceType(event.resourceType),
         sessionId,
       }
 
@@ -208,6 +265,14 @@ export class CdpFetchTransport {
         // Node's IncomingMessage lowercases headers on the MITM path; the
         // synthetic CDP codec does not. Use the lowercase form ExtractCypressMetadataHeaders reads.
         request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
+      }
+
+      // Extra-target sessions (popups / _blank) share this transport with
+      // isFromExtraTarget so MaybeSetBasicAuthHeaders still runs under
+      // CYPRESS_INTERNAL_DISABLE_PROXY=1 (MITM never sees those requests).
+      if (this.options.isFromExtraTarget) {
+        debug('marking extra-target request %s', event.request.url)
+        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = 'true'
       }
 
       const responseDeferred: ResponsePauseDeferred = {
@@ -391,10 +456,10 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    let bodyStream: Readable
+    let originalBody: Buffer
 
     try {
-      bodyStream = await this.fetchResponseBody(event, sessionId)
+      originalBody = await this.fetchResponseBody(event, sessionId)
     } catch (err) {
       deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
@@ -424,11 +489,12 @@ export class CdpFetchTransport {
 
     deferred.resolve({
       ...event.request,
-      id: networkRequestId,
+      id: `${this.requestIdPrefix}${networkRequestId}`,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
-      bodyStream,
+      bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
+      originalBodyDigest: digestBody(originalBody),
       sessionId,
     })
   }
@@ -454,18 +520,16 @@ export class CdpFetchTransport {
     ]
   }
 
-  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Readable> => {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {
     if (isRedirectPause(event)) {
-      return Readable.from([])
+      return Buffer.alloc(0)
     }
 
     const response = await this.client.send('Fetch.getResponseBody', {
       requestId: event.requestId,
     }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-
-    return Readable.from(body.length ? [body] : [])
+    return Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
@@ -507,39 +571,23 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Builds continueRequest headers when outbound headers differ from the pause
-   * (excluding X-Cypress-Is-AUT-Frame). That marker is injected onto the paused
-   * request for the intercept/legacy pipeline and must never be forwarded to
-   * the origin — parity with ExtractCypressMetadataHeaders on the MITM path.
+   * Builds continueRequest headers when outbound headers differ from the pause,
+   * excluding internal Cypress markers (see partitionInternalMarkers).
    */
   private continueRequestHeaders = async (
     event: Protocol.Fetch.RequestPausedEvent,
     outbound: CdpFetchTransportRequest,
   ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const stripAut = (headers: Protocol.Network.Headers) => {
-      return Object.fromEntries(
-        Object.entries(headers).filter(([name]) => {
-          return name.toLowerCase() !== AUT_FRAME_HEADER.toLowerCase()
-        }),
-      )
-    }
-
-    const outboundWithoutAut = stripAut(outbound.headers ?? {})
-    const originalWithoutAut = stripAut(event.request.headers)
-    const originalHadAut = Object.keys(event.request.headers).some((name) => {
-      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
-    })
-    const outboundHadAut = Object.keys(outbound.headers ?? {}).some((name) => {
-      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
-    })
+    const original = partitionInternalMarkers(event.request.headers)
+    const withoutMarkers = partitionInternalMarkers(outbound.headers ?? {})
 
     // No meaningful header mutations and nothing to strip — omit headers from
     // continueRequest so CDP keeps the browser's original set.
-    if (!this.headersChanged(outboundWithoutAut, originalWithoutAut) && !originalHadAut && !outboundHadAut) {
+    if (!this.headersChanged(withoutMarkers.kept, original.kept) && !original.hadMarker && !withoutMarkers.hadMarker) {
       return
     }
 
-    return this.toContinueRequestHeaders(outboundWithoutAut)
+    return this.toContinueRequestHeaders(withoutMarkers.kept)
   }
 
   // Must NOT clear extraInfo tracking on success — the next response under a

@@ -357,6 +357,53 @@ describe('lib/server-base', () => {
     })
   })
 
+  describe('#attachCdpFetchExtraTarget', () => {
+    function createClient () {
+      return {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+    }
+
+    beforeEach(function () {
+      this.server._openConfig = this.config
+      this.server._socket = {
+        toDriver: sinon.stub(),
+        close: sinon.stub(),
+        setProtocolManager: sinon.stub(),
+      }
+
+      this.server.getCurrentBrowser = () => null
+      this.server._netStubbingState = {
+        routes: [],
+        requests: {},
+        reset: sinon.stub(),
+      }
+    })
+
+    it('delegates to the CDP Fetch runtime when present', async function () {
+      const pageClient = createClient()
+      const extraClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(pageClient)
+
+      const detach = sinon.stub().resolves()
+      const attachExtraTarget = sinon.stub(this.server._cdpFetchRuntime, 'attachExtraTarget').resolves(detach)
+
+      const result = await this.server.attachCdpFetchExtraTarget(extraClient)
+
+      expect(attachExtraTarget).to.have.been.calledOnceWith(extraClient)
+      expect(result).to.equal(detach)
+    })
+
+    it('returns undefined when there is no CDP Fetch runtime', async function () {
+      const result = await this.server.attachCdpFetchExtraTarget(createClient())
+
+      expect(result).to.be.undefined
+    })
+  })
+
   describe('#createServer', () => {
     beforeEach(function () {
       this.port = 54321
