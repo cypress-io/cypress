@@ -1483,9 +1483,8 @@ describe('lib/util/ci_provider', () => {
       travisEventType: 'travisEventType',
       travisCommitRange: 'travisCommitRange',
       travisBuildNumber: 'travisBuildNumber',
-      travisPullRequest: '',
-      travisPullRequestBranch: '',
-      travisPullRequestSha: '',
+      // TRAVIS_PULL_REQUEST, _BRANCH and _SHA are empty off a PR, so they are
+      // not recorded at all
     })
 
     expectsCommitParams({
@@ -1519,6 +1518,138 @@ describe('lib/util/ci_provider', () => {
       sha: 'travisPullRequestSha',
       branch: 'travisPullRequestBranch',
       message: 'travisCommitMessage',
+    })
+  })
+
+  describe('malformed values', () => {
+    it('does not record an empty or whitespace-only value', () => {
+      resetEnv = mockedEnv({
+        CIRCLECI: 'true',
+        CIRCLE_JOB: 'build',
+        CIRCLE_BUILD_NUM: '',
+        CIRCLE_BUILD_URL: '   ',
+      }, { clear: true })
+
+      return expectsCiParams({
+        circleJob: 'build',
+      })
+    })
+
+    it('does not record a placeholder left behind by the provider', () => {
+      resetEnv = mockedEnv({
+        CIRCLECI: 'true',
+        CIRCLE_JOB: 'build',
+        CIRCLE_BUILD_NUM: 'undefined',
+        CIRCLE_BUILD_URL: 'null',
+        CIRCLE_PR_NUMBER: '(null)',
+      }, { clear: true })
+
+      return expectsCiParams({
+        circleJob: 'build',
+      })
+    })
+
+    it('does not record a variable the provider never expanded', () => {
+      resetEnv = mockedEnv({
+        TF_BUILD: 'true',
+        AZURE_HTTP_USER_AGENT: 'agent',
+        BUILD_BUILDID: 'buildId',
+        SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: '$(System.PullRequest.PullRequestNumber)',
+        SYSTEM_TEAMPROJECT: '${CI_PROJECT_NAME}',
+      }, { clear: true })
+
+      return expectsCiParams({
+        buildBuildid: 'buildId',
+      })
+    })
+
+    it('does not record a value past the length limit', () => {
+      resetEnv = mockedEnv({
+        BUILDKITE: 'true',
+        BUILDKITE_BUILD_ID: 'buildkiteBuildId',
+        BUILDKITE_REPO: `https://github.com/org/${'x'.repeat(600)}`,
+      }, { clear: true })
+
+      return expectsCiParams({
+        buildkiteBuildId: 'buildkiteBuildId',
+      })
+    })
+
+    // Tooling that colourises output can leave ANSI escapes in a variable
+    it('does not record a value containing control characters', () => {
+      resetEnv = mockedEnv({
+        BUILDKITE: 'true',
+        BUILDKITE_BUILD_ID: 'buildkiteBuildId',
+        BUILDKITE_JOB_ID: '\u001B[31mjobId\u001B[0m',
+      }, { clear: true })
+
+      return expectsCiParams({
+        buildkiteBuildId: 'buildkiteBuildId',
+      })
+    })
+
+    // A wrong drop here fails the whole run with an indeterminate-ciBuildId
+    // error, so these are never checked against a provider-specific format.
+    it('records a correlation key whatever shape it arrives in', () => {
+      resetEnv = mockedEnv({
+        CIRCLECI: 'true',
+        CIRCLE_WORKFLOW_ID: 'wf_01JQZX9K2M4N6P8R',
+        CIRCLE_BUILD_NUM: 'build-77',
+      }, { clear: true })
+
+      return expectsCiParams({
+        circleWorkflowId: 'wf_01JQZX9K2M4N6P8R',
+        circleBuildNum: 'build-77',
+      })
+    })
+  })
+
+  describe('credentials in repository urls', () => {
+    it('removes the job token GitLab embeds in CI_REPOSITORY_URL', () => {
+      resetEnv = mockedEnv({
+        GITLAB_CI: 'true',
+        CI_PIPELINE_ID: 'ciPipelineId',
+        CI_REPOSITORY_URL: 'https://gitlab-ci-token:abc123token@gitlab.com/org/repo.git',
+      }, { clear: true })
+
+      expectsCiParams({
+        ciPipelineId: 'ciPipelineId',
+        ciRepositoryUrl: 'https://gitlab.com/org/repo.git',
+      })
+
+      return expectsCommitParams({
+        remoteOrigin: 'https://gitlab.com/org/repo.git',
+      })
+    })
+
+    it('leaves an scp-style remote untouched', () => {
+      resetEnv = mockedEnv({
+        BUILDKITE: 'true',
+        BUILDKITE_REPO: 'git@github.com:org/repo.git',
+        BUILDKITE_COMMIT: 'buildKiteCommit',
+        BUILDKITE_BRANCH: 'buildKiteBranch',
+      }, { clear: true })
+
+      expectsCiParams({
+        buildkiteRepo: 'git@github.com:org/repo.git',
+      })
+
+      return expectsCommitParams({
+        sha: 'buildKiteCommit',
+        branch: 'buildKiteBranch',
+        remoteOrigin: 'git@github.com:org/repo.git',
+      })
+    })
+
+    it('leaves a url without credentials untouched', () => {
+      resetEnv = mockedEnv({
+        GITLAB_CI: 'true',
+        CI_REPOSITORY_URL: 'https://gitlab.com/org/repo.git',
+      }, { clear: true })
+
+      return expectsCiParams({
+        ciRepositoryUrl: 'https://gitlab.com/org/repo.git',
+      })
     })
   })
 })

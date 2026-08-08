@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { isCI } from 'ci-info'
 import debugModule from 'debug'
+import { check, CI_PARAM_SHAPES, COMMIT_SHAPES } from './ci_shapes'
 
 const debug = debugModule('cypress:server')
 
@@ -11,11 +12,23 @@ const join = (char: string, ...pieces: (string | undefined)[]) => {
 }
 
 const toCamelObject = (obj, key) => {
-  return _.set(obj, _.camelCase(key), process.env[key])
+  const value = check(key, process.env[key], CI_PARAM_SHAPES[key])
+
+  // `omitUndefined` drops the key downstream, so a value that fails its shape
+  // check is simply never recorded.
+  return _.set(obj, _.camelCase(key), value)
 }
 
 const extract = (envKeys) => {
   return _.transform(envKeys, toCamelObject, {})
+}
+
+const checkCommitParams = (params: Record<string, string | undefined> | null) => {
+  if (!params) {
+    return params
+  }
+
+  return _.mapValues(params, (value, field) => check(field, value, COMMIT_SHAPES[field]))
 }
 
 // The Jenkins Git plugin populates GIT_BRANCH with the remote-qualified
@@ -794,7 +807,11 @@ export const ciParams = () => {
 }
 
 export const commitParams = () => {
-  return _get(_providerCommitParams)
+  return _.chain(_get(_providerCommitParams))
+  .thru(checkCommitParams)
+  .thru(omitUndefined)
+  .defaultTo(null)
+  .value()
 }
 
 export const commitDefaults = (existingInfo: Record<string, string | null | undefined>) => {
