@@ -13,6 +13,9 @@ const debugVerbose = debugModule('cypress-verbose:server:record:ci-info')
  * problem, not something the user can act on mid-run, so it must never
  * interrupt recording.
  *
+ * Credentials are stripped rather than dropped, since the rest of the value is
+ * still worth recording.
+ *
  * These checks are deliberately structural — empty, placeholder, unexpanded,
  * unprintable, oversized — and never assert a provider-specific format. A
  * regex for "looks like a build number" would be a guess about a value we do
@@ -43,18 +46,20 @@ const PLACEHOLDER = /^(null|undefined|\(null\)|nil|<unset>)$/i
 // eslint-disable-next-line no-control-regex
 const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/
 
-export type Shape = 'token' | 'text' | 'url'
+export type Shape = 'token' | 'text'
 
 // `git@github.com:owner/repo.git` — scp-like syntax, which `new URL()` rejects
 const SCP_LIKE = /^[\w.-]+@[\w.-]+:[^\s]+$/
 
 /**
- * Repository URLs can carry credentials — GitLab hands every job a
- * `CI_REPOSITORY_URL` of `https://gitlab-ci-token:<token>@host/group/project.git`.
+ * Any captured value can turn out to be a URL carrying credentials — GitLab
+ * hands every job a `CI_REPOSITORY_URL` of
+ * `https://gitlab-ci-token:<token>@host/group/project.git`. This runs over every
+ * value rather than a list of the variables believed to hold URLs, because such
+ * a list silently stops protecting the moment a provider adds one.
  *
- * A value that doesn't parse as a URL is still returned as-is: providers put
- * unexpected things in URL-ish variables, and the structural checks have
- * already passed. Only the credentials are removed.
+ * Anything that isn't a URL, or is one without credentials, is returned
+ * untouched — no normalisation is applied to values that need no change.
  */
 const stripCredentials = (value: string, key: string) => {
   if (SCP_LIKE.test(value)) {
@@ -121,7 +126,7 @@ const evaluate = (key: string, value: string, shape: Shape) => {
     return undefined
   }
 
-  return shape === 'url' ? stripCredentials(trimmed, key) : trimmed
+  return stripCredentials(trimmed, key)
 }
 
 /**
@@ -144,49 +149,10 @@ export const check = (key: string, value: string | undefined, shape: Shape = 'to
 }
 
 /**
- * Variables whose value is a URL, and so may arrive carrying credentials.
- * Everything not listed is checked as a `token`.
- */
-const URL_PARAMS = [
-  'ARGOCD_APP_SOURCE_REPO_URL',
-  'ATC_EXTERNAL_URL',
-  'bamboo_buildResultsUrl',
-  'BITRISE_BUILD_URL',
-  'BUDDY_RUN_URL',
-  'BUILD_REPOSITORY_URI',
-  'BUILD_URL',
-  'BUILDKITE_BUILD_URL',
-  'CF_BUILD_URL',
-  'CI_BUILD_LINK',
-  'CI_JOB_URL',
-  'CI_PIPELINE_URL',
-  'CI_PROJECT_URL',
-  'CI_PULL_REQUEST',
-  'CIRCLE_BUILD_URL',
-  'CIRCLE_PULL_REQUEST',
-  'CIRCLE_REPOSITORY_URL',
-  'CYPRESS_CI_BUILD_URL',
-  'CYPRESS_PULL_REQUEST_URL',
-  'DEPLOY_PRIME_URL',
-  'DEPLOY_URL',
-  'DRONE_BUILD_LINK',
-  'GIT_URL',
-  'GO_SERVER_URL',
-  'SEMAPHORE_ORGANIZATION_URL',
-  'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI',
-  'TRAVIS_BUILD_WEB_URL',
-  'URL',
-] as const
-
-
-export const CI_PARAM_SHAPES: Record<string, Shape> =
-  Object.fromEntries(URL_PARAMS.map((k) => [k, 'url' as const]))
-
-/**
- * Shapes for the `commit` fields. These mean the same thing for every provider,
- * so unlike `ci.params` they key off the field name rather than the variable.
+ * The only value needing anything other than the default: a commit message is
+ * legitimately long and multiline, where every other captured value is a
+ * single-line identifier.
  */
 export const COMMIT_SHAPES: Record<string, Shape> = {
   message: 'text',
-  remoteOrigin: 'url',
 }

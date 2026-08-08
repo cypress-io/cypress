@@ -364,7 +364,6 @@ describe('lib/util/ci_provider', () => {
       'bamboo_planRepository_revision': 'gitSha',
       'bamboo_planRepository_branch': 'gitBranch',
       'bamboo_planRepository_username': 'gitAuthor',
-      'bamboo_planRepository_repositoryURL': 'gitRemoteOrigin',
     }, { clear: true })
 
     expectsName('bamboo')
@@ -378,7 +377,7 @@ describe('lib/util/ci_provider', () => {
       sha: 'gitSha',
       branch: 'gitBranch',
       authorName: 'gitAuthor',
-      remoteOrigin: 'gitRemoteOrigin',
+      remoteOrigin: 'bambooPlanRepositoryRepositoryUrl',
     })
   })
 
@@ -856,8 +855,6 @@ describe('lib/util/ci_provider', () => {
     expectsCommitParams({
       sha: 'ciCommitSha',
       defaultBranch: 'ciBaseRef',
-      runAttempt: 'ciGithubRunAttempt',
-      remoteBranch: 'ciHeadRef',
       branch: 'GHCommitBranch',
     })
 
@@ -872,7 +869,6 @@ describe('lib/util/ci_provider', () => {
 
     expectsCommitParams({
       branch: 'ciHeadRef',
-      remoteBranch: 'ciHeadRef',
     })
 
     // with GITHUB_REF_NAME used as branch
@@ -1557,6 +1553,35 @@ describe('lib/util/ci_provider', () => {
         sha: 'buildKiteCommit',
         branch: 'buildKiteBranch',
         remoteOrigin: 'git@github.com:org/repo.git',
+      })
+    })
+
+
+    // No list of which variables hold URLs: any value that parses as one and
+    // carries credentials is stripped, wherever it came from.
+    it('strips credentials from any value, not a known set of url variables', () => {
+      resetEnv = mockedEnv({
+        CIRCLECI: 'true',
+        CIRCLE_JOB: 'build',
+        CIRCLE_REPOSITORY_URL: 'https://user:secret@github.com/org/repo.git',
+        CIRCLE_BUILD_URL: 'https://token:pw@circleci.com/gh/org/repo/1',
+      }, { clear: true })
+
+      return expectsCiParams({
+        circleJob: 'build',
+        circleBuildUrl: 'https://circleci.com/gh/org/repo/1',
+        circleRepositoryUrl: 'https://github.com/org/repo.git',
+      })
+    })
+
+    it('leaves a value that is not a url alone', () => {
+      resetEnv = mockedEnv({
+        CIRCLECI: 'true',
+        CIRCLE_JOB: 'user:secret@not-a-url',
+      }, { clear: true })
+
+      return expectsCiParams({
+        circleJob: 'user:secret@not-a-url',
       })
     })
 

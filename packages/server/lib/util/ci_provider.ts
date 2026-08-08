@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { isCI } from 'ci-info'
 import debugModule from 'debug'
-import { check, CI_PARAM_SHAPES, COMMIT_SHAPES } from './ci_shapes'
+import { check, COMMIT_SHAPES } from './ci_shapes'
 
 const debug = debugModule('cypress:server')
 
@@ -12,7 +12,7 @@ const join = (char: string, ...pieces: (string | undefined)[]) => {
 }
 
 const toCamelObject = (obj, key) => {
-  const value = check(key, process.env[key], CI_PARAM_SHAPES[key])
+  const value = check(key, process.env[key])
 
   // `omitUndefined` drops the key downstream, so a value that fails its shape
   // check is simply never recorded.
@@ -537,7 +537,7 @@ const _providerCommitParams = () => {
       // message: ???
       authorName: env.bamboo_planRepository_username,
       // authorEmail: ???
-      remoteOrigin: env.bamboo_planRepository_repositoryURL,
+      remoteOrigin: env.bamboo_planRepository_repositoryUrl,
       // defaultBranch: ???
     },
     bitbucket: {
@@ -604,8 +604,6 @@ const _providerCommitParams = () => {
       //                   tag that triggered the workflow run
       branch: env.GH_BRANCH || env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME,
       defaultBranch: env.GITHUB_BASE_REF,
-      remoteBranch: env.GITHUB_HEAD_REF,
-      runAttempt: env.GITHUB_RUN_ATTEMPT,
     },
     gitlab: {
       sha: env.CI_COMMIT_SHA,
