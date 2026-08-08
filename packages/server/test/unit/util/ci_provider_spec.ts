@@ -141,13 +141,11 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('appveyor')
     expectsCiParams({
-      appveyorJobId: 'appveyorJobId2',
       appveyorAccountName: 'appveyorAccountName',
       appveyorProjectSlug: 'appveyorProjectSlug',
       appveyorBuildNumber: 'appveyorBuildNumber',
       appveyorBuildVersion: 'appveyorBuildVersion',
       appveyorPullRequestNumber: 'appveyorPullRequestNumber',
-      appveyorPullRequestHeadRepoBranch: 'appveyorPullRequestHeadRepoBranch',
     })
 
     expectsCommitParams({
@@ -250,9 +248,6 @@ describe('lib/util/ci_provider', () => {
       codebuildBuildId: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
       codebuildBuildArn: 'arn:aws:codebuild:us-west-2:123456789012:build/codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
       codebuildBuildNumber: '123',
-      codebuildResolvedSourceVersion: 'commit',
-      codebuildSourceRepoUrl: 'repositoryUrl',
-      codebuildSourceVersion: 'commitOrBranchOrTag',
     })
 
     return expectsCommitParams({
@@ -280,11 +275,7 @@ describe('lib/util/ci_provider', () => {
       awsBranch: 'main',
       awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
       awsJobId: '0000000001',
-      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
-      awsCommitId: 'commitSha',
       awsPullRequestId: '12',
-      awsPullRequestSourceBranch: 'featureA',
-      awsPullRequestDestinationBranch: 'main',
     })
 
     return expectsCommitParams({
@@ -319,11 +310,7 @@ describe('lib/util/ci_provider', () => {
       awsBranch: 'main',
       awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
       awsJobId: '0000000001',
-      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
-      awsCommitId: 'amplifyCommitSha',
       awsPullRequestId: '12',
-      awsPullRequestSourceBranch: 'featureA',
-      awsPullRequestDestinationBranch: 'main',
     })
 
     return expectsCommitParams({
@@ -357,11 +344,7 @@ describe('lib/util/ci_provider', () => {
       awsAppId: 'abcd1234',
       awsBranch: 'main',
       awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
-      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
-      awsCommitId: 'amplifyCommitSha',
       awsPullRequestId: '12',
-      awsPullRequestSourceBranch: 'featureA',
-      awsPullRequestDestinationBranch: 'main',
     })
 
     return expectsCommitParams({
@@ -387,8 +370,6 @@ describe('lib/util/ci_provider', () => {
     expectsCiParams({
       bambooBuildNumber: 'bambooBuildNumber',
       bambooBuildResultsUrl: 'bambooBuildResultsUrl',
-      bambooPlanRepositoryRepositoryUrl: 'bambooPlanRepositoryRepositoryUrl',
-      bambooBuildKey: 'bambooBuildKey',
     })
 
     return expectsCommitParams({
@@ -420,7 +401,6 @@ describe('lib/util/ci_provider', () => {
       bitbucketBuildNumber: 'bitbucketBuildNumber',
       bitbucketRepoOwner: 'bitbucketRepoOwner',
       bitbucketRepoSlug: 'bitbucketRepoSlug',
-      bitbucketParallelStep: 'bitbucketParallelStep',
       bitbucketStepRunNumber: 'bitbucketStepRunNumber',
     })
 
@@ -473,11 +453,7 @@ describe('lib/util/ci_provider', () => {
       bitbucketBuildNumber: 'bitbucketBuildNumber',
       bitbucketRepoOwner: 'bitbucketRepoOwner',
       bitbucketRepoSlug: 'bitbucketRepoSlug',
-      bitbucketParallelStep: 'bitbucketParallelStep',
       bitbucketStepRunNumber: 'bitbucketStepRunNumber',
-      bitbucketPrId: 'bitbucketPrId',
-      bitbucketPrDestinationBranch: 'bitbucketPrDestinationBranch',
-      bitbucketPrDestinationCommit: 'bitbucketPrDestinationCommit',
       bitbucketPipelineUuid: 'bitbucketPipelineUuid',
     })
 
@@ -522,12 +498,6 @@ describe('lib/util/ci_provider', () => {
       buddyRunId: 'pull/1',
       buddyRunPrNo: '1',
       buddyRunUrl: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
-      buddyRunBranch: 'feature-branch',
-      buddyRunCommit: '46c360492d6372e5335300776806af412755871',
-      buddyRunCommitMessage: 'commit message',
-      buddyRunCommitCommitterName: 'Committer Name',
-      buddyRunCommitCommitterEmail: 'committer@example.com',
-      buddyRepoSshUrl: 'git@github.com:githubaccount/repository',
     })
 
     return expectsCommitParams({
@@ -562,10 +532,6 @@ describe('lib/util/ci_provider', () => {
       bitriseBuildNumber: '123',
       bitriseBuildUrl: 'https://app.bitrise.io/build/abcd',
       bitriseBuildSlug: 'abcd',
-      bitriseAppSlug: 'appslug',
-      gitRepositoryUrl: 'git@github.com:octocat/hello-world.git',
-      bitriseGitBranch: 'main',
-      bitriseioGitBranchDest: 'main',
       bitrisePullRequest: '42',
     })
 
@@ -604,16 +570,11 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('buildkite')
     expectsCiParams({
-      buildkiteRepo: 'buildkiteRepo',
       buildkiteJobId: 'buildkiteJobId',
       buildkiteRetryCount: 'buildkiteRetryCount',
-      buildkiteSource: 'buildkiteSource',
       buildkiteBuildId: 'buildkiteBuildId',
       buildkiteBuildUrl: 'buildkiteBuildUrl',
-      buildkiteBuildNumber: 'buildkiteBuildNumber',
       buildkitePullRequest: 'buildkitePullRequest',
-      buildkitePullRequestRepo: 'buildkitePullRequestRepo',
-      buildkitePullRequestBaseBranch: 'buildkitePullRequestBaseBranch',
     })
 
     expectsCommitParams({
@@ -676,7 +637,6 @@ describe('lib/util/ci_provider', () => {
       circlePrNumber: 'circlePrNumber',
       circlePrReponame: 'circlePrReponame',
       circlePrUsername: 'circlePrUsername',
-      circleCompareUrl: 'circleCompareUrl',
       circlePipelineId: 'circlePipelineId',
       circleWorkflowId: 'circleWorkflowId',
       circleWorkflowJobId: 'circleWorkflowJobId',
@@ -803,14 +763,9 @@ describe('lib/util/ci_provider', () => {
       harnessBuildId: 'harnessBuildId',
       harnessExecutionId: 'harnessExecutionId',
       harnessPipelineId: 'harnessPipelineId',
-      harnessProjectId: 'harnessProjectId',
-      harnessOrgId: 'harnessOrgId',
-      harnessAccountId: 'harnessAccountId',
-      harnessStageId: 'harnessStageId',
       droneBuildLink: 'droneBuildLink',
       droneBuildNumber: '42',
       dronePullRequest: '13',
-      droneRepo: 'octocat/hello-world',
     })
 
     return expectsCommitParams({
@@ -842,7 +797,6 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('drone')
     expectsCiParams({
-      droneJobNumber: 'droneJobNumber',
       droneBuildLink: 'droneBuildLink',
       droneBuildNumber: 'droneBuildNumber',
       dronePullRequest: 'dronePullRequest',
@@ -886,11 +840,6 @@ describe('lib/util/ci_provider', () => {
       githubRepository: 'ciGithubRepository',
       githubRunAttempt: 'ciGithubRunAttempt',
       githubRunId: 'ciGithubRunId',
-      githubJob: 'jobName',
-      githubBaseRef: 'ciBaseRef',
-      githubHeadRef: 'ciHeadRef',
-      githubRefName: 'ciRefName',
-      githubRef: 'ciCommitRef',
     })
 
     expectsCommitParams({
@@ -966,14 +915,7 @@ describe('lib/util/ci_provider', () => {
       ciBuildId: 'ciJobId',
       ciPipelineId: 'ciPipelineId',
       ciPipelineUrl: 'ciPipelineUrl',
-      gitlabHost: 'gitlabHost',
-      ciProjectId: 'ciProjectId',
       ciProjectUrl: 'ciProjectUrl',
-      ciRepositoryUrl: 'ciRepositoryUrl',
-      ciEnvironmentUrl: 'ciEnvironmentUrl',
-      ciDefaultBranch: 'ciDefaultBranch',
-      ciMergeRequestSourceBranchName: 'sourceBranchName',
-      ciMergeRequestSourceBranchSha: 'sourceBranchSha',
     })
 
     expectsCommitParams({
@@ -1019,18 +961,9 @@ describe('lib/util/ci_provider', () => {
     expectsName('goCD')
     expectsCiParams({
       goServerUrl: 'https://127.0.0.1:8154/go',
-      goEnvironmentName: 'Development',
       goPipelineName: 'main',
       goPipelineCounter: '2345',
       goPipelineLabel: '1.1.2345',
-      goStageName: 'dev',
-      goStageCounter: '1',
-      goJobName: 'linux-firefox',
-      goTriggerUser: 'changes',
-      goRevision: '123',
-      goToRevision: '123',
-      goFromRevision: '121',
-      goMaterialHasChanged: 'true',
     })
 
     return expectsCommitParams(null)
@@ -1057,7 +990,6 @@ describe('lib/util/ci_provider', () => {
       projectId: 'projectId',
       commitSha: 'commitSha',
       branchName: 'branchName',
-      headBranch: 'headBranch',
       baseBranch: 'baseBranch',
       prNumber: 'prNumber',
     })
@@ -1211,9 +1143,6 @@ describe('lib/util/ci_provider', () => {
         buildNumber: 'buildNumber',
         cypressCiBuildUrl: 'cypressCiBuildUrl',
         changeId: 'changeId',
-        changeTitle: 'changeTitle',
-        changeUrl: 'changeUrl',
-        changeTarget: 'changeTarget',
       })
 
       return expectsCommitParams({
@@ -1302,36 +1231,10 @@ describe('lib/util/ci_provider', () => {
       pullRequestNumber: 'pullRequestNumber',
       semaphoreBranchId: 'semaphoreBranchId',
       semaphoreBuildNumber: 'semaphoreBuildNumber',
-      semaphoreCurrentJob: 'semaphoreCurrentJob',
-      semaphoreCurrentThread: 'semaphoreCurrentThread',
-      semaphoreExecutableUuid: 'semaphoreExecutableUuid',
-      semaphoreGitBranch: 'show-semaphore-v2-266',
-      semaphoreGitWorkingBranch: 'show-semaphore-v2-266',
-      semaphoreGitCommitAuthor: 'semaphoreGitCommitAuthor',
-      semaphoreGitDir: 'cypress-example-kitchensink',
       semaphoreGitPrNumber: '1',
-      semaphoreGitRef: 'refs/heads/show-semaphore-v2-266',
-      semaphoreGitRefType: 'branch',
-      semaphoreGitRepoSlug: 'cypress-io/cypress-example-kitchensink',
-      semaphoreGitSha: '83ce1df0f8be2767655bb805d20126ee441b71bf',
-      semaphoreGitUrl: 'git@github.com:cypress-io/cypress-example-kitchensink.git',
-      semaphoreJobId: '5fb8dd98-3242-4a4e-a8ab-c4eca9db486c',
-      semaphoreJobName: 'Cypress E2E 2',
-      semaphoreJobCount: 'semaphoreJobCount',
-      semaphoreJobIndex: '2',
-      semaphoreJobUuid: 'semaphoreJobUuid',
       semaphoreOrganizationUrl: 'https://my-org.semaphoreci.com',
       semaphorePipelineId: 'a9219129-951e-4e2c-9354-45534b63fa8b',
-      semaphorePlatform: 'semaphorePlatform',
-      semaphoreProjectDir: 'semaphoreProjectDir',
-      semaphoreProjectHashId: 'semaphoreProjectHashId',
-      semaphoreProjectId: 'b717c4cc-fa0e-46f8-8bbf-589ab49a1777',
-      semaphoreProjectName: 'cypress-example-kitchensink',
-      semaphoreProjectUuid: 'semaphoreProjectUuid',
-      semaphoreRepoSlug: 'semaphoreRepoSlug',
-      semaphoreTriggerSource: 'semaphoreTriggerSource',
       semaphoreWorkflowId: '67aecea7-e4e7-405e-a77c-165e1b37a128',
-      semaphoreWorkflowNumber: '42',
     })
 
     return expectsCommitParams({
@@ -1428,15 +1331,9 @@ describe('lib/util/ci_provider', () => {
     expectsCiParams({
       buildBuildid: 'buildId',
       buildBuildnumber: 'buildNumber',
-      buildContainerid: 'containerId',
-      buildRepositoryUri: 'buildRepositoryUri',
       systemPlanid: 'planId',
       systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
-      systemPullrequestTargetbranch: 'targetBranch',
-      systemPullrequestTargetbranchname: 'targetBranchName',
       systemJobid: 'jobid',
-      systemStageattempt: 'stageAttempt',
-      systemPhaseattempt: 'phaseAttempt',
       systemJobattempt: 'jobAttempt',
       systemTeamproject: 'teamProject',
       buildDefinitionname: 'buildDefinitionName',
@@ -1475,13 +1372,10 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('travis')
     expectsCiParams({
-      travisJobId: 'travisJobId',
       travisBuildId: 'travisBuildId',
       travisBuildWebUrl: 'https://travis-ci.org/github/project/123',
       travisRepoSlug: 'travisRepoSlug',
       travisJobNumber: 'travisJobNumber',
-      travisEventType: 'travisEventType',
-      travisCommitRange: 'travisCommitRange',
       travisBuildNumber: 'travisBuildNumber',
       // TRAVIS_PULL_REQUEST, _BRANCH and _SHA are empty off a PR, so they are
       // not recorded at all
@@ -1605,6 +1499,8 @@ describe('lib/util/ci_provider', () => {
   })
 
   describe('credentials in repository urls', () => {
+    // CI_REPOSITORY_URL is no longer captured into ci.params, so the job token
+    // GitLab embeds in it only ever reaches Cloud through commit.remoteOrigin.
     it('removes the job token GitLab embeds in CI_REPOSITORY_URL', () => {
       resetEnv = mockedEnv({
         GITLAB_CI: 'true',
@@ -1614,7 +1510,6 @@ describe('lib/util/ci_provider', () => {
 
       expectsCiParams({
         ciPipelineId: 'ciPipelineId',
-        ciRepositoryUrl: 'https://gitlab.com/org/repo.git',
       })
 
       return expectsCommitParams({
@@ -1625,13 +1520,14 @@ describe('lib/util/ci_provider', () => {
     it('leaves an scp-style remote untouched', () => {
       resetEnv = mockedEnv({
         BUILDKITE: 'true',
+        BUILDKITE_BUILD_ID: 'buildkiteBuildId',
         BUILDKITE_REPO: 'git@github.com:org/repo.git',
         BUILDKITE_COMMIT: 'buildKiteCommit',
         BUILDKITE_BRANCH: 'buildKiteBranch',
       }, { clear: true })
 
       expectsCiParams({
-        buildkiteRepo: 'git@github.com:org/repo.git',
+        buildkiteBuildId: 'buildkiteBuildId',
       })
 
       return expectsCommitParams({
@@ -1644,11 +1540,11 @@ describe('lib/util/ci_provider', () => {
     it('leaves a url without credentials untouched', () => {
       resetEnv = mockedEnv({
         GITLAB_CI: 'true',
-        CI_REPOSITORY_URL: 'https://gitlab.com/org/repo.git',
+        CI_JOB_URL: 'https://gitlab.com/org/repo/-/jobs/42',
       }, { clear: true })
 
       return expectsCiParams({
-        ciRepositoryUrl: 'https://gitlab.com/org/repo.git',
+        ciJobUrl: 'https://gitlab.com/org/repo/-/jobs/42',
       })
     })
   })

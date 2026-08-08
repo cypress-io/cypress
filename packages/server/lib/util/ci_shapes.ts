@@ -150,50 +150,34 @@ export const check = (key: string, value: string | undefined, shape: Shape = 'to
 const URL_PARAMS = [
   'ARGOCD_APP_SOURCE_REPO_URL',
   'ATC_EXTERNAL_URL',
-  'AWS_CLONE_URL',
   'BITRISE_BUILD_URL',
-  'BUDDY_REPO_SSH_URL',
   'BUDDY_RUN_URL',
   'BUILDKITE_BUILD_URL',
-  'BUILDKITE_PULL_REQUEST_REPO',
-  'BUILDKITE_REPO',
-  'BUILD_REPOSITORY_URI',
   'BUILD_URL',
   'CF_BUILD_URL',
-  'CHANGE_URL',
   'CIRCLE_BUILD_URL',
-  'CIRCLE_COMPARE_URL',
   'CIRCLE_PULL_REQUEST',
   'CIRCLE_REPOSITORY_URL',
   'CI_BUILD_LINK',
-  'CI_ENVIRONMENT_URL',
   'CI_JOB_URL',
   'CI_PIPELINE_URL',
   'CI_PROJECT_URL',
   'CI_PULL_REQUEST',
-  'CI_REPOSITORY_URL',
-  'CODEBUILD_SOURCE_REPO_URL',
   'CYPRESS_CI_BUILD_URL',
   'CYPRESS_PULL_REQUEST_URL',
   'DEPLOY_PRIME_URL',
   'DEPLOY_URL',
   'DRONE_BUILD_LINK',
-  'GIT_REPOSITORY_URL',
   'GO_SERVER_URL',
-  'SEMAPHORE_GIT_URL',
   'SEMAPHORE_ORGANIZATION_URL',
   'TRAVIS_BUILD_WEB_URL',
   'URL',
   'bamboo_buildResultsUrl',
-  'bamboo_planRepository_repositoryUrl',
 ] as const
 
-const TEXT_PARAMS = ['BUDDY_RUN_COMMIT_MESSAGE'] as const
 
-export const CI_PARAM_SHAPES: Record<string, Shape> = {
-  ...Object.fromEntries(URL_PARAMS.map((k) => [k, 'url' as const])),
-  ...Object.fromEntries(TEXT_PARAMS.map((k) => [k, 'text' as const])),
-}
+export const CI_PARAM_SHAPES: Record<string, Shape> =
+  Object.fromEntries(URL_PARAMS.map((k) => [k, 'url' as const]))
 
 /**
  * Shapes for the `commit` fields. These mean the same thing for every provider,

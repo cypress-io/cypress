@@ -198,13 +198,11 @@ const _providerCiParams = () => {
   return {
     // https://www.appveyor.com/docs/environment-variables/
     appveyor: extract([
-      'APPVEYOR_JOB_ID',
       'APPVEYOR_ACCOUNT_NAME',
       'APPVEYOR_PROJECT_SLUG',
       'APPVEYOR_BUILD_NUMBER',
       'APPVEYOR_BUILD_VERSION',
       'APPVEYOR_PULL_REQUEST_NUMBER',
-      'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
     ]),
     // https://argo-cd.readthedocs.io/en/stable/user-guide/build-environment/
     argoCd: extract([
@@ -234,16 +232,10 @@ const _providerCiParams = () => {
     azure: extract([
       'BUILD_BUILDID',
       'BUILD_BUILDNUMBER',
-      'BUILD_CONTAINERID',
-      'BUILD_REPOSITORY_URI',
       'SYSTEM_JOBID',
-      'SYSTEM_STAGEATTEMPT',
-      'SYSTEM_PHASEATTEMPT',
       'SYSTEM_JOBATTEMPT',
       'SYSTEM_PLANID',
       'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
-      'SYSTEM_PULLREQUEST_TARGETBRANCH',
-      'SYSTEM_PULLREQUEST_TARGETBRANCHNAME',
       'SYSTEM_TEAMPROJECT',
       'BUILD_DEFINITIONNAME',
     ]),
@@ -251,9 +243,6 @@ const _providerCiParams = () => {
       'CODEBUILD_BUILD_ID',
       'CODEBUILD_BUILD_ARN',
       'CODEBUILD_BUILD_NUMBER',
-      'CODEBUILD_RESOLVED_SOURCE_VERSION',
-      'CODEBUILD_SOURCE_REPO_URL',
-      'CODEBUILD_SOURCE_VERSION',
     ]),
     // https://docs.aws.amazon.com/amplify/latest/userguide/environment-variables.html
     awsAmplifyConsole: extract([
@@ -261,12 +250,8 @@ const _providerCiParams = () => {
       'AWS_BRANCH',
       'AWS_BRANCH_ARN',
       'AWS_JOB_ID',
-      'AWS_CLONE_URL',
-      'AWS_COMMIT_ID',
       // PR preview builds
       'AWS_PULL_REQUEST_ID',
-      'AWS_PULL_REQUEST_SOURCE_BRANCH',
-      'AWS_PULL_REQUEST_DESTINATION_BRANCH',
     ]),
     // https://buddy.works/docs/basics/environment-variables/default-variables
     buddy: extract([
@@ -277,60 +262,39 @@ const _providerCiParams = () => {
       // The URL of the current pipeline run
       'BUDDY_RUN_URL',
       // The name of the Git branch of the current pipeline run
-      'BUDDY_RUN_BRANCH',
       // The SHA1 hash of the commit of the current pipeline run
-      'BUDDY_RUN_COMMIT',
       // The commit message of the currently run commit
-      'BUDDY_RUN_COMMIT_MESSAGE',
       // The name of the committer of the currently run commit
-      'BUDDY_RUN_COMMIT_COMMITTER_NAME',
       // The email address of the committer email of the currently run commit
-      'BUDDY_RUN_COMMIT_COMMITTER_EMAIL',
       // The SSH URL of the repository
-      'BUDDY_REPO_SSH_URL',
     ]),
     // https://docs.bitrise.io/en/bitrise-ci/references/available-environment-variables.html
     bitrise: extract([
       'BITRISE_BUILD_NUMBER',
       'BITRISE_BUILD_URL',
       'BITRISE_BUILD_SLUG',
-      'BITRISE_APP_SLUG',
-      'GIT_REPOSITORY_URL',
-      'BITRISE_GIT_BRANCH',
-      'BITRISEIO_GIT_BRANCH_DEST',
       'BITRISE_PULL_REQUEST',
     ]),
     // https://confluence.atlassian.com/bamboo/bamboo-variables-289277087.html
     bamboo: extract([
       'bamboo_buildNumber',
       'bamboo_buildResultsUrl',
-      'bamboo_planRepository_repositoryUrl',
-      'bamboo_buildKey',
     ]),
     // https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
       'BITBUCKET_REPO_OWNER',
       'BITBUCKET_BUILD_NUMBER',
-      'BITBUCKET_PARALLEL_STEP',
       'BITBUCKET_STEP_RUN_NUMBER',
       // the PR variables are only set on pull request builds
-      'BITBUCKET_PR_ID',
-      'BITBUCKET_PR_DESTINATION_BRANCH',
-      'BITBUCKET_PR_DESTINATION_COMMIT',
       'BITBUCKET_PIPELINE_UUID',
     ]),
     // https://buildkite.com/docs/pipelines/configure/environment-variables
     buildkite: extract([
-      'BUILDKITE_REPO',
-      'BUILDKITE_SOURCE',
       'BUILDKITE_JOB_ID',
       'BUILDKITE_BUILD_ID',
       'BUILDKITE_BUILD_URL',
-      'BUILDKITE_BUILD_NUMBER',
       'BUILDKITE_PULL_REQUEST',
-      'BUILDKITE_PULL_REQUEST_REPO',
-      'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
       'BUILDKITE_RETRY_COUNT',
     ]),
     // https://circleci.com/docs/reference/variables/
@@ -341,7 +305,6 @@ const _providerCiParams = () => {
       'CIRCLE_PR_NUMBER',
       'CIRCLE_PR_REPONAME',
       'CIRCLE_PR_USERNAME',
-      'CIRCLE_COMPARE_URL',
       'CIRCLE_WORKFLOW_ID',
       'CIRCLE_WORKFLOW_JOB_ID',
       'CIRCLE_PIPELINE_ID',
@@ -382,10 +345,6 @@ const _providerCiParams = () => {
       'HARNESS_BUILD_ID',
       'HARNESS_EXECUTION_ID',
       'HARNESS_PIPELINE_ID',
-      'HARNESS_PROJECT_ID',
-      'HARNESS_ORG_ID',
-      'HARNESS_ACCOUNT_ID',
-      'HARNESS_STAGE_ID',
       // build/run links and identifiers (often exposed as DRONE_* as well)
       'CI_BUILD_LINK',
       'CI_BUILD_NUMBER',
@@ -393,10 +352,8 @@ const _providerCiParams = () => {
       'DRONE_BUILD_NUMBER',
       // PR + repo metadata
       'DRONE_PULL_REQUEST',
-      'DRONE_REPO',
     ]),
     drone: extract([
-      'DRONE_JOB_NUMBER',
       'DRONE_BUILD_LINK',
       'DRONE_BUILD_NUMBER',
       'DRONE_PULL_REQUEST',
@@ -409,11 +366,6 @@ const _providerCiParams = () => {
       'GITHUB_RUN_ID',
       'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
-      'GITHUB_BASE_REF',
-      'GITHUB_HEAD_REF',
-      'GITHUB_REF_NAME',
-      'GITHUB_REF',
-      'GITHUB_JOB',
     ]),
     // see https://docs.gitlab.com/ci/variables/predefined_variables/
     gitlab: extract([
@@ -426,31 +378,15 @@ const _providerCiParams = () => {
       'CI_JOB_URL',
       'CI_JOB_NAME',
       // other information
-      'GITLAB_HOST',
-      'CI_PROJECT_ID',
       'CI_PROJECT_URL',
-      'CI_REPOSITORY_URL',
-      'CI_ENVIRONMENT_URL',
-      'CI_DEFAULT_BRANCH',
       // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
-      'CI_MERGE_REQUEST_SOURCE_BRANCH_NAME',
-      'CI_MERGE_REQUEST_SOURCE_BRANCH_SHA',
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
     goCD: extract([
       'GO_SERVER_URL',
-      'GO_ENVIRONMENT_NAME',
       'GO_PIPELINE_NAME',
       'GO_PIPELINE_COUNTER',
       'GO_PIPELINE_LABEL',
-      'GO_STAGE_NAME',
-      'GO_STAGE_COUNTER',
-      'GO_JOB_NAME',
-      'GO_TRIGGER_USER',
-      'GO_REVISION',
-      'GO_TO_REVISION',
-      'GO_FROM_REVISION',
-      'GO_MATERIAL_HAS_CHANGED',
     ]),
     googleCloud: extract([
       // individual jobs
@@ -462,7 +398,6 @@ const _providerCiParams = () => {
       'TAG_NAME',
       'COMMIT_SHA',
       'SHORT_SHA',
-      '_HEAD_BRANCH',
       '_BASE_BRANCH',
       '_PR_NUMBER',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
@@ -476,51 +411,15 @@ const _providerCiParams = () => {
       'ghprbPullId',
       // Jenkins pipeline options change options
       'CHANGE_ID',
-      'CHANGE_URL',
-      'CHANGE_TARGET',
-      'CHANGE_TITLE',
     ]),
     // https://docs.semaphore.io/reference/env-vars
     semaphore: extract([
       'SEMAPHORE_BRANCH_ID',
       'SEMAPHORE_BUILD_NUMBER',
-      'SEMAPHORE_CURRENT_JOB',
-      'SEMAPHORE_CURRENT_THREAD',
-      'SEMAPHORE_EXECUTABLE_UUID',
-      'SEMAPHORE_GIT_BRANCH',
-      'SEMAPHORE_GIT_COMMIT_AUTHOR',
-      'SEMAPHORE_GIT_COMMITTER',
-      'SEMAPHORE_GIT_DIR',
-      'SEMAPHORE_GIT_PR_BRANCH',
-      'SEMAPHORE_GIT_PR_NAME',
       'SEMAPHORE_GIT_PR_NUMBER',
-      'SEMAPHORE_GIT_PR_SHA',
-      'SEMAPHORE_GIT_PR_SLUG',
-      'SEMAPHORE_GIT_REF',
-      'SEMAPHORE_GIT_REF_TYPE',
-      'SEMAPHORE_GIT_REPO_NAME',
-      'SEMAPHORE_GIT_REPO_SLUG',
-      'SEMAPHORE_GIT_SHA',
-      'SEMAPHORE_GIT_TAG_NAME',
-      'SEMAPHORE_GIT_URL',
-      'SEMAPHORE_GIT_WORKING_BRANCH',
-      'SEMAPHORE_JOB_COUNT',
-      'SEMAPHORE_JOB_INDEX',
-      'SEMAPHORE_JOB_ID', // v2
-      'SEMAPHORE_JOB_NAME',
-      'SEMAPHORE_JOB_UUID', // v1
       'SEMAPHORE_ORGANIZATION_URL',
       'SEMAPHORE_PIPELINE_ID',
-      'SEMAPHORE_PLATFORM',
-      'SEMAPHORE_PROJECT_DIR',
-      'SEMAPHORE_PROJECT_HASH_ID',
-      'SEMAPHORE_PROJECT_ID', // v2
-      'SEMAPHORE_PROJECT_NAME',
-      'SEMAPHORE_PROJECT_UUID', // v1
-      'SEMAPHORE_REPO_SLUG',
-      'SEMAPHORE_TRIGGER_SOURCE',
       'SEMAPHORE_WORKFLOW_ID',
-      'SEMAPHORE_WORKFLOW_NUMBER',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
     ]),
     // https://www.jetbrains.com/help/teamcity/predefined-build-parameters.html#Predefined+Server+Build+Parameters
@@ -530,17 +429,12 @@ const _providerCiParams = () => {
     ]),
     // // https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     travis: extract([
-      'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
       'TRAVIS_BUILD_WEB_URL',
       'TRAVIS_REPO_SLUG',
       'TRAVIS_JOB_NUMBER',
-      'TRAVIS_EVENT_TYPE',
-      'TRAVIS_COMMIT_RANGE',
       'TRAVIS_BUILD_NUMBER',
       'TRAVIS_PULL_REQUEST',
-      'TRAVIS_PULL_REQUEST_BRANCH',
-      'TRAVIS_PULL_REQUEST_SHA',
     ]),
     // https://docs.netlify.com/configure-builds/environment-variables
     netlify: extract([
