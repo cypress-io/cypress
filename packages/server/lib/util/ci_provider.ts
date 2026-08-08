@@ -616,6 +616,11 @@ const _providerCommitParams = () => {
       remoteOrigin: env.CI_REPOSITORY_URL,
       defaultBranch: env.CI_DEFAULT_BRANCH,
     },
+    // GO_REVISION is only unsuffixed for a single unnamed material; with named
+    // materials it becomes GO_REVISION_<MATERIAL_NAME>.
+    goCD: {
+      sha: env.GO_REVISION,
+    },
     googleCloud: {
       sha: env.COMMIT_SHA,
       branch: env.BRANCH_NAME,
@@ -648,14 +653,13 @@ const _providerCommitParams = () => {
       // defaultBranch: ???
     },
     snap: null,
-    // TeamCity does not expose standardized commit metadata via env vars by default.
-    // branch: not a predefined env var; may be configured via custom parameters
-    // message: ???
-    // authorName: ???
-    // authorEmail: ???
-    // remoteOrigin: ???
-    // defaultBranch: ???
-    teamcity: null,
+    // BUILD_VCS_NUMBER is only unsuffixed when the build configuration has a
+    // single VCS root; with several it becomes BUILD_VCS_NUMBER_<VCS_root_ID>,
+    // which we cannot resolve without knowing the root.
+    // branch, message and author are configurable per build, not predefined.
+    teamcity: {
+      sha: env.BUILD_VCS_NUMBER,
+    },
     travis: {
       sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
       // for PRs, TRAVIS_BRANCH is the base branch being merged into

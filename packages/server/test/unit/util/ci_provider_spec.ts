@@ -980,7 +980,9 @@ describe('lib/util/ci_provider', () => {
       goStageCounter: '1',
     })
 
-    return expectsCommitParams(null)
+    return expectsCommitParams({
+      sha: '123',
+    })
   })
 
   it('google cloud', () => {
@@ -1265,6 +1267,7 @@ describe('lib/util/ci_provider', () => {
     resetEnv = mockedEnv({
       TEAMCITY_VERSION: '2025.12',
       BUILD_NUMBER: '42',
+      BUILD_VCS_NUMBER: 'teamcityVcsNumber',
       BUILD_URL: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     }, { clear: true })
 
@@ -1274,7 +1277,9 @@ describe('lib/util/ci_provider', () => {
       buildUrl: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     })
 
-    return expectsCommitParams(null)
+    return expectsCommitParams({
+      sha: 'teamcityVcsNumber',
+    })
   })
 
   it('netlify', () => {
@@ -1625,6 +1630,187 @@ describe('lib/util/ci_provider', () => {
       return expectsCiParams({
         buildNumber: 'buildNumber',
         gitUrl: 'https://github.com/org/repo.git',
+      })
+    })
+  })
+
+  // When there is no .git — an unmounted volume in docker, say — commitInfo
+  // returns nulls and commitDefaults falls back to the provider's environment.
+  // That fallback reads process.env directly, so it does not depend on a value
+  // also being present in ci.params.
+  describe('commit fallback when git is unavailable', () => {
+    const noGit = {
+      sha: null,
+      branch: null,
+      authorName: null,
+      authorEmail: null,
+      message: null,
+      remoteOrigin: null,
+      defaultBranch: null,
+    }
+
+    it('gitlab fills sha, branch, author, message and remote from the environment', () => {
+      resetEnv = mockedEnv({
+        GITLAB_CI: 'true',
+        CI_COMMIT_SHA: 'ciCommitSha',
+        CI_COMMIT_REF_NAME: 'ciCommitRefName',
+        CI_COMMIT_MESSAGE: 'ciCommitMessage',
+        GITLAB_USER_NAME: 'gitlabUserName',
+        GITLAB_USER_EMAIL: 'gitlabUserEmail',
+        CI_REPOSITORY_URL: 'https://gitlab.com/org/repo.git',
+        CI_DEFAULT_BRANCH: 'main',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'ciCommitSha',
+        branch: 'ciCommitRefName',
+        authorName: 'gitlabUserName',
+        authorEmail: 'gitlabUserEmail',
+        message: 'ciCommitMessage',
+        remoteOrigin: 'https://gitlab.com/org/repo.git',
+        defaultBranch: 'main',
+      })
+    })
+
+    it('buddy fills the whole commit from the environment', () => {
+      resetEnv = mockedEnv({
+        BUDDY: 'true',
+        BUDDY_RUN_COMMIT: 'buddyRunCommit',
+        BUDDY_RUN_BRANCH: 'buddyRunBranch',
+        BUDDY_RUN_COMMIT_MESSAGE: 'buddyRunCommitMessage',
+        BUDDY_RUN_COMMIT_COMMITTER_NAME: 'buddyCommitterName',
+        BUDDY_RUN_COMMIT_COMMITTER_EMAIL: 'buddy@example.com',
+        BUDDY_REPO_SSH_URL: 'git@github.com:org/repo.git',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'buddyRunCommit',
+        branch: 'buddyRunBranch',
+        authorName: 'buddyCommitterName',
+        authorEmail: 'buddy@example.com',
+        message: 'buddyRunCommitMessage',
+        remoteOrigin: 'git@github.com:org/repo.git',
+        defaultBranch: null,
+      })
+    })
+
+    it('semaphore fills sha, branch, author and remote from the environment', () => {
+      resetEnv = mockedEnv({
+        SEMAPHORE: 'true',
+        SEMAPHORE_GIT_SHA: 'semaphoreGitSha',
+        SEMAPHORE_GIT_WORKING_BRANCH: 'semaphoreGitWorkingBranch',
+        SEMAPHORE_GIT_COMMIT_AUTHOR: 'semaphoreGitCommitAuthor',
+        SEMAPHORE_GIT_URL: 'https://github.com/org/repo.git',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'semaphoreGitSha',
+        branch: 'semaphoreGitWorkingBranch',
+        authorName: 'semaphoreGitCommitAuthor',
+        authorEmail: null,
+        message: null,
+        remoteOrigin: 'https://github.com/org/repo.git',
+        defaultBranch: null,
+      })
+    })
+
+    it('bitrise fills the commit from the environment', () => {
+      resetEnv = mockedEnv({
+        BITRISE_IO: 'true',
+        BITRISE_GIT_COMMIT: 'bitriseGitCommit',
+        BITRISE_GIT_BRANCH: 'bitriseGitBranch',
+        BITRISE_GIT_MESSAGE: 'bitriseGitMessage',
+        GIT_CLONE_COMMIT_AUTHOR_NAME: 'bitriseAuthor',
+        GIT_CLONE_COMMIT_AUTHOR_EMAIL: 'bitrise@example.com',
+        GIT_REPOSITORY_URL: 'https://github.com/org/repo.git',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'bitriseGitCommit',
+        branch: 'bitriseGitBranch',
+        authorName: 'bitriseAuthor',
+        authorEmail: 'bitrise@example.com',
+        message: 'bitriseGitMessage',
+        remoteOrigin: 'https://github.com/org/repo.git',
+        defaultBranch: null,
+      })
+    })
+
+    it('buildkite fills the commit and the default branch from the environment', () => {
+      resetEnv = mockedEnv({
+        BUILDKITE: 'true',
+        BUILDKITE_COMMIT: 'buildkiteCommit',
+        BUILDKITE_BRANCH: 'buildkiteBranch',
+        BUILDKITE_MESSAGE: 'buildkiteMessage',
+        BUILDKITE_BUILD_CREATOR: 'buildkiteCreator',
+        BUILDKITE_BUILD_CREATOR_EMAIL: 'buildkite@example.com',
+        BUILDKITE_REPO: 'https://github.com/org/repo.git',
+        BUILDKITE_PIPELINE_DEFAULT_BRANCH: 'main',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'buildkiteCommit',
+        branch: 'buildkiteBranch',
+        authorName: 'buildkiteCreator',
+        authorEmail: 'buildkite@example.com',
+        message: 'buildkiteMessage',
+        remoteOrigin: 'https://github.com/org/repo.git',
+        defaultBranch: 'main',
+      })
+    })
+
+    it('teamcity falls back to the vcs revision', () => {
+      resetEnv = mockedEnv({
+        TEAMCITY_VERSION: '2024.03',
+        BUILD_VCS_NUMBER: 'teamcityVcsNumber',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'teamcityVcsNumber',
+        branch: null,
+        authorName: null,
+        authorEmail: null,
+        message: null,
+        remoteOrigin: null,
+        defaultBranch: null,
+      })
+    })
+
+    it('goCD falls back to the material revision', () => {
+      resetEnv = mockedEnv({
+        GO_JOB_NAME: 'goJobName',
+        GO_REVISION: 'goRevision',
+      }, { clear: true })
+
+      return expectsCommitDefaults(noGit, {
+        sha: 'goRevision',
+        branch: null,
+        authorName: null,
+        authorEmail: null,
+        message: null,
+        remoteOrigin: null,
+        defaultBranch: null,
+      })
+    })
+
+    it('prefers git over the provider environment when both are present', () => {
+      resetEnv = mockedEnv({
+        GITLAB_CI: 'true',
+        CI_COMMIT_SHA: 'ciCommitSha',
+        CI_COMMIT_REF_NAME: 'ciCommitRefName',
+      }, { clear: true })
+
+      return expectsCommitDefaults({
+        ...noGit,
+        sha: 'gitFoundSha',
+      }, {
+        sha: 'gitFoundSha',
+        branch: 'ciCommitRefName',
+        authorName: null,
+        authorEmail: null,
+        message: null,
+        remoteOrigin: null,
+        defaultBranch: null,
       })
     })
   })
