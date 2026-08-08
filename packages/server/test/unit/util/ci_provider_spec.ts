@@ -146,6 +146,7 @@ describe('lib/util/ci_provider', () => {
       appveyorBuildNumber: 'appveyorBuildNumber',
       appveyorBuildVersion: 'appveyorBuildVersion',
       appveyorPullRequestNumber: 'appveyorPullRequestNumber',
+      appveyorJobId: 'appveyorJobId2',
     })
 
     expectsCommitParams({
@@ -370,6 +371,7 @@ describe('lib/util/ci_provider', () => {
     expectsCiParams({
       bambooBuildNumber: 'bambooBuildNumber',
       bambooBuildResultsUrl: 'bambooBuildResultsUrl',
+      bambooBuildKey: 'bambooBuildKey',
     })
 
     return expectsCommitParams({
@@ -398,10 +400,11 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('bitbucket')
     expectsCiParams({
-      bitbucketBuildNumber: 'bitbucketBuildNumber',
-      bitbucketRepoOwner: 'bitbucketRepoOwner',
       bitbucketRepoSlug: 'bitbucketRepoSlug',
+      bitbucketRepoOwner: 'bitbucketRepoOwner',
+      bitbucketBuildNumber: 'bitbucketBuildNumber',
       bitbucketStepRunNumber: 'bitbucketStepRunNumber',
+      bitbucketParallelStep: 'bitbucketParallelStep',
     })
 
     expectsCommitParams({
@@ -450,11 +453,12 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('bitbucket')
     expectsCiParams({
-      bitbucketBuildNumber: 'bitbucketBuildNumber',
-      bitbucketRepoOwner: 'bitbucketRepoOwner',
       bitbucketRepoSlug: 'bitbucketRepoSlug',
+      bitbucketRepoOwner: 'bitbucketRepoOwner',
+      bitbucketBuildNumber: 'bitbucketBuildNumber',
       bitbucketStepRunNumber: 'bitbucketStepRunNumber',
       bitbucketPipelineUuid: 'bitbucketPipelineUuid',
+      bitbucketParallelStep: 'bitbucketParallelStep',
     })
 
     expectsCommitParams({
@@ -533,6 +537,7 @@ describe('lib/util/ci_provider', () => {
       bitriseBuildUrl: 'https://app.bitrise.io/build/abcd',
       bitriseBuildSlug: 'abcd',
       bitrisePullRequest: '42',
+      bitriseAppSlug: 'appslug',
     })
 
     return expectsCommitParams({
@@ -571,10 +576,11 @@ describe('lib/util/ci_provider', () => {
     expectsName('buildkite')
     expectsCiParams({
       buildkiteJobId: 'buildkiteJobId',
-      buildkiteRetryCount: 'buildkiteRetryCount',
       buildkiteBuildId: 'buildkiteBuildId',
       buildkiteBuildUrl: 'buildkiteBuildUrl',
       buildkitePullRequest: 'buildkitePullRequest',
+      buildkiteRetryCount: 'buildkiteRetryCount',
+      buildkiteBuildNumber: 'buildkiteBuildNumber',
     })
 
     expectsCommitParams({
@@ -766,6 +772,10 @@ describe('lib/util/ci_provider', () => {
       droneBuildLink: 'droneBuildLink',
       droneBuildNumber: '42',
       dronePullRequest: '13',
+      harnessProjectId: 'harnessProjectId',
+      harnessOrgId: 'harnessOrgId',
+      harnessAccountId: 'harnessAccountId',
+      harnessStageId: 'harnessStageId',
     })
 
     return expectsCommitParams({
@@ -834,12 +844,13 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('githubActions')
     expectsCiParams({
+      githubWorkflow: 'ciGitHubWorkflowName',
       githubAction: 'ciGitHubActionId',
       githubEventName: 'ciEventName',
-      githubWorkflow: 'ciGitHubWorkflowName',
-      githubRepository: 'ciGithubRepository',
-      githubRunAttempt: 'ciGithubRunAttempt',
       githubRunId: 'ciGithubRunId',
+      githubRunAttempt: 'ciGithubRunAttempt',
+      githubRepository: 'ciGithubRepository',
+      githubJob: 'jobName',
     })
 
     expectsCommitParams({
@@ -909,13 +920,14 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('gitlab')
     expectsCiParams({
+      ciPipelineId: 'ciPipelineId',
+      ciPipelineUrl: 'ciPipelineUrl',
+      ciBuildId: 'ciJobId',
       ciJobId: 'ciJobId',
       ciJobUrl: 'ciJobUrl',
       ciJobName: 'ciJobName',
-      ciBuildId: 'ciJobId',
-      ciPipelineId: 'ciPipelineId',
-      ciPipelineUrl: 'ciPipelineUrl',
       ciProjectUrl: 'ciProjectUrl',
+      ciProjectId: 'ciProjectId',
     })
 
     expectsCommitParams({
@@ -964,6 +976,8 @@ describe('lib/util/ci_provider', () => {
       goPipelineName: 'main',
       goPipelineCounter: '2345',
       goPipelineLabel: '1.1.2345',
+      goJobName: 'linux-firefox',
+      goStageCounter: '1',
     })
 
     return expectsCommitParams(null)
@@ -1228,13 +1242,15 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('semaphore')
     expectsCiParams({
-      pullRequestNumber: 'pullRequestNumber',
       semaphoreBranchId: 'semaphoreBranchId',
       semaphoreBuildNumber: 'semaphoreBuildNumber',
       semaphoreGitPrNumber: '1',
       semaphoreOrganizationUrl: 'https://my-org.semaphoreci.com',
       semaphorePipelineId: 'a9219129-951e-4e2c-9354-45534b63fa8b',
       semaphoreWorkflowId: '67aecea7-e4e7-405e-a77c-165e1b37a128',
+      pullRequestNumber: 'pullRequestNumber',
+      semaphoreJobId: '5fb8dd98-3242-4a4e-a8ab-c4eca9db486c',
+      semaphoreProjectId: 'b717c4cc-fa0e-46f8-8bbf-589ab49a1777',
     })
 
     return expectsCommitParams({
@@ -1331,12 +1347,15 @@ describe('lib/util/ci_provider', () => {
     expectsCiParams({
       buildBuildid: 'buildId',
       buildBuildnumber: 'buildNumber',
-      systemPlanid: 'planId',
-      systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
       systemJobid: 'jobid',
       systemJobattempt: 'jobAttempt',
+      systemPlanid: 'planId',
+      systemPullrequestPullrequestnumber: 'systemPullrequestPullrequestnumber',
       systemTeamproject: 'teamProject',
       buildDefinitionname: 'buildDefinitionName',
+      buildRepositoryUri: 'buildRepositoryUri',
+      systemStageattempt: 'stageAttempt',
+      systemPhaseattempt: 'phaseAttempt',
     })
 
     return expectsCommitParams({
@@ -1377,8 +1396,7 @@ describe('lib/util/ci_provider', () => {
       travisRepoSlug: 'travisRepoSlug',
       travisJobNumber: 'travisJobNumber',
       travisBuildNumber: 'travisBuildNumber',
-      // TRAVIS_PULL_REQUEST, _BRANCH and _SHA are empty off a PR, so they are
-      // not recorded at all
+      travisJobId: 'travisJobId',
     })
 
     expectsCommitParams({
@@ -1545,6 +1563,68 @@ describe('lib/util/ci_provider', () => {
 
       return expectsCiParams({
         ciJobUrl: 'https://gitlab.com/org/repo/-/jobs/42',
+      })
+    })
+  })
+
+  // These are not read by Cypress Cloud yet. They are captured so support can be
+  // added later without waiting for every user to upgrade the app, since an
+  // uncaptured value is unavailable for the life of every released version.
+  describe('capability inputs captured ahead of support', () => {
+    it('azure sends the collection uri a build url needs', () => {
+      resetEnv = mockedEnv({
+        TF_BUILD: 'true',
+        AZURE_HTTP_USER_AGENT: 'agent',
+        BUILD_BUILDID: 'buildId',
+        SYSTEM_TEAMPROJECT: 'teamProject',
+        SYSTEM_TEAMFOUNDATIONCOLLECTIONURI: 'https://dev.azure.com/acme/',
+      }, { clear: true })
+
+      return expectsCiParams({
+        buildBuildid: 'buildId',
+        systemTeamproject: 'teamProject',
+        systemTeamfoundationcollectionuri: 'https://dev.azure.com/acme/',
+      })
+    })
+
+    it('buildkite sends the build a rebuild came from', () => {
+      resetEnv = mockedEnv({
+        BUILDKITE: 'true',
+        BUILDKITE_BUILD_ID: 'buildkiteBuildId',
+        BUILDKITE_REBUILT_FROM_BUILD_ID: 'originalBuildId',
+      }, { clear: true })
+
+      return expectsCiParams({
+        buildkiteBuildId: 'buildkiteBuildId',
+        buildkiteRebuiltFromBuildId: 'originalBuildId',
+      })
+    })
+
+    it('semaphore sends its rerun flags', () => {
+      resetEnv = mockedEnv({
+        SEMAPHORE: 'true',
+        SEMAPHORE_PIPELINE_ID: 'semaphorePipelineId',
+        SEMAPHORE_PIPELINE_RERUN: 'true',
+        SEMAPHORE_WORKFLOW_RERUN: 'false',
+      }, { clear: true })
+
+      return expectsCiParams({
+        semaphorePipelineId: 'semaphorePipelineId',
+        semaphorePipelineRerun: 'true',
+        semaphoreWorkflowRerun: 'false',
+      })
+    })
+
+    it('jenkins sends the repository url it has no remoteOrigin for', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'jenkinsUrl',
+        BUILD_NUMBER: 'buildNumber',
+        GIT_URL: 'https://github.com/org/repo.git',
+      }, { clear: true })
+
+      return expectsCiParams({
+        buildNumber: 'buildNumber',
+        gitUrl: 'https://github.com/org/repo.git',
       })
     })
   })

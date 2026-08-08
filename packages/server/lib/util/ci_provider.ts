@@ -203,6 +203,7 @@ const _providerCiParams = () => {
       'APPVEYOR_BUILD_NUMBER',
       'APPVEYOR_BUILD_VERSION',
       'APPVEYOR_PULL_REQUEST_NUMBER',
+      'APPVEYOR_JOB_ID',
     ]),
     // https://argo-cd.readthedocs.io/en/stable/user-guide/build-environment/
     argoCd: extract([
@@ -238,6 +239,10 @@ const _providerCiParams = () => {
       'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
       'SYSTEM_TEAMPROJECT',
       'BUILD_DEFINITIONNAME',
+      'BUILD_REPOSITORY_URI',
+      'SYSTEM_STAGEATTEMPT',
+      'SYSTEM_PHASEATTEMPT',
+      'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI',
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
@@ -274,11 +279,13 @@ const _providerCiParams = () => {
       'BITRISE_BUILD_URL',
       'BITRISE_BUILD_SLUG',
       'BITRISE_PULL_REQUEST',
+      'BITRISE_APP_SLUG',
     ]),
     // https://confluence.atlassian.com/bamboo/bamboo-variables-289277087.html
     bamboo: extract([
       'bamboo_buildNumber',
       'bamboo_buildResultsUrl',
+      'bamboo_buildKey',
     ]),
     // https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
     bitbucket: extract([
@@ -288,6 +295,7 @@ const _providerCiParams = () => {
       'BITBUCKET_STEP_RUN_NUMBER',
       // the PR variables are only set on pull request builds
       'BITBUCKET_PIPELINE_UUID',
+      'BITBUCKET_PARALLEL_STEP',
     ]),
     // https://buildkite.com/docs/pipelines/configure/environment-variables
     buildkite: extract([
@@ -296,6 +304,8 @@ const _providerCiParams = () => {
       'BUILDKITE_BUILD_URL',
       'BUILDKITE_PULL_REQUEST',
       'BUILDKITE_RETRY_COUNT',
+      'BUILDKITE_BUILD_NUMBER',
+      'BUILDKITE_REBUILT_FROM_BUILD_ID',
     ]),
     // https://circleci.com/docs/reference/variables/
     circle: extract([
@@ -352,6 +362,10 @@ const _providerCiParams = () => {
       'DRONE_BUILD_NUMBER',
       // PR + repo metadata
       'DRONE_PULL_REQUEST',
+      'HARNESS_PROJECT_ID',
+      'HARNESS_ORG_ID',
+      'HARNESS_ACCOUNT_ID',
+      'HARNESS_STAGE_ID',
     ]),
     drone: extract([
       'DRONE_BUILD_LINK',
@@ -366,6 +380,7 @@ const _providerCiParams = () => {
       'GITHUB_RUN_ID',
       'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
+      'GITHUB_JOB',
     ]),
     // see https://docs.gitlab.com/ci/variables/predefined_variables/
     gitlab: extract([
@@ -380,6 +395,7 @@ const _providerCiParams = () => {
       // other information
       'CI_PROJECT_URL',
       // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+      'CI_PROJECT_ID',
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
     goCD: extract([
@@ -387,6 +403,8 @@ const _providerCiParams = () => {
       'GO_PIPELINE_NAME',
       'GO_PIPELINE_COUNTER',
       'GO_PIPELINE_LABEL',
+      'GO_JOB_NAME',
+      'GO_STAGE_COUNTER',
     ]),
     googleCloud: extract([
       // individual jobs
@@ -411,6 +429,7 @@ const _providerCiParams = () => {
       'ghprbPullId',
       // Jenkins pipeline options change options
       'CHANGE_ID',
+      'GIT_URL',
     ]),
     // https://docs.semaphore.io/reference/env-vars
     semaphore: extract([
@@ -421,6 +440,10 @@ const _providerCiParams = () => {
       'SEMAPHORE_PIPELINE_ID',
       'SEMAPHORE_WORKFLOW_ID',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
+      'SEMAPHORE_JOB_ID',
+      'SEMAPHORE_PROJECT_ID',
+      'SEMAPHORE_PIPELINE_RERUN',
+      'SEMAPHORE_WORKFLOW_RERUN',
     ]),
     // https://www.jetbrains.com/help/teamcity/predefined-build-parameters.html#Predefined+Server+Build+Parameters
     teamcity: extract([
@@ -435,6 +458,7 @@ const _providerCiParams = () => {
       'TRAVIS_JOB_NUMBER',
       'TRAVIS_BUILD_NUMBER',
       'TRAVIS_PULL_REQUEST',
+      'TRAVIS_JOB_ID',
     ]),
     // https://docs.netlify.com/configure-builds/environment-variables
     netlify: extract([
