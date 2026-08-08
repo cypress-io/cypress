@@ -652,7 +652,6 @@ const _providerCommitParams = () => {
       remoteOrigin: env.SEMAPHORE_GIT_URL || env.SEMAPHORE_GIT_REPO_SLUG,
       // defaultBranch: ???
     },
-    snap: null,
     // BUILD_VCS_NUMBER is only unsuffixed when the build configuration has a
     // single VCS root; with several it becomes BUILD_VCS_NUMBER_<VCS_root_ID>,
     // which we cannot resolve without knowing the root.
