@@ -1,6 +1,9 @@
 import debugModule from 'debug'
 
 const debug = debugModule('cypress:server:record:ci-info')
+// Every variable that carried a value and what became of it. `debug` reports
+// only the values it rejected, which is the actionable subset.
+const debugVerbose = debugModule('cypress-verbose:server:record:ci-info')
 
 /**
  * Shape checks for values read out of the CI environment.
@@ -32,7 +35,11 @@ const MAX_TEXT_LENGTH = 2000
 const UNEXPANDED_TEMPLATE = /\$[({][^)}]*[)}]/
 const PLACEHOLDER = /^(null|undefined|\(null\)|nil|<unset>)$/i
 // Tab, newline and carriage return are handled per-shape below; anything else
-// in the C0/C1 range means the variable is holding something other than a value.
+// in the C0/C1 range means the variable is holding something other than a value
+// — an ANSI escape from colourised tooling, most often.
+// `no-control-regex` exists to catch these characters appearing in a pattern by
+// accident, where they are invisible to a reader. Matching them is the whole
+// point here, so the rule is disabled rather than worked around.
 // eslint-disable-next-line no-control-regex
 const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/
 
@@ -73,14 +80,7 @@ const stripCredentials = (value: string, key: string) => {
   return url.toString()
 }
 
-/**
- * Returns the value to record, or `undefined` to record nothing.
- */
-export const check = (key: string, value: string | undefined, shape: Shape = 'token') => {
-  if (value == null) {
-    return undefined
-  }
-
+const evaluate = (key: string, value: string, shape: Shape) => {
   const trimmed = value.trim()
 
   if (!trimmed) {
@@ -122,6 +122,25 @@ export const check = (key: string, value: string | undefined, shape: Shape = 'to
   }
 
   return shape === 'url' ? stripCredentials(trimmed, key) : trimmed
+}
+
+/**
+ * Returns the value to record, or `undefined` to record nothing.
+ */
+export const check = (key: string, value: string | undefined, shape: Shape = 'token') => {
+  // An unset variable is the normal case for every provider we didn't detect,
+  // so it isn't worth reporting even verbosely.
+  if (value == null) {
+    return undefined
+  }
+
+  const result = evaluate(key, value, shape)
+
+  // Only ever the result: the raw value may still hold the credentials
+  // `stripCredentials` just removed.
+  debugVerbose('%s (%s) %s', key, shape, result === undefined ? 'not recorded' : `recorded as ${result}`)
+
+  return result
 }
 
 /**

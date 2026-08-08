@@ -23,14 +23,6 @@ const extract = (envKeys) => {
   return _.transform(envKeys, toCamelObject, {})
 }
 
-const checkCommitParams = (params: Record<string, string | undefined> | null) => {
-  if (!params) {
-    return params
-  }
-
-  return _.mapValues(params, (value, field) => check(field, value, COMMIT_SHAPES[field]))
-}
-
 // The Jenkins Git plugin populates GIT_BRANCH with the remote-qualified
 // branch name (e.g. "origin/main" or "refs/remotes/origin/main"). Recording
 // the remote prefix causes the branch to not match the actual branch name in
@@ -807,11 +799,23 @@ export const ciParams = () => {
 }
 
 export const commitParams = () => {
-  return _.chain(_get(_providerCommitParams))
-  .thru(checkCommitParams)
-  .thru(omitUndefined)
-  .defaultTo(null)
-  .value()
+  const params: Record<string, string | undefined> | null = _get(_providerCommitParams)
+
+  if (!params) {
+    return null
+  }
+
+  const checked: Record<string, string> = {}
+
+  for (const [field, value] of Object.entries(params)) {
+    const result = check(field, value, COMMIT_SHAPES[field])
+
+    if (result !== undefined) {
+      checked[field] = result
+    }
+  }
+
+  return checked
 }
 
 export const commitDefaults = (existingInfo: Record<string, string | null | undefined>) => {
