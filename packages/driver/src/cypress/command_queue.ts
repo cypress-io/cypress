@@ -463,15 +463,15 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       // Commands that aren't given their own `timeout` fall back to the
-      // runnable's, which is applied from `defaultCommandTimeout` when the
-      // runnable begins, so re-apply it when `Cypress.config()` changed the
-      // value mid-test. This happens between commands because setting the
-      // runnable's timeout re-arms its timer, which would cut short a command
-      // that lowered the value while it was running.
+      // runnable's, which is set from `defaultCommandTimeout` when the runnable
+      // begins, so pick up a value `Cypress.config()` changed mid-test. This
+      // happens between commands because setting the runnable's timeout re-arms
+      // its timer, which would cut short a command that lowered the value while
+      // it was running.
       const defaultCommandTimeout = this.cy.config('defaultCommandTimeout')
 
-      if (_.isFinite(defaultCommandTimeout) && defaultCommandTimeout !== this.state('appliedDefaultCommandTimeout')) {
-        this.state('appliedDefaultCommandTimeout', defaultCommandTimeout)
+      if (_.isFinite(defaultCommandTimeout) && defaultCommandTimeout !== this.state('runnableDefaultCommandTimeout')) {
+        this.state('runnableDefaultCommandTimeout', defaultCommandTimeout)
         this.cy.timeout(defaultCommandTimeout)
       }
 
