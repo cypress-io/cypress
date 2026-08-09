@@ -100,8 +100,8 @@ const notInstalledCI = (executable: string): any => {
 
     Reasons it may be missing:
 
-    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
-    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+    - You're caching 'node_modules' but are not caching this path: ${state.getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${state.getCacheDir()}
 
     Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
 
