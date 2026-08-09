@@ -3601,6 +3601,7 @@
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/browsers/bidi_automation.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
+    "./packages/server/lib/browsers/cdp-protocol/body-digest.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-connection.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-fetch-codec.ts",
