@@ -1,5 +1,6 @@
 import {
   CookieJar,
+  defaultPath,
   toughCookieToAutomationCookie,
   automationCookieToToughCookie,
   SerializableAutomationCookie,
@@ -55,6 +56,11 @@ const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
 export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[]) => {
   const url = location.href
   const domain = location.hostname
+  // a cookie set without a Path is scoped to the directory of the url that set
+  // it, not the root. this mirrors what tough-cookie derives for cookies going
+  // into the jar, so the browser and the jar agree on where a cookie lives
+  // @see https://datatracker.ietf.org/doc/html/rfc6265#section-5.1.4
+  const defaultCookiePath = defaultPath(location.pathname)
   const cookieJar = new CookieJar()
   const existingCookies = parseDocumentCookieString(document.cookie)
 
@@ -104,14 +110,18 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()
 
+      if (!parsedCookie.path) {
+        parsedCookie.path = defaultCookiePath
+      }
+
       // if the cookie is expired, remove it in our cookie jar
       // and via setting it inside our automation client with the correct expiry.
       // This will have the effect of removing the cookie
       if (parsedCookie.expiryTime() < Date.now()) {
         cookieJar.removeCookie({
           name: parsedCookie.key,
-          path: parsedCookie.path || '/',
-          domain: parsedCookie.domain as string,
+          path: parsedCookie.path,
+          domain: parsedCookie.domain || domain,
         })
 
         // send the cookie to the server so it can be removed from the browser
@@ -130,10 +140,6 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
 
       if (cookie) {
         cookie.sameSite = parsedCookie.sameSite
-
-        if (!parsedCookie.path) {
-          cookie.path = '/'
-        }
 
         // send the cookie to the server so it can be set in the browser via
         // automation and in our server-side cookie jar so it's available

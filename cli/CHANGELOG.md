@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+- Fixed an issue where a cookie set by a [`cy.request()`](https://on.cypress.io/request) response without a `Path` attribute was stored at the root path `/` instead of the directory of the requested URL. For example, a `Set-Cookie` returned from `/api/sign-in` is now scoped to `/api`, matching how the browser stores it, so [`cy.getCookie()`](https://on.cypress.io/getcookie) reports the real path and the cookie is only sent to requests under it. The same correction applies to cookies set through `document.cookie` inside a [`cy.origin()`](https://on.cypress.io/origin) block. Fixes [#26876](https://github.com/cypress-io/cypress/issues/26876).
 
 **Misc:**
 

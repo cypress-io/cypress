@@ -213,6 +213,51 @@ describe('lib/request', () => {
     })
   })
 
+  context('#setCookiesOnBrowser', () => {
+    const setCookiesOnBrowser = function (this: any, setCookie: string, resUrl: string) {
+      // @ts-expect-error - setCookiesOnBrowser is private
+      return request.setCookiesOnBrowser({ headers: { 'set-cookie': setCookie } }, resUrl, this.fn)
+      .then(() => {
+        return this.fn.withArgs('set:cookie').lastCall.args[1]
+      })
+    }
+
+    it('defaults the path to the directory of the response url', function () {
+      return setCookiesOnBrowser.call(this, 'session=abc', 'http://localhost:1234/api/sign-in')
+      .then((cookie) => {
+        expect(cookie).to.include({ name: 'session', path: '/api' })
+      })
+    })
+
+    it('defaults the path to the root when the response url has a single segment', function () {
+      return setCookiesOnBrowser.call(this, 'session=abc', 'http://localhost:1234/sign-in')
+      .then((cookie) => {
+        expect(cookie).to.include({ path: '/' })
+      })
+    })
+
+    it('defaults the path to the root when the response url has no path', function () {
+      return setCookiesOnBrowser.call(this, 'session=abc', 'http://localhost:1234')
+      .then((cookie) => {
+        expect(cookie).to.include({ path: '/' })
+      })
+    })
+
+    it('ignores the query string when defaulting the path', function () {
+      return setCookiesOnBrowser.call(this, 'session=abc', 'http://localhost:1234/api/sign-in?redirect=/home')
+      .then((cookie) => {
+        expect(cookie).to.include({ path: '/api' })
+      })
+    })
+
+    it('does not override an explicit path', function () {
+      return setCookiesOnBrowser.call(this, 'session=abc; Path=/', 'http://localhost:1234/api/sign-in')
+      .then((cookie) => {
+        expect(cookie).to.include({ path: '/' })
+      })
+    })
+  })
+
   context('#create', () => {
     beforeEach(function (done) {
       this.hits = 0

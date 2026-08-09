@@ -1,4 +1,4 @@
-import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
+import { Cookie, CookieJar as ToughCookieJar, defaultPath } from 'tough-cookie'
 import type { AutomationCookie } from './automation'
 
 interface SerializableAutomationCookie extends Omit<AutomationCookie, 'expiry'> {
@@ -6,7 +6,7 @@ interface SerializableAutomationCookie extends Omit<AutomationCookie, 'expiry'> 
   maxAge: 'Infinity' | '-Infinity' | number | null
 }
 
-export { SerializableAutomationCookie, Cookie }
+export { SerializableAutomationCookie, Cookie, defaultPath }
 
 interface CookieData {
   name: string
@@ -117,15 +117,27 @@ export class CookieJar {
   }
 
   removeCookie (cookieData: CookieData) {
+    const { domain, name, path } = cookieData
+
     // have to use the internal memstore. looks like an async api, but
     // it's actually synchronous
-    // @ts-ignore
-    this._cookieJar.store.removeCookie(
-      cookieData.domain,
-      cookieData.path || '/',
-      cookieData.name,
-      () => {},
-    )
+    const removeCookieForPath = (cookiePath: string) => {
+      // @ts-ignore
+      this._cookieJar.store.removeCookie(domain, cookiePath, name, () => {})
+    }
+
+    if (path) {
+      removeCookieForPath(path)
+
+      return
+    }
+
+    // a cookie defaults to the path of the request that set it, so without an
+    // explicit path we can't know which one to target. the browser clears
+    // cookies by name and domain alone, so match that and clear every path
+    this.getAllCookies()
+    .filter((cookie) => cookie.domain === domain && cookie.key === name)
+    .forEach((cookie) => removeCookieForPath(cookie.path as string))
   }
 
   removeAllCookies () {

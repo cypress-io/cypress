@@ -301,6 +301,52 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         })
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/26876
+    describe('scopes cookies set through the document.cookie patch to the correct path', () => {
+      beforeEach(() => {
+        cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+        cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+      })
+
+      it('defaults the path to the directory of the current url', () => {
+        cy.origin(`https://app.foobar.com:3503`, () => {
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=bar'
+          })
+
+          cy.getCookie('foo').should('have.property', 'path', '/fixtures')
+        })
+      })
+
+      it('does not override an explicit path', () => {
+        cy.origin(`https://app.foobar.com:3503`, () => {
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=bar; Path=/'
+          })
+
+          cy.getCookie('foo').should('have.property', 'path', '/')
+        })
+      })
+
+      it('removes a cookie expired from the path it was set on', () => {
+        cy.origin(`https://app.foobar.com:3503`, () => {
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=bar'
+          })
+
+          cy.getCookie('foo').its('value').should('eq', 'bar')
+
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=deleted; Max-Age=0'
+
+            expect(win.document.cookie).to.not.include('foo')
+          })
+
+          cy.getCookie('foo').should('eq', null)
+        })
+      })
+    })
   })
 
   describe('Same-Site Cross-Origin cookie behavior', () => {
