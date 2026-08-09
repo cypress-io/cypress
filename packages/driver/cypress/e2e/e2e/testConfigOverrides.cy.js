@@ -110,6 +110,62 @@ describe('per-test config', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/25991
+  describe('changing defaultCommandTimeout via Cypress.config mid-test', () => {
+    const globalTimeout = Cypress.config('defaultCommandTimeout')
+
+    afterEach(() => {
+      Cypress.config('defaultCommandTimeout', globalTimeout)
+    })
+
+    it('applies to the commands that follow it', () => {
+      Cypress.config('defaultCommandTimeout', 500)
+
+      cy.then(() => {
+        expect(cy.timeout()).eq(500)
+      })
+    })
+
+    it('applies when changed from inside a command', () => {
+      cy.then(() => {
+        Cypress.config('defaultCommandTimeout', 500)
+      })
+      .then(() => {
+        expect(cy.timeout()).eq(500)
+      })
+    })
+
+    it('times the following command out using the new value', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Timed out retrying after 500ms')
+        done()
+      })
+
+      Cypress.config('defaultCommandTimeout', 500)
+
+      cy.get('#does-not-exist')
+    })
+
+    it('is restored after a command that extends the timeout', () => {
+      Cypress.config('defaultCommandTimeout', 500)
+
+      // `cy.wait()` extends the runnable's timeout for the duration of the wait
+      cy.wait(10).then(() => {
+        expect(cy.timeout()).eq(500)
+      })
+    })
+
+    it('does not shorten the command it was changed from', () => {
+      cy.then(() => {
+        Cypress.config('defaultCommandTimeout', 50)
+
+        // the command that lowered the timeout keeps running under the timeout
+        // it started with, so this resolves rather than timing out at 50ms
+        return Cypress.Promise.delay(500)
+      })
+    })
+  })
+
   describe('in beforeEach', () => {
     it('set various config values', {
       defaultCommandTimeout: 200,

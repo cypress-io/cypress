@@ -31,6 +31,7 @@ export interface StateFunc {
   (k: 'specWindow', v?: Window): Window
   (k: 'runnable', v?: CypressRunnable): CypressRunnable
   (k: 'isStable', v?: boolean): boolean
+  (k: 'seededCommandTimeout', v?: number): number
   (k: 'current', v?: $Command): $Command
   (k: 'canceled', v?: boolean): boolean
   (k: 'error', v?: Error): Error

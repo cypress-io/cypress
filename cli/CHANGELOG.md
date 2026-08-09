@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+- Fixed an issue where changing [`defaultCommandTimeout`](https://docs.cypress.io/app/references/configuration#Timeouts) with [`Cypress.config()`](https://on.cypress.io/config) while a test was running had no effect on the commands that followed it in that test, and only took effect from the next test onwards. Fixes [#25991](https://github.com/cypress-io/cypress/issues/25991).
 
 **Misc:**
 
