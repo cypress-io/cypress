@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
+- Fixed an issue where `cypress run` printed the `(Attempt N of M)` line twice for the same attempt when a `beforeEach` and an `afterEach` hook both failed during that attempt. Fixes [#26143](https://github.com/cypress-io/cypress/issues/26143).
 
 ## 15.20.1
 
