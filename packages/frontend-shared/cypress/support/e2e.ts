@@ -228,7 +228,7 @@ before(() => {
 beforeEach(() => {
   // Reset the ports so we know we need to call "openProject" before each test
   cy.task('setCyInCyVariables', { 'e2e_serverPort': undefined }).then(() => {
-    taskInternal('__internal__beforeEach', undefined)
+    taskInternal('__internal__beforeEach', undefined, { timeout: SIXTY_SECONDS })
   })
 })
 
