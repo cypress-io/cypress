@@ -112,56 +112,68 @@ describe('per-test config', () => {
 
   // https://github.com/cypress-io/cypress/issues/25991
   describe('changing defaultCommandTimeout via Cypress.config mid-test', () => {
+    // this spec configures no timeouts of its own, so this resolves to the
+    // `defaultCommandTimeout` default of 4000 from @packages/config. Reading it
+    // rather than hard-coding it keeps these tests working if that default
+    // changes, and it is read at file load - before any test mutates config -
+    // so `afterEach` restores the value the runnables were seeded with.
     const globalTimeout = Cypress.config('defaultCommandTimeout')
+    const runtimeTimeout = 500
+
+    before(() => {
+      // nothing below proves anything unless the value the tests set differs
+      // from the one their runnable was seeded with
+      expect(runtimeTimeout).not.to.eq(globalTimeout)
+    })
 
     afterEach(() => {
       Cypress.config('defaultCommandTimeout', globalTimeout)
     })
 
     it('applies to the commands that follow it', () => {
-      Cypress.config('defaultCommandTimeout', 500)
+      Cypress.config('defaultCommandTimeout', runtimeTimeout)
 
       cy.then(() => {
-        expect(cy.timeout()).eq(500)
+        expect(cy.timeout()).eq(runtimeTimeout)
       })
     })
 
     it('applies when changed from inside a command', () => {
       cy.then(() => {
-        Cypress.config('defaultCommandTimeout', 500)
+        Cypress.config('defaultCommandTimeout', runtimeTimeout)
       })
       .then(() => {
-        expect(cy.timeout()).eq(500)
+        expect(cy.timeout()).eq(runtimeTimeout)
       })
     })
 
     it('times the following command out using the new value', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('Timed out retrying after 500ms')
+        expect(err.message).to.include(`Timed out retrying after ${runtimeTimeout}ms`)
         done()
       })
 
-      Cypress.config('defaultCommandTimeout', 500)
+      Cypress.config('defaultCommandTimeout', runtimeTimeout)
 
       cy.get('#does-not-exist')
     })
 
     it('is restored after a command that extends the timeout', () => {
-      Cypress.config('defaultCommandTimeout', 500)
+      Cypress.config('defaultCommandTimeout', runtimeTimeout)
 
       // `cy.wait()` extends the runnable's timeout for the duration of the wait
       cy.wait(10).then(() => {
-        expect(cy.timeout()).eq(500)
+        expect(cy.timeout()).eq(runtimeTimeout)
       })
     })
 
     it('does not shorten the command it was changed from', () => {
       cy.then(() => {
-        Cypress.config('defaultCommandTimeout', 50)
+        Cypress.config('defaultCommandTimeout', runtimeTimeout)
 
         // the command that lowered the timeout keeps running under the timeout
-        // it started with, so this resolves rather than timing out at 50ms
-        return Cypress.Promise.delay(500)
+        // it started with, so this outlives the new value rather than timing out
+        return Cypress.Promise.delay(runtimeTimeout * 2)
       })
     })
   })

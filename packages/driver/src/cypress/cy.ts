@@ -983,7 +983,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
       // control timeouts on runnables ourselves
       if (_.isFinite(timeout)) {
-        cy.state('seededCommandTimeout', timeout)
+        cy.state('appliedDefaultCommandTimeout', timeout)
         cy.timeout(timeout)
       }
 
