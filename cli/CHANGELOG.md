@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+- Fixed an issue where a request intercepted by [`cy.intercept()`](https://on.cypress.io/intercept) could be reported with an empty `body` when the browser closed the connection, such as during a form submission, a page navigation, an aborted `fetch`/`XHR`, or a component unmounting between tests. The body the browser had already sent is now used instead of an empty string. Fixes [#26431](https://github.com/cypress-io/cypress/issues/26431).
 
 **Misc:**
 

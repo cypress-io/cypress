@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import url from 'url'
-import { concatStream } from '@packages/network'
 import type { RequestMiddleware } from '@packages/proxy'
 import type { NetworkInterceptionCore, CyHttpMessages } from '@packages/network-interception'
 import { SERIALIZABLE_REQ_PROPS } from '@packages/network-interception'
@@ -9,6 +8,7 @@ import {
   getBodyEncoding,
 } from './util'
 import { InterceptedRequest } from './intercepted-request'
+import { bufferRequestBody } from './request-body'
 import { telemetry } from '@packages/telemetry'
 
 type InterceptRequestMiddleware = RequestMiddleware extends (this: infer T) => any ? T : never
@@ -64,33 +64,9 @@ export async function handleInterceptRequest (
     delete mw.netStubbingState.requests[request.id]
   })
 
-  const ensureBody = () => {
-    return new Promise<void>((resolve) => {
-      if (req.body) {
-        return resolve()
-      }
-
-      const onClose = (): void => {
-        req.body = ''
-
-        return resolve()
-      }
-
-      if (request.res.destroyed) {
-        onClose()
-      }
-
-      request.res.once('close', onClose)
-
-      request.req.pipe(concatStream((reqBody) => {
-        req.body = reqBody
-        request.res.off('close', onClose)
-        resolve()
-      }))
-    })
+  if (!req.body) {
+    req.body = await bufferRequestBody(request.req, request.res, mw.debug)
   }
-
-  await ensureBody()
 
   request.addDefaultSubscriptions()
 
