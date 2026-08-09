@@ -2988,6 +2988,22 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.attr('foo')
       })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('throws when the attribute name is not a string', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `attr` assertion requires the attribute name to be a string. You passed: `{ width: \'200px\' }`',
+          )
+
+          // jQuery would have set the attribute rather than read it
+          expect(this.$div[0].getAttribute('width')).to.be.null
+
+          done()
+        })
+
+        expect(this.$div).to.have.attr({ width: '200px' })
+      })
     })
 
     context('prop', () => {
@@ -3104,6 +3120,21 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.prop('foo')
       })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('throws when the property name is not a string', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `prop` assertion requires the property name to be a string. You passed: `{ checked: false }`',
+          )
+
+          expect(this.$input[0].checked).to.be.true
+
+          done()
+        })
+
+        expect(this.$input).to.have.prop({ checked: false })
+      })
     })
 
     context('css', () => {
@@ -3173,6 +3204,37 @@ describe('src/cy/commands/assertions', () => {
         })
 
         expect({}).to.have.css('foo')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('throws when the CSS property name is not a string', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `css` assertion requires the CSS property name to be a string. You passed: `{ backgroundColor: \'rgb(128, 0, 0)\' }`',
+          )
+
+          expect(this.$div[0].style.backgroundColor).to.eq('')
+
+          done()
+        })
+
+        expect(this.$div).to.have.css({ backgroundColor: 'rgb(128, 0, 0)' })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/26451
+      it('fails a should() without retrying and without styling the subject', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(
+            'The `css` assertion requires the CSS property name to be a string.',
+          )
+
+          expect(err.message).to.not.include('Timed out retrying')
+          expect(cy.$$('#attr-number')[0].style.backgroundColor).to.eq('')
+
+          done()
+        })
+
+        cy.get('#attr-number').should('have.css', { backgroundColor: 'rgb(128, 0, 0)' })
       })
     })
   })

@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+- Fixed an issue where passing an object to the [`have.attr`, `have.css`, or `have.prop` assertions](https://on.cypress.io/assertions), such as `.should('have.css', { backgroundColor: 'rgb(128, 0, 0)' })`, applied those styles, attributes, or properties to the element and passed instead of asserting on them. These assertions now fail with an error stating that the name must be a string. Fixes [#26451](https://github.com/cypress-io/cypress/issues/26451).
 
 **Misc:**
 
