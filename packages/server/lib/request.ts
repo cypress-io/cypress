@@ -605,9 +605,9 @@ export class Request {
       }
 
       if (!cookie.path || cookie.path[0] !== '/') {
-        // a Set-Cookie without a valid Path is scoped to the directory of the
-        // request URI, not the root. tough-cookie only applies this default
-        // when a cookie is put into a jar, which doesn't happen here
+        // tough-cookie only derives the default path when a cookie goes into a
+        // jar, which doesn't happen here, so without this the browser stores
+        // the cookie at the root
         // @see https://datatracker.ietf.org/doc/html/rfc6265#section-5.1.4
         cookie.path = tough.defaultPath(parsedUrl.pathname!)
       }

@@ -855,9 +855,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
             httpOnly: false,
             hostOnly: true,
             name: 'name',
-            // the cookie is set without a Path by
-            // /fixtures/auth/document-cookie.html, so it defaults to that
-            // page's directory
+            // /fixtures/auth/document-cookie.html sets this without a Path
             path: '/fixtures/auth',
             sameSite: 'lax',
             secure: false,

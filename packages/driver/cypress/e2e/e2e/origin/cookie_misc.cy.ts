@@ -302,7 +302,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    // https://github.com/cypress-io/cypress/issues/26876
+    // FIXES: https://github.com/cypress-io/cypress/issues/26876 (getCookie(s) has incorrect default for path)
     describe('scopes cookies set through the document.cookie patch to the correct path', () => {
       beforeEach(() => {
         cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)

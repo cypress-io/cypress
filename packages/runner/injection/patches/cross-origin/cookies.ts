@@ -56,9 +56,8 @@ const sendCookieToServer = (cookie: SerializableAutomationCookie) => {
 export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[]) => {
   const url = location.href
   const domain = location.hostname
-  // a cookie set without a Path is scoped to the directory of the url that set
-  // it, not the root. this mirrors what tough-cookie derives for cookies going
-  // into the jar, so the browser and the jar agree on where a cookie lives
+  // the jar derives this same default for the cookies it stores, so deriving
+  // it here keeps the browser and the jar agreeing on where a cookie lives
   // @see https://datatracker.ietf.org/doc/html/rfc6265#section-5.1.4
   const defaultCookiePath = defaultPath(location.pathname)
   const cookieJar = new CookieJar()

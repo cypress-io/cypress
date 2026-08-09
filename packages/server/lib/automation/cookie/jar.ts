@@ -132,9 +132,8 @@ export class CookieJar {
       return
     }
 
-    // a cookie defaults to the path of the request that set it, so without an
-    // explicit path we can't know which one to target. the browser clears
-    // cookies by name and domain alone, so match that and clear every path
+    // the browser clears cookies by name and domain alone, so a caller that
+    // gives no path means every path that cookie was stored under
     this.getAllCookies()
     .filter((cookie) => cookie.domain === domain && cookie.key === name)
     .forEach((cookie) => removeCookieForPath(cookie.path as string))
