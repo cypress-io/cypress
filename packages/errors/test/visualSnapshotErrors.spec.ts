@@ -143,7 +143,7 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    CANNOT_TRASH_ASSETS_UNSAFE_FOLDER: () => {
+    CANNOT_TRASH_ASSETS_FOLDER_CONTAINS_PROJECT: () => {
       return {
         default: [['downloadsFolder: /var/www/project'], '/var/www/project'],
         multiple: [['screenshotsFolder: /var/www', 'downloadsFolder: /var/www/project'], '/var/www/project'],

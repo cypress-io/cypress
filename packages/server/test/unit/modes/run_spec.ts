@@ -63,7 +63,7 @@ describe('lib/modes/run', () => {
       expect(trashedFolders()).to.have.lengthOf(2)
 
       expect(warning).to.be.calledWith(
-        'CANNOT_TRASH_ASSETS_UNSAFE_FOLDER',
+        'CANNOT_TRASH_ASSETS_FOLDER_CONTAINS_PROJECT',
         [`downloadsFolder: ${projectRoot}`],
         projectRoot,
       )
@@ -76,13 +76,13 @@ describe('lib/modes/run', () => {
 
       expect(trashedFolders()).not.to.include(parent)
       expect(warning).to.be.calledWith(
-        'CANNOT_TRASH_ASSETS_UNSAFE_FOLDER',
+        'CANNOT_TRASH_ASSETS_FOLDER_CONTAINS_PROJECT',
         [`videosFolder: ${parent}`],
         projectRoot,
       )
     })
 
-    it('still trashes the remaining folders and warns once for all unsafe ones', async () => {
+    it('still trashes the remaining folders and warns once for all skipped ones', async () => {
       await trashAssets(makeConfig({
         videosFolder: path.join('/var', 'www'),
         downloadsFolder: projectRoot,
@@ -92,7 +92,7 @@ describe('lib/modes/run', () => {
 
       expect(warning).to.be.calledOnce
       expect(warning).to.be.calledWith(
-        'CANNOT_TRASH_ASSETS_UNSAFE_FOLDER',
+        'CANNOT_TRASH_ASSETS_FOLDER_CONTAINS_PROJECT',
         [
           `videosFolder: ${path.join('/var', 'www')}`,
           `downloadsFolder: ${projectRoot}`,

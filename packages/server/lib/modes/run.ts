@@ -240,14 +240,14 @@ export async function trashAssets (config: Cfg) {
   // `path.resolve` turns an empty string into the project root and `../` into its
   // parent, so a mistyped asset folder can point at a directory holding the project.
   // Emptying that would take the project with it. https://github.com/cypress-io/cypress/issues/26393
-  const [unsafe, safe] = _.partition(folders, ([, folder]) => containsProjectRoot(folder, config.projectRoot))
+  const [containingProject, trashable] = _.partition(folders, ([, folder]) => containsProjectRoot(folder, config.projectRoot))
 
-  if (unsafe.length) {
-    errors.warning('CANNOT_TRASH_ASSETS_UNSAFE_FOLDER', unsafe.map(([key, folder]) => `${key}: ${folder}`), config.projectRoot)
+  if (containingProject.length) {
+    errors.warning('CANNOT_TRASH_ASSETS_FOLDER_CONTAINS_PROJECT', containingProject.map(([key, folder]) => `${key}: ${folder}`), config.projectRoot)
   }
 
   try {
-    await Promise.all(safe.map(([, folder]) => trash.folder(folder)))
+    await Promise.all(trashable.map(([, folder]) => trash.folder(folder)))
   } catch (err) {
     // dont make trashing assets fail the build
     errors.warning('CANNOT_TRASH_ASSETS', err)

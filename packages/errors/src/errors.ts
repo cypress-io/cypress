@@ -60,7 +60,7 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
-  CANNOT_TRASH_ASSETS_UNSAFE_FOLDER: (arg1: string[], arg2: string) => {
+  CANNOT_TRASH_ASSETS_FOLDER_CONTAINS_PROJECT: (arg1: string[], arg2: string) => {
     return errTemplate`\
         Warning: We skipped trashing the following folders because each one resolves to your project root or a directory above it:
 
