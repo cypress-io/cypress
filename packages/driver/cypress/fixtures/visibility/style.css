@@ -18,10 +18,10 @@ nav li {
   margin: 4px 0;
 }
 
-[cy-expect="hidden"], [cy-legacy-expect="hidden"], [cy-fast-expect="hidden"] {
+[cy-expect="hidden"], [cy-legacy-expect="hidden"], [cy-modern-expect="hidden"] {
   background-color: lightcoral;
 }
 
-[cy-expect="visible"], [cy-legacy-expect="visible"], [cy-fast-expect="visible"] {
+[cy-expect="visible"], [cy-legacy-expect="visible"], [cy-modern-expect="visible"] {
   background-color: lightgreen;
 }

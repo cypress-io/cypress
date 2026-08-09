@@ -523,6 +523,20 @@ const parentHasOpacityZero = function ($el) {
   return parentHasOpacityZero($el.parent())
 }
 
+const getClosedDetailsHiding = (el: HTMLElement): HTMLElement | null => {
+  // search from the parent: a closed `<details>` renders itself, so it is never the reason
+  // it is hidden
+  const details = el.parentElement?.closest<HTMLElement>('details:not([open])')
+
+  if (!details) {
+    return null
+  }
+
+  // the disclosure triangle keeps rendering while the element is closed, so anything inside
+  // that `<details>`' own `<summary>` is not hidden by it
+  return el.closest('summary')?.parentElement === details ? null : details
+}
+
 /* eslint-disable no-cond-assign */
 export const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
   // TODO: need to add in the reason an element
@@ -559,6 +573,17 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     } as CheckVisibilityOptions)
 
     if (!passesCheckVisibility) {
+      // browsers hide the contents of a closed `<details>` through its ::details-content
+      // pseudo-element, which `getComputedStyle(el)` never reports, so the computed values below
+      // would all read as visible. Name the element doing the hiding and skip them entirely.
+      const closedDetails = getClosedDetailsHiding(hiddenEl)
+
+      if (closedDetails) {
+        const detailsNode = stringifyElement($jquery.wrap(closedDetails), 'short')
+
+        return `This element \`${hiddenNode}\` is not visible because it is inside a closed \`<details>\` element: \`${detailsNode}\`. The browser does not render the contents of a closed \`<details>\` element. Open it by clicking its \`<summary>\` first.`
+      }
+
       const style = getComputedStyle(hiddenEl)
       const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
 

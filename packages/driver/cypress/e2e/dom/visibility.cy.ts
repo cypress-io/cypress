@@ -363,6 +363,32 @@ describe('src/cypress/dom/visibility', {
           ])
         })
 
+        describe('details', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/details.html')
+          })
+
+          assertVisibilityForSections([
+            'details-closed',
+            'details-open',
+            'details-nested',
+          ])
+
+          it('detects visibility as the details element is toggled', () => {
+            // browsers render the contents of a closed `<details>` through a
+            // `content-visibility: hidden` ::details-content pseudo-element, which leaves the
+            // contents laid out. Only the modern strategy sees through that.
+            const whenClosed = mode === 'modern' ? 'not.be.visible' : 'be.visible'
+
+            prepareFixtureSection('details-closed')
+            cy.get('#closed-child').should(whenClosed)
+            cy.get('#closed-summary').click()
+            cy.get('#closed-child').should('be.visible')
+            cy.get('#closed-summary').click()
+            cy.get('#closed-child').should(whenClosed)
+          })
+        })
+
         describe('edge cases', () => {
           const isModern = mode === 'modern'
 
@@ -668,6 +694,73 @@ describe('src/cypress/dom/visibility', {
         const reason = dom.getReasonIsHidden($el)
 
         expect(reason).to.eq('This element `<div#actually-visible>` is not visible.')
+      })
+    })
+
+    describe('closed details', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/details.html')
+        prepareFixtureSection('details-closed')
+      })
+
+      it('names the closed details element instead of reporting values that all read as visible', () => {
+        // `content-visibility: hidden` lives on the closed details' ::details-content
+        // pseudo-element, so the element's own computed values cannot explain the failure.
+        cy.get('#closed-child').then(($el) => {
+          const reason = dom.getReasonIsHidden($el)
+
+          expect(reason).to.eq('This element `<div#closed-child.testCase>` is not visible because it is inside a closed `<details>` element: `<details#closed-details.testCase>`. The browser does not render the contents of a closed `<details>` element. Open it by clicking its `<summary>` first.')
+        })
+      })
+
+      it('names the closed details element for a deeper descendant', () => {
+        cy.get('#closed-descendant').then(($el) => {
+          const reason = dom.getReasonIsHidden($el)
+
+          expect(reason).to.eq('This element `<span#closed-descendant.testCase>` is not visible because it is inside a closed `<details>` element: `<details#closed-details.testCase>`. The browser does not render the contents of a closed `<details>` element. Open it by clicking its `<summary>` first.')
+        })
+      })
+
+      it('names the closed details ahead of the element\'s own cause', () => {
+        // the element also has `display: none`, but the closed details is checked first so the
+        // reason costs no computed style read. Opening the details surfaces the other cause.
+        cy.get('#closed-display-none').then(($el) => {
+          const reason = dom.getReasonIsHidden($el)
+
+          expect(reason).to.eq('This element `<div#closed-display-none.testCase>` is not visible because it is inside a closed `<details>` element: `<details#closed-details.testCase>`. The browser does not render the contents of a closed `<details>` element. Open it by clicking its `<summary>` first.')
+        })
+
+        cy.get('#closed-summary').click()
+        cy.get('#closed-display-none').then(($el) => {
+          const reason = dom.getReasonIsHidden($el)
+
+          expect(reason).to.eq('This element `<div#closed-display-none.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+        })
+      })
+
+      it('does not blame a closed details element for itself', () => {
+        // a closed `<details>` renders its own summary, so when the details element is the
+        // hidden subject the cause is always something else
+        cy.$$('body').append('<div style="display: none;"><details id="nested-details"><summary>click me</summary>hidden item</details></div>')
+
+        cy.get('#nested-details').then(($el) => {
+          const reason = dom.getReasonIsHidden($el)
+
+          expect(reason).to.eq('This element `<details#nested-details>` is not visible per `Element.checkVisibility()`. Computed: `display: block`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+        })
+      })
+
+      it('does not blame the closed details for an element inside its summary', () => {
+        // the summary keeps rendering while the details is closed
+        cy.get('#closed-summary').then(($summary) => {
+          $summary.append('<span id="summary-child" style="opacity: 0;">hidden in summary</span>')
+        })
+
+        cy.get('#summary-child').then(($el) => {
+          const reason = dom.getReasonIsHidden($el)
+
+          expect(reason).to.eq('This element `<span#summary-child>` is not visible per `Element.checkVisibility()`. Computed: `display: inline`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
+        })
       })
     })
   })

@@ -26,6 +26,10 @@
 
 - `Angular` version 22 is now supported within component testing, including Launchpad project detection and the `@cypress/schematic` Angular CLI integration. Addresses [#33753](https://github.com/cypress-io/cypress/issues/33753).
 
+**Bugfixes:**
+
+- Elements inside a closed `<details>` element are no longer considered visible. Assertions such as [`.should('not.be.visible')`](https://on.cypress.io/should) now pass for content the browser does not render until the `<details>` is opened, and action commands such as [`.click()`](https://on.cypress.io/click) no longer try to interact with it. When such an element is expected to be visible, the failure message now names the closed `<details>` element as the reason. Fixes [#20706](https://github.com/cypress-io/cypress/issues/20706), [#24193](https://github.com/cypress-io/cypress/issues/24193) and [#30555](https://github.com/cypress-io/cypress/issues/30555).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `37.6.0` to `41.7.0`.

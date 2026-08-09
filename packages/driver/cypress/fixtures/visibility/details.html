@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Details Element Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body>
+  <h1>Details Element Visibility Tests</h1>
+
+  <div class="test-section" cy-section="details-closed" cy-has-conflicts="true">
+    <h3>Closed Details</h3>
+    <details class="testCase" cy-expect="visible" cy-label="Closed details element" id="closed-details">
+      <summary class="testCase" cy-expect="visible" cy-label="Summary of closed details" id="closed-summary">click me</summary>
+      <div class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Child of closed details" id="closed-child">hidden item</div>
+      <div class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Wrapper in closed details" id="closed-wrapper">
+        <span class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Descendant of closed details" id="closed-descendant">deeply hidden item</span>
+      </div>
+      <div class="testCase" cy-expect="hidden" cy-label="Display none child of closed details" id="closed-display-none" style="display: none;">display none item</div>
+    </details>
+  </div>
+
+  <div class="test-section" cy-section="details-open">
+    <h3>Open Details</h3>
+    <details class="testCase" cy-expect="visible" cy-label="Open details element" id="open-details" open>
+      <summary class="testCase" cy-expect="visible" cy-label="Summary of open details" id="open-summary">click me</summary>
+      <div class="testCase" cy-expect="visible" cy-label="Child of open details" id="open-child">shown item</div>
+      <div class="testCase" cy-expect="visible" cy-label="Wrapper in open details" id="open-wrapper">
+        <span class="testCase" cy-expect="visible" cy-label="Descendant of open details" id="open-descendant">deeply shown item</span>
+      </div>
+      <div class="testCase" cy-expect="hidden" cy-label="Display none child of open details" id="open-display-none" style="display: none;">display none item</div>
+    </details>
+  </div>
+
+  <div class="test-section" cy-section="details-nested" cy-has-conflicts="true">
+    <h3>Nested Details</h3>
+    <details class="testCase" cy-expect="visible" cy-label="Outer closed details" id="outer-closed-details">
+      <summary class="testCase" cy-expect="visible" cy-label="Summary of outer closed details" id="outer-closed-summary">click me</summary>
+      <details class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Open details inside closed details" id="inner-open-details" open>
+        <summary class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Summary of open details inside closed details" id="inner-open-summary">click me</summary>
+        <div class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Child of open details inside closed details" id="inner-open-child">hidden item</div>
+      </details>
+    </details>
+
+    <details class="testCase" cy-expect="visible" cy-label="Outer open details" id="outer-open-details" open>
+      <summary class="testCase" cy-expect="visible" cy-label="Summary of outer open details" id="outer-open-summary">click me</summary>
+      <details class="testCase" cy-expect="visible" cy-label="Closed details inside open details" id="inner-closed-details">
+        <summary class="testCase" cy-expect="visible" cy-label="Summary of closed details inside open details" id="inner-closed-summary">click me</summary>
+        <div class="testCase" cy-modern-expect="hidden" cy-legacy-expect="visible" cy-label="Child of closed details inside open details" id="inner-closed-child">hidden item</div>
+      </details>
+    </details>
+  </div>
+</body>
+</html>
