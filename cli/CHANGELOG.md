@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+- Fixed an issue on Windows where adding, renaming, moving or deleting a spec file while `cypress open` was running was not reflected in the specs list, leaving stale specs until Cypress was restarted. Clicking a spec that had been renamed or moved could then fail to run. Projects whose [`specPattern`](https://docs.cypress.io/app/references/configuration#e2e) contains a directory, such as the End-to-End Testing default `cypress/e2e/**/*.cy.{js,jsx,ts,tsx}`, were affected. Fixes [#22303](https://github.com/cypress-io/cypress/issues/22303).
 
 ## 15.20.0
 
