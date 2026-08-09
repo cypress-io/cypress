@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where `cypress run` with [`trashAssetsBeforeRuns`](https://docs.cypress.io/app/references/configuration#Videos) enabled deleted the contents of the project, or of a directory above it, when [`downloadsFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files), [`screenshotsFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files), or [`videosFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files) resolved to such a directory (for example `downloadsFolder: ''` or `'../'`). Cypress now leaves those folders alone and warns instead. Fixes [#26393](https://github.com/cypress-io/cypress/issues/26393).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
 **Misc:**

@@ -220,17 +220,34 @@ const removeOldProfiles = (browser) => {
   })
 }
 
-async function trashAssets (config: Cfg) {
+const containsProjectRoot = (folder: string, projectRoot: string) => {
+  const relative = path.relative(folder, projectRoot)
+
+  return !path.isAbsolute(relative) && !relative.split(path.sep).includes('..')
+}
+
+export async function trashAssets (config: Cfg) {
   if (config.trashAssetsBeforeRuns !== true) {
     return
   }
 
+  const folders = _.toPairs({
+    videosFolder: config.videosFolder,
+    screenshotsFolder: config.screenshotsFolder,
+    downloadsFolder: config.downloadsFolder,
+  }).filter((pair): pair is [string, string] => _.isString(pair[1]))
+
+  // `path.resolve` turns an empty string into the project root and `../` into its
+  // parent, so a mistyped asset folder can point at a directory holding the project.
+  // Emptying that would take the project with it. https://github.com/cypress-io/cypress/issues/26393
+  const [unsafe, safe] = _.partition(folders, ([, folder]) => containsProjectRoot(folder, config.projectRoot))
+
+  if (unsafe.length) {
+    errors.warning('CANNOT_TRASH_ASSETS_UNSAFE_FOLDER', unsafe.map(([key, folder]) => `${key}: ${folder}`), config.projectRoot)
+  }
+
   try {
-    await Promise.all([
-      trash.folder(config.videosFolder),
-      typeof config.screenshotsFolder === 'string' ? trash.folder(config.screenshotsFolder) : Promise.resolve(),
-      trash.folder(config.downloadsFolder),
-    ])
+    await Promise.all(safe.map(([, folder]) => trash.folder(folder)))
   } catch (err) {
     // dont make trashing assets fail the build
     errors.warning('CANNOT_TRASH_ASSETS', err)

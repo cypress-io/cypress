@@ -1,0 +1,11 @@
+[31mWarning: We skipped trashing the following folders because each one resolves to your project root or a directory above it:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mdownloadsFolder: /var/www/project[39m[31m[39m
+[31m[39m
+[31mYour project root is: [94m/var/www/project[39m[31m[39m
+[31m[39m
+[31mTrashing these folders would have deleted your project, so we left them alone and the run will continue.[39m
+[31m[39m
+[31mUpdate these values in your Cypress configuration to point to a directory inside your project, or set [33mtrashAssetsBeforeRuns[39m[31m to [95mfalse[39m[31m to turn off trashing.[39m
+[31m[39m
+[31mThis warning will not affect or change the exit code.[39m

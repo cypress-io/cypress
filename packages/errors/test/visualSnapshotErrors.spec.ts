@@ -143,6 +143,12 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CANNOT_TRASH_ASSETS_UNSAFE_FOLDER: () => {
+      return {
+        default: [['downloadsFolder: /var/www/project'], '/var/www/project'],
+        multiple: [['screenshotsFolder: /var/www', 'downloadsFolder: /var/www/project'], '/var/www/project'],
+      }
+    },
     CANNOT_REMOVE_OLD_BROWSER_PROFILES: () => {
       const err = makeErr()
 

@@ -60,6 +60,20 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
+  CANNOT_TRASH_ASSETS_UNSAFE_FOLDER: (arg1: string[], arg2: string) => {
+    return errTemplate`\
+        Warning: We skipped trashing the following folders because each one resolves to your project root or a directory above it:
+
+        ${fmt.listItems(arg1)}
+
+        Your project root is: ${fmt.path(arg2)}
+
+        Trashing these folders would have deleted your project, so we left them alone and the run will continue.
+
+        Update these values in your Cypress configuration to point to a directory inside your project, or set ${fmt.highlight('trashAssetsBeforeRuns')} to ${fmt.highlightSecondary('false')} to turn off trashing.
+
+        This warning will not affect or change the exit code.`
+  },
   CANNOT_REMOVE_OLD_BROWSER_PROFILES: (arg1: Error) => {
     return errTemplate`\
         Warning: We failed to remove old browser profiles from previous runs.
