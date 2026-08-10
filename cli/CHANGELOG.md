@@ -9,6 +9,10 @@
 
 - Fixed an issue where the error reported in CI when the Cypress binary is missing suggested caching and persisting the default binary cache location, ignoring any [`CYPRESS_CACHE_FOLDER`](https://docs.cypress.io/app/references/advanced-installation#Binary-cache) override. The suggestions now name the directory Cypress actually looked in. Addresses [#23009](https://github.com/cypress-io/cypress/discussions/23009). Addressed in [#34543](https://github.com/cypress-io/cypress/pull/34543).
 
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.22.4` to `4.23.12`. Component testing for projects using `@angular/cli` 22.1 no longer fails to compile every module with `The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received undefined` — tsx now shims `import.meta` even when a comment splits the meta-property, as emitted by `@babel/helper-define-polyfill-provider` 1.x. Fixes [#34461](https://github.com/cypress-io/cypress/issues/34461).
+
 ## 15.20.0
 
 **Performance:**

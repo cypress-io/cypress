@@ -35,7 +35,7 @@
     "json5": "^2.2.3",
     "mock-require": "3.0.3",
     "semantic-release": "22.0.12",
-    "tsx": "4.22.4",
+    "tsx": "4.23.12",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4",
     "webpack": "^5.39.0"
