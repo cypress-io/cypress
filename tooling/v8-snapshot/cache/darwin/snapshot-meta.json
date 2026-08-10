@@ -3580,7 +3580,6 @@
     "./packages/scaffold-config/node_modules/p-locate/index.js",
     "./packages/server/config/app.json",
     "./packages/server/lib/adapters/configurator-network-policy.ts",
-    "./packages/server/lib/adapters/file-server-origin.ts",
     "./packages/server/lib/adapters/internal-routes.ts",
     "./packages/server/lib/adapters/serve-internal-routes.ts",
     "./packages/server/lib/append_electron_switches.ts",
