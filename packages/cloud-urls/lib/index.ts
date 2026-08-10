@@ -10,12 +10,12 @@ export function resolveCloudEnv (env: NodeJS.ProcessEnv = process.env): CloudEnv
   return (env.CYPRESS_INTERNAL_CLOUD_ENV ?? (env.CYPRESS_INTERNAL_ENV || 'development')) as CloudEnv
 }
 
-export const eventCollectorEnv = (): CloudEnv => {
-  const env = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV as CloudEnv
+export function eventCollectorEnv (env: NodeJS.ProcessEnv = process.env): CloudEnv {
+  const collectorEnv = env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV as CloudEnv
 
-  return CLOUD_URLS[env] ? env : 'production'
+  return Object.prototype.hasOwnProperty.call(CLOUD_URLS, collectorEnv) ? collectorEnv : 'production'
 }
 
-export const eventCollectorUrl = (includeMachineId = false): string => {
-  return `${CLOUD_URLS[eventCollectorEnv()]}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
+export function eventCollectorUrl (includeMachineId = false, env: NodeJS.ProcessEnv = process.env): string {
+  return `${CLOUD_URLS[eventCollectorEnv(env)]}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
 }

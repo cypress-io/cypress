@@ -286,6 +286,11 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/cloud-urls": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/cypress-instances": {
       "entry": [
         "lib/generated/**/*.ts"

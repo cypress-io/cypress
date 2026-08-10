@@ -4,7 +4,10 @@
   ],
   "exclude": [
     "dist",
-    "node_modules"
+    "node_modules",
+    "**/__spec__/**",
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ],
   "compilerOptions": {
     "target": "ES2018",
