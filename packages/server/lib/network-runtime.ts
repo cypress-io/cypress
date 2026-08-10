@@ -6,6 +6,7 @@ import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkI
 import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
+import { toFileServerUrl } from '@packages/network-tools'
 import type { CookieJar } from './automation/cookie/jar'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
@@ -16,8 +17,8 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-clie
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
-import { createFileServerOriginMiddleware } from './adapters/file-server-origin'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -205,19 +206,46 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     }),
   )
 
-  // CDP Fetch continues to the browser origin, so strategy:file URLs need a
-  // Node-side file-server origin after the legacy pipeline (see file-server-origin).
-  networkInterception.use(createFileServerOriginMiddleware({
-    remoteStates: deps.remoteStates,
-    getFileServerToken: deps.getFileServerToken,
-    request: deps.request,
-  }))
+  // Send strategy:file requests to the origin server over the wire, and let
+  // Express serve them from the file server, rather than answering the pause
+  // here in Node. Two things depend on it:
+  //   - visit documents. Their response is already buffered by the resolve:url
+  //     pre-flight, so answering the pause would fulfill from that buffer and
+  //     the browser would never make a request. No request means no
+  //     Network.*ExtraInfo and no HTTP caching for the document.
+  //   - subresources. They reach the origin either way, but continuing them
+  //     here runs the middleware on the CDP side first and again on the
+  //     Express side, so the pipeline would process them twice.
+  // Releasing both pauses untouched leaves Express as the single owner of
+  // the middleware. The loopback headers mark the request as ours so the
+  // catch-all serves it under the URL the page actually asked for.
+  // Shared with extra-target transports: popup file traffic reaches Express
+  // the same way, so it needs the same single-owner release.
+  const resolveOriginRedirect = (url: string) => {
+    if (!toFileServerUrl(url, deps.remoteStates.current())) {
+      return undefined
+    }
+
+    const parsed = new URL(url)
+
+    return {
+      // Identity today — a strategy:file remote state always resolves to our
+      // own origin — but this keeps the request pointed at us if that stops
+      // holding, rather than letting it escape to a host we do not serve.
+      url: new URL(`${parsed.pathname}${parsed.search}`, resolveProxyUrlBase(deps.config)).href,
+      headers: {
+        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url,
+        [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+      },
+    }
+  }
 
   const fetchTransport = new CdpFetchTransport(deps.client, networkInterception, {
     isAUTFrame: deps.isAUTFrame,
     // Download-manager pauses omit networkId and never emit requestWillBeSent;
     // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
+    resolveOriginRedirect,
   })
 
   // Extra-target transports share networkInterception so they cannot drift from
@@ -259,6 +287,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
       const extraTransport = new CdpFetchTransport(client, networkInterception, {
         isFromExtraTarget: true,
+        resolveOriginRedirect,
       })
 
       await extraTransport.start()
