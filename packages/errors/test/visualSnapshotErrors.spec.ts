@@ -1182,5 +1182,10 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

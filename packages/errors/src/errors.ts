@@ -793,7 +793,6 @@ export const AllCypressErrors = {
 
         If you're running lots of tests on a memory intense application.
           - Try increasing the CPU/memory on the machine you're running on.
-          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
           - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
 
         You can learn more here:
@@ -1346,6 +1345,12 @@ export const AllCypressErrors = {
       The ${fmt.highlight('experimentalFastVisibility')} configuration option has been removed. The modern visibility algorithm is now the default.
 
       Please remove ${fmt.highlight('experimentalFastVisibility')} from your configuration. To use the legacy algorithm instead, set ${fmt.highlightSecondary(`visibilityStrategy: 'legacy'`)}.`
+  },
+  EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('experimentalMemoryManagement')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}. Memory management is now enabled by default under the ${fmt.highlight('manageBrowserMemory')} option.
+
+      Please remove ${fmt.highlight('experimentalMemoryManagement')} from your configuration. To keep memory management disabled, set ${fmt.highlightSecondary('manageBrowserMemory: false')}.`
   },
   VISIBILITY_STRATEGY_DEPRECATION: () => {
     return errTemplate`\
