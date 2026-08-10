@@ -1,3 +1,10 @@
+# [@cypress/grep-v6.0.3](https://github.com/cypress-io/cypress/compare/@cypress/grep-v6.0.2...@cypress/grep-v6.0.3) (2026-08-07)
+
+
+### Bug Fixes
+
+* **grep:** ignore empty parts in a semicolon-separated grep title ([#34525](https://github.com/cypress-io/cypress/issues/34525)) ([4e8fe8e](https://github.com/cypress-io/cypress/commit/4e8fe8e346b9bc0ee1d71a501788a2393d369382))
+
 # [@cypress/grep-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/grep-v6.0.1...@cypress/grep-v6.0.2) (2026-06-03)
 
 
