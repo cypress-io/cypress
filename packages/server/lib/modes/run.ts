@@ -223,6 +223,10 @@ const removeOldProfiles = (browser) => {
 const containsProjectRoot = (folder: string, projectRoot: string) => {
   const relative = path.relative(folder, projectRoot)
 
+  // Reaching the project root from `folder` without climbing means `folder` is the
+  // project root or sits above it. `path.relative` returns an absolute path when no
+  // route exists between the two (separate drives on Windows), and comparing whole
+  // segments keeps a directory named `..cache` from reading as a climb.
   return !path.isAbsolute(relative) && !relative.split(path.sep).includes('..')
 }
 
