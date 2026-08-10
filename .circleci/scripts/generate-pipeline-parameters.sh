@@ -206,6 +206,10 @@ while IFS= read -r file; do
       system_tests=true
       unit_tests=true
       ;;
+    packages/agent-info/*)
+      # No monorepo consumers yet — only its own vitest suite runs in unit-tests.
+      unit_tests=true
+      ;;
     packages/runner/*)
       driver_tests=true
       app_ui_tests=true
