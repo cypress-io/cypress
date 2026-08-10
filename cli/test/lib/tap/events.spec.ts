@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
-import { resolvedInstanceId } from '../../../lib/cypress-instances'
+import { resolvedInstanceIdentity } from '../../../lib/cypress-instances'
 import { detectAgent } from '@packages/agent-info'
 import util, { DEVELOPMENT_VERSION } from '../../../lib/util'
 
@@ -21,7 +21,7 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
 
   return {
     ...actual,
-    resolvedInstanceId: vi.fn().mockReturnValue(null),
+    resolvedInstanceIdentity: vi.fn().mockReturnValue(null),
   }
 })
 
@@ -51,7 +51,7 @@ describe('lib/tap/events', () => {
     vi.stubGlobal('fetch', fetchMock)
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     delete process.env.CYPRESS_INTERNAL_ENV
-    vi.mocked(resolvedInstanceId).mockReturnValue(null)
+    vi.mocked(resolvedInstanceIdentity).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
     vi.mocked(util.pkgVersion).mockReturnValue('15.0.0')
     dateNow.mockReturnValue(1_000)
@@ -90,7 +90,7 @@ describe('lib/tap/events', () => {
   })
 
   it('carries the id of the instance the command resolved', async () => {
-    vi.mocked(resolvedInstanceId).mockReturnValue('a1b2c3d4-0000-4000-8000-000000000000')
+    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'a1b2c3d4-0000-4000-8000-000000000000', machineId: null, userId: null })
 
     await reportTapTrace(0)
 
@@ -101,6 +101,41 @@ describe('lib/tap/events', () => {
     await reportTapTrace(1)
 
     expect(posted(fetchMock).payload).not.toHaveProperty('instanceId')
+  })
+
+  it('reports to the machine collector with the machine id the instance carried', async () => {
+    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: 'machine-hash', userId: null })
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://cloud.cypress.io/machine-collect')
+    expect(posted(fetchMock).machineId).toBe('machine-hash')
+    expect(posted(fetchMock).payload).not.toHaveProperty('machineId')
+  })
+
+  it('stays anonymous when the instance reports no machine id', async () => {
+    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: null, userId: null })
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://cloud.cypress.io/anon-collect')
+    expect(posted(fetchMock)).not.toHaveProperty('machineId')
+  })
+
+  it('carries the cloud user id of the instance the command resolved', async () => {
+    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: 'machine-hash', userId: 'cloud-user-1' })
+
+    await reportTapTrace(0)
+
+    expect(posted(fetchMock).payload).toMatchObject({ userId: 'cloud-user-1' })
+  })
+
+  it('omits the user id when the instance has no logged-in user', async () => {
+    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: 'machine-hash', userId: null })
+
+    await reportTapTrace(0)
+
+    expect(posted(fetchMock).payload).not.toHaveProperty('userId')
   })
 
   it('carries the agent that invoked the command', async () => {

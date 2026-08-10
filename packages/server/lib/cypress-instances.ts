@@ -53,7 +53,9 @@ export const cypressInstances = {
       testingType,
     }
 
-    currentState = { ...record, cdpBrowserWsUrl: null, browserName: null }
+    // machineId/userId are read fresh from the data context when the probe route
+    // answers; the in-memory state only carries the browser attachment.
+    currentState = { ...record, cdpBrowserWsUrl: null, browserName: null, machineId: null, userId: null }
 
     try {
       await persist(record)

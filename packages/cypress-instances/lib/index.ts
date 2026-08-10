@@ -33,6 +33,10 @@ export interface LiveInstanceState extends CypressInstance {
   cdpBrowserWsUrl: string | null
   /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
   browserName: string | null
+  /** sha256 hash of the OS machine GUID (node-machine-id), or `null` when unresolvable. */
+  machineId: string | null
+  /** Cloud user id of the logged-in user, or `null` when logged out or not yet resolved. */
+  userId: string | null
 }
 
 export interface ReadyInstanceState extends LiveInstanceState {
