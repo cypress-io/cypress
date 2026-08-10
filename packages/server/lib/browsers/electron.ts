@@ -66,6 +66,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
       onReconnect: () => {},
       fullyManageTabs: true,
       onServiceWorkerClientEvent: parent.onServiceWorkerClientEvent,
+      onExtraTargetCriClientReady: options.onExtraTargetCriClientReady,
     })
   }
 

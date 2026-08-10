@@ -46,6 +46,7 @@ export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, Ht
         method: ctx.req.method,
         headers: ctx.req.headers as HttpRequest['headers'],
         body: ctx.req.body,
+        resourceType: ctx.req.resourceType,
       }
     },
 
