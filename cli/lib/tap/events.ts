@@ -9,7 +9,7 @@ import type { ReportedInvocation } from './reported-invocation'
 const debug = Debug('cypress:cli:tap')
 
 const CAMPAIGN = 'Tap Command'
-const MEDIUM = 'cli'
+const MEDIUM = 'tap-cli'
 const POST_TIMEOUT_MS = 2000
 
 // The same map the app reads through @packages/data-context; the CLI cannot reach
@@ -90,7 +90,6 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
     exitCode,
     errorCode: trace.errorCode,
     durationMs: Date.now() - trace.startedAt,
-    cypressVersion,
   }
 
   const url = eventCollectorUrl()

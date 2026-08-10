@@ -78,14 +78,13 @@ describe('lib/tap/events', () => {
 
     expect(posted(fetchMock)).toEqual({
       campaign: 'Tap Command',
-      medium: 'cli',
+      medium: 'tap-cli',
       messageId: expect.any(String),
       payload: {
         command: 'status',
         flags: ['json'],
         exitCode: 0,
         durationMs: 42,
-        cypressVersion: expect.any(String),
       },
     })
   })
