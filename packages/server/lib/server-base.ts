@@ -30,7 +30,7 @@ import { SocketAllowed } from './util/socket_allowed'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
+import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
@@ -54,7 +54,7 @@ import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-r
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -208,6 +208,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: GraphqlWsHandle
+  private _closing?: Bluebird<any>
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -559,6 +560,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     await runtime.start()
   }
 
+  async attachCdpFetchExtraTarget (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+  ): Promise<ExtraTargetDetach | undefined> {
+    return this._cdpFetchRuntime?.attachExtraTarget(client)
+  }
+
   private resetCdpFetchRuntime () {
     try {
       this._cdpFetchRuntime?.reset()
@@ -755,7 +762,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this.socketAllowed.isRequestAllowed(req)) {
+      // Without the proxy, upgrades arrive on direct connections the CONNECT
+      // port allow-list never saw — a loopback remoteAddress is the only
+      // available gate (see #34513).
+      const isAllowed = isProxyDisabled()
+        ? this.socketAllowed.isRequestFromLocalhost(req)
+        : this.socketAllowed.isRequestAllowed(req)
+
+      if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }
@@ -828,6 +842,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
+    if (this._closing) {
+      return this._closing
+    }
+
     // graphql-ws clients must be closed before the HTTP server is destroyed.
     const graphqlDispose = this._graphqlWS?.dispose
       ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
@@ -837,7 +855,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
       : Bluebird.resolve()
 
-    return graphqlDispose.then(() => {
+    this._closing = graphqlDispose.then(() => {
       return Bluebird.all([
         this._close(),
         this._socket?.close(),
@@ -850,6 +868,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       return res
     })
+    .finally(() => {
+      this._closing = undefined
+    })
+
+    return this._closing
   }
 
   end () {
@@ -1184,8 +1207,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          // With the MITM proxy disabled, the server is not a proxy. The
+          // `proxy` option above still delivers this request in absolute form,
+          // so it lands on the direct-origin catch-all in routes.ts — the token
+          // is what marks it as our own loopback there, letting the catch-all
+          // route it through the interception pipeline so the stub can reply.
+          // `tunnel: false` keeps https URLs on that same absolute-form path:
+          // the default CONNECT tunnel would be rejected by onConnect, which
+          // refuses all CONNECTs when the proxy is disabled. Loopback-only —
+          // this request never leaves 127.0.0.1.
+          // Gated so proxy-on wire traffic is unchanged.
+          ...(isProxyDisabled() ? { tunnel: false } : {}),
           headers: {
             'x-cypress-resolving-url': '1',
+            ...(isProxyDisabled() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
           },
         })
       }
