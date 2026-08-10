@@ -513,6 +513,41 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25641
+    it('reads the previous alias when an alias is assigned to itself', () => {
+      cy.get('#list li').as('items')
+      cy.get('@items').as('items')
+
+      cy.get('@items').should('have.length', 3)
+    })
+
+    it('requeries an alias that was assigned to itself', () => {
+      cy.get('#list li').as('items')
+      cy.get('@items').as('items')
+
+      cy.then(() => {
+        cy.$$('#list').append('<li class="item">li 3</li>')
+      })
+
+      cy.get('@items').should('have.length', 4)
+    })
+
+    it('narrows an alias in terms of itself', () => {
+      cy.get('#list li').as('items')
+      cy.get('@items').last().as('items')
+
+      cy.get('@items').should('have.length', 1).and('have.text', 'li 2')
+    })
+
+    it('reads the previous aliases when two aliases reference each other', () => {
+      cy.get('#list').as('list')
+      cy.get('@list').find('li').as('items')
+      cy.get('@items').parent().as('list')
+
+      cy.get('@list').should('have.id', 'list')
+      cy.get('@items').should('have.length', 3)
+    })
+
     it('only retries up to last command', () => {
       cy
       .get('#list li')

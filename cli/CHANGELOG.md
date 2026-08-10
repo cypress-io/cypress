@@ -4,6 +4,7 @@
 **Bugfixes:**
 
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+- Fixed a regression in [12.0.0](#12-0-0) where assigning an [alias](https://on.cypress.io/as) in terms of itself, such as `cy.get('@items').as('items')` or `cy.get('@items').first().as('items')`, failed with `RangeError: Maximum call stack size exceeded`. The reassigned alias now yields what the chain that defined it yields. Fixes [#25641](https://github.com/cypress-io/cypress/issues/25641).
 
 **Misc:**
 

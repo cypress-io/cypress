@@ -20,37 +20,43 @@ type QueryCommandOptions = 'get' | 'contains' | 'shadow' | ''
 function getAlias (selector, log, cy) {
   const alias = selector.slice(1)
 
+  // Looked up once and reused, so that a subject chain stored by `.as()` keeps pointing at the
+  // alias this query read when it ran. Re-reading the name on every replay makes
+  // `cy.get('@foo').as('foo')` store a chain that resolves through itself, recursing until the
+  // stack overflows. https://github.com/cypress-io/cypress/issues/25641
+  let aliasObj
+
   return () => {
-    let toSelect
+    if (!aliasObj) {
+      let toSelect
 
-    // Aliases come in two types: raw names, or names followed by an index.
-    // For example, "@foo.bar" or "@foo.bar.1" or "@foo.bar.all", where 1 or all are the index.
-    if ((cy.state('aliases') || {})[alias]) {
-      toSelect = selector
-    } else {
-      // If the name isn't in our state, then this is probably a dynamic alias -
-      // which is to say, it includes an index.
-      toSelect = selector.replace(/\.(\d+|all)$/, '')
-    }
-
-    let aliasObj
-
-    try {
-      aliasObj = cy.getAlias(toSelect)
-    } catch (err) {
-      // possibly this is a dynamic alias, check to see if there is a request
-      // We need to use the stripped alias
-      const strippedAlias = aliasDisplayName(toSelect)
-      const requests = getAliasedRequests(strippedAlias, cy.state)
-
-      if (!isDynamicAliasingPossible(cy.state) || !requests.length) {
-        err.retry = false
-        throw err
+      // Aliases come in two types: raw names, or names followed by an index.
+      // For example, "@foo.bar" or "@foo.bar.1" or "@foo.bar.all", where 1 or all are the index.
+      if ((cy.state('aliases') || {})[alias]) {
+        toSelect = selector
+      } else {
+        // If the name isn't in our state, then this is probably a dynamic alias -
+        // which is to say, it includes an index.
+        toSelect = selector.replace(/\.(\d+|all)$/, '')
       }
 
-      aliasObj = {
-        alias: strippedAlias,
-        command: cy.state('routes')[requests[0].routeId].command,
+      try {
+        aliasObj = cy.getAlias(toSelect)
+      } catch (err) {
+        // possibly this is a dynamic alias, check to see if there is a request
+        // We need to use the stripped alias
+        const strippedAlias = aliasDisplayName(toSelect)
+        const requests = getAliasedRequests(strippedAlias, cy.state)
+
+        if (!isDynamicAliasingPossible(cy.state) || !requests.length) {
+          err.retry = false
+          throw err
+        }
+
+        aliasObj = {
+          alias: strippedAlias,
+          command: cy.state('routes')[requests[0].routeId].command,
+        }
       }
     }
 
