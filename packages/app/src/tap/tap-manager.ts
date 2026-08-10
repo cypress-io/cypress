@@ -2,7 +2,7 @@ import { tapCommands } from './commands'
 import { TapCommandError } from './commands/definition'
 import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
-import { TAP_SCHEMA_VERSION } from './contract'
+import { TAP_SCHEMA_VERSION, withoutViewOptions } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
@@ -38,7 +38,7 @@ export class TapManager implements TapBindingContract {
           description,
           ...(details ? { details } : {}),
           params: params.map((param) => ({ ...param })),
-          options: (options ?? []).map((option) => ({ ...option })),
+          options: withoutViewOptions(options).map((option) => ({ ...option })),
           ...(hidden ? { hidden: true } : {}),
         }
       }),
@@ -78,7 +78,9 @@ export class TapManager implements TapBindingContract {
       }
     }
 
-    const optionSchema = definition.options ?? []
+    // View-only options are the CLI's own; a caller naming one is naming an
+    // option this command does not have, and is told so.
+    const optionSchema = withoutViewOptions(definition.options)
 
     const coercedArgs = coerceCommandArgs(command, definition.params, normalizedArgs, optionSchema)
 

@@ -52,8 +52,11 @@ export const beginTapTrace = ({ command, flags }: ReportedInvocation): void => {
   trace = newTrace(command, flags)
 }
 
-export const noteTapCommand = (dispatched: string): void => {
+// Names only: an option's value carries selectors, spec paths and test titles,
+// so the trace takes the keys of what commander parsed, never the values.
+export const noteTapCommand = (dispatched: string, ...parsed: Record<string, string>[]): void => {
   trace.command = dispatched
+  trace.flags = [...new Set([...trace.flags, ...parsed.flatMap((values) => Object.keys(values))])]
 }
 
 export const noteTapFailure = (code: string): void => {

@@ -60,18 +60,24 @@ describe('lib/exec/tap reporting the invocation', () => {
     expect(reportedEvent()).not.toHaveProperty('errorCode')
   })
 
+  // A schema command's flags are named by the schema, which a discovery failure
+  // never fetched, so the code is all such an invocation has to report.
   it('reports a discovery failure by its code', async () => {
     vi.mocked(resolveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
-    expect(await tap.start(['reporter', '--testId', 'r2'], {})).toBe(1)
+    expect(await tap.start(['reporter', '--test-id', 'r2'], {})).toBe(1)
     expect(reportedEvent()).toMatchObject({ command: 'reporter', exitCode: 1, errorCode: 'NO_INSTANCE' })
+    expect(reportedEvent().flags).toEqual([])
   })
 
+  // A CLI-native command is dispatched before it looks for an instance, so it
+  // reports what was typed as well as the code it failed with.
   it('reports a discovery failure a CLI-native command handled itself', async () => {
     vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
 
-    expect(await tap.start(['specs'], {})).toBe(1)
-    expect(reportedEvent()).toMatchObject({ command: 'specs', exitCode: 1, errorCode: 'NO_INSTANCE' })
+    expect(await tap.start(['run', 'cypress/e2e/a.cy.js'], {})).toBe(1)
+    expect(reportedEvent()).toMatchObject({ command: 'run', exitCode: 1, errorCode: 'NO_INSTANCE', flags: ['spec'] })
+    expect(JSON.stringify(reportedEvent())).not.toContain('a.cy.js')
   })
 
   it('reports an instance-side failure by the code the instance gave', async () => {
@@ -124,9 +130,9 @@ describe('lib/exec/tap reporting the invocation', () => {
     it('reports the flag names an invocation used, never their values', async () => {
       mockSession(buildTapSchema('15.0.0'))
 
-      expect(await tap.start(['reporter', '--testId', 'r2'], { json: true, instance: 4242 })).toBe(0)
+      expect(await tap.start(['reporter', '--test-id', 'r2'], { json: true, instance: 4242 })).toBe(0)
 
-      expect(reportedEvent().flags).toEqual(['testId', 'json', 'instance'])
+      expect(reportedEvent().flags).toEqual(['json', 'instance', 'test-id'])
       expect(JSON.stringify(reportedEvent())).not.toContain('r2')
       expect(JSON.stringify(reportedEvent())).not.toContain('4242')
     })
@@ -138,11 +144,14 @@ describe('lib/exec/tap reporting the invocation', () => {
       expect(reportedEvent().flags).toEqual(['help'])
     })
 
-    it('reports a flag this CLI does not declare as unknown', async () => {
-      mockSession()
+    // An undeclared flag is rejected before dispatch, so it reports as the usage
+    // error it is, under no flag at all — and the value it carried stays home.
+    it('reports no flag for one this CLI does not declare, and never its value', async () => {
+      mockSession(buildTapSchema('15.0.0'))
 
-      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js', '--secret-token=abc123'], {})).toBe(1)
-      expect(reportedEvent().flags).toEqual(['unknown'])
+      expect(await tap.start(['reporter', '--secret-token=abc123'], {})).toBe(1)
+      expect(reportedEvent()).toMatchObject({ command: 'reporter', errorCode: 'INVALID_USAGE' })
+      expect(reportedEvent().flags).toEqual([])
       expect(JSON.stringify(reportedEvent())).not.toContain('abc123')
     })
 

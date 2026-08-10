@@ -66,7 +66,8 @@ const withJson = (schema: TapSchema, name: string, options: Record<string, strin
 
 const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
   let dispatchCode: number | undefined
-  const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
+  const program = buildNativeProgram(native, async (name, args, commandOptions, renderOptions) => {
+    noteTapCommand(name, args, commandOptions, renderOptions)
     dispatchCode = await native.handler(options, args, commandOptions)
   })
 
@@ -132,7 +133,7 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
 
       let dispatchCode = 0
       const program = buildTapProgram(schema, async (name, args, commandOptions, renderOptions) => {
-        noteTapCommand(name)
+        noteTapCommand(name, args, commandOptions, renderOptions)
         dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, renderOptions)
       })
 
@@ -184,7 +185,7 @@ const tapModule = {
     const info = buildCommandInfo(operands)
     let exitCode = 1
 
-    beginTapTrace(reportedInvocation(info.command, operands, options))
+    beginTapTrace(reportedInvocation(info.command, info.wantsHelp, options))
 
     // The CLI exits the moment this returns, so the trace is reported before it
     // does rather than left in flight.

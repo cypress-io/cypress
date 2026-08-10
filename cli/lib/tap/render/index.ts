@@ -1,5 +1,4 @@
-import type { ClearResult, PinResult, TapCommandName, TapCommandOptionSchema, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
-import { TAP_VIEW_OPTIONS } from '@packages/cypress-instances'
+import type { ClearResult, PinResult, TapCommandName, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
 import type { TapRunResult } from '../commands/run'
 import type { TapInstanceSummary } from '../commands/instances'
 import type { TapSpecEntry } from '../commands/specs'
@@ -72,13 +71,4 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {
   return renderings[command as TapCommandName | TapNativeCommandName]
-}
-
-/**
- * The view-only options to declare on a command on top of the ones its schema
- * advertises. They stay in the CLI: the instance neither needs nor is told about
- * them, so they work against any version that has the command at all.
- */
-export const renderOptionsFor = (command: string): readonly TapCommandOptionSchema[] => {
-  return TAP_VIEW_OPTIONS[command as TapCommandName | TapNativeCommandName] ?? []
 }
