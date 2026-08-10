@@ -11,7 +11,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `tsx` from `4.22.4` to `4.23.12`. Component testing for projects using `@angular/cli` 22.1 no longer fails to compile every module with `The argument 'filename' must be a file URL object, file URL string, or absolute path string. Received undefined` — tsx now shims `import.meta` even when a comment splits the meta-property, as emitted by `@babel/helper-define-polyfill-provider` 1.x. Fixes [#34461](https://github.com/cypress-io/cypress/issues/34461).
+- Upgraded `tsx` from `4.22.4` to `4.23.12`. Fixes [#34461](https://github.com/cypress-io/cypress/issues/34461).
 
 ## 15.20.0
 
