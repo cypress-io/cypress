@@ -360,7 +360,7 @@ describe('CloudDataSource', () => {
       }
     })
 
-    it('resolves the environment when the client is created, not when the module loads', async () => {
+    it('does not freeze the environment at module load', async () => {
       process.env.CYPRESS_INTERNAL_ENV = 'production'
 
       const source = new CloudDataSource({
