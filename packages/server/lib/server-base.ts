@@ -209,6 +209,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: GraphqlWsHandle
+  private _closing?: Bluebird<any>
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -766,7 +767,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this.socketAllowed.isRequestAllowed(req)) {
+      // Without the proxy, upgrades arrive on direct connections the CONNECT
+      // port allow-list never saw — a loopback remoteAddress is the only
+      // available gate (see #34513).
+      const isAllowed = isProxyDisabled()
+        ? this.socketAllowed.isRequestFromLocalhost(req)
+        : this.socketAllowed.isRequestAllowed(req)
+
+      if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }
@@ -839,6 +847,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
+    if (this._closing) {
+      return this._closing
+    }
+
     // graphql-ws clients must be closed before the HTTP server is destroyed.
     const graphqlDispose = this._graphqlWS?.dispose
       ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
@@ -848,7 +860,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
       : Bluebird.resolve()
 
-    return graphqlDispose.then(() => {
+    this._closing = graphqlDispose.then(() => {
       return Bluebird.all([
         this._close(),
         this._socket?.close(),
@@ -861,6 +873,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       return res
     })
+    .finally(() => {
+      this._closing = undefined
+    })
+
+    return this._closing
   }
 
   end () {
