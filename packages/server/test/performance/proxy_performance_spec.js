@@ -298,6 +298,12 @@ const EXPECTED_IMAGE_COUNT = 1000
 // recorded as failures, so capture has to stay open until enough of them have landed.
 const CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_CAPTURE_TIMEOUT) || 15000
 
+// The latency origin's MITM captures are queueing-bound at ~1000 x 50ms / ~6
+// connections ≈ 9-10s, and the no-h2 assertion allows up to 2x that — the
+// capture window has to outlast the assertion boundary, or a slow-but-assertable
+// run dies as a capture timeout before the assertion can fail it.
+const HTTP2_LATENCY_CAPTURE_TIMEOUT_MS = 45000
+
 // When the fixture host serves something other than the fixture - a GitHub Pages error
 // page, say - the symptom is an oddly small request count with nothing pending, so the
 // diagnostic has to name what actually loaded.
@@ -310,7 +316,7 @@ const REPORTED_URL_COUNT = 5
 // the load event.
 const BAD_PAGE_GRACE_MS = 1000
 
-const createHarCaptureHooks = () => {
+const createHarCaptureHooks = (captureTimeoutMs = CAPTURE_TIMEOUT_MS) => {
   const started = new Set()
   const finished = new Set()
   const failed = new Set()
@@ -375,8 +381,8 @@ const createHarCaptureHooks = () => {
           if (finished.size >= EXPECTED_IMAGE_COUNT) return resolve()
 
           const timeout = setTimeout(() => {
-            reject(new Error(`Timed out after ${CAPTURE_TIMEOUT_MS}ms waiting for ${EXPECTED_IMAGE_COUNT} requests to finish loading. ${describeCapture()}`))
-          }, CAPTURE_TIMEOUT_MS)
+            reject(new Error(`Timed out after ${captureTimeoutMs}ms waiting for ${EXPECTED_IMAGE_COUNT} requests to finish loading. ${describeCapture()}`))
+          }, captureTimeoutMs)
 
           onTargetReached = () => {
             clearTimeout(timeout)
@@ -472,7 +478,7 @@ const getResultsFromHar = (har) => {
   return results
 }
 
-const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
+const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutMs } = {}) => {
   const cdpPort = CDP_PORT_RANGE_START + Math.floor(Math.random() * CDP_PORT_RANGE_SIZE)
 
   const browser = {
@@ -580,7 +586,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
     return Promise.delay(500).then(() => {
       debug('Trying to connect to Chrome...')
 
-      const captureHooks = createHarCaptureHooks()
+      const captureHooks = createHarCaptureHooks(captureTimeoutMs)
 
       const harCapturer = HarCapturer.run([
         urlUnderTest,
@@ -681,13 +687,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire } = {}) => {
 let cyServer
 let proxyDisabledServer
 
-// TODO: re-enable once the fixture is served from somewhere that tolerates the load this
-// suite generates - 1000 requests and ~15MB per capture, 16 captures per run, on every PR.
-// GitHub Pages appears to throttle it: single requests to test-page-speed.cypress.io are
-// reliable, but a capture intermittently receives a Pages error page instead of the fixture
-// and then records 5 requests instead of 1001. Unarchiving cypress-fetch-page and rebuilding
-// it did not help. https://github.com/cypress-io/cypress/issues/34530
-describe.skip('Proxy Performance', function () {
+describe('Proxy Performance', function () {
   // a retried test re-measures the baseline, so this has to cover two full captures
   this.timeout(2 * CAPTURE_TIMEOUT_MS + (30 * 1000))
   this.retries(3)
@@ -783,7 +783,15 @@ describe.skip('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    describe(urlUnderTest, function () {
+    // TODO: re-enable once the fixture is served from somewhere that tolerates the load the
+    // hosted-page describes generate - 1000 requests and ~15MB per capture, 16 captures per
+    // run, on every PR. GitHub Pages appears to throttle it: single requests to
+    // test-page-speed.cypress.io are reliable, but a capture intermittently receives a Pages
+    // error page instead of the fixture and then records 5 requests instead of 1001.
+    // Unarchiving cypress-fetch-page and rebuilding it did not help. The synthetic latency
+    // origin below is localhost, so it stays on.
+    // https://github.com/cypress-io/cypress/issues/34530
+    describe.skip(urlUnderTest, function () {
       // the fixture host does not always serve the fixture, and a load that missed it is
       // rejected in about a second, so retrying freely is what gets a run past a bad patch
       this.retries(15)
@@ -941,7 +949,8 @@ describe.skip('Proxy Performance', function () {
 
   describe(`${HTTP2_LATENCY_ORIGIN_URL} (synthetic latency origin)`, function () {
     this.retries(15)
-    this.timeout(120 * 1000)
+    // each test here is a paired measurement — two full captures per attempt
+    this.timeout(2 * HTTP2_LATENCY_CAPTURE_TIMEOUT_MS + (30 * 1000))
 
     const mitmCase = makeTestCase({ name: 'With Cypress proxy, Intercepted', cyProxy: true, cyIntercept: true })
     const proxyDisabledCase = makeTestCase({ name: 'With proxy disabled, Intercepted (CDP)', proxyDisabled: true })
@@ -965,11 +974,11 @@ describe.skip('Proxy Performance', function () {
       let proxyDisabledWire
 
       // paired and time-adjacent: both sides re-measured on every retry
-      const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, mitmCase, { onWire: (wire) => {
+      const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, mitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
         mitmWire = wire
       } })
 
-      const proxyDisabledResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledCase, { onWire: (wire) => {
+      const proxyDisabledResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
         proxyDisabledWire = wire
       } })
 
@@ -990,8 +999,8 @@ describe.skip('Proxy Performance', function () {
 
       let wireEvidence
 
-      const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, pairedMitmCase)
-      const results = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledNoH2Case, { onWire: (wire) => {
+      const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, pairedMitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS })
+      const results = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledNoH2Case, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
         wireEvidence = wire
       } })
 
