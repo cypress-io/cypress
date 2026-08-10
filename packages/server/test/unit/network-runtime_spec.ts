@@ -1,6 +1,7 @@
 import { NetworkProxy } from '@packages/proxy'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
+import { CdpFetchTransport } from '../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
@@ -40,6 +41,7 @@ describe('lib/network-runtime', () => {
     url?: string
     resourceType?: Protocol.Network.ResourceType
     responseStatusCode?: number
+    responseHeaders?: Protocol.Fetch.HeaderEntry[]
   }): Protocol.Fetch.RequestPausedEvent {
     return {
       requestId: options.requestId,
@@ -52,6 +54,7 @@ describe('lib/network-runtime', () => {
         headers: {},
       },
       responseStatusCode: options.responseStatusCode,
+      responseHeaders: options.responseHeaders,
     } as Protocol.Fetch.RequestPausedEvent
   }
 
@@ -390,6 +393,77 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'fetch-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').to.not.exist
+  })
+
+  // The legacy pipeline hands every response body back through the synthetic
+  // Express context, so an asset it does not rewrite has to come out
+  // byte-identical for the transport to release the origin response.
+  it('createCdpFetchRuntime continues asset responses the legacy pipeline leaves byte-identical', async () => {
+    const assetBody = Buffer.from('body { color: red; }')
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: assetBody.toString('base64'), base64Encoded: true }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const pause = {
+      requestId: 'asset-request',
+      networkId: 'network-asset-1',
+      url: 'https://example.test/app.css',
+      resourceType: 'Stylesheet' as Protocol.Network.ResourceType,
+    }
+
+    const handled = onRequestPaused(createPausedRequest(pause))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      ...pause,
+      responseStatusCode: 200,
+      responseHeaders: [{
+        name: 'content-type',
+        value: 'text/css',
+      }, {
+        name: 'content-length',
+        value: String(assetBody.length),
+      }],
+    }))
+
+    await flush()
+    await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'asset-request',
+      responseCode: 200,
+    })
+
+    // The pipeline left the headers alone, so the origin's own content-length
+    // survives by omitting responseHeaders rather than resending a copy of it.
+    expect(continueResponseCall!.args[1]).to.not.have.property('responseHeaders')
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').to.not.exist
   })
 
   it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {
@@ -633,5 +707,148 @@ describe('lib/network-runtime', () => {
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'http-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const detach = await runtime.attachExtraTarget(extraClient)
+
+    expect(extraClient.send).to.have.been.calledWith('Network.enable')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    })
+
+    expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
+    expect(extraClient.send.withArgs('Network.enable'))
+    .to.have.been.calledBefore(extraClient.send.withArgs('Fetch.enable'))
+
+    const transportReset = sinon.spy(CdpFetchTransport.prototype, 'reset')
+
+    runtime.reset()
+
+    // Asserts the extra transport itself reset, not just that reset() fired
+    // twice — a call count alone would also pass if the main transport's
+    // reset ran twice and the extra transport's never ran.
+    expect(transportReset).to.have.been.calledTwice
+    expect(transportReset.thisValues).to.include(runtime.fetchTransport)
+    expect(transportReset.thisValues.filter((transport) => transport !== runtime.fetchTransport)).to.have.length(1)
+
+    await detach()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+
+    await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime stop also stops attached extra-target transports', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+    await runtime.stop()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  it('createCdpFetchRuntime stop does not hang on an extra-target transport that never answers Fetch.disable', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // models an extra target whose own CDP connection is already gone —
+    // Fetch.disable is sent but never answered
+    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+    await runtime.stop()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget rejects promptly when stop() lands mid-attach', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // park attachExtraTarget inside extraTransport.start() until we release it
+    const fetchEnableGate = Promise.withResolvers<void>()
+
+    extraClient.send.withArgs('Fetch.enable').returns(fetchEnableGate.promise)
+    // models a dead-but-open extra-target socket — Fetch.disable is sent but
+    // never answered, same as the sibling stop()/detach paths
+    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const attach = runtime.attachExtraTarget(extraClient)
+
+    await flush()
+
+    // stop() lands while attach is still awaiting Fetch.enable inside start()
+    await runtime.stop()
+
+    fetchEnableGate.resolve()
+
+    await expect(attach).to.be.rejectedWith('CDP Fetch runtime has been stopped')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
   })
 })

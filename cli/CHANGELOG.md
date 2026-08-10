@@ -3,8 +3,16 @@
 
 **Bugfixes:**
 
-- Fixed an issue where Chrome could silently upgrade a top-level [`cy.visit()`](https://on.cypress.io/visit) from `http://` to `https://` for real hostnames on the default ports 80/443 (Chrome's HTTPS-Upgrades feature). That left Cypress on an origin the test never requested, so visits that followed cross-origin `http://` redirects never settled. Fixes [#34508](https://github.com/cypress-io/cypress/issues/34508).
+- Fixed a regression in [15.20.0](#15-20-0) where the Cypress app sent all Cypress Cloud requests to `http://localhost:3000` instead of Cypress Cloud. Logging in could not complete, and the Runs and Debug pages reported no data. Addressed in [#34536](https://github.com/cypress-io/cypress/pull/34536).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
+
+**Misc:**
+
+- Fixed an issue where the error reported in CI when the Cypress binary is missing suggested caching and persisting the default binary cache location, ignoring any [`CYPRESS_CACHE_FOLDER`](https://docs.cypress.io/app/references/advanced-installation#Binary-cache) override. The suggestions now name the directory Cypress actually looked in. Addresses [#23009](https://github.com/cypress-io/cypress/discussions/23009). Addressed in [#34543](https://github.com/cypress-io/cypress/pull/34543).
+
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.22.4` to `4.23.12`. Fixes [#34461](https://github.com/cypress-io/cypress/issues/34461).
 
 ## 15.20.0
 

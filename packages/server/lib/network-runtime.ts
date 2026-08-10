@@ -9,9 +9,10 @@ import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './automation/cookie/jar'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
-import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import type { FoundBrowser, ProtocolManagerShape, ExtraTargetDetach } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-client'
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
@@ -63,6 +64,12 @@ export type CdpFetchNetworkRuntime = {
   networkInterceptionCore: NetworkInterceptionCore
   networkInterception: HttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse>
   fetchTransport: CdpFetchTransport
+  /**
+   * Attaches a CdpFetchTransport to an extra-target (popup / _blank) CDP
+   * session so its requests run the shared middleware onion with the
+   * extra-target marker. Returns detach() to stop that transport.
+   */
+  attachExtraTarget (client: Pick<ICriClient, 'send' | 'on' | 'off'>): Promise<ExtraTargetDetach>
   start (): Promise<void>
   reset (): void
   stop (): Promise<void>
@@ -130,6 +137,8 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     },
   }
 }
+
+const RUNTIME_STOPPED_ERROR = 'Cannot attach extra target: CDP Fetch runtime has been stopped'
 
 /**
  * Composition-root factory for the CDP Fetch network runtime used when the
@@ -211,6 +220,13 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
   })
 
+  // Extra-target transports share networkInterception so they cannot drift from
+  // the main-target middleware onion. Tracked so reset()/stop() cover them.
+  // request ids are namespaced inside each extra CdpFetchTransport so concurrent
+  // sessions cannot collide in the shared codec maps.
+  const extraTargetTransports = new Set<CdpFetchTransport>()
+  let stopped = false
+
   // Proxy parity: cookie simulation's simulated top, which nothing else
   // updates when the proxy is off. Sourced from navigation commits because
   // cache-served documents never produce a Fetch pause. Only http(s) commits
@@ -231,6 +247,44 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
+    async attachExtraTarget (client) {
+      if (stopped) {
+        throw new Error(RUNTIME_STOPPED_ERROR)
+      }
+
+      // CDPNetworkExtraInfo (used by CdpFetchTransport for Set-Cookie) requires
+      // Network on this session. The browser-level Network.enable in
+      // _onAttachToTarget does not apply to this dedicated extra-target CRI client.
+      await client.send('Network.enable', DEFAULT_NETWORK_ENABLE_OPTIONS)
+
+      const extraTransport = new CdpFetchTransport(client, networkInterception, {
+        isFromExtraTarget: true,
+      })
+
+      await extraTransport.start()
+
+      if (stopped) {
+        // Not awaited, for the same reason stop() itself does not await extras:
+        // a dead extra-target socket may never answer Fetch.disable, and this
+        // must reject promptly so _onAttachToTarget's caller reaches its
+        // fallback instead of suspending the Target.attachedToTarget handler.
+        extraTransport.stop().catch(() => {})
+
+        throw new Error(RUNTIME_STOPPED_ERROR)
+      }
+
+      extraTargetTransports.add(extraTransport)
+
+      return async () => {
+        extraTargetTransports.delete(extraTransport)
+
+        try {
+          await extraTransport.stop()
+        } catch {
+          // Extra-target sockets are usually already gone when detach runs.
+        }
+      }
+    },
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
@@ -247,10 +301,27 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
     reset () {
       fetchTransport.reset()
+
+      for (const extraTransport of extraTargetTransports) {
+        extraTransport.reset()
+      }
     },
-    stop () {
+    async stop () {
+      stopped = true
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
+
+      // Not awaited, for the same reason _onTargetDestroyed and
+      // closeExtraTargets do not await detach: a dead extra-target socket may
+      // never answer Fetch.disable, and stop() runs ahead of HTTP server
+      // teardown — it must not be able to hang that.
+      for (const extraTransport of extraTargetTransports) {
+        extraTransport.stop().catch(() => {
+          // Extra-target sockets are usually already gone.
+        })
+      }
+
+      extraTargetTransports.clear()
 
       return fetchTransport.stop()
     },

@@ -12,7 +12,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 
 **Architecture**
 
-- `gulp/` — Gulp build pipeline: `gulpfile.ts` defines all tasks; `tasks/` contains individual task modules (Vite builds, webpack, GraphQL codegen, autobarrel, package assembly, cloud validation sync, etc.); `utils/` has shared helpers (child process, exit, path map, stream prefix)
+- `gulp/` — Gulp build pipeline: `gulpfile.ts` defines all tasks; `tasks/` contains individual task modules (Vite builds, webpack, GraphQL codegen, autobarrel, package assembly, cloud validation sync, etc.); `utils/` has shared helpers (child process, path map, stream prefix, nexus typegen)
 - `binary/` — Cypress binary lifecycle: `build.ts` (electron-builder packaging), `upload.js` / `upload-build-artifact.js` (S3 upload), `move-binaries.ts` (post-release artifact moves), `smoke.js` (smoke-test the built binary), `zip.js` (zip/unzip), `util/` (packages manifest, upload helpers, CloudFlare cache purge)
 - `semantic-commits/` — Conventional commit helpers: `get-current-release-data.js`, `get-linked-issues.js`, `validate-binary-changelog.js`
 - `github-actions/semantic-pull-request/` — GitHub Action that validates PR titles against the conventional commit format
