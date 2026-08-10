@@ -79,6 +79,16 @@ type CdpFetchTransportOptions = {
    * the full pre-request timeout.
    */
   addPendingUrlWithoutPreRequest?: (url: string) => void
+  /**
+   * When set for a URL, the transport releases the request pause with a
+   * page-invisible `Fetch.continueRequest` url override (plus the returned
+   * headers) and releases the response pause untouched. No middleware runs
+   * on the CDP side. Used to send strategy:file requests to the Cypress
+   * origin regardless of what origin the page believes it is on — the wire
+   * request lands on our Express server (which runs the pipeline exactly
+   * once) while the page keeps its impersonated URL.
+   */
+  resolveOriginRedirect?: (url: string) => { url: string, headers: Record<string, string> } | undefined
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -117,6 +127,23 @@ export class CdpFetchTransport {
    * overlapping the main target) would collide in the shared intercept maps.
    */
   private readonly requestIdPrefix: string
+
+  /**
+   * Fetch.requestIds this transport redirected to the Cypress origin at the
+   * request stage (see `options.resolveOriginRedirect`).
+   *
+   * Request and response pauses arrive as separate events, so the response
+   * side needs this to recognize a redirected flow:
+   *
+   * - `interceptRequest` adds the id when a redirect resolves, then continues
+   *   the request with the url override.
+   * - `resolveResponse` deletes the id and releases that pause untouched.
+   *   Express already ran the pipeline for these — running it again here
+   *   would double-process the response.
+   * - `reset` clears the rest: a flow aborted before its response pause
+   *   arrives (navigation away) has nothing else to remove its entry.
+   */
+  private readonly originRedirectedRequests = new Set<string>()
 
   private isStarted = false
 
@@ -185,6 +212,9 @@ export class CdpFetchTransport {
   reset (): void {
     debug('resetting CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
     this.rejectAll(new Error('CDP Fetch transport reset'))
+    // Redirected flows aborted mid-request (navigation away) never reach a
+    // response pause, so nothing else would clear them.
+    this.originRedirectedRequests.clear()
     this.networkExtraInfo.flush()
   }
 
@@ -211,6 +241,55 @@ export class CdpFetchTransport {
 
   private interceptRequest = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
     if (event.responseErrorReason || typeof event.responseStatusCode === 'number') {
+      return
+    }
+
+    let originRedirect: { url: string, headers: Record<string, string> } | undefined
+
+    try {
+      originRedirect = this.options.resolveOriginRedirect?.(event.request.url)
+    } catch (err) {
+      // A resolver failure must not strand the pause — fall through to the
+      // normal interception flow.
+      debug('resolveOriginRedirect failed for %s: %s', event.request.url, (err as Error).message)
+    }
+
+    if (originRedirect) {
+      debug('redirecting %s to the Cypress origin (%s) — page keeps its URL', event.request.url, originRedirect.url)
+
+      // The Express-side pipeline still runs pre-request correlation for the
+      // direct request, so pauses without networkId (download-manager) must be
+      // pre-registered here just like intercepted ones. Correlation keys on
+      // the page URL — Network events report it, not the override.
+      if (!event.networkId) {
+        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
+      }
+
+      this.originRedirectedRequests.add(event.requestId)
+
+      try {
+        await this.client.send('Fetch.continueRequest', {
+          requestId: event.requestId,
+          // The url override is not observable by the page: location, history,
+          // Network events, and the HTTP cache all keep the impersonated URL.
+          url: originRedirect.url,
+          headers: [
+            ...Object.entries(event.request.headers).map(([name, value]) => ({ name, value: String(value) })),
+            ...Object.entries(originRedirect.headers).map(([name, value]) => ({ name, value })),
+          ],
+        }, sessionId)
+      } catch (err) {
+        debug('origin-redirect continueRequest failed for %s, releasing untouched: %s', event.request.url, (err as Error).message)
+
+        // If CDP rejected the override params, a bare release still frees the
+        // pause. The set entry stays valid: the un-overridden request reaches
+        // the same origin (the override is identity today), and its response
+        // pause must still be released untouched.
+        await this.safeSend('Fetch.continueRequest', {
+          requestId: event.requestId,
+        }, sessionId)
+      }
+
       return
     }
 
@@ -396,6 +475,28 @@ export class CdpFetchTransport {
 
   private resolveResponse = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
     if (!event.responseErrorReason && typeof event.responseStatusCode !== 'number') {
+      return
+    }
+
+    if (this.originRedirectedRequests.delete(event.requestId)) {
+      debug('releasing redirected response pause for %s', event.request.url)
+
+      // Nothing consumes extraInfo tracking for a redirected flow.
+      if (event.networkId) {
+        this.networkExtraInfo.clear(event.networkId, sessionId)
+      }
+
+      if (event.responseErrorReason) {
+        await this.safeSend('Fetch.failRequest', {
+          requestId: event.requestId,
+          errorReason: event.responseErrorReason,
+        }, sessionId)
+      } else {
+        await this.safeSend('Fetch.continueResponse', {
+          requestId: event.requestId,
+        }, sessionId)
+      }
+
       return
     }
 
