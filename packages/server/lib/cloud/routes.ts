@@ -3,12 +3,6 @@ import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
 
-/**
- * Read on each call rather than at module scope. This module is only kept out of the V8
- * snapshot by its place in the generated deferred list, which is rebuilt from scratch
- * whenever yarn.lock changes; a module-level value would freeze into the binary as
- * `development` the moment that classification shifts.
- */
 export const getApiUrl = (): string => {
   return app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
 }

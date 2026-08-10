@@ -66,8 +66,6 @@ describe('EventCollectorActions', () => {
       expect(result).toBe(false)
     })
 
-    // The module itself is initialized while the V8 snapshot is built, where this variable
-    // is absent. Reading it any earlier than the request freezes the wrong url into the binary.
     it('resolves the environment when the event is recorded, not when the module loads', async () => {
       const original = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
 

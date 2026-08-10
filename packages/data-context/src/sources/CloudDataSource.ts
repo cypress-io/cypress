@@ -115,9 +115,6 @@ export class CloudDataSource {
   }
 
   reset () {
-    // Resolved here rather than at module scope: this module is initialized while the
-    // V8 snapshot is built, where CYPRESS_INTERNAL_ENV is always 'development', so a
-    // module-level value would freeze into the binary and point it at localhost.
     return this.#cloudUrqlClient = createClient({
       url: `${this.getCloudUrl(resolveCloudEnv())}/test-runner-graphql`,
       exchanges: [

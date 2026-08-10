@@ -23,10 +23,6 @@ type EventInputs = {
 /**
  * Defaults to staging when doing development. To override to production for development,
  * explicitly set process.env.CYPRESS_INTERNAL_ENV to 'production`
- *
- * Read on each call rather than at module scope: this module is initialized while the V8
- * snapshot is built, so a module-level value would freeze into the binary and ignore the
- * environment the app actually starts with.
  */
 function resolveEventCollectorEnv () {
   return (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'production') as 'development' | 'staging' | 'production'

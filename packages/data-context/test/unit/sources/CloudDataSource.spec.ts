@@ -360,9 +360,6 @@ describe('CloudDataSource', () => {
       }
     })
 
-    // The module itself is initialized while the V8 snapshot is built, where
-    // CYPRESS_INTERNAL_ENV is always 'development'. Reading it any earlier than this
-    // freezes the wrong url into the binary.
     it('resolves the environment when the client is created, not when the module loads', async () => {
       process.env.CYPRESS_INTERNAL_ENV = 'production'
 
