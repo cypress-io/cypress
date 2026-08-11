@@ -66,11 +66,11 @@ describe('tap/commands/command', () => {
     return cy.stub(tapManagerDataSource, 'getSnapshotRunner').returns({ getSnapshotPropsForLog })
   }
 
-  it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
+  it('fails with SPEC_NOT_STARTED when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '1' })).to.deep.eq({
-      error: { code: 'NO_RUN' },
+      error: { code: 'SPEC_NOT_STARTED' },
     })
   })
 
@@ -78,7 +78,7 @@ describe('tap/commands/command', () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'nope', 'command-id': '1' })).to.deep.eq({
-      error: { code: 'TEST_NOT_FOUND', detail: 'Looked for "nope".' },
+      error: { code: 'TEST_NOT_FOUND', detail: 'Looked for `--test-id` "nope".' },
     })
   })
 
@@ -170,7 +170,7 @@ describe('tap/commands/command', () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '1', attempt: '3' })).to.deep.eq({
-      error: { code: 'ATTEMPT_NOT_FOUND', detail: 'Test "r2" has 2 attempts, so `--attempt` takes 1–2.' },
+      error: { code: 'ATTEMPT_NOT_FOUND', detail: 'Looked for `--attempt` 3. Test "r2" has 2 attempts.' },
     })
   })
 
@@ -180,7 +180,7 @@ describe('tap/commands/command', () => {
     stubTests(getSerializedConsolePropsForLog)
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '9', attempt: '1' })).to.deep.eq({
-      error: { code: 'COMMAND_NOT_FOUND', detail: 'Looked for "9".' },
+      error: { code: 'COMMAND_NOT_FOUND', detail: 'Looked for `--command-id` "9".' },
     })
 
     expect(getSerializedConsolePropsForLog).not.to.have.been.called

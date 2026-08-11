@@ -201,6 +201,11 @@ export const extractAria = (
   })
 }
 
-export const ariaCommand = defineNativeCommand('aria', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'), parseIndex(commandOptions.at))
-}, 'aria'))
+export const ariaCommand = defineNativeCommand('aria', (options, _args, commandOptions) => {
+  const maxNodes = parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes')
+  const at = parseIndex(commandOptions.at)
+
+  return withResolvedAutFrame(options, (session, frame) => {
+    return extractAria(session, frame, commandOptions.selector, maxNodes, at)
+  }, 'aria')
+})

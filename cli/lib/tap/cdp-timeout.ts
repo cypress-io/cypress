@@ -16,7 +16,7 @@ export const FIND_INSTANCE_TIMEOUT_MS = 2_000
 // how long we waited is the part the user can act on with `--timeout`.
 const unresponsive = (what: string, ms: number): TapError => {
   return new TapError('RENDERER_UNRESPONSIVE', {
-    detail: `It did not answer within ${ms}ms.`,
+    detail: `No response within the specified timeout (${ms}ms).`,
     message: `No reply to ${what} within ${ms}ms.`,
   })
 }

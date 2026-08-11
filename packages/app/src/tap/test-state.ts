@@ -1,5 +1,5 @@
 import type { SerializedCommandLog, SerializedTest } from '@packages/types'
-import { TapError } from './contract'
+import { notFoundTapError, TapError } from './contract'
 import { omitNullish } from './utils'
 
 import type { TapCommandSnapshot, TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
@@ -36,7 +36,9 @@ const attemptsOf = (test: SerializedTest): SerializedTest[] => {
 type AttemptSelection =
   | { test: SerializedTest, attempt: SerializedTest, attemptNumber: number }
   | { error: 'TEST_NOT_FOUND' }
-  | { error: 'ATTEMPT_NOT_FOUND', attempts: number }
+  // `requested` is what the caller asked for, which the failure reports back;
+  // `attempts` is what the test has, which is what narrows the search.
+  | { error: 'ATTEMPT_NOT_FOUND', attempts: number, requested: number }
 
 const isAttemptInRange = (attempt: number, count: number): boolean => {
   return Number.isInteger(attempt) && attempt >= 1 && attempt <= count
@@ -56,24 +58,21 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
   }
 
   if (!isAttemptInRange(attempt, attempts.length)) {
-    return { error: 'ATTEMPT_NOT_FOUND', attempts: attempts.length }
+    return { error: 'ATTEMPT_NOT_FOUND', attempts: attempts.length, requested: attempt }
   }
 
   return { test, attempt: attempts[attempt - 1], attemptNumber: attempt }
 }
 
-export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapError => {
+export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number, requested: number }, testId: string): TapError => {
   if (selection.error === 'TEST_NOT_FOUND') {
-    return new TapError('TEST_NOT_FOUND', { detail: `Looked for "${testId}".` })
+    return notFoundTapError('TEST_NOT_FOUND', '--test-id', testId)
   }
 
-  const { attempts } = selection
+  const { attempts, requested } = selection
+  const has = attempts === 1 ? `Test "${testId}" has only 1 attempt.` : `Test "${testId}" has ${attempts} attempts.`
 
-  const detail = attempts === 1
-    ? `Test "${testId}" has only 1 attempt.`
-    : `Test "${testId}" has ${attempts} attempts, so \`--attempt\` takes 1–${attempts}.`
-
-  return new TapError('ATTEMPT_NOT_FOUND', { detail })
+  return notFoundTapError('ATTEMPT_NOT_FOUND', '--attempt', requested, has)
 }
 
 // The reporter's `renderProps` (resolved to an object by the time a log

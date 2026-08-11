@@ -7,8 +7,7 @@ import type { TapSession } from '../tap-session'
 import { renderOutcome, renderTapFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
 import type { FrameAmbiguousResult } from './single-match'
-import { TAP_EXEC_METHOD, TapError } from '@packages/cypress-instances'
-import type { TapErrorCode } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError, invalidValueTapError, specInProgressTapError, tapErrorFromPayload } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -22,7 +21,7 @@ const AUT_FRAME_NAME_PREFIX = 'Your project:'
 // the single-node lookup), and the app-side `resolve-selector` reports the same
 // condition over the wire — they must all say it the same way.
 export const invalidSelectorError = (selector: string): TapError => {
-  return new TapError('INVALID_SELECTOR', { detail: `The selector was "${selector}".` })
+  return invalidValueTapError('--selector', 'a valid CSS selector', selector)
 }
 
 export interface AutFrame {
@@ -90,17 +89,17 @@ export const assertFrameReadable = async (session: TapSession): Promise<void> =>
   if ('error' in outcome) {
     // The instance already named the condition; re-raise it as ours so it renders
     // through the one path rather than being reported as a frame read failure.
-    throw new TapError(outcome.error.code as TapErrorCode, { detail: outcome.error.detail })
+    throw tapErrorFromPayload(outcome.error)
   }
 
-  const { state } = outcome.result as TapRunState
+  const { state, spec } = outcome.result as TapRunState
 
   if (state === 'running') {
-    throw new TapError('RUN_IN_PROGRESS')
+    throw specInProgressTapError(spec)
   }
 
   if (state !== 'passed' && state !== 'failed') {
-    throw new TapError('NO_RUN')
+    throw new TapError('SPEC_NOT_STARTED')
   }
 }
 

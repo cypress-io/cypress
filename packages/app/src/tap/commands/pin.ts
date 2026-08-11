@@ -2,7 +2,7 @@ import { defineCommand } from './definition'
 import { attemptOfLog, attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, TapTestsRunner } from '../types'
-import { TapError } from '../contract'
+import { notFoundTapError, specInProgressTapError, TapError } from '../contract'
 import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
 // A pin as the commands read it, whoever made it: tap's own, or one made by hand
@@ -94,7 +94,7 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
 
   const available = snapshots.map((entry, index) => (entry.name !== undefined ? `"${entry.name}" (${index + 1})` : `${index + 1}`)).join(', ')
 
-  throw new TapError('SNAPSHOT_NOT_FOUND', { detail: `Looked for "${at}". This command has: ${available}.` })
+  throw notFoundTapError('SNAPSHOT_NOT_FOUND', '--at', at, `This command has: ${available}.`)
 }
 
 export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test, 'command-id': command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
@@ -117,11 +117,11 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   }
 
   if (!runner) {
-    throw new TapError('NO_RUN')
+    throw new TapError('SPEC_NOT_STARTED')
   }
 
   if (tapManagerDataSource.isRunning()) {
-    throw new TapError('RUN_IN_PROGRESS')
+    throw specInProgressTapError(tapManagerDataSource.getActiveSpecRelative() ?? null)
   }
 
   const selection = selectTestAttempt(runner, test, attempt)
@@ -133,7 +133,7 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   const logId = resolveCommandLogId(selection.attempt, command, test)
 
   if (logId === undefined) {
-    throw new TapError('COMMAND_NOT_FOUND', { detail: `Looked for "${command}".` })
+    throw notFoundTapError('COMMAND_NOT_FOUND', '--command-id', command)
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)

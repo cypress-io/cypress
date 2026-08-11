@@ -18,10 +18,16 @@ describe('lib/tap/utils parseIndex', () => {
     expect(parseIndex('3')).to.eq(3)
   })
 
-  it('rejects every malformed value with INVALID_INDEX', () => {
+  it('rejects every malformed value, naming the flag and what it takes', () => {
     for (const bad of MALFORMED) {
-      expect(() => parseIndex(bad as any), JSON.stringify(bad)).to.throw(TapError).that.includes({ code: 'INVALID_INDEX' })
+      expect(() => parseIndex(bad as any), JSON.stringify(bad)).to.throw(TapError).that.includes({ code: 'INVALID_VALUE' })
     }
+  })
+
+  it('reports the value it was given', () => {
+    expect(() => parseIndex('abc')).to.throw(TapError).that.includes({
+      detail: 'Expected `--at` to be a whole number, 0 or greater.\n\nInstead the value was: "abc"',
+    })
   })
 })
 
@@ -35,9 +41,15 @@ describe('lib/tap/utils parsePositiveInt', () => {
     expect(parsePositiveInt('9007199254740991', 200, 'max-nodes')).to.eq(Number.MAX_SAFE_INTEGER)
   })
 
-  it('rejects zero and every malformed value with INVALID_LIMIT', () => {
+  it('rejects zero and every malformed value, naming the flag and what it takes', () => {
     for (const bad of ['0', ...MALFORMED]) {
-      expect(() => parsePositiveInt(bad as any, 200, 'max-nodes'), JSON.stringify(bad)).to.throw(TapError).that.includes({ code: 'INVALID_LIMIT' })
+      expect(() => parsePositiveInt(bad as any, 200, 'max-nodes'), JSON.stringify(bad)).to.throw(TapError).that.includes({ code: 'INVALID_VALUE' })
     }
+  })
+
+  it('names the flag it was parsing, which the two commands share', () => {
+    expect(() => parsePositiveInt('0', 200, 'max-nodes')).to.throw(TapError).that.includes({
+      detail: 'Expected `--max-nodes` to be a positive integer.\n\nInstead the value was: "0"',
+    })
   })
 })

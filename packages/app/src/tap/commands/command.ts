@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { TapError } from '../contract'
+import { notFoundTapError, TapError } from '../contract'
 import { attemptSelectionError, liveSnapshots, resolveCommand, selectTestAttempt, serializeCommandSnapshots } from '../test-state'
 import { omitNullish } from '../utils'
 import type { CommandResult, ConsolePropsResult } from '../types'
@@ -27,7 +27,7 @@ export const commandCommand = defineCommand('command', async (_params, options):
   const runner = tapManagerDataSource.getRunner()
 
   if (!runner) {
-    throw new TapError('NO_RUN')
+    throw new TapError('SPEC_NOT_STARTED')
   }
 
   const selection = selectTestAttempt(runner, test, attempt)
@@ -42,7 +42,7 @@ export const commandCommand = defineCommand('command', async (_params, options):
   const resolved = resolveCommand(selection.attempt, command, test)
 
   if (!resolved) {
-    throw new TapError('COMMAND_NOT_FOUND', { detail: `Looked for "${command}".` })
+    throw notFoundTapError('COMMAND_NOT_FOUND', '--command-id', command)
   }
 
   const snapshotProps = tapManagerDataSource.getSnapshotRunner()?.getSnapshotPropsForLog(test, resolved.logId)

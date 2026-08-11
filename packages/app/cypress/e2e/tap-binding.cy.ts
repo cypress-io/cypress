@@ -112,18 +112,41 @@ describe('tap binding', () => {
 
       expect((commandWithoutCommandId as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
+      // A flag that only means something alongside another one, as distinct from
+      // the required flag left out above.
+      const attemptWithoutTestId = await binding.exec('reporter', {}, { attempt: '1' })
+
+      expect((attemptWithoutTestId as { error: { code: string, detail: string } }).error.code).to.eq('MISSING_COMPANION_OPTION')
+      expect((attemptWithoutTestId as { error: { code: string, detail: string } }).error.detail).to.contain('You passed the `--attempt` flag without also passing the `--test-id` flag.')
+
+      // An option that exists but cannot take what it was handed: reported as the
+      // value, not as the shape of the invocation.
+      const attemptNotANumber = await binding.exec('reporter', {}, { 'test-id': 'r1', attempt: 'abc' })
+
+      expect((attemptNotANumber as { error: { code: string, detail: string } }).error).to.deep.eq({
+        code: 'INVALID_VALUE',
+        detail: 'Expected `--attempt` to be a number.\n\nInstead the value was: "abc"',
+      })
+
+      // A flag no command declares, which the CLI answers before a call is made —
+      // this is the same condition reached through the binding directly.
+      const noSuchOption = await binding.exec('reporter', {}, { bogus: 'x' })
+
+      expect((noSuchOption as { error: { code: string, detail: string } }).error.code).to.eq('UNKNOWN_OPTION')
+      expect((noSuchOption as { error: { code: string, detail: string } }).error.detail).to.contain('Unknown option "--bogus"')
+
       // No spec has run yet, so there is no run to read — a domain failure.
       const specViewBeforeRun = await binding.exec('reporter')
 
-      expect((specViewBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      expect((specViewBeforeRun as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
 
       const commandBeforeRun = await binding.exec('command', {}, { 'test-id': 'r1', 'command-id': '1' })
 
-      expect((commandBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      expect((commandBeforeRun as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
 
       const reporterBeforeRun = await binding.exec('reporter', {}, { 'test-id': 'r1' })
 
-      expect((reporterBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      expect((reporterBeforeRun as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
 
       // specs and run are CLI-native commands now — the CLI reads the spec list and
       // triggers runs directly over the instance's GraphQL — so the binding no longer serves them.
@@ -288,7 +311,7 @@ describe('tap binding', () => {
 
       const invalid = await binding.exec('resolve-selector', { selector: '>>bad' })
 
-      expect((invalid as { error: { code: string } }).error.code).to.eq('INVALID_SELECTOR')
+      expect((invalid as { error: { code: string } }).error.code).to.eq('INVALID_VALUE')
 
       const missingSelector = await binding.exec('resolve-selector')
 
@@ -556,7 +579,7 @@ describe('tap binding pin lifecycle', () => {
 
       const beforeRun = await binding.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
-      expect((beforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+      expect((beforeRun as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
     })
 
     runPinTargetSpec()
@@ -985,7 +1008,7 @@ describe('tap binding run lifecycle', () => {
       ])
 
       for (const outcome of refused) {
-        expect((outcome as { error: { code: string } }).error.code).to.eq('NO_RUN')
+        expect((outcome as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
       }
     })
 

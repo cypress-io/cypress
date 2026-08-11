@@ -90,7 +90,7 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect(outcome).to.deep.eq({
-      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for "during". This command has: "before" (1), "after" (2).' },
+      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for `--at` "during". This command has: "before" (1), "after" (2).' },
     })
 
     expect(pinSnapshot).not.to.have.been.called
@@ -484,20 +484,24 @@ describe('tap/commands/pin', () => {
     expect(pinSnapshot).not.to.have.been.called
   })
 
-  it('fails with NO_RUN when no runner has mounted', async () => {
+  it('fails with SPEC_NOT_STARTED when no runner has mounted', async () => {
     stubSource({ runner: undefined })
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('NO_RUN')
+    expect((outcome as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
   })
 
-  it('refuses to pin while a spec is running', async () => {
+  it('refuses to pin while a spec is running, naming the spec to wait on', async () => {
     stubSource({ running: true })
+    cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/slow.cy.js')
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
-    expect((outcome as { error: { code: string } }).error).to.deep.eq({ code: 'RUN_IN_PROGRESS' })
+    expect((outcome as { error: { code: string, detail: string } }).error).to.deep.eq({
+      code: 'SPEC_IN_PROGRESS',
+      detail: 'The spec cypress/e2e/slow.cy.js is currently running.',
+    })
   })
 
   it('fails with TEST_NOT_FOUND and COMMAND_NOT_FOUND for unknown ids', async () => {

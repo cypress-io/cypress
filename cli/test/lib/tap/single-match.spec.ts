@@ -99,15 +99,21 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     const { session } = makeSession({ count: 3 })
 
     await expect(resolveAmbiguity(session, frame, '.item', 3)).rejects.toMatchObject({
-      code: 'INVALID_INDEX',
-      detail: '".item" matched 3 elements, so `--at` takes 0 to 2.',
+      code: 'INVALID_VALUE',
+      detail: 'Expected `--at` to be 0 to 2, since ".item" matched 3 elements.\n\nInstead the value was: 3',
     })
   })
 
+  // Not a bad value but a missing companion: `--at` has nothing to index without
+  // a `--selector`, whatever number it was given.
   it('rejects an --at when nothing is there to index', async () => {
     const { session, callFunctionOn } = makeSession({ count: 1 })
 
-    await expect(resolveAmbiguity(session, frame, undefined, 0)).rejects.toMatchObject({ code: 'INVALID_INDEX' })
+    await expect(resolveAmbiguity(session, frame, undefined, 0)).rejects.toMatchObject({
+      code: 'MISSING_COMPANION_OPTION',
+      detail: 'You passed the `--at` flag without also passing the `--selector` flag.\n\nPass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.',
+    })
+
     // No selector means no reason to reach into the frame at all.
     expect(callFunctionOn).not.toHaveBeenCalled()
   })
@@ -118,12 +124,13 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     expect(await resolveAmbiguity(session, frame, '.missing', 4)).to.be.undefined
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
+  it('maps a bad selector to the selector it was given', async () => {
     const { session } = makeSession({ invalidSelector: true })
 
     await expect(resolveAmbiguity(session, frame, '>>bad')).rejects.toMatchObject({
       name: 'TapError',
-      code: 'INVALID_SELECTOR',
+      code: 'INVALID_VALUE',
+      detail: 'Expected `--selector` to be a valid CSS selector.\n\nInstead the value was: ">>bad"',
     })
   })
 

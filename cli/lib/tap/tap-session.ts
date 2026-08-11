@@ -4,7 +4,7 @@ import CRI from 'chrome-remote-interface'
 import { DEFAULT_CDP_TIMEOUT_MS, FIND_INSTANCE_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
 import type { ReadyInstanceState } from '../cypress-instances'
 import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD, TapError } from '@packages/cypress-instances'
-import type { TapErrorCode, TapErrorPayload, TapExecResult } from '@packages/cypress-instances'
+import type { RaisableTapErrorCode, TapErrorPayload, TapExecResult } from '@packages/cypress-instances'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -33,7 +33,7 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
  * An unresponsive renderer is reported as itself rather than as whatever call
  * happened to time out: it is the condition worth waiting longer on.
  */
-export const throwTapError = (code: TapErrorCode, message: string, cause?: unknown): never => {
+export const throwTapError = (code: RaisableTapErrorCode, message: string, cause?: unknown): never => {
   if (isRendererUnresponsive(cause)) {
     throw cause
   }

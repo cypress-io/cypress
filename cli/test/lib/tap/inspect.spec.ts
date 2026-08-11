@@ -101,10 +101,10 @@ describe('lib/tap/commands/inspect extractInspect', () => {
     })
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
+  it('reports a rejected selector as the value it was given', async () => {
     const { session } = makeInspectSession({ invalidSelector: true })
 
-    await expect(extractInspect(session, frame, '>>bad')).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
+    await expect(extractInspect(session, frame, '>>bad')).rejects.toMatchObject({ code: 'INVALID_VALUE' })
   })
 
   it('still returns the element when the accessibility node is unavailable', async () => {

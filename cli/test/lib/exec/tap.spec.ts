@@ -161,11 +161,16 @@ describe('lib/exec/tap', () => {
       expect(call).toHaveBeenCalledWith('exec', ['fake-command-for-testing', { spec: 'cypress/e2e/a.cy.js' }, { browser: 'chrome', headed: 'true' }])
     })
 
+    // The flag it does not take, then the help that lists the ones it does.
     it('rejects an option the command does not advertise, without reaching exec', async () => {
       const call = mockSession()
 
       expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js', '--nope'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`unknown option '--nope'`)
+
+      const printed = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(printed).toContain('Unknown option "--nope"')
+      expect(printed).toContain('Usage: cypress tap fake-command-for-testing')
       expect(call.mock.calls).toEqual([['getSchema']])
     })
 
@@ -321,11 +326,16 @@ describe('lib/exec/tap', () => {
   })
 
   describe('commander validates the command against the live schema', () => {
+    // The name it has no command for, then the help that lists the ones it has.
     it('rejects a command the instance does not advertise, without reaching exec', async () => {
       const call = mockSession()
 
       expect(await tap.start(['bogus'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`unknown command 'bogus'`)
+
+      const printed = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(printed).toContain('Unknown command "bogus"')
+      expect(printed).toContain('Usage: cypress tap [command]')
       expect(call.mock.calls).toEqual([['getSchema']])
     })
 
@@ -439,8 +449,8 @@ describe('lib/exec/tap', () => {
       mockSession()
 
       expect(await tap.start(['bogus', '--help'], {})).toBe(1)
-      expect(logger.print()).toContain(TAP_ERROR_COPY.UNKNOWN_COMMAND.description)
-      expect(logger.print()).toContain('is not a command')
+      expect(logger.print()).toContain('Unknown command "bogus"')
+      expect(logger.print()).toContain('Usage: cypress tap [command]')
     })
 
     it('treats a hidden command as unknown for `<command> --help` and omits it from the listing', async () => {
@@ -453,9 +463,10 @@ describe('lib/exec/tap', () => {
       } satisfies TapSchema)
 
       expect(await tap.start(['run-state', '--help'], {})).toBe(1)
-      expect(logger.print()).toContain(TAP_ERROR_COPY.UNKNOWN_COMMAND.description)
-      expect(logger.print()).toContain('"run-state" is not available in this Cypress')
-      expect(logger.print()).not.toContain('run-state,')
+      expect(logger.print()).toContain('Unknown command "run-state"')
+      // The listing that follows is the remedy, so a hidden command must not
+      // appear in it either.
+      expect(logger.print()).not.toContain('internal poll target')
     })
   })
 
@@ -1102,7 +1113,7 @@ describe('lib/exec/tap', () => {
       mockInstanceGraphql({ runSpec: null })
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
-      expect(logger.print()).toContain(TAP_ERROR_COPY.RUN_FAILED.description)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.SPEC_START_FAILED.description)
     })
 
     it('forwards --instance plus the cwd to discovery', async () => {
@@ -1283,7 +1294,8 @@ describe('lib/exec/tap', () => {
                                 properties
           reporter [options]    render a test’s full reporter view — its routes,
                                 hooks, and command log — or, without --test-id, the
-                                spec-level overview: run stats and every suite’s tests
+                                spec-level overview: the spec’s stats and every suite’s
+                                tests
           pin [options]         pin a command’s DOM snapshot into the live
                                 app-under-test frame so the dom/aria/inspect commands
                                 can read it; pass --clear to release
@@ -1298,8 +1310,7 @@ describe('lib/exec/tap', () => {
 
       const help = logger.print()
 
-      expect(help).toContain(TAP_ERROR_COPY.UNKNOWN_COMMAND.description)
-      expect(help).toContain('"instancs" is not available in this Cypress')
+      expect(help).toContain('Unknown command "instancs"')
       expect(help).toContain('instances')
       expect(help).toContain('specs')
     })

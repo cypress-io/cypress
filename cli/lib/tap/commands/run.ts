@@ -23,7 +23,7 @@ const RUN_SPEC_TIMEOUT_MS = 60_000
 // to the tap code whose copy describes it. A code this CLI does not know reads as
 // the instance failing to start the spec, which is what it observed.
 const RUN_SPEC_FAILURES: Record<string, TapErrorCode> = {
-  GENERAL_ERROR: 'RUN_FAILED',
+  GENERAL_ERROR: 'SPEC_START_FAILED',
   NO_PROJECT: 'NO_PROJECT',
   NO_SPEC_PATH: 'INVALID_ARGUMENTS',
   NO_SPEC_PATTERN_MATCH: 'SPEC_NOT_FOUND',
@@ -63,8 +63,8 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
     }
 
     const failure = result?.__typename === 'RunSpecError'
-      ? { code: RUN_SPEC_FAILURES[result.code] ?? 'RUN_FAILED', detail: result.detailMessage ?? undefined }
-      : { code: 'RUN_FAILED', detail: `The instance returned no result for "${args.spec}".` }
+      ? { code: RUN_SPEC_FAILURES[result.code] ?? 'SPEC_START_FAILED', detail: result.detailMessage ?? undefined }
+      : { code: 'SPEC_START_FAILED', detail: `The instance returned no result for "${args.spec}".` }
 
     return await renderTapFailure(failure)
   } catch (err: any) {

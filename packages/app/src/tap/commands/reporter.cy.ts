@@ -141,13 +141,13 @@ describe('tap/commands/reporter', () => {
   // the runner seam rather than replace it.
   const stubRunner = (runner: unknown) => cy.stub(tapManagerDataSource, 'getRunner').returns(runner)
 
-  it('fails with NO_RUN when no spec has mounted a runner yet', async () => {
+  it('fails with SPEC_NOT_STARTED when no spec has mounted a runner yet', async () => {
     stubRunner(undefined)
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r2' })
 
     expect(outcome).to.deep.eq({
-      error: { code: 'NO_RUN' },
+      error: { code: 'SPEC_NOT_STARTED' },
     })
   })
 
@@ -416,8 +416,8 @@ describe('tap/commands/reporter', () => {
 
       expect(outcome).to.deep.eq({
         error: {
-          code: 'INVALID_OPTIONS',
-          detail: 'No `--test-id` was given, so there is no single test to select an attempt of.',
+          code: 'MISSING_COMPANION_OPTION',
+          detail: 'You passed the `--attempt` flag without also passing the `--test-id` flag.\n\nPass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.',
         },
       })
     })

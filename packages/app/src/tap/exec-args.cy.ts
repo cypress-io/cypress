@@ -1,6 +1,14 @@
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
 import type { TapCommandOptionSchema, TapCommandParamSchema } from './contract'
 
+// Coercion answers with the failure already raised, so a case is asserted by the
+// code it carries and the specifics it renders with.
+const failure = (outcome: unknown): { code: string, detail?: string } => {
+  const { code, detail } = (outcome as { error: { code: string, detail?: string } }).error
+
+  return { code, detail }
+}
+
 describe('tap/exec-args', () => {
   describe('coerceCommandArgs', () => {
     const PARAMS: TapCommandParamSchema[] = [
@@ -23,39 +31,45 @@ describe('tap/exec-args', () => {
     it('rejects missing required params with a usage hint', () => {
       const outcome = coerceCommandArgs('probe', PARAMS, {})
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('missing the required <path>')
-      expect((outcome as { message: string }).message).to.contain('Usage: cypress tap probe <path> [count] [exact]')
+      expect(failure(outcome).code).to.eq('INVALID_ARGUMENTS')
+      expect(failure(outcome).detail).to.contain('missing the required <path>')
+      expect(failure(outcome).detail).to.contain('Usage: cypress tap probe <path> [count] [exact]')
     })
 
     it('rejects an arg not named by the param schema', () => {
       const outcome = coerceCommandArgs('probe', PARAMS, { path: 'a', count: '1', exact: 'true', extra: 'extra' })
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('<extra> was passed to "probe", but it\'s not a supported argument')
+      expect(failure(outcome).code).to.eq('INVALID_ARGUMENTS')
+      expect(failure(outcome).detail).to.contain('<extra> was passed to "probe", but it\'s not a supported argument')
     })
 
     it('rejects values that do not parse as the declared number type', () => {
       for (const bad of ['abc', '']) {
         const outcome = coerceCommandArgs('probe', PARAMS, { path: 'a', count: bad })
 
-        expect(outcome.ok, `value "${bad}"`).to.eq(false)
-        expect((outcome as { message: string }).message).to.contain('<count> must be a number')
+        expect(failure(outcome), `value "${bad}"`).to.deep.eq({
+          code: 'INVALID_VALUE',
+          detail: `Expected \`<count>\` to be a number.\n\nInstead the value was: ${JSON.stringify(bad)}`,
+        })
       }
     })
 
     it('rejects values that are not literal true/false for the boolean type', () => {
       const outcome = coerceCommandArgs('probe', PARAMS, { path: 'a', count: '1', exact: 'yes' })
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('<exact> must be true or false')
+      expect(failure(outcome)).to.deep.eq({
+        code: 'INVALID_VALUE',
+        detail: 'Expected `<exact>` to be true or false.\n\nInstead the value was: "yes"',
+      })
     })
 
     it('rejects non-string wire values', () => {
       const outcome = coerceCommandArgs('probe', PARAMS, { path: 42 as unknown as string })
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('<path> must be a string')
+      expect(failure(outcome)).to.deep.eq({
+        code: 'INVALID_VALUE',
+        detail: 'Expected `<path>` to be a string.\n\nInstead the value was: 42',
+      })
     })
   })
 
@@ -87,30 +101,38 @@ describe('tap/exec-args', () => {
     it('rejects a missing required option with a usage hint', () => {
       const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, {})
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('missing the required --config option')
-      expect((outcome as { message: string }).message).to.contain('Usage: cypress tap run <spec> [options]')
+      expect(failure(outcome).code).to.eq('INVALID_OPTIONS')
+      expect(failure(outcome).detail).to.contain('missing the required --config option')
+      expect(failure(outcome).detail).to.contain('Usage: cypress tap run <spec> [options]')
     })
 
-    it('rejects an option not in the schema', () => {
+    // A flag the command has no such thing as reads as its own condition, not as
+    // one of the ways a flag it does have can be wrong.
+    it('rejects an option not in the schema, naming it and the usage', () => {
       const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json', bogus: 'x' })
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('has no --bogus option')
+      expect(failure(outcome)).to.deep.eq({
+        code: 'UNKNOWN_OPTION',
+        detail: 'Unknown option "--bogus"\n\nUsage: cypress tap run <spec> [options]',
+      })
     })
 
     it('rejects a value that does not parse as the declared number type', () => {
       const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json', port: 'abc' })
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('--port must be a number')
+      expect(failure(outcome)).to.deep.eq({
+        code: 'INVALID_VALUE',
+        detail: 'Expected `--port` to be a number.\n\nInstead the value was: "abc"',
+      })
     })
 
     it('rejects a non true/false value for a boolean option', () => {
       const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json', headed: 'yes' })
 
-      expect(outcome.ok).to.eq(false)
-      expect((outcome as { message: string }).message).to.contain('--headed must be true or false')
+      expect(failure(outcome)).to.deep.eq({
+        code: 'INVALID_VALUE',
+        detail: 'Expected `--headed` to be true or false.\n\nInstead the value was: "yes"',
+      })
     })
   })
 })

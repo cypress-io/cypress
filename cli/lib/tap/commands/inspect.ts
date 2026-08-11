@@ -133,6 +133,10 @@ export const extractInspect = (
   }
 })
 
-export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractInspect(session, frame, commandOptions.selector, parseIndex(commandOptions.at))
-}, 'inspect'))
+export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => {
+  const at = parseIndex(commandOptions.at)
+
+  return withResolvedAutFrame(options, (session, frame) => {
+    return extractInspect(session, frame, commandOptions.selector, at)
+  }, 'inspect')
+})

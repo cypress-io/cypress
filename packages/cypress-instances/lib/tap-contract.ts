@@ -111,7 +111,7 @@ const commandMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: run stats and every suite’s tests',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: the spec’s stats and every suite’s tests',
   details: `Shows test results the way the Cypress app's reporter panel does, right in
 your terminal. Pass --test-id <id> (test ids come from the spec overview this
 same command prints with no --test-id) to see one
@@ -119,7 +119,7 @@ test's full story: its network routes, the hooks that ran, the complete
 command log, and the failure output when something went wrong. Add --attempt
 to view an earlier retry.
 
-Leave --test-id off to get the spec-level overview instead: the run's pass/fail
+Leave --test-id off to get the spec-level overview instead: the spec's pass/fail
 stats and every suite's tests at a glance.`,
   params: [],
   options: [
@@ -205,12 +205,12 @@ const runMeta = {
   description: 'run (or rerun) a spec by its project-relative path',
   details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
 command. If no browser is open it launches one, switching to the spec's testing
-type when needed, then requests the run and returns immediately — returning does
-not mean the run has started, let alone finished.
+type when needed, then requests the spec and returns immediately — returning does
+not mean the spec has started, let alone finished.
 
-Poll the status command for run progress. Read status first and keep its
-startedAt: a verdict still carrying that same startedAt describes the run before
-this one, so wait for a verdict whose startedAt differs.`,
+Poll the status command for progress. Read status first and keep its startedAt:
+a verdict still carrying that same startedAt describes the spec before this one,
+so wait for a verdict whose startedAt differs.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
@@ -238,9 +238,9 @@ and stays loading for as long as the build takes, so a poller needs its own
 timeout. A spec whose build fails reports failed and carries the reason as
 error — it ran no tests, so it reports no counts either.
 
-From loading onwards the output carries startedAt, the run every other field
-describes (null while loading). A rerun leaves the previous run's verdict
-readable until the incoming run starts, identical on every other field, so
+From loading onwards the output carries startedAt, the spec every other field
+describes (null while loading). A rerun leaves the previous spec's verdict
+readable until the incoming one starts, identical on every other field, so
 compare startedAt before believing a verdict.`,
 } as const satisfies TapNativeCommandSchema
 

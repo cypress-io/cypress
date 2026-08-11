@@ -1,7 +1,7 @@
 import { tapCommands } from './commands'
 import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
-import { isTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
+import { isTapError, unknownCommandTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
@@ -55,9 +55,9 @@ export class TapManager implements TapBindingContract {
       : undefined
 
     if (!definition) {
-      const detail = `"${command}" is not available in this Cypress (v${this.cypressVersion}), which offers: ${Object.keys(tapCommands).join(', ')}.`
+      const offers = `This Cypress (v${this.cypressVersion}) offers: ${Object.keys(tapCommands).join(', ')}.`
 
-      return { error: new TapError('UNKNOWN_COMMAND', { detail }).toPayload() }
+      return { error: unknownCommandTapError(command, offers).toPayload() }
     }
 
     const normalizedArgs = normalizePayload(args)
@@ -75,13 +75,13 @@ export class TapManager implements TapBindingContract {
     const coercedArgs = coerceCommandArgs(command, definition.params, normalizedArgs, optionSchema)
 
     if (!coercedArgs.ok) {
-      return { error: new TapError('INVALID_ARGUMENTS', { detail: coercedArgs.message }).toPayload() }
+      return { error: coercedArgs.error.toPayload() }
     }
 
     const coercedOptions = coerceCommandOptions(command, definition.params, optionSchema, normalizedOptions)
 
     if (!coercedOptions.ok) {
-      return { error: new TapError('INVALID_OPTIONS', { detail: coercedOptions.message }).toPayload() }
+      return { error: coercedOptions.error.toPayload() }
     }
 
     try {

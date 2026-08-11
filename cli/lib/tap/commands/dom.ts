@@ -57,6 +57,14 @@ export const extractDom = (
   }
 })
 
-export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'), parseIndex(commandOptions.at))
-}, 'dom'))
+// The options are read before an instance is resolved, so a value this command
+// cannot use is reported as itself rather than as whatever the search for a
+// Cypress to run it against happened to find.
+export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => {
+  const maxChars = parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars')
+  const at = parseIndex(commandOptions.at)
+
+  return withResolvedAutFrame(options, (session, frame) => {
+    return extractDom(session, frame, commandOptions.selector, maxChars, at)
+  }, 'dom')
+})

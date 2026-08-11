@@ -3,6 +3,7 @@ import commander from 'commander'
 import { tapCliCommands } from './commands'
 import { renderOptionsFor } from './render'
 import type { TapCliCommand } from './types'
+import { unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>, renderOptions: Record<string, string>) => Promise<void> | void
@@ -72,6 +73,34 @@ const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly 
   return forwarded
 }
 
+// commander's own answers to an unknown name or flag are patched CLI-wide (see
+// `lib/cli.ts`) to print their own wording and exit the process. tap raises them
+// as the tap failures they are and lets them unwind to the one place every tap
+// failure renders, so the replacements land on the instance, where they take
+// precedence over that patched prototype. The generated help is the listing:
+// whatever the reader typed, it names what they could have.
+type UnknownInputHandlers = commander.Command & {
+  _allowUnknownOption?: boolean
+  unknownOption(flag: string): void
+  unknownCommand(): void
+}
+
+const answerUnknownOption = (command: commander.Command): void => {
+  (command as UnknownInputHandlers).unknownOption = function (flag: string): void {
+    if (this._allowUnknownOption) {
+      return
+    }
+
+    throw unknownOptionTapError(flag, this.helpInformation())
+  }
+}
+
+const answerUnknownCommand = (program: commander.Command): void => {
+  (program as UnknownInputHandlers).unknownCommand = function (): void {
+    throw unknownCommandTapError(this.args[0], this.helpInformation())
+  }
+}
+
 const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
   if (args.length <= params.length) {
     return
@@ -123,6 +152,7 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
   const renderOptions = renderOptionsFor(name)
 
   declareOptions(command, [...options, ...renderOptions])
+  answerUnknownOption(command)
 
   if (dispatch) {
     command.action(() => {
@@ -140,6 +170,8 @@ const newProgram = (): commander.Command => {
   program.addHelpCommand(false)
   program.description('Interacts with a running Cypress instance')
   program.usage('[command] [args...] [options]')
+  answerUnknownOption(program)
+  answerUnknownCommand(program)
 
   return program
 }

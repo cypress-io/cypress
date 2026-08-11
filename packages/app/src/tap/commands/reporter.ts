@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { TapError } from '../contract'
+import { missingCompanionOptionTapError, TapError } from '../contract'
 import { attemptSelectionError, selectTestAttempt, serializeReporterSpecView, serializeReporterView } from '../test-state'
 import type { TapReporterSpecView, TapReporterView } from '../contract'
 
@@ -8,12 +8,12 @@ export const reporterCommand = defineCommand('reporter', async (_params, { 'test
   const runner = tapManagerDataSource.getRunner()
 
   if (!runner) {
-    throw new TapError('NO_RUN')
+    throw new TapError('SPEC_NOT_STARTED')
   }
 
   if (test === undefined) {
     if (attempt !== undefined) {
-      throw new TapError('INVALID_OPTIONS', { detail: 'No `--test-id` was given, so there is no single test to select an attempt of.' })
+      throw missingCompanionOptionTapError('--attempt', '--test-id', 'Pass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.')
     }
 
     return serializeReporterSpecView(runner, tapManagerDataSource.getActiveSpecRelative())

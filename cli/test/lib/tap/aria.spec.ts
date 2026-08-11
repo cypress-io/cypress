@@ -108,10 +108,10 @@ describe('lib/tap/commands/aria extractAria', () => {
     expect(client.Accessibility.getFullAXTree).not.toHaveBeenCalled()
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
+  it('reports a rejected selector as the value it was given', async () => {
     const { session } = makeAxSession({ invalidSelector: true })
 
-    await expect(extractAria(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
+    await expect(extractAria(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_VALUE' })
   })
 
   it('caps the tree at max-nodes and flags truncation', async () => {

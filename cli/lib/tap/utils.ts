@@ -1,4 +1,4 @@
-import { TapError } from '@packages/cypress-instances'
+import { invalidValueTapError } from '@packages/cypress-instances'
 
 const WHOLE_NUMBER = /^\d+$/
 
@@ -20,7 +20,7 @@ export const parseIndex = (raw: string | undefined): number | undefined => {
   const value = parseWholeNumber(raw)
 
   if (value === undefined) {
-    throw new TapError('INVALID_INDEX', { detail: `\`--at\` was given "${raw}".` })
+    throw invalidValueTapError('--at', 'a whole number, 0 or greater', raw)
   }
 
   return value
@@ -34,7 +34,7 @@ export const parsePositiveInt = (raw: string | undefined, fallback: number, labe
   const value = parseWholeNumber(raw)
 
   if (value === undefined || value <= 0) {
-    throw new TapError('INVALID_LIMIT', { detail: `\`--${label}\` was given "${raw}".` })
+    throw invalidValueTapError(`--${label}`, 'a positive integer', raw)
   }
 
   return value

@@ -1,17 +1,24 @@
 // The copy for every `cypress tap` failure, keyed by its code.
 //
-// A code is a registry key, not output: the CLI renders each failure the way the
-// rest of the CLI does — description, solution, the platform footer — and never
-// prints the key. That is why codes raised only CLI-side live here too, alongside
-// the ones the app raises over the wire: one lookup table means one answer to what
-// a tap failure means, and one place to add the next one.
+// A code is a registry key, not output: the CLI prints the condition, the specifics
+// and the remedy as plain paragraphs, and never prints the key. That is why codes
+// raised only CLI-side live here too, alongside the ones the app raises over the
+// wire: one lookup table means one answer to what a tap failure means, and one place
+// to add the next one.
 //
 // A failure fills the slots like so:
 //
 //   description  the condition, generic — never interpolated
-//   solution     what to do about it, generic — never interpolated
 //   detail       the specifics, at the throw site: the selector, the available
 //                snapshots, the valid range. Omitted where there are none.
+//   solution     what to do about it, generic — never interpolated. Omitted where
+//                the specifics already say it.
+//
+// A condition whose opening line names its subject — the value that will not do,
+// the command that does not exist — cannot be written as a generic sentence, so
+// its copy lives in a factory at the foot of this module instead of in the table.
+// Both sides of the wire raise it through that factory, which is what keeps the
+// wording in one place; the entry is then the code and its doc comment alone.
 //
 // The raw underlying failure (a CDP rejection, an HTTP status) is a diagnostic
 // rather than copy: it rides on the error's `message`/`cause` for logs and
@@ -21,8 +28,8 @@
 // CLI to highlight, and `docs` as a path rather than a URL.
 
 export interface TapErrorCopy {
-  description: string
-  solution: string
+  description?: string
+  solution?: string
   /** Append the CLI's standard "search for or open a GitHub issue" block. */
   recommendGhIssue?: boolean
   /** Path under the Cypress docs site, rendered as a "Learn more" block. */
@@ -47,18 +54,17 @@ export type TapErrorCode =
   // Reading its data
   | 'GRAPHQL_UNREACHABLE'
   | 'GRAPHQL_FAILED'
-  // The run lifecycle
-  | 'NO_RUN'
-  | 'RUN_IN_PROGRESS'
-  | 'RUN_FAILED'
+  // The spec lifecycle
+  | 'SPEC_NOT_STARTED'
+  | 'SPEC_IN_PROGRESS'
+  | 'SPEC_START_FAILED'
   | 'SPEC_NOT_FOUND'
   | 'NO_PROJECT'
   | 'TESTING_TYPE_NOT_CONFIGURED'
   // Reading the app under test
   | 'NO_AUT'
-  | 'INVALID_SELECTOR'
   | 'FRAME_READ_FAILED'
-  // Selecting a test, command, or snapshot of a run
+  // Selecting a test, command, or snapshot of a spec
   | 'TEST_NOT_FOUND'
   | 'ATTEMPT_NOT_FOUND'
   | 'COMMAND_NOT_FOUND'
@@ -68,11 +74,12 @@ export type TapErrorCode =
   | 'PIN_TARGET_REQUIRED'
   // Checking the invocation
   | 'UNKNOWN_COMMAND'
+  | 'UNKNOWN_OPTION'
+  | 'MISSING_COMPANION_OPTION'
   | 'INVALID_ARGUMENTS'
   | 'INVALID_OPTIONS'
   | 'INVALID_PAYLOAD'
-  | 'INVALID_INDEX'
-  | 'INVALID_LIMIT'
+  | 'INVALID_VALUE'
 
 const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
 
@@ -85,8 +92,9 @@ const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
  *   DISCOVERY  NO_INSTANCE, STALE_INSTANCE
  *   TRANSPORT  RENDERER_UNRESPONSIVE, CDP_UNREACHABLE, BINDING_NOT_FOUND,
  *              BINDING_THREW, STALE_HANDLE, PROTOCOL_MISMATCH
- *   DISPATCH   UNKNOWN_COMMAND, INVALID_ARGUMENTS, INVALID_OPTIONS,
- *              INVALID_PAYLOAD
+ *   DISPATCH   UNKNOWN_COMMAND, UNKNOWN_OPTION, INVALID_ARGUMENTS,
+ *              MISSING_COMPANION_OPTION, INVALID_OPTIONS, INVALID_PAYLOAD,
+ *              INVALID_VALUE
  *
  * instances:
  * - none. It reports the instances it found and swallows every probe failure, so
@@ -103,39 +111,45 @@ const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
  * run:
  * - DISCOVERY
  * - GRAPHQL_UNREACHABLE, GRAPHQL_FAILED, INSTANCE_OUTDATED
- * - SPEC_NOT_FOUND, RUN_FAILED, NO_PROJECT, TESTING_TYPE_NOT_CONFIGURED,
+ * - SPEC_NOT_FOUND, SPEC_START_FAILED, NO_PROJECT, TESTING_TYPE_NOT_CONFIGURED,
  *   INVALID_ARGUMENTS — the last four mapped from the runSpec mutation's codes
  *
+ * Every command also answers UNKNOWN_COMMAND and UNKNOWN_OPTION before it runs:
+ * the CLI parses the invocation against the schema it holds, so a name or flag
+ * that is not in it never reaches the instance.
+ *
  * dom, aria, inspect:
+ * - INVALID_VALUE, from their own option parsing, before an instance is resolved
  * - DISCOVERY, plus NO_BROWSER_ATTACHED
  * - TRANSPORT
- * - NO_RUN, RUN_IN_PROGRESS — the run-lifecycle gate, before any read
- * - NO_AUT, INVALID_SELECTOR, FRAME_READ_FAILED, INVALID_INDEX
- * - INVALID_LIMIT, from `dom --max-chars` and `aria --max-nodes` only
+ * - SPEC_NOT_STARTED, SPEC_IN_PROGRESS — the spec-lifecycle gate, before any read
+ * - NO_AUT, FRAME_READ_FAILED
+ * - INVALID_VALUE again, for a rejected `--selector` or an `--at` past the last
+ *   match, and MISSING_COMPANION_OPTION for `--at` with no `--selector`
  *
  * The rest run on the instance through the binding, so all of them carry
  * DISCOVERY, NO_BROWSER_ATTACHED, TRANSPORT, DISPATCH, and the version pair
  * CLI_OUTDATED / INSTANCE_OUTDATED from the schema handshake. What each adds:
  *
  * command:
- * - NO_RUN, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND, COMMAND_NOT_FOUND,
+ * - SPEC_NOT_STARTED, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND, COMMAND_NOT_FOUND,
  *   AMBIGUOUS_COMMAND
  *
  * reporter:
- * - NO_RUN, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND
- * - INVALID_OPTIONS, for `--attempt` without `--test-id`
+ * - SPEC_NOT_STARTED, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND
+ * - MISSING_COMPANION_OPTION, for `--attempt` without `--test-id`
  *
  * pin:
- * - NO_RUN, RUN_IN_PROGRESS, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND,
+ * - SPEC_NOT_STARTED, SPEC_IN_PROGRESS, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND,
  *   COMMAND_NOT_FOUND, AMBIGUOUS_COMMAND
  * - SNAPSHOT_NOT_FOUND, SNAPSHOT_UNAVAILABLE, PIN_TARGET_REQUIRED
  *
  * run-state (hidden; `status` and the AUT readers call it):
- * - none of its own. It answers with the run's state, reporting even a failed
+ * - none of its own. It answers with the spec's state, reporting even a failed
  *   spec build as a result rather than a failure.
  *
  * resolve-selector (hidden; the AUT readers call it to name ambiguous matches):
- * - NO_AUT, INVALID_SELECTOR
+ * - NO_AUT, INVALID_VALUE
  */
 export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
   /**
@@ -145,8 +159,8 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    * Detail: `Looked for pid 4321.` when `--instance` named one; none otherwise.
    */
   NO_INSTANCE: {
-    description: 'No running Cypress instance is available to drive.',
-    solution: '`cypress tap` drives a Cypress you already have open. Start one with `cypress open`, then try again.',
+    description: 'Could not find an open-mode session to tap into.',
+    solution: 'Start Cypress with `cypress open`, select a testing type and launch a browser, then try again.',
   },
   /**
    * Commands: all but `instances`, on the same path as NO_INSTANCE — records
@@ -166,13 +180,13 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    */
   NO_BROWSER_ATTACHED: {
     description: 'Cypress is running, but no test browser is open.',
-    solution: 'Open a browser in Cypress, then try again.',
+    solution: 'Open a Chromium browser in Cypress, then try again.',
   },
   /**
    * Commands: every command that opens a CDP session — the schema commands,
    * `dom`, `aria`, `inspect`, `status`. `instances` swallows it and reports
    * `rendererResponsive: false` instead of failing.
-   * Detail: `It did not answer within 30000ms.` Which call went unanswered is a
+   * Detail: `No response within the specified timeout (30000ms).` Which call went unanswered is a
    * protocol detail, so it stays on the diagnostic.
    */
   RENDERER_UNRESPONSIVE: {
@@ -280,18 +294,20 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    * to read) and `command`, `reporter`, `pin` (no run mounted app-side).
    * Detail: none — there is nothing to name beyond the condition itself.
    */
-  NO_RUN: {
-    description: 'No spec has been run yet.',
-    solution: 'Start one with `cypress tap run <spec>`, then read it once it has finished. `cypress tap specs` lists the specs this instance can run.',
+  SPEC_NOT_STARTED: {
+    description: 'No spec is available to read.',
+    solution: 'Start a spec with the `run` command, then read it once it has finished.',
   },
   /**
    * Commands: `dom`, `aria`, `inspect` (the app is in flux mid-run, so a read
    * would capture a transient page) and `pin`.
-   * Detail: none.
+   * Detail: always the line `specInProgressTapError` builds, which names the spec
+   * that is running — hence no condition of its own here.
+   *
+   * @deprecated - raise it with specInProgressTapError(), which writes its copy
    */
-  RUN_IN_PROGRESS: {
-    description: 'A spec is currently running.',
-    solution: 'Wait for it to finish — `cypress tap status` reports when it has — then try again.',
+  SPEC_IN_PROGRESS: {
+    solution: 'Use `cypress tap status` to verify when the spec has finished.',
   },
   /**
    * Commands: `run`.
@@ -300,8 +316,8 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    * - no result at all: The instance returned no result for
    *   "cypress/e2e/a.cy.ts".
    */
-  RUN_FAILED: {
-    description: 'The Cypress instance could not start the run.',
+  SPEC_START_FAILED: {
+    description: 'The Cypress instance could not start the spec.',
     solution: 'Check the instance with `cypress tap status`, then try again.',
     recommendGhIssue: true,
   },
@@ -346,16 +362,6 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: 'Run a spec first with `cypress tap run <spec>`. To read the app as it was at an earlier command, pin that command with `cypress tap pin`.',
   },
   /**
-   * Commands: `dom`, `aria`, `inspect` — raised by the match counter, the DOM
-   * read, or the single-node lookup — and `resolve-selector`. All four go
-   * through one factory so the wording cannot drift between them.
-   * Detail: `The selector was ">>bad".`
-   */
-  INVALID_SELECTOR: {
-    description: 'The app under test rejected the selector as invalid CSS.',
-    solution: 'Check the selector for a syntax error, such as an unclosed quote or bracket, then try again.',
-  },
-  /**
    * Commands: `dom`, `aria`, `inspect` — an injected script threw inside the AUT
    * frame while counting matches, reading the DOM, or inspecting an element.
    * Detail: none. The script that threw and its exception stay on the diagnostic.
@@ -367,31 +373,36 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
   },
 
   /**
+   * The three lookups share one shape, raised through `notFoundTapError`: what was
+   * being looked for, the option and value that named nothing, and where the real
+   * ones are listed. See its doc for the line each detail carries.
+   *
    * Commands: `command`, `reporter`, `pin` — all three select a test by id.
-   * Detail: `Looked for "r7".`
+   *
+   * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
   TEST_NOT_FOUND: {
-    description: 'The run has no test matching that id.',
-    solution: '`cypress tap reporter` lists this run’s tests and their ids.',
+    description: 'No test in this spec matched that id.',
+    solution: 'Run `cypress tap reporter` to list the tests in the spec.',
   },
   /**
    * Commands: `command`, `reporter`, `pin` — all three accept `--attempt`.
-   * Details:
-   * - never retried: Test "r2" has only 1 attempt.
-   * - out of range: Test "r2" has 3 attempts, so `--attempt` takes 1–3.
+   *
+   * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
   ATTEMPT_NOT_FOUND: {
-    description: 'That test has no such attempt.',
+    description: 'No attempt of this test matched that number.',
     solution: '`--attempt` takes a 1-based attempt number and selects an earlier attempt of a retried test; omit it for the latest.',
   },
   /**
    * Commands: `command` and `pin` — the two that resolve a command id to a
    * reporter row.
-   * Detail: `Looked for "9".`
+   *
+   * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
   COMMAND_NOT_FOUND: {
-    description: 'The test has no command matching that id.',
-    solution: '`cypress tap reporter --test-id <id>` lists this test’s commands and their ids.',
+    description: 'No command in this test matched that id.',
+    solution: 'Run `cypress tap reporter --test-id <id>` to list the commands in the test.',
   },
   /**
    * Commands: `command` and `pin`, when an unqualified row number matches rows
@@ -404,13 +415,15 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: 'Qualify the id with the section it belongs to, as `cypress tap reporter` lists it.',
   },
   /**
-   * Commands: `pin`, when `--at` names neither a snapshot nor a valid index.
-   * Detail: `Looked for "during". This command has: "before" (1), "after" (2).`
-   * The enumeration is the point — it is how the reader picks a valid one.
+   * Commands: `pin`, when `--at` names neither a snapshot nor a valid index. Its
+   * context clause enumerates the snapshots the command does have, which is how
+   * the reader picks a valid one.
+   *
+   * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
   SNAPSHOT_NOT_FOUND: {
-    description: 'That command has no snapshot matching `--at`.',
-    solution: '`--at` takes a snapshot name or a 1-based index; omit it to pin the command’s final state.',
+    description: 'No snapshot of this command matched that name or index.',
+    solution: 'Run `cypress tap command --test-id <id> --command-id <id>` to list the snapshots a command has. `--at` takes a snapshot name or a 1-based index; omit it to pin the command’s final state.',
   },
   /**
    * Commands: `pin`.
@@ -437,37 +450,54 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    * Commands: any invocation naming a command neither the CLI nor the instance
    * offers, whether it was run or only asked for `--help`; and the binding's own
    * dispatch, which also guards against an inherited name like `constructor`.
-   * Detail: `"instancs" is not available in this Cypress (v15.0.0), which offers:
-   * instances, status, specs, …` — the listing is what makes a typo fixable.
+   * Raised through `unknownCommandTapError`, so its copy lives there. The listing
+   * that follows is what makes a typo fixable: the CLI's own help, or the
+   * commands the binding offers.
    */
-  UNKNOWN_COMMAND: {
-    description: 'That is not a command this Cypress offers.',
-    solution: 'Run `cypress tap --help` to list the commands available.',
-  },
+  /** @deprecated - raise it with unknownCommandTapError(), which writes its copy */
+  UNKNOWN_COMMAND: {},
   /**
-   * Commands: the schema commands, from positional coercion in the binding; and
-   * `run`, from the mutation's NO_SPEC_PATH.
-   * Detail: the coercion failure followed by the command's signature — `<spec>
-   * must be a string, but number was given. Usage: cypress tap run <spec>` — or
-   * the mutation's `detailMessage`.
+   * Commands: any invocation passing a flag the command does not declare, caught
+   * CLI-side as the command's grammar parses; and the binding's own coercion, for
+   * a caller that reaches it directly. Raised through `unknownOptionTapError`.
+   * An option the command does take but was given wrongly is INVALID_OPTIONS (a
+   * required one missing, one that needs another alongside it) or INVALID_VALUE
+   * (a value of the wrong type).
+   */
+  /** @deprecated - raise it with unknownOptionTapError(), which writes its copy */
+  UNKNOWN_OPTION: {},
+  /**
+   * Commands: the schema commands, when an argument is unknown or a required one
+   * is missing; and `run`, from the mutation's NO_SPEC_PATH. An argument of the
+   * wrong type is INVALID_VALUE instead.
+   * Detail: the fault followed by the command's signature — `<foo> was passed to
+   * "run", but it's not a supported argument of "run". Usage: cypress tap run
+   * <spec>` — or the mutation's `detailMessage`.
    */
   INVALID_ARGUMENTS: {
     description: 'The command was given an argument it cannot accept.',
     solution: 'Run `cypress tap <command> --help` for the arguments it takes.',
   },
   /**
-   * Commands: the schema commands, from flag coercion in the binding; and
-   * `reporter`, when `--attempt` arrives without `--test-id`.
-   * Details:
-   * - flag coercion: the failure plus the command's signature, as in "pin" has
-   *   no --foo option. Usage: cypress tap pin [options]
-   * - `reporter` given `--attempt` alone: No --test-id was given, so there is no
-   *   single test to select an attempt of.
+   * Commands: the schema commands, when a required flag is missing. A flag of the
+   * wrong type is INVALID_VALUE, one that needs another alongside it is
+   * MISSING_COMPANION_OPTION, and a flag the CLI knows the command does not take
+   * never reaches here — the CLI names it and prints that command's help.
+   * Detail: the fault plus the command's signature, as in "pin" is missing the
+   * required --test-id option. Usage: cypress tap pin [options]
    */
   INVALID_OPTIONS: {
     description: 'The command was given an option it cannot accept.',
     solution: 'Run `cypress tap <command> --help` for the options it takes.',
   },
+  /**
+   * Commands: `reporter`, for `--attempt` without `--test-id`; and `dom`, `aria`,
+   * `inspect`, for `--at` without `--selector`. Both flags are named, and what
+   * dropping either one leaves you with is the throw site's to say.
+   *
+   * @deprecated - raise it with missingCompanionOptionTapError(), which writes its copy
+   */
+  MISSING_COMPANION_OPTION: {},
   /**
    * Commands: the schema commands — but not reachable by mistyping a flag. It
    * means args or options crossed the wire as something other than an object, so
@@ -481,25 +511,16 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     recommendGhIssue: true,
   },
   /**
-   * Commands: `dom`, `aria`, `inspect` — the three that take `--at`.
-   * Details, one per way the option can be wrong:
-   * - not a whole number: the value read back, as in `--at` was given "abc".
-   * - no selector to index into: says so, and names `--selector`.
-   * - past the last match: the range, as in ".item" matched 3 elements, so
-   *   `--at` takes 0 to 2.
+   * Commands: any command taking a value this CLI or the instance rejects —
+   * `--max-chars`/`--max-nodes`, `--at` (malformed or past the last match),
+   * `--selector`, and the schema commands' own positional and flag coercion.
+   * Detail: always the two paragraphs `invalidValue` builds, which is why this
+   * entry carries no solution — the expectation is the solution.
+   *
+   * @deprecated - raise it with invalidValueTapError(), which writes its copy
    */
-  INVALID_INDEX: {
-    description: '`--at` is not a valid index into the matched elements.',
-    solution: '`--at` takes a whole number, 0 or greater: a 0-based index into the elements `--selector` matched, so it needs a selector to index into and a match at that index.',
-  },
-  /**
-   * Commands: `dom` (`--max-chars`) and `aria` (`--max-nodes`).
-   * Detail: the offending flag and value, as in `--max-nodes` was given "0".
-   * The flag is named because the two commands share this entry.
-   */
-  INVALID_LIMIT: {
-    description: 'A size limit was not a positive integer.',
-    solution: 'Options that cap the size of a read — `--max-chars`, `--max-nodes` — take a positive integer.',
+  INVALID_VALUE: {
+    description: 'An invalid value was given.',
   },
 }
 
@@ -540,6 +561,26 @@ export interface TapErrorOptions {
 }
 
 /**
+ * The codes whose copy is a factory's rather than the table's. Their opening line
+ * names a subject the table cannot know, so raising one bare would print a failure
+ * with nothing above its specifics — hence the constructor will not take them, and
+ * the factories at the foot of this module are the way in.
+ */
+export type FactoryRaisedTapErrorCode =
+  | 'INVALID_VALUE'
+  | 'TEST_NOT_FOUND'
+  | 'ATTEMPT_NOT_FOUND'
+  | 'COMMAND_NOT_FOUND'
+  | 'SNAPSHOT_NOT_FOUND'
+  | 'UNKNOWN_COMMAND'
+  | 'UNKNOWN_OPTION'
+  | 'MISSING_COMPANION_OPTION'
+  | 'SPEC_IN_PROGRESS'
+
+/** Every code a caller may raise directly: the ones whose copy the table holds. */
+export type RaisableTapErrorCode = Exclude<TapErrorCode, FactoryRaisedTapErrorCode>
+
+/**
  * The one error every tap failure is raised as, on both sides of the wire: the app
  * throws it from a command handler, the CLI throws it from discovery, transport, and
  * its own commands. `code` selects the copy; `detail` carries what the copy cannot
@@ -550,7 +591,7 @@ export class TapError extends Error {
   detail?: string
   cause?: unknown
 
-  constructor (code: TapErrorCode, options: TapErrorOptions = {}) {
+  constructor (code: RaisableTapErrorCode, options: TapErrorOptions = {}) {
     super(options.message ?? code)
 
     this.name = 'TapError'
@@ -573,4 +614,74 @@ export class TapError extends Error {
 
 export const isTapError = (err: unknown): err is TapError => {
   return err instanceof TapError
+}
+
+// The one door through the constructor's guard, so that every code it keeps out is
+// still built the same way — with the copy its factory below writes.
+const factoryRaised = (code: FactoryRaisedTapErrorCode, detail: string): TapError => {
+  return new TapError(code as unknown as RaisableTapErrorCode, { detail })
+}
+
+/**
+ * The one way to report a value a command cannot use: what was expected of the named
+ * input, then the value as it arrived. Both sides of the wire raise it through here,
+ * so a bad `--at` reads the same whether the CLI caught it or the instance did.
+ */
+export const invalidValueTapError = (name: string, expected: string, value: unknown): TapError => {
+  return factoryRaised('INVALID_VALUE', `Expected \`${name}\` to be ${expected}.\n\nInstead the value was: ${JSON.stringify(value)}`)
+}
+
+/** The lookups that answer the same way: a well-formed id that named nothing. */
+export type NotFoundTapErrorCode = 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
+
+/**
+ * A selector that was read fine but matched nothing the run has. Each entry states
+ * what was being looked for and where the real ones are listed; this writes the one
+ * line only the throw site can — which option was given what — plus whatever narrows
+ * the search, such as how many attempts the test actually has.
+ */
+export const notFoundTapError = (code: NotFoundTapErrorCode, option: string, value: unknown, context?: string): TapError => {
+  return factoryRaised(code, `Looked for \`${option}\` ${JSON.stringify(value)}.${context ? ` ${context}` : ''}`)
+}
+
+/**
+ * A flag that only means something alongside another one. Both are named here;
+ * `remedy` is the throw site's, because what dropping either one leaves you with
+ * is particular to the pair — a spec-wide view, the whole document.
+ */
+export const missingCompanionOptionTapError = (given: string, required: string, remedy: string): TapError => {
+  return factoryRaised('MISSING_COMPANION_OPTION', `You passed the \`${given}\` flag without also passing the \`${required}\` flag.\n\n${remedy}`)
+}
+
+/**
+ * A name no command answers to, and a flag no command declares: say which one was
+ * given, then list the real ones. `listing` is whatever names them where the failure
+ * was noticed — the CLI's generated help, or the commands the binding offers — and
+ * is the remedy, which is why neither carries a solution of its own.
+ */
+export const unknownCommandTapError = (name: string, listing: string): TapError => {
+  return factoryRaised('UNKNOWN_COMMAND', `Unknown command "${name}"\n\n${listing}`)
+}
+
+export const unknownOptionTapError = (flag: string, listing: string): TapError => {
+  return factoryRaised('UNKNOWN_OPTION', `Unknown option "${flag}"\n\n${listing}`)
+}
+
+/**
+ * The spec that is mid-run, which is what makes the condition actionable: it names
+ * what to wait on. Both sides raise it through here — the CLI from its run-state
+ * gate, the app from the runner — and the spec is only unnamed in the moment
+ * between one being selected and its path being known.
+ */
+export const specInProgressTapError = (spec: string | null): TapError => {
+  return factoryRaised('SPEC_IN_PROGRESS', spec ? `The spec ${spec} is currently running.` : 'The spec is currently running.')
+}
+
+/**
+ * Re-raise a failure the instance already named. The code is whatever crossed the
+ * wire — including one a factory built over there, whose copy arrived with it — so
+ * this takes what the constructor will not.
+ */
+export const tapErrorFromPayload = (payload: TapErrorPayload): TapError => {
+  return new TapError(payload.code as RaisableTapErrorCode, { detail: payload.detail })
 }

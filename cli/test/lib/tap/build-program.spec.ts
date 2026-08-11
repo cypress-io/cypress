@@ -166,11 +166,16 @@ describe('lib/tap/build-program', () => {
     )
   })
 
-  it('throws a catchable unknownCommand error for a command not in the schema', () => {
+  // A name the schema has no command for is a tap failure like any other, raised
+  // with the listing that answers it rather than reported in commander's voice.
+  it('raises a tap failure naming a command not in the schema, and the help that lists them', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['bogus'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.unknownCommand' }),
+      expect.objectContaining({
+        code: 'UNKNOWN_COMMAND',
+        detail: expect.stringContaining('Unknown command "bogus"'),
+      }),
     )
   })
 
@@ -301,11 +306,14 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, {}, {})
   })
 
-  it('throws a catchable unknownOption error for a flag not in the schema', () => {
+  it('raises a tap failure naming a flag not in the schema, and the help that lists them', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.unknownOption' }),
+      expect.objectContaining({
+        code: 'UNKNOWN_OPTION',
+        detail: expect.stringContaining('Unknown option "--nope"'),
+      }),
     )
   })
 

@@ -103,12 +103,13 @@ describe('lib/tap/commands/dom extractDom', () => {
     expect(result.html).to.eq('<htm')
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
+  it('reports a rejected selector as the value it was given', async () => {
     const { session } = makeSession([{ value: { invalidSelector: true } }])
 
     await expect(extractDom(session, frame, '>>bad', 100)).rejects.toMatchObject({
       name: 'TapError',
-      code: 'INVALID_SELECTOR',
+      code: 'INVALID_VALUE',
+      detail: 'Expected `--selector` to be a valid CSS selector.\n\nInstead the value was: ">>bad"',
     })
   })
 

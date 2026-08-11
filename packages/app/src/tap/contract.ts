@@ -13,6 +13,12 @@ export {
   MAX_DERIVED_SELECTORS,
   TapError,
   isTapError,
+  invalidValueTapError,
+  unknownCommandTapError,
+  unknownOptionTapError,
+  specInProgressTapError,
+  notFoundTapError,
+  missingCompanionOptionTapError,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 export type {

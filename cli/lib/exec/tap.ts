@@ -87,7 +87,10 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
       return 1
     }
 
-    throw err
+    // A command that reads its own options before resolving an instance — as the
+    // AUT readers do, so a bad value is answered as itself — raises outside the
+    // flow that renders the rest of its failures.
+    return await renderTapFailure(err)
   }
 
   return dispatchCode ?? 1

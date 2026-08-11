@@ -11,13 +11,13 @@ describe('tap/tap-manager', () => {
   // exercised once the first real command lands (see the `run` command spec).
   // Until then these cover the command-lookup failure and the wire envelope.
   describe('exec', () => {
-    it('returns UNKNOWN_COMMAND listing the available commands', async () => {
+    it('returns UNKNOWN_COMMAND naming the name given and listing the available commands', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('bogus')
 
       expect((outcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
-      expect((outcome as { error: { detail: string } }).error.detail).to.contain(`which offers: ${Object.keys(tapCommands).join(', ')}.`)
+      expect((outcome as { error: { detail: string } }).error.detail).to.eq(`Unknown command "bogus"\n\nThis Cypress (v${CYPRESS_VERSION}) offers: ${Object.keys(tapCommands).join(', ')}.`)
       expect((outcome as { error: { detail: string } }).error.detail).to.contain('v15.0.0')
     })
 

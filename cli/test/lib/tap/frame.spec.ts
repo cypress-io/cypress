@@ -87,30 +87,32 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     await expect(assertFrameReadable(session)).resolves.toBeUndefined()
   })
 
-  it('rejects mid-run with RUN_IN_PROGRESS so a poller waits for the app to settle', async () => {
+  // Naming the spec is what makes the wait actionable — it says what to poll on.
+  it('rejects mid-run with SPEC_IN_PROGRESS so a poller waits for the app to settle', async () => {
     const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'running' } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
       name: 'TapError',
-      code: 'RUN_IN_PROGRESS',
+      code: 'SPEC_IN_PROGRESS',
+      detail: 'The spec login.cy.js is currently running.',
     })
   })
 
-  it('rejects with NO_RUN — distinct from mid-run — when no spec has run', async () => {
+  it('rejects with SPEC_NOT_STARTED — distinct from mid-run — when no spec has run', async () => {
     const session = sessionForRunState({ result: { spec: null, totalSpecs: 3 } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
       name: 'TapError',
-      code: 'NO_RUN',
+      code: 'SPEC_NOT_STARTED',
     })
   })
 
-  it('rejects a spec still building with NO_RUN — loading is not a verdict, so there is no run to read', async () => {
+  it('rejects a spec still building with SPEC_NOT_STARTED — loading is not a verdict, so there is no run to read', async () => {
     const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'loading', startedAt: null } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
       name: 'TapError',
-      code: 'NO_RUN',
+      code: 'SPEC_NOT_STARTED',
     })
   })
 
