@@ -335,9 +335,8 @@ jobs:
       parallelism: 1
       record-group-suffix: '-remediated'
       # #34467 continue unmodified CDP Fetch responses; #34465 extra-target shared
-      # middleware. Excludes downloads_basic_auth.cy.ts — #34512 Network.enable
-      # never settles on the extra target's session. Add it here once that is fixed.
-      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts
+      # middleware; #34512 extra-target Network.enable hang (downloads_basic_auth).
+      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/cypress/downloads_basic_auth.cy.ts
       requires:
         - ready-to-test
   - driver-integration-tests-electron:
@@ -347,10 +346,9 @@ jobs:
       require-opt-in: false
       parallelism: 1
       record-group-suffix: '-remediated'
-      # #34465 extra-target shared middleware. Excludes
-      # downloads_basic_auth.cy.ts — #34512 Network.enable never settles on the
-      # extra target's session. Add it here once that is fixed.
-      spec: cypress/e2e/cypress/downloads.cy.ts
+      # #34465 extra-target shared middleware; #34512 extra-target Network.enable
+      # hang (downloads_basic_auth).
+      spec: cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/cypress/downloads_basic_auth.cy.ts
       requires:
         - ready-to-test
   - unit-tests-proxy-disabled:
