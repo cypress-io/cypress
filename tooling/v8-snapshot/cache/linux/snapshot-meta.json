@@ -3713,7 +3713,6 @@
     "./packages/scaffold-config/node_modules/p-locate/index.js",
     "./packages/server/config/app.json",
     "./packages/server/lib/adapters/configurator-network-policy.ts",
-    "./packages/server/lib/adapters/file-server-origin.ts",
     "./packages/server/lib/adapters/internal-routes.ts",
     "./packages/server/lib/adapters/serve-internal-routes.ts",
     "./packages/server/lib/append_electron_switches.ts",
@@ -3735,6 +3734,7 @@
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/browsers/bidi_automation.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
+    "./packages/server/lib/browsers/cdp-protocol/body-digest.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-connection.ts",
     "./packages/server/lib/browsers/cdp-protocol/cdp-fetch-codec.ts",
@@ -3744,6 +3744,7 @@
     "./packages/server/lib/browsers/cdp-protocol/cri-client.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-errors.ts",
     "./packages/server/lib/browsers/cdp-protocol/debug-cdp-connection.ts",
+    "./packages/server/lib/browsers/cdp-protocol/normalize-resource-type.ts",
     "./packages/server/lib/browsers/constants.ts",
     "./packages/server/lib/browsers/electron.ts",
     "./packages/server/lib/browsers/firefox-util.ts",
@@ -4061,5 +4062,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "90b91efec93a894fa0a5e04bb72d94db4772728337c2160c7b9e815a6ca8a6ff"
+  "deferredHash": "c7959ec7760bff2dea49e4911034ad8b7066184aaef53662f644b77a87e79805"
 }

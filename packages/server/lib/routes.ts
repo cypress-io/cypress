@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { domainPropsToHostname } from '@packages/network-tools'
+import { domainPropsToHostname, toFileServerUrl } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -25,6 +25,7 @@ import { privilegedCommandsManager } from './privileged-commands/privileged-comm
 import { cypressInstances } from './cypress-instances'
 import { INSTANCES_ROUTE_PREFIX } from '@packages/cypress-instances'
 import { isProxyDisabled } from './util/is-proxy-disabled'
+import { isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -369,11 +370,69 @@ export const createCommonRoutes = ({
     })
   }
 
+  // Direct-origin catch-all: with the MITM proxy disabled the Cypress origin
+  // serves the traffic it owns, which reaches this router three ways:
+  //  - `strategy:file` requests the CDP transport deliberately redirects here. For example, a relative
+  //    `cy.visit('index.html')` and the assets that page pulls in, served off disk from the project root.
+  //  - `resolve:url` pre-flights this server forces through itself. For example, a `cy.visit()` whose URL
+  //    matches a `cy.intercept()` route, so net-stubbing gets a chance to reply.
+  //  - requests that never produce a Fetch pause at all (service-worker scripts come from the SW target).
+  // Anything else falls through: handing an arbitrary URL to the pipeline would send it back out to our own origin and loop.
+  if (isProxyDisabled() && (getNetworkProxy || networkProxy)) {
+    router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
+      const proxy = resolveNetworkProxy()
+
+      if (!proxy) {
+        return next()
+      }
+
+      // A loopback token means we steered this request here ourselves, rather
+      // than the browser. This means it is either:
+      //   - an intercept-matched cy.visit() pre-flight that _onResolveUrl forced through this server, or
+      //   - a strategy:file request the CDP transport redirected to our origin.
+      // setProxiedUrl has already restored the URL that was actually asked
+      // for, so hand it to the pipeline as-is. The fallback below rebuilds the
+      // URL from the Host header, which here would replace the real target and
+      // hide it from net-stubbing and the file-server rewrite.
+      if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && /^https?:\/\//.test(req.proxiedUrl)) {
+        debug('serving loopback-token request through the pipeline: %s %s', req.method, req.proxiedUrl)
+
+        await proxy.handleHttpRequest(req, res)
+
+        return
+      }
+
+      // Un-tokened direct traffic — nothing steered it here, it addressed us:
+      //   - service-worker scripts
+      //   - other requests that never produce a Fetch pause
+      // Resolve against the Host header, since the request may address us under
+      // an aliased name, and let the toFileServerUrl origin comparison decide:
+      // a forged Host grants nothing a caller could not get by using the right name.
+      const base = req.headers.host ? `${req.protocol}://${req.headers.host}` : resolveProxyUrlBase(config)
+      const absoluteUrl = new URL(req.url, base).href
+
+      if (toFileServerUrl(absoluteUrl, remoteStates.current())) {
+        debug('serving direct file server request through the pipeline: %s %s', req.method, absoluteUrl)
+
+        req.proxiedUrl = absoluteUrl
+        await proxy.handleHttpRequest(req, res)
+
+        return
+      }
+
+      debug('falling through, not a file server url: %s %s', req.method, absoluteUrl)
+
+      return next()
+    })
+  }
+
   // when we experience uncaught errors
   // during routing just log them out to
   // the console and send 500 status
   // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
+  // Express dispatches error middleware by arity — the unused `next` keeps
+  // this from running as a regular handler on every unmatched request.
+  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)
