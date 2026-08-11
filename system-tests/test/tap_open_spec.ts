@@ -231,7 +231,14 @@ describe('tap CLI against a settled run', function () {
 
     // Scrub the pid with the value the JSON payload reports, rather than a digit pattern
     // that could also match the run counts.
-    snapshotRendering('status', result.stdout, [[new RegExp(String(payload.pid), 'g'), '<pid>']])
+    snapshotRendering('status', result.stdout, [
+      [new RegExp(String(payload.pid), 'g'), '<pid>'],
+      // The instance table pads PROJECT to the width of the longest value, so the
+      // column width tracks the scaffolded tmp path — which differs between a local
+      // run and CI. Collapse space runs: column order and content stay asserted,
+      // alignment (the part that legitimately varies) does not.
+      [/ {2,}/g, '  '],
+    ])
   })
 
   it('clips a read at --max-chars', async () => {
@@ -240,6 +247,16 @@ describe('tap CLI against a settled run', function () {
     expect(result.exitCode).to.eq(0)
     expect(result.json().truncated, 'the browser-side cap clipped the output').to.eq(true)
     expect(result.json().html).to.have.length(20)
+  })
+
+  it('accepts the short option aliases', async () => {
+    // -s/-m for a native command, and the same read via the long forms, so the aliases
+    // are proven equivalent rather than merely accepted.
+    const short = await instance.tap(['--json', 'dom', '-s', '#status', '-m', '30000'])
+    const long = await instance.tap(['--json', 'dom', '--selector', '#status', '--max-chars', '30000'])
+
+    expect(short.exitCode).to.eq(0)
+    expect(short.json()).to.deep.eq(long.json())
   })
 
   it('reports a selector that matches nothing as an answer, not a failure', async () => {
@@ -582,7 +599,7 @@ describe('tap CLI reading a pinned snapshot', function () {
 
     testId = (tests[0] as { id: string }).id
 
-    const log = (await instance.tap(['--json', 'reporter', '--testId', testId])).json()
+    const log = (await instance.tap(['--json', 'reporter', '--test-id', testId])).json()
 
     clickCommandId = log.commands.find((entry: { name: string }) => entry.name === 'click').id
   })
@@ -597,13 +614,13 @@ describe('tap CLI reading a pinned snapshot', function () {
     expect(overview.spec).to.include('pin-target.cy.js')
     expect(overview.stats).to.include({ passed: 1, failed: 0 })
 
-    const log = (await instance.tap(['--json', 'reporter', '--testId', testId])).json()
+    const log = (await instance.tap(['--json', 'reporter', '--test-id', testId])).json()
 
     expect(log.commands.map((entry: { name: string }) => entry.name)).to.include.members(['visit', 'get', 'click', 'assert'])
   })
 
   it('details one command, including the snapshots pinnable on it', async () => {
-    const result = await instance.tap(['--json', 'command', '--testId', testId, '--commandId', clickCommandId])
+    const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', clickCommandId])
 
     expect(result.exitCode).to.eq(0)
 
@@ -614,11 +631,11 @@ describe('tap CLI reading a pinned snapshot', function () {
     expect(detail.consoleProps, 'the command’s console output').to.exist
   })
 
-  it('exits 1 when --commandId is given without the test it belongs to', async () => {
-    const result = await instance.tap(['command', '--commandId', clickCommandId])
+  it('exits 1 when --command-id is given without the test it belongs to', async () => {
+    const result = await instance.tap(['command', '--command-id', clickCommandId])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('--testId')
+    expect(failureOutput(result)).to.include('--test-id')
   })
 
   it('reads the pinned snapshot rather than the live page', async () => {
@@ -627,7 +644,7 @@ describe('tap CLI reading a pinned snapshot', function () {
 
     expect(live.html).to.eq('<div id="status">clicked</div>')
 
-    const pin = await instance.tap(['--json', 'pin', '--testId', testId, '--commandId', clickCommandId, '--at', 'before'])
+    const pin = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
 
     expect(pin.exitCode).to.eq(0)
     expect(pin.json().pinned).to.deep.include({ test: testId })
