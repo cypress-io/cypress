@@ -108,7 +108,6 @@ export class CriClient implements ICriClient {
   // CDP.Client instances
   private subscriptions: Subscription[] = []
   private enableCommands: EnableCommand[] = []
-  private enqueuedCommands: EnqueuedCommand[] = []
 
   private _commandQueue: CDPCommandQueue = new CDPCommandQueue()
 
@@ -153,6 +152,13 @@ export class CriClient implements ICriClient {
 
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', onAsynchronousError)
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect', this._onCdpConnectionReconnect)
+
+    // Once the connection reaches a terminal state - a terminal disconnect with
+    // reconnection disabled, or reconnection exhausting its retries and giving up -
+    // nothing will ever flush the command queue. Reject it so callers awaiting those
+    // commands fail instead of hanging forever.
+    this.cdpConnection.addConnectionEventListener('cdp-connection-closed', this._rejectEnqueuedCommands)
+    this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', this._rejectEnqueuedCommands)
 
     if (onCriConnectionClosed) {
       this.cdpConnection.addConnectionEventListener('cdp-connection-closed', onCriConnectionClosed)
@@ -329,6 +335,7 @@ export class CriClient implements ICriClient {
         return await this.cdpConnection.send(command, params, sessionId)
       } catch (err) {
         debug('Encountered error on send %o', { command, params, sessionId, err })
+
         // This error occurs when the browser has been left open for a long
         // time and/or the user's computer has been put to sleep. The
         // socket disconnects and we need to recreate the socket and
@@ -337,23 +344,22 @@ export class CriClient implements ICriClient {
           throw err
         }
 
-        debug('error classified as WEBSOCKET_NOT_OPEN_RE; enqueuing and attempting to reconnect')
-
-        const p = this._enqueueCommand(command, params, sessionId)
-
-        // if enqueued commands were wiped out from the reconnect and the socket is already closed, reject the command as it will never be run
-        if (this.enqueuedCommands.length === 0 && this.cdpConnection.terminated) {
-          debug('connection was closed was trying to reconnect')
-
-          return Promise.reject(new Error(`${command} will not run as browser CRI connection was reset`))
+        if (this.cdpConnection.terminated) {
+          return this._rejectTerminated(command)
         }
 
-        return p
+        debug('error classified as WEBSOCKET_NOT_OPEN_RE; enqueuing and attempting to reconnect')
+
+        return this._enqueueCommand(command, params, sessionId)
       } finally {
         if (hangDetectionTimer) {
           clearTimeout(hangDetectionTimer)
         }
       }
+    }
+
+    if (this.cdpConnection.terminated) {
+      return this._rejectTerminated(command)
     }
 
     return this._enqueueCommand(command, params, sessionId)
@@ -455,6 +461,18 @@ export class CriClient implements ICriClient {
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
     return this._commandQueue.add(command, params, sessionId)
+  }
+
+  // A terminated connection never reconnects, so a send against one is rejected outright
+  // rather than enqueued to await a flush that will never come.
+  private _rejectTerminated <TCmd extends CdpCommand> (command: TCmd): Promise<ProtocolMapping.Commands[TCmd]['returnType']> {
+    debug('connection to target %s is terminated; rejecting %s instead of enqueuing', this.targetId, command)
+
+    return Promise.reject(new CDPDisconnectedError(`${command} will not run as the CRI connection to Target ${this.targetId} has been closed`))
+  }
+
+  private _rejectEnqueuedCommands = () => {
+    this._commandQueue.reject(new CDPDisconnectedError(`The CRI connection to Target ${this.targetId} has been closed; enqueued commands will never run`))
   }
 
   private _onCdpConnectionReconnect = async () => {
