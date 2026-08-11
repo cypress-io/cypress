@@ -10,6 +10,11 @@ type CreateServeInternalRoutesMiddlewareOptions = {
   request: ServerRequest
 }
 
+const LOOPBACK_HEADERS = new Set([
+  CYPRESS_INTERNAL_LOOPBACK_HEADER,
+  CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER,
+])
+
 const HOP_BY_HOP_HEADERS = new Set([
   'accept-encoding',
   'connection',
@@ -22,18 +27,21 @@ const HOP_BY_HOP_HEADERS = new Set([
   'trailer',
   'transfer-encoding',
   'upgrade',
-  CYPRESS_INTERNAL_LOOPBACK_HEADER,
-  CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER,
+  ...LOOPBACK_HEADERS,
 ])
 
-function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
+function omitHeaders (headers: HttpHeaders = {}, omit: Set<string>): HttpHeaders {
   return Object.entries(headers).reduce<HttpHeaders>((memo, [key, value]) => {
-    if (!HOP_BY_HOP_HEADERS.has(key.toLowerCase())) {
+    if (!omit.has(key.toLowerCase())) {
       memo[key] = value
     }
 
     return memo
   }, {})
+}
+
+function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
+  return omitHeaders(headers, HOP_BY_HOP_HEADERS)
 }
 
 function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
@@ -78,8 +86,10 @@ export function createServeInternalRoutesMiddleware ({
       // Cloud-bundle routes re-enter on purpose: the cypress-in-cypress parent's
       // Express handlers forward them through the proxy to the child project.
       // Hand them to the legacy pipeline instead of swallowing the forward.
+      // Drop the loopback headers first — the token authenticates re-entry and
+      // must never ride the outbound request to the child project or the AUT.
       if (isCloudBundleRoute(url.pathname)) {
-        return next(request)
+        return next({ ...request, headers: omitHeaders(request.headers, LOOPBACK_HEADERS) })
       }
 
       // Otherwise no route handler owned this path and the catch-all proxy saw

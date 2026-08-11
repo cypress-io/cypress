@@ -203,6 +203,25 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(serverRequest.create).not.to.have.been.called
   })
 
+  it('strips the loopback headers from delegated cloud-bundle re-entries', async () => {
+    // The token authenticates re-entry — forwarding it to the child project or
+    // the AUT would hand a real origin the means to forge a trusted loopback.
+    const { middleware } = createMiddleware()
+    const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+      headers: {
+        'accept-encoding': 'gzip',
+        'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+      },
+    }, next)
+
+    expect(next.firstCall.args[0].headers).to.deep.equal({ 'accept-encoding': 'gzip' })
+  })
+
   it('does not short-circuit on a spoofed loopback header without the process token', async () => {
     const { middleware, serverRequest } = createMiddleware({
       statusCode: 200,
