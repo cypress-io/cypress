@@ -3,13 +3,13 @@
 
 **Bugfixes:**
 
+- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
 
 ## 15.20.1
 
 **Bugfixes:**
 
-- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed a regression in [15.20.0](#15-20-0) where the Cypress app sent all Cypress Cloud requests to `http://localhost:3000` instead of Cypress Cloud. Logging in could not complete, and the Runs and Debug pages reported no data. Addressed in [#34536](https://github.com/cypress-io/cypress/pull/34536).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
