@@ -32,12 +32,12 @@ export interface AutFrame {
   frameId: string
 }
 
-interface FrameNode {
+export interface FrameNode {
   frame: { id: string, name?: string, url?: string }
   childFrames?: FrameNode[]
 }
 
-const findAutFrame = (node: FrameNode): { id: string, url: string } | undefined => {
+export const findAutFrame = (node: FrameNode): { id: string, url: string } | undefined => {
   if ((node.frame.name ?? '').startsWith(AUT_FRAME_NAME_PREFIX)) {
     return { id: node.frame.id, url: node.frame.url ?? '' }
   }

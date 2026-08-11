@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tap AUT content</title>
+  <style>
+    /* Explicit values so the computed styles and box the inspect command reports
+       are the same on every platform. Anything inherited from the default
+       stylesheet (font-family in particular) varies by OS. */
+    #status {
+      color: rgb(0, 100, 0);
+      background-color: rgb(240, 240, 240);
+      display: block;
+      font-size: 16px;
+      width: 200px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tap fixture</h1>
+  <div id="status" data-cy="status">ready</div>
+  <div id="panel" role="region" aria-label="Controls">
+    <button id="toggle" aria-pressed="true">Toggle</button>
+    <button id="locked" disabled>Locked</button>
+    <label for="search">Search</label>
+    <input id="search" type="text">
+    <input id="agree" type="checkbox" checked>
+    <!-- `disabled` above and `required` here are the two states Chrome reports as
+         plain booleans. `pressed` and `checked` are tristates ('true'/'false'/'mixed'),
+         so they are here for their roles and names, not for their state output. -->
+    <input id="required-field" type="text" required aria-label="Required field">
+  </div>
+  <!-- Three matches for `.item`, so a selector read has to report the ambiguity
+       and `--at` has a range to index into. -->
+  <ul>
+    <li class="item">Item 1</li>
+    <li class="item">Item 2</li>
+    <li class="item">Item 3</li>
+  </ul>
+</body>
+</html>
