@@ -5,6 +5,15 @@ const disabledFeatures = [
   // Hide toolbar button that opens dialog for controlling media sessions.
   'GlobalMediaControls',
 
+  // Chrome silently upgrades outermost main-frame http:// GET navigations to
+  // https:// (Chrome 115+). Cypress navigates top to exactly the origin a visit
+  // resolved to, so an upgrade strands the runner on an origin the driver never
+  // asked for and cy.visit re-switches origins forever. Chromium exempts
+  // loopback, non-unique hosts, and explicit non-default ports, so this only
+  // affects real hostnames on 80/443.
+  // https://github.com/cypress-io/cypress/issues/34508
+  'HttpsUpgrades',
+
   // Disables the Interest Feed Content Suggestions,
   // which is a feature that shows content suggestions based on the user's interests.
   // https://www.google.com/interests/saved
@@ -12,6 +21,18 @@ const disabledFeatures = [
 
   // Hides the Lens feature in the URL address bar.
   'LensOverlay',
+
+  // Disable Chrome's Local Network Access (LNA) checks, which began rolling out
+  // in Chrome 141. LNA gates requests from a page to local/private/loopback
+  // addresses behind a `local-network-access` permission prompt. In an automated
+  // browser the prompt cannot be answered, so cross-origin requests to local dev
+  // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
+  // worked in Chrome 140. Cypress fully controls the browser under test, so it's
+  // safe to opt out of these checks entirely.
+  // https://github.com/cypress-io/cypress/issues/32708
+  // https://developer.chrome.com/blog/local-network-access
+  'LocalNetworkAccessChecks',
+  'LocalNetworkAccessChecksWebRTC',
 
   // Avoid the startup dialog for _Do you want the application 'Chromium.app' to accept incoming network connections?_.
   // Also disables the Chrome Media Router https://chromium.googlesource.com/chromium/src/+/HEAD/docs/media/media_router.md
@@ -25,18 +46,6 @@ const disabledFeatures = [
   // Disables "Enhanced ad privacy in Chrome" dialog
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
-
-  // Disable Chrome's Local Network Access (LNA) checks, which began rolling out
-  // in Chrome 141. LNA gates requests from a page to local/private/loopback
-  // addresses behind a `local-network-access` permission prompt. In an automated
-  // browser the prompt cannot be answered, so cross-origin requests to local dev
-  // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
-  // worked in Chrome 140. Cypress fully controls the browser under test, so it's
-  // safe to opt out of these checks entirely.
-  // https://github.com/cypress-io/cypress/issues/32708
-  // https://developer.chrome.com/blog/local-network-access
-  'LocalNetworkAccessChecks',
-  'LocalNetworkAccessChecksWebRTC',
 
   // Disable manual option and popup prompt of Chrome translation
   // https://github.com/cypress-io/cypress/issues/28225

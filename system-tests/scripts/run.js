@@ -108,7 +108,11 @@ if (!isWindows()) {
 if (options.fgrep) {
   commandAndArguments.args.push(
     '--fgrep',
-    options.fgrep,
+    // Shell-joined below. On POSIX, quote so multi-word filters stay one mocha
+    // arg. On Windows (cmd.exe + shell:true), quotes pass through literally.
+    isWindows()
+      ? options.fgrep
+      : `'${String(options.fgrep).replace(/'/g, `'\\''`)}'`,
   )
 }
 

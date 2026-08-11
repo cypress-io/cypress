@@ -315,6 +315,21 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.wait('@create')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/28282
+    it('QUERY method shorthand is treated as a method, not a url', () => {
+      cy.intercept('QUERY', '/query-only', { statusCode: 200, body: 'ok' }).as('query')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/query-only", {
+            method: 'QUERY',
+          });`,
+        )
+      })
+
+      cy.wait('@query').its('request.method').should('eq', 'QUERY')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/16117
     it('can statically stub a url response with headers', () => {
       cy.intercept('/url', { headers: { foo: 'bar' }, body: 'something' })

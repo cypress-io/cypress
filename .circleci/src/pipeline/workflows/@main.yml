@@ -19,6 +19,9 @@ linux-x64:
         context: test-runner:env-canary
         requires:
           - node_modules_install
+    - check-lockfile:
+        requires:
+          - build
     - check-ts:
         requires:
           - build
@@ -281,6 +284,7 @@ linux-x64:
           - npm-cypress-schematic
           - lint-types
           - linux-lint
+          - check-lockfile
           - percy-finalize
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
