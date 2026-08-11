@@ -336,10 +336,10 @@ jobs:
       record-group-suffix: '-remediated'
       # #34467 continue unmodified CDP Fetch responses; #34465 extra-target shared
       # middleware; #34557 encoding drifts pinned per-pipeline (#34554, #34384, #34386);
-      # #34555 service worker session interception. Excludes downloads_basic_auth.cy.ts
-      # — #34512 Network.enable never settles on the extra target's session. Add it
-      # here once that is fixed.
-      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/service-worker.cy.js
+      # #34555 service worker session interception; #34562 synthetic request query +
+      # httpVersion drift. Excludes downloads_basic_auth.cy.ts — #34512 Network.enable
+      # never settles on the extra target's session. Add it here once that is fixed.
+      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/service-worker.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts
       requires:
         - ready-to-test
   - driver-integration-tests-electron:
