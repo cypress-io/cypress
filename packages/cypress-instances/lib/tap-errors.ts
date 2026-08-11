@@ -76,6 +76,67 @@ export type TapErrorCode =
 
 const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
 
+/**
+ * The same map read the other way: which failures each command can report. Three
+ * sets recur, because every command shares one discovery path, one transport
+ * layer, and one dispatcher — they are named once here and referred to below
+ * rather than repeated per command.
+ *
+ *   DISCOVERY  NO_INSTANCE, STALE_INSTANCE
+ *   TRANSPORT  RENDERER_UNRESPONSIVE, CDP_UNREACHABLE, BINDING_NOT_FOUND,
+ *              BINDING_THREW, STALE_HANDLE, PROTOCOL_MISMATCH
+ *   DISPATCH   UNKNOWN_COMMAND, INVALID_ARGUMENTS, INVALID_OPTIONS,
+ *              INVALID_PAYLOAD
+ *
+ * instances:
+ * - none. It reports the instances it found and swallows every probe failure, so
+ *   an unresponsive one reads as `rendererResponsive: false` rather than an error.
+ *
+ * status:
+ * - DISCOVERY, but reported as `not connected` at exit 0 — never rendered
+ * - TRANSPORT
+ *
+ * specs:
+ * - DISCOVERY
+ * - GRAPHQL_UNREACHABLE, GRAPHQL_FAILED, INSTANCE_OUTDATED
+ *
+ * run:
+ * - DISCOVERY
+ * - GRAPHQL_UNREACHABLE, GRAPHQL_FAILED, INSTANCE_OUTDATED
+ * - SPEC_NOT_FOUND, RUN_FAILED, NO_PROJECT, TESTING_TYPE_NOT_CONFIGURED,
+ *   INVALID_ARGUMENTS — the last four mapped from the runSpec mutation's codes
+ *
+ * dom, aria, inspect:
+ * - DISCOVERY, plus NO_BROWSER_ATTACHED
+ * - TRANSPORT
+ * - NO_RUN, RUN_IN_PROGRESS — the run-lifecycle gate, before any read
+ * - NO_AUT, INVALID_SELECTOR, FRAME_READ_FAILED, INVALID_INDEX
+ * - INVALID_LIMIT, from `dom --max-chars` and `aria --max-nodes` only
+ *
+ * The rest run on the instance through the binding, so all of them carry
+ * DISCOVERY, NO_BROWSER_ATTACHED, TRANSPORT, DISPATCH, and the version pair
+ * CLI_OUTDATED / INSTANCE_OUTDATED from the schema handshake. What each adds:
+ *
+ * command:
+ * - NO_RUN, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND, COMMAND_NOT_FOUND,
+ *   AMBIGUOUS_COMMAND
+ *
+ * reporter:
+ * - NO_RUN, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND
+ * - INVALID_OPTIONS, for `--attempt` without `--test-id`
+ *
+ * pin:
+ * - NO_RUN, RUN_IN_PROGRESS, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND,
+ *   COMMAND_NOT_FOUND, AMBIGUOUS_COMMAND
+ * - SNAPSHOT_NOT_FOUND, SNAPSHOT_UNAVAILABLE, PIN_TARGET_REQUIRED
+ *
+ * run-state (hidden; `status` and the AUT readers call it):
+ * - none of its own. It answers with the run's state, reporting even a failed
+ *   spec build as a result rather than a failure.
+ *
+ * resolve-selector (hidden; the AUT readers call it to name ambiguous matches):
+ * - NO_AUT, INVALID_SELECTOR
+ */
 export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
   /**
    * Commands: all but `instances` — every other command resolves an instance
