@@ -328,6 +328,16 @@ describe('tap CLI against a settled run', function () {
 
     // aria projects structural and text roles away.
     expect(roles).to.not.include.members(['StaticText', 'generic', 'InlineTextBox'])
+
+    // Only states Chrome reports as plain booleans are asserted. `collectTrueStates`
+    // (cli/lib/tap/aut/cdp.ts) filters on `value === true`, but Chrome reports `pressed`
+    // and `checked` as tristates ('true'/'false'/'mixed'), so those never surface —
+    // verified against a real browser with the fixture's aria-pressed button and checked
+    // checkbox. `invalid` is a token type and is likely affected the same way.
+    const named = (role: string, name: string) => outcome.nodes.find((node: { role: string, name?: string }) => node.role === role && node.name === name)
+
+    expect(named('button', 'Locked')?.states).to.deep.eq(['disabled'])
+    expect(named('textbox', 'Required field')?.states).to.deep.eq(['required'])
   })
 
   it('roots the accessibility tree at a selector', async () => {

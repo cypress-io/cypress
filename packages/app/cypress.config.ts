@@ -1,7 +1,6 @@
 import { defineConfig } from 'cypress'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 import { writeMochaEventSnapshot, readMochaEventSnapshot } from './cypress/tasks/mochaEvents'
-import { tapAutResolveInstance, tapAutFrameTree, tapAutRead } from './cypress/tasks/tap-aut'
 import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
 
 export default defineConfig({
@@ -64,9 +63,6 @@ export default defineConfig({
         readMochaEventSnapshot,
         setCyInCyVariables,
         getCyInCyVariables,
-        tapAutResolveInstance,
-        tapAutFrameTree,
-        tapAutRead,
       })
 
       return await e2ePluginSetup(on, config)
