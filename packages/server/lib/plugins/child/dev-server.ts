@@ -19,12 +19,12 @@ export const wrap = (
     ipc.send('dev-server:compile:success', { specFile, jitRecompile, jitRecompileGeneration })
   })
 
-  devServerEvents.on('dev-server:jit-recompile:queued', (data: { generation: number }) => {
+  devServerEvents.on('dev-server:jit-recompile:queued', (data: { generation: number, neededForJustInTimeCompile?: boolean }) => {
     ipc.send('dev-server:jit-recompile:queued', data)
   })
 
-  devServerEvents.on('dev-server:specs:unchanged', () => {
-    ipc.send('dev-server:specs:unchanged')
+  devServerEvents.on('dev-server:specs:unchanged', (data?: { neededForJustInTimeCompile?: boolean }) => {
+    ipc.send('dev-server:specs:unchanged', data)
   })
 
   options.devServerEvents = devServerEvents

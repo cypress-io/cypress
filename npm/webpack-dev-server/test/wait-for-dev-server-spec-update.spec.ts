@@ -14,7 +14,7 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
     await tick()
 
     expect(resolved).toBe(false)
@@ -39,7 +39,7 @@ describe('waitForDevServerSpecUpdate', () => {
 
     expect(resolved).toBe(false)
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
     events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await promise
 
@@ -55,7 +55,7 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
     events.emit('dev-server:compile:success', { specFile: spec.absolute })
     await tick()
 
@@ -76,8 +76,8 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 2 })
-    events.emit('dev-server:specs:unchanged')
+    events.emit('dev-server:jit-recompile:queued', { generation: 2, neededForJustInTimeCompile: true })
+    events.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile: true })
     await tick()
 
     expect(resolved).toBe(false)
@@ -97,7 +97,7 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:specs:unchanged')
+    events.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile: true })
     await promise
 
     expect(resolved).toBe(true)
@@ -110,7 +110,7 @@ describe('waitForDevServerSpecUpdate', () => {
 
     const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' })
 
-    events.emit('dev-server:specs:unchanged')
+    events.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile: true })
     events.emit('dev-server:on-spec-updated')
     await promise
 
@@ -126,12 +126,34 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 2 })
+    events.emit('dev-server:jit-recompile:queued', { generation: 2, neededForJustInTimeCompile: true })
     events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await tick()
 
     expect(resolved).toBe(false)
 
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 2 })
+    await promise
+
+    expect(resolved).toBe(true)
+  })
+
+  it('ignores JIT and specs:unchanged events from unrelated file-watcher spec updates', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' }).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:specs:unchanged')
+    await tick()
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 2, neededForJustInTimeCompile: true })
     events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 2 })
     await promise
 
@@ -170,7 +192,7 @@ describe('waitForDevServerSpecUpdate', () => {
 
     expect(resolved).toBe(false)
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
     events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await promise
 
@@ -186,7 +208,7 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
+    events.emit('dev-server:jit-recompile:queued', { generation: 1, neededForJustInTimeCompile: true })
     events.emit('dev-server:on-spec-updated')
     await tick()
 

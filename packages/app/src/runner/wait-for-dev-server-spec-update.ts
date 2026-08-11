@@ -5,11 +5,13 @@ export type DevServerCompileSuccessData = {
 }
 
 export type DevServerSpecUpdateEvents = {
-  once (event: 'dev-server:on-spec-updated' | 'dev-server:specs:unchanged', handler: () => void): void
-  once (event: 'dev-server:jit-recompile:queued', handler: (data: { generation: number }) => void): void
+  once (event: 'dev-server:on-spec-updated', handler: () => void): void
+  on (event: 'dev-server:jit-recompile:queued', handler: (data: { generation: number, neededForJustInTimeCompile?: boolean }) => void): void
+  on (event: 'dev-server:specs:unchanged', handler: (data?: { neededForJustInTimeCompile?: boolean }) => void): void
   on (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
   off (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
-  off (event: 'dev-server:specs:unchanged', handler: () => void): void
+  off (event: 'dev-server:specs:unchanged', handler: (data?: { neededForJustInTimeCompile?: boolean }) => void): void
+  off (event: 'dev-server:jit-recompile:queued', handler: (data: { generation: number, neededForJustInTimeCompile?: boolean }) => void): void
   emit (event: 'dev-server:on-spec-update', spec: { absolute: string }): void
 }
 
@@ -52,6 +54,7 @@ export function waitForDevServerSpecUpdate (
     const cleanup = () => {
       events.off('dev-server:compile:success', onCompileSuccess)
       events.off('dev-server:specs:unchanged', onSpecsUnchanged)
+      events.off('dev-server:jit-recompile:queued', onJitRecompileQueued)
     }
 
     const tryResolve = () => {
@@ -90,7 +93,11 @@ export function waitForDevServerSpecUpdate (
       tryResolve()
     }
 
-    const onSpecsUnchanged = () => {
+    const onSpecsUnchanged = (data?: { neededForJustInTimeCompile?: boolean }) => {
+      if (!data?.neededForJustInTimeCompile) {
+        return
+      }
+
       if (expectedJitRecompileGeneration !== undefined) {
         return
       }
@@ -99,7 +106,11 @@ export function waitForDevServerSpecUpdate (
       tryResolve()
     }
 
-    const onJitRecompileQueued = ({ generation }: { generation: number }) => {
+    const onJitRecompileQueued = ({ generation, neededForJustInTimeCompile }: { generation: number, neededForJustInTimeCompile?: boolean }) => {
+      if (!neededForJustInTimeCompile) {
+        return
+      }
+
       if (resolved) {
         return
       }
@@ -132,8 +143,8 @@ export function waitForDevServerSpecUpdate (
       tryResolve()
     }
 
-    events.once('dev-server:specs:unchanged', onSpecsUnchanged)
-    events.once('dev-server:jit-recompile:queued', onJitRecompileQueued)
+    events.on('dev-server:specs:unchanged', onSpecsUnchanged)
+    events.on('dev-server:jit-recompile:queued', onJitRecompileQueued)
     events.once('dev-server:on-spec-updated', onSpecUpdated)
 
     events.emit('dev-server:on-spec-update', spec)

@@ -93,8 +93,10 @@ export class CypressCTWebpackPlugin {
    * See https://github.com/cypress-io/cypress/issues/24398
    */
   private onSpecsChange = async ({ specs, options }: { specs: Cypress.Cypress['spec'][], options?: { neededForJustInTimeCompile: boolean}}) => {
+    const neededForJustInTimeCompile = !!options?.neededForJustInTimeCompile
+
     if (_.isEqual(specs, this.files)) {
-      this.devServerEvents.emit('dev-server:specs:unchanged')
+      this.devServerEvents.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile })
 
       return
     }
@@ -104,7 +106,7 @@ export class CypressCTWebpackPlugin {
       const generation = ++this.jitRecompileGeneration
 
       this.pendingJitRecompileGenerations.push(generation)
-      this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation })
+      this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile })
 
       return
     }
@@ -112,7 +114,7 @@ export class CypressCTWebpackPlugin {
     const generation = ++this.jitRecompileGeneration
 
     this.pendingJitRecompileGenerations.push(generation)
-    this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation })
+    this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile })
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here

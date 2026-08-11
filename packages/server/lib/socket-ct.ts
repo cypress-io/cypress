@@ -15,11 +15,11 @@ export class SocketCt extends SocketBase {
     super(config)
 
     // should we use this option at all for component testing 😕?
-    devServer.emitter.on('dev-server:specs:unchanged', () => {
-      this.toRunner('dev-server:specs:unchanged')
+    devServer.emitter.on('dev-server:specs:unchanged', (data?: { neededForJustInTimeCompile?: boolean }) => {
+      this.toRunner('dev-server:specs:unchanged', data)
     })
 
-    devServer.emitter.on('dev-server:jit-recompile:queued', (data) => {
+    devServer.emitter.on('dev-server:jit-recompile:queued', (data: { generation: number, neededForJustInTimeCompile?: boolean }) => {
       this.toRunner('dev-server:jit-recompile:queued', data)
     })
 

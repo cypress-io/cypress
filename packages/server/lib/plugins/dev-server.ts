@@ -31,12 +31,12 @@ plugins.registerHandler((ipc: PluginIpcHandler) => {
     baseEmitter.emit('dev-server:compile:success', { specFile, jitRecompile, jitRecompileGeneration })
   })
 
-  ipc.on('dev-server:jit-recompile:queued', (data: { generation: number }) => {
+  ipc.on('dev-server:jit-recompile:queued', (data: { generation: number, neededForJustInTimeCompile?: boolean }) => {
     baseEmitter.emit('dev-server:jit-recompile:queued', data)
   })
 
-  ipc.on('dev-server:specs:unchanged', () => {
-    baseEmitter.emit('dev-server:specs:unchanged')
+  ipc.on('dev-server:specs:unchanged', (data?: { neededForJustInTimeCompile?: boolean }) => {
+    baseEmitter.emit('dev-server:specs:unchanged', data)
   })
 })
 
