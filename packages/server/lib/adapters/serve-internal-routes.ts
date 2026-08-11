@@ -1,6 +1,6 @@
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 type ServeInternalRoutesConfig = InternalRouteConfig
@@ -72,10 +72,18 @@ export function createServeInternalRoutesMiddleware ({
       return next(request)
     }
 
-    // Re-entry after our own Express loopback: no route handler owned this path,
-    // so the catch-all proxy saw it again. Stop instead of looping forever.
-    // Require the process token — AUT content can forge the URL header alone.
+    // Re-entry after our own Express loopback. Require the process token —
+    // AUT content can forge the URL header alone.
     if (isTrustedInternalLoopback(request.headers)) {
+      // Cloud-bundle routes re-enter on purpose: the cypress-in-cypress parent's
+      // Express handlers forward them through the proxy to the child project.
+      // Hand them to the legacy pipeline instead of swallowing the forward.
+      if (isCloudBundleRoute(url.pathname)) {
+        return next(request)
+      }
+
+      // Otherwise no route handler owned this path and the catch-all proxy saw
+      // it again. Stop instead of looping forever.
       return {
         id: request.id,
         url: request.url,

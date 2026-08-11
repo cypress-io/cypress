@@ -24,10 +24,11 @@ describe('lib/adapters/internal-routes', () => {
     expect(isInternalCypressRoute('/__cypress/src/spec-0.js', config)).to.be.false
   })
 
-  it('does not match studio or cy-prompt module-federation entries', () => {
-    // Parent cy-in-cy Express handlers re-enter the proxy for these paths.
-    expect(isInternalCypressRoute('/__cypress-studio/app-studio.js', config)).to.be.false
-    expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config)).to.be.false
+  it('matches studio and cy-prompt module-federation entries', () => {
+    // Served by Express routes outside /__cypress; the loopback re-entry
+    // guard lets the parent cy-in-cy forwarders continue for these paths.
+    expect(isInternalCypressRoute('/__cypress-studio/app-studio.js', config)).to.be.true
+    expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config)).to.be.true
   })
 
   it('does not match internal route lookalikes', () => {
@@ -180,6 +181,26 @@ describe('lib/adapters/serve-internal-routes', () => {
       headers: { 'content-type': 'text/plain' },
       body: 'Not Found',
     })
+  })
+
+  it('delegates trusted loopback re-entries for cloud-bundle routes to the next middleware', async () => {
+    // The cypress-in-cypress parent's Express handlers for studio/cy-prompt
+    // re-enter the proxy to forward to the child project — the legacy
+    // pipeline must receive the request instead of a loop-guard 404.
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+      headers: {
+        'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+      },
+    }, next)
+
+    expect(next).to.have.been.calledOnce
+    expect(serverRequest.create).not.to.have.been.called
   })
 
   it('does not short-circuit on a spoofed loopback header without the process token', async () => {
