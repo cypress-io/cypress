@@ -139,7 +139,6 @@ class $Cypress {
   state!: StateFunc
   originalConfig: any
   config: any
-  env: any
   expose: any
   getTestRetries: any
   Cookies!: ICookies
@@ -947,6 +946,14 @@ class $Cypress {
   // Cypress.require() is only valid inside the cy.origin() callback
   require () {
     $errUtils.throwErrByPath('require.invalid_outside_origin')
+  }
+
+  // Stubbed after its removal in 16.0.0 so the read and write forms both name
+  // the migration path rather than throwing a bare `TypeError`
+  env (keyOrValues?: string | Record<string, any>) {
+    const keys = _.isObject(keyOrValues) ? Object.keys(keyOrValues) : _.compact([keyOrValues])
+
+    $errUtils.throwErrByPath('env.removed', { args: { keys } })
   }
 
   get currentTest () {

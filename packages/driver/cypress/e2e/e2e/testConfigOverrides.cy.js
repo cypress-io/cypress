@@ -392,6 +392,17 @@ describe('cannot set override configuration options that', () => {
     Cypress.config('viewportHeight', 100)
   })
 
+  it('throws if mutating env with Cypress.config()', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('Overriding the `env` configuration was removed in Cypress version 16.0.0')
+      expect(err.message).to.include('https://on.cypress.io/cypress-env-migration')
+      done()
+    })
+
+    Cypress.config('env', { FOO: 'bar' })
+  })
+
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
       Cypress.config('foo', 'bar')

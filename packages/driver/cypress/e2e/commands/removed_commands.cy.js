@@ -62,3 +62,62 @@ context('Cypress.Cookies.preserveOnce', () => {
     Cypress.Cookies.preserveOnce({})
   })
 })
+
+context('Cypress.env', () => {
+  const removalMessage = '`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values that must remain in the Node process.'
+
+  it('throws error when reading a variable', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(`${removalMessage}\n\nThe variable being accessed was: \`FOO\``)
+      expect(err.docsUrl).to.equal('https://on.cypress.io/cypress-env-migration')
+
+      done()
+    })
+
+    Cypress.env('FOO')
+  })
+
+  it('throws error when writing a single variable', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(`${removalMessage}\n\nThe variable being accessed was: \`FOO\``)
+
+      done()
+    })
+
+    Cypress.env('FOO', 'bar')
+  })
+
+  it('throws error when writing an object of variables', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(`${removalMessage}\n\nThe variables being accessed were: \`FOO\`, \`BAR\``)
+
+      done()
+    })
+
+    Cypress.env({ FOO: 'foo', BAR: 'bar' })
+  })
+
+  it('throws error when reading every variable', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(removalMessage)
+
+      done()
+    })
+
+    Cypress.env()
+  })
+
+  // the spec bridge constructs its own Cypress instance
+  it('throws error inside a cy.origin() callback', { browser: '!webkit' }, (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include(removalMessage)
+      expect(err.message).to.include('The variable being accessed was: `FOO`')
+
+      done()
+    })
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      Cypress.env('FOO')
+    })
+  })
+})
