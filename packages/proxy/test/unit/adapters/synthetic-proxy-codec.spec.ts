@@ -53,6 +53,27 @@ describe('createSyntheticExpressContext', () => {
     expect(req.resourceType).to.equal('xhr')
   })
 
+  it('populates httpVersion and query like the Express-served MITM request', () => {
+    // cy.intercept's request message picks both off req (SERIALIZABLE_REQ_PROPS);
+    // without them the driver falsely flags requests as modified.
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/search?foo=bar&baz=two%20words',
+    })
+
+    expect(req.httpVersion).to.equal('1.1')
+    expect(req.query).to.deep.equal({ foo: 'bar', baz: 'two words' })
+  })
+
+  it('populates an empty query for urls without a search string', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/plain',
+    })
+
+    expect(req.query).to.deep.equal({})
+  })
+
   it('lowercases request header keys like Node IncomingMessage', () => {
     const { req } = createSyntheticExpressContext({
       id: 'network-1',

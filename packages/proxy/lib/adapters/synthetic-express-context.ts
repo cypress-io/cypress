@@ -65,6 +65,14 @@ function parseCookieHeader (header?: string | string[]): Record<string, string> 
   }, {})
 }
 
+function parseUrlQuery (url: string): Record<string, string> {
+  try {
+    return Object.fromEntries(new URL(url, 'http://127.0.0.1').searchParams)
+  } catch {
+    return {}
+  }
+}
+
 function serializeCookie (name: string, value: string, options: CookieOptions = {}): string {
   const parts = [`${name}=${encodeURIComponent(value)}`]
   const path = options.path == null ? '/' : options.path
@@ -288,6 +296,13 @@ export function createSyntheticExpressContext (request: HttpRequest): {
   req.isAUTFrame = false
   req.isFromExtraTarget = false
   req.isSyncRequest = false
+  // cy.intercept's request message picks httpVersion and query off this req
+  // (SERIALIZABLE_REQ_PROPS). Express provides both on the MITM path; without
+  // them the driver-side merge re-derives `query` and falsely flags the
+  // request as modified. httpVersion mirrors the MITM contract, which always
+  // reports the browser→proxy hop's 1.1 rather than the origin protocol.
+  req.httpVersion = '1.1'
+  req.query = parseUrlQuery(request.url)
 
   return {
     req,
