@@ -10,11 +10,6 @@ type CreateServeInternalRoutesMiddlewareOptions = {
   request: ServerRequest
 }
 
-const LOOPBACK_HEADERS = new Set([
-  CYPRESS_INTERNAL_LOOPBACK_HEADER,
-  CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER,
-])
-
 const HOP_BY_HOP_HEADERS = new Set([
   'accept-encoding',
   'connection',
@@ -27,21 +22,18 @@ const HOP_BY_HOP_HEADERS = new Set([
   'trailer',
   'transfer-encoding',
   'upgrade',
-  ...LOOPBACK_HEADERS,
+  CYPRESS_INTERNAL_LOOPBACK_HEADER,
+  CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER,
 ])
 
-function omitHeaders (headers: HttpHeaders = {}, omit: Set<string>): HttpHeaders {
+function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
   return Object.entries(headers).reduce<HttpHeaders>((memo, [key, value]) => {
-    if (!omit.has(key.toLowerCase())) {
+    if (!HOP_BY_HOP_HEADERS.has(key.toLowerCase())) {
       memo[key] = value
     }
 
     return memo
   }, {})
-}
-
-function filterHeaders (headers: HttpHeaders = {}): HttpHeaders {
-  return omitHeaders(headers, HOP_BY_HOP_HEADERS)
 }
 
 function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): string {
@@ -86,10 +78,15 @@ export function createServeInternalRoutesMiddleware ({
       // Cloud-bundle routes re-enter on purpose: the cypress-in-cypress parent's
       // Express handlers forward them through the proxy to the child project.
       // Hand them to the legacy pipeline instead of swallowing the forward.
-      // Drop the loopback headers first — the token authenticates re-entry and
-      // must never ride the outbound request to the child project or the AUT.
+      // The token authenticates re-entry and must not reach the child project
+      // or the AUT.
       if (isCloudBundleRoute(url.pathname)) {
-        return next({ ...request, headers: omitHeaders(request.headers, LOOPBACK_HEADERS) })
+        const headers = { ...request.headers }
+
+        delete headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
+        delete headers[CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]
+
+        return next({ ...request, headers })
       }
 
       // Otherwise no route handler owned this path and the catch-all proxy saw
