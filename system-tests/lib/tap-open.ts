@@ -14,8 +14,7 @@ import type { ProjectFixtureDir } from './fixtureDirs'
 
 const debug = Debug('cypress:system-tests:tap-open')
 
-// The real CLI, which is what these tests exist to exercise. It requires `cli/dist`,
-// so the workspace has to be built (`yarn build`, or `cd cli && yarn build-cli`).
+// The CLI requires `cli/dist` from `yarn build` or `cd cli && yarn build-cli`.
 const CLI_BIN = path.join(__dirname, '..', '..', 'cli', 'bin', 'cypress')
 
 // CYPRESS_CONFIG_ENV places the app-data dir holding saved state, so 'test' keeps this
@@ -48,7 +47,7 @@ export interface TapResult {
 export interface TapStatus {
   status: string
   startedAt?: string | null
-  /** Present once an instance is reachable; the human rendering leads with it. */
+  /** Set once the instance is reachable. */
   pid?: number
   [key: string]: unknown
 }
@@ -145,27 +144,22 @@ export const tapWithoutInstance = async (args: string[]): Promise<TapResult> => 
 
 export interface TapInstance {
   projectRoot: string
-  /** Runs the real `cypress tap` CLI. Prepend '--json' for a machine-readable result. */
   tap (args: string[]): Promise<TapResult>
   status (): Promise<TapStatus>
   /** Fires `tap run` and returns immediately — returning does not mean it started. */
   requestRun (spec: string): Promise<TapResult>
-  /** Polls status until `match` holds, or fails with the last status and open-mode output. */
+  /** Polls until `match` holds, with the last status and open output on timeout. */
   waitForStatus (match: (status: TapStatus) => boolean, label: string): Promise<TapStatus>
-  /** Requests a run, then polls until a verdict for *this* run lands. */
   runSpec (spec: string): Promise<TapStatus>
-  /** Kills the process tree but leaves the instance record behind, so the CLI sees a
-   * record whose writer is gone — the STALE_INSTANCE path. */
+  /** Kills the process tree but leaves the instance record for stale-record tests. */
   terminate (): Promise<void>
   kill (): Promise<void>
 }
 
-/** What a boot strategy has to provide for `buildInstance` to drive it. */
 interface BootedInstance {
   projectRoot: string
-  /** Kills the process tree, leaving the instance record on disk. */
   terminate (): Promise<void>
-  /** Extra diagnostic context appended to failures — the boot output, where capturable. */
+  /** Boot output appended to timeout errors when available. */
   context (): string
   /** Non-null once the booting process is gone, so polling can fail fast. */
   exitReason (): string | null
@@ -180,8 +174,7 @@ const buildInstance = async (booted: BootedInstance): Promise<TapInstance> => {
   }
 
   const status = async (): Promise<TapStatus> => {
-    // status always exits 0 for a determinable stage, so its own output is the signal —
-    // but it renders for humans unless asked for JSON.
+    // status exits 0 for any determinable stage, so the JSON field is the signal.
     return (await runTap(['--json', 'status'], projectRoot)).json<TapStatus>()
   }
 
@@ -291,18 +284,13 @@ const prepareProject = async (project: ProjectFixtureDir): Promise<string> => {
 }
 
 /**
- * Boots a real `cypress open` session by spawning the CLI, and hands back a handle for
- * driving it with the real `cypress tap` CLI. Nothing here is stubbed: the instance
- * writes its own record, serves its own liveness probe, and attaches its own browser.
- *
- * Spawning directly — rather than through the Module API — is what buys the three
- * properties this harness leans on: a per-instance env, captured boot output, and a
- * child handle to kill. See `openTapInstanceViaModuleApi` for the contrast.
+ * Spawning the CLI gives the harness a per-instance env, captured boot output, and a
+ * child handle to kill. See `openTapInstanceViaModuleApi` for the Module API contrast.
  */
 export const openTapInstance = async (project: ProjectFixtureDir): Promise<TapInstance> => {
   const projectRoot = await prepareProject(project)
 
-  // detached so the whole tree (CLI -> Electron -> browser) can be signalled at once.
+  // Electron and the browser outlive the CLI alone, so detach and signal the whole tree.
   const child = cp.spawn(process.execPath, [
     CLI_BIN, 'open',
     '--project', projectRoot,
@@ -323,8 +311,6 @@ export const openTapInstance = async (project: ProjectFixtureDir): Promise<TapIn
 
   return buildInstance({
     projectRoot,
-    // The CLI spawns the Electron process which spawns the browser, so signalling the
-    // CLI alone leaves the tree behind.
     terminate: async () => {
       if (child.exitCode === null && child.pid) {
         await new Promise<void>((resolve) => treeKill(child.pid!, 'SIGKILL', () => resolve()))
@@ -335,7 +321,6 @@ export const openTapInstance = async (project: ProjectFixtureDir): Promise<TapIn
   })
 }
 
-/** The pid that wrote the record for `projectRoot`, which is the process to signal. */
 const recordedPid = async (projectRoot: string): Promise<number | undefined> => {
   const dir = path.join(CACHE_FOLDER, 'instances')
   const entries: string[] = await fs.readdir(dir).catch(() => [])
@@ -356,21 +341,9 @@ const recordedPid = async (projectRoot: string): Promise<number | undefined> => 
 }
 
 /**
- * Boots the same session through the documented Module API — `cypress.open()` — instead
- * of spawning the CLI, so the public programmatic entry is covered too. It exercises
- * `normalizeModuleOptions` and `processOpenOptions`, which the spawn path skips.
- *
- * It is deliberately not the default, because `exec/open.ts` forwards only
- * `{ dev, detached }` to `spawn.start` and drops that function's `env` and `stdio`
- * options. Three consequences, all visible here:
- *
- *   1. The child inherits *this* process's env, so the only way to steer it is to
- *      mutate ours — restored on kill, but visible to anything else sharing the process.
- *   2. stdio comes from the CLI's own strategy ('inherit'), so boot output cannot be
- *      captured per instance; a failure has to be read out of the mocha output.
- *   3. `spawn.start` resolves on process *exit*, so there is no child handle. Cleanup
- *      goes through the pid in the instance record — which does not exist if the
- *      instance never booted, exactly when cleanup matters most.
+ * Covers the documented `cypress.open()` entry and its option normalization. The Module
+ * API inherits this process's env and stdio and exposes no child handle, so this path
+ * must mutate env and terminate through the pid in the instance record.
  */
 export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): Promise<TapInstance> => {
   const projectRoot = await prepareProject(project)
@@ -378,7 +351,7 @@ export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): P
   const overrides: Record<string, string | undefined> = {
     CYPRESS_CONFIG_ENV: CONFIG_ENV,
     CYPRESS_CACHE_FOLDER: CACHE_FOLDER,
-    // Reserved: the CLI sets it for its own child and warns when handed one.
+    // The CLI sets this reserved variable for its own child.
     CYPRESS_INTERNAL_ENV: undefined,
     CYPRESS_INTERNAL_E2E_TESTING_SELF: undefined,
     CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT: undefined,

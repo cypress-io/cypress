@@ -26,13 +26,11 @@
     <label for="search">Search</label>
     <input id="search" type="text">
     <input id="agree" type="checkbox" checked>
-    <!-- `disabled` above and `required` here are the two states Chrome reports as
-         plain booleans. `pressed` and `checked` are tristates ('true'/'false'/'mixed'),
-         so they are here for their roles and names, not for their state output. -->
+    <!-- Chrome reports disabled and required as booleans, but pressed and checked as
+         tristates that are excluded from state output. -->
     <input id="required-field" type="text" required aria-label="Required field">
   </div>
-  <!-- Three matches for `.item`, so a selector read has to report the ambiguity
-       and `--at` has a range to index into. -->
+  <!-- Three matches exercise ambiguous selectors and `--at`. -->
   <ul>
     <li class="item">Item 1</li>
     <li class="item">Item 2</li>

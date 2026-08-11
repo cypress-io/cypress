@@ -32,3 +32,43 @@ PID  PROJECT  TYPE  BROWSER
 ✓ cypress/e2e/aut-content.cy.js  (started at <time>)
 ✓ 1  ✖ --  ○ --
 `
+
+exports['reporter failed command log'] = `
+✖ Failing > fails after loading the fixture page  failed
+
+TEST BODY · r3
+   1  visit    cypress/e2e/aut-content.html
+   2  get      #status
+   3  -assert  expected <div#status> to have text this is not what the page says, but the text was ready ✖
+
+✖ AssertionError
+  Timed out retrying after <duration>: expected '<div#status>' to have text 'this is not what the page says', but the text was 'ready'
+
+  cypress/e2e/failing.cy.js:5:23
+    3 |   it('fails after loading the fixture page', () => {
+    4 |     cy.visit('cypress/e2e/aut-content.html')
+  > 5 |     cy.get('#status').should('have.text', 'this is not what the page says')
+      |                       ^
+    6 |   })
+    7 | })
+    8 |
+`
+
+exports['reporter spec overview'] = `
+cypress/e2e/pin-target.cy.js  (started at <time>)
+✓ 1  ✖ --  ○ --  <duration>
+
+Pin Target
+   r3  ✓ clicks the toggle  <duration>
+`
+
+exports['reporter command log'] = `
+✓ Pin Target > clicks the toggle  passed
+
+TEST BODY · r3
+   1  visit    cypress/e2e/pin-target.html
+   2  get      #toggle
+   3  -click
+   4  get      #status
+   5  -assert  expected <div#status> to have text clicked
+`

@@ -13,17 +13,14 @@ const PIN_SPEC = 'cypress/e2e/pin-target.cy.js'
 
 const STATUS_DIV = '<div id="status" data-cy="status">ready</div>'
 
-// Booting open mode, launching a browser, and running specs all take real time.
 const SUITE_TIMEOUT_MS = 360000
 
 /** Failures render as `CODE: message` on stderr, so the code is the stable assertion. */
 const failureOutput = (result: { stdout: string, stderr: string }) => `${result.stdout}${result.stderr}`
 
 /**
- * Snapshots the human-readable rendering, which is what a person actually reads and the
- * only output `--json` never exercises. Scrubs the parts that legitimately differ per
- * run — the scaffolded project path, the server port, and durations — so a snapshot
- * failure means the rendering changed, not the environment.
+ * Snapshots human-readable output after scrubbing paths, ports, and timing so failures
+ * represent rendering changes rather than environment differences.
  */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const snapshot = require('snap-shot-it')
@@ -38,15 +35,22 @@ const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, str
 
   globals.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
+  // `layout` can leave column padding behind ANSI resets, so trim after stripping them.
   let normalized = stripAnsi(text)
+  .split('\n')
+  .map((line) => line.trimEnd())
+  .join('\n')
   .replace(/[\w./-]*cy-projects\/tap-retries/g, '<project>')
   .replace(/localhost:\d+/g, 'localhost:<port>')
-  .replace(/\b\d+(\.\d+)?ms\b/g, '<ms>')
+  // Duration units vary by magnitude, so normalize every shape to one token.
+  .replace(/\b\d+(\.\d+)?m?s\b/g, '<duration>')
   // The whole parenthetical, not just the clock digits: the label carries a meridiem
   // (and would carry a different shape under another locale or a 24-hour clock), so
   // scrubbing only the digits leaves an AM/PM that flips with the time of day.
   .replace(/\(started at [^)]*\)/g, '(started at <time>)')
   .replace(/\b\d{1,2}:\d{2}:\d{2}(\.\d+)?\b/g, '<time>')
+  // mm:ss only; the clock rule above handles hh:mm:ss.
+  .replace(/\b\d{2}:\d{2}\b/g, '<duration>')
 
   for (const [pattern, replacement] of extra) {
     normalized = normalized.replace(pattern, replacement)
@@ -56,21 +60,13 @@ const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, str
 }
 
 /**
- * The only coverage that drives the real `cypress tap` CLI end to end: a real
- * `cypress open` instance, discovered through its own record and liveness probe, read
- * over its own browser's CDP connection. Everything the cypress-in-cypress specs have
- * to bypass is exercised here — argument parsing, discovery failures, the
- * run-lifecycle gate, unshadowed AUT frame resolution, the renderers, and exit codes.
- *
- * Reads are asserted through `--json` rather than the human rendering: the result
- * contract is stable, the prose is not, and `--json` still goes through renderOutcome.
+ * Drives the real `cypress tap` CLI against a real open-mode instance. JSON assertions
+ * cover the stable result contract; snapshots cover selected human renderings.
  */
 describe('tap CLI with no running instance', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
   it('reports "not connected" from status, and exits 0', async () => {
-    // status always exits 0 for a determinable stage, so a poller can branch on the
-    // field instead of on the exit code.
     const result = await tapWithoutInstance(['--json', 'status'])
 
     expect(result.exitCode).to.eq(0)
@@ -224,10 +220,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('renders status for humans', async () => {
-    // The richest human rendering: the instance columns, then the phase line, then the
-    // counts. Once a spec is selected the phase is carried by the icon rather than
-    // spelled out, so there is no word to substring-match — which is exactly why this
-    // one is worth snapshotting.
+    // Once a spec is selected, an icon carries the phase, so snapshot the full rendering.
     const payload = await instance.status()
     const result = await instance.tap(['status'])
 
@@ -254,8 +247,6 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('accepts the short option aliases', async () => {
-    // -s/-m for a native command, and the same read via the long forms, so the aliases
-    // are proven equivalent rather than merely accepted.
     const short = await instance.tap(['--json', 'dom', '-s', '#status', '-m', '30000'])
     const long = await instance.tap(['--json', 'dom', '--selector', '#status', '--max-chars', '30000'])
 
@@ -273,16 +264,14 @@ describe('tap CLI against a settled run', function () {
   it('exits 1 and names the matches for an ambiguous selector', async () => {
     const result = await instance.tap(['--json', 'dom', '--selector', '.item'])
 
-    // The ambiguity answer prints on stdout like any result, but it is not the read
-    // that was asked for, so the exit code has to say so.
+    // Ambiguity is a stdout result, but not a successful read.
     expect(result.exitCode).to.eq(1)
 
     const outcome = result.json()
 
     expect(outcome).to.deep.include({ ambiguous: true, selector: '.item', count: 3 })
 
-    // Unlike cypress-in-cypress, the binding here is the instance's own, so the
-    // disambiguating selectors are really derived.
+    // These selectors come from the live DOM rather than a stubbed binding.
     expect(outcome.selectors).to.have.length(3)
   })
 
@@ -326,14 +315,9 @@ describe('tap CLI against a settled run', function () {
     expect(outcome.nodeCount).to.eq(outcome.nodes.length)
     expect(roles).to.include.members(['heading', 'region', 'button', 'textbox', 'checkbox'])
 
-    // aria projects structural and text roles away.
     expect(roles).to.not.include.members(['StaticText', 'generic', 'InlineTextBox'])
 
-    // Only states Chrome reports as plain booleans are asserted. `collectTrueStates`
-    // (cli/lib/tap/aut/cdp.ts) filters on `value === true`, but Chrome reports `pressed`
-    // and `checked` as tristates ('true'/'false'/'mixed'), so those never surface —
-    // verified against a real browser with the fixture's aria-pressed button and checked
-    // checkbox. `invalid` is a token type and is likely affected the same way.
+    // `collectTrueStates` includes Chrome's boolean states, not tristates such as checked.
     const named = (role: string, name: string) => outcome.nodes.find((node: { role: string, name?: string }) => node.role === role && node.name === name)
 
     expect(named('button', 'Locked')?.states).to.deep.eq(['disabled'])
@@ -348,7 +332,6 @@ describe('tap CLI against a settled run', function () {
     const outcome = result.json()
     const roles = outcome.nodes.map((node: { role: string }) => node.role)
 
-    // Depths are relative to the subtree, so the region is its root.
     expect(outcome.nodes[0]).to.include({ depth: 0, role: 'region', name: 'Controls' })
     expect(roles, 'the document root is outside the subtree').to.not.include('RootWebArea')
     expect(roles, 'the heading is outside the subtree').to.not.include('heading')
@@ -437,8 +420,6 @@ describe('tap CLI across the run lifecycle', function () {
   })
 
   it('starts a new run on rerun, with its own startedAt', async () => {
-    // A rerun leaves the previous verdict readable until the incoming run starts, so
-    // startedAt is the only way to tell which run a verdict describes.
     const settled = await instance.runSpec(SLOW_SPEC)
 
     expect(settled.status).to.eq('passed')
@@ -451,11 +432,22 @@ describe('tap CLI across the run lifecycle', function () {
 
     expect(settled.status).to.eq('failed')
 
-    // A failed verdict is still a settled run, so the read is allowed.
     const result = await instance.tap(['--json', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
+  })
+
+  it('renders the failure in the command log', async () => {
+    // Reuse the prior failed run because only it renders the error panel.
+    const overview = (await instance.tap(['--json', 'reporter'])).json()
+    const [test] = overview.suites.flatMap((suite: { tests: Array<{ id: string }> }) => suite.tests)
+
+    const result = await instance.tap(['reporter', '--test-id', test.id])
+
+    expect(result.exitCode).to.eq(0)
+
+    snapshotRendering('reporter failed command log', result.stdout)
   })
 
   it('exits 1 with NO_INSTANCE once the instance is gone', async () => {
@@ -473,16 +465,8 @@ describe('tap CLI across the run lifecycle', function () {
 })
 
 /**
- * The same instance, booted through the documented Module API (`cypress.open()`) rather
- * than by spawning the CLI. This is the entry a user or agent scripting Cypress
- * programmatically would reach for, and nothing else proves a Module-API-booted
- * instance is discoverable by tap — `cli/test/lib/exec/open.spec.ts` stops at asserting
- * the argv it builds, with spawn stubbed.
- *
- * Assertions are a deliberate subset: the read surface is already covered above against
- * the spawned instance, so what is worth proving here is that the boot path produces an
- * instance tap can find, gate on, and read. See `openTapInstanceViaModuleApi` for what
- * this boot path costs a test harness.
+ * Proves a `cypress.open()` instance is discoverable and readable through tap. The full
+ * read surface is already covered above against the CLI-spawned instance.
  */
 describe('tap CLI against a Module-API-booted instance', function () {
   this.timeout(SUITE_TIMEOUT_MS)
@@ -528,13 +512,8 @@ describe('tap CLI against a Module-API-booted instance', function () {
 })
 
 /**
- * `cli/lib/tap/AGENTS.md` requires help text to describe *what* a command does and never
- * how it gets there — no CDP protocol details, find-instance mechanism, or in-browser
- * binding internals. Nothing enforced that rule until now; it is easy to reintroduce
- * while documenting a new option.
- *
- * The command list is read back out of the top-level help, so a command added later is
- * covered without touching this test.
+ * Enforces the user-facing help policy in `cli/lib/tap/AGENTS.md`. Commands are parsed
+ * from top-level help so newly added commands are covered automatically.
  */
 describe('tap CLI help text', function () {
   this.timeout(SUITE_TIMEOUT_MS)
@@ -562,7 +541,6 @@ describe('tap CLI help text', function () {
   it('documents every command without leaking internals', async () => {
     const root = await helpFor([])
 
-    // The "Commands:" section lists one command per entry, indented by two spaces.
     const names = root
     .slice(root.indexOf('Commands:'))
     .split('\n')
@@ -588,13 +566,8 @@ describe('tap CLI help text', function () {
 })
 
 /**
- * Pinning is the one read that does not target the live app: it restores a command's
- * recorded DOM snapshot into the AUT frame, and the reads then see *that*. The fixture
- * clicks a button that rewrites #status, so the pinned "before" snapshot and the live
- * page differ — which is the only way to prove a read followed the pin.
- *
- * This is also the only coverage of the binding-routed subcommands (`reporter`,
- * `command`, `pin`) through the CLI rather than through the in-browser binding.
+ * Pinning restores a command's DOM snapshot into the AUT frame. The fixture changes
+ * #status so reads can distinguish the pinned snapshot from the live page.
  */
 describe('tap CLI reading a pinned snapshot', function () {
   this.timeout(SUITE_TIMEOUT_MS)
@@ -633,6 +606,22 @@ describe('tap CLI reading a pinned snapshot', function () {
     expect(log.commands.map((entry: { name: string }) => entry.name)).to.include.members(['visit', 'get', 'click', 'assert'])
   })
 
+  it('renders the spec overview for humans', async () => {
+    const result = await instance.tap(['reporter'])
+
+    expect(result.exitCode).to.eq(0)
+
+    snapshotRendering('reporter spec overview', result.stdout)
+  })
+
+  it('renders a test’s command log for humans', async () => {
+    const result = await instance.tap(['reporter', '--test-id', testId])
+
+    expect(result.exitCode).to.eq(0)
+
+    snapshotRendering('reporter command log', result.stdout)
+  })
+
   it('details one command, including the snapshots pinnable on it', async () => {
     const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', clickCommandId])
 
@@ -653,7 +642,6 @@ describe('tap CLI reading a pinned snapshot', function () {
   })
 
   it('reads the pinned snapshot rather than the live page', async () => {
-    // The click already ran, so the live page holds the post-click DOM.
     const live = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(live.html).to.eq('<div id="status">clicked</div>')
@@ -664,7 +652,6 @@ describe('tap CLI reading a pinned snapshot', function () {
     expect(pin.json().pinned).to.deep.include({ test: testId })
     expect(pin.json().pinned.at).to.deep.include({ name: 'before', index: 1, total: 2 })
 
-    // The read now resolves the restored snapshot, which predates the click.
     const pinned = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(pinned.html, 'the pre-click snapshot').to.eq('<div id="status">ready</div>')
