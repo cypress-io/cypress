@@ -291,6 +291,19 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('on(backend:request, reset:server:state)', () => {
+      it('forwards the per-test options to options.onResetServerState', function (done) {
+        sinon.stub(this.options, 'onResetServerState')
+
+        return this.client.emit('backend:request', 'reset:server:state', { blockHosts: ['*.pendo.io'] }, (resp) => {
+          expect(this.options.onResetServerState).to.be.calledWith({ blockHosts: ['*.pendo.io'] })
+          expect(resp.response).to.be.undefined
+
+          return done()
+        })
+      })
+    })
+
     describe('on(backend:request, wait:for:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {

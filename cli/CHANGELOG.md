@@ -1,14 +1,25 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.20.2
+
+**Bugfixes:**
+
+- Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
+
 ## 15.20.1
 
 **Bugfixes:**
 
 - Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
+- Fixed a regression in [15.20.0](#15-20-0) where the Cypress app sent all Cypress Cloud requests to `http://localhost:3000` instead of Cypress Cloud. Logging in could not complete, and the Runs and Debug pages reported no data. Addressed in [#34536](https://github.com/cypress-io/cypress/pull/34536).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
 **Misc:**
 
 - Fixed an issue where the error reported in CI when the Cypress binary is missing suggested caching and persisting the default binary cache location, ignoring any [`CYPRESS_CACHE_FOLDER`](https://docs.cypress.io/app/references/advanced-installation#Binary-cache) override. The suggestions now name the directory Cypress actually looked in. Addresses [#23009](https://github.com/cypress-io/cypress/discussions/23009). Addressed in [#34543](https://github.com/cypress-io/cypress/pull/34543).
+
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.22.4` to `4.23.12`. Fixes [#34461](https://github.com/cypress-io/cypress/issues/34461).
 
 ## 15.20.0
 
