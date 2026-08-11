@@ -19,10 +19,13 @@ function waitAndAssertInterceptions (alias: string, contentEncoding: string) {
     interceptions.forEach((interception) => {
       expect(interception.response?.statusCode).to.eq(200)
 
-      if (Cypress.expose('PROXY_DISABLED')) {
-        // NOTE: accepted MITM → CDP drift (#34554): the interception carries a
-        // decoded body, so content-encoding is honestly absent. MITM reports the
-        // wire encoding on a body that no longer has it.
+      // NOTE: accepted MITM → CDP drift (#34554): browser-fetched responses reach
+      // net-stubbing already decoded, so content-encoding is honestly absent. The
+      // document is exempt — an intercept-matched visit is still resolved Node-side
+      // through the MITM pipeline, which reports the wire encoding on a decoded body.
+      const isBrowserFetched = Cypress.expose('PROXY_DISABLED') && !interception.request.url.endsWith('/html')
+
+      if (isBrowserFetched) {
         expect(interception.response?.headers?.['content-encoding']).to.be.undefined
       } else {
         expect(interception.response?.headers?.['content-encoding']).to.eq(contentEncoding)
