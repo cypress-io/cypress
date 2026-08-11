@@ -69,6 +69,21 @@ function matchesPathPrefix (pathname: string, route: string): boolean {
   return pathname === normalizedRoute || pathname.startsWith(`${normalizedRoute}/`)
 }
 
+// Cloud-delivered bundle namespaces (studio, cy-prompt) served by Express
+// routes outside /__cypress — see packages/server/lib/routes.ts. In
+// cypress-in-cypress the parent's Express handlers for these paths re-enter
+// the proxy to forward to the child project, so the loopback re-entry guard
+// must let them continue instead of 404ing.
+export const CYPRESS_STUDIO_ROUTE = '/__cypress-studio'
+
+export const CYPRESS_CY_PROMPT_ROUTE = '/__cypress-cy-prompt'
+
+const CLOUD_BUNDLE_ROUTES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
+
+export function isCloudBundleRoute (pathname: string): boolean {
+  return CLOUD_BUNDLE_ROUTES.some((route) => matchesPathPrefix(pathname, route))
+}
+
 export function isInternalCypressRoute (pathname: string, config: InternalRouteConfig): boolean {
   // Component-testing app/spec assets are served by the bundler under
   // /__cypress/src (or a custom public path). Matching the whole namespace
@@ -82,6 +97,7 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
     config.clientRoute,
     config.socketIoRoute,
     config.socketIoRoute ? `${config.socketIoRoute}-graphql` : undefined,
+    ...CLOUD_BUNDLE_ROUTES,
   ].filter((route): route is string => Boolean(route))
 
   return internalRoutes.some((route) => matchesPathPrefix(pathname, route))
