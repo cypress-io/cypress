@@ -327,6 +327,24 @@ jobs:
       spec: cypress/e2e/choose-a-browser.cy.ts,cypress/e2e/open-mode.cy.ts
       requires:
         - ready-to-test
+  - run-app-integration-tests-chrome:
+      name: run-app-integration-tests-chrome-cdp-remediated
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      disable-proxy: true
+      require-opt-in: false
+      parallelism: 1
+      record-group-suffix: '-remediated'
+      # #34561 cypress-in-cypress specs: exercise the spec-transition teardown that
+      # wedged on a zombie (disconnected-but-not-terminated) CDP connection when the
+      # proxy is disabled.
+      spec: cypress/e2e/cypress-in-cypress.cy.ts,cypress/e2e/cypress-in-cypress-e2e.cy.ts,cypress/e2e/cypress-in-cypress-run-mode.cy.ts,cypress/e2e/cypress-in-cypress-component.cy.ts
+      requires:
+        - ready-to-test
   - driver-integration-tests-chrome:
       name: driver-integration-tests-chrome-cdp-remediated
       context: test-runner:cypress-record-key
@@ -554,6 +572,7 @@ jobs:
         - system-tests-electron-cdp-remediated
         - unit-tests-proxy-disabled
         - run-launchpad-integration-tests-chrome-cdp-remediated
+        - run-app-integration-tests-chrome-cdp-remediated
         - driver-integration-tests-chrome-cdp-remediated
         - driver-integration-tests-electron-cdp-remediated
         - driver-integration-tests-chrome
