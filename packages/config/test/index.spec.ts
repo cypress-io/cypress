@@ -322,7 +322,7 @@ describe('config/src/index', () => {
       it('does not call onError handler if validating level is suite', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportWidth: 200 }, 'suite', errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, blockHosts: 'example.com' }, 'suite', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
@@ -330,7 +330,7 @@ describe('config/src/index', () => {
       it('does not call onError handler if validating level is test', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportHeight: 100 }, 'test', errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportHeight: 100, blockHosts: 'example.com' }, 'test', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
@@ -338,7 +338,7 @@ describe('config/src/index', () => {
       it('does not call onError handler outside test execution (e.g. file load)', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, undefined, errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' }, undefined, errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
@@ -346,9 +346,9 @@ describe('config/src/index', () => {
       it('calls onError handler if validating level is run-time', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, 'runtime', errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' }, 'runtime', errorFn)
 
-        expect(errorFn).toHaveBeenCalledTimes(2)
+        expect(errorFn).toHaveBeenCalledTimes(3)
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
           invalidConfigKey: 'viewportWidth',
           supportedOverrideLevel: 'suiteOrTest',
@@ -356,6 +356,11 @@ describe('config/src/index', () => {
 
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
           invalidConfigKey: 'viewportHeight',
+          supportedOverrideLevel: 'suiteOrTest',
+        }))
+
+        expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
+          invalidConfigKey: 'blockHosts',
           supportedOverrideLevel: 'suiteOrTest',
         }))
       })

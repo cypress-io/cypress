@@ -173,7 +173,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
     requireRestartOnChange: 'server',
   }, {
     name: 'chromeWebSecurity',

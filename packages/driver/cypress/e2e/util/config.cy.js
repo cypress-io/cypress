@@ -147,7 +147,7 @@ describe('driver/src/cypress/validate_config', () => {
             expect(overrideLevel).to.eq(mocha_runnable)
 
             expect(() => {
-              validateConfig(state, { viewportWidth: 200, viewportHeight: 100 })
+              validateConfig(state, { viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' })
             }).not.to.throw()
           })
         })
@@ -165,6 +165,10 @@ describe('driver/src/cypress/validate_config', () => {
           expect(() => {
             validateConfig(state, { viewportWidth: 200 })
           }).to.throw(`\`Cypress.config()\` cannot override \`viewportWidth\` during test execution`)
+
+          expect(() => {
+            validateConfig(state, { blockHosts: 'example.com' })
+          }).to.throw(`\`Cypress.config()\` cannot override \`blockHosts\` during test execution`)
         })
 
         it('does not throw when set outside test execution (e.g. support/spec file load)', () => {
@@ -178,7 +182,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.be.undefined
 
           expect(() => {
-            validateConfig(state, { viewportWidth: 200, viewportHeight: 100 })
+            validateConfig(state, { viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' })
           }).not.to.throw()
         })
       })
