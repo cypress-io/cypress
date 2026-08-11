@@ -40,7 +40,9 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 }
 
 export type CreateCdpFetchRuntimeDeps = {
-  client: Pick<ICriClient, 'send' | 'on' | 'off'>
+  // onServiceWorkerTargetAttached is a settable hook: the runtime assigns it
+  // so service worker sessions get Fetch enabled before they start running.
+  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onServiceWorkerTargetAttached'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
   // Protocol-neutral subscription to AUT document navigation commits,
   // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
@@ -317,9 +319,17 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
+      // A service worker's network runs on its own CDP session — without
+      // enabling Fetch there, its script fetch and fetch-handler requests
+      // bypass the middleware onion (and cy.intercept) entirely.
+      deps.client.onServiceWorkerTargetAttached = (sessionId) => {
+        return fetchTransport.attachServiceWorkerSession(sessionId)
+      }
+
       try {
         await fetchTransport.start()
       } catch (err) {
+        deps.client.onServiceWorkerTargetAttached = undefined
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
 
@@ -337,6 +347,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     },
     async stop () {
       stopped = true
+      deps.client.onServiceWorkerTargetAttached = undefined
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 
