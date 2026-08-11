@@ -42,6 +42,10 @@ const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, str
   .replace(/[\w./-]*cy-projects\/tap-retries/g, '<project>')
   .replace(/localhost:\d+/g, 'localhost:<port>')
   .replace(/\b\d+(\.\d+)?ms\b/g, '<ms>')
+  // The whole parenthetical, not just the clock digits: the label carries a meridiem
+  // (and would carry a different shape under another locale or a 24-hour clock), so
+  // scrubbing only the digits leaves an AM/PM that flips with the time of day.
+  .replace(/\(started at [^)]*\)/g, '(started at <time>)')
   .replace(/\b\d{1,2}:\d{2}:\d{2}(\.\d+)?\b/g, '<time>')
 
   for (const [pattern, replacement] of extra) {

@@ -29,6 +29,6 @@ exports['status'] = `
 PID  PROJECT  TYPE  BROWSER
 <pid>  <project>  e2e  Chrome
 
-✓ cypress/e2e/aut-content.cy.js  (started at <time> AM)
+✓ cypress/e2e/aut-content.cy.js  (started at <time>)
 ✓ 1  ✖ --  ○ --
 `
