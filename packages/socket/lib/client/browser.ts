@@ -14,7 +14,7 @@ declare global {
 let usesAutomationSocket = false
 
 const getAutomationSocket = (fullNamespace: string): SocketShape => {
-  // When running in Chromium and with a baseUrl set to something that includes basic auth: (e.g. http://user:pass@localhost:1234), the assets
+  // With a baseUrl that includes basic auth (e.g. http://user:pass@localhost:1234), the assets
   // will load twice. Thus, we need to add the cypress sockets to the window object rather than just relying on a local variable.
   window.cypressSockets ||= {}
   if (!window.cypressSockets[fullNamespace]) {

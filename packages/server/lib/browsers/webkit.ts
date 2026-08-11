@@ -13,13 +13,14 @@ const debug = Debug('cypress:server:browsers:webkit')
 
 let wkAutomation: WebKitAutomation | undefined
 
-export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer) {
   if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
 
   debug('connecting to new spec %o', { url: options.url, hasVideoApi: !!options.videoApi })
 
   automation.use(wkAutomation)
   wkAutomation.automation = automation
+  wkAutomation.cdpSocketServer = cdpSocketServer
   await options.onInitializeNewBrowserTab()
   await wkAutomation.reset({
     newUrl: options.url,

@@ -39,7 +39,7 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
-  private cdpSocketServer?: CDPSocketServer
+  cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
