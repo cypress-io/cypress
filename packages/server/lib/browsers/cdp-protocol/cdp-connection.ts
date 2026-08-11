@@ -104,7 +104,26 @@ export class CDPConnection {
 
     if (this._autoReconnect) {
       this._connection.on('disconnect', this._reconnect)
+    } else {
+      // Without reconnection, a closed socket is permanent. Surface that as a
+      // terminal state so pending senders can reject instead of enqueueing
+      // against a connection that will never come back.
+      this._connection.on('disconnect', this._onTerminalDisconnect)
     }
+  }
+
+  private _onTerminalDisconnect = async () => {
+    this.debug('terminal disconnect for target %s (reconnection disabled)', this._options.target)
+
+    this._terminated = true
+
+    try {
+      await this._gracefullyDisconnect()
+    } catch (e) {
+      this.debug('error cleaning up terminally-disconnected CDP connection: ', e)
+    }
+
+    this._emitter.emit('cdp-connection-closed')
   }
 
   async disconnect () {
@@ -124,6 +143,7 @@ export class CDPConnection {
   private _gracefullyDisconnect = async () => {
     this._connection?.off('event', this._broadcastEvent)
     this._connection?.off('disconnect', this._reconnect)
+    this._connection?.off('disconnect', this._onTerminalDisconnect)
 
     await this._connection?.close()
     this._connection = undefined

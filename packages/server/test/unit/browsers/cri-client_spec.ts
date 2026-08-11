@@ -284,7 +284,7 @@ describe('lib/browsers/cri-client', function () {
 
           await client.close()
 
-          expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as browser CRI connection was reset')
+          await expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as the CRI connection to Target')
         })
 
         it(`when socket is closed mid send ('WebSocket connection closed' variant)`, async function () {
@@ -295,7 +295,42 @@ describe('lib/browsers/cri-client', function () {
 
           await client.close()
 
-          expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as browser CRI connection was reset')
+          await expect(client.send('DOM.getDocument', { depth: -1 })).to.be.rejectedWith('DOM.getDocument will not run as the CRI connection to Target')
+        })
+      })
+
+      context('when reconnection is disabled (cypress-in-cypress)', () => {
+        beforeEach(() => {
+          process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+        })
+
+        afterEach(() => {
+          delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+        })
+
+        it('rejects an enqueued command when the socket terminally disconnects', async function () {
+          const client = await getClient()
+
+          // a send that fails like a closed socket gets enqueued for a reconnect
+          send.onFirstCall().rejects(new Error('WebSocket is not open: readyState 3 (CLOSED)'))
+
+          const pending = client.send('Fetch.disable')
+
+          // let the failed send settle into the queue before disconnecting
+          await new Promise((resolve) => setImmediate(resolve))
+
+          // the underlying socket disconnect is terminal — no reconnect will flush the queue
+          await criStub.on.withArgs('disconnect').args[0][1]()
+
+          await expect(pending).to.be.rejectedWith('The CRI connection to Target')
+        })
+
+        it('rejects sends after the socket has terminally disconnected instead of enqueuing them', async function () {
+          const client = await getClient()
+
+          await criStub.on.withArgs('disconnect').args[0][1]()
+
+          await expect(client.send('Fetch.disable')).to.be.rejectedWith('Fetch.disable will not run as the CRI connection to Target')
         })
       })
     })

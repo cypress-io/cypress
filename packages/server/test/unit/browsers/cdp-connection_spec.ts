@@ -116,9 +116,28 @@ describe('CDPConnection', () => {
         await cdpConnection.connect()
       })
 
-      it('does not add a reconnect listener', async () => {
+      it('adds a terminal disconnect listener rather than a reconnect listener', async () => {
         //@ts-expect-error
-        expect(stubbedCDPClient.on?.withArgs('disconnect')).not.to.have.been.called
+        expect(stubbedCDPClient.on?.withArgs('disconnect')).to.have.been.calledOnce
+      })
+
+      it('marks the connection terminated and emits cdp-connection-closed when the socket disconnects', async () => {
+        //@ts-expect-error
+        const disconnectListener = stubbedCDPClient.on?.withArgs('disconnect').args[0][1]
+
+        await disconnectListener()
+
+        expect(cdpConnection.terminated).to.be.true
+        expect(onConnectionClosedCb).to.have.been.called
+      })
+
+      it('rejects subsequent sends as terminated', async () => {
+        //@ts-expect-error
+        const disconnectListener = stubbedCDPClient.on?.withArgs('disconnect').args[0][1]
+
+        await disconnectListener()
+
+        await expect(cdpConnection.send('Page.enable')).to.be.rejectedWith(CDPDisconnectedError)
       })
     })
   })

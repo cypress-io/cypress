@@ -91,6 +91,21 @@ describe('CDPCommandQueue', () => {
     })
   })
 
+  describe('.reject', () => {
+    it('rejects every enqueued command promise and empties the queue', async () => {
+      const queue = new CDPCommandQueue()
+
+      const first = queue.add(enableAnimation.command, enableAnimation.params)
+      const second = queue.add(removeAttribute.command, removeAttribute.params)
+
+      queue.reject(new Error('connection closed'))
+
+      expect(queue.entries).to.have.lengthOf(0)
+      await expect(first).to.be.rejectedWith('connection closed')
+      await expect(second).to.be.rejectedWith('connection closed')
+    })
+  })
+
   describe('.extract', () => {
     let queue: CDPCommandQueue
     let searchCommand: Partial<Command<any>>
