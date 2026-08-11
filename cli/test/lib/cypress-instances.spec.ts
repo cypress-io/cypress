@@ -14,7 +14,7 @@ import {
   listLiveInstances,
   getInstancesDir,
   pruneDeadInstanceRecords,
-  CypressInstanceError,
+  TapError,
 } from '../../lib/cypress-instances'
 
 vi.mock('../../lib/tasks/state', async (importActual) => {
@@ -312,7 +312,7 @@ describe('lib/cypress-instances', () => {
 
       const err = await resolveInstance({ cwd: PROJECT }).catch((e) => e)
 
-      expect(err).toBeInstanceOf(CypressInstanceError)
+      expect(err).toBeInstanceOf(TapError)
       expect(err.code).toBe('NO_INSTANCE')
       // The dead-process leftover is reaped, so it stops masquerading as a
       // still-running-but-unresponsive (stale) instance on later commands.

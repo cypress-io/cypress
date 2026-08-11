@@ -1,3 +1,5 @@
+import type { TapErrorPayload } from './tap-errors'
+
 export const TAP_SCHEMA_VERSION = 1
 
 export const TAP_BINDING_GLOBAL = '__CYPRESS_TAP_BINDING__'
@@ -5,8 +7,6 @@ export const TAP_BINDING_GLOBAL = '__CYPRESS_TAP_BINDING__'
 export const TAP_SCHEMA_METHOD = 'getSchema'
 
 export const TAP_EXEC_METHOD = 'exec'
-
-export const TAP_RUN_IN_PROGRESS_MESSAGE = 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again'
 
 export interface TapCommandParamSchema {
   name: string
@@ -48,7 +48,7 @@ export interface TapSchema {
 
 export type TapExecResult =
   | { result: unknown }
-  | { error: { code: string, message: string } }
+  | { error: TapErrorPayload }
 
 // How a command's declared params/options surface to its handler, derived once
 // here so the app's defineCommand and the CLI's defineNativeCommand type handlers
@@ -331,6 +331,11 @@ export const TAP_NATIVE_COMMANDS = [
 ] as const satisfies readonly TapNativeCommandSchema[]
 
 export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
+
+// The failure catalogue and the error both sides raise. Re-exported here for the
+// same reason the result contracts are: this module is dependency-free, so the
+// browser-side app can import it where it cannot import the package barrel.
+export * from './tap-errors'
 
 // Per-command result contracts live in `./contracts/`; re-exported here so the
 // app's deep import of this module and the package barrel both reach them.

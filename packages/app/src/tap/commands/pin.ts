@@ -1,8 +1,8 @@
-import { defineCommand, noRunError, TapCommandError } from './definition'
+import { defineCommand } from './definition'
 import { attemptOfLog, attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, TapTestsRunner } from '../types'
-import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
+import { TapError } from '../contract'
 import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
 // A pin as the commands read it, whoever made it: tap's own, or one made by hand
@@ -94,7 +94,7 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
 
   const available = snapshots.map((entry, index) => (entry.name !== undefined ? `"${entry.name}" (${index + 1})` : `${index + 1}`)).join(', ')
 
-  throw new TapCommandError('SNAPSHOT_NOT_FOUND', `no snapshot of this command matches "${at}" — available snapshots: ${available}`)
+  throw new TapError('SNAPSHOT_NOT_FOUND', { detail: `Looked for "${at}". This command has: ${available}.` })
 }
 
 export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test, 'command-id': command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
@@ -113,15 +113,15 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   }
 
   if (test === undefined || command === undefined) {
-    throw new TapCommandError('PIN_TARGET_REQUIRED', 'provide a test id and command id to pin (as listed by the reporter command), or pass --clear to release the current pin')
+    throw new TapError('PIN_TARGET_REQUIRED')
   }
 
   if (!runner) {
-    throw noRunError()
+    throw new TapError('NO_RUN')
   }
 
   if (tapManagerDataSource.isRunning()) {
-    throw new TapCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
+    throw new TapError('RUN_IN_PROGRESS')
   }
 
   const selection = selectTestAttempt(runner, test, attempt)
@@ -133,14 +133,14 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   const logId = resolveCommandLogId(selection.attempt, command, test)
 
   if (logId === undefined) {
-    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --test-id) to list this test’s commands`)
+    throw new TapError('COMMAND_NOT_FOUND', { detail: `Looked for "${command}".` })
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)
   const snapshots = liveSnapshots(props)
 
   if (snapshots.length === 0) {
-    throw new TapCommandError('SNAPSHOT_UNAVAILABLE', 'this command has no DOM snapshot to pin — snapshots are captured in open mode and kept only for the most recent tests (numTestsKeptInMemory)')
+    throw new TapError('SNAPSHOT_UNAVAILABLE')
   }
 
   const index = resolveAt(snapshots, at)
@@ -160,7 +160,7 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
 
   // The app is the record of the pin, so a pin it did not take is not a result.
   if (!pinned) {
-    throw new TapCommandError('SNAPSHOT_UNAVAILABLE', 'the app under test did not take the pin — this command’s snapshots may have just fallen out of memory (numTestsKeptInMemory)')
+    throw new TapError('SNAPSHOT_UNAVAILABLE', { detail: 'The app under test did not take the pin.' })
   }
 
   return { pinned, ...(props?.url !== undefined ? { url: props.url } : {}) }

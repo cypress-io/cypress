@@ -16,9 +16,9 @@ describe('tap/tap-manager', () => {
 
       const outcome = await manager.exec('bogus')
 
-      expect((outcome as { error: { code: string, message: string } }).error.code).to.eq('UNKNOWN_COMMAND')
-      expect((outcome as { error: { message: string } }).error.message).to.contain(`Available commands: ${Object.keys(tapCommands).join(', ')}.`)
-      expect((outcome as { error: { message: string } }).error.message).to.contain('v15.0.0')
+      expect((outcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
+      expect((outcome as { error: { detail: string } }).error.detail).to.contain(`which offers: ${Object.keys(tapCommands).join(', ')}.`)
+      expect((outcome as { error: { detail: string } }).error.detail).to.contain('v15.0.0')
     })
 
     it('does not resolve inherited property names as commands', async () => {

@@ -1,16 +1,58 @@
 import commander from 'commander'
+import chalk from 'chalk'
 
 import logger from '../logger'
+import { docsUrl, formErrorText } from '../errors'
+import util from '../util'
 import { renderingFor } from './render'
 import type { InstanceSelection } from '../cypress-instances'
-import type { TapSchema } from '@packages/cypress-instances'
+import { tapErrorCopy } from '@packages/cypress-instances'
+import type { TapErrorCopy, TapSchema } from '@packages/cypress-instances'
 
-export const renderFailure = (err: { code: string, message: string }): void => {
-  logger.errorToStderr(`${err.code}: ${err.message}`)
+// The registry keeps its copy dependency-free, so the commands it names arrive in
+// backticks for the CLI to colour the way the rest of the catalogue already does.
+const highlight = (copy: string): string => copy.replace(/`([^`]+)`/g, (_match, command) => chalk.cyan(command))
+
+/**
+ * Expands an entry's metadata into the trailing blocks it asks for, so guidance
+ * repeated across errors is declared once per entry rather than written out again
+ * in each one.
+ */
+const solutionFor = (copy: TapErrorCopy): string => {
+  const parts = [highlight(copy.solution)]
+
+  if (copy.docs) {
+    parts.push(`Learn more:\n\n  ${chalk.blue(`${docsUrl}${copy.docs}`)}`)
+  }
+
+  if (copy.recommendGhIssue) {
+    parts.push(`If the problem persists, search for an existing issue or open a GitHub issue at\n\n  ${chalk.blue(util.issuesUrl)}`)
+  }
+
+  return parts.join('\n\n')
 }
 
-export const renderKnownFailure = (err: { details: { description: string, solution: string } }): void => {
-  logger.errorToStderr(`${err.details.description}\n\n${err.details.solution}`)
+/**
+ * The single exit for every tap failure, whether the CLI raised it or it arrived
+ * from the instance as a wire payload: the code selects the copy, `detail` carries
+ * whatever was specific to this one, and `formErrorText` lays it out the way every
+ * other CLI error is laid out. The code itself is never printed. An error with no
+ * code is not ours to render and keeps unwinding.
+ */
+export const renderTapFailure = async (err: any): Promise<number> => {
+  if (typeof err?.code !== 'string') {
+    throw err
+  }
+
+  const copy = tapErrorCopy(err.code)
+  const detail = typeof err.detail === 'string' && err.detail !== '' ? highlight(err.detail) : undefined
+
+  logger.errorToStderr(await formErrorText({
+    description: highlight(copy.description),
+    solution: solutionFor(copy),
+  }, detail))
+
+  return 1
 }
 
 export const renderResult = (result: unknown): void => {
@@ -40,10 +82,10 @@ export const renderNativeHelp = (program: commander.Command, command: string): v
   logger.always(program.commands.find((subcommand) => subcommand.name() === command)!.helpInformation())
 }
 
-const unknownCommandMessage = (program: commander.Command, schema: TapSchema, command: string): string => {
+const unknownCommandDetail = (program: commander.Command, schema: TapSchema, command: string): string => {
   const available = program.commands.map((subcommand) => subcommand.name()).join(', ')
 
-  return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${available}.`
+  return `"${command}" is not available in this Cypress (v${schema.cypressVersion}), which offers: ${available}.`
 }
 
 const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string => {
@@ -61,16 +103,14 @@ const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string
   return target
 }
 
-const renderHelp = (program: commander.Command, schema: TapSchema, command: string | undefined, banner?: string): number => {
+const renderHelp = async (program: commander.Command, schema: TapSchema, command: string | undefined, banner?: string): Promise<number> => {
   const prefix = banner ? `${banner}\n\n` : ''
 
   if (command) {
     const subcommand = program.commands.find((sub) => sub.name() === command)
 
     if (!subcommand) {
-      renderFailure({ code: 'UNKNOWN_COMMAND', message: unknownCommandMessage(program, schema, command) })
-
-      return 1
+      return await renderTapFailure({ code: 'UNKNOWN_COMMAND', detail: unknownCommandDetail(program, schema, command) })
     }
 
     // Standalone help is the only place a schema command's full `details` prose
@@ -92,10 +132,10 @@ const renderHelp = (program: commander.Command, schema: TapSchema, command: stri
   return 0
 }
 
-export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined): number => {
+export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined): Promise<number> => {
   return renderHelp(program, schema, command, instanceBanner(schema, selection))
 }
 
-export const renderStaticHelp = (program: commander.Command, schema: TapSchema, command: string | undefined): number => {
+export const renderStaticHelp = (program: commander.Command, schema: TapSchema, command: string | undefined): Promise<number> => {
   return renderHelp(program, schema, command)
 }

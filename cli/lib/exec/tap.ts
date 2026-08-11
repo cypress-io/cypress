@@ -1,11 +1,11 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { CypressInstanceError, resolveInstance } from '../cypress-instances'
+import { isTapError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
+import { renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp, renderTapFailure } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
@@ -15,19 +15,28 @@ import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
 
+// The failures that mean no instance was reachable to ask. Help is answerable
+// without one, so these — and only these — lose to a help invocation.
+const DISCOVERY_CODES: ReadonlySet<string> = new Set([
+  'NO_INSTANCE',
+  'STALE_INSTANCE',
+  'NO_BROWSER_ATTACHED',
+  'RENDERER_UNRESPONSIVE',
+])
+
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
 
   if (!schema || typeof schema !== 'object' || typeof schema.schemaVersion !== 'number' || !Array.isArray(schema.commands)) {
-    return throwTapError(errors.tapInvalidSchema, `${TAP_SCHEMA_METHOD} returned an unrecognizable schema.`)
+    return throwTapError('PROTOCOL_MISMATCH', `${TAP_SCHEMA_METHOD} returned an unrecognizable schema.`)
   }
 
   if (schema.schemaVersion > TAP_SCHEMA_VERSION) {
-    return throwTapError(errors.tapUnsupportedProtocol, `schema version v${schema.schemaVersion} is newer than the CLI's v${TAP_SCHEMA_VERSION}.`)
+    return throwTapError('CLI_OUTDATED', `schema version v${schema.schemaVersion} is newer than the CLI's v${TAP_SCHEMA_VERSION}.`)
   }
 
   if (schema.schemaVersion < TAP_SCHEMA_VERSION) {
-    return throwTapError(errors.tapOutdatedProtocol, `schema version v${schema.schemaVersion} is older than the CLI's v${TAP_SCHEMA_VERSION}.`)
+    return throwTapError('INSTANCE_OUTDATED', `schema version v${schema.schemaVersion} is older than the CLI's v${TAP_SCHEMA_VERSION}.`)
   }
 
   return schema
@@ -88,9 +97,7 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
-    renderFailure(outcome.error)
-
-    return 1
+    return await renderTapFailure(outcome.error)
   }
 
   // The rendering reads both: the options that shaped the result and the ones
@@ -103,7 +110,7 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
 // With no instance to query, fall back to the schema this CLI ships with so the
 // help listing still reflects every command the CLI knows — the query path stays
 // authoritative when an instance is attached (it may run a different version).
-const renderKnownSchema = (command: string | undefined): number => {
+const renderKnownSchema = (command: string | undefined): Promise<number> => {
   const schema = buildTapSchema(util.pkgVersion())
   const program = buildTapProgram(schema, () => {})
 
@@ -150,25 +157,15 @@ const tapModule = {
         return dispatchCode
       }, options.timeout)
     } catch (err: any) {
-      if (err instanceof CypressInstanceError) {
-        if (wantsHelp || !command) {
-          return renderKnownSchema(command)
-        }
-
-        debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
-        renderFailure(err)
-
-        return 1
+      // Help is answerable without an instance, so a discovery failure falls back
+      // to the schema the CLI ships with rather than reporting the failure.
+      if (isTapError(err) && DISCOVERY_CODES.has(err.code) && (wantsHelp || !command)) {
+        return await renderKnownSchema(command)
       }
 
-      if (err.known && err.details) {
-        debug('tap %s failed: %s', command || '(help)', err.message)
-        renderKnownFailure(err)
+      debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
 
-        return 1
-      }
-
-      throw err
+      return await renderTapFailure(err)
     }
   },
 }

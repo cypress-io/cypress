@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parseIndex, parsePositiveInt } from '../../../lib/tap/utils'
-import { FrameCommandError } from '../../../lib/tap/aut/frame'
+import { TapError } from '@packages/cypress-instances'
 
 // Every input shape both parsers must reject, shared so they reject the same
 // class: text `Number()` coerces to a number that passes an isInteger check,
@@ -20,7 +20,7 @@ describe('lib/tap/utils parseIndex', () => {
 
   it('rejects every malformed value with INVALID_INDEX', () => {
     for (const bad of MALFORMED) {
-      expect(() => parseIndex(bad as any), JSON.stringify(bad)).to.throw(FrameCommandError).that.includes({ code: 'INVALID_INDEX' })
+      expect(() => parseIndex(bad as any), JSON.stringify(bad)).to.throw(TapError).that.includes({ code: 'INVALID_INDEX' })
     }
   })
 })
@@ -37,7 +37,7 @@ describe('lib/tap/utils parsePositiveInt', () => {
 
   it('rejects zero and every malformed value with INVALID_LIMIT', () => {
     for (const bad of ['0', ...MALFORMED]) {
-      expect(() => parsePositiveInt(bad as any, 200, 'max-nodes'), JSON.stringify(bad)).to.throw(FrameCommandError).that.includes({ code: 'INVALID_LIMIT' })
+      expect(() => parsePositiveInt(bad as any, 200, 'max-nodes'), JSON.stringify(bad)).to.throw(TapError).that.includes({ code: 'INVALID_LIMIT' })
     }
   })
 })

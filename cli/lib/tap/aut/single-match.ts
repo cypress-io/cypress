@@ -1,10 +1,10 @@
-import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError } from '@packages/cypress-instances'
 import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-instances'
 
 import { validateExecResult } from '../tap-session'
 import type { TapSession } from '../tap-session'
 import { createFrameIsolatedWorld } from './cdp'
-import { FrameCommandError } from './frame'
+import { invalidSelectorError } from './frame'
 import type { AutFrame } from './frame'
 import { countMatches } from './scripts'
 import type { MatchCountResult } from './scripts'
@@ -57,7 +57,7 @@ export const resolveAmbiguity = async (
 ): Promise<FrameAmbiguousResult | undefined> => {
   if (selector === undefined) {
     if (at !== undefined) {
-      throw new FrameCommandError('INVALID_INDEX', '--at needs a selector to index into')
+      throw new TapError('INVALID_INDEX', { detail: 'The `--at` option needs a selector to index into. Pass `--selector` alongside it.' })
     }
 
     return undefined
@@ -74,13 +74,13 @@ export const resolveAmbiguity = async (
   }, sessionId)
 
   if (exceptionDetails) {
-    throw new FrameCommandError('FRAME_READ_FAILED', `resolving "${selector}" in the app under test failed: ${exceptionDetails.exception?.description || exceptionDetails.text}`)
+    throw new TapError('FRAME_READ_FAILED', { message: `resolving "${selector}" in the app under test failed: ${exceptionDetails.exception?.description || exceptionDetails.text}` })
   }
 
   const { count, invalidSelector } = result.value as MatchCountResult
 
   if (invalidSelector) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw invalidSelectorError(selector)
   }
 
   // Nothing matched: each command reports that in its own shape, and an `--at`
@@ -91,7 +91,7 @@ export const resolveAmbiguity = async (
 
   if (at !== undefined) {
     if (at >= count) {
-      throw new FrameCommandError('INVALID_INDEX', `"${selector}" matched ${count} element${count === 1 ? '' : 's'}; pass --at 0-${count - 1}`)
+      throw new TapError('INVALID_INDEX', { detail: `"${selector}" matched ${count} element${count === 1 ? '' : 's'}, so \`--at\` takes 0 to ${count - 1}.` })
     }
 
     return undefined

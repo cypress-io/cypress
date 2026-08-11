@@ -29,17 +29,17 @@ const firstErrorMessage = (envelopeErrors: unknown): string | null => {
 
 const validateEnvelope = <T>(operationName: string, envelope: GraphqlEnvelope | null): T => {
   if (!envelope || typeof envelope !== 'object') {
-    return throwTapError(errors.tapGraphqlFailed, `The instance answered ${operationName} with an unrecognizable response.`)
+    return throwTapError('GRAPHQL_FAILED', `The instance answered ${operationName} with an unrecognizable response.`)
   }
 
   const errorMessage = firstErrorMessage(envelope.errors)
 
   if (errorMessage !== null) {
-    return throwTapError(errors.tapGraphqlFailed, `The instance failed to run ${operationName}: ${errorMessage}`)
+    return throwTapError('GRAPHQL_FAILED', `The instance failed to run ${operationName}: ${errorMessage}`)
   }
 
   if (!envelope.data || typeof envelope.data !== 'object') {
-    return throwTapError(errors.tapGraphqlFailed, `The instance answered ${operationName} without data.`)
+    return throwTapError('GRAPHQL_FAILED', `The instance answered ${operationName} without data.`)
   }
 
   return envelope.data as T
@@ -61,7 +61,7 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
   } catch (err: any) {
     debug('graphql request %s to pid %d failed: %o', operationName, instance.pid, err)
 
-    return throwTapError(errors.tapGraphqlUnreachable, `Could not reach the instance to run ${operationName}: ${err.message}`, err)
+    return throwTapError('GRAPHQL_UNREACHABLE', `Could not reach the instance to run ${operationName}: ${err.message}`, err)
   }
 
   // A valid request passes the server's force-proxy guard untouched; a redirect
@@ -69,7 +69,7 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
   // direct tap GraphQL — an older Cypress that predates it (or one that rejected
   // our instance-id). Report that instead of the runner HTML as a data error.
   if (response.redirected) {
-    return throwTapError(errors.tapOutdatedProtocol, `The instance redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
+    return throwTapError('INSTANCE_OUTDATED', `The instance redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
   }
 
   if (response.status !== 200) {
@@ -79,11 +79,11 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
 
     debug('graphql request %s to pid %d answered %d: %o', operationName, instance.pid, response.status, envelope)
 
-    return throwTapError(errors.tapGraphqlUnreachable, `The instance answered ${operationName} with status ${response.status}.`)
+    return throwTapError('GRAPHQL_UNREACHABLE', `The instance answered ${operationName} with status ${response.status}.`)
   }
 
   const envelope = await response.json().catch((err) => {
-    return throwTapError(errors.tapGraphqlFailed, `The instance answered ${operationName} with a non-JSON response.`, err)
+    return throwTapError('GRAPHQL_FAILED', `The instance answered ${operationName} with a non-JSON response.`, err)
   })
 
   return validateEnvelope<TResult>(operationName, envelope as GraphqlEnvelope | null)

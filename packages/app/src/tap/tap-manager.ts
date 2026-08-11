@@ -1,8 +1,7 @@
 import { tapCommands } from './commands'
-import { TapCommandError } from './commands/definition'
 import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
-import { TAP_SCHEMA_VERSION } from './contract'
+import { isTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
@@ -56,12 +55,9 @@ export class TapManager implements TapBindingContract {
       : undefined
 
     if (!definition) {
-      return {
-        error: {
-          code: 'UNKNOWN_COMMAND',
-          message: `"${command}" is not a command of this Cypress (v${this.cypressVersion}). Available commands: ${Object.keys(tapCommands).join(', ')}.`,
-        },
-      }
+      const detail = `"${command}" is not available in this Cypress (v${this.cypressVersion}), which offers: ${Object.keys(tapCommands).join(', ')}.`
+
+      return { error: new TapError('UNKNOWN_COMMAND', { detail }).toPayload() }
     }
 
     const normalizedArgs = normalizePayload(args)
@@ -69,13 +65,9 @@ export class TapManager implements TapBindingContract {
 
     if (!normalizedArgs || !normalizedOptions) {
       const field = normalizedArgs ? 'options' : 'args'
+      const detail = `"${command}" received a non-object ${field} payload, rather than one keyed by name.`
 
-      return {
-        error: {
-          code: 'INVALID_PAYLOAD',
-          message: `"${command}" received a non-object ${field} payload; expected an object keyed by name.`,
-        },
-      }
+      return { error: new TapError('INVALID_PAYLOAD', { detail }).toPayload() }
     }
 
     const optionSchema = definition.options ?? []
@@ -83,22 +75,22 @@ export class TapManager implements TapBindingContract {
     const coercedArgs = coerceCommandArgs(command, definition.params, normalizedArgs, optionSchema)
 
     if (!coercedArgs.ok) {
-      return { error: { code: 'INVALID_ARGUMENTS', message: coercedArgs.message } }
+      return { error: new TapError('INVALID_ARGUMENTS', { detail: coercedArgs.message }).toPayload() }
     }
 
     const coercedOptions = coerceCommandOptions(command, definition.params, optionSchema, normalizedOptions)
 
     if (!coercedOptions.ok) {
-      return { error: { code: 'INVALID_OPTIONS', message: coercedOptions.message } }
+      return { error: new TapError('INVALID_OPTIONS', { detail: coercedOptions.message }).toPayload() }
     }
 
     try {
       return { result: await definition.handler(coercedArgs.args, coercedOptions.options) }
     } catch (err) {
-      // A handler's TapCommandError is a domain failure; surface it as { error }.
+      // A handler's TapError is a domain failure; surface it as { error }.
       // Any other throw is a real binding bug.
-      if (err instanceof TapCommandError) {
-        return { error: { code: err.code, message: err.message } }
+      if (isTapError(err)) {
+        return { error: err.toPayload() }
       }
 
       throw err

@@ -1,4 +1,4 @@
-import { FrameCommandError } from './aut/frame'
+import { TapError } from '@packages/cypress-instances'
 
 const WHOLE_NUMBER = /^\d+$/
 
@@ -20,7 +20,7 @@ export const parseIndex = (raw: string | undefined): number | undefined => {
   const value = parseWholeNumber(raw)
 
   if (value === undefined) {
-    throw new FrameCommandError('INVALID_INDEX', '--at must be a 0-based index: a whole number, 0 or greater')
+    throw new TapError('INVALID_INDEX', { detail: `\`--at\` was given "${raw}".` })
   }
 
   return value
@@ -34,7 +34,7 @@ export const parsePositiveInt = (raw: string | undefined, fallback: number, labe
   const value = parseWholeNumber(raw)
 
   if (value === undefined || value <= 0) {
-    throw new FrameCommandError('INVALID_LIMIT', `${label} must be a positive integer`)
+    throw new TapError('INVALID_LIMIT', { detail: `\`--${label}\` was given "${raw}".` })
   }
 
   return value

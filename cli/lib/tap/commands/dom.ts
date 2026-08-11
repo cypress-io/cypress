@@ -1,6 +1,7 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
-import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
+import { invalidSelectorError, withResolvedAutFrame } from '../aut/frame'
+import { TapError } from '@packages/cypress-instances'
 import { parseIndex, parsePositiveInt } from '../utils'
 import { createFrameIsolatedWorld } from '../aut/cdp'
 import { withAmbiguous } from '../aut/single-match'
@@ -39,13 +40,14 @@ export const extractDom = (
   }, sessionId)
 
   if (exceptionDetails) {
-    throw new FrameCommandError('FRAME_READ_FAILED', `reading the app-under-test DOM failed: ${exceptionDetails.exception?.description || exceptionDetails.text}`)
+    throw new TapError('FRAME_READ_FAILED', { message: `reading the app-under-test DOM failed: ${exceptionDetails.exception?.description || exceptionDetails.text}` })
   }
 
   const value = result.value as DomReadResult
 
+  // Only a selector the reader was given can come back rejected.
   if (value.invalidSelector) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw invalidSelectorError(selector!)
   }
 
   return {

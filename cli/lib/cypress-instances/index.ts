@@ -1,13 +1,13 @@
 import path from 'path'
 
-import { CypressInstanceError } from './record'
+import { TapError } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 import { readLiveInstances } from './store'
 
-export { CypressInstanceError, INSTANCES_DIRNAME } from './record'
+export { TapError, isTapError, INSTANCES_DIRNAME } from './record'
 
-export type { LiveInstanceState, ReadyInstanceState, CypressInstanceErrorCode, CypressInstance } from './record'
+export type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 
 export { isPidAlive, verifyInstanceRecord } from './liveness'
 
@@ -68,12 +68,11 @@ export interface ResolveInstanceOptions {
   probeTimeoutMs?: number
 }
 
-const describeFilter = (instance: number | undefined): string => {
-  if (instance !== undefined) {
-    return ` with pid ${instance}`
-  }
-
-  return ''
+// The specifics an instance failure carries: which pid was asked for, if any. The
+// condition and the remedy come from the error's registry entry, so this adds only
+// what that entry cannot know.
+const describeFilter = (instance: number | undefined): string | undefined => {
+  return instance === undefined ? undefined : `Looked for pid ${instance}.`
 }
 
 const lowestPid = <T extends LiveInstanceState>(instances: T[]): T => {
@@ -105,19 +104,13 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   const matches = records.filter((record) => matchesInstance(record, instance))
 
   if (matches.length === 0) {
-    throw new CypressInstanceError(
-      'NO_INSTANCE',
-      `No Cypress instance found${describeFilter(instance)}. This command requires Cypress running in open mode. Start Cypress in open mode and try again.`,
-    )
+    throw new TapError('NO_INSTANCE', { detail: describeFilter(instance) })
   }
 
   const live = await probeMatches(matches, probeTimeoutMs)
 
   if (live.length === 0) {
-    throw new CypressInstanceError(
-      'STALE_INSTANCE',
-      `Cypress was previously running${describeFilter(instance)}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode and try again.`,
-    )
+    throw new TapError('STALE_INSTANCE', { detail: describeFilter(instance) })
   }
 
   return live
@@ -144,13 +137,10 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
 
   if (ready.length === 0) {
     const detail = live.length === 1
-      ? ` (pid ${live[0].pid}, ${live[0].projectRoot})`
+      ? `The instance is pid ${live[0].pid}, at ${live[0].projectRoot}.`
       : describeFilter(options.instance)
 
-    throw new CypressInstanceError(
-      'NO_BROWSER_ATTACHED',
-      `Cypress is running${detail}, but no test browser is open. Open a browser in Cypress and try again.`,
-    )
+    throw new TapError('NO_BROWSER_ATTACHED', { detail })
   }
 
   const { instance: selected, reason } = selectInstance(ready, options)

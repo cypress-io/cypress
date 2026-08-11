@@ -1,8 +1,9 @@
-import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
+import { resolveLiveInstance } from '../../cypress-instances'
 import { LiveInstanceState, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
-import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
+import { renderOutcome, renderTapFailure } from '../output'
 import { defineNativeCommand } from './definition'
+import type { TapErrorCode } from '@packages/cypress-instances'
 import type { TapCliOptions } from '../types'
 import { posixify } from '../../util'
 
@@ -18,6 +19,18 @@ export interface TapRunResult {
 
 const RUN_SPEC_TIMEOUT_MS = 60_000
 
+// The instance's runSpec mutation names its failures with its own codes; each maps
+// to the tap code whose copy describes it. A code this CLI does not know reads as
+// the instance failing to start the spec, which is what it observed.
+const RUN_SPEC_FAILURES: Record<string, TapErrorCode> = {
+  GENERAL_ERROR: 'RUN_FAILED',
+  NO_PROJECT: 'NO_PROJECT',
+  NO_SPEC_PATH: 'INVALID_ARGUMENTS',
+  NO_SPEC_PATTERN_MATCH: 'SPEC_NOT_FOUND',
+  SPEC_NOT_FOUND: 'SPEC_NOT_FOUND',
+  TESTING_TYPE_NOT_CONFIGURED: 'TESTING_TYPE_NOT_CONFIGURED',
+}
+
 const findTargetSpec = async (instance: LiveInstanceState, relative: string) => {
   const specsData = await queryInstanceGraphql(instance, TapSpecsOperation)
   const wanted = posixify(relative)
@@ -32,9 +45,7 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
     const match = await findTargetSpec(instance, args.spec)
 
     if (!match) {
-      renderFailure({ code: 'SPEC_NOT_FOUND', message: `No spec matches the path "${args.spec}" — use the specs command to list runnable specs.` })
-
-      return 1
+      return await renderTapFailure({ code: 'SPEC_NOT_FOUND', detail: `Looked for "${args.spec}".` })
     }
 
     const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute), RUN_SPEC_TIMEOUT_MS)
@@ -52,26 +63,12 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
     }
 
     const failure = result?.__typename === 'RunSpecError'
-      ? { code: result.code, message: result.detailMessage ?? `The spec "${args.spec}" could not be run.` }
-      : { code: 'RUN_FAILED', message: `The instance returned no result for running "${args.spec}".` }
+      ? { code: RUN_SPEC_FAILURES[result.code] ?? 'RUN_FAILED', detail: result.detailMessage ?? undefined }
+      : { code: 'RUN_FAILED', detail: `The instance returned no result for "${args.spec}".` }
 
-    renderFailure(failure)
-
-    return 1
+    return await renderTapFailure(failure)
   } catch (err: any) {
-    if (err instanceof CypressInstanceError) {
-      renderFailure(err)
-
-      return 1
-    }
-
-    if (err.known && err.details) {
-      renderKnownFailure(err)
-
-      return 1
-    }
-
-    throw err
+    return await renderTapFailure(err)
   }
 }
 

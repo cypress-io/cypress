@@ -70,10 +70,7 @@ describe('tap/commands/command', () => {
     stubRunner(undefined)
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '1' })).to.deep.eq({
-      error: {
-        code: 'NO_RUN',
-        message: 'No spec has been started yet. Use the run command to start a spec.',
-      },
+      error: { code: 'NO_RUN' },
     })
   })
 
@@ -81,10 +78,7 @@ describe('tap/commands/command', () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'nope', 'command-id': '1' })).to.deep.eq({
-      error: {
-        code: 'TEST_NOT_FOUND',
-        message: 'no test of this run matches the id "nope" — use the reporter command to list this run’s tests',
-      },
+      error: { code: 'TEST_NOT_FOUND', detail: 'Looked for "nope".' },
     })
   })
 
@@ -176,10 +170,7 @@ describe('tap/commands/command', () => {
     stubTests()
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '1', attempt: '3' })).to.deep.eq({
-      error: {
-        code: 'ATTEMPT_NOT_FOUND',
-        message: 'test "r2" has 2 attempts; pass --attempt 1–2 (defaults to the latest)',
-      },
+      error: { code: 'ATTEMPT_NOT_FOUND', detail: 'Test "r2" has 2 attempts, so `--attempt` takes 1–2.' },
     })
   })
 
@@ -189,10 +180,7 @@ describe('tap/commands/command', () => {
     stubTests(getSerializedConsolePropsForLog)
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '9', attempt: '1' })).to.deep.eq({
-      error: {
-        code: 'COMMAND_NOT_FOUND',
-        message: 'no command of this test matches the id "9" — use the reporter command (with --test-id) to list this test’s commands',
-      },
+      error: { code: 'COMMAND_NOT_FOUND', detail: 'Looked for "9".' },
     })
 
     expect(getSerializedConsolePropsForLog).not.to.have.been.called

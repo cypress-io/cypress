@@ -10,11 +10,14 @@ import type { TapSchema, TapExecResult } from '@packages/cypress-instances/lib/t
 export {
   TAP_SCHEMA_VERSION,
   TAP_COMMANDS,
-  TAP_RUN_IN_PROGRESS_MESSAGE,
   MAX_DERIVED_SELECTORS,
+  TapError,
+  isTapError,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 export type {
+  TapErrorCode,
+  TapErrorPayload,
   TapCommandParamSchema,
   TapCommandOptionSchema,
   TapCommandName,
@@ -42,10 +45,6 @@ export type {
   TapReporterSpecAttempt,
   TapReporterSuite,
 } from '@packages/cypress-instances/lib/tap-contract'
-
-// Reserved dispatch-level failure codes `exec` itself produces; domain failures
-// carry a command-defined code, so TapExecResult.code stays an open string.
-export type TapExecDispatchFailureCode = 'UNKNOWN_COMMAND' | 'INVALID_PAYLOAD' | 'INVALID_ARGUMENTS' | 'INVALID_OPTIONS'
 
 export interface TapBindingContract {
   getSchema (): Promise<TapSchema>

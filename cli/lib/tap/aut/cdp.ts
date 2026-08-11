@@ -1,6 +1,6 @@
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from './frame'
-import { FrameCommandError } from './frame'
+import { invalidSelectorError } from './frame'
 
 // A separate JS context that shares the frame's DOM but not its globals, so
 // nothing the tap reads pollutes the page.
@@ -40,7 +40,7 @@ export const querySelectorObjectId = async (
   }, sessionId)
 
   if (exceptionDetails) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw invalidSelectorError(selector)
   }
 
   // querySelector returned null — a real "nothing matched" answer, not an error.

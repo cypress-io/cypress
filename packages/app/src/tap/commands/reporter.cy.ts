@@ -147,10 +147,7 @@ describe('tap/commands/reporter', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('reporter', {}, { 'test-id': 'r2' })
 
     expect(outcome).to.deep.eq({
-      error: {
-        code: 'NO_RUN',
-        message: 'No spec has been started yet. Use the run command to start a spec.',
-      },
+      error: { code: 'NO_RUN' },
     })
   })
 
@@ -419,8 +416,8 @@ describe('tap/commands/reporter', () => {
 
       expect(outcome).to.deep.eq({
         error: {
-          code: 'ATTEMPT_NOT_FOUND',
-          message: 'the --attempt option applies only when rendering a single test; pass --test-id <id>',
+          code: 'INVALID_OPTIONS',
+          detail: 'No `--test-id` was given, so there is no single test to select an attempt of.',
         },
       })
     })

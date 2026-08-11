@@ -1,5 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
-import { defineCommand, noRunError, TapCommandError } from './definition'
+import { defineCommand } from './definition'
+import { TapError } from '../contract'
 import { attemptSelectionError, selectTestAttempt, serializeReporterSpecView, serializeReporterView } from '../test-state'
 import type { TapReporterSpecView, TapReporterView } from '../contract'
 
@@ -7,12 +8,12 @@ export const reporterCommand = defineCommand('reporter', async (_params, { 'test
   const runner = tapManagerDataSource.getRunner()
 
   if (!runner) {
-    throw noRunError()
+    throw new TapError('NO_RUN')
   }
 
   if (test === undefined) {
     if (attempt !== undefined) {
-      throw new TapCommandError('ATTEMPT_NOT_FOUND', 'the --attempt option applies only when rendering a single test; pass --test-id <id>')
+      throw new TapError('INVALID_OPTIONS', { detail: 'No `--test-id` was given, so there is no single test to select an attempt of.' })
     }
 
     return serializeReporterSpecView(runner, tapManagerDataSource.getActiveSpecRelative())

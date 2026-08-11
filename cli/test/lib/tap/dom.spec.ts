@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { extractDom } from '../../../lib/tap/commands/dom'
-import { FrameCommandError } from '../../../lib/tap/aut/frame'
+import { TapError } from '@packages/cypress-instances'
 import type { TapSession } from '../../../lib/tap/tap-session'
 
 const SESSION_ID = 'S1'
@@ -107,7 +107,7 @@ describe('lib/tap/commands/dom extractDom', () => {
     const { session } = makeSession([{ value: { invalidSelector: true } }])
 
     await expect(extractDom(session, frame, '>>bad', 100)).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'INVALID_SELECTOR',
     })
   })
@@ -115,7 +115,7 @@ describe('lib/tap/commands/dom extractDom', () => {
   it('maps a CDP evaluation exception to FRAME_READ_FAILED', async () => {
     const failing = () => makeSession([{ exceptionDetails: { text: 'boom', exception: { description: 'boom' } } }]).session
 
-    await expect(extractDom(failing(), frame, undefined, 100)).rejects.toBeInstanceOf(FrameCommandError)
+    await expect(extractDom(failing(), frame, undefined, 100)).rejects.toBeInstanceOf(TapError)
     await expect(extractDom(failing(), frame, undefined, 100)).rejects.toMatchObject({ code: 'FRAME_READ_FAILED' })
   })
 })

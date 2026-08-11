@@ -13,18 +13,6 @@ export type {
   InstanceTestingType,
 } from '@packages/cypress-instances'
 
-export type CypressInstanceErrorCode =
-  | 'NO_INSTANCE'
-  | 'STALE_INSTANCE'
-  | 'NO_BROWSER_ATTACHED'
-  | 'RENDERER_UNRESPONSIVE'
-
-export class CypressInstanceError extends Error {
-  code: CypressInstanceErrorCode
-
-  constructor (code: CypressInstanceErrorCode, message: string) {
-    super(message)
-    this.name = 'CypressInstanceError'
-    this.code = code
-  }
-}
+// Instance discovery raises the same `TapError` every other tap failure is raised
+// as, so one catch and one renderer cover the whole surface.
+export { TapError, isTapError } from '@packages/cypress-instances'

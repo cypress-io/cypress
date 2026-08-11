@@ -90,7 +90,7 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect(outcome).to.deep.eq({
-      error: { code: 'SNAPSHOT_NOT_FOUND', message: 'no snapshot of this command matches "during" — available snapshots: "before" (1), "after" (2)' },
+      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for "during". This command has: "before" (1), "after" (2).' },
     })
 
     expect(pinSnapshot).not.to.have.been.called
@@ -497,10 +497,7 @@ describe('tap/commands/pin', () => {
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
-    expect((outcome as { error: { code: string, message: string } }).error).to.deep.eq({
-      code: 'RUN_IN_PROGRESS',
-      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
-    })
+    expect((outcome as { error: { code: string } }).error).to.deep.eq({ code: 'RUN_IN_PROGRESS' })
   })
 
   it('fails with TEST_NOT_FOUND and COMMAND_NOT_FOUND for unknown ids', async () => {
@@ -563,7 +560,7 @@ describe('tap/commands/pin', () => {
     expect(outcome).to.deep.eq({
       error: {
         code: 'AMBIGUOUS_COMMAND',
-        message: '"2" matches h1:2 (before each) and h2:2 (before each) — qualify the id with its section, e.g. "h1:2"',
+        detail: '"2" matches h1:2 (before each) and h2:2 (before each) — e.g. "h1:2".',
       },
     })
 

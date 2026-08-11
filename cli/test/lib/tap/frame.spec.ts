@@ -62,8 +62,8 @@ describe('lib/tap/aut/frame resolveAutFrame', () => {
     })
 
     await expect(resolveAutFrame(client as any, SESSION_ID)).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'NO_AUT_FRAME',
+      name: 'TapError',
+      code: 'NO_AUT',
     })
   })
 })
@@ -91,9 +91,8 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'running' } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'RUN_IN_PROGRESS',
-      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
     })
   })
 
@@ -101,7 +100,7 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     const session = sessionForRunState({ result: { spec: null, totalSpecs: 3 } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'NO_RUN',
     })
   })
@@ -110,18 +109,18 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'loading', startedAt: null } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'NO_RUN',
     })
   })
 
-  it('surfaces an app-side run-state error envelope as a FrameCommandError', async () => {
-    const session = sessionForRunState({ error: { code: 'BOOM', message: 'run-state blew up' } })
+  it('surfaces an app-side run-state error envelope as a TapError', async () => {
+    const session = sessionForRunState({ error: { code: 'BOOM', detail: 'run-state blew up' } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'BOOM',
-      message: 'run-state blew up',
+      detail: 'run-state blew up',
     })
   })
 })

@@ -17,9 +17,9 @@ describe('lib/tap/cdp-timeout', () => {
 
       expect(isRendererUnresponsive(err)).to.eq(true)
       expect(err.code).to.eq('RENDERER_UNRESPONSIVE')
+      expect(err.detail).to.contain(`${BOUND}ms`)
+      // Which call went unanswered is a diagnostic, not copy.
       expect(err.message).to.contain('the probe')
-      expect(err.message).to.contain(`${BOUND}ms`)
-      expect(err.message).to.contain('--timeout')
     })
 
     it('resolves with the value when the call answers first', async () => {

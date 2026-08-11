@@ -100,7 +100,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
 
     await expect(resolveAmbiguity(session, frame, '.item', 3)).rejects.toMatchObject({
       code: 'INVALID_INDEX',
-      message: '".item" matched 3 elements; pass --at 0-2',
+      detail: '".item" matched 3 elements, so `--at` takes 0 to 2.',
     })
   })
 
@@ -122,7 +122,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     const { session } = makeSession({ invalidSelector: true })
 
     await expect(resolveAmbiguity(session, frame, '>>bad')).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'INVALID_SELECTOR',
     })
   })

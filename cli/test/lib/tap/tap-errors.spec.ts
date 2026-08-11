@@ -1,123 +1,193 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import stripAnsi from 'strip-ansi'
 
-import { errors } from '../../../lib/errors'
+import logger from '../../../lib/logger'
+import { renderTapFailure } from '../../../lib/tap/output'
+import { TAP_ERROR_COPY, tapErrorCopy } from '@packages/cypress-instances'
 
-// Catalog of every user-facing `cypress tap` error. The command boundary prints
-// an error's description + solution only — no platform footer and no `----`
-// dividers (the runtime diagnostic stays on the Error for logs/--debug). Adding
-// or rewording a tap error should land here as a snapshot diff. Which failure
-// maps to which entry is covered by tap-session.spec.ts.
+// The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
+// should land here as a snapshot diff.
+//
+// These snapshots hold the registry copy alone — the condition and the remedy. What
+// a caller sees also carries the specifics from the throw site and a platform
+// footer, which is machine-dependent; the rendering assertions below cover the
+// assembled shape without pinning the footer.
 
-// eslint-disable-next-line no-control-regex
-const ANSI = /\[[0-9;]*m/g
-
-// Mirror of what the command boundary shows the user. ANSI is stripped so the
-// snapshot is the plain copy (a real terminal would color the links/keywords).
-const render = (entry: { description: string, solution: string }): string => {
-  return `${entry.description}\n\n${entry.solution}`.replace(ANSI, '')
-}
-
-describe('lib/tap public error catalog', () => {
-  it('exposes exactly these public tap errors (add a case below for any new entry)', () => {
-    expect(Object.keys(errors).filter((key) => key.startsWith('tap')).sort()).toMatchInlineSnapshot(`
+describe('lib/tap error registry', () => {
+  it('covers exactly these codes (add a case below for any new entry)', () => {
+    expect(Object.keys(TAP_ERROR_COPY).sort()).toMatchInlineSnapshot(`
       [
-        "tapBindingNotFound",
-        "tapBindingThrew",
-        "tapCdpUnreachable",
-        "tapGraphqlFailed",
-        "tapGraphqlUnreachable",
-        "tapInvalidExecResult",
-        "tapInvalidSchema",
-        "tapOutdatedProtocol",
-        "tapStaleHandle",
-        "tapUnsupportedProtocol",
+        "AMBIGUOUS_COMMAND",
+        "ATTEMPT_NOT_FOUND",
+        "BINDING_NOT_FOUND",
+        "BINDING_THREW",
+        "CDP_UNREACHABLE",
+        "CLI_OUTDATED",
+        "COMMAND_NOT_FOUND",
+        "FRAME_READ_FAILED",
+        "GRAPHQL_FAILED",
+        "GRAPHQL_UNREACHABLE",
+        "INSTANCE_OUTDATED",
+        "INVALID_ARGUMENTS",
+        "INVALID_INDEX",
+        "INVALID_LIMIT",
+        "INVALID_OPTIONS",
+        "INVALID_PAYLOAD",
+        "INVALID_SELECTOR",
+        "NO_AUT",
+        "NO_BROWSER_ATTACHED",
+        "NO_INSTANCE",
+        "NO_PROJECT",
+        "NO_RUN",
+        "PIN_TARGET_REQUIRED",
+        "PROTOCOL_MISMATCH",
+        "RENDERER_UNRESPONSIVE",
+        "RUN_FAILED",
+        "RUN_IN_PROGRESS",
+        "SNAPSHOT_NOT_FOUND",
+        "SNAPSHOT_UNAVAILABLE",
+        "SPEC_NOT_FOUND",
+        "STALE_HANDLE",
+        "STALE_INSTANCE",
+        "TESTING_TYPE_NOT_CONFIGURED",
+        "TEST_NOT_FOUND",
+        "UNKNOWN_COMMAND",
       ]
     `)
   })
 
-  it('tapCdpUnreachable — the debugging connection to the browser was lost', () => {
-    expect(render(errors.tapCdpUnreachable)).toMatchInlineSnapshot(`
-      "Lost the debugging connection to the browser Cypress is running.
+  it('reads as one voice across every entry', () => {
+    const rendered = Object.entries(TAP_ERROR_COPY)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([code, copy]) => `${code}\n  ${copy.description}\n  ${copy.solution}`)
+    .join('\n\n')
 
-      The browser may have just closed. Make sure Cypress is running with a browser open, then try again."
-    `)
+    expect(rendered).toMatchSnapshot()
   })
 
-  it('tapBindingNotFound — the instance page could not be reached', () => {
-    expect(render(errors.tapBindingNotFound)).toMatchInlineSnapshot(`
-      "Could not connect to the Cypress instance.
+  // Every entry is copy a caller reads, so the house rules apply to all of them at
+  // once rather than one assertion per entry.
+  it('states each condition and remedy as a finished sentence', () => {
+    const offenders = Object.entries(TAP_ERROR_COPY).flatMap(([code, copy]) => {
+      return (['description', 'solution'] as const)
+      .filter((slot) => !/^[`A-Z]/.test(copy[slot]) || !/[.?]$/.test(copy[slot]))
+      .map((slot) => `${code}.${slot}`)
+    })
 
-      The instance may still be loading — try again in a moment.
-
-      If the problem persists, the browser tab running Cypress may have been closed. Open a browser in Cypress and try again."
-    `)
+    expect(offenders).to.deep.eq([])
   })
 
-  it('tapBindingThrew — the binding method threw inside the instance', () => {
-    expect(render(errors.tapBindingThrew)).toMatchInlineSnapshot(`
-      "The Cypress instance failed while running the tap command.
+  it('leaves the specifics to the throw site, never interpolating them', () => {
+    const interpolated = Object.entries(TAP_ERROR_COPY)
+    .filter(([, copy]) => `${copy.description}${copy.solution}`.includes('${'))
+    .map(([code]) => code)
 
-      Search for an existing issue or open a GitHub issue at
-
-        https://github.com/cypress-io/cypress/issues"
-    `)
+    expect(interpolated).to.deep.eq([])
   })
 
-  it('tapStaleHandle — the instance navigated mid-command', () => {
-    expect(render(errors.tapStaleHandle)).toMatchInlineSnapshot(`
-      "The Cypress instance navigated while running the command.
+  it('links only through on.cypress.io, as a path the CLI resolves', () => {
+    const offenders = Object.entries(TAP_ERROR_COPY)
+    .filter(([, copy]) => `${copy.description}${copy.solution}${copy.docs ?? ''}`.includes('docs.cypress.io'))
+    .map(([code]) => code)
 
-      Try running the command again."
-    `)
+    expect(offenders).to.deep.eq([])
+  })
+})
+
+describe('lib/tap error registry lookup', () => {
+  it('resolves a code it ships', () => {
+    expect(tapErrorCopy('NO_INSTANCE')).to.eq(TAP_ERROR_COPY.NO_INSTANCE)
   })
 
-  it('tapInvalidSchema — the instance returned an unrecognizable schema', () => {
-    expect(render(errors.tapInvalidSchema)).toMatchInlineSnapshot(`
-      "The running Cypress returned a tap schema this CLI does not recognize.
+  // The code arrives from the instance over the wire, so anything that is not a code
+  // this CLI ships has to land somewhere rather than resolving to nothing — or, for
+  // an inherited name, to a member of Object.prototype.
+  it('falls back to the protocol-mismatch copy, plus a report, for a code only a newer Cypress knows', () => {
+    const copy = tapErrorCopy('SOMETHING_THIS_CLI_HAS_NEVER_HEARD_OF')
 
-      The running version of Cypress may not support cypress tap."
-    `)
+    expect(copy.description).to.eq(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+    expect(copy.recommendGhIssue).to.be.true
   })
 
-  it('tapUnsupportedProtocol — the instance is newer than this CLI', () => {
-    expect(render(errors.tapUnsupportedProtocol)).toMatchInlineSnapshot(`
-      "The running Cypress is newer than this CLI and uses a tap protocol it does not understand.
-
-      Update the CLI (npm install --save-dev cypress@latest) and try again."
-    `)
+  it('falls back for an inherited name rather than a prototype member', () => {
+    for (const name of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) {
+      expect(tapErrorCopy(name), name).to.eq(tapErrorCopy('NOT_A_CODE'))
+    }
   })
 
-  it('tapOutdatedProtocol — the instance is older than this CLI', () => {
-    expect(render(errors.tapOutdatedProtocol)).toMatchInlineSnapshot(`
-      "The running Cypress is older than this CLI and speaks an earlier tap protocol.
+  it('falls back for a code that is not a string at all', () => {
+    for (const value of [undefined, null, 42, {}, [], true]) {
+      expect(tapErrorCopy(value), String(value)).to.eq(tapErrorCopy('NOT_A_CODE'))
+    }
+  })
+})
 
-      Update Cypress in the running project to match this CLI (npm install --save-dev cypress@latest), then try again."
-    `)
+describe('lib/tap error rendering', () => {
+  const stderr = (): string => stripAnsi(vi.mocked(console.error).mock.calls.flat().join(' '))
+
+  beforeEach(() => {
+    logger.reset()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
-  it('tapGraphqlUnreachable — the instance data layer could not be reached', () => {
-    expect(render(errors.tapGraphqlUnreachable)).toMatchInlineSnapshot(`
-      "Could not reach the Cypress instance to read its data.
+  const render = async (code: string, detail?: string): Promise<string> => {
+    await renderTapFailure({ code, detail })
 
-      The instance may have just closed. Make sure Cypress is running in open mode, then try again."
-    `)
+    return stderr()
+  }
+
+  // The code is a registry key, not output: it selects the copy and never reaches
+  // the reader.
+  it('never prints the error code', async () => {
+    for (const code of Object.keys(TAP_ERROR_COPY)) {
+      vi.mocked(console.error).mockClear()
+
+      expect(await render(code), code).not.to.contain(code)
+    }
   })
 
-  it('tapGraphqlFailed — the instance failed while answering a data query', () => {
-    expect(render(errors.tapGraphqlFailed)).toMatchInlineSnapshot(`
-      "The Cypress instance failed while answering a data query.
+  it('lays a failure out the way every other CLI error is laid out', async () => {
+    const printed = await render('NO_INSTANCE')
 
-      Search for an existing issue or open a GitHub issue at
-
-        https://github.com/cypress-io/cypress/issues"
-    `)
+    expect(printed).to.contain(TAP_ERROR_COPY.NO_INSTANCE.description)
+    expect(printed).to.contain('Start one with cypress open')
+    expect(printed).to.contain('----------')
+    expect(printed).to.contain('Cypress Version:')
   })
 
-  it('tapInvalidExecResult — the instance returned an unrecognizable exec result', () => {
-    expect(render(errors.tapInvalidExecResult)).toMatchInlineSnapshot(`
-      "The running Cypress returned a result this CLI does not recognize.
+  it('prints the throw site\'s specifics under the registered copy', async () => {
+    expect(await render('NO_INSTANCE', 'Looked for pid 999.')).to.contain('Looked for pid 999.')
+  })
 
-      The running version of Cypress may not support cypress tap."
-    `)
+  it('expands recommendGhIssue into the CLI\'s standard issue block', async () => {
+    const printed = await render('BINDING_THREW')
+
+    expect(printed).to.contain('search for an existing issue or open a GitHub issue at')
+    expect(printed).to.contain('https://github.com/cypress-io/cypress/issues')
+  })
+
+  it('leaves the issue block off an entry that does not ask for it', async () => {
+    expect(await render('NO_INSTANCE')).not.to.contain('github.com/cypress-io/cypress/issues')
+  })
+
+  it('expands docs into a Learn more block under the docs site', async () => {
+    const printed = await render('TESTING_TYPE_NOT_CONFIGURED')
+
+    expect(printed).to.contain('Learn more:')
+    expect(printed).to.contain('https://on.cypress.io/configuration')
+  })
+
+  // Both slots carry backticked commands, so the markup has to be stripped from
+  // both — a description keeping its backticks is the way this has gone wrong.
+  it('strips the markup from every entry, whichever slot carries it', async () => {
+    for (const code of Object.keys(TAP_ERROR_COPY)) {
+      vi.mocked(console.error).mockClear()
+
+      expect(await render(code), code).not.to.contain('`')
+    }
+  })
+
+  it('keeps unwinding an error that is not ours to render', async () => {
+    await expect(renderTapFailure(new Error('not a tap failure'))).rejects.toThrow('not a tap failure')
   })
 })

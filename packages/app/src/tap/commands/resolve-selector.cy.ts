@@ -81,7 +81,7 @@ describe('tap/commands/resolve-selector', () => {
     stubSource(undefined)
 
     expect(await exec()).to.deep.eq({
-      error: { code: 'NO_AUT', message: 'no app under test is loaded — run a spec first' },
+      error: { code: 'NO_AUT' },
     })
   })
 
@@ -94,7 +94,7 @@ describe('tap/commands/resolve-selector', () => {
     })
 
     expect(await exec('>>bad')).to.deep.eq({
-      error: { code: 'INVALID_SELECTOR', message: '">>bad" is not a valid CSS selector' },
+      error: { code: 'INVALID_SELECTOR', detail: 'The selector was ">>bad".' },
     })
   })
 

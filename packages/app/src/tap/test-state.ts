@@ -1,5 +1,5 @@
 import type { SerializedCommandLog, SerializedTest } from '@packages/types'
-import { TapCommandError } from './commands/definition'
+import { TapError } from './contract'
 import { omitNullish } from './utils'
 
 import type { TapCommandSnapshot, TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
@@ -62,18 +62,18 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
   return { test, attempt: attempts[attempt - 1], attemptNumber: attempt }
 }
 
-export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapCommandError => {
+export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number }, testId: string): TapError => {
   if (selection.error === 'TEST_NOT_FOUND') {
-    return new TapCommandError('TEST_NOT_FOUND', `no test of this run matches the id "${testId}" — use the reporter command to list this run’s tests`)
+    return new TapError('TEST_NOT_FOUND', { detail: `Looked for "${testId}".` })
   }
 
   const { attempts } = selection
 
-  const message = attempts === 1
-    ? `test "${testId}" has only 1 attempt; --attempt selects an earlier attempt of a retried test`
-    : `test "${testId}" has ${attempts} attempts; pass --attempt 1–${attempts} (defaults to the latest)`
+  const detail = attempts === 1
+    ? `Test "${testId}" has only 1 attempt.`
+    : `Test "${testId}" has ${attempts} attempts, so \`--attempt\` takes 1–${attempts}.`
 
-  return new TapCommandError('ATTEMPT_NOT_FOUND', message)
+  return new TapError('ATTEMPT_NOT_FOUND', { detail })
 }
 
 // The reporter's `renderProps` (resolved to an object by the time a log
@@ -252,7 +252,7 @@ const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], i
     return `${hookId}:${rowId}${hookName ? ` (${hookName})` : ''}`
   })
 
-  throw new TapCommandError('AMBIGUOUS_COMMAND', `"${tapId}" matches ${qualified.join(' and ')} — qualify the id with its section, e.g. "${qualified[0].split(' ')[0]}"`)
+  throw new TapError('AMBIGUOUS_COMMAND', { detail: `"${tapId}" matches ${qualified.join(' and ')} — e.g. "${qualified[0].split(' ')[0]}".` })
 }
 
 /**

@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import type { LiveInstanceState } from '../../../lib/cypress-instances'
-import { errors } from '../../../lib/errors'
 
 const instance: LiveInstanceState = {
   schemaVersion: 1,
@@ -53,8 +52,7 @@ describe('lib/tap/instance-gql', () => {
     fetchMock.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
     await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlUnreachable,
+            code: 'GRAPHQL_UNREACHABLE',
       message: expect.stringContaining('ECONNREFUSED'),
     })
   })
@@ -63,8 +61,7 @@ describe('lib/tap/instance-gql', () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500))
 
     await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlUnreachable,
+            code: 'GRAPHQL_UNREACHABLE',
       message: expect.stringContaining('500'),
     })
   })
@@ -73,8 +70,7 @@ describe('lib/tap/instance-gql', () => {
     fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
 
     await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapOutdatedProtocol,
+            code: 'INSTANCE_OUTDATED',
       message: expect.stringContaining('redirected'),
     })
   })
@@ -83,8 +79,7 @@ describe('lib/tap/instance-gql', () => {
     fetchMock.mockResolvedValue(jsonResponse({ errors: [{ message: 'resolver exploded' }] }))
 
     await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlFailed,
+            code: 'GRAPHQL_FAILED',
       message: expect.stringContaining('resolver exploded'),
     })
   })
@@ -94,8 +89,7 @@ describe('lib/tap/instance-gql', () => {
       fetchMock.mockResolvedValue(jsonResponse({ errors: malformedErrors }))
 
       await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-        known: true,
-        details: errors.tapGraphqlFailed,
+                code: 'GRAPHQL_FAILED',
       })
     }
   })
@@ -106,8 +100,7 @@ describe('lib/tap/instance-gql', () => {
     } })
 
     await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlFailed,
+            code: 'GRAPHQL_FAILED',
     })
   })
 
@@ -116,8 +109,7 @@ describe('lib/tap/instance-gql', () => {
       fetchMock.mockResolvedValue(jsonResponse(payload))
 
       await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-        known: true,
-        details: errors.tapGraphqlFailed,
+                code: 'GRAPHQL_FAILED',
       })
     }
   })

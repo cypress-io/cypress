@@ -1,10 +1,14 @@
-import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
+import { isTapError, resolveLiveInstance } from '../../cypress-instances'
 import type { ReadyInstanceState } from '../../cypress-instances'
 import { withTapSession, validateExecResult } from '../tap-session'
-import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
+import { renderOutcome, renderTapFailure } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions, TapRunState, TapStatus } from '../types'
+
+// The two ways an instance can fail to resolve at all. Both are a lifecycle stage
+// `status` reports rather than a failure it exits on; anything else really did fail.
+const NOT_CONNECTED_CODES: ReadonlySet<string> = new Set(['NO_INSTANCE', 'STALE_INSTANCE'])
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   const pinned = runState.pinned ? { pinned: runState.pinned } : {}
@@ -33,7 +37,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
     selection = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
   } catch (err) {
     // No live instance is a status a poller waits on, not a failure.
-    if (err instanceof CypressInstanceError) {
+    if (isTapError(err) && NOT_CONNECTED_CODES.has(err.code)) {
       renderOutcome('status', { status: 'not connected' } satisfies TapStatus, options.json)
 
       return 0
@@ -66,30 +70,16 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
     }, options.timeout)
 
     if ('error' in outcome) {
-      renderFailure(outcome.error)
-
-      return 1
+      return await renderTapFailure(outcome.error)
     }
 
     renderOutcome('status', mergeRunState(base, outcome.result as TapRunState), options.json)
 
     return 0
   } catch (err: any) {
-    // A degraded instance reached this far carries a code (e.g. an unresponsive
-    // renderer); the earlier catch only covers instances that never resolved.
-    if (err instanceof CypressInstanceError) {
-      renderFailure(err)
-
-      return 1
-    }
-
-    if (err.known && err.details) {
-      renderKnownFailure(err)
-
-      return 1
-    }
-
-    throw err
+    // A degraded instance reached this far (e.g. an unresponsive renderer); the
+    // earlier catch only covers instances that never resolved.
+    return await renderTapFailure(err)
   }
 }
 
