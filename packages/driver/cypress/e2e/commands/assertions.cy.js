@@ -2989,7 +2989,6 @@ describe('src/cy/commands/assertions', () => {
         expect({}).to.have.attr('foo')
       })
 
-      // https://github.com/cypress-io/cypress/issues/26451
       it('throws when the attribute name is not a string', function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.include(
