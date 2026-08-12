@@ -49,8 +49,8 @@ const snapshotRendering = (name: string, text: string, extra: Array<[RegExp, str
   // scrubbing only the digits leaves an AM/PM that flips with the time of day.
   .replace(/\(started at [^)]*\)/g, '(started at <time>)')
   .replace(/\b\d{1,2}:\d{2}:\d{2}(\.\d+)?\b/g, '<time>')
-  // mm:ss only; the clock rule above handles hh:mm:ss.
-  .replace(/\b\d{2}:\d{2}\b/g, '<duration>')
+  // mm:ss only; colons on either side identify a file:line:column location.
+  .replace(/(?<!:)\b\d{2}:\d{2}\b(?!:)/g, '<duration>')
 
   for (const [pattern, replacement] of extra) {
     normalized = normalized.replace(pattern, replacement)

@@ -44,14 +44,14 @@ TEST BODY · r3
 ✖ AssertionError
   Timed out retrying after <duration>: expected '<div#status>' to have text 'this is not what the page says', but the text was 'ready'
 
-  cypress/e2e/failing.cy.js:5:23
-    3 |   it('fails after loading the fixture page', () => {
-    4 |     cy.visit('cypress/e2e/aut-content.html')
-  > 5 |     cy.get('#status').should('have.text', 'this is not what the page says')
-      |                       ^
-    6 |   })
-    7 | })
-    8 |
+  cypress/e2e/failing.cy.js:10:23
+     8 |   it('fails after loading the fixture page', () => {
+     9 |     cy.visit('cypress/e2e/aut-content.html')
+  > 10 |     cy.get('#status').should('have.text', expectedText)
+       |                       ^
+    11 |   })
+    12 | })
+    13 |
 `
 
 exports['reporter spec overview'] = `
