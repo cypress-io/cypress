@@ -863,6 +863,107 @@ describe('CdpFetchTransport', () => {
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
     })
 
+    // Network.responseReceived derives mimeType/charset from the wire
+    // content-type; a continueResponse header override does not update them,
+    // so a changed content-type must take the fulfill path to be recorded
+    // truthfully (e.g. Test Replay keys stylesheet handling off mimeType).
+    it('fulfills when middleware changes only the content-type of an untouched body', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            'content-type': 'text/css',
+          },
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = [{ name: 'Content-Type', value: 'application/octet-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/css',
+        }],
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    // Overrides other than content-type are recorded truthfully by CDP on
+    // continueResponse, so they keep the cheaper wire release.
+    it('continues when middleware changes headers other than content-type', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            'x-custom': 'yes',
+          },
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = [{ name: 'Content-Type', value: 'application/octet-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [
+          { name: 'content-type', value: 'application/octet-stream' },
+          { name: 'x-custom', value: 'yes' },
+        ],
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
     it('matches request and response pauses by fetch request id', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
@@ -1786,8 +1887,10 @@ describe('CdpFetchTransport', () => {
         return {
           ...response,
           body: await readStream(response.bodyStream!),
+          // a content-type change would force the fulfill path (mimeType
+          // derivation) — use a neutral header to stay on continueResponse
           headers: {
-            'content-type': 'text/plain',
+            'x-verbatim': 'empty',
           },
           statusCode: 204,
         }
@@ -1816,8 +1919,8 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 204,
         responseHeaders: [{
-          name: 'content-type',
-          value: 'text/plain',
+          name: 'x-verbatim',
+          value: 'empty',
         }],
       })
 
