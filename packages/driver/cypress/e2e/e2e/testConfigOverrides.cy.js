@@ -401,7 +401,7 @@ describe('cannot set override configuration options that', () => {
 
     Cypress.config('blockHosts', 'example.com')
   })
-  
+
   it('throws if mutating env with Cypress.config()', (done) => {
     window.top.__cySkipValidateConfig = false
     cy.once('fail', (err) => {
