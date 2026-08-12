@@ -53,6 +53,35 @@ describe('createSyntheticExpressContext', () => {
     expect(req.resourceType).to.equal('xhr')
   })
 
+  it('populates query like the Express-served MITM request', () => {
+    // cy.intercept's request message picks query off req (SERIALIZABLE_REQ_PROPS);
+    // without it the driver falsely flags requests as modified.
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/search?foo=bar&baz=two%20words',
+    })
+
+    expect(req.query).to.deep.equal({ foo: 'bar', baz: 'two words' })
+  })
+
+  it('leaves httpVersion unset rather than reporting a protocol it cannot know', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/plain',
+    })
+
+    expect(req).not.to.have.property('httpVersion')
+  })
+
+  it('populates an empty query for urls without a search string', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/plain',
+    })
+
+    expect(req.query).to.deep.equal({})
+  })
+
   it('lowercases request header keys like Node IncomingMessage', () => {
     const { req } = createSyntheticExpressContext({
       id: 'network-1',
@@ -104,6 +133,16 @@ describe('createSyntheticExpressContext', () => {
     })
 
     expect(incomingRes.headers['set-cookie']).to.deep.equal(['a=1', 'b=2'])
+  })
+
+  it('does not fabricate an httpVersion on the synthetic response', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+    })
+
+    expect(incomingRes.httpVersion).to.be.null
   })
 
   it('keeps malformed cookie values without throwing', () => {
