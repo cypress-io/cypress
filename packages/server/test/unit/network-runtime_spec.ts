@@ -525,14 +525,15 @@ describe('lib/network-runtime', () => {
     expect(seenResourceTypes).to.include('xhr')
   })
 
-  it('createCdpFetchRuntime fulfills strategy:file URLs from the file server without continueRequest', async () => {
+  it('createCdpFetchRuntime redirects strategy:file URLs to the Cypress origin with loopback headers', async () => {
     const client = {
       send: sinon.stub().resolves({}),
       on: sinon.stub(),
       off: sinon.stub(),
     }
     const deps = baseDeps()
-    const fileBody = Buffer.from('"Joe","Smith"')
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
 
     deps.remoteStates.current = sinon.stub().returns({
       origin: 'http://localhost:2020',
@@ -544,14 +545,7 @@ describe('lib/network-runtime', () => {
 
     deps.request = {
       rp: sinon.stub(),
-      create: sinon.stub().resolves({
-        statusCode: 200,
-        headers: {
-          'content-type': 'text/csv',
-          'content-disposition': 'attachment; filename="records.csv"',
-        },
-        body: fileBody,
-      }),
+      create: sinon.stub(),
     } as any
 
     const runtime = createCdpFetchRuntime({ ...deps, client })
@@ -565,27 +559,90 @@ describe('lib/network-runtime', () => {
 
     await flush()
 
-    expect(deps.request.create).to.have.been.calledWithMatch({
-      url: 'http://localhost:2021/cypress/fixtures/records.csv',
-      headers: {
-        'x-cypress-authorization': 'token',
-      },
-    }, true)
+    // No Node-side file-server fetch — the request stays on the wire and the
+    // Express direct-origin catch-all serves it.
+    expect(deps.request.create).to.not.have.been.called
 
     const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
     const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
 
-    expect(continueCall, 'expected no Fetch.continueRequest').to.not.exist
-    expect(fulfillCall, 'expected Fetch.fulfillRequest').to.exist
-    expect(fulfillCall!.args[1]).to.include({
-      requestId: 'file-request',
-      responseCode: 200,
-    })
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest').to.not.exist
 
-    expect(fulfillCall!.args[1].body).to.equal(fileBody.toString('base64'))
+    // Page-invisible url override to our origin; loopback headers carry the
+    // impersonated URL so setProxiedUrl restores it Express-side.
+    const continueParams = continueCall!.args[1]
+
+    expect(continueParams.requestId).to.eq('file-request')
+    expect(continueParams.url).to.eq('http://localhost:2020/cypress/fixtures/records.csv')
+
+    const headerNames = continueParams.headers.map((h: { name: string }) => h.name)
+
+    expect(headerNames).to.include('x-cypress-internal-loopback')
+    expect(headerNames).to.include('x-cypress-internal-loopback-token')
+    expect(continueParams.headers.find((h: { name: string }) => h.name === 'x-cypress-internal-loopback').value)
+    .to.eq('http://localhost:2020/cypress/fixtures/records.csv')
+
+    // The response pause for a passed-through request is released untouched.
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse').to.exist
+    expect(continueResponseCall!.args[1]).to.deep.equal({ requestId: 'file-request' })
   })
 
-  it('createCdpFetchRuntime fulfills download pauses without networkId without waiting for pre-request timeout', async function () {
+  it('createCdpFetchRuntime releases the pause untouched when the origin-redirect continueRequest is rejected', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string, params: any) => {
+        // reject the full-args override, accept the bare release
+        if (method === 'Fetch.continueRequest' && params?.url) {
+          throw new Error('Invalid http header value')
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+    }))
+
+    await flush()
+
+    const continueCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCalls, 'override attempt plus bare fallback').to.have.length(2)
+    expect(continueCalls[0].args[1].url).to.exist
+    expect(continueCalls[1].args[1]).to.deep.equal({ requestId: 'file-request' })
+  })
+
+  it('createCdpFetchRuntime passes download pauses without networkId through without waiting for pre-request timeout', async function () {
     this.timeout(5000)
 
     const clock = sinon.useFakeTimers({
@@ -601,6 +658,8 @@ describe('lib/network-runtime', () => {
       const deps = baseDeps()
       const fileBody = Buffer.from('"Joe","Smith"')
       const downloadUrl = 'http://localhost:2020/cypress/fixtures/records.csv'
+
+      deps.config = { ...deps.config, port: 2020 } as Cypress.Config
 
       deps.remoteStates.current = sinon.stub().returns({
         origin: 'http://localhost:2020',
@@ -630,8 +689,8 @@ describe('lib/network-runtime', () => {
       const addPendingSpy = sinon.spy(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
       const onRequestPaused = await startCdpRuntime(runtime, client)
 
-      // Downloads omit networkId — without pre-registration CorrelateBrowserPreRequest
-      // would wait the default 2000ms pre-request timeout before file-server-origin runs.
+      // Downloads omit networkId — without pre-registration the Express-side
+      // CorrelateBrowserPreRequest would wait the default 2000ms pre-request timeout.
       const handled = onRequestPaused(createPausedRequest({
         requestId: 'download-file-request',
         url: downloadUrl,
@@ -641,16 +700,16 @@ describe('lib/network-runtime', () => {
       await clock.tickAsync(0)
       await flush()
 
+      // Pre-registration still happens for pass-through pauses so the
+      // Express-side CorrelateBrowserPreRequest resolves immediately.
       expect(addPendingSpy).to.have.been.calledOnceWith(downloadUrl)
-      expect(deps.request.create).to.have.been.calledOnce
+      expect(deps.request.create).to.not.have.been.called
 
-      const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+      const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
 
-      expect(fulfillCall, 'expected Fetch.fulfillRequest before pre-request timeout').to.exist
-      expect(fulfillCall!.args[1]).to.include({
-        requestId: 'download-file-request',
-        responseCode: 200,
-      })
+      expect(continueCall, 'expected Fetch.continueRequest before pre-request timeout').to.exist
+      expect(continueCall!.args[1].requestId).to.eq('download-file-request')
+      expect(continueCall!.args[1].url).to.eq(downloadUrl)
 
       await handled
     } finally {
@@ -720,6 +779,60 @@ describe('lib/network-runtime', () => {
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
   })
 
+  it('createCdpFetchRuntime attachExtraTarget transports redirect strategy:file URLs like the main transport', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    const runtime = createCdpFetchRuntime({ ...deps, client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+
+    const onRequestPaused = (event: Protocol.Fetch.RequestPausedEvent) => {
+      return Promise.all(extraClient.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
+        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent) => void)(event)
+      }))
+    }
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'popup-file-request',
+      networkId: 'network-popup-1',
+      url: 'http://localhost:2020/cypress/fixtures/popup.html',
+    }))
+
+    await flush()
+
+    // Popup file traffic reaches Express either way — released untouched so
+    // the pipeline runs once there, not on the CDP side first.
+    const continueCall = extraClient.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(continueCall!.args[1].url).to.eq('http://localhost:2020/cypress/fixtures/popup.html')
+    expect(continueCall!.args[1].headers.map((h: { name: string }) => h.name))
+    .to.include('x-cypress-internal-loopback-token')
+
+    await runtime.stop()
+  })
+
   it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {
     const mainClient = {
       send: sinon.stub().resolves({}),
@@ -766,6 +879,62 @@ describe('lib/network-runtime', () => {
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
 
     await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime enables Fetch on service worker sessions that attach to the page connection', async () => {
+    const client: {
+      send: sinon.SinonStub
+      on: sinon.SinonStub
+      off: sinon.SinonStub
+      onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+    } = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    expect(client.onServiceWorkerTargetAttached, 'hook is not registered before start').to.not.exist
+
+    await runtime.start()
+    client.send.resetHistory()
+
+    await client.onServiceWorkerTargetAttached!('sw-session')
+
+    // A service worker's script fetch and fetch-handler requests run on its own
+    // session, so they only reach the middleware onion (and cy.intercept) if
+    // Fetch is enabled there too.
+    expect(client.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    }, 'sw-session')
+
+    await runtime.stop()
+
+    // The page client outlives the runtime, so a stale hook would enable Fetch
+    // against a transport that has already dropped its handlers.
+    expect(client.onServiceWorkerTargetAttached, 'hook is cleared on stop').to.not.exist
+  })
+
+  it('createCdpFetchRuntime clears the service worker hook when Fetch.enable fails', async () => {
+    const client: {
+      send: sinon.SinonStub
+      on: sinon.SinonStub
+      off: sinon.SinonStub
+      onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+    } = {
+      send: sinon.stub().rejects(new Error('enable failed')),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+
+    expect(client.onServiceWorkerTargetAttached).to.not.exist
   })
 
   it('createCdpFetchRuntime stop also stops attached extra-target transports', async () => {

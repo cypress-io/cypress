@@ -657,16 +657,22 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
   return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
 }
 
+export const resetServerState = (Cypress, state) => {
+  state('redirectionCount', {})
+
+  // `blockHosts` is enforced server-side from a process-global config, so only the primary
+  // origin sends it, already resolved with any test config override by the time this fires
+  const options = Cypress.isCrossOriginSpecBridge ? {} : { blockHosts: Cypress.config('blockHosts') ?? null }
+
+  // reset any state on the backend
+  // TODO: this is a bug in e2e it needs to be returned
+  return Cypress.backend('reset:server:state', options)
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   reset()
 
-  Cypress.on('test:before:run:async', () => {
-    state('redirectionCount', {})
-
-    // reset any state on the backend
-    // TODO: this is a bug in e2e it needs to be returned
-    return Cypress.backend('reset:server:state')
-  })
+  Cypress.on('test:before:run:async', () => resetServerState(Cypress, state))
 
   Cypress.on('test:before:run', reset)
 
