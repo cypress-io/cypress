@@ -33,7 +33,7 @@ const validateSchema = (value: unknown): TapSchema => {
   }
 
   if (schema.schemaVersion > TAP_SCHEMA_VERSION) {
-    return throwTapError('CLI_OUTDATED', `schema version v${schema.schemaVersion} is newer than the CLI's v${TAP_SCHEMA_VERSION}.`)
+    return throwTapError('CLI_OUTDATED')
   }
 
   if (schema.schemaVersion < TAP_SCHEMA_VERSION) {

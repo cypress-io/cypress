@@ -10,7 +10,7 @@ ATTEMPT_NOT_FOUND
   \`--attempt\` takes a 1-based attempt number and selects an earlier attempt of a retried test; omit it for the latest.
 
 BINDING_NOT_FOUND
-  Could not find the running Cypress in any open browser tab.
+  Could not make a connection to the Cypress application.
   The instance may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again.
 
 BINDING_THREW
@@ -18,7 +18,7 @@ BINDING_THREW
   Check the instance with \`cypress tap status\`, then try again.
 
 CDP_UNREACHABLE
-  Lost the debugging connection to the browser running Cypress.
+  Lost the connection to the browser running Cypress.
   The browser may have just closed. Make sure Cypress is running with a browser open, then try again.
 
 CLI_OUTDATED
@@ -70,7 +70,7 @@ NO_AUT
 
 NO_BROWSER_ATTACHED
   Cypress is running, but no test browser is open.
-  Open a Chromium browser in Cypress, then try again.
+  Open a Chromium based browser in Cypress, then try again.
 
 NO_INSTANCE
   Could not find an open-mode session to tap into.
@@ -121,7 +121,7 @@ STALE_HANDLE
 
 STALE_INSTANCE
   Cypress was running, but is no longer responding.
-  It likely exited uncleanly. Start Cypress again with \`cypress open\`, then try again.
+  Cypress likely exited uncleanly. Start Cypress again with \`cypress open\`, then try again.
 
 TEST_NOT_FOUND
   No test in this spec matched that id.

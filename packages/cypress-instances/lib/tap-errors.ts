@@ -170,12 +170,12 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
   /** Raised when records matched, but none answered its liveness probe. */
   STALE_INSTANCE: {
     description: 'Cypress was running, but is no longer responding.',
-    solution: 'It likely exited uncleanly. Start Cypress again with `cypress open`, then try again.',
+    solution: 'Cypress likely exited uncleanly. Start Cypress again with `cypress open`, then try again.',
   },
   /** Raised when the instance is live, but has no browser open to drive. */
   NO_BROWSER_ATTACHED: {
     description: 'Cypress is running, but no test browser is open.',
-    solution: 'Open a Chromium browser in Cypress, then try again.',
+    solution: 'Open a Chromium based browser in Cypress, then try again.',
   },
   /** Raised when a CDP call went unanswered until the timeout elapsed. */
   RENDERER_UNRESPONSIVE: {
@@ -185,12 +185,12 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
 
   /** Raised when the CDP connection could not be opened, or dropped mid-command. */
   CDP_UNREACHABLE: {
-    description: 'Lost the debugging connection to the browser running Cypress.',
+    description: 'Lost the connection to the browser running Cypress.',
     solution: 'The browser may have just closed. Make sure Cypress is running with a browser open, then try again.',
   },
   /** Raised when no open page carries the tap binding. */
   BINDING_NOT_FOUND: {
-    description: 'Could not find the running Cypress in any open browser tab.',
+    description: 'Could not make a connection to the Cypress application.',
     solution: 'The instance may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again.',
   },
   /** Raised when a binding method threw while running the command. */
