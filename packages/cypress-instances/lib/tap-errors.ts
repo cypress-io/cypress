@@ -153,20 +153,13 @@ const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
  * - NO_AUT, INVALID_VALUE
  */
 export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
-  /**
-   * Commands: all but `instances` — every other command resolves an instance
-   * first. Two never render it: `status` reports `not connected` instead, and a
-   * `--help` invocation prints help rather than failing.
-   * Detail: none. Nothing was named, so there is nothing to name back; an
-   * `--instance` that matched nothing is INSTANCE_NOT_FOUND instead.
-   */
+  /** Raised when discovery found no instance record at all, and none was named. */
   NO_INSTANCE: {
     description: 'Could not find an open-mode session to tap into.',
     solution: 'Start Cypress with `cypress open`, select a testing type and launch a browser, then try again.',
   },
   /**
-   * Commands: all but `instances`, on the same path as NO_INSTANCE — but with a
-   * pid given, so the remedy is the listing rather than starting Cypress.
+   * Raised when `--instance` named a pid no record on disk matches.
    *
    * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
@@ -174,210 +167,114 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     description: 'No running Cypress matched that process id.',
     solution: 'Run `cypress tap instances` to list the sessions you can tap into.',
   },
-  /**
-   * Commands: all but `instances`, on the same path as NO_INSTANCE — records
-   * matched, but none answered its liveness probe.
-   * Detail: `Looked for \`--instance\` 4321.` when one was named; none otherwise.
-   */
+  /** Raised when records matched, but none answered its liveness probe. */
   STALE_INSTANCE: {
     description: 'Cypress was running, but is no longer responding.',
     solution: 'It likely exited uncleanly. Start Cypress again with `cypress open`, then try again.',
   },
-  /**
-   * Commands: the schema commands (`command`, `reporter`, `pin`, `run-state`,
-   * `resolve-selector`) and `dom`, `aria`, `inspect` — the ones needing a browser
-   * to drive. `specs`, `run`, and `status` resolve an instance without one.
-   * Detail: `The instance is pid 4321, at /repo.` when exactly one is live;
-   * otherwise `Looked for \`--instance\` 4321.`, or none.
-   */
+  /** Raised when the instance is live, but has no browser open to drive. */
   NO_BROWSER_ATTACHED: {
     description: 'Cypress is running, but no test browser is open.',
     solution: 'Open a Chromium browser in Cypress, then try again.',
   },
-  /**
-   * Commands: every command that opens a CDP session — the schema commands,
-   * `dom`, `aria`, `inspect`, `status`. `instances` swallows it and reports
-   * `rendererResponsive: false` instead of failing.
-   * Detail: `No response within the specified timeout (30000ms).` Which call went unanswered is a
-   * protocol detail, so it stays on the diagnostic.
-   */
+  /** Raised when a CDP call went unanswered until the timeout elapsed. */
   RENDERER_UNRESPONSIVE: {
     description: 'Cypress is reachable, but the page running it is not responding.',
     solution: 'It may be paused in DevTools, stuck in a loop, or starved of memory. Pass `--timeout <ms>` to wait longer.',
   },
 
-  /**
-   * Commands: every command that opens a CDP session — the schema commands,
-   * `dom`, `aria`, `inspect`, `status`.
-   * Detail: none. Six sites share this entry (opening the socket, listing
-   * targets, attaching, evaluating the binding, reading it back, and the call
-   * itself); none is separately actionable, so which one failed stays on the
-   * diagnostic.
-   */
+  /** Raised when the CDP connection could not be opened, or dropped mid-command. */
   CDP_UNREACHABLE: {
     description: 'Lost the debugging connection to the browser running Cypress.',
     solution: 'The browser may have just closed. Make sure Cypress is running with a browser open, then try again.',
   },
-  /**
-   * Commands: every command that opens a CDP session — the schema commands,
-   * `dom`, `aria`, `inspect`, `status`.
-   * Detail: none. Raised both when no open page carries the binding and when a
-   * page answered without one; the diagnostic tells the two apart.
-   */
+  /** Raised when no open page carries the tap binding. */
   BINDING_NOT_FOUND: {
     description: 'Could not find the running Cypress in any open browser tab.',
     solution: 'The instance may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again.',
   },
-  /**
-   * Commands: every command that calls a binding method — the schema commands,
-   * `status`, and `dom`/`aria`/`inspect` through their run-state gate.
-   * Detail: none. The method that threw and its exception stay on the
-   * diagnostic, since neither is something the reader can act on.
-   */
+  /** Raised when a binding method threw while running the command. */
   BINDING_THREW: {
     description: 'The Cypress instance failed while running the command.',
     solution: 'Check the instance with `cypress tap status`, then try again.',
     recommendGhIssue: true,
   },
-  /**
-   * Commands: every command that calls a binding method — the schema commands,
-   * `status`, `dom`, `aria`, `inspect` — and only once a retry has also failed.
-   * Detail: none. The raw Chrome text ("Execution context was destroyed") is a
-   * vendor string, so it stays on the diagnostic.
-   */
+  /** Raised when the page navigated mid-call, and the retry hit it again. */
   STALE_HANDLE: {
     description: 'The Cypress instance navigated while running the command.',
     solution: 'Run the command again.',
   },
 
-  /**
-   * Commands: the schema commands, either from the `getSchema` handshake or from
-   * an `exec` reply that is neither a result nor a failure envelope. Also the
-   * fallback for any code this CLI ships no entry for.
-   * Detail: none. Which reply was unrecognizable stays on the diagnostic.
-   */
+  /** Raised when the instance replied in a shape this CLI has no handling for. */
   PROTOCOL_MISMATCH: {
     description: 'The running Cypress answered in a way this CLI does not recognize.',
     solution: `The running Cypress and this CLI are likely different versions. Update the older of the two with ${UPDATE_COMMAND}, then try again.`,
   },
-  /**
-   * Commands: the schema commands, from the `getSchema` handshake.
-   * Detail: none. The two version numbers stay on the diagnostic — the remedy is
-   * the same whichever they are.
-   */
+  /** Raised when the handshake reported a schema version newer than this CLI's. */
   CLI_OUTDATED: {
     description: 'The running Cypress is newer than this CLI.',
     solution: `Update the CLI with ${UPDATE_COMMAND}, then try again.`,
   },
-  /**
-   * Commands: the schema commands (handshake), plus `specs` and `run` when the
-   * instance redirects a GraphQL request instead of answering it — a server old
-   * enough to predate the direct-tap route.
-   * Detail: none; the versions, or the redirected operation, stay on the
-   * diagnostic.
-   */
+  /** Raised when the handshake reported an older schema version, or GraphQL redirected. */
   INSTANCE_OUTDATED: {
     description: 'The running Cypress is older than this CLI.',
     solution: `Update Cypress in the running project with ${UPDATE_COMMAND}, restart it, then try again.`,
   },
 
-  /**
-   * Commands: `specs` and `run` — the two that read instance data over HTTP.
-   * Detail: none. The operation and the transport failure (a refused socket, a
-   * timeout, a non-200 status) stay on the diagnostic.
-   */
+  /** Raised when a GraphQL request never got an answer over HTTP. */
   GRAPHQL_UNREACHABLE: {
     description: 'Could not reach the Cypress instance to read its data.',
     solution: 'The instance may have just closed. Make sure Cypress is running in open mode, then try again.',
   },
-  /**
-   * Commands: `specs` and `run`.
-   * Detail: none. Whether the envelope was unrecognizable, carried GraphQL
-   * errors, held no data, or was not JSON at all stays on the diagnostic.
-   */
+  /** Raised when GraphQL answered, but with errors, no data, or not JSON. */
   GRAPHQL_FAILED: {
     description: 'The Cypress instance failed while answering a data query.',
     solution: 'Try the command again.',
     recommendGhIssue: true,
   },
 
-  /**
-   * Commands: `dom`, `aria`, `inspect` (no run has settled, so there is nothing
-   * to read) and `command`, `reporter`, `pin` (no run mounted app-side).
-   * Detail: none — there is nothing to name beyond the condition itself.
-   */
+  /** Raised when a spec was read before any has run. */
   SPEC_NOT_STARTED: {
     description: 'No spec is available to read.',
     solution: 'Start a spec with the `run` command, then read it once it has finished.',
   },
   /**
-   * Commands: `dom`, `aria`, `inspect` (the app is in flux mid-run, so a read
-   * would capture a transient page) and `pin`.
-   * Detail: always the line `specInProgressTapError` builds, which names the spec
-   * that is running — hence no condition of its own here.
+   * Raised when a spec was read while it is still running.
    *
    * @deprecated - raise it with specInProgressTapError(), which writes its copy
    */
   SPEC_IN_PROGRESS: {
     solution: 'Use `cypress tap status` to verify when the spec has finished.',
   },
-  /**
-   * Commands: `run`.
-   * Details:
-   * - the mutation's GENERAL_ERROR: its own `detailMessage`.
-   * - no result at all: The instance returned no result for
-   *   "cypress/e2e/a.cy.ts".
-   */
+  /** Raised when the runSpec mutation failed, or answered with no result. */
   SPEC_START_FAILED: {
     description: 'The Cypress instance could not start the spec.',
     solution: 'Check the instance with `cypress tap status`, then try again.',
     recommendGhIssue: true,
   },
-  /**
-   * Commands: `run`.
-   * Details:
-   * - absent from the instance's spec list, checked before any run is requested:
-   *   Looked for "cypress/e2e/a.cy.ts".
-   * - the mutation's SPEC_NOT_FOUND or NO_SPEC_PATTERN_MATCH: its own
-   *   `detailMessage`.
-   */
+  /** Raised when the given path matches no spec the instance can run. */
   SPEC_NOT_FOUND: {
     description: 'The instance has no spec matching that path.',
     solution: '`cypress tap specs` lists the specs this instance can run. If the spec exists but is not listed, widen `specPattern` in the Cypress config.',
   },
-  /**
-   * Commands: `run`, from the mutation's NO_PROJECT.
-   * Detail: the mutation's `detailMessage`, when it sends one.
-   */
+  /** Raised when the instance is running with no project open. */
   NO_PROJECT: {
     description: 'The Cypress instance has no project open.',
     solution: 'Open a project in Cypress, then try again.',
   },
-  /**
-   * Commands: `run`, from the mutation's TESTING_TYPE_NOT_CONFIGURED — the
-   * spec's testing type is not one this project configures.
-   * Detail: the mutation's `detailMessage`, when it sends one.
-   */
+  /** Raised when the spec's testing type is not one this project configures. */
   TESTING_TYPE_NOT_CONFIGURED: {
     description: 'That testing type is not configured for this project.',
     solution: 'Configure it in the Cypress config, or start Cypress in a testing type the project supports.',
     docs: '/configuration',
   },
 
-  /**
-   * Commands: `dom`, `aria`, `inspect` (no app-under-test frame in the runner
-   * page) and `resolve-selector` (no selector source app-side).
-   * Detail: none.
-   */
+  /** Raised when the runner page holds no app-under-test frame to read. */
   NO_AUT: {
     description: 'No app under test is loaded.',
     solution: 'Run a spec first with `cypress tap run <spec>`. To read the app as it was at an earlier command, pin that command with `cypress tap pin`.',
   },
-  /**
-   * Commands: `dom`, `aria`, `inspect` — an injected script threw inside the AUT
-   * frame while counting matches, reading the DOM, or inspecting an element.
-   * Detail: none. The script that threw and its exception stay on the diagnostic.
-   */
+  /** Raised when an injected script threw inside the AUT frame. */
   FRAME_READ_FAILED: {
     description: 'Reading the app under test failed.',
     solution: 'The page may have navigated mid-read. Try again once it has settled.',
@@ -385,11 +282,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
   },
 
   /**
-   * The three lookups share one shape, raised through `notFoundTapError`: what was
-   * being looked for, the option and value that named nothing, and where the real
-   * ones are listed. See its doc for the line each detail carries.
-   *
-   * Commands: `command`, `reporter`, `pin` — all three select a test by id.
+   * Raised when `--test-id` named a test this spec does not have.
    *
    * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
@@ -398,7 +291,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: 'Run `cypress tap reporter` to list the tests in the spec.',
   },
   /**
-   * Commands: `command`, `reporter`, `pin` — all three accept `--attempt`.
+   * Raised when `--attempt` named a number past the test's attempts.
    *
    * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
@@ -407,8 +300,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: '`--attempt` takes a 1-based attempt number and selects an earlier attempt of a retried test; omit it for the latest.',
   },
   /**
-   * Commands: `command` and `pin` — the two that resolve a command id to a
-   * reporter row.
+   * Raised when `--command-id` named a reporter row this test does not have.
    *
    * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
@@ -416,20 +308,13 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     description: 'No command in this test matched that id.',
     solution: 'Run `cypress tap reporter --test-id <id>` to list the commands in the test.',
   },
-  /**
-   * Commands: `command` and `pin`, when an unqualified row number matches rows
-   * in two different hooks and neither is the test body.
-   * Detail: `"2" matches h1:2 (before each) and h2:2 (before each) — e.g.
-   * "h1:2".` The pair is what makes the id qualifiable.
-   */
+  /** Raised when an unqualified row number matches rows in two different hooks. */
   AMBIGUOUS_COMMAND: {
     description: 'That command id matches more than one row of the test.',
     solution: 'Qualify the id with the section it belongs to, as `cypress tap reporter` lists it.',
   },
   /**
-   * Commands: `pin`, when `--at` names neither a snapshot nor a valid index. Its
-   * context clause enumerates the snapshots the command does have, which is how
-   * the reader picks a valid one.
+   * Raised when `--at` named neither a snapshot of the command nor a valid index.
    *
    * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
@@ -437,97 +322,53 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     description: 'No snapshot of this command matched that name or index.',
     solution: 'Run `cypress tap command --test-id <id> --command-id <id>` to list the snapshots a command has. `--at` takes a snapshot name or a 1-based index; omit it to pin the command’s final state.',
   },
-  /**
-   * Commands: `pin`.
-   * Details:
-   * - no snapshot captured, or already evicted: none.
-   * - the pin call went through but the app reported nothing pinned, a race with
-   *   memory eviction: The app under test did not take the pin.
-   */
+  /** Raised when the command captured no snapshot, or it has since been evicted. */
   SNAPSHOT_UNAVAILABLE: {
     description: 'That command has no DOM snapshot to pin.',
     solution: 'Snapshots are captured in open mode and kept only for the most recent tests, as `numTestsKeptInMemory` sets. Run the spec again to capture fresh snapshots, or raise `numTestsKeptInMemory` to keep more.',
   },
-  /**
-   * Commands: `pin`, invoked with neither `--test-id`/`--command-id` nor
-   * `--clear`.
-   * Detail: none; the solution names both ways forward.
-   */
+  /** Raised when `pin` ran with neither a command to pin nor `--clear`. */
   PIN_TARGET_REQUIRED: {
     description: 'The `pin` command was not told what to pin.',
     solution: 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.',
   },
 
   /**
-   * Commands: any invocation naming a command neither the CLI nor the instance
-   * offers, whether it was run or only asked for `--help`; and the binding's own
-   * dispatch, which also guards against an inherited name like `constructor`.
-   * Raised through `unknownCommandTapError`, so its copy lives there. The listing
-   * that follows is what makes a typo fixable: the CLI's own help, or the
-   * commands the binding offers.
+   * Raised when the invocation named a command that does not exist.
+   *
+   * @deprecated - raise it with unknownCommandTapError(), which writes its copy
    */
-  /** @deprecated - raise it with unknownCommandTapError(), which writes its copy */
   UNKNOWN_COMMAND: {},
   /**
-   * Commands: any invocation passing a flag the command does not declare, caught
-   * CLI-side as the command's grammar parses; and the binding's own coercion, for
-   * a caller that reaches it directly. Raised through `unknownOptionTapError`.
-   * An option the command does take but was given wrongly is INVALID_OPTIONS (a
-   * required one missing, one that needs another alongside it) or INVALID_VALUE
-   * (a value of the wrong type).
+   * Raised when the invocation passed a flag the command does not declare.
+   *
+   * @deprecated - raise it with unknownOptionTapError(), which writes its copy
    */
-  /** @deprecated - raise it with unknownOptionTapError(), which writes its copy */
   UNKNOWN_OPTION: {},
-  /**
-   * Commands: the schema commands, when an argument is unknown or a required one
-   * is missing; and `run`, from the mutation's NO_SPEC_PATH. An argument of the
-   * wrong type is INVALID_VALUE instead.
-   * Detail: the fault followed by the command's signature — `<foo> was passed to
-   * "run", but it's not a supported argument of "run". Usage: cypress tap run
-   * <spec>` — or the mutation's `detailMessage`.
-   */
+  /** Raised when an argument is unknown, or a required one is missing. */
   INVALID_ARGUMENTS: {
     description: 'The command was given an argument it cannot accept.',
     solution: 'Run `cypress tap <command> --help` for the arguments it takes.',
   },
-  /**
-   * Commands: the schema commands, when a required flag is missing. A flag of the
-   * wrong type is INVALID_VALUE, one that needs another alongside it is
-   * MISSING_COMPANION_OPTION, and a flag the CLI knows the command does not take
-   * never reaches here — the CLI names it and prints that command's help.
-   * Detail: the fault plus the command's signature, as in "pin" is missing the
-   * required --test-id option. Usage: cypress tap pin [options]
-   */
+  /** Raised when a required option is missing. */
   INVALID_OPTIONS: {
     description: 'The command was given an option it cannot accept.',
     solution: 'Run `cypress tap <command> --help` for the options it takes.',
   },
   /**
-   * Commands: `reporter`, for `--attempt` without `--test-id`; and `dom`, `aria`,
-   * `inspect`, for `--at` without `--selector`. Both flags are named, and what
-   * dropping either one leaves you with is the throw site's to say.
+   * Raised when a flag was passed without the flag it depends on.
    *
    * @deprecated - raise it with missingCompanionOptionTapError(), which writes its copy
    */
   MISSING_COMPANION_OPTION: {},
-  /**
-   * Commands: the schema commands — but not reachable by mistyping a flag. It
-   * means args or options crossed the wire as something other than an object, so
-   * it reads as a protocol fault and asks for a report.
-   * Detail: `"pin" received a non-object args payload, rather than one keyed by
-   * name.`
-   */
+  /** Raised when args or options crossed the wire as something other than an object. */
   INVALID_PAYLOAD: {
     description: 'The command was given input this CLI could not read.',
     solution: 'Run `cypress tap <command> --help` for the arguments and options it takes.',
     recommendGhIssue: true,
   },
   /**
-   * Commands: any command taking a value this CLI or the instance rejects —
-   * `--max-chars`/`--max-nodes`, `--at` (malformed or past the last match),
-   * `--selector`, and the schema commands' own positional and flag coercion.
-   * Detail: always the two paragraphs `invalidValue` builds, which is why this
-   * entry carries no solution — the expectation is the solution.
+   * Raised when a known input was given a value of the wrong type or range.
    *
    * @deprecated - raise it with invalidValueTapError(), which writes its copy
    */
