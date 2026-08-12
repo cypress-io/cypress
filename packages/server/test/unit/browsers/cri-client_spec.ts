@@ -336,6 +336,15 @@ describe('lib/browsers/cri-client', function () {
 
           await expect(client.send('Fetch.disable')).to.be.rejectedWith('Fetch.disable will not run as the CRI connection to Target')
         })
+
+        it('marks the client closed once a terminal disconnect has already happened', async function () {
+          const client = await getClient()
+
+          await fireDisconnect()
+
+          await expect(client.close()).to.be.fulfilled
+          expect(client.closed).to.be.true
+        })
       })
     })
   })

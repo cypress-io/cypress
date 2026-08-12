@@ -153,10 +153,11 @@ export class CriClient implements ICriClient {
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', onAsynchronousError)
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect', this._onCdpConnectionReconnect)
 
-    // Once the connection reaches a terminal state - a terminal disconnect with
-    // reconnection disabled, or reconnection exhausting its retries and giving up -
-    // nothing will ever flush the command queue. Reject it so callers awaiting those
-    // commands fail instead of hanging forever.
+    // 'cdp-connection-closed' means the connection is terminated for good, so this
+    // permanently rejects the queue. 'cdp-connection-reconnect-error' only drains what's
+    // already queued - exhausting retries does not mark the connection terminated, so a
+    // send issued after this fires still enqueues and hangs (root browser client only;
+    // the run is torn down by the fatal CDP_COULD_NOT_RECONNECT anyway). See #34581.
     this.cdpConnection.addConnectionEventListener('cdp-connection-closed', this._rejectEnqueuedCommands)
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', this._rejectEnqueuedCommands)
 
@@ -397,6 +398,11 @@ export class CriClient implements ICriClient {
     debug('closing')
     if (this._closed || this.cdpConnection?.terminated) {
       debug('not closing, cri client is already closed %o', { closed: this._closed, target: this.targetId, connection: this.cdpConnection })
+
+      // a terminal disconnect marks the connection terminated outside of close(), so
+      // this branch is reachable with _closed still false - callers gate on .closed
+      // (e.g. resetBrowserTargets), so it must reflect reality once terminated is true
+      this._closed = true
 
       return
     }
