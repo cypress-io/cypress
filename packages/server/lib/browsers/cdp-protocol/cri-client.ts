@@ -86,6 +86,15 @@ export interface ICriClient {
    * Unregisters callback for particular event.
    */
   off: OffFn
+  /**
+   * When set, service worker targets attaching to this connection await this
+   * callback before being released from their waiting-for-debugger pause.
+   * The CDP Fetch runtime uses it to enable Fetch on the service worker's
+   * session — a service worker's script fetch and fetch-handler requests run
+   * on its own session, so without this they bypass interception entirely
+   * when the proxy is disabled.
+   */
+  onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
@@ -117,6 +126,8 @@ export class CriClient implements ICriClient {
 
   private _crashed = false
   private cdpConnection: CDPConnection
+
+  public onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
 
   private constructor (
     public targetId: string,
@@ -449,6 +460,17 @@ export class CriClient implements ICriClient {
     } catch (error) {
       // it's possible that the target was closed before we could enable network, in that case, just ignore
       debug('error attaching to target cri: %o', { error, event })
+    }
+
+    if (event.targetInfo.type === 'service_worker' && this.onServiceWorkerTargetAttached) {
+      try {
+        // Must complete while the target is still paused — releasing the
+        // debugger first lets the service worker's script fetch escape
+        // uninterceptable.
+        await this.onServiceWorkerTargetAttached(event.sessionId)
+      } catch (error) {
+        debug('error enabling service worker interception: %o', { error, event })
+      }
     }
 
     if (event.waitingForDebugger) {
