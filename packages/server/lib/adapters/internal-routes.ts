@@ -1,4 +1,5 @@
 import { id as randomId } from '../util/random'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 // Fields are optional at the type level because RuntimeConfigOptions extends
 // Partial<...>. At runtime, `port` is required before loopback (toLoopbackUrl
@@ -74,6 +75,10 @@ function matchesPathPrefix (pathname: string, route: string): boolean {
 // cypress-in-cypress the parent's Express handlers for these paths re-enter
 // the proxy to forward to the child project, so the loopback re-entry guard
 // must let them continue instead of 404ing.
+//
+// Only internal with the proxy disabled. Under MITM these reach Express
+// through the legacy pipeline; looping them back skips later intercept
+// stages and breaks studio.
 export const CYPRESS_STUDIO_ROUTE = '/__cypress-studio'
 
 export const CYPRESS_CY_PROMPT_ROUTE = '/__cypress-cy-prompt'
@@ -97,7 +102,7 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
     config.clientRoute,
     config.socketIoRoute,
     config.socketIoRoute ? `${config.socketIoRoute}-graphql` : undefined,
-    ...CLOUD_BUNDLE_ROUTES,
+    ...(isProxyDisabled() ? CLOUD_BUNDLE_ROUTES : []),
   ].filter((route): route is string => Boolean(route))
 
   return internalRoutes.some((route) => matchesPathPrefix(pathname, route))
