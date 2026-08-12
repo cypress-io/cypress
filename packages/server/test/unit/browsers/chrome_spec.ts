@@ -1121,6 +1121,28 @@ describe('lib/browsers/chrome', () => {
         expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('WebFontsCacheAwareTimeoutAdaption')
       })
     })
+
+    context('HTTPS upgrades', () => {
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      })
+
+      it('disables HttpsUpgrades when the proxy is disabled', () => {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+        const args = chrome._getArgs({}, {})
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.include('HttpsUpgrades')
+      })
+
+      it('disables HttpsUpgrades when the proxy is enabled', () => {
+        const args = chrome._getArgs({}, {})
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.include('HttpsUpgrades')
+      })
+    })
   })
 
   describe('#_normalizeHostResolverRules', () => {

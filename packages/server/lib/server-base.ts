@@ -55,7 +55,7 @@ import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-r
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -205,6 +205,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // MITM proxy is disabled) still receives protocol / pre-request settings.
   private _protocolManager?: ProtocolManagerShape
   private _preRequestTimeout?: number
+  // Tests can override `blockHosts` at runtime, so hold the project-level value to
+  // restore between specs. Kept here rather than in the network runtime, which is
+  // rebuilt mid-run and would snapshot an active override.
+  private _projectBlockHosts?: Cfg['blockHosts']
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -378,6 +382,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('server open')
     this.testingType = testingType
     this._openConfig = config
+    this._projectBlockHosts = config.blockHosts
     this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -633,12 +638,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
-    options.onResetServerState = () => {
+    options.onResetServerState = ({ blockHosts }: { blockHosts?: Cfg['blockHosts'] } = {}) => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
       this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
+
+      // only apply blockHosts when the caller explicitly sent a value. the config object
+      // is shared with every network runtime and read at enforcement time, so assigning
+      // it here is enough for both current and later-created runtimes to see it.
+      if (blockHosts !== undefined && this._openConfig) {
+        this._openConfig.blockHosts = blockHosts
+      }
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
@@ -767,7 +779,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this.socketAllowed.isRequestAllowed(req)) {
+      // Without the proxy, upgrades arrive on direct connections the CONNECT
+      // port allow-list never saw — a loopback remoteAddress is the only
+      // available gate (see #34513).
+      const isAllowed = isProxyDisabled()
+        ? this.socketAllowed.isRequestFromLocalhost(req)
+        : this.socketAllowed.isRequestAllowed(req)
+
+      if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }
@@ -814,6 +833,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resetCdpFetchRuntime()
     this._networkProxy?.clearCredentials()
+
+    // discard any per-test blockHosts override so it can't leak into the next spec
+    if (this._openConfig) {
+      this._openConfig.blockHosts = this._projectBlockHosts
+    }
+
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
@@ -1205,8 +1230,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          // With the MITM proxy disabled, the server is not a proxy. The
+          // `proxy` option above still delivers this request in absolute form,
+          // so it lands on the direct-origin catch-all in routes.ts — the token
+          // is what marks it as our own loopback there, letting the catch-all
+          // route it through the interception pipeline so the stub can reply.
+          // `tunnel: false` keeps https URLs on that same absolute-form path:
+          // the default CONNECT tunnel would be rejected by onConnect, which
+          // refuses all CONNECTs when the proxy is disabled. Loopback-only —
+          // this request never leaves 127.0.0.1.
+          // Gated so proxy-on wire traffic is unchanged.
+          ...(isProxyDisabled() ? { tunnel: false } : {}),
           headers: {
             'x-cypress-resolving-url': '1',
+            ...(isProxyDisabled() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
           },
         })
       }

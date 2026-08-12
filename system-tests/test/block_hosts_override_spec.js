@@ -5,26 +5,25 @@ const onServer = function (app) {
     return res.send('<html>hi there</html>')
   })
 
-  app.get('/req', (req, res) => {
-    // without this an allowed cross-origin request fails on CORS and reports the same
-    // zero status as a blocked one, so the test would pass even when nothing is blocked
+  return app.get('/req', (req, res) => {
+    // allow the cross-origin fetch to read the response so an allowed request is
+    // distinguishable from a blocked one, which has no CORS headers
     res.header('Access-Control-Allow-Origin', '*')
 
     return res.sendStatus(200)
   })
-
-  return app.get('/status', (req, res) => {
-    return res.sendStatus(503)
-  })
 }
 
-describe('e2e blockHosts', () => {
+describe('e2e blockHosts test config override', () => {
   systemTests.setup({
     servers: [{
       port: 3131,
       onServer,
     }, {
       port: 3232,
+      onServer,
+    }, {
+      port: 3333,
       onServer,
     }],
     settings: {
@@ -36,10 +35,9 @@ describe('e2e blockHosts', () => {
     },
   })
 
-  it('passes', function () {
+  it('applies blockHosts test config overrides at runtime', function () {
     return systemTests.exec(this, {
-      spec: 'block_hosts.cy.js',
-      snapshot: true,
+      spec: 'block_hosts_override.cy.js',
     })
   })
 })

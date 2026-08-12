@@ -106,7 +106,7 @@ describe('StudioLifecycleManager', () => {
         }),
       },
       '../routes': {
-        apiUrl: 'http://localhost:1234/',
+        getApiUrl: () => 'http://localhost:1234/',
       },
       './telemetry/TelemetryManager': {
         telemetryManager: {
