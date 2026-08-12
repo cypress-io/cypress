@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 
 import util, { DEVELOPMENT_VERSION } from '../util'
-import { resolvedInstanceId } from '../cypress-instances'
+import { resolvedInstanceIdentity } from '../cypress-instances'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
 
@@ -89,17 +89,24 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
       return
     }
 
+    const identity = resolvedInstanceIdentity()
+
     const payload = {
       command: trace.command,
       flags: trace.flags.slice(0, MAX_REPORTED_FLAGS),
       agent: detectAgent(),
-      instanceId: resolvedInstanceId() ?? undefined,
+      instanceId: identity?.instanceId ?? undefined,
+      userId: identity?.userId ?? undefined,
       exitCode,
       errorCode: trace.errorCode,
       durationMs: Date.now() - trace.startedAt,
     }
 
-    const url = eventCollectorUrl()
+    // The identity travels in the instance probe response, so an invocation that
+    // never resolved an instance has no machineId and stays on the anonymous
+    // collector, mirroring EventCollectorActions.recordEvent app-side.
+    const machineId = identity?.machineId ?? undefined
+    const url = eventCollectorUrl(machineId !== undefined)
 
     await fetch(url, {
       method: 'POST',
@@ -107,7 +114,7 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
         'Content-Type': 'application/json',
         'x-cypress-version': cypressVersion,
       },
-      body: JSON.stringify({ campaign: CAMPAIGN, medium: MEDIUM, messageId: trace.messageId, payload }),
+      body: JSON.stringify({ campaign: CAMPAIGN, medium: MEDIUM, messageId: trace.messageId, machineId, payload }),
       signal: AbortSignal.timeout(POST_TIMEOUT_MS),
     })
 
