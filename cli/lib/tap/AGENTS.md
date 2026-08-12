@@ -25,13 +25,3 @@ Every tap invocation reports itself once, on the way out, from `events.ts`: the 
 
 Setting `CYPRESS_DISABLE_GUEST_TELEMETRY` to any value turns that report off, and it is not a tap-only knob: it is the opt-out for everything Cypress collects without an account behind it. The paths that answer to it:
 
-| Path | What it sends | Where the guard is |
-| --- | --- | --- |
-| tap CLI invocations | one `anon-collect` / `machine-collect` event per `cypress tap` command | `cli/lib/tap/events.ts` (read through `util.getEnv`, so npm config sets it too) |
-| App and Launchpad UI events | every `recordEvent` GraphQL mutation — banners seen and dismissed, promos, CT-available, Debug page — to `anon-collect` / `machine-collect` | `packages/data-context/src/actions/EventCollectorActions.ts` |
-| Run and artifact-upload crash reports | serialized exceptions to the Cloud crash endpoint | `packages/server/lib/cloud/reporting_disabled.ts`, via `lib/cloud/exception.ts` |
-| Studio and cy-prompt error reports | bundle errors, method names and arguments | the same helper, via `lib/cloud/api/{studio,cy-prompt}/report_*_error.ts` |
-
-Two collection paths deliberately do not read it: `recordEventGQL` local test counts, which only ever send for a logged-in user and so are not guest telemetry, and `@packages/telemetry`'s OpenTelemetry spans, which stay off unless `CYPRESS_INTERNAL_ENABLE_TELEMETRY` explicitly turns them on.
-
-A new collection path honors this variable from the start rather than shipping a second knob. Each of the three code bases above reads the variable itself — the CLI bundle, `data-context` and `server` cannot share one helper cheaply — so a rename means touching all three.
