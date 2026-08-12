@@ -1,6 +1,5 @@
 import { CDPCommandQueue, Command } from '../../../lib/browsers/cdp-protocol/cdp-command-queue'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
-import pDeferred from 'p-defer'
 import _ from 'lodash'
 
 const { expect } = require('../../spec_helper')
@@ -152,7 +151,7 @@ describe('CDPCommandQueue', () => {
       const queue = new CDPCommandQueue()
 
       queue.add(enableAnimation.command, enableAnimation.params)
-      const deferred = pDeferred()
+      const deferred = Promise.withResolvers()
 
       queue.unshift({
         command: enableAnimation.command,

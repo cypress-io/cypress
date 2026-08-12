@@ -97,17 +97,11 @@ We dynamically generated a new test to display this failure.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     assertions_failing_outside_of_test.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test.cy.js/An unc     (1280x720)
-     aught error was detected outside of a test (failed).png                                        
 
 
 ====================================================================================================
@@ -180,17 +174,11 @@ https://on.cypress.io/cannot-execute-commands-outside-test
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     commands_outside_of_test.cy.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test.cy.js/An uncaught erro     (1280x720)
-     r was detected outside of a test (failed).png                                                  
 
 
 ====================================================================================================

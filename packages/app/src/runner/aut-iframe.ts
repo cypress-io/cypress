@@ -1,4 +1,4 @@
-import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { AUT_FRAME_NAME_IDENTIFIER, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
@@ -50,9 +50,12 @@ export class AutIframe {
     // Create two iframes to facilitate before/after snapshot
     // rendering with a double buffer.
     this.$snapshotIframes = _.times(2, (index) => {
+      const snapshotName = `${AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER} - ${index}: '${this.projectName}'`
+
       const $snapshotIframe = this.$('<iframe>', {
-        id: `AUT Snapshot - ${index}: '${this.projectName}'`,
-        title: `AUT Snapshot - ${index}: '${this.projectName}'`,
+        id: snapshotName,
+        name: snapshotName,
+        title: snapshotName,
         class: 'aut-snapshot-iframe',
         'data-snapshot-index': index,
       })
@@ -123,7 +126,7 @@ export class AutIframe {
    * If the AUT is cross super domain origin relative to top, a security error is thrown and the method returns false
    * If the AUT is cross super domain origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
    * Otherwise, if top and the AUT match super domain origins, the method returns true.
-   * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
+   * If the AUT is on about:blank, the src attribute has been stripped off the iframe and it is adhering to same origin policy
    */
   doesAUTMatchTopSuperDomainOrigin = () => {
     const Cypress = this.eventManager.getCypress()
@@ -135,7 +138,11 @@ export class AutIframe {
       const locationTop = Cypress.Location.create(window.location.href)
       const locationAUT = Cypress.Location.create(currentHref)
 
-      return locationTop.superDomainOrigin === locationAUT.superDomainOrigin || locationAUT.superDomainOrigin === 'about://blank'
+      if (locationAUT.protocol === 'about:') {
+        return true
+      }
+
+      return locationTop.superDomainOrigin === locationAUT.superDomainOrigin
     } catch (err) {
       if (err.name === 'SecurityError') {
         return false
@@ -177,13 +184,19 @@ export class AutIframe {
 
   restoreDom = (snapshot) => {
     if (!this.doesAUTMatchTopSuperDomainOrigin()) {
+      if (!this.$iframe?.attr('src')) {
+        logger.logError('Cannot restore the snapshot: the AUT is cross origin and has no src attribute to remove.')
+
+        return
+      }
+
       /**
        * A load event fires here when the src is removed (as does an unload event).
        * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).
        * This doesn't resort in a log message being generated for a new page.
        * In the event-manager code, we stop adding logs from other domains once the spec is finished.
        */
-      this.$iframe?.one('load', () => {
+      this.$iframe.one('load', () => {
         this.restoreDom(snapshot)
       })
 

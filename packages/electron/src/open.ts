@@ -7,7 +7,6 @@ import inspector from 'inspector'
 import { ChildProcess, spawn } from 'child_process'
 import Debug from 'debug'
 import os from 'os'
-import pDefer from 'p-defer'
 
 function getInspectFromUrl (url: string): string {
   const flag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
@@ -80,7 +79,7 @@ export async function open (
       { stdio: 'pipe' },
     )
 
-    const childClosed = pDefer<number>()
+    const childClosed = Promise.withResolvers<number>()
 
     spawned.on('error', (err) => {
       console.error(err)

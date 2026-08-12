@@ -428,7 +428,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
-    validation: validate.isOneOf('center', 'top', 'bottom', 'nearest', false),
+    validation: validate.isValidScrollBehavior,
     overrideLevel: 'any',
   }, {
     name: 'supportFile',
