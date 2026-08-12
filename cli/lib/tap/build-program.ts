@@ -3,9 +3,8 @@ import commander from 'commander'
 import { tapCliCommands } from './commands'
 import type { TapCliCommand } from './types'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
-import { viewOptionsFor, withoutViewOptions } from '@packages/cypress-instances'
 
-type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>, renderOptions: Record<string, string>) => Promise<void> | void
+type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
 
 interface CommandSpec {
   name: string
@@ -117,20 +116,13 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
     command.description(description)
   }
 
-  // A command's view-only options are declared alongside the ones it forwards so
-  // they render in the same help, but they are collected apart from them: only
-  // the forwarded ones reach the instance. They are taken from the CLI's own copy
-  // of the contract, since the schema an attached instance advertises omits them.
-  const execOptions = withoutViewOptions(options)
-  const renderOptions = viewOptionsFor(name)
-
-  declareOptions(command, [...execOptions, ...renderOptions])
+  declareOptions(command, options)
 
   if (dispatch) {
     command.action(() => {
       rejectExcessArguments(name, params, command.args)
 
-      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, execOptions), forwardedOptions(command, renderOptions))
+      return dispatch(name, forwardedArgs(params, command.args), forwardedOptions(command, options))
     })
   }
 }

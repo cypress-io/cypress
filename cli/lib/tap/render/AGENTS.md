@@ -79,11 +79,10 @@ soft-wrapped line breaks the column it was padded into. Reach for the same
 three moves — summarize, offer the drill-down, clamp to width — for any future
 result whose depth the CLI does not control.
 
-`--depth` is a **view option**: declared by the rendering
-(`TapCommandRendering.options`), rendered into the command's help like any other
-flag, but collected apart from the schema's and never sent to the instance. A
-flag that only changes how a result reads belongs there — it then works against
-any instance version that has the command at all.
+`--depth` is an ordinary option on the `command` command, declared in the shared
+contract like any other. The instance advertises it, the CLI forwards it with the
+rest, and the renderer reads it from that same options bag. A flag that only
+changes how a result reads needs no special plumbing: the handler ignores it.
 
 ## Conventions worth keeping
 

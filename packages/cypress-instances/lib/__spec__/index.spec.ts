@@ -9,7 +9,6 @@ import {
   INSTANCES_DIRNAME,
   SCHEMA_VERSION,
   TAP_COMMANDS,
-  withoutViewOptions,
 } from '../index'
 
 const validRecord = {
@@ -81,16 +80,12 @@ describe('cypress-instances contract', () => {
       expect(advertised!.details).toBe(reporter.details)
     })
 
-    it('keeps a view-only option on its command but off the wire schema', () => {
+    it('advertises every option a command declares', () => {
       const command = TAP_COMMANDS.find(({ name }) => name === 'command')!
-      const depth = command.options.find(({ name }) => name === 'depth')
-
-      expect(depth).toMatchObject({ viewOnly: true })
-
       const advertised = buildTapSchema('15.0.0').commands.find(({ name }) => name === 'command')!
 
-      expect(advertised.options.map(({ name }) => name)).not.toContain('depth')
-      expect(withoutViewOptions(command.options).map(({ name }) => name)).toEqual(advertised.options.map(({ name }) => name))
+      expect(advertised.options.map(({ name }) => name)).toContain('depth')
+      expect(advertised.options.map(({ name }) => name)).toEqual(command.options.map(({ name }) => name))
     })
   })
 })

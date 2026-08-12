@@ -12,7 +12,6 @@ export {
   TAP_COMMANDS,
   TAP_RUN_IN_PROGRESS_MESSAGE,
   MAX_DERIVED_SELECTORS,
-  withoutViewOptions,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 export type {
