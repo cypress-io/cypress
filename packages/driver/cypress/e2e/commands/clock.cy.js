@@ -47,8 +47,6 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    // An empty methods array expands to the default set (as it did before the
-    // @sinonjs/fake-timers 14 upgrade), and still leaves queueMicrotask alone.
     it('expands an empty methods array to the default set', function () {
       cy.clock(0, []).then(function (clock) {
         const { methods } = clock.details()
