@@ -147,11 +147,29 @@ jobs:
       perf-h2-capture-timeout: '180000'
       requires:
         - ready-to-test
+  # The container-vs-VM pair, matched at gen1 rather than gen2. The gen2 VM classes
+  # need a machine image newer than ubuntu-2004, and on ubuntu-2604 the image's
+  # default node (v24) wins over the repo's pinned 22.19.0 in `unpack-dependencies`,
+  # which does not re-source ensure-node.sh - the restored node_modules then fail to
+  # load. gen1 `medium` on ubuntu-2004 is the combination `unit-tests` already runs,
+  # so the workspace restore is known to work there. Pairing it against a gen1 docker
+  # cell keeps the comparison free of a CPU-generation confound.
   - server-performance-tests:
       name: server-performance-tests-machine-x64
-      executor: linux-x64-gen2
-      resource_class: medium.gen2
-      perf-label: vm-medium.gen2
+      executor: linux-x64
+      resource_class: medium
+      perf-label: vm-medium
+      perf-spec: proxy_performance_spec
+      install-firefox: false
+      perf-report-only: true
+      perf-retries: '0'
+      perf-h2-capture-timeout: '180000'
+      requires:
+        - ready-to-test
+  - server-performance-tests:
+      name: server-performance-tests-docker-gen1
+      resource_class: medium
+      perf-label: docker-medium
       perf-spec: proxy_performance_spec
       install-firefox: false
       perf-report-only: true
@@ -596,3 +614,4 @@ jobs:
         - server-performance-tests-medium-plus
         - server-performance-tests-large
         - server-performance-tests-machine-x64
+        - server-performance-tests-docker-gen1
