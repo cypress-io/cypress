@@ -216,12 +216,13 @@ describe('cli', () => {
     // tests import lib/exec/tap directly and never see it.
     it('leaves a command that took exitOverride to finish its own failure', async () => {
       const options = {
-        // The child inherits this environment, and both of these decide which line
+        // The child inherits this environment, and each of these decides which line
         // the reporting prints — or whether it prints one at all.
         env: {
           DEBUG: 'cypress:cli:tap',
           CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV: undefined,
           CYPRESS_INTERNAL_ENV: undefined,
+          CYPRESS_DISABLE_GUEST_TELEMETRY: undefined,
         },
         filter: ['code', 'stdout', 'stderr'],
       }
