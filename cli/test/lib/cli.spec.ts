@@ -907,6 +907,16 @@ describe('cli', () => {
       expect(tap.start).toBeCalledWith(['health'], { instance: 123 })
     })
 
+    // The invocation reports the keys of what commander parsed, so an option left
+    // unset has to arrive as no key rather than as an undefined value.
+    it('forwards a key only for the options the invocation set', async () => {
+      await exec('tap health --json')
+
+      await flushPromises()
+
+      expect(Object.keys(vi.mocked(tap.start).mock.calls[0][1]!)).toEqual(['json'])
+    })
+
     it('catches rejection and exits', async () => {
       const err = new Error('tap health failed badly')
 

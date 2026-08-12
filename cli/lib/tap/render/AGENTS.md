@@ -79,11 +79,6 @@ soft-wrapped line breaks the column it was padded into. Reach for the same
 three moves — summarize, offer the drill-down, clamp to width — for any future
 result whose depth the CLI does not control.
 
-`--depth` is an ordinary option on the `command` command, declared in the shared
-contract like any other. The instance advertises it, the CLI forwards it with the
-rest, and the renderer reads it from that same options bag. A flag that only
-changes how a result reads needs no special plumbing: the handler ignores it.
-
 ## Conventions worth keeping
 
 - **Empty states keep the frame.** Prefer the command's normal shape with a

@@ -12,8 +12,8 @@ const CAMPAIGN = 'Tap Command'
 const MEDIUM = 'tap-cli'
 const POST_TIMEOUT_MS = 2000
 
-// The same map the app reads through @packages/data-context; the CLI cannot reach
-// that package, so the three URLs are duplicated here.
+// Duplicated from packages/data-context/src/util/cloudUrls.ts, which the CLI
+// cannot import.
 const CLOUD_URLS = {
   development: 'http://localhost:3000',
   staging: 'https://cloud-staging.cypress.io',
@@ -33,10 +33,6 @@ const eventCollectorUrl = (includeMachineId = false): string => {
   return `${CLOUD_URLS[namedCollectorEnv() ?? 'production']}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
 }
 
-// What the invocation turned out to be, accumulated as it runs. `beginTapTrace`
-// opens one the moment the CLI knows what was typed, the `note` calls refine it
-// as the command resolves and fails, and `reportTapTrace` posts it once, just
-// before the process exits.
 interface TapTrace {
   messageId: string
   startedAt: number

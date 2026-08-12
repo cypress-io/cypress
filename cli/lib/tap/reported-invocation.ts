@@ -1,18 +1,15 @@
 import type { TapCliOptions } from './types'
+import type { TapCommandName, TapNativeCommandName } from '@packages/cypress-instances'
 import { KNOWN_COMMANDS } from '@packages/cypress-instances'
+
+type ReportedCommand = TapNativeCommandName | TapCommandName | 'unknown'
 
 // A name this CLI does not know is whatever the user typed, so it is reported
 // as unknown rather than sent verbatim.
-const reportedCommand = (command: string | undefined): string | undefined => {
-  if (!command) {
-    return undefined
-  }
-
-  return KNOWN_COMMANDS.has(command) ? command : 'unknown'
-}
+const getKnownCommand = (command: string): ReportedCommand => KNOWN_COMMANDS.has(command) ? command as ReportedCommand : 'unknown'
 
 export interface ReportedInvocation {
-  command: string | undefined
+  command: ReportedCommand | undefined
   flags: string[]
 }
 
@@ -22,9 +19,9 @@ export interface ReportedInvocation {
  * command declares are reported once commander has parsed them, by noteTapCommand.
  */
 export const reportedInvocation = (command: string | undefined, wantsHelp: boolean, options: TapCliOptions): ReportedInvocation => ({
-  command: reportedCommand(command),
+  command: command ? getKnownCommand(command) : undefined,
   flags: [
     ...wantsHelp ? ['help'] : [],
-    ...Object.entries(options).filter(([, value]) => value !== undefined).map(([name]) => name),
+    ...Object.keys(options),
   ],
 })
