@@ -17,9 +17,11 @@ type EnvCheck = string | ((env: NodeJS.ProcessEnv) => boolean)
 
 const envMatcher = (key: string, regex: RegExp, opts: { noTTY?: boolean } = {}) => {
   return (env: NodeJS.ProcessEnv): boolean => {
-    // Some vars are set by both an IDE's integrated terminal and its CLI agent. A TTY
-    // means a human is typing at the terminal, not an agent-spawned subprocess.
-    if (opts.noTTY && process.stdout?.isTTY) {
+    // Some vars are set by both an IDE's integrated terminal and its CLI agent. A TTY on
+    // either end means a human is at the terminal, not an agent-spawned subprocess. Both
+    // ends are checked because redirecting one still leaves the other attached, as in
+    // `cypress run | tee log.txt`.
+    if (opts.noTTY && (process.stdout?.isTTY || process.stdin?.isTTY)) {
       return false
     }
 
@@ -40,7 +42,7 @@ const AGENTS: readonly (readonly [AgentName, readonly EnvCheck[]])[] = [
   ['auggie', ['AUGMENT_AGENT']],
   ['goose', ['GOOSE_PROVIDER']],
   ['junie', ['JUNIE_DATA', 'JUNIE_SHIM_PATH']],
-  ['devin', [envMatcher('EDITOR', /devin/)]],
+  ['devin', [envMatcher('EDITOR', /(^|[\\/])devin(\.exe)?$/)]],
   ['cursor', ['CURSOR_AGENT']],
   ['kiro', [envMatcher('TERM_PROGRAM', /kiro/, { noTTY: true })]],
 ]

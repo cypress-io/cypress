@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { detectAgent, isAgent } from '..'
 
@@ -46,27 +46,51 @@ describe('lib/agent-info', () => {
     expect(detectAgent({ CURSOR_AGENT: '1', CLAUDECODE: '1' })).toBe('claude')
   })
 
+  it('matches the devin editor on a Windows-style path', () => {
+    expect(detectAgent({ EDITOR: 'C:\\Users\\someone\\devin.exe' })).toBe('devin')
+  })
+
+  it('does not match devin in the path of an unrelated editor', () => {
+    expect(detectAgent({ EDITOR: '/home/devin/.local/bin/vim' })).toBeUndefined()
+  })
+
   describe('TTY-gated matches', () => {
     // vitest runs without a TTY, so isTTY is absent rather than false and cannot be spied on.
-    const originalIsTTY = Object.getOwnPropertyDescriptor(process.stdout, 'isTTY')
+    const restores: (() => void)[] = []
 
-    beforeEach(() => {
-      Object.defineProperty(process.stdout, 'isTTY', { value: true, configurable: true })
-    })
+    const attachTerminal = (stream: NodeJS.WriteStream | NodeJS.ReadStream) => {
+      const original = Object.getOwnPropertyDescriptor(stream, 'isTTY')
+
+      Object.defineProperty(stream, 'isTTY', { value: true, configurable: true })
+
+      restores.push(() => {
+        if (original) {
+          Object.defineProperty(stream, 'isTTY', original)
+        } else {
+          delete (stream as any).isTTY
+        }
+      })
+    }
 
     afterEach(() => {
-      if (originalIsTTY) {
-        Object.defineProperty(process.stdout, 'isTTY', originalIsTTY)
-      } else {
-        delete (process.stdout as any).isTTY
-      }
+      restores.splice(0).forEach((restore) => restore())
     })
 
     it('does not report kiro when a human is at an interactive terminal', () => {
+      attachTerminal(process.stdout)
+
+      expect(detectAgent({ TERM_PROGRAM: 'kiro' })).toBeUndefined()
+    })
+
+    it('does not report kiro when only stdin is a terminal, as when output is piped', () => {
+      attachTerminal(process.stdin)
+
       expect(detectAgent({ TERM_PROGRAM: 'kiro' })).toBeUndefined()
     })
 
     it('still reports an explicitly named agent from an interactive terminal', () => {
+      attachTerminal(process.stdout)
+
       expect(detectAgent({ TERM_PROGRAM: 'kiro', CLAUDECODE: '1' })).toBe('claude')
     })
   })
