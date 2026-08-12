@@ -559,6 +559,61 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
   })
 
+  it('copies bodySkipped onto the ctx as resBodySkipped', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-skipped',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    codec.encodeResponse({
+      id: 'network-skipped',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+    })
+
+    expect(ctx.resBodySkipped).to.equal(true)
+  })
+
+  it('leaves resBodySkipped unset when bodySkipped is absent', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-not-skipped',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    codec.encodeResponse({
+      id: 'network-not-skipped',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodyStream: Readable.from(['origin']),
+    })
+
+    expect(ctx.resBodySkipped).to.be.undefined
+  })
+
   it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
     const { ExtractCypressMetadataHeaders } = RequestMiddleware
 
