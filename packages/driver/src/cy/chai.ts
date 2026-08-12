@@ -57,6 +57,20 @@ chai.use((chai, u) => {
       })
     },
 
+    onInvalidArg (method, description, arg) {
+      const err = $errUtils.cypressErrByPath('chai.invalid_jquery_accessor_arg', {
+        args: {
+          assertion: method,
+          description,
+          arg,
+        },
+      })
+
+      // retrying can never make the argument valid
+      err.retry = false
+      throw err
+    },
+
     onError (err, method, obj, negated) {
       switch (method) {
         case 'visible':
