@@ -301,8 +301,23 @@ const CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_CAPTURE_TIMEOUT) || 150
 // The latency origin's MITM captures are queueing-bound at ~1000 x 50ms / ~6
 // connections ≈ 9-10s, and the no-h2 assertion allows up to 2x that — the
 // capture window has to outlast the assertion boundary, or a slow-but-assertable
-// run dies as a capture timeout before the assertion can fail it.
-const HTTP2_LATENCY_CAPTURE_TIMEOUT_MS = 45000
+// run dies as a capture timeout before the assertion can fail it. On a
+// CPU-starved runner both sides stretch well past that, so the window is
+// overridable rather than fixed.
+const HTTP2_LATENCY_CAPTURE_TIMEOUT_MS = Number(process.env.PROXY_PERF_H2_CAPTURE_TIMEOUT) || 45000
+
+// The default is sized for a flaky fixture host, where a retry gets a different
+// page. A slow box is not flaky - it fails every attempt - so re-measuring both
+// sides 16 times only multiplies the runtime. An unset CI parameter arrives as an
+// empty string, which has to mean "default" rather than Number('') === 0.
+const RETRIES = process.env.PROXY_PERF_RETRIES ? Number(process.env.PROXY_PERF_RETRIES) : 15
+
+// The comparative timing assertions encode an environment: they hold where CPU
+// is cheap enough for the CDP pipeline to stay off the critical path. When
+// benchmarking deliberately-constrained infrastructure, the expected outcome and
+// a red build are the same event, so the timings are reported and the
+// wire-protocol assertions - which are correctness, not performance - stay on.
+const REPORT_ONLY = ['1', 'true'].includes(process.env.PROXY_PERF_REPORT_ONLY)
 
 // When the fixture host serves something other than the fixture - a GitHub Pages error
 // page, say - the symptom is an oddly small request count with nothing pending, so the
@@ -315,6 +330,72 @@ const REPORTED_URL_COUNT = 5
 // let the retry pick up a load that got the real page. This beat covers initiation lagging
 // the load event.
 const BAD_PAGE_GRACE_MS = 1000
+
+/**
+ * Reads a cgroup controller file for this process, or null when it cannot be read
+ * (not Linux, no cgroup, or an unconstrained cgroup).
+ *
+ * cgroup v2 reports a single `0::/<path>` entry in `/proc/self/cgroup`, relative to
+ * the cgroup mount. Inside a container the cgroup namespace maps that to the mount
+ * root, but on a bare host the controller files live under the sub-cgroup, so the
+ * base has to be resolved rather than assumed.
+ */
+const readCgroupValue = async (file) => {
+  try {
+    const raw = await fse.readFile('/proc/self/cgroup', 'utf8')
+    const relative = raw.split('\n').find((line) => line.startsWith('0::'))?.slice(3).trim().replace(/^\/+/, '')
+
+    return (await fse.readFile(path.join('/sys/fs/cgroup', relative || '', file), 'utf8')).trim()
+  } catch {
+    return null
+  }
+}
+
+// `os.cpus()` reports the host's core count inside a container, not the cgroup
+// budget, so Chrome and libuv size their thread pools for a machine they do not
+// have. Recording what was seen alongside what was actually granted is what makes
+// a cross-size comparison interpretable.
+const describeEnvironment = async () => {
+  return {
+    label: process.env.PROXY_PERF_LABEL || 'local',
+    coresSeen: os.cpus().length,
+    totalMemBytes: os.totalmem(),
+    cgroupCpuMax: await readCgroupValue('cpu.max'),
+    cgroupMemoryMax: await readCgroupValue('memory.max'),
+  }
+}
+
+/**
+ * Appends one JSON line per measurement to `$CIRCLE_ARTIFACTS/proxy-perf.jsonl`.
+ * `console.table` is readable in a single job's log but does not aggregate across
+ * a matrix of them, which is what the comparison actually needs.
+ */
+const recordBenchmark = async (record) => {
+  const line = JSON.stringify({ ...await describeEnvironment(), ...record })
+
+  debug('benchmark record %s', line)
+
+  const artifacts = process.env.CIRCLE_ARTIFACTS
+
+  if (!artifacts) return
+
+  await fse.ensureDir(artifacts)
+  await fse.appendFile(path.join(artifacts, 'proxy-perf.jsonl'), `${line}\n`)
+}
+
+/**
+ * Asserts `actual` is under `bound`, unless REPORT_ONLY - in which case the
+ * comparison is reported and the run stays green.
+ */
+const expectTiming = (actual, bound, message) => {
+  if (REPORT_ONLY) {
+    process.stdout.write(`report-only: ${message} - ${actual} vs bound ${bound} (${actual < bound ? 'within' : 'over'})\n`)
+
+    return
+  }
+
+  expect(actual, message).to.be.lessThan(bound)
+}
 
 const createHarCaptureHooks = (captureTimeoutMs = CAPTURE_TIMEOUT_MS) => {
   const started = new Set()
@@ -948,13 +1029,20 @@ describe('Proxy Performance', function () {
   })
 
   describe(`${HTTP2_LATENCY_ORIGIN_URL} (synthetic latency origin)`, function () {
-    this.retries(15)
+    this.retries(RETRIES)
     // each test here is a paired measurement — two full captures per attempt
     this.timeout(2 * HTTP2_LATENCY_CAPTURE_TIMEOUT_MS + (30 * 1000))
 
     const mitmCase = makeTestCase({ name: 'With Cypress proxy, Intercepted', cyProxy: true, cyIntercept: true })
     const proxyDisabledCase = makeTestCase({ name: 'With proxy disabled, Intercepted (CDP)', proxyDisabled: true })
     const proxyDisabledNoH2Case = makeTestCase({ name: 'With proxy disabled, Intercepted (CDP) w/o HTTP/2', proxyDisabled: true, disableHttp2: true })
+
+    before(async () => {
+      // emitted before any measurement so a cell that never finishes a capture
+      // still appears in the aggregated comparison as a failure mode rather than
+      // as a missing row
+      await recordBenchmark({ test: 'environment' })
+    })
 
     after(() => {
       const testCases = [mitmCase, proxyDisabledCase, proxyDisabledNoH2Case]
@@ -984,6 +1072,15 @@ describe('Proxy Performance', function () {
 
       debug('latency-origin paired totals: mitm %d proxy-disabled %d', mitmResults['Total'], proxyDisabledResults['Total'])
 
+      await recordBenchmark({
+        test: 'cdp-h2-vs-mitm',
+        mitmTotal: mitmResults['Total'],
+        cdpTotal: proxyDisabledResults['Total'],
+        cdpAvgWait: proxyDisabledResults['Avg Wait'],
+        mitmAvgWait: mitmResults['Avg Wait'],
+        h2Preserved: proxyDisabledWire.http1_1StatusLines === 0,
+      })
+
       expect(mitmWire.http1_1StatusLines, 'MITM responses received over HTTP/1.1').to.be.at.least(1000)
       expect(proxyDisabledWire.responses, 'proxy-disabled wire responses observed').to.be.at.least(1000)
       expect(proxyDisabledWire.http1_1StatusLines, 'proxy-disabled responses received over HTTP/1.1').to.eq(0)
@@ -991,7 +1088,7 @@ describe('Proxy Performance', function () {
       // the injected per-response delay makes this hold in any environment:
       // ~6 HTTP/1.1 connections pay 1000 x delay / 6 in queueing, HTTP/2
       // multiplexing does not
-      expect(proxyDisabledResults['Total'], 'proxy-disabled HTTP/2 Total vs MITM intercepted Total').to.be.lessThan(mitmResults['Total'])
+      expectTiming(proxyDisabledResults['Total'], mitmResults['Total'], 'proxy-disabled HTTP/2 Total vs MITM intercepted Total')
     })
 
     it('With proxy disabled, Intercepted (CDP) w/o HTTP/2 loads 1000 delayed images within 2x of MITM interception', async function () {
@@ -1004,11 +1101,17 @@ describe('Proxy Performance', function () {
         wireEvidence = wire
       } })
 
+      await recordBenchmark({
+        test: 'cdp-no-h2-vs-mitm',
+        mitmTotal: mitmResults['Total'],
+        cdpNoH2Total: results['Total'],
+      })
+
       expect(wireEvidence.http1_1StatusLines, 'responses fell back to HTTP/1.1 on the wire').to.be.at.least(1000)
 
       // both sides are connection-queueing-bound here; 2x bounds the CDP
       // pipeline's added per-request cost at equal protocol
-      expect(results['Total']).to.be.lessThan(2 * mitmResults['Total'])
+      expectTiming(results['Total'], 2 * mitmResults['Total'], 'proxy-disabled w/o HTTP/2 Total vs 2x MITM intercepted Total')
     })
   })
 })

@@ -2311,15 +2311,83 @@ jobs:
 
   server-performance-tests:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium.gen2
+      # '' runs the whole test/performance glob, which includes the cross-browser
+      # cy_visit_performance system test. A benchmark instance narrows to the proxy
+      # spec so a three-browser system test isn't competing for the same CPU it is
+      # trying to measure.
+      perf-spec:
+        type: string
+        default: ''
+      # cy_visit_performance_spec runs in firefox, so the full glob needs it
+      install-firefox:
+        type: boolean
+        default: true
+      # identifies the row this job contributes to the aggregated comparison
+      perf-label:
+        type: string
+        default: baseline
+      # reports the MITM-vs-CDP timings instead of asserting them, for instances
+      # deliberately run on constrained infrastructure where the expected result
+      # and a red build would otherwise be the same event
+      perf-report-only:
+        type: boolean
+        default: false
+      perf-retries:
+        type: string
+        default: ''
+      perf-h2-capture-timeout:
+        type: string
+        default: ''
+    resource_class: << parameters.resource_class >>
+    environment:
+      <<: *defaultsEnvironment
+      PROXY_PERF_LABEL: << parameters.perf-label >>
+      PROXY_PERF_RETRIES: << parameters.perf-retries >>
+      PROXY_PERF_H2_CAPTURE_TIMEOUT: << parameters.perf-h2-capture-timeout >>
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-server-tests >>
       - restore_cached_workspace
+      # Machine executors are a non-root user on a bare Ubuntu image: the docker
+      # image bakes in Xvfb, but `run.js` wraps mocha in `xvfb-maybe`, which
+      # rejects outright if `xvfb-run` is missing. `localhost` also resolves to a
+      # live ::1 on a VM and typically not in a container - Happy Eyeballs hides
+      # that as added connection latency, which would land straight in the
+      # wall-clock ratios this job measures.
+      - when:
+          condition:
+            equal: [ *linux-x64-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Ensure Xvfb is present
+                command: |
+                  if ! which xvfb-run > /dev/null; then
+                    sudo apt-get update && sudo apt-get install -y xvfb
+                  fi
+                  which xvfb-run Xvfb
+            - run:
+                name: Pin localhost to both address families
+                command: |
+                  cat \<<'EOF' | sudo tee /etc/hosts
+                  127.0.0.1 localhost
+                  ::1 localhost
+                  EOF
       - install-browsers:
           install-chrome: true
-          install-firefox: true
+          install-firefox: << parameters.install-firefox >>
       - run:
-          command: yarn workspace @packages/server test-performance
+          name: Proxy performance benchmark (<< parameters.perf-label >> / << parameters.resource_class >>)
+          environment:
+            PROXY_PERF_REPORT_ONLY: << parameters.perf-report-only >>
+          command: |
+            source ./scripts/ensure-node.sh
+            node -e "const os=require('os');console.log('cores seen:',os.cpus().length,'totalmem:',os.totalmem())"
+            yarn workspace @packages/server test-performance << parameters.perf-spec >>
       - store_artifacts:
           path: /tmp/artifacts
           when: always
