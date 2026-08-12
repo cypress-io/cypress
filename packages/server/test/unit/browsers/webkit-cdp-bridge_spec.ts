@@ -142,6 +142,40 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       expect(secondRan).to.be.true
     })
 
+    it('keeps messages behind a timed-out evaluation serialized', async () => {
+      bridge = new WebKitCDPBridge(page, 50)
+
+      const order: string[] = []
+
+      mainFrame.evaluate = sinon.stub()
+      .onFirstCall().callsFake(() => new Promise(() => {}))
+      .onSecondCall().callsFake(() => {
+        order.push('second started')
+
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            order.push('second resolved')
+            resolve('two')
+          }, 10)
+        })
+      })
+      .onThirdCall().callsFake(() => {
+        order.push('third started')
+
+        return Promise.resolve('three')
+      })
+
+      bridge.send('Runtime.evaluate', { expression: 'stuck()' })
+      const second = bridge.send('Runtime.evaluate', { expression: 'two()' })
+      const third = bridge.send('Runtime.evaluate', { expression: 'three()' })
+
+      await Promise.all([second, third])
+
+      // the third message waits for the second to settle (its own turn) rather
+      // than sharing the stuck evaluation's deadline and firing concurrently
+      expect(order).to.deep.equal(['second started', 'second resolved', 'third started'])
+    })
+
     it('keeps evaluating after a failed evaluation', async () => {
       mainFrame.evaluate = sinon.stub()
       .onFirstCall().rejects(new Error('Execution context was destroyed'))

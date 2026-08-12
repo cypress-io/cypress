@@ -74,17 +74,20 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
         // wrap in an IIFE so the multi-statement expression is valid for Playwright's string evaluation
         const evaluation = this.evaluateChain.then(() => frame.evaluate(`(() => {${params.expression}})()`))
 
-        // advance the chain when the evaluation settles — or after a bound, so an
-        // evaluation that never settles (e.g. a frame stuck mid-navigation) cannot
-        // stall every later server -> browser message; a timed-out evaluation may
-        // still complete later, trading strict ordering for liveness in that
-        // degraded case
-        this.evaluateChain = Promise.race([
-          evaluation.catch(() => undefined),
-          new Promise<void>((resolve) => {
-            setTimeout(resolve, this.evaluateOrderTimeout).unref?.()
-          }),
-        ])
+        // advance the chain when the evaluation settles — or after a bound that
+        // starts when the evaluation takes its turn, so one evaluation that
+        // never settles (e.g. a frame stuck mid-navigation) cannot stall every
+        // later server -> browser message while messages behind it stay
+        // serialized; a timed-out evaluation may still complete later, trading
+        // strict ordering for liveness in that degraded case
+        this.evaluateChain = this.evaluateChain.then(() => {
+          return Promise.race([
+            evaluation.catch(() => undefined),
+            new Promise<void>((resolve) => {
+              setTimeout(resolve, this.evaluateOrderTimeout).unref?.()
+            }),
+          ])
+        })
 
         return evaluation
       }
