@@ -960,6 +960,62 @@ describe('lib/network-runtime', () => {
     await runtime.stop()
   })
 
+  it('createCdpFetchRuntime enables Fetch on service worker sessions that attach to the page connection', async () => {
+    const client: {
+      send: sinon.SinonStub
+      on: sinon.SinonStub
+      off: sinon.SinonStub
+      onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+    } = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    expect(client.onServiceWorkerTargetAttached, 'hook is not registered before start').to.not.exist
+
+    await runtime.start()
+    client.send.resetHistory()
+
+    await client.onServiceWorkerTargetAttached!('sw-session')
+
+    // A service worker's script fetch and fetch-handler requests run on its own
+    // session, so they only reach the middleware onion (and cy.intercept) if
+    // Fetch is enabled there too.
+    expect(client.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    }, 'sw-session')
+
+    await runtime.stop()
+
+    // The page client outlives the runtime, so a stale hook would enable Fetch
+    // against a transport that has already dropped its handlers.
+    expect(client.onServiceWorkerTargetAttached, 'hook is cleared on stop').to.not.exist
+  })
+
+  it('createCdpFetchRuntime clears the service worker hook when Fetch.enable fails', async () => {
+    const client: {
+      send: sinon.SinonStub
+      on: sinon.SinonStub
+      off: sinon.SinonStub
+      onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+    } = {
+      send: sinon.stub().rejects(new Error('enable failed')),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+
+    expect(client.onServiceWorkerTargetAttached).to.not.exist
+  })
+
   it('createCdpFetchRuntime stop also stops attached extra-target transports', async () => {
     const mainClient = {
       send: sinon.stub().resolves({}),

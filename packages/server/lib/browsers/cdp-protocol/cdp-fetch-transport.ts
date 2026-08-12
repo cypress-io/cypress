@@ -20,6 +20,16 @@ type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 
+// Shared by every session this transport enables so none of them can drift
+// into pausing a different set of requests than the others.
+const FETCH_PATTERNS: Protocol.Fetch.EnableRequest = {
+  patterns: [{
+    requestStage: 'Request',
+  }, {
+    requestStage: 'Response',
+  }],
+}
+
 // CDP refuses Fetch.getResponseBody for a pause in the redirect-received state,
 // and documents a redirect status plus a location header as the way to tell that
 // state apart from response-received. Drift from MITM: redirect bodies are
@@ -159,16 +169,40 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Enables the CDP Fetch domain and starts intercepting requests.
+   * Enables the Fetch domain on a single CDP session.
    *
-   * This transport must be the sole owner of the Fetch domain on its CDP
-   * session. `Fetch.enable` is not additive: the last call on a session
-   * replaces the pattern list, while `Fetch.requestPaused` handlers stack.
-   * Enabling this alongside `cdp_automation._handlePausedRequests` on the
-   * same session clobbers patterns and races `continueRequest` calls, which
-   * can drop the `X-Cypress-Is-AUT-Frame` header or hang document requests
-   * until the response-pause timeout. Coordinating the two owners is out of
-   * scope; do not enable both on one session.
+   * `Fetch.enable` is scoped to the session it is sent on. Omitting
+   * `sessionId` enables the connection's own session — the target this
+   * transport was constructed for, plus its subframes — and reaches nothing
+   * else. Sibling sessions on the same connection keep their own Fetch state,
+   * so each one whose traffic must run the middleware onion needs its own
+   * call; without it, that session's requests never pause and go straight to
+   * the network.
+   *
+   * Only the enable is per-session. Pauses from every enabled session arrive
+   * on the shared connection carrying their own `sessionId`, which
+   * `interceptRequest`/`resolveResponse` thread back through each reply, so
+   * one pair of handlers serves all of them.
+   *
+   * Within a session, enabling is not additive: the last call replaces the
+   * pattern list (while `Fetch.requestPaused` handlers stack). This transport
+   * must therefore be the sole owner of the Fetch domain on every session it
+   * enables. Enabling alongside `cdp_automation._handlePausedRequests` on one
+   * session clobbers patterns and races `continueRequest` calls, which can
+   * drop the `X-Cypress-Is-AUT-Frame` header or hang document requests until
+   * the response-pause timeout. Coordinating two owners is out of scope; do
+   * not enable both on one session.
+   */
+  private async enableFetch (sessionId?: string): Promise<void> {
+    debug('enabling CDP Fetch on session %s', sessionId ?? '<own>')
+
+    await this.client.send('Fetch.enable', FETCH_PATTERNS, sessionId)
+  }
+
+  /**
+   * Attaches the Fetch handlers and enables interception on this transport's
+   * own session. Sessions that attach later come through
+   * `attachServiceWorkerSession`.
    */
   async start (): Promise<void> {
     if (this.isStarted) {
@@ -186,13 +220,7 @@ export class CdpFetchTransport {
     this.isStarted = true
 
     try {
-      await this.client.send('Fetch.enable', {
-        patterns: [{
-          requestStage: 'Request',
-        }, {
-          requestStage: 'Response',
-        }],
-      })
+      await this.enableFetch()
 
       debug('CDP Fetch transport started')
     } catch (err) {
@@ -203,6 +231,27 @@ export class CdpFetchTransport {
 
       throw err
     }
+  }
+
+  /**
+   * Enables interception on a service worker session attached to this
+   * transport's connection. A service worker's script fetch and its
+   * fetch-handler requests run on that session rather than the page's, so
+   * without this they bypass the middleware onion — and `cy.intercept` —
+   * entirely.
+   *
+   * Must run while the target is still waiting for the debugger; the caller
+   * (CriClient._onAttachedToTarget) sequences this before
+   * Runtime.runIfWaitingForDebugger.
+   */
+  async attachServiceWorkerSession (sessionId: string): Promise<void> {
+    if (!this.isStarted) {
+      debug('attachServiceWorkerSession skipped (transport not started)')
+
+      return
+    }
+
+    await this.enableFetch(sessionId)
   }
 
   /**
