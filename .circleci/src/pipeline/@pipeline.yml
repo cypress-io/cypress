@@ -330,10 +330,28 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
+          name: Generate Electron version key
+          command: node -p "require('./package.json').devDependencies.electron" > electron_version
+      - restore_cache:
+          name: Restore Electron download cache
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+              }}-electron-download-cache-{{ checksum "electron_version" }}
+      - run:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
+            # @packages/electron forwards this to @electron/get, whose default
+            # cache root is platform-specific — pinning it keeps a single
+            # save_cache path valid on every executor
+            export electron_config_cache="$HOME/.electron-cache"
             yarn build
+      - save_cache:
+          name: Save Electron download cache
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+            }}-electron-download-cache-{{ checksum "electron_version" }}
+          paths:
+            - ~/.electron-cache
       - run:
           name: Sync Cloud Validations
           command: |
