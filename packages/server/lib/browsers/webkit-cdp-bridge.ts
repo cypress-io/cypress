@@ -5,6 +5,17 @@ import type { CDPSocketBridge } from '@packages/socket'
 
 const debugVerbose = Debug('cypress-verbose:server:browsers:webkit-cdp-bridge')
 
+// how long a single evaluation may hold up the ordering chain before later
+// messages are dispatched anyway
+const EVALUATE_ORDER_TIMEOUT_MS = 5000
+
+type RuntimeParams = {
+  name?: string
+  expression?: string
+  contextId?: number
+  returnByValue?: boolean
+}
+
 /**
  * Adapts a Playwright page to the `CDPSocketBridge` interface so the
  * automation socket (`CDPSocketServer`) can carry driver <-> server traffic in
@@ -22,7 +33,7 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
   // serializes evaluations so messages reach the browser in emit order, like CDP's transport
   private evaluateChain: Promise<unknown> = Promise.resolve()
 
-  constructor (private page: playwright.Page) {
+  constructor (private page: playwright.Page, private evaluateOrderTimeout: number = EVALUATE_ORDER_TIMEOUT_MS) {
     super()
 
     page.on('framedetached', (frame) => {
@@ -32,18 +43,18 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
     })
   }
 
-  async send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params?: any): Promise<any> {
+  async send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params: RuntimeParams = {}): Promise<any> {
     switch (command) {
       case 'Runtime.enable':
         return
 
       case 'Runtime.addBinding':
         // CDP treats a repeat registration as a no-op; Playwright throws
-        if (this.registeredBindings.has(params.name)) return
+        if (this.registeredBindings.has(params.name!)) return
 
-        this.registeredBindings.add(params.name)
+        this.registeredBindings.add(params.name!)
 
-        return this.page.exposeBinding(params.name, ({ frame }, payload: string) => {
+        return this.page.exposeBinding(params.name!, ({ frame }, payload: string) => {
           let executionContextId = this.contextIdByFrame.get(frame)
 
           if (executionContextId === undefined) {
@@ -63,7 +74,17 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
         // wrap in an IIFE so the multi-statement expression is valid for Playwright's string evaluation
         const evaluation = this.evaluateChain.then(() => frame.evaluate(`(() => {${params.expression}})()`))
 
-        this.evaluateChain = evaluation.catch(() => undefined)
+        // advance the chain when the evaluation settles — or after a bound, so an
+        // evaluation that never settles (e.g. a frame stuck mid-navigation) cannot
+        // stall every later server -> browser message; a timed-out evaluation may
+        // still complete later, trading strict ordering for liveness in that
+        // degraded case
+        this.evaluateChain = Promise.race([
+          evaluation.catch(() => undefined),
+          new Promise<void>((resolve) => {
+            setTimeout(resolve, this.evaluateOrderTimeout).unref?.()
+          }),
+        ])
 
         return evaluation
       }

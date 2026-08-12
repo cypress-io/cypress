@@ -123,6 +123,25 @@ describe('lib/browsers/webkit-cdp-bridge', () => {
       expect(order).to.deep.equal(['first resolved', 'second started'])
     })
 
+    it('advances past an evaluation that never settles', async () => {
+      bridge = new WebKitCDPBridge(page, 10)
+
+      let secondRan = false
+
+      mainFrame.evaluate = sinon.stub()
+      .onFirstCall().callsFake(() => new Promise(() => {}))
+      .onSecondCall().callsFake(() => {
+        secondRan = true
+
+        return Promise.resolve('ok')
+      })
+
+      bridge.send('Runtime.evaluate', { expression: 'stuck()' })
+
+      await expect(bridge.send('Runtime.evaluate', { expression: 'two()' })).to.eventually.equal('ok')
+      expect(secondRan).to.be.true
+    })
+
     it('keeps evaluating after a failed evaluation', async () => {
       mainFrame.evaluate = sinon.stub()
       .onFirstCall().rejects(new Error('Execution context was destroyed'))

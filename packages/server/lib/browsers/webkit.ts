@@ -20,7 +20,10 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
 
   automation.use(wkAutomation)
   wkAutomation.automation = automation
-  wkAutomation.cdpSocketServer = cdpSocketServer
+
+  // without a fallback transport, replacing a working socket server with nothing would silently hang the next spec
+  if (cdpSocketServer) wkAutomation.cdpSocketServer = cdpSocketServer
+
   await options.onInitializeNewBrowserTab()
   await wkAutomation.reset({
     newUrl: options.url,

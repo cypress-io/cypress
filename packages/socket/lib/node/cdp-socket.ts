@@ -34,6 +34,8 @@ export class CDPSocketServer extends EventEmitter {
   }
 
   async attachCDPClient (cdpClient: CDPSocketBridge): Promise<void> {
+    // detach the previous socket so re-attaching (e.g. per spec) does not accumulate listeners on a long-lived client
+    this._cdpSocket?.close()
     this._cdpSocket = await CDPSocket.init(cdpClient, this._fullNamespace)
 
     await Promise.all(Object.values(this._namespaceMap).map(async (server) => {
