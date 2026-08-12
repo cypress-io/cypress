@@ -39,4 +39,24 @@ describe('lib/util/socket_allowed', function () {
       expect(sw.isRequestAllowed(req)).to.be.false
     })
   })
+
+  context('#isRequestFromLocalhost', () => {
+    it('allows loopback remote addresses without any port allow-list entry', () => {
+      expect(sw.allowedLocalPorts).to.deep.eq([])
+
+      for (const remoteAddress of ['127.0.0.1', '::1']) {
+        const req = { socket: { remoteAddress } } as Request
+
+        expect(sw.isRequestFromLocalhost(req), remoteAddress).to.be.true
+      }
+    })
+
+    it('rejects non-loopback remote addresses', () => {
+      for (const remoteAddress of ['192.168.1.20', '10.0.0.5', undefined]) {
+        const req = { socket: { remoteAddress } } as Request
+
+        expect(sw.isRequestFromLocalhost(req), String(remoteAddress)).to.be.false
+      }
+    })
+  })
 })

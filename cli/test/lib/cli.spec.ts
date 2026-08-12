@@ -209,6 +209,30 @@ describe('cli', () => {
 
       expect(result).toMatchSnapshot()
     })
+
+    // The patch above exits the process, which skips whatever the command still
+    // had to do. `tap` takes exitOverride() so it can report the invocation on
+    // its way out, and only a spawned binary loads the patch at all — the unit
+    // tests import lib/exec/tap directly and never see it.
+    it('leaves a command that took exitOverride to finish its own failure', async () => {
+      const options = {
+        // The child inherits this environment, and both of these decide which line
+        // the reporting prints — or whether it prints one at all.
+        env: {
+          DEBUG: 'cypress:cli:tap',
+          CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV: undefined,
+          CYPRESS_INTERNAL_ENV: undefined,
+        },
+        filter: ['code', 'stdout', 'stderr'],
+      }
+
+      const result = await execa('bin/cypress', ['tap', 'status', '--fake'], options)
+
+      expect(result).toContain('unknown option: --fake')
+      expect(result).toContain('code: 1')
+      // Only printed from the reporting that the exit would have skipped.
+      expect(result).toContain('skipped tap event')
+    })
   })
 
   describe('help command', () => {
@@ -881,6 +905,16 @@ describe('cli', () => {
       await flushPromises()
 
       expect(tap.start).toBeCalledWith(['health'], { instance: 123 })
+    })
+
+    // The invocation reports the keys of what commander parsed, so an option left
+    // unset has to arrive as no key rather than as an undefined value.
+    it('forwards a key only for the options the invocation set', async () => {
+      await exec('tap health --json')
+
+      await flushPromises()
+
+      expect(Object.keys(vi.mocked(tap.start).mock.calls[0][1]!)).toEqual(['json'])
     })
 
     it('catches rejection and exits', async () => {

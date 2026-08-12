@@ -7,6 +7,8 @@ import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
+import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../tap/events'
+import { reportedInvocation } from '../tap/reported-invocation'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
@@ -14,6 +16,9 @@ import util from '../util'
 import { errors } from '../errors'
 
 const debug = Debug('cypress:cli:tap')
+
+const INVALID_USAGE = 'INVALID_USAGE'
+const UNHANDLED = 'UNHANDLED'
 
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
@@ -61,7 +66,8 @@ const withJson = (schema: TapSchema, name: string, options: Record<string, strin
 
 const runNativeCommand = async (native: TapCliCommand, positionals: string[], options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
   let dispatchCode: number | undefined
-  const program = buildNativeProgram(native, async (_name, args, commandOptions) => {
+  const program = buildNativeProgram(native, async (name, args, commandOptions) => {
+    noteTapCommand(name, args, commandOptions)
     dispatchCode = await native.handler(options, args, commandOptions)
   })
 
@@ -75,6 +81,8 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
     await program.parseAsync(positionals, { from: 'user' })
   } catch (err: any) {
     if (err instanceof commander.CommanderError) {
+      noteTapFailure(INVALID_USAGE)
+
       return 1
     }
 
@@ -84,7 +92,7 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
   return dispatchCode ?? 1
 }
 
-const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined, renderOptions: Record<string, string>): Promise<number> => {
+const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
@@ -93,9 +101,7 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
     return 1
   }
 
-  // The rendering reads both: the options that shaped the result and the ones
-  // that only shape its view.
-  renderOutcome(command, outcome.result, json, { ...commandOptions, ...renderOptions })
+  renderOutcome(command, outcome.result, json, commandOptions)
 
   return 0
 }
@@ -110,65 +116,87 @@ const renderKnownSchema = (command: string | undefined): number => {
   return renderStaticHelp(program, schema, command)
 }
 
+const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options: TapCliOptions): Promise<number> => {
+  const native = tapCliCommands.find(({ name }) => name === command)
+
+  if (native) {
+    return runNativeCommand(native, positionals, options, wantsHelp)
+  }
+
+  try {
+    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+
+    return await withTapSession(selection.instance, async (session) => {
+      const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
+
+      let dispatchCode = 0
+      const program = buildTapProgram(schema, async (name, args, commandOptions) => {
+        noteTapCommand(name, args, commandOptions)
+        dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json)
+      })
+
+      if (wantsHelp || !command) {
+        return renderSchemaHelp(program, schema, selection, command)
+      }
+
+      try {
+        await program.parseAsync(positionals, { from: 'user' })
+      } catch (err: any) {
+        if (err instanceof commander.CommanderError) {
+          noteTapFailure(INVALID_USAGE)
+
+          return 1
+        }
+
+        throw err
+      }
+
+      return dispatchCode
+    }, options.timeout)
+  } catch (err: any) {
+    if (err instanceof CypressInstanceError) {
+      if (wantsHelp || !command) {
+        return renderKnownSchema(command)
+      }
+
+      debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
+      renderFailure(err)
+
+      return 1
+    }
+
+    if (err.known && err.details) {
+      debug('tap %s failed: %s', command || '(help)', err.message)
+      renderKnownFailure(err)
+
+      return 1
+    }
+
+    throw err
+  }
+}
+
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
 
-    const { wantsHelp, positionals, command } = buildCommandInfo(operands)
+    const info = buildCommandInfo(operands)
+    let exitCode = 1
 
-    const native = tapCliCommands.find(({ name }) => name === command)
+    beginTapTrace(reportedInvocation(info.command, info.wantsHelp, options))
 
-    if (native) {
-      return runNativeCommand(native, positionals, options, wantsHelp)
-    }
-
+    // The CLI exits the moment this returns, so the trace is reported before it
+    // does rather than left in flight.
     try {
-      const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+      exitCode = await runTap(info, options)
 
-      return await withTapSession(selection.instance, async (session) => {
-        const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
-
-        let dispatchCode = 0
-        const program = buildTapProgram(schema, async (name, args, commandOptions, renderOptions) => {
-          dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, renderOptions)
-        })
-
-        if (wantsHelp || !command) {
-          return renderSchemaHelp(program, schema, selection, command)
-        }
-
-        try {
-          await program.parseAsync(positionals, { from: 'user' })
-        } catch (err: any) {
-          if (err instanceof commander.CommanderError) {
-            return 1
-          }
-
-          throw err
-        }
-
-        return dispatchCode
-      }, options.timeout)
+      return exitCode
     } catch (err: any) {
-      if (err instanceof CypressInstanceError) {
-        if (wantsHelp || !command) {
-          return renderKnownSchema(command)
-        }
-
-        debug('tap %s failed: %s %s', command || '(help)', err.code, err.message)
-        renderFailure(err)
-
-        return 1
-      }
-
-      if (err.known && err.details) {
-        debug('tap %s failed: %s', command || '(help)', err.message)
-        renderKnownFailure(err)
-
-        return 1
-      }
+      noteTapFailure(UNHANDLED)
 
       throw err
+    } finally {
+      await reportTapTrace(exitCode)
     }
   },
 }

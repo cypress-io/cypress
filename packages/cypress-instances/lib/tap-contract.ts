@@ -19,8 +19,8 @@ export interface TapCommandOptionSchema {
   name: string
   // A single letter, rendered by the CLI as `-t, --test-id <test-id>`. Commander
   // accepts a letter claimed twice within one command and silently lets the last
-  // declaration win, so an alias must be unique across the command's own options,
-  // the CLI's view-only ones, and the `--instance` every command shares.
+  // declaration win, so an alias must be unique across the command's own options
+  // and the `--instance` every command shares.
   alias?: string
   type: 'string' | 'number' | 'boolean'
   required: boolean
@@ -55,12 +55,12 @@ export type TapExecResult =
 // the same way: entries matching `Present` are keys the handler can rely on, the
 // rest may be absent, and each wire `type` maps through `Scalars`.
 type SchemaObject<
-  Entries extends readonly { name: string, type: TapCommandParamSchema['type'] }[],
+  Entry extends { name: string, type: TapCommandParamSchema['type'] },
   Present,
   Scalars extends Record<TapCommandParamSchema['type'], unknown>,
 > =
-  { [E in Entries[number] as E extends Present ? E['name'] : never]: Scalars[E['type']] } &
-  { [E in Entries[number] as E extends Present ? never : E['name']]?: Scalars[E['type']] }
+  { [E in Entry as E extends Present ? E['name'] : never]: Scalars[E['type']] } &
+  { [E in Entry as E extends Present ? never : E['name']]?: Scalars[E['type']] }
 
 // App-side handlers see coerced values (the binding's exec coerces each wire
 // string to its declared scalar before dispatch): required params are present,
@@ -68,10 +68,10 @@ type SchemaObject<
 type CoercedScalars = { string: string, number: number, boolean: boolean }
 
 export type TapCoercedParams<P extends readonly TapCommandParamSchema[]> =
-  SchemaObject<P, { required: true }, CoercedScalars>
+  SchemaObject<P[number], { required: true }, CoercedScalars>
 
 export type TapCoercedOptions<O extends readonly TapCommandOptionSchema[]> =
-  SchemaObject<O, { required: true } | { type: 'boolean' }, CoercedScalars>
+  SchemaObject<O[number], { required: true } | { type: 'boolean' }, CoercedScalars>
 
 // CLI-side handlers see commander's values forwarded as raw strings (a set
 // boolean flag arrives as the string 'true'). Only required value options are
@@ -79,10 +79,10 @@ export type TapCoercedOptions<O extends readonly TapCommandOptionSchema[]> =
 type RawScalars = { string: string, number: string, boolean: string }
 
 export type TapRawParams<P extends readonly TapCommandParamSchema[]> =
-  SchemaObject<P, { required: true }, RawScalars>
+  SchemaObject<P[number], { required: true }, RawScalars>
 
 export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
-  SchemaObject<O, { required: true, type: 'string' | 'number' }, RawScalars>
+  SchemaObject<O[number], { required: true, type: 'string' | 'number' }, RawScalars>
 
 // Options that recur across commands, defined once so their name, type, and help
 // text can't drift between the commands that expose them. `test-id` and
@@ -106,6 +106,7 @@ const commandMeta = {
     // that is not being rendered for reading room.
     { name: 'json', type: 'boolean', required: false, description: 'print the raw JSON result instead of the human-readable rendering — every console property in full, however long, rather than the long ones named by their length' },
     attemptField,
+    { name: 'depth', alias: 'd', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
   ],
 } as const satisfies TapCommandSchema
 
@@ -180,7 +181,7 @@ export const buildTapSchema = (cypressVersion: string): TapSchema => {
       description: command.description,
       ...('details' in command ? { details: command.details } : {}),
       params: (command.params as readonly TapCommandParamSchema[]).map((param) => ({ ...param })),
-      options: command.options.map((option) => ({ ...option })),
+      options: (command.options as readonly TapCommandOptionSchema[]).map((option) => ({ ...option })),
       ...('hidden' in command && command.hidden ? { hidden: true } : {}),
     }
   })
@@ -331,6 +332,11 @@ export const TAP_NATIVE_COMMANDS = [
 ] as const satisfies readonly TapNativeCommandSchema[]
 
 export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
+
+const allTapCommands: readonly (TapCommandSchema | TapNativeCommandSchema)[] = [...TAP_NATIVE_COMMANDS, ...TAP_COMMANDS]
+
+/** Every command name this CLI ships, whether it dispatches to the instance or handles it itself. */
+export const KNOWN_COMMANDS: ReadonlySet<string> = new Set(allTapCommands.map(({ name }) => name))
 
 // Per-command result contracts live in `./contracts/`; re-exported here so the
 // app's deep import of this module and the package barrel both reach them.

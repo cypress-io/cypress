@@ -5,6 +5,7 @@ export const monorepoPaths = {
   root: path.join(__dirname, '../..'),
   pkgDir: path.join(__dirname, '../../packages'),
   toolingDir: path.join(__dirname, '../../system-tests'),
+  pkgAgentInfo: path.join(__dirname, '../../packages/agent-info'),
   pkgApp: path.join(__dirname, '../../packages/app'),
   pkgConfig: path.join(__dirname, '../../packages/config'),
   pkgCypressInstances: path.join(__dirname, '../../packages/cypress-instances'),

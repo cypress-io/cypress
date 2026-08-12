@@ -79,5 +79,13 @@ describe('cypress-instances contract', () => {
       expect(advertised).toBeDefined()
       expect(advertised!.details).toBe(reporter.details)
     })
+
+    it('advertises every option a command declares', () => {
+      const command = TAP_COMMANDS.find(({ name }) => name === 'command')!
+      const advertised = buildTapSchema('15.0.0').commands.find(({ name }) => name === 'command')!
+
+      expect(advertised.options.map(({ name }) => name)).toContain('depth')
+      expect(advertised.options.map(({ name }) => name)).toEqual(command.options.map(({ name }) => name))
+    })
   })
 })

@@ -132,6 +132,14 @@ function isNonProductionCypressInternalEnvValue (value: string | undefined): boo
 }
 
 /**
+ * The version every package carries in a source checkout, which the release
+ * replaces with the computed one (see scripts/get-next-version.js). Comparing
+ * `pkgVersion()` against it is how the CLI knows it is running from the repo
+ * rather than from an install.
+ */
+export const DEVELOPMENT_VERSION = '0.0.0-development'
+
+/**
  * Prints NODE_OPTIONS using debug() module, but only
  * if DEBUG=cypress... is set
  */

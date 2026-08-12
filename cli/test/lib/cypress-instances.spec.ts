@@ -14,6 +14,8 @@ import {
   listLiveInstances,
   getInstancesDir,
   pruneDeadInstanceRecords,
+  resolvedInstanceId,
+  resolvedInstanceIdentity,
   CypressInstanceError,
 } from '../../lib/cypress-instances'
 
@@ -166,14 +168,24 @@ describe('lib/cypress-instances', () => {
     }
 
     it('resolves the record with the live CDP state and browser name when the instance echoes the instanceId', async () => {
-      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL, browserName: 'Chrome' } })
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL, browserName: 'Chrome', machineId: 'machine-hash', userId: 'cloud-user-1' } })
       const record = recordFor(port)
 
       expect(await verifyInstanceRecord(record)).toEqual({
         ...record,
         cdpBrowserWsUrl: CDP_WS_URL,
         browserName: 'Chrome',
+        machineId: 'machine-hash',
+        userId: 'cloud-user-1',
       })
+    })
+
+    it('normalizes identity fields an older instance omits (or junks) to null', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, machineId: 42 } })
+      const live = await verifyInstanceRecord(recordFor(port))
+
+      expect(live!.machineId).toBeNull()
+      expect(live!.userId).toBeNull()
     })
 
     it('nulls the browser name when the CDP endpoint is unreachable', async () => {
@@ -304,6 +316,30 @@ describe('lib/cypress-instances', () => {
       stubKill({ alive: [111] })
 
       await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+    })
+
+    it('remembers the id of the instance it selected', async () => {
+      const port = await startReadyInstance(INSTANCE_ID)
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      await resolveInstance({ cwd: PROJECT })
+
+      expect(resolvedInstanceId()).toBe(INSTANCE_ID)
+    })
+
+    it('remembers the identity the probe carried for the instance it selected', async () => {
+      const port = await startFakeInstance({
+        respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL, machineId: 'machine-hash', userId: 'cloud-user-1' },
+      })
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      await resolveInstance({ cwd: PROJECT })
+
+      expect(resolvedInstanceIdentity()).toEqual({ instanceId: INSTANCE_ID, machineId: 'machine-hash', userId: 'cloud-user-1' })
     })
 
     it('reaps the leftover record and throws NO_INSTANCE when the only match’s process is dead', async () => {

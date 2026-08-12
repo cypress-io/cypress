@@ -27,7 +27,7 @@ export default [
     },
   },
   {
-    files: ['src/**/*.js', 'src/**/*.ts', 'expects/**/*.js', 'expects/**/*.ts'],
+    files: ['src/**/*.js', 'src/**/*.ts'],
     languageOptions: {
       globals: {
         process: 'readonly',

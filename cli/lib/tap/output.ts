@@ -2,10 +2,12 @@ import commander from 'commander'
 
 import logger from '../logger'
 import { renderingFor } from './render'
+import { noteTapFailure } from './events'
 import type { InstanceSelection } from '../cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 
 export const renderFailure = (err: { code: string, message: string }): void => {
+  noteTapFailure(err.code)
   logger.errorToStderr(`${err.code}: ${err.message}`)
 }
 
