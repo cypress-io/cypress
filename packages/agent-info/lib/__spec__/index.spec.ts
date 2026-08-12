@@ -108,6 +108,10 @@ describe('lib/agent-info', () => {
       expect(detectAgent({ AI_AGENT: 'some-internal-tool-v3' })).toBe('other')
     })
 
+    it('reports a value that only begins with a known name as other', () => {
+      expect(detectAgent({ AI_AGENT: 'pipecat' })).toBe('other')
+    })
+
     it('loses to an env var the detection table recognizes', () => {
       expect(detectAgent({ AI_AGENT: 'cursor', CLAUDECODE: '1' })).toBe('claude')
     })

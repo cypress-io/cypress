@@ -186,6 +186,15 @@ describe('lib/tap/events', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it('sends nothing from a development build whose collector environment is unrecognized', async () => {
+    vi.mocked(util.pkgVersion).mockReturnValue(DEVELOPMENT_VERSION)
+    process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'dev'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('reports from a development build that names a collector environment', async () => {
     vi.mocked(util.pkgVersion).mockReturnValue(DEVELOPMENT_VERSION)
     process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'staging'
@@ -207,5 +216,17 @@ describe('lib/tap/events', () => {
     fetchMock.mockRejectedValue(new Error('socket hang up'))
 
     await expect(reportTapTrace(0)).resolves.toBeUndefined()
+  })
+
+  // The command's own outcome is already decided by the time this runs, so a throw
+  // from anywhere in here would replace it.
+  it('stays silent when assembling the event throws', async () => {
+    vi.mocked(detectAgent).mockImplementation(() => {
+      throw new Error('cannot read the environment')
+    })
+
+    await expect(reportTapTrace(0)).resolves.toBeUndefined()
+
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

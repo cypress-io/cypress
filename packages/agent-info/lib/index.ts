@@ -55,7 +55,9 @@ const KNOWN_NAMES = AGENTS.map(([name]) => name)
 const fromAiAgent = (value: string): AgentName => {
   const normalized = value.toLowerCase()
 
-  return KNOWN_NAMES.find((name) => normalized.startsWith(name)) ?? 'other'
+  // The name has to end where it ends, so a short one like `pi` cannot claim an
+  // unrelated `pipecat`.
+  return KNOWN_NAMES.find((name) => new RegExp(`^${name}($|[^a-z0-9])`).test(normalized)) ?? 'other'
 }
 
 export const detectAgent = (env: NodeJS.ProcessEnv = process.env): AgentName | undefined => {

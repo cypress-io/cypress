@@ -20,11 +20,17 @@ const CLOUD_URLS = {
   production: 'https://cloud.cypress.io',
 } as const
 
-const eventCollectorUrl = (includeMachineId = false): string => {
-  const collectorEnv = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV as keyof typeof CLOUD_URLS
-  const cloudUrl = CLOUD_URLS[Object.prototype.hasOwnProperty.call(CLOUD_URLS, collectorEnv) ? collectorEnv : 'production']
+// Which collector the environment names, if it names one this CLI has a URL for.
+// An unrecognized value is no collector at all, so a typo cannot pass for naming
+// one and land a source checkout's traffic in the production analytics.
+const namedCollectorEnv = (): keyof typeof CLOUD_URLS | undefined => {
+  const named = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV as keyof typeof CLOUD_URLS
 
-  return `${cloudUrl}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
+  return Object.prototype.hasOwnProperty.call(CLOUD_URLS, named) ? named : undefined
+}
+
+const eventCollectorUrl = (includeMachineId = false): string => {
+  return `${CLOUD_URLS[namedCollectorEnv() ?? 'production']}/${includeMachineId ? 'machine-collect' : 'anon-collect'}`
 }
 
 // What the invocation turned out to be, accumulated as it runs. `beginTapTrace`
@@ -72,29 +78,31 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
     return
   }
 
-  const cypressVersion = util.pkgVersion()
-
-  // Local development reports nothing unless it names the collector to use, so
-  // working on tap cannot put its own traffic in the production analytics.
-  if (cypressVersion === DEVELOPMENT_VERSION && !process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV) {
-    debug('skipped tap event: development build')
-
-    return
-  }
-
-  const payload = {
-    command: trace.command,
-    flags: trace.flags,
-    agent: detectAgent(),
-    instanceId: resolvedInstanceId() ?? undefined,
-    exitCode,
-    errorCode: trace.errorCode,
-    durationMs: Date.now() - trace.startedAt,
-  }
-
-  const url = eventCollectorUrl()
-
+  // This runs from the `finally` the CLI exits on, so nothing here may throw: a
+  // failure while assembling the event would replace the command's own outcome.
   try {
+    const cypressVersion = util.pkgVersion()
+
+    // Local development reports nothing unless it names the collector to use, so
+    // working on tap cannot put its own traffic in the production analytics.
+    if (cypressVersion === DEVELOPMENT_VERSION && !namedCollectorEnv()) {
+      debug('skipped tap event: development build')
+
+      return
+    }
+
+    const payload = {
+      command: trace.command,
+      flags: trace.flags,
+      agent: detectAgent(),
+      instanceId: resolvedInstanceId() ?? undefined,
+      exitCode,
+      errorCode: trace.errorCode,
+      durationMs: Date.now() - trace.startedAt,
+    }
+
+    const url = eventCollectorUrl()
+
     await fetch(url, {
       method: 'POST',
       headers: {
@@ -107,6 +115,6 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
 
     debug('recorded tap event to %s %o', url, payload)
   } catch (err) {
-    debug('failed to record tap event to %s %o due to error %o', url, payload, err)
+    debug('failed to record tap event for %o due to error %o', trace, err)
   }
 }
