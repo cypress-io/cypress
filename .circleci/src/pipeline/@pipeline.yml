@@ -31,8 +31,8 @@ parameters:
   run-proxy-disabled-tests:
     type: boolean
     default: false
-  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`
-  # workflow once daily.
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
+  # (can also be set manually to run the Windows workflow)
   run-windows-scheduled:
     type: boolean
     default: false

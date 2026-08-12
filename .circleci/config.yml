@@ -24,10 +24,8 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
-  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows`
-  # workflow once daily. Must be declared here (not just in
-  # .circleci/src/pipeline/@pipeline.yml) since this is the entry-point config
-  # CircleCI validates trigger parameters against.
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
+  # (can also be set manually to run the Windows workflow)
   run-windows-scheduled:
     type: boolean
     default: false
