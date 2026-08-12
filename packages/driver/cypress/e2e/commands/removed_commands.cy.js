@@ -88,10 +88,11 @@ context('Cypress.Cookies.preserveOnce', () => {
 
 context('Cypress.env', () => {
   const removalMessage = '`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.'
+  const pluginMessage = 'This call may come from a plugin. Update the plugin to a version that supports Cypress 16.'
 
   it('throws error when reading a key', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\``)
+      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\`\n\n${pluginMessage}`)
       expect(err.docsUrl).to.equal('https://on.cypress.io/cypress-env-migration')
 
       done()
@@ -102,7 +103,7 @@ context('Cypress.env', () => {
 
   it('throws error when writing a single key', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\``)
+      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\`\n\n${pluginMessage}`)
 
       done()
     })
@@ -112,7 +113,7 @@ context('Cypress.env', () => {
 
   it('throws error when writing an object of keys', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(`${removalMessage}\n\nThe keys being accessed were: \`FOO\`, \`BAR\``)
+      expect(err.message).to.equal(`${removalMessage}\n\nThe keys being accessed were: \`FOO\`, \`BAR\`\n\n${pluginMessage}`)
 
       done()
     })
@@ -122,7 +123,7 @@ context('Cypress.env', () => {
 
   it('throws error when reading every key', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(removalMessage)
+      expect(err.message).to.equal(`${removalMessage}\n\n${pluginMessage}`)
 
       done()
     })

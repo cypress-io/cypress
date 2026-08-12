@@ -505,6 +505,8 @@ export default {
         message.push(`The keys being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
       }
 
+      message.push('This call may come from a plugin. Update the plugin to a version that supports Cypress 16.')
+
       return {
         message: message.join('\n\n'),
         docsUrl: 'https://on.cypress.io/cypress-env-migration',
