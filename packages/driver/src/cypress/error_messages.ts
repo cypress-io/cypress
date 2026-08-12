@@ -285,8 +285,6 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    // The migration link is in the message because run-time override errors are
-    // re-thrown as plain spec window Errors, which drops `docsUrl`.
     env_removed: stripIndent`\
       Overriding the \`env\` configuration was removed in Cypress version 16.0.0.
 
@@ -492,12 +490,12 @@ export default {
         > "{{error}}"`,
     },
     removed ({ keys }: { keys: string[] }) {
-      const message = ['`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values that must remain in the Node process.']
+      const message = ['`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.']
 
       if (keys.length === 1) {
-        message.push(`The variable being accessed was: \`${keys[0]}\``)
+        message.push(`The key being accessed was: \`${keys[0]}\``)
       } else if (keys.length > 1) {
-        message.push(`The variables being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
+        message.push(`The keys being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
       }
 
       return {

@@ -64,11 +64,11 @@ context('Cypress.Cookies.preserveOnce', () => {
 })
 
 context('Cypress.env', () => {
-  const removalMessage = '`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values that must remain in the Node process.'
+  const removalMessage = '`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.'
 
-  it('throws error when reading a variable', (done) => {
+  it('throws error when reading a key', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(`${removalMessage}\n\nThe variable being accessed was: \`FOO\``)
+      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\``)
       expect(err.docsUrl).to.equal('https://on.cypress.io/cypress-env-migration')
 
       done()
@@ -77,9 +77,9 @@ context('Cypress.env', () => {
     Cypress.env('FOO')
   })
 
-  it('throws error when writing a single variable', (done) => {
+  it('throws error when writing a single key', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(`${removalMessage}\n\nThe variable being accessed was: \`FOO\``)
+      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\``)
 
       done()
     })
@@ -87,9 +87,9 @@ context('Cypress.env', () => {
     Cypress.env('FOO', 'bar')
   })
 
-  it('throws error when writing an object of variables', (done) => {
+  it('throws error when writing an object of keys', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.equal(`${removalMessage}\n\nThe variables being accessed were: \`FOO\`, \`BAR\``)
+      expect(err.message).to.equal(`${removalMessage}\n\nThe keys being accessed were: \`FOO\`, \`BAR\``)
 
       done()
     })
@@ -97,7 +97,7 @@ context('Cypress.env', () => {
     Cypress.env({ FOO: 'foo', BAR: 'bar' })
   })
 
-  it('throws error when reading every variable', (done) => {
+  it('throws error when reading every key', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.equal(removalMessage)
 
@@ -107,11 +107,26 @@ context('Cypress.env', () => {
     Cypress.env()
   })
 
+  // TODO: Webkit does not have correct stack traces on errors currently
+  it('points the code frame and stack at the call site', { browser: '!webkit' }, (done) => {
+    cy.on('fail', (err) => {
+      expect(err.codeFrame).to.exist
+      expect(err.codeFrame.relativeFile).to.include('removed_commands.cy.js')
+      expect(err.codeFrame.frame).to.include('Cypress.env')
+      expect(err.stack).to.include('From Your Spec Code:')
+      expect(err.stack).not.to.include('bluebird')
+
+      done()
+    })
+
+    Cypress.env('FOO')
+  })
+
   // the spec bridge constructs its own Cypress instance
   it('throws error inside a cy.origin() callback', { browser: '!webkit' }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(removalMessage)
-      expect(err.message).to.include('The variable being accessed was: `FOO`')
+      expect(err.message).to.include('The key being accessed was: `FOO`')
 
       done()
     })

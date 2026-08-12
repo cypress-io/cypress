@@ -948,12 +948,16 @@ class $Cypress {
     $errUtils.throwErrByPath('require.invalid_outside_origin')
   }
 
-  // Stubbed after its removal in 16.0.0 so the read and write forms both name
-  // the migration path rather than throwing a bare `TypeError`
   env (keyOrValues?: string | Record<string, any>) {
     const keys = _.isObject(keyOrValues) ? Object.keys(keyOrValues) : _.compact([keyOrValues])
+    const specWindow = this.state?.('specWindow')
 
-    $errUtils.throwErrByPath('env.removed', { args: { keys } })
+    $errUtils.throwErrByPath('env.removed', {
+      args: { keys },
+      errProps: {
+        userInvocationStack: specWindow && $stackUtils.captureUserInvocationStack(specWindow.Error),
+      },
+    })
   }
 
   get currentTest () {
