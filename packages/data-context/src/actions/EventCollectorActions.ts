@@ -24,16 +24,18 @@ type EventInputs = {
  * Defaults to staging when doing development. To override to production for development,
  * explicitly set process.env.CYPRESS_INTERNAL_ENV to 'production`
  */
-const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'production') as 'development' | 'staging' | 'production'
+function resolveEventCollectorEnv () {
+  return (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'production') as 'development' | 'staging' | 'production'
+}
 
 export class EventCollectorActions {
   constructor (private ctx: DataContext) {
-    debug('Using %s environment for Event Collection', cloudEnv)
+    debug('Using %s environment for Event Collection', resolveEventCollectorEnv())
   }
 
   async recordEvent (event: CollectibleEvent, includeMachineId: boolean): Promise<boolean> {
     try {
-      const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
+      const cloudUrl = this.ctx.cloud.getCloudUrl(resolveEventCollectorEnv())
       const eventUrl = includeMachineId ? `${cloudUrl}/machine-collect` : `${cloudUrl}/anon-collect`
       const headers = {
         'Content-Type': 'application/json',

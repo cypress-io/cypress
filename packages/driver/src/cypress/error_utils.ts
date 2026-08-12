@@ -375,7 +375,9 @@ const replaceErrMsgTokens = (errMessage, args) => {
   if (!errMessage) return errMessage
 
   const replace = (str, argValue, argKey) => {
-    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
+    // Use a replacer function so `$` sequences in the (user-controlled) arg are
+    // inserted literally rather than treated as special replacement patterns.
+    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), () => argValue)
   }
 
   const getMsg = function (args = {}) {

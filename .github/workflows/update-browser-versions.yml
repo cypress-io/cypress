@@ -41,7 +41,7 @@ jobs:
         run: CI=true yarn
       - name: Check for new Chrome versions
         id: get-versions
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
@@ -72,7 +72,7 @@ jobs:
       - name: Check need for update on existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
         id: check-need-for-branch-update
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { checkNeedForBranchUpdate } = require('./scripts/github-actions/update-browser-versions.js')
@@ -86,7 +86,7 @@ jobs:
       ## Both
       - name: Update Browser Versions File
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { updateBrowserVersionsFile } = require('./scripts/github-actions/update-browser-versions.js')
@@ -98,7 +98,7 @@ jobs:
             })
       - name: Commit and push via API
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -118,7 +118,7 @@ jobs:
       ## Update available and a branch/PR already exists
       - name: Update PR Title
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -135,7 +135,7 @@ jobs:
       - name: Create Pull Request
         id: create-pr
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |

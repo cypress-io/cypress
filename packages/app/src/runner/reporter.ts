@@ -1,3 +1,4 @@
+import { REPORTER_FRAME_NAME } from '@packages/types'
 import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
 import { getReporterElement, REPORTER_ID } from './utils'
 import { getEventManager } from '.'
@@ -73,7 +74,8 @@ function renderReporter (
   const frame = doc.createElement('iframe')
 
   frame.id = 'reporter-frame'
-  frame.title = 'Cypress Reporter'
+  frame.title = REPORTER_FRAME_NAME
+  frame.name = REPORTER_FRAME_NAME
   // hidden until the cloned stylesheets load so the reporter is never shown
   // (or interacted with) unstyled
   frame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:transparent;visibility:hidden'
