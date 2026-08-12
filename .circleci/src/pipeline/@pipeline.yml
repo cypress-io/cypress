@@ -208,6 +208,17 @@ executors:
     environment:
       PLATFORM: linux
 
+  # Separate from `linux-x64` because the gen2 VM resource classes are not offered
+  # on ubuntu-2004 - CircleCI rejects the job outright with `invalid-resource-class`
+  # - and the proxy benchmark's VM cell has to be generation-matched to the docker
+  # cell it is compared against. `unit-tests` keeps ubuntu-2004 untouched.
+  linux-x64-gen2: &linux-x64-gen2-executor
+    machine:
+      image: ubuntu-2604:current
+    resource_class: medium.gen2
+    environment:
+      PLATFORM: linux
+
 commands:
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
   # Run this command in a job before you want to use the SHOULD_PERSIST_ARTIFACTS variable.
@@ -2361,7 +2372,9 @@ jobs:
       # wall-clock ratios this job measures.
       - when:
           condition:
-            equal: [ *linux-x64-executor, << parameters.executor >> ]
+            or:
+              - equal: [ *linux-x64-executor, << parameters.executor >> ]
+              - equal: [ *linux-x64-gen2-executor, << parameters.executor >> ]
           steps:
             - run:
                 name: Ensure Xvfb is present

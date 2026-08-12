@@ -149,7 +149,7 @@ jobs:
         - ready-to-test
   - server-performance-tests:
       name: server-performance-tests-machine-x64
-      executor: linux-x64
+      executor: linux-x64-gen2
       resource_class: medium.gen2
       perf-label: vm-medium.gen2
       perf-spec: proxy_performance_spec
