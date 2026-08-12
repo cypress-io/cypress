@@ -36,123 +36,10 @@ export interface TapErrorCopy {
   docs?: string
 }
 
-export type TapErrorCode =
-  // Finding an instance to drive
-  | 'NO_INSTANCE'
-  | 'INSTANCE_NOT_FOUND'
-  | 'STALE_INSTANCE'
-  | 'NO_BROWSER_ATTACHED'
-  | 'RENDERER_UNRESPONSIVE'
-  // Connecting to it
-  | 'CDP_UNREACHABLE'
-  | 'BINDING_NOT_FOUND'
-  | 'BINDING_THREW'
-  | 'STALE_HANDLE'
-  // Agreeing on a protocol with it
-  | 'PROTOCOL_MISMATCH'
-  | 'CLI_OUTDATED'
-  | 'INSTANCE_OUTDATED'
-  // Reading its data
-  | 'GRAPHQL_UNREACHABLE'
-  | 'GRAPHQL_FAILED'
-  // The spec lifecycle
-  | 'SPEC_NOT_STARTED'
-  | 'SPEC_IN_PROGRESS'
-  | 'SPEC_START_FAILED'
-  | 'SPEC_NOT_FOUND'
-  | 'NO_PROJECT'
-  | 'TESTING_TYPE_NOT_CONFIGURED'
-  // Reading the app under test
-  | 'NO_AUT'
-  | 'FRAME_READ_FAILED'
-  // Selecting a test, command, or snapshot of a spec
-  | 'TEST_NOT_FOUND'
-  | 'ATTEMPT_NOT_FOUND'
-  | 'COMMAND_NOT_FOUND'
-  | 'AMBIGUOUS_COMMAND'
-  | 'SNAPSHOT_NOT_FOUND'
-  | 'SNAPSHOT_UNAVAILABLE'
-  | 'PIN_TARGET_REQUIRED'
-  // Checking the invocation
-  | 'UNKNOWN_COMMAND'
-  | 'UNKNOWN_OPTION'
-  | 'MISSING_COMPANION_OPTION'
-  | 'INVALID_ARGUMENTS'
-  | 'INVALID_OPTIONS'
-  | 'INVALID_PAYLOAD'
-  | 'INVALID_VALUE'
-
 const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
 
-/**
- * The same map read the other way: which failures each command can report. Three
- * sets recur, because every command shares one discovery path, one transport
- * layer, and one dispatcher — they are named once here and referred to below
- * rather than repeated per command.
- *
- *   DISCOVERY  NO_INSTANCE, INSTANCE_NOT_FOUND, STALE_INSTANCE
- *   TRANSPORT  RENDERER_UNRESPONSIVE, CDP_UNREACHABLE, BINDING_NOT_FOUND,
- *              BINDING_THREW, STALE_HANDLE, PROTOCOL_MISMATCH
- *   DISPATCH   UNKNOWN_COMMAND, UNKNOWN_OPTION, INVALID_ARGUMENTS,
- *              MISSING_COMPANION_OPTION, INVALID_OPTIONS, INVALID_PAYLOAD,
- *              INVALID_VALUE
- *
- * instances:
- * - none. It reports the instances it found and swallows every probe failure, so
- *   an unresponsive one reads as `rendererResponsive: false` rather than an error.
- *
- * status:
- * - DISCOVERY, but reported as `not connected` at exit 0 — never rendered
- * - TRANSPORT
- *
- * specs:
- * - DISCOVERY
- * - GRAPHQL_UNREACHABLE, GRAPHQL_FAILED, INSTANCE_OUTDATED
- *
- * run:
- * - DISCOVERY
- * - GRAPHQL_UNREACHABLE, GRAPHQL_FAILED, INSTANCE_OUTDATED
- * - SPEC_NOT_FOUND, SPEC_START_FAILED, NO_PROJECT, TESTING_TYPE_NOT_CONFIGURED,
- *   INVALID_ARGUMENTS — the last four mapped from the runSpec mutation's codes
- *
- * Every command also answers UNKNOWN_COMMAND and UNKNOWN_OPTION before it runs:
- * the CLI parses the invocation against the schema it holds, so a name or flag
- * that is not in it never reaches the instance.
- *
- * dom, aria, inspect:
- * - INVALID_VALUE, from their own option parsing, before an instance is resolved
- * - DISCOVERY, plus NO_BROWSER_ATTACHED
- * - TRANSPORT
- * - SPEC_NOT_STARTED, SPEC_IN_PROGRESS — the spec-lifecycle gate, before any read
- * - NO_AUT, FRAME_READ_FAILED
- * - INVALID_VALUE again, for a rejected `--selector` or an `--at` past the last
- *   match, and MISSING_COMPANION_OPTION for `--at` with no `--selector`
- *
- * The rest run on the instance through the binding, so all of them carry
- * DISCOVERY, NO_BROWSER_ATTACHED, TRANSPORT, DISPATCH, and the version pair
- * CLI_OUTDATED / INSTANCE_OUTDATED from the schema handshake. What each adds:
- *
- * command:
- * - SPEC_NOT_STARTED, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND, COMMAND_NOT_FOUND,
- *   AMBIGUOUS_COMMAND
- *
- * reporter:
- * - SPEC_NOT_STARTED, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND
- * - MISSING_COMPANION_OPTION, for `--attempt` without `--test-id`
- *
- * pin:
- * - SPEC_NOT_STARTED, SPEC_IN_PROGRESS, TEST_NOT_FOUND, ATTEMPT_NOT_FOUND,
- *   COMMAND_NOT_FOUND, AMBIGUOUS_COMMAND
- * - SNAPSHOT_NOT_FOUND, SNAPSHOT_UNAVAILABLE, PIN_TARGET_REQUIRED
- *
- * run-state (hidden; `status` and the AUT readers call it):
- * - none of its own. It answers with the spec's state, reporting even a failed
- *   spec build as a result rather than a failure.
- *
- * resolve-selector (hidden; the AUT readers call it to name ambiguous matches):
- * - NO_AUT, INVALID_VALUE
- */
-export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
+export const TAP_ERROR_COPY = {
+  // Finding an instance to drive
   /** Raised when discovery found no instance record at all, and none was named. */
   NO_INSTANCE: {
     description: 'Could not find an open-mode session to tap into.',
@@ -183,6 +70,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: 'It may be paused in DevTools, stuck in a loop, or starved of memory. Pass `--timeout <ms>` to wait longer.',
   },
 
+  // Connecting to it
   /** Raised when the CDP connection could not be opened, or dropped mid-command. */
   CDP_UNREACHABLE: {
     description: 'Lost the connection to the browser running Cypress.',
@@ -205,6 +93,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: 'Run the command again.',
   },
 
+  // Agreeing on a protocol with it
   /** Raised when the instance replied in a shape this CLI has no handling for. */
   PROTOCOL_MISMATCH: {
     description: 'The running Cypress answered in a way this CLI does not recognize.',
@@ -221,6 +110,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: `Update Cypress in the running project with ${UPDATE_COMMAND}, restart it, then try again.`,
   },
 
+  // Reading its data
   /** Raised when a GraphQL request never got an answer over HTTP. */
   GRAPHQL_UNREACHABLE: {
     description: 'Could not reach the Cypress instance to read its data.',
@@ -233,6 +123,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     recommendGhIssue: true,
   },
 
+  // The spec lifecycle
   /** Raised when a spec was read before any has run. */
   SPEC_NOT_STARTED: {
     description: 'No spec is available to read.',
@@ -269,6 +160,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     docs: '/configuration',
   },
 
+  // Reading the app under test
   /** Raised when the runner page holds no app-under-test frame to read. */
   NO_AUT: {
     description: 'No app under test is loaded.',
@@ -281,6 +173,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     recommendGhIssue: true,
   },
 
+  // Selecting a test, command, or snapshot of a spec
   /**
    * Raised when `--test-id` named a test this spec does not have.
    *
@@ -333,6 +226,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
     solution: 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.',
   },
 
+  // Checking the invocation
   /**
    * Raised when the invocation named a command that does not exist.
    *
@@ -375,7 +269,10 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
   INVALID_VALUE: {
     description: 'An invalid value was given.',
   },
-}
+} satisfies Record<string, TapErrorCopy>
+
+/** Every failure `cypress tap` can report: the keys of the table above. */
+export type TapErrorCode = keyof typeof TAP_ERROR_COPY
 
 // An unknown code is a protocol mismatch by definition — the instance speaks of a
 // failure this CLI has no copy for — but worth a report, since a same-version pair

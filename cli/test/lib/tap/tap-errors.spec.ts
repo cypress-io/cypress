@@ -3,7 +3,7 @@ import stripAnsi from 'strip-ansi'
 
 import logger from '../../../lib/logger'
 import { renderTapFailure } from '../../../lib/tap/output'
-import { TAP_ERROR_COPY, invalidValueTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
+import { TAP_ERROR_COPY, type TapErrorCopy, invalidValueTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff.
@@ -13,6 +13,8 @@ import { TAP_ERROR_COPY, invalidValueTapError, notFoundTapError, specInProgressT
 // assertions below cover the assembled shape.
 
 describe('lib/tap error registry', () => {
+  const entries: [string, TapErrorCopy][] = Object.entries(TAP_ERROR_COPY)
+
   it('covers exactly these codes (add a case below for any new entry)', () => {
     expect(Object.keys(TAP_ERROR_COPY).sort()).toMatchInlineSnapshot(`
       [
@@ -57,7 +59,7 @@ describe('lib/tap error registry', () => {
   })
 
   it('reads as one voice across every entry', () => {
-    const rendered = Object.entries(TAP_ERROR_COPY)
+    const rendered = entries
     .filter(([, copy]) => copy.description || copy.solution)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([code, copy]) => [code, copy.description, copy.solution].filter(Boolean).join('\n  '))
@@ -70,7 +72,7 @@ describe('lib/tap error registry', () => {
   // to hold here and their factory writes that line. Every other entry states its
   // condition, whether or not a factory raises it.
   it('holds no condition only for the codes whose opening line names its subject', () => {
-    const copyless = Object.entries(TAP_ERROR_COPY)
+    const copyless = entries
     .filter(([, copy]) => !copy.description)
     .map(([code]) => code)
 
@@ -81,7 +83,7 @@ describe('lib/tap error registry', () => {
   // once rather than one assertion per entry. A solution is optional — an entry
   // whose specifics carry the remedy, as INVALID_VALUE's do, ships without one.
   it('states each condition and remedy as a finished sentence', () => {
-    const offenders = Object.entries(TAP_ERROR_COPY).flatMap(([code, copy]) => {
+    const offenders = entries.flatMap(([code, copy]) => {
       return (['description', 'solution'] as const)
       .filter((slot) => copy[slot] !== undefined)
       .filter((slot) => !/^[`A-Z]/.test(copy[slot]!) || !/[.?]$/.test(copy[slot]!))
@@ -92,7 +94,7 @@ describe('lib/tap error registry', () => {
   })
 
   it('leaves the specifics to the throw site, never interpolating them', () => {
-    const interpolated = Object.entries(TAP_ERROR_COPY)
+    const interpolated = entries
     .filter(([, copy]) => `${copy.description}${copy.solution}`.includes('${'))
     .map(([code]) => code)
 
@@ -100,7 +102,7 @@ describe('lib/tap error registry', () => {
   })
 
   it('links only through on.cypress.io, as a path the CLI resolves', () => {
-    const offenders = Object.entries(TAP_ERROR_COPY)
+    const offenders = entries
     .filter(([, copy]) => `${copy.description}${copy.solution}${copy.docs ?? ''}`.includes('docs.cypress.io'))
     .map(([code]) => code)
 
