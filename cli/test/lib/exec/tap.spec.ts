@@ -12,7 +12,7 @@ import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
 import { buildTapSchema } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
-import { TAP_ERROR_COPY, TapError } from '@packages/cypress-instances'
+import { TAP_ERROR_COPY, TapError, notFoundTapError } from '@packages/cypress-instances'
 import tap from '../../../lib/exec/tap'
 
 const tapError = (code: string, message: string): Error => {
@@ -634,6 +634,15 @@ describe('lib/exec/tap', () => {
       vi.mocked(resolveLiveInstance).mockRejectedValue(new TapError('STALE_INSTANCE', 'stale'))
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    // A poller watching one pid should read "not connected" once it exits, rather
+    // than flipping to a failure the moment its record goes.
+    it('reports "not connected" when the pid it was given has gone', async () => {
+      vi.mocked(resolveLiveInstance).mockRejectedValue(notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321))
+
+      expect(await tap.start(['status'], { instance: 4321, json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
@@ -1395,6 +1404,27 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(TAP_ERROR_COPY.NO_INSTANCE.description)
+    })
+
+    // Help is answerable without an instance, so naming a pid that no longer exists
+    // must not cost the caller the listing it asked for.
+    it('falls back to generic help for --help when the named instance is not found', async () => {
+      failResolve(notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321))
+
+      expect(await tap.start(['--help'], { instance: 4321 })).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.INSTANCE_NOT_FOUND.description)
+    })
+
+    it('reports the pid it was given when the named instance is not found', async () => {
+      failResolve(notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321))
+
+      expect(await tap.start(['health'], { instance: 4321 })).toBe(1)
+
+      const printed = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(printed).toContain(TAP_ERROR_COPY.INSTANCE_NOT_FOUND.description)
+      expect(printed).toContain('Looked for --instance 4321')
     })
 
     it('rethrows unexpected errors for the generic CLI error path', async () => {

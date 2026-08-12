@@ -26,6 +26,7 @@ describe('lib/tap error registry', () => {
         "FRAME_READ_FAILED",
         "GRAPHQL_FAILED",
         "GRAPHQL_UNREACHABLE",
+        "INSTANCE_NOT_FOUND",
         "INSTANCE_OUTDATED",
         "INVALID_ARGUMENTS",
         "INVALID_OPTIONS",
@@ -162,19 +163,19 @@ describe('lib/tap error rendering', () => {
   // The condition, then the specifics that explain it, then what to do about it —
   // as paragraphs, with nothing between them to separate.
   it('lays a failure out as condition, specifics, remedy', async () => {
-    const printed = await render('NO_INSTANCE', 'Looked for pid 999.')
+    const printed = await render('INSTANCE_NOT_FOUND', 'Looked for `--instance` 999.')
 
     expect(printed).to.eq([
-      TAP_ERROR_COPY.NO_INSTANCE.description,
-      'Looked for pid 999.',
-      TAP_ERROR_COPY.NO_INSTANCE.solution!.replace(/`/g, ''),
+      TAP_ERROR_COPY.INSTANCE_NOT_FOUND.description,
+      'Looked for --instance 999.',
+      TAP_ERROR_COPY.INSTANCE_NOT_FOUND.solution!.replace(/`/g, ''),
     ].join('\n\n'))
   })
 
   // A tap failure is about the state of a running instance, not about which Cypress
   // is installed or the machine it runs on.
   it('carries no rule and no platform footer', async () => {
-    const printed = await render('NO_INSTANCE', 'Looked for pid 999.')
+    const printed = await render('NO_INSTANCE')
 
     expect(printed).not.to.contain('----------')
     expect(printed).not.to.contain('Cypress Version:')
@@ -203,8 +204,9 @@ describe('lib/tap error rendering', () => {
     expect(printed).to.eq('Unknown option "--bogus"\n\nUsage: cypress tap dom [options]')
   })
 
-  // The three lookups answer the same way: what was not found, the option and value
-  // that named nothing, then where the real ones are listed.
+  // The lookups answer the same way, whether they searched a spec or the machine:
+  // what was not found, the option and value that named nothing, then where the real
+  // ones are listed.
   it('reports a lookup that matched nothing in one shape, whichever id it was', async () => {
     expect(await render('TEST_NOT_FOUND', notFoundTapError('TEST_NOT_FOUND', '--test-id', 'r7').detail)).to.eq([
       'No test in this spec matched that id.',
@@ -218,6 +220,15 @@ describe('lib/tap error rendering', () => {
       'No command in this test matched that id.',
       'Looked for --command-id "9".',
       'Run cypress tap reporter --test-id <id> to list the commands in the test.',
+    ].join('\n\n'))
+
+    vi.mocked(console.error).mockClear()
+
+    // A pid is a number, so it reads without quotes where an id reads with them.
+    expect(await render('INSTANCE_NOT_FOUND', notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321).detail)).to.eq([
+      'No running Cypress matched that process id.',
+      'Looked for --instance 4321.',
+      'Run cypress tap instances to list the sessions you can tap into.',
     ].join('\n\n'))
   })
 

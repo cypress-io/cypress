@@ -41,6 +41,10 @@ GRAPHQL_UNREACHABLE
   Could not reach the Cypress instance to read its data.
   The instance may have just closed. Make sure Cypress is running in open mode, then try again.
 
+INSTANCE_NOT_FOUND
+  No running Cypress matched that process id.
+  Run \`cypress tap instances\` to list the sessions you can tap into.
+
 INSTANCE_OUTDATED
   The running Cypress is older than this CLI.
   Update Cypress in the running project with \`npm install --save-dev cypress@latest\`, restart it, then try again.

@@ -39,6 +39,7 @@ export interface TapErrorCopy {
 export type TapErrorCode =
   // Finding an instance to drive
   | 'NO_INSTANCE'
+  | 'INSTANCE_NOT_FOUND'
   | 'STALE_INSTANCE'
   | 'NO_BROWSER_ATTACHED'
   | 'RENDERER_UNRESPONSIVE'
@@ -89,7 +90,7 @@ const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
  * layer, and one dispatcher — they are named once here and referred to below
  * rather than repeated per command.
  *
- *   DISCOVERY  NO_INSTANCE, STALE_INSTANCE
+ *   DISCOVERY  NO_INSTANCE, INSTANCE_NOT_FOUND, STALE_INSTANCE
  *   TRANSPORT  RENDERER_UNRESPONSIVE, CDP_UNREACHABLE, BINDING_NOT_FOUND,
  *              BINDING_THREW, STALE_HANDLE, PROTOCOL_MISMATCH
  *   DISPATCH   UNKNOWN_COMMAND, UNKNOWN_OPTION, INVALID_ARGUMENTS,
@@ -156,16 +157,27 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    * Commands: all but `instances` — every other command resolves an instance
    * first. Two never render it: `status` reports `not connected` instead, and a
    * `--help` invocation prints help rather than failing.
-   * Detail: `Looked for pid 4321.` when `--instance` named one; none otherwise.
+   * Detail: none. Nothing was named, so there is nothing to name back; an
+   * `--instance` that matched nothing is INSTANCE_NOT_FOUND instead.
    */
   NO_INSTANCE: {
     description: 'Could not find an open-mode session to tap into.',
     solution: 'Start Cypress with `cypress open`, select a testing type and launch a browser, then try again.',
   },
   /**
+   * Commands: all but `instances`, on the same path as NO_INSTANCE — but with a
+   * pid given, so the remedy is the listing rather than starting Cypress.
+   *
+   * @deprecated - raise it with notFoundTapError(), which writes its detail
+   */
+  INSTANCE_NOT_FOUND: {
+    description: 'No running Cypress matched that process id.',
+    solution: 'Run `cypress tap instances` to list the sessions you can tap into.',
+  },
+  /**
    * Commands: all but `instances`, on the same path as NO_INSTANCE — records
    * matched, but none answered its liveness probe.
-   * Detail: `Looked for pid 4321.` when `--instance` named one; none otherwise.
+   * Detail: `Looked for \`--instance\` 4321.` when one was named; none otherwise.
    */
   STALE_INSTANCE: {
     description: 'Cypress was running, but is no longer responding.',
@@ -176,7 +188,7 @@ export const TAP_ERROR_COPY: Record<TapErrorCode, TapErrorCopy> = {
    * `resolve-selector`) and `dom`, `aria`, `inspect` — the ones needing a browser
    * to drive. `specs`, `run`, and `status` resolve an instance without one.
    * Detail: `The instance is pid 4321, at /repo.` when exactly one is live;
-   * otherwise the `--instance` filter, or none.
+   * otherwise `Looked for \`--instance\` 4321.`, or none.
    */
   NO_BROWSER_ATTACHED: {
     description: 'Cypress is running, but no test browser is open.',
@@ -568,6 +580,7 @@ export interface TapErrorOptions {
  */
 export type FactoryRaisedTapErrorCode =
   | 'INVALID_VALUE'
+  | 'INSTANCE_NOT_FOUND'
   | 'TEST_NOT_FOUND'
   | 'ATTEMPT_NOT_FOUND'
   | 'COMMAND_NOT_FOUND'
@@ -632,13 +645,13 @@ export const invalidValueTapError = (name: string, expected: string, value: unkn
 }
 
 /** The lookups that answer the same way: a well-formed id that named nothing. */
-export type NotFoundTapErrorCode = 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
+export type NotFoundTapErrorCode = 'INSTANCE_NOT_FOUND' | 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
 
 /**
- * A selector that was read fine but matched nothing the run has. Each entry states
- * what was being looked for and where the real ones are listed; this writes the one
- * line only the throw site can — which option was given what — plus whatever narrows
- * the search, such as how many attempts the test actually has.
+ * A value that was read fine but matched nothing there is. Each entry states what
+ * was being looked for and where the real ones are listed; this writes the one line
+ * only the throw site can — which option was given what — plus whatever narrows the
+ * search, such as how many attempts the test actually has.
  */
 export const notFoundTapError = (code: NotFoundTapErrorCode, option: string, value: unknown, context?: string): TapError => {
   return factoryRaised(code, `Looked for \`${option}\` ${JSON.stringify(value)}.${context ? ` ${context}` : ''}`)

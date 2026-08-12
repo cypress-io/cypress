@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { TapError } from './record'
+import { TapError, notFoundTapError } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 import { readLiveInstances } from './store'
@@ -72,7 +72,7 @@ export interface ResolveInstanceOptions {
 // condition and the remedy come from the error's registry entry, so this adds only
 // what that entry cannot know.
 const describeFilter = (instance: number | undefined): string | undefined => {
-  return instance === undefined ? undefined : `Looked for pid ${instance}.`
+  return instance === undefined ? undefined : `Looked for \`--instance\` ${instance}.`
 }
 
 const lowestPid = <T extends LiveInstanceState>(instances: T[]): T => {
@@ -95,8 +95,9 @@ const selectInstance = <T extends LiveInstanceState>(candidates: T[], options: R
   return { instance: lowestPid(candidates), reason: 'arbitrary' }
 }
 
-// Reads, filters by pid, and probes for liveness. Throws NO_INSTANCE when
-// nothing matches and STALE_INSTANCE when matches exist but none responds.
+// Reads, filters by pid, and probes for liveness. Throws when nothing matches —
+// INSTANCE_NOT_FOUND for a pid that named nothing, NO_INSTANCE when none was
+// asked for — and STALE_INSTANCE when matches exist but none responds.
 const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanceState[]> => {
   const { instance, probeTimeoutMs } = options
   const records = await readLiveInstances()
@@ -104,7 +105,9 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   const matches = records.filter((record) => matchesInstance(record, instance))
 
   if (matches.length === 0) {
-    throw new TapError('NO_INSTANCE', { detail: describeFilter(instance) })
+    throw instance === undefined
+      ? new TapError('NO_INSTANCE')
+      : notFoundTapError('INSTANCE_NOT_FOUND', '--instance', instance)
   }
 
   const live = await probeMatches(matches, probeTimeoutMs)

@@ -19,6 +19,7 @@ const debug = Debug('cypress:cli:tap')
 // without one, so these — and only these — lose to a help invocation.
 const DISCOVERY_CODES: ReadonlySet<string> = new Set([
   'NO_INSTANCE',
+  'INSTANCE_NOT_FOUND',
   'STALE_INSTANCE',
   'NO_BROWSER_ATTACHED',
   'RENDERER_UNRESPONSIVE',

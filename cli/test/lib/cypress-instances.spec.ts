@@ -299,11 +299,14 @@ describe('lib/cypress-instances', () => {
       expect(selection.instance.cdpBrowserWsUrl).toBe(CDP_WS_URL)
     })
 
-    it('throws NO_INSTANCE when no record matches the filters', async () => {
+    it('throws INSTANCE_NOT_FOUND, naming the pid, when no record matches the filters', async () => {
       mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [111] })
 
-      await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+      await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({
+        code: 'INSTANCE_NOT_FOUND',
+        detail: 'Looked for `--instance` 999.',
+      })
     })
 
     it('reaps the leftover record and throws NO_INSTANCE when the only match’s process is dead', async () => {
@@ -314,6 +317,8 @@ describe('lib/cypress-instances', () => {
 
       expect(err).toBeInstanceOf(TapError)
       expect(err.code).toBe('NO_INSTANCE')
+      // Nothing was asked for, so there is nothing to name back.
+      expect(err.detail).toBeUndefined()
       // The dead-process leftover is reaped, so it stops masquerading as a
       // still-running-but-unresponsive (stale) instance on later commands.
       expect(fs.existsSync(`${INSTANCES_DIR}/111.json`)).toBe(false)
@@ -400,7 +405,7 @@ describe('lib/cypress-instances', () => {
 
       expect(selection.instance.pid).toBe(222)
       expect(selection.reason).toBe('explicit')
-      await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+      await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'INSTANCE_NOT_FOUND' })
     })
 
     it('prefers the instance rooted at the cwd when several are live (reason: cwd-match)', async () => {
@@ -471,13 +476,13 @@ describe('lib/cypress-instances', () => {
       expect(selection.instance.cdpBrowserWsUrl).toBe(CDP_WS_URL)
     })
 
-    it('throws NO_INSTANCE when no record matches the filters', async () => {
+    it('throws INSTANCE_NOT_FOUND when no record matches the filters', async () => {
       mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
       stubKill({ alive: [111] })
 
       const err = await resolveLiveInstance({ instance: 999, cwd: PROJECT }).catch((e) => e)
 
-      expect(err.code).toBe('NO_INSTANCE')
+      expect(err.code).toBe('INSTANCE_NOT_FOUND')
       // resolveLiveInstance serves pre-browser commands (specs/status), so the
       // guidance must not tell the user to open a browser.
       expect(err.message).not.toMatch(/browser/i)

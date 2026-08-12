@@ -6,9 +6,11 @@ import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions, TapRunState, TapStatus } from '../types'
 
-// The two ways an instance can fail to resolve at all. Both are a lifecycle stage
+// The ways an instance can fail to resolve at all. Each is a lifecycle stage
 // `status` reports rather than a failure it exits on; anything else really did fail.
-const NOT_CONNECTED_CODES: ReadonlySet<string> = new Set(['NO_INSTANCE', 'STALE_INSTANCE'])
+// A named `--instance` that has gone is one of them, so a poller watching one pid
+// keeps reading `not connected` after it exits rather than starting to error.
+const NOT_CONNECTED_CODES: ReadonlySet<string> = new Set(['NO_INSTANCE', 'INSTANCE_NOT_FOUND', 'STALE_INSTANCE'])
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   const pinned = runState.pinned ? { pinned: runState.pinned } : {}
