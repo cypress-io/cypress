@@ -594,11 +594,11 @@ darwin-arm64:
 
 # Windows CI is expensive, so unlike the other platform workflows above it does not run on every 
 # develop/release push. It runs via CircleCI Scheduled Pipelines (configured in the CircleCI UI, not here)
-# that set run-windows-scheduled=true, plus on the other filters listed below.
+# that set run-windows-workflow=true, plus on the other filters listed below.
 windows:
   when:
     or:
-      - equal: [ true, << pipeline.parameters.run-windows-scheduled >> ]
+      - equal: [ true, << pipeline.parameters.run-windows-workflow >> ]
       - and:
           - *full-workflow-filters
           - not:
