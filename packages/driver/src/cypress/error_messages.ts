@@ -468,6 +468,13 @@ export default {
     },
   },
 
+  end: {
+    removed: {
+      message: `${cmd('end')} was removed in Cypress version 16.0.0. A Cypress chain is already terminated when the next \`cy.<command>()\` starts a new chain, so \`.end()\` calls can be removed.`,
+      docsUrl: 'https://on.cypress.io/migration-guide',
+    },
+  },
+
   env: {
     docsUrl: 'https://on.cypress.io/api/env',
     invalid_argument: {
