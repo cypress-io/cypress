@@ -435,12 +435,12 @@ function specsPageIsVisible (specsSetup) {
   return cy.get('[data-cy=spec-list-container]').should('be.visible')
 }
 
-function visitLaunchpad (options: { showWelcome?: boolean } = { showWelcome: false }) {
+function visitLaunchpad (options: { showWelcome?: boolean, spinnerTimeout?: number } = { showWelcome: false }) {
   cy.task<{ e2e_launchpadPort: number }>('getCyInCyVariables', ['e2e_launchpadPort']).then(({ e2e_launchpadPort }) => {
     function launchpadVisit () {
       return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
         return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
-          return cy.get('.spinner', { timeout: 10000, log: false }).should('not.exist').then(() => {
+          return cy.get('.spinner', { timeout: options.spinnerTimeout ?? 10000, log: false }).should('not.exist').then(() => {
             return val
           })
         })

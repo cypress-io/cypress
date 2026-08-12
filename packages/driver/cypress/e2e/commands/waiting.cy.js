@@ -943,6 +943,38 @@ describe('src/cy/commands/waiting', () => {
       return null
     })
 
+    describe('retries in afterEach hook when the test failed', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/jquery.html')
+      })
+
+      it('yields the aliased request', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).contain('expected true to be false')
+
+          return false
+        })
+
+        expect(true).to.be.false
+      })
+
+      afterEach(() => {
+        const resp = { foo: 'foo' }
+        const win = cy.state('window')
+
+        cy.on('command:retry', _.once(() => {
+          xhrGet(win, '/users?afterEach=1')
+        }))
+
+        cy
+        .intercept(/users/, resp).as('getUsersAfterEach')
+        .wait('@getUsersAfterEach').then((xhr) => {
+          expect(xhr.request.url).to.include('/users?afterEach=1')
+          expect(xhr.response.body).to.deep.eq(resp)
+        })
+      })
+    })
+
     describe('errors', () => {
       describe('invalid 1st argument', {
         defaultCommandTimeout: 50,

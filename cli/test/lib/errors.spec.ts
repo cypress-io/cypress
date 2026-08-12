@@ -1,5 +1,6 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest'
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest'
 import os from 'os'
+import path from 'path'
 import si, { Systeminformation } from 'systeminformation'
 import util from '../../lib/util'
 import { errors, getError, formErrorText } from '../../lib/errors'
@@ -125,6 +126,31 @@ describe('errors', function () {
       const text: string = await formErrorText(errors.invalidSmokeTestDisplayError, 'current message', 'prev message')
 
       expect(text).toMatchSnapshot()
+    })
+  })
+
+  describe('.errors.notInstalledCI', function () {
+    const originalCacheFolder = process.env.CYPRESS_CACHE_FOLDER
+
+    afterEach(() => {
+      if (originalCacheFolder === undefined) {
+        delete process.env.CYPRESS_CACHE_FOLDER
+      } else {
+        process.env.CYPRESS_CACHE_FOLDER = originalCacheFolder
+      }
+    })
+
+    it('names the overridden cache folder in the paths to persist', async () => {
+      const cacheFolder = path.resolve('/tmp', 'custom-cypress-cache')
+
+      process.env.CYPRESS_CACHE_FOLDER = cacheFolder
+
+      const executable = path.join(cacheFolder, '1.2.3', 'Cypress', 'Cypress')
+      const text: string = await formErrorText(errors.notInstalledCI(executable))
+
+      expect(text).toContain(`are not caching this path: ${cacheFolder}`)
+      expect(text).toContain(`did not persist: ${cacheFolder}`)
+      expect(text).not.toContain(util.getCacheDir())
     })
   })
 })

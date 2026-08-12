@@ -42,17 +42,11 @@ https://on.cypress.io/cypress-env-migration
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     allow-cypress-env.cy.ts                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/allow-cypress-env.cy.ts/allowCypressEnv -- invo     (1280x720)
-     kes Cypress.env() (failed).png                                                                 
 
 
 ====================================================================================================

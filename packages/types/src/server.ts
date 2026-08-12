@@ -12,6 +12,12 @@ export type CdpClientShape = {
   off: (...args: any[]) => void
 }
 
+// Releases a CdpFetchTransport attached to an extra-target (popup / `_blank`)
+// CDP session. Returned by OnExtraTargetCriClientReady.
+export type ExtraTargetDetach = () => Promise<void>
+
+export type OnExtraTargetCriClientReady = (client: CdpClientShape) => Promise<ExtraTargetDetach | undefined>
+
 /**
  * Interface for compiler error location information
  * Used across error handling systems to provide file, line, and column details
@@ -93,6 +99,13 @@ export type BrowserLaunchOpts = {
   relaunchBrowser?: () => Promise<any>
   protocolManager?: ProtocolManagerShape
   onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>, onAUTFrameNavigated?: (listener: (url: string) => void) => () => void) => Promise<void>
+  /**
+   * When the MITM proxy is disabled, called for each extra-target (popup /
+   * `_blank`) CDP session so the CDP Fetch runtime can attach shared request
+   * middleware. Returns an optional detach callback invoked when the target
+   * is destroyed. Absent when the MITM proxy is enabled (header-only continue).
+   */
+  onExtraTargetCriClientReady?: OnExtraTargetCriClientReady
   // Only set when the MITM proxy is disabled: `hosts` is translated into
   // browser-level resolver rules instead of the Node-side DNS remap.
   hosts?: { [host: string]: string } | null

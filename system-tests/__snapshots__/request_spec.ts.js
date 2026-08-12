@@ -137,17 +137,11 @@ https://on.cypress.io/request
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request_http_network_error_failing.cy.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing.cy.js/when n     (1280x720)
-     etwork connection cannot be established -- fails (failed).png                                  
 
 
 ====================================================================================================
@@ -249,17 +243,11 @@ https://on.cypress.io/request
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request_status_code_failing.cy.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing.cy.js/when status c     (1280x720)
-     ode isnt 2xx or 3xx -- fails (failed).png                                                      
 
 
 ====================================================================================================
@@ -369,17 +357,11 @@ https://on.cypress.io/request
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     request_long_http_props_failing.cy.js                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing.cy.js/when stat     (1280x720)
-     us code isnt 2xx or 3xx -- fails (failed).png                                                  
 
 
 ====================================================================================================

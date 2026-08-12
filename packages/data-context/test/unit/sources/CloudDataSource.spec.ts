@@ -348,4 +348,36 @@ describe('CloudDataSource', () => {
       expect(fetchStub).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe('cloud url', () => {
+    const originalEnv = process.env.CYPRESS_INTERNAL_ENV
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.CYPRESS_INTERNAL_ENV
+      } else {
+        process.env.CYPRESS_INTERNAL_ENV = originalEnv
+      }
+    })
+
+    it('does not freeze the environment at module load', async () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'production'
+
+      const source = new CloudDataSource({
+        fetch: fetchStub,
+        getUser: getUserStub,
+        logout: logoutStub,
+        invalidateClientUrqlCache: invalidateCacheStub,
+      })
+
+      await source.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
+        operationDoc: FAKE_USER_QUERY,
+        operationVariables: {},
+        operationType: 'query',
+      })
+
+      expect(fetchStub).toHaveBeenCalledWith('https://cloud.cypress.io/test-runner-graphql', expect.anything())
+    })
+  })
 })

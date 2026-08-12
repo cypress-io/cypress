@@ -8,5 +8,6 @@ describe('e2e issue 173', () => {
     spec: 'issue_173.cy.js',
     snapshot: true,
     expectedExitCode: 1,
+    config: { screenshotOnRunFailure: false },
   })
 })
