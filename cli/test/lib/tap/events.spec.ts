@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { beginTapTrace, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
+import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
 import { resolvedInstanceId } from '../../../lib/cypress-instances'
 import { detectAgent } from '@packages/agent-info'
 import util, { DEVELOPMENT_VERSION } from '../../../lib/util'
@@ -49,8 +49,8 @@ describe('lib/tap/events', () => {
     fetchMock.mockReset()
     fetchMock.mockResolvedValue({ status: 200 })
     vi.stubGlobal('fetch', fetchMock)
-    delete process.env.CYPRESS_DISABLE_TELEMETRY
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
+    delete process.env.CYPRESS_INTERNAL_ENV
     vi.mocked(resolvedInstanceId).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
     vi.mocked(util.pkgVersion).mockReturnValue('15.0.0')
@@ -170,8 +170,33 @@ describe('lib/tap/events', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/anon-collect')
   })
 
+  it('reports to the collector the internal environment names', async () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'staging'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://cloud-staging.cypress.io/anon-collect')
+  })
+
+  it('prefers the collector environment over the internal one', async () => {
+    process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'staging'
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://cloud-staging.cypress.io/anon-collect')
+  })
+
   it('falls back to production for an unrecognized collector environment', async () => {
     process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'nonsense'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://cloud.cypress.io/anon-collect')
+  })
+
+  it('falls back to production for an internal environment naming no collector', async () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'test'
 
     await reportTapTrace(0)
 
@@ -204,12 +229,14 @@ describe('lib/tap/events', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('https://cloud-staging.cypress.io/anon-collect')
   })
 
-  it('sends nothing when telemetry is turned off', async () => {
-    process.env.CYPRESS_DISABLE_TELEMETRY = '1'
+  it('reports no more flags than the payload holds', async () => {
+    const declared = Object.fromEntries(Array.from({ length: 40 }, (_value, index) => [`flag-${index}`, 'set']))
 
-    await reportTapTrace(1)
+    noteTapCommand('status', declared)
 
-    expect(fetchMock).not.toHaveBeenCalled()
+    await reportTapTrace(0)
+
+    expect(posted(fetchMock).payload.flags).toHaveLength(25)
   })
 
   it('stays silent when the collector cannot be reached', async () => {

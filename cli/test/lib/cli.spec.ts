@@ -220,8 +220,8 @@ describe('cli', () => {
         // the reporting prints — or whether it prints one at all.
         env: {
           DEBUG: 'cypress:cli:tap',
-          CYPRESS_DISABLE_TELEMETRY: undefined,
           CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV: undefined,
+          CYPRESS_INTERNAL_ENV: undefined,
         },
         filter: ['code', 'stdout', 'stderr'],
       }

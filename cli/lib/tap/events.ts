@@ -12,6 +12,10 @@ const CAMPAIGN = 'Tap Command'
 const MEDIUM = 'tap-cli'
 const POST_TIMEOUT_MS = 2000
 
+// Only flags a command declares reach a trace, and no command declares close to
+// this many, so the cap is a backstop rather than the real bound.
+const MAX_REPORTED_FLAGS = 25
+
 // Duplicated from packages/data-context/src/util/cloudUrls.ts, which the CLI
 // cannot import.
 const CLOUD_URLS = {
@@ -20,11 +24,13 @@ const CLOUD_URLS = {
   production: 'https://cloud.cypress.io',
 } as const
 
-// Which collector the environment names, if it names one this CLI has a URL for.
-// An unrecognized value is no collector at all, so a typo cannot pass for naming
-// one and land a source checkout's traffic in the production analytics.
+// Which collector the environment names, if it names one this CLI has a URL for:
+// the collector variable the app reads (see EventCollectorActions), then the
+// internal environment it is normally derived from. An unrecognized value is no
+// collector at all, so a typo cannot pass for naming one and land a source
+// checkout's traffic in the production analytics.
 const namedCollectorEnv = (): keyof typeof CLOUD_URLS | undefined => {
-  const named = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV as keyof typeof CLOUD_URLS
+  const named = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV ?? process.env.CYPRESS_INTERNAL_ENV) as keyof typeof CLOUD_URLS
 
   return Object.prototype.hasOwnProperty.call(CLOUD_URLS, named) ? named : undefined
 }
@@ -70,10 +76,6 @@ export const noteTapFailure = (code: string): void => {
 // spelled out here rather than spread from the trace, so a new trace field
 // cannot silently become a new wire field.
 export const reportTapTrace = async (exitCode: number): Promise<void> => {
-  if (process.env.CYPRESS_DISABLE_TELEMETRY) {
-    return
-  }
-
   // This runs from the `finally` the CLI exits on, so nothing here may throw: a
   // failure while assembling the event would replace the command's own outcome.
   try {
@@ -89,7 +91,7 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
 
     const payload = {
       command: trace.command,
-      flags: trace.flags,
+      flags: trace.flags.slice(0, MAX_REPORTED_FLAGS),
       agent: detectAgent(),
       instanceId: resolvedInstanceId() ?? undefined,
       exitCode,
