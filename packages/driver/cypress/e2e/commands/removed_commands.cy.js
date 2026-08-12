@@ -121,6 +121,26 @@ context('Cypress.env', () => {
     Cypress.env({ FOO: 'foo', BAR: 'bar' })
   })
 
+  it('throws error when reading an array of keys', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(`${removalMessage}\n\nThe keys being accessed were: \`FOO\`, \`BAR\`\n\n${pluginMessage}`)
+
+      done()
+    })
+
+    Cypress.env(['FOO', 'BAR'])
+  })
+
+  it('throws error when reading an array of a single key', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(`${removalMessage}\n\nThe key being accessed was: \`FOO\`\n\n${pluginMessage}`)
+
+      done()
+    })
+
+    Cypress.env(['FOO'])
+  })
+
   it('throws error when reading every key', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.equal(`${removalMessage}\n\n${pluginMessage}`)

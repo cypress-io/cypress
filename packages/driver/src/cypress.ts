@@ -948,8 +948,19 @@ class $Cypress {
     $errUtils.throwErrByPath('require.invalid_outside_origin')
   }
 
-  env (keyOrValues?: string | Record<string, any>) {
-    const keys = _.isObject(keyOrValues) ? Object.keys(keyOrValues) : _.compact([keyOrValues])
+  env (keyOrValues?: string | string[] | Record<string, any>) {
+    let keys: string[] = []
+
+    // an array holds the keys themselves, so reading Object.keys() off of it
+    // would report indexes rather than what the caller asked for
+    if (_.isArray(keyOrValues)) {
+      keys = _.compact(keyOrValues)
+    } else if (_.isObject(keyOrValues)) {
+      keys = Object.keys(keyOrValues)
+    } else if (keyOrValues) {
+      keys = [keyOrValues]
+    }
+
     const specWindow = this.state?.('specWindow')
 
     $errUtils.throwErrByPath('env.removed', {
