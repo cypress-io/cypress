@@ -49,7 +49,7 @@ describe('lib/tap/events', () => {
     fetchMock.mockReset()
     fetchMock.mockResolvedValue({ status: 200 })
     vi.stubGlobal('fetch', fetchMock)
-    delete process.env.CYPRESS_CRASH_REPORTS
+    delete process.env.CYPRESS_DISABLE_TELEMETRY
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     vi.mocked(resolvedInstanceId).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
@@ -204,8 +204,8 @@ describe('lib/tap/events', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('https://cloud-staging.cypress.io/anon-collect')
   })
 
-  it('sends nothing when crash reports are turned off', async () => {
-    process.env.CYPRESS_CRASH_REPORTS = '0'
+  it('sends nothing when telemetry is turned off', async () => {
+    process.env.CYPRESS_DISABLE_TELEMETRY = '1'
 
     await reportTapTrace(1)
 

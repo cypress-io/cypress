@@ -177,17 +177,15 @@ describe('lib/exec/tap reporting the invocation', () => {
     expect(await tap.start(['health'], {})).toBe(0)
   })
 
-  it('sends nothing when crash reports are turned off', async () => {
-    const original = process.env.CYPRESS_CRASH_REPORTS
-
-    process.env.CYPRESS_CRASH_REPORTS = '0'
+  it('sends nothing when telemetry is turned off', async () => {
+    vi.stubEnv('CYPRESS_DISABLE_TELEMETRY', '1')
     mockSession()
 
     try {
       expect(await tap.start(['health'], {})).toBe(0)
       expect(fetchMock).not.toHaveBeenCalled()
     } finally {
-      process.env.CYPRESS_CRASH_REPORTS = original
+      vi.unstubAllEnvs()
     }
   })
 })

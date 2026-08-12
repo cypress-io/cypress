@@ -70,7 +70,7 @@ export const noteTapFailure = (code: string): void => {
 // spelled out here rather than spread from the trace, so a new trace field
 // cannot silently become a new wire field.
 export const reportTapTrace = async (exitCode: number): Promise<void> => {
-  if (process.env.CYPRESS_CRASH_REPORTS === '0') {
+  if (process.env.CYPRESS_DISABLE_TELEMETRY) {
     return
   }
 
