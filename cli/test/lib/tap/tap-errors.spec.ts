@@ -6,11 +6,9 @@ import { renderTapFailure } from '../../../lib/tap/output'
 import { TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, invalidValueTapError, missingCompanionOptionTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
-// should land here as a snapshot diff.
-//
-// These snapshots hold the registry copy alone — the condition and the remedy. What
-// a caller sees also carries the specifics from the throw site; the rendering
-// assertions below cover the assembled shape.
+// should land here as a snapshot diff: the rendering catalogue at the foot of this
+// file snapshots each code as a caller sees it, headed by an invocation that
+// produces it.
 
 describe('lib/tap error registry', () => {
   const entries: [string, TapErrorCopy][] = Object.entries(TAP_ERROR_COPY)
@@ -56,16 +54,6 @@ describe('lib/tap error registry', () => {
         "UNKNOWN_OPTION",
       ]
     `)
-  })
-
-  it('reads as one voice across every entry', () => {
-    const rendered = entries
-    .filter(([, copy]) => copy.description || copy.solution)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([code, copy]) => [code, copy.description, copy.solution].filter(Boolean).join('\n  '))
-    .join('\n\n')
-
-    expect(rendered).toMatchSnapshot()
   })
 
   // These conditions open by naming their subject, so there is no generic sentence
