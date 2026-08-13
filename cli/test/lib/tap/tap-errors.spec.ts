@@ -4,7 +4,7 @@ import stripAnsi from 'strip-ansi'
 import logger from '../../../lib/logger'
 import { renderTapFailure, helpFor } from '../../../lib/tap/output'
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, invalidValueTapError, missingCompanionOptionTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
+import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, invalidValueTapError, missingArgumentsTapError, missingCompanionOptionTapError, missingOptionTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff: the rendering catalogue at the foot of this
@@ -491,16 +491,16 @@ describe('lib/tap error rendering catalogue', () => {
       failure: unknownOptionTapError('--bogus'),
       helpOf: 'dom',
     },
-    // packages/app/src/tap/exec-args.ts
+    // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     INVALID_ARGUMENTS: {
       invocation: 'cypress tap run',
-      failure: new TapError('INVALID_ARGUMENTS', { detail: '"run" is missing the required <spec> argument(s).' }),
+      failure: missingArgumentsTapError('run', ['spec']),
       helpOf: 'run',
     },
-    // packages/app/src/tap/exec-args.ts
+    // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     INVALID_OPTIONS: {
       invocation: 'cypress tap reporter',
-      failure: new TapError('INVALID_OPTIONS', { detail: '"reporter" is missing the required --test-id option.' }),
+      failure: missingOptionTapError('reporter', 'test-id'),
       helpOf: 'reporter',
     },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/commands/reporter.ts

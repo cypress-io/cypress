@@ -1,4 +1,4 @@
-import { invalidValueTapError, TapError, unknownOptionTapError } from './contract'
+import { invalidValueTapError, missingArgumentsTapError, missingOptionTapError, TapError, unknownOptionTapError } from './contract'
 import type { TapCommandOptionSchema, TapCommandParamSchema } from './contract'
 
 type ExpectedType = TapCommandParamSchema['type']
@@ -76,7 +76,7 @@ export const coerceCommandArgs = (name: string, params: readonly TapCommandParam
   const missing = params.filter(({ required, name: param }) => required && args[param] === undefined)
 
   if (missing.length) {
-    return invalid(`"${name}" is missing the required ${missing.map(({ name: param }) => `<${param}>`).join(' ')} argument(s).`)
+    return { ok: false, error: missingArgumentsTapError(name, missing.map(({ name: param }) => param)) }
   }
 
   const coerced: Record<string, unknown> = {}
@@ -105,10 +105,6 @@ type CoercedCommandOptions =
   | CoercionFailure
 
 export const coerceCommandOptions = (name: string, options: readonly TapCommandOptionSchema[], raw: Record<string, string>): CoercedCommandOptions => {
-  const invalid = (message: string): CoercedCommandOptions => {
-    return { ok: false, error: new TapError('INVALID_OPTIONS', { detail: message }) }
-  }
-
   const known = new Set(options.map(({ name: option }) => option))
   const unknown = Object.keys(raw).find((key) => !known.has(key))
 
@@ -125,7 +121,7 @@ export const coerceCommandOptions = (name: string, options: readonly TapCommandO
 
     if (supplied === undefined) {
       if (option.required) {
-        return invalid(`"${name}" is missing the required --${option.name} option.`)
+        return { ok: false, error: missingOptionTapError(name, option.name) }
       }
 
       if (option.type === 'boolean') {

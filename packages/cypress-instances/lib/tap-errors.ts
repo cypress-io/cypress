@@ -402,6 +402,23 @@ export const unknownOptionTapError = (flag: string, listing?: string): TapError 
 }
 
 /**
+ * A required input the invocation left out. Both sides raise these through here —
+ * the CLI when its own grammar catches the omission, the instance when a call
+ * reaches it without one — so an omission reads the same whichever side caught it.
+ * Their entries name no remedy of their own: the called command's help lists every
+ * input it takes, and the CLI appends it as it renders.
+ */
+export const missingArgumentsTapError = (command: string, params: readonly string[]): TapError => {
+  const named = params.map((param) => `<${param}>`).join(' ')
+
+  return new TapError('INVALID_ARGUMENTS', { detail: `"${command}" is missing the required ${named} argument(s).` })
+}
+
+export const missingOptionTapError = (command: string, option: string): TapError => {
+  return new TapError('INVALID_OPTIONS', { detail: `"${command}" is missing the required --${option} option.` })
+}
+
+/**
  * The spec that is mid-run, which is what makes the condition actionable: it names
  * what to wait on. Both sides raise it through here — the CLI from its run-state
  * gate, the app from the runner — and the spec is only unnamed in the moment

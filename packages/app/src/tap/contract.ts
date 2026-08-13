@@ -20,6 +20,8 @@ export {
   specInProgressTapError,
   notFoundTapError,
   missingCompanionOptionTapError,
+  missingArgumentsTapError,
+  missingOptionTapError,
 } from '@packages/cypress-instances/lib/tap-contract'
 
 export type {

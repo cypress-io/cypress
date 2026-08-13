@@ -259,7 +259,12 @@ describe('lib/exec/tap', () => {
       const call = mockSession()
 
       expect(await tap.start(['fake-command-for-testing'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`missing required argument 'spec'`)
+
+      const stderr = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(stderr).toContain('"fake-command-for-testing" is missing the required <spec> argument(s).')
+      // The remedy is the called command's own help, which lists what it takes.
+      expect(stderr).toContain('Usage: cypress tap fake-command-for-testing')
       expect(call.mock.calls).toEqual([['getSchema']])
     })
   })
@@ -1110,12 +1115,13 @@ describe('lib/exec/tap', () => {
 
     it('rejects `inspect` with no selector, without reading the frame', async () => {
       expect(await tap.start(['inspect'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`required option '-s, --selector <selector>' not specified`)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain('"inspect" is missing the required --selector option.')
       expect(withResolvedAutFrame).not.toHaveBeenCalled()
     })
 
     it('rejects excess positionals for dom, without reading the frame', async () => {
       expect(await tap.start(['dom', '.a', '.b'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain('2 arguments were passed to "dom", but it takes none.')
       expect(withResolvedAutFrame).not.toHaveBeenCalled()
     })
 
