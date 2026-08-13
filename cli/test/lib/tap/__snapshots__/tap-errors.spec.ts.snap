@@ -89,7 +89,11 @@ exports[`lib/tap error rendering catalogue > GRAPHQL_UNREACHABLE 1`] = `
 "> cypress tap specs
 Could not connect to the Cypress session to read its data.
 
-The Cypress session may have just closed. Make sure Cypress is running in open mode, then try again."
+The Cypress session may have just closed. Make sure Cypress is running in open mode, then try again.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
 `;
 
 exports[`lib/tap error rendering catalogue > INSTANCE_NOT_FOUND 1`] = `

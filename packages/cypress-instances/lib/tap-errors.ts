@@ -94,6 +94,7 @@ export const TAP_ERROR_COPY = {
   GRAPHQL_UNREACHABLE: {
     description: `Could not connect to the ${TAP_TARGET} to read its data.`,
     solution: `The ${TAP_TARGET} may have just closed. Make sure Cypress is running in open mode, then try again.`,
+    recommendGhIssue: true,
   },
   /** Raised when GraphQL answered, but with errors, no data, or not JSON. */
   GRAPHQL_FAILED: {
