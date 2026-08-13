@@ -46,9 +46,11 @@ every call, so the server log shows whether each binary body reached it intact.
 ## Status
 
 This project is a reproduction, not a passing regression suite, and is
-deliberately not wired into CI. With the proxy enabled all six specs pass.
-With `CYPRESS_INTERNAL_DISABLE_PROXY=1` three fail, each on a distinct defect
-in the CDP Fetch transport:
+deliberately not wired into CI. With the proxy enabled every spec passes. With
+`CYPRESS_INTERNAL_DISABLE_PROXY=1` five fail, on three distinct defects in the
+CDP Fetch transport:
+
+`grpc-web.cy.js`:
 
 | spec | proxy enabled | proxy disabled |
 | --- | --- | --- |
@@ -59,6 +61,15 @@ in the CDP Fetch transport:
 | delivers a server-streaming call progressively | pass | **fail** — whole body buffered |
 | can be stubbed with an ArrayBuffer body | pass | pass |
 
+`json-rewrite.cy.js` — ordinary JSON and text POSTs, no gRPC involved,
+isolating the rewrite defect from anything binary:
+
+| spec | proxy enabled | proxy disabled |
+| --- | --- | --- |
+| passes an unmodified JSON body through | pass | pass |
+| sends a rewritten JSON body | pass | **fail** — origin gets the original body |
+| sends a rewritten text body | pass | **fail** — origin gets the original body |
+
 1. **Truncated request bodies.** `cdp-fetch-transport.ts` builds `req.body`
    from `Fetch.requestPaused`'s `request.postData`, which Chrome serializes as
    a UTF-8 string and truncates at the first byte that is not valid UTF-8. The
@@ -68,8 +79,11 @@ in the CDP Fetch transport:
    `binary`, i.e. base64. Chrome rejects the command
    (`Failed to deserialize params.postData - BINDINGS: invalid base64 string`)
    and the transport's error path continues the request unmodified, so
-   assigning `req.body` in an intercept handler is a silent no-op. This is not
-   gRPC-specific — it affects every request-body rewrite in this mode.
+   assigning `req.body` in an intercept handler is a silent no-op. Nothing
+   about this is gRPC- or binary-specific: `json-rewrite.cy.js` shows it with
+   a plain `req.body = { a: 2 }` on an `application/json` POST. The response
+   pause is orphaned by the same error path, so `cy.wait()` on that route
+   never yields a response either.
 3. **Buffered streaming responses.** `Fetch.enable` subscribes to
    `requestStage: 'Response'`, which makes Chrome withhold the whole response
    body until the pause is resolved. This applies to every response, whether

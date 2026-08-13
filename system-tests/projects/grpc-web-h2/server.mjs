@@ -228,6 +228,22 @@ const page = (protocol) => {
         return transport === 'xhr' ? echoViaXhr(text) : echoViaFetch(text)
       }
 
+      window.jsonPost = (payload) => {
+        return fetch('/api/json', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).then((res) => res.json())
+      }
+
+      window.textPost = (text) => {
+        return fetch('/api/json', {
+          method: 'POST',
+          headers: { 'content-type': 'text/plain' },
+          body: text,
+        }).then((res) => res.json())
+      }
+
       // real protobuf routinely contains bytes that are not valid UTF-8;
       // 0xFF 0x80 0xC3 0x28 is an unambiguously invalid sequence
       window.grpcBinaryBody = new Uint8Array([
@@ -320,6 +336,19 @@ server.on('request', async (req, res) => {
     res.setHeader('x-echo-request', request)
 
     return res.end(grpcWebResponse(`echo: ${request}`))
+  }
+
+  // an ordinary JSON endpoint — nothing gRPC about it — echoing back exactly
+  // what arrived, so a spec can compare it against what it asked to send
+  if (req.url === '/api/json') {
+    const body = await readBody(req)
+
+    console.log(`[grpc-web] json request: ${body.length} bytes ${JSON.stringify(body.toString('utf8'))}`)
+
+    res.setHeader('content-type', 'application/json')
+    res.setHeader('x-received-bytes', String(body.length))
+
+    return res.end(JSON.stringify({ received: body.toString('utf8') }))
   }
 
   // a request body that is deliberately not valid UTF-8, echoing back exactly
