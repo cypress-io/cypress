@@ -1566,15 +1566,15 @@ export default {
           // In this case, we DON'T need to add the new test attempt as it is already queued to rerun.
           const testRetryThatMatches = test.parent.testsQueue.find((t) => t.id === newTest.id && t._currentRetry === newTest._currentRetry)
 
-          if (!testRetryThatMatches) {
-            test.parent.testsQueue.unshift(newTest)
-          }
-
           // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
           test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
           test._retriedFromAfterEachHook = true
 
-          Cypress.action('runner:retry', wrap(test), test.err)
+          if (!testRetryThatMatches) {
+            test.parent.testsQueue.unshift(newTest)
+
+            Cypress.action('runner:retry', wrap(test), test.err)
+          }
 
           return noFail()
         }

@@ -64,8 +64,9 @@ export class CDPConnection {
   }
 
   get ws () {
-    // this is reached into by browser-cri-client to detect close events - needs rethinking
-    return (this._connection as { _ws?: WebSocket })._ws
+    // this is reached into by browser-cri-client to detect close events - needs rethinking.
+    // _connection can be undefined after a terminal disconnect, so this must stay optional
+    return (this._connection as { _ws?: WebSocket } | undefined)?._ws
   }
 
   on<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
@@ -104,7 +105,26 @@ export class CDPConnection {
 
     if (this._autoReconnect) {
       this._connection.on('disconnect', this._reconnect)
+    } else {
+      // Without reconnection, a closed socket is permanent - there is no retry loop
+      // that will ever bring the connection back. Treat it as terminated so pending
+      // and future senders reject instead of waiting on a reconnect that never comes.
+      this._connection.on('disconnect', this._onTerminalDisconnect)
     }
+  }
+
+  private _onTerminalDisconnect = async () => {
+    this.debug('terminal disconnect for target %s (reconnection disabled)', this._options.target)
+
+    this._terminated = true
+
+    try {
+      await this._gracefullyDisconnect()
+    } catch (e) {
+      this.debug('error cleaning up terminally-disconnected CDP connection: ', e)
+    }
+
+    this._emitter.emit('cdp-connection-closed')
   }
 
   async disconnect () {
@@ -124,6 +144,7 @@ export class CDPConnection {
   private _gracefullyDisconnect = async () => {
     this._connection?.off('event', this._broadcastEvent)
     this._connection?.off('disconnect', this._reconnect)
+    this._connection?.off('disconnect', this._onTerminalDisconnect)
 
     await this._connection?.close()
     this._connection = undefined
