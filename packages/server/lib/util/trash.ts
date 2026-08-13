@@ -12,7 +12,9 @@ import trash from 'trash'
 // warn.
 const trashItem = async (itemPath: string): Promise<void> => {
   try {
-    await trash([itemPath])
+    // These are literal paths from `readdir`, and `trash` globs its input by
+    // default, silently skipping names that contain glob syntax such as `[`.
+    await trash([itemPath], { glob: false })
   } catch (error) {
     if (await fs.pathExists(itemPath)) {
       throw error

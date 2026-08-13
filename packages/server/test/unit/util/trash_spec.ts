@@ -57,6 +57,31 @@ describe('lib/util/trash', () => {
       fs.rmdirSync(basePath)
     })
 
+    it('trashes items whose names contain glob syntax', async () => {
+      // Screenshot names come from test titles, so brackets are common. Globbed,
+      // `[special]` reads as a character class and matches nothing.
+      sinon.stub(os, 'platform').returns('darwin')
+      const basePath = path.join(tempDir, 'foo')
+      const bracketedName = 'handles [special] chars (failed).png'
+
+      fs.mkdirSync(basePath, { recursive: true })
+      fs.writeFileSync(path.resolve(basePath, bracketedName), '')
+
+      const trashStub = sinon.stub().callsFake(async (paths: string[]) => {
+        paths.forEach((p) => fs.rmSync(p, { recursive: true, force: true }))
+      })
+
+      const trashModule = proxyquire(path.resolve(__dirname, '../../../lib/util/trash'), {
+        trash: trashStub,
+      })
+
+      await trashModule.folder(basePath)
+
+      expect(trashStub).to.have.been.calledWith([path.resolve(basePath, bracketedName)], { glob: false })
+      expect(fs.existsSync(path.resolve(basePath, bracketedName))).to.be.false
+      fs.rmdirSync(basePath)
+    })
+
     it('doesn\'t fail if directory is non-existent', async () => {
       await trash.folder(path.join(tempDir, 'bar'))
     })
