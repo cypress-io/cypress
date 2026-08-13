@@ -706,7 +706,7 @@ ACCESSIBILITY
   role  generic
 
 BOX
-  x 8  y 80  width 200  height 24
+  x <x>  y <y>  width 200  height 24
 
 STYLES (24)
   display  block

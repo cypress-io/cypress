@@ -1307,8 +1307,9 @@ describe('tap CLI debugging a failed run end to end', function () {
     expect(failingSpec, 'the failing spec listed for the discovered instance').to.exist
 
     const renderedSpecs = await instance.tap(['--instance', pid, 'specs'])
+    const [specsHeading, ...specRows] = renderedSpecs.stdout.trimEnd().split('\n')
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} specs\n${renderedSpecs.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap --instance ${pid} specs\n${[specsHeading, ...specRows.sort()].join('\n')}`)
 
     const before = await instance.status()
     const runResult = await instance.tap(['--instance', pid, 'run', failingSpec!.relativePath])
@@ -1405,6 +1406,7 @@ describe('tap CLI debugging a failed run end to end', function () {
     snapshotRendering('complete failed run debugging journey', journeyOutput.join('\n\n'), [
       [/ {2,}[\w ]+ ago$/gm, '  <modified>'],
       [new RegExp(pid, 'g'), '<pid>'],
+      [/x \d+ {3}y \d+/, 'x <x>   y <y>'],
       [/ {2,}/g, '  '],
     ])
 
@@ -1418,6 +1420,10 @@ describe('tap CLI debugging a failed run end to end', function () {
   })
 
   it('renders the failed row the way a reader would meet it', async () => {
+    const settled = await instance.runSpec(FAILING_SPEC)
+
+    expect(settled.status).to.eq('failed')
+
     const test = await firstTest(instance)
     const failed = rowNamed(await commandLog(instance, test.id), 'assert')
 
