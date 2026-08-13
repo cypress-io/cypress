@@ -1,0 +1,3 @@
+[31mRe-running only the tests that did not pass in the previous run. It will not include tests that passed in that run.[39m
+[31m[39m
+[31mThe previous run is: [94mhttps://cloud.cypress.io/runs/12345[39m[31m[39m

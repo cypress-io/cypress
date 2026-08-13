@@ -215,6 +215,12 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    CLOUD_RERUN_FAILED_TESTS: () => {
+      return {
+        default: [{}],
+        withAnchorRunUrl: [{ anchorRunUrl: 'https://cloud.cypress.io/runs/12345' }],
+      }
+    },
     CLOUD_API_RESPONSE_FAILED_RETRYING: () => {
       return {
         default: [{
