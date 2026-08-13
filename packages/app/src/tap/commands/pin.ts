@@ -2,7 +2,7 @@ import { defineCommand } from './definition'
 import { attemptOfLog, attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, TapTestsRunner } from '../types'
-import { notFoundTapError, specInProgressTapError, TapError } from '../contract'
+import { CommandNotFoundTapError, SnapshotNotFoundTapError, SpecInProgressTapError, TapError } from '../contract'
 import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
 // A pin as the commands read it, whoever made it: tap's own, or one made by hand
@@ -94,7 +94,7 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
 
   const available = snapshots.map((entry, index) => (entry.name !== undefined ? `"${entry.name}" (${index + 1})` : `${index + 1}`)).join(', ')
 
-  throw notFoundTapError('SNAPSHOT_NOT_FOUND', '--at', at, `This command has: ${available}.`)
+  throw new SnapshotNotFoundTapError(at, `This command has: ${available}.`)
 }
 
 export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test, 'command-id': command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
@@ -123,7 +123,7 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   }
 
   if (tapManagerDataSource.isRunning()) {
-    throw specInProgressTapError(tapManagerDataSource.getActiveSpecRelative() ?? null)
+    throw new SpecInProgressTapError(tapManagerDataSource.getActiveSpecRelative() ?? null)
   }
 
   const selection = selectTestAttempt(runner, test, attempt)
@@ -135,7 +135,7 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   const logId = resolveCommandLogId(selection.attempt, command, test)
 
   if (logId === undefined) {
-    throw notFoundTapError('COMMAND_NOT_FOUND', '--command-id', command)
+    throw new CommandNotFoundTapError(command)
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)

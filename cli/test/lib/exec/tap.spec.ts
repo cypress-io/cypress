@@ -12,7 +12,7 @@ import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
 import { buildTapSchema } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
-import { TAP_ERROR_COPY, notFoundTapError } from '@packages/cypress-instances'
+import { TAP_ERROR_COPY, InstanceNotFoundTapError } from '@packages/cypress-instances'
 import tap from '../../../lib/exec/tap'
 import { mockResolved, mockSession, readyInstance, resetTapMocks, schema, tapError } from './tap-fixtures'
 
@@ -565,7 +565,7 @@ describe('lib/exec/tap', () => {
     // A poller watching one pid should read "not connected" once it exits, rather
     // than flipping to a failure the moment its record goes.
     it('reports "not connected" when the pid it was given has gone', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new InstanceNotFoundTapError(4321))
 
       expect(await tap.start(['status'], { instance: 4321, json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
@@ -731,6 +731,15 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['status', 'extra'], {})).toBe(1)
       expect(resolveLiveInstance).not.toHaveBeenCalled()
       expect(withTapSession).not.toHaveBeenCalled()
+    })
+
+    it('rethrows unexpected errors for the generic CLI error path', async () => {
+      const unexpected = new Error('boom')
+
+      mockLiveResolved(liveInstance())
+      vi.mocked(queryInstanceGraphql).mockRejectedValue(unexpected)
+
+      await expect(tap.start(['specs'], {})).rejects.toBe(unexpected)
     })
   })
 
@@ -922,15 +931,6 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['specs', 'extra'], {})).toBe(1)
       expect(resolveLiveInstance).not.toHaveBeenCalled()
       expect(queryInstanceGraphql).not.toHaveBeenCalled()
-    })
-
-    it('rethrows unexpected errors for the generic CLI error path', async () => {
-      const unexpected = new Error('boom')
-
-      mockLiveResolved(liveInstance())
-      vi.mocked(queryInstanceGraphql).mockRejectedValue(unexpected)
-
-      await expect(tap.start(['specs'], {})).rejects.toBe(unexpected)
     })
   })
 
@@ -1339,7 +1339,7 @@ describe('lib/exec/tap', () => {
     // Help is answerable without an instance, so naming a pid that no longer exists
     // must not cost the caller the listing it asked for.
     it('falls back to generic help for --help when the named instance is not found', async () => {
-      failResolve(notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321))
+      failResolve(new InstanceNotFoundTapError(4321))
 
       expect(await tap.start(['--help'], { instance: 4321 })).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -1347,7 +1347,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('reports the pid it was given when the named instance is not found', async () => {
-      failResolve(notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321))
+      failResolve(new InstanceNotFoundTapError(4321))
 
       expect(await tap.start(['health'], { instance: 4321 })).toBe(1)
 

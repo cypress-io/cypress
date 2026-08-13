@@ -1,7 +1,7 @@
 import { tapCommands } from './commands'
 import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
-import { isTapError, unknownCommandTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
+import { isTapError, UnknownCommandTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
@@ -55,7 +55,7 @@ export class TapManager implements TapBindingContract {
       : undefined
 
     if (!definition) {
-      return { error: unknownCommandTapError(command).toPayload() }
+      return { error: new UnknownCommandTapError(command).toPayload() }
     }
 
     const normalizedArgs = normalizePayload(args)

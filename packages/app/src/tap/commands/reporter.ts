@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { missingCompanionOptionTapError, TapError } from '../contract'
+import { MissingCompanionOptionTapError, TapError } from '../contract'
 import { attemptSelectionError, selectTestAttempt, serializeReporterSpecView, serializeReporterView } from '../test-state'
 import type { TapReporterSpecView, TapReporterView } from '../contract'
 
@@ -13,7 +13,7 @@ export const reporterCommand = defineCommand('reporter', async (_params, { 'test
 
   if (test === undefined) {
     if (attempt !== undefined) {
-      throw missingCompanionOptionTapError('--attempt', '--test-id', 'Pass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.')
+      throw new MissingCompanionOptionTapError('--attempt', '--test-id', 'Pass `--test-id` to specify the test, or omit `--attempt` to review the latest attempt for every test in the spec.')
     }
 
     return serializeReporterSpecView(runner, tapManagerDataSource.getActiveSpecRelative())

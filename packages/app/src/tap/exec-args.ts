@@ -1,4 +1,4 @@
-import { invalidValueTapError, missingArgumentsTapError, missingOptionTapError, TapError, unknownOptionTapError } from './contract'
+import { InvalidValueTapError, MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownOptionTapError } from './contract'
 import type { TapCommandOptionSchema, TapCommandParamSchema } from './contract'
 
 type ExpectedType = TapCommandParamSchema['type']
@@ -35,16 +35,16 @@ type CoercedField =
 
 // Coerce one raw wire value for a labeled field (`<param>` or `--option`). A value
 // of the wrong type is the same failure whichever field carried it, so the
-// positional and flag paths raise it through the one factory.
+// positional and flag paths raise it as the one error.
 const coerceField = (label: string, type: ExpectedType, raw: string): CoercedField => {
   if (typeof raw !== 'string') {
-    return { ok: false, error: invalidValueTapError(label, 'a string', raw) }
+    return { ok: false, error: new InvalidValueTapError(label, 'a string', raw) }
   }
 
   const result = coerceScalar(type, raw)
 
   if (!result.ok) {
-    return { ok: false, error: invalidValueTapError(label, result.expected, raw) }
+    return { ok: false, error: new InvalidValueTapError(label, result.expected, raw) }
   }
 
   return { ok: true, value: result.value }
@@ -76,7 +76,7 @@ export const coerceCommandArgs = (name: string, params: readonly TapCommandParam
   const missing = params.filter(({ required, name: param }) => required && args[param] === undefined)
 
   if (missing.length) {
-    return { ok: false, error: missingArgumentsTapError(name, missing.map(({ name: param }) => param)) }
+    return { ok: false, error: new MissingArgumentsTapError(name, missing.map(({ name: param }) => param)) }
   }
 
   const coerced: Record<string, unknown> = {}
@@ -111,7 +111,7 @@ export const coerceCommandOptions = (name: string, options: readonly TapCommandO
   // A flag this command has no such thing as, rather than one it has and was given
   // wrongly — the same condition the CLI answers before a call ever gets here.
   if (unknown) {
-    return { ok: false, error: unknownOptionTapError(`--${unknown}`) }
+    return { ok: false, error: new UnknownOptionTapError(`--${unknown}`) }
   }
 
   const coerced: Record<string, unknown> = {}
@@ -121,7 +121,7 @@ export const coerceCommandOptions = (name: string, options: readonly TapCommandO
 
     if (supplied === undefined) {
       if (option.required) {
-        return { ok: false, error: missingOptionTapError(name, option.name) }
+        return { ok: false, error: new MissingOptionTapError(name, option.name) }
       }
 
       if (option.type === 'boolean') {

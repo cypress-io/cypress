@@ -2,7 +2,7 @@ import commander from 'commander'
 
 import { tapCliCommands } from './commands'
 import type { TapCliCommand } from './types'
-import { missingArgumentsTapError, missingOptionTapError, TapError, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
+import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-instances'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
@@ -94,13 +94,13 @@ const answerUnknownOption = (command: commander.Command): void => {
       return
     }
 
-    throw unknownOptionTapError(flag)
+    throw new UnknownOptionTapError(flag)
   }
 }
 
 const answerUnknownCommand = (program: commander.Command): void => {
   (program as InvalidInputHandlers).unknownCommand = function (): void {
-    throw unknownCommandTapError(this.args[0])
+    throw new UnknownCommandTapError(this.args[0])
   }
 }
 
@@ -121,7 +121,7 @@ const answerMissingInput = (command: commander.Command, name: string, params: re
   handlers.missingArgument = function (missing: string): void {
     const absent = params.filter(({ required }, index) => required && this.args[index] === undefined).map((param) => param.name)
 
-    throw missingArgumentsTapError(name, absent.length ? absent : [missing])
+    throw new MissingArgumentsTapError(name, absent.length ? absent : [missing])
   }
 
   handlers.optionMissingArgument = function (option: commander.Option): void {
@@ -129,7 +129,7 @@ const answerMissingInput = (command: commander.Command, name: string, params: re
   }
 
   handlers.missingMandatoryOptionValue = function (option: commander.Option): void {
-    throw missingOptionTapError(name, flagOf(option).replace(/^--/, ''))
+    throw new MissingOptionTapError(name, flagOf(option).replace(/^--/, ''))
   }
 }
 

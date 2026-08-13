@@ -7,7 +7,7 @@ import util from '../util'
 import { renderingFor } from './render'
 import { noteTapFailure } from './events'
 import type { InstanceSelection } from '../cypress-instances'
-import { tapErrorCopy, unknownCommandTapError } from '@packages/cypress-instances'
+import { tapErrorCopy, UnknownCommandTapError } from '@packages/cypress-instances'
 import type { TapErrorCopy, TapSchema } from '@packages/cypress-instances'
 
 // The registry keeps its copy dependency-free, so the commands it names arrive in
@@ -123,7 +123,7 @@ const renderHelp = async (program: commander.Command, schema: TapSchema, command
     const subcommand = program.commands.find((sub) => sub.name() === command)
 
     if (!subcommand) {
-      return await renderTapFailure(unknownCommandTapError(command, program.helpInformation()))
+      return await renderTapFailure(new UnknownCommandTapError(command, program.helpInformation()))
     }
 
     // Standalone help is the only place a schema command's full `details` prose

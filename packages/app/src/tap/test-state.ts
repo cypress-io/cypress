@@ -1,5 +1,5 @@
 import type { SerializedCommandLog, SerializedTest } from '@packages/types'
-import { notFoundTapError, TapError } from './contract'
+import { AttemptNotFoundTapError, TapError, TestNotFoundTapError } from './contract'
 import { omitNullish } from './utils'
 
 import type { TapCommandSnapshot, TapNetworkInfo, TapReporterCommand, TapReporterSpecAttempt, TapReporterSpecTest, TapReporterSpecView, TapReporterSuite, TapReporterView } from './contract'
@@ -66,13 +66,13 @@ export const selectTestAttempt = (runner: Pick<TapTestsRunner, 'getTestState'>, 
 
 export const attemptSelectionError = (selection: { error: 'TEST_NOT_FOUND' } | { error: 'ATTEMPT_NOT_FOUND', attempts: number, requested: number }, testId: string): TapError => {
   if (selection.error === 'TEST_NOT_FOUND') {
-    return notFoundTapError('TEST_NOT_FOUND', '--test-id', testId)
+    return new TestNotFoundTapError(testId)
   }
 
   const { attempts, requested } = selection
   const has = attempts === 1 ? `Test "${testId}" has only 1 attempt.` : `Test "${testId}" has ${attempts} attempts.`
 
-  return notFoundTapError('ATTEMPT_NOT_FOUND', '--attempt', requested, has)
+  return new AttemptNotFoundTapError(requested, has)
 }
 
 // The reporter's `renderProps` (resolved to an object by the time a log

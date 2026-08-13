@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import { defineCommand } from './definition'
-import { MAX_DERIVED_SELECTORS, TapError, invalidValueTapError } from '../contract'
+import { MAX_DERIVED_SELECTORS, TapError, InvalidValueTapError } from '../contract'
 import type { ResolveSelectorMatch, ResolveSelectorResult } from '../contract'
 
 // A shadow-scoped selector is unique only within its own shadow root, so it can't
@@ -21,7 +21,7 @@ export const resolveSelectorCommand = defineCommand('resolve-selector', async ({
   try {
     matched = source.find(selector)
   } catch {
-    throw invalidValueTapError('--selector', 'a valid CSS selector', selector)
+    throw new InvalidValueTapError('--selector', 'a valid CSS selector', selector)
   }
 
   const selectors: ResolveSelectorMatch[] = []

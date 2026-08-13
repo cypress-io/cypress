@@ -35,7 +35,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when `--instance` named a pid no record on disk matches.
    *
-   * @deprecated - raise it with notFoundTapError(), which writes its detail
+   * @deprecated - raise it with new InstanceNotFoundTapError(), which writes its detail
    */
   INSTANCE_NOT_FOUND: {
     description: `No ${TAP_TARGET} matched that process id.`,
@@ -120,7 +120,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when a spec was read while it is still running.
    *
-   * @deprecated - raise it with specInProgressTapError(), which writes its copy
+   * @deprecated - raise it with new SpecInProgressTapError(), which writes its copy
    */
   SPEC_IN_PROGRESS: {
     solution: 'Use `cypress tap status` to verify when the spec has finished.',
@@ -164,7 +164,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when `--test-id` named a test this spec does not have.
    *
-   * @deprecated - raise it with notFoundTapError(), which writes its detail
+   * @deprecated - raise it with new TestNotFoundTapError(), which writes its detail
    */
   TEST_NOT_FOUND: {
     description: 'No test in this spec matched that id.',
@@ -173,7 +173,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when `--attempt` named a number past the test's attempts.
    *
-   * @deprecated - raise it with notFoundTapError(), which writes its detail
+   * @deprecated - raise it with new AttemptNotFoundTapError(), which writes its detail
    */
   ATTEMPT_NOT_FOUND: {
     description: 'No attempt of this test matched that number.',
@@ -182,7 +182,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when `--command-id` named a reporter row this test does not have.
    *
-   * @deprecated - raise it with notFoundTapError(), which writes its detail
+   * @deprecated - raise it with new CommandNotFoundTapError(), which writes its detail
    */
   COMMAND_NOT_FOUND: {
     description: 'No command in this test matched that id.',
@@ -196,7 +196,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when `--at` named neither a snapshot of the command nor a valid index.
    *
-   * @deprecated - raise it with notFoundTapError(), which writes its detail
+   * @deprecated - raise it with new SnapshotNotFoundTapError(), which writes its detail
    */
   SNAPSHOT_NOT_FOUND: {
     description: 'No snapshot of this command matched that name or index.',
@@ -212,7 +212,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when the invocation named a command that does not exist.
    *
-   * @deprecated - raise it with unknownCommandTapError(), which writes its copy
+   * @deprecated - raise it with new UnknownCommandTapError(), which writes its copy
    */
   UNKNOWN_COMMAND: {
     attachHelp: true,
@@ -220,7 +220,7 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when the invocation passed a flag the command does not declare.
    *
-   * @deprecated - raise it with unknownOptionTapError(), which writes its copy
+   * @deprecated - raise it with new UnknownOptionTapError(), which writes its copy
    */
   UNKNOWN_OPTION: {
     attachHelp: true,
@@ -240,13 +240,13 @@ export const TAP_ERROR_COPY = {
   /**
    * Raised when a flag was passed without the flag it depends on.
    *
-   * @deprecated - raise it with missingCompanionOptionTapError(), which writes its copy
+   * @deprecated - raise it with new MissingCompanionOptionTapError(), which writes its copy
    */
   MISSING_COMPANION_OPTION: {},
   /**
    * Raised when a known input was given a value of the wrong type or range.
    *
-   * @deprecated - raise it with invalidValueTapError(), which writes its copy
+   * @deprecated - raise it with new InvalidValueTapError(), which writes its copy
    */
   INVALID_VALUE: {
     description: 'An invalid value was given.',
@@ -293,12 +293,12 @@ export interface TapErrorOptions {
 }
 
 /**
- * The codes whose copy is a factory's rather than the table's. Their opening line
+ * The codes whose copy is a subclass's rather than the table's. Their opening line
  * names a subject the table cannot know, so raising one bare would print a failure
  * with nothing above its specifics — hence the constructor will not take them, and
- * the factories at the foot of this module are the way in.
+ * the classes at the foot of this module are the way in.
  */
-export type FactoryRaisedTapErrorCode =
+export type DetailedTapErrorCode =
   | 'INVALID_VALUE'
   | 'INSTANCE_NOT_FOUND'
   | 'TEST_NOT_FOUND'
@@ -311,13 +311,18 @@ export type FactoryRaisedTapErrorCode =
   | 'SPEC_IN_PROGRESS'
 
 /** Every code a caller may raise directly: the ones whose copy the table holds. */
-export type RaisableTapErrorCode = Exclude<TapErrorCode, FactoryRaisedTapErrorCode>
+export type RaisableTapErrorCode = Exclude<TapErrorCode, DetailedTapErrorCode>
 
 /**
  * The one error every tap failure is raised as, on both sides of the wire: the app
  * throws it from a command handler, the CLI throws it from discovery, transport, and
  * its own commands. `code` selects the copy; `detail` carries what the copy cannot
  * know; `message` is the diagnostic, which stays out of the rendered output.
+ *
+ * The classes below name a condition rather than restate one, but only as it is
+ * built: a failure the other side raised arrives through `fromPayload` as this
+ * class, never as the subclass that wrote it over there. So a reader branches on
+ * `code`, never on which subclass an error is.
  */
 export class TapError extends Error {
   code: TapErrorCode
@@ -339,6 +344,15 @@ export class TapError extends Error {
     }
   }
 
+  /**
+   * Re-raise a failure the instance already named. The code is whatever crossed the
+   * wire — including one a subclass built over there, whose copy arrived with it —
+   * so this takes what the constructor will not.
+   */
+  static fromPayload (payload: TapErrorPayload): TapError {
+    return new TapError(payload.code as RaisableTapErrorCode, { detail: payload.detail })
+  }
+
   /** The wire form: the code and the specifics, never the diagnostic. */
   toPayload (): TapErrorPayload {
     return { code: this.code, ...(this.detail !== undefined ? { detail: this.detail } : {}) }
@@ -350,9 +364,11 @@ export const isTapError = (err: unknown): err is TapError => {
 }
 
 // The one door through the constructor's guard, so that every code it keeps out is
-// still built the same way — with the copy its factory below writes.
-const factoryRaised = (code: FactoryRaisedTapErrorCode, detail: string): TapError => {
-  return new TapError(code as unknown as RaisableTapErrorCode, { detail })
+// still built the same way — with the copy its class below writes.
+abstract class DetailedTapError extends TapError {
+  constructor (code: DetailedTapErrorCode, detail: string) {
+    super(code as unknown as RaisableTapErrorCode, { detail })
+  }
 }
 
 /**
@@ -360,21 +376,57 @@ const factoryRaised = (code: FactoryRaisedTapErrorCode, detail: string): TapErro
  * input, then the value as it arrived. Both sides of the wire raise it through here,
  * so a bad `--at` reads the same whether the CLI caught it or the instance did.
  */
-export const invalidValueTapError = (name: string, expected: string, value: unknown): TapError => {
-  return factoryRaised('INVALID_VALUE', `Expected \`${name}\` to be ${expected}.\n\nInstead the value was: ${JSON.stringify(value)}`)
+export class InvalidValueTapError extends DetailedTapError {
+  constructor (name: string, expected: string, value: unknown) {
+    super('INVALID_VALUE', `Expected \`${name}\` to be ${expected}.\n\nInstead the value was: ${JSON.stringify(value)}`)
+  }
 }
 
 /** The lookups that answer the same way: a well-formed id that named nothing. */
-export type NotFoundTapErrorCode = 'INSTANCE_NOT_FOUND' | 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
+type NotFoundTapErrorCode = 'INSTANCE_NOT_FOUND' | 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
 
 /**
  * A value that was read fine but matched nothing there is. Each entry states what
  * was being looked for and where the real ones are listed; this writes the one line
  * only the throw site can — which option was given what — plus whatever narrows the
- * search, such as how many attempts the test actually has.
+ * search, such as how many attempts the test actually has. The option is the
+ * subclass's rather than the caller's, since each of these lookups is reached by
+ * exactly one flag.
  */
-export const notFoundTapError = (code: NotFoundTapErrorCode, option: string, value: unknown, context?: string): TapError => {
-  return factoryRaised(code, `Looked for \`${option}\` ${JSON.stringify(value)}.${context ? ` ${context}` : ''}`)
+abstract class NotFoundTapError extends DetailedTapError {
+  constructor (code: NotFoundTapErrorCode, option: string, value: unknown, context?: string) {
+    super(code, `Looked for \`${option}\` ${JSON.stringify(value)}.${context ? ` ${context}` : ''}`)
+  }
+}
+
+export class InstanceNotFoundTapError extends NotFoundTapError {
+  constructor (value: unknown) {
+    super('INSTANCE_NOT_FOUND', '--instance', value)
+  }
+}
+
+export class TestNotFoundTapError extends NotFoundTapError {
+  constructor (value: unknown) {
+    super('TEST_NOT_FOUND', '--test-id', value)
+  }
+}
+
+export class CommandNotFoundTapError extends NotFoundTapError {
+  constructor (value: unknown) {
+    super('COMMAND_NOT_FOUND', '--command-id', value)
+  }
+}
+
+export class AttemptNotFoundTapError extends NotFoundTapError {
+  constructor (value: unknown, context?: string) {
+    super('ATTEMPT_NOT_FOUND', '--attempt', value, context)
+  }
+}
+
+export class SnapshotNotFoundTapError extends NotFoundTapError {
+  constructor (value: unknown, context?: string) {
+    super('SNAPSHOT_NOT_FOUND', '--at', value, context)
+  }
 }
 
 /**
@@ -382,8 +434,10 @@ export const notFoundTapError = (code: NotFoundTapErrorCode, option: string, val
  * `remedy` is the throw site's, because what dropping either one leaves you with
  * is particular to the pair — a spec-wide view, the whole document.
  */
-export const missingCompanionOptionTapError = (given: string, required: string, remedy: string): TapError => {
-  return factoryRaised('MISSING_COMPANION_OPTION', `You passed the \`${given}\` flag without also passing the \`${required}\` flag.\n\n${remedy}`)
+export class MissingCompanionOptionTapError extends DetailedTapError {
+  constructor (given: string, required: string, remedy: string) {
+    super('MISSING_COMPANION_OPTION', `You passed the \`${given}\` flag without also passing the \`${required}\` flag.\n\n${remedy}`)
+  }
 }
 
 /**
@@ -393,12 +447,16 @@ export const missingCompanionOptionTapError = (given: string, required: string, 
  * called, which the CLI holds and appends as it renders. `listing` is for a raiser
  * with one of its own and no renderer to defer to.
  */
-export const unknownCommandTapError = (name: string, listing?: string): TapError => {
-  return factoryRaised('UNKNOWN_COMMAND', listing ? `Unknown command "${name}"\n\n${listing}` : `Unknown command "${name}"`)
+export class UnknownCommandTapError extends DetailedTapError {
+  constructor (name: string, listing?: string) {
+    super('UNKNOWN_COMMAND', listing ? `Unknown command "${name}"\n\n${listing}` : `Unknown command "${name}"`)
+  }
 }
 
-export const unknownOptionTapError = (flag: string, listing?: string): TapError => {
-  return factoryRaised('UNKNOWN_OPTION', listing ? `Unknown option "${flag}"\n\n${listing}` : `Unknown option "${flag}"`)
+export class UnknownOptionTapError extends DetailedTapError {
+  constructor (flag: string, listing?: string) {
+    super('UNKNOWN_OPTION', listing ? `Unknown option "${flag}"\n\n${listing}` : `Unknown option "${flag}"`)
+  }
 }
 
 /**
@@ -406,16 +464,21 @@ export const unknownOptionTapError = (flag: string, listing?: string): TapError 
  * the CLI when its own grammar catches the omission, the instance when a call
  * reaches it without one — so an omission reads the same whichever side caught it.
  * Their entries name no remedy of their own: the called command's help lists every
- * input it takes, and the CLI appends it as it renders.
+ * input it takes, and the CLI appends it as it renders. The table describes both
+ * codes, so these write only the specifics rather than the opening line too.
  */
-export const missingArgumentsTapError = (command: string, params: readonly string[]): TapError => {
-  const named = params.map((param) => `<${param}>`).join(' ')
+export class MissingArgumentsTapError extends TapError {
+  constructor (command: string, params: readonly string[]) {
+    const named = params.map((param) => `<${param}>`).join(' ')
 
-  return new TapError('INVALID_ARGUMENTS', { detail: `"${command}" is missing the required ${named} argument(s).` })
+    super('INVALID_ARGUMENTS', { detail: `"${command}" is missing the required ${named} argument(s).` })
+  }
 }
 
-export const missingOptionTapError = (command: string, option: string): TapError => {
-  return new TapError('INVALID_OPTIONS', { detail: `"${command}" is missing the required --${option} option.` })
+export class MissingOptionTapError extends TapError {
+  constructor (command: string, option: string) {
+    super('INVALID_OPTIONS', { detail: `"${command}" is missing the required --${option} option.` })
+  }
 }
 
 /**
@@ -424,15 +487,8 @@ export const missingOptionTapError = (command: string, option: string): TapError
  * gate, the app from the runner — and the spec is only unnamed in the moment
  * between one being selected and its path being known.
  */
-export const specInProgressTapError = (spec: string | null): TapError => {
-  return factoryRaised('SPEC_IN_PROGRESS', spec ? `The spec ${spec} is currently running.` : 'The spec is currently running.')
-}
-
-/**
- * Re-raise a failure the instance already named. The code is whatever crossed the
- * wire — including one a factory built over there, whose copy arrived with it — so
- * this takes what the constructor will not.
- */
-export const tapErrorFromPayload = (payload: TapErrorPayload): TapError => {
-  return new TapError(payload.code as RaisableTapErrorCode, { detail: payload.detail })
+export class SpecInProgressTapError extends DetailedTapError {
+  constructor (spec: string | null) {
+    super('SPEC_IN_PROGRESS', spec ? `The spec ${spec} is currently running.` : 'The spec is currently running.')
+  }
 }

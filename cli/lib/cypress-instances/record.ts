@@ -15,4 +15,4 @@ export type {
 
 // Instance discovery raises the same `TapError` every other tap failure is raised
 // as, so one catch and one renderer cover the whole surface.
-export { TapError, isTapError, notFoundTapError, TAP_TARGET } from '@packages/cypress-instances'
+export { TapError, isTapError, InstanceNotFoundTapError, TAP_TARGET } from '@packages/cypress-instances'

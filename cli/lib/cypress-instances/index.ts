@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { TapError, notFoundTapError } from './record'
+import { TapError, InstanceNotFoundTapError } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 import { readLiveInstances } from './store'
@@ -114,7 +114,7 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   if (matches.length === 0) {
     throw instance === undefined
       ? new TapError('NO_INSTANCE')
-      : notFoundTapError('INSTANCE_NOT_FOUND', '--instance', instance)
+      : new InstanceNotFoundTapError(instance)
   }
 
   const live = await probeMatches(matches, probeTimeoutMs)

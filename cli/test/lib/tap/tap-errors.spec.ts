@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
+import Debug from 'debug'
 
 import logger from '../../../lib/logger'
 import { renderTapFailure, helpFor } from '../../../lib/tap/output'
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, invalidValueTapError, missingArgumentsTapError, missingCompanionOptionTapError, missingOptionTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
+import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, InstanceNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff: the rendering catalogue at the foot of this
@@ -171,6 +172,10 @@ describe('lib/tap error rendering', () => {
     ].join('\n\n'))
   })
 
+  it('keeps unwinding an error that is not ours to render', async () => {
+    await expect(renderTapFailure(new Error('not a tap failure'))).rejects.toThrow('not a tap failure')
+  })
+
   // A tap failure is about the state of a running instance, not about which Cypress
   // is installed or the machine it runs on.
   it('carries no rule and no platform footer', async () => {
@@ -184,7 +189,7 @@ describe('lib/tap error rendering', () => {
   // The one shape every unusable value is reported in, whichever option or argument
   // carried it and whichever side of the wire rejected it.
   it('reports a bad value as what was expected and what arrived', async () => {
-    const printed = await render('INVALID_VALUE', invalidValueTapError('--max-chars', 'a positive integer', 'bogus').detail)
+    const printed = await render('INVALID_VALUE', new InvalidValueTapError('--max-chars', 'a positive integer', 'bogus').detail)
 
     expect(printed).to.eq('An invalid value was given.\n\nExpected --max-chars to be a positive integer.\n\nInstead the value was: "bogus"')
   })
@@ -192,13 +197,13 @@ describe('lib/tap error rendering', () => {
   // Both open by naming what was given, and close with the listing that answers it —
   // whatever named the real ones where the failure was noticed.
   it('reports an unknown command as the name given, then the listing', async () => {
-    const printed = await render('UNKNOWN_COMMAND', unknownCommandTapError('oel2k', 'Commands:\n  instances\n  status').detail)
+    const printed = await render('UNKNOWN_COMMAND', new UnknownCommandTapError('oel2k', 'Commands:\n  instances\n  status').detail)
 
     expect(printed).to.eq('Unknown command "oel2k"\n\nCommands:\n  instances\n  status')
   })
 
   it('reports an unknown option as the flag given, then the listing', async () => {
-    const printed = await render('UNKNOWN_OPTION', unknownOptionTapError('--bogus', 'Usage: cypress tap dom [options]').detail)
+    const printed = await render('UNKNOWN_OPTION', new UnknownOptionTapError('--bogus', 'Usage: cypress tap dom [options]').detail)
 
     expect(printed).to.eq('Unknown option "--bogus"\n\nUsage: cypress tap dom [options]')
   })
@@ -207,7 +212,7 @@ describe('lib/tap error rendering', () => {
   // what was not found, the option and value that named nothing, then where the real
   // ones are listed.
   it('reports a lookup that matched nothing in one shape, whichever id it was', async () => {
-    expect(await render('TEST_NOT_FOUND', notFoundTapError('TEST_NOT_FOUND', '--test-id', 'r7').detail)).to.eq([
+    expect(await render('TEST_NOT_FOUND', new TestNotFoundTapError('r7').detail)).to.eq([
       'No test in this spec matched that id.',
       'Looked for --test-id "r7".',
       'Run cypress tap reporter to list the tests in the spec.',
@@ -215,7 +220,7 @@ describe('lib/tap error rendering', () => {
 
     vi.mocked(console.error).mockClear()
 
-    expect(await render('COMMAND_NOT_FOUND', notFoundTapError('COMMAND_NOT_FOUND', '--command-id', '9').detail)).to.eq([
+    expect(await render('COMMAND_NOT_FOUND', new CommandNotFoundTapError('9').detail)).to.eq([
       'No command in this test matched that id.',
       'Looked for --command-id "9".',
       'Run cypress tap reporter --test-id <id> to list the commands in the test.',
@@ -224,7 +229,7 @@ describe('lib/tap error rendering', () => {
     vi.mocked(console.error).mockClear()
 
     // A pid is a number, so it reads without quotes where an id reads with them.
-    expect(await render('INSTANCE_NOT_FOUND', notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321).detail)).to.eq([
+    expect(await render('INSTANCE_NOT_FOUND', new InstanceNotFoundTapError(4321).detail)).to.eq([
       'No Cypress session matched that process id.',
       'Looked for --instance 4321.',
       'Run cypress tap instances to list the Cypress sessions you can tap into.',
@@ -234,7 +239,7 @@ describe('lib/tap error rendering', () => {
   // What narrows the search rides along with the value: how many attempts there
   // are is what makes a rejected number actionable.
   it('carries the context a lookup has, when it has any', async () => {
-    const detail = notFoundTapError('ATTEMPT_NOT_FOUND', '--attempt', 5, 'Test "r2" has 3 attempts.').detail
+    const detail = new AttemptNotFoundTapError(5, 'Test "r2" has 3 attempts.').detail
 
     expect(await render('ATTEMPT_NOT_FOUND', detail)).to.contain('Looked for --attempt 5. Test "r2" has 3 attempts.')
   })
@@ -242,7 +247,7 @@ describe('lib/tap error rendering', () => {
   // The spec is what a poller waits on, so the condition names it and the remedy
   // says how to tell when it has finished.
   it('reports a run in progress as the spec running, then how to watch it', async () => {
-    const printed = await render('SPEC_IN_PROGRESS', specInProgressTapError('cypress/e2e/slow.cy.js').detail)
+    const printed = await render('SPEC_IN_PROGRESS', new SpecInProgressTapError('cypress/e2e/slow.cy.js').detail)
 
     expect(printed).to.eq('The spec cypress/e2e/slow.cy.js is currently running.\n\nUse cypress tap status to verify when the spec has finished.')
   })
@@ -301,10 +306,6 @@ describe('lib/tap error rendering', () => {
       expect(await render(code), code).not.to.contain('`')
     }
   })
-
-  it('keeps unwinding an error that is not ours to render', async () => {
-    await expect(renderTapFailure(new Error('not a tap failure'))).rejects.toThrow('not a tap failure')
-  })
 })
 
 // Every code, rendered end to end as a caller sees it: an invocation that produces
@@ -347,7 +348,7 @@ describe('lib/tap error rendering catalogue', () => {
     // cli/lib/cypress-instances/index.ts (resolveInstance)
     INSTANCE_NOT_FOUND: {
       invocation: 'cypress tap --instance 4321 dom --selector "#status"',
-      failure: notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321),
+      failure: new InstanceNotFoundTapError(4321),
     },
     // cli/lib/cypress-instances/index.ts (liveMatches)
     STALE_INSTANCE: {
@@ -417,7 +418,7 @@ describe('lib/tap error rendering catalogue', () => {
     // cli/lib/tap/aut/frame.ts; also packages/app/src/tap/commands/pin.ts
     SPEC_IN_PROGRESS: {
       invocation: 'cypress tap dom --selector "#status"',
-      failure: specInProgressTapError('cypress/e2e/checkout.cy.ts'),
+      failure: new SpecInProgressTapError('cypress/e2e/checkout.cy.ts'),
     },
     // cli/lib/tap/commands/run.ts
     SPEC_START_FAILED: {
@@ -452,17 +453,17 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/test-state.ts
     TEST_NOT_FOUND: {
       invocation: 'cypress tap reporter --test-id r7',
-      failure: notFoundTapError('TEST_NOT_FOUND', '--test-id', 'r7'),
+      failure: new TestNotFoundTapError('r7'),
     },
     // packages/app/src/tap/test-state.ts
     ATTEMPT_NOT_FOUND: {
       invocation: 'cypress tap reporter --test-id r7 --attempt 5',
-      failure: notFoundTapError('ATTEMPT_NOT_FOUND', '--attempt', 5, 'Test "r7" has 3 attempts.'),
+      failure: new AttemptNotFoundTapError(5, 'Test "r7" has 3 attempts.'),
     },
     // packages/app/src/tap/commands/command.ts; also pin.ts
     COMMAND_NOT_FOUND: {
       invocation: 'cypress tap command --test-id r7 --command-id 9',
-      failure: notFoundTapError('COMMAND_NOT_FOUND', '--command-id', '9'),
+      failure: new CommandNotFoundTapError('9'),
     },
     // packages/app/src/tap/test-state.ts
     AMBIGUOUS_COMMAND: {
@@ -472,7 +473,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_NOT_FOUND: {
       invocation: 'cypress tap pin --test-id r7 --command-id 3 --at middle',
-      failure: notFoundTapError('SNAPSHOT_NOT_FOUND', '--at', 'middle', 'This command has: before, after.'),
+      failure: new SnapshotNotFoundTapError('middle', 'This command has: before, after.'),
     },
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_UNAVAILABLE: {
@@ -482,36 +483,36 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/tap-manager.ts; also cli/lib/tap/build-program.ts
     UNKNOWN_COMMAND: {
       invocation: 'cypress tap oel2k',
-      failure: unknownCommandTapError('oel2k'),
+      failure: new UnknownCommandTapError('oel2k'),
       helpOf: 'oel2k',
     },
     // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     UNKNOWN_OPTION: {
       invocation: 'cypress tap dom --bogus',
-      failure: unknownOptionTapError('--bogus'),
+      failure: new UnknownOptionTapError('--bogus'),
       helpOf: 'dom',
     },
     // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     INVALID_ARGUMENTS: {
       invocation: 'cypress tap run',
-      failure: missingArgumentsTapError('run', ['spec']),
+      failure: new MissingArgumentsTapError('run', ['spec']),
       helpOf: 'run',
     },
     // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     INVALID_OPTIONS: {
       invocation: 'cypress tap reporter',
-      failure: missingOptionTapError('reporter', 'test-id'),
+      failure: new MissingOptionTapError('reporter', 'test-id'),
       helpOf: 'reporter',
     },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/commands/reporter.ts
     MISSING_COMPANION_OPTION: {
       invocation: 'cypress tap dom --at 1',
-      failure: missingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.'),
+      failure: new MissingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.'),
     },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/exec-args.ts
     INVALID_VALUE: {
       invocation: 'cypress tap dom --selector ".item" --at 5',
-      failure: invalidValueTapError('--at', '0 to 2, since ".item" matched 3 elements', '5'),
+      failure: new InvalidValueTapError('--at', '0 to 2, since ".item" matched 3 elements', '5'),
     },
   }
 

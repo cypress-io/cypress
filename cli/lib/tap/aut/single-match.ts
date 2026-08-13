@@ -1,4 +1,4 @@
-import { TAP_EXEC_METHOD, TapError, invalidValueTapError, missingCompanionOptionTapError } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError, InvalidValueTapError, MissingCompanionOptionTapError } from '@packages/cypress-instances'
 import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-instances'
 
 import { validateExecResult } from '../tap-session'
@@ -57,7 +57,7 @@ export const resolveAmbiguity = async (
 ): Promise<FrameAmbiguousResult | undefined> => {
   if (selector === undefined) {
     if (at !== undefined) {
-      throw missingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.')
+      throw new MissingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.')
     }
 
     return undefined
@@ -91,7 +91,7 @@ export const resolveAmbiguity = async (
 
   if (at !== undefined) {
     if (at >= count) {
-      throw invalidValueTapError('--at', `0 to ${count - 1}, since "${selector}" matched ${count} element${count === 1 ? '' : 's'}`, at)
+      throw new InvalidValueTapError('--at', `0 to ${count - 1}, since "${selector}" matched ${count} element${count === 1 ? '' : 's'}`, at)
     }
 
     return undefined
