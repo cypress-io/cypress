@@ -187,6 +187,36 @@ describe('driver/src/cypress/validate_config', () => {
         })
       })
 
+      describe('when the config option is env', () => {
+        it('throws when mutated at run-time with Cypress.config()', () => {
+          const state = $SetterGetter.create({
+            duringUserTestExecution: true,
+            specWindow: { Error },
+            runnable: { type: 'test' },
+          })
+
+          expect(() => {
+            validateConfig(state, { env: { FOO: 'bar' } })
+          }).to.throw('Overriding the `env` configuration was removed in Cypress version 16.0.0.')
+        })
+
+        ;['test', 'suite'].forEach((mocha_runnable) => {
+          it(`throws when config override level is ${mocha_runnable}`, () => {
+            const state = $SetterGetter.create({
+              duringUserTestExecution: false,
+              test: {
+                _testConfig: { applied: mocha_runnable },
+              },
+              specWindow: { Error },
+            })
+
+            expect(() => {
+              validateConfig(state, { env: { FOO: 'bar' } })
+            }).to.throw('Please update to use `expose: { KEY: value }` to make a value readable in the browser for a suite or test.')
+          })
+        })
+      })
+
       describe('when config override level is suite', () => {
         it('and config override is read-only', () => {
           const state = $SetterGetter.create({

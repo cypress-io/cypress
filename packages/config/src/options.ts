@@ -219,7 +219,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    overrideLevel: 'any',
+    overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {
     name: 'expose',
