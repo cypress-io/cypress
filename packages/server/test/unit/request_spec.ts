@@ -3,6 +3,7 @@ import '../spec_helper'
 import _ from 'lodash'
 import http from 'http'
 import Bluebird from 'bluebird'
+import { agent } from '@packages/network'
 import { Request } from '../../lib/request'
 import snapshot from 'snap-shot-it'
 import rp from '@cypress/request-promise'
@@ -216,9 +217,18 @@ describe('lib/request', () => {
   context('#create', () => {
     beforeEach(function (done) {
       this.hits = 0
+      this.staleSocketKills = 0
+
+      // a request arriving on a socket that has already carried one stands in for
+      // the keep-alive race: the origin closed the pooled socket before we wrote
+      const servedSockets = new WeakSet()
 
       this.srv = http.createServer((req, res) => {
         this.hits++
+
+        const isReusedSocket = servedSockets.has(req.socket)
+
+        servedSockets.add(req.socket)
 
         switch (req.url) {
           case '/never-ends':
@@ -227,6 +237,16 @@ describe('lib/request', () => {
             return res.write('foo\n')
           case '/econnreset':
             return req.socket.destroy()
+          case '/econnreset-on-reuse':
+            if (isReusedSocket) {
+              this.staleSocketKills++
+
+              return req.socket.destroy()
+            }
+
+            res.writeHead(200, { 'content-length': 2 })
+
+            return res.end('ok')
           default:
             break
         }
@@ -355,6 +375,112 @@ describe('lib/request', () => {
           expect(err.error.code).to.eq('ECONNRESET')
 
           expect(this.hits).to.eq(5)
+        })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24716
+    context('retries for non-idempotent requests', () => {
+      beforeEach(() => {
+        // whether the socket came from the pool is what decides these outcomes, so
+        // no leftover pooled socket from an earlier test may answer them
+        agent.httpAgent.destroy()
+      })
+
+      it('does not retry a POST reset on a fresh connection', function () {
+        const opts = {
+          url: 'http://localhost:9988/econnreset',
+          method: 'POST',
+          retryIntervals: [0, 1, 2, 3],
+          timeout: 250,
+        }
+
+        return request.create(opts, true)
+        .then(() => {
+          throw new Error('should not reach')
+        }).catch((err) => {
+          expect(err.error.code).to.eq('ECONNRESET')
+
+          // the origin may have acted on it, so it must not be replayed
+          expect(this.hits).to.eq(1)
+        })
+      })
+
+      it('retries a POST reset on a socket reused from the pool', function () {
+        const opts = {
+          url: 'http://localhost:9988/econnreset-on-reuse',
+          method: 'POST',
+          retryIntervals: [0, 1, 2, 3],
+          timeout: 250,
+        }
+
+        // warm the pool so the request under test goes out on a reused socket
+        return request.create({ url: 'http://localhost:9988/econnreset-on-reuse' }, true)
+        .then(() => {
+          return request.create(opts, true)
+        })
+        .then((body) => {
+          expect(body).to.eq('ok')
+
+          // the replay only happened if the origin killed the reused socket first
+          expect(this.staleSocketKills).to.be.at.least(1)
+        })
+      })
+
+      it('still retries a POST refused before a connection was made', () => {
+        const opts = {
+          url: 'http://localhost:9989/econnrefused',
+          method: 'POST',
+          retryIntervals: [0, 1, 2, 3],
+          timeout: 250,
+        }
+
+        const stream = request.create(opts) as Duplexify<Stream.Readable, Stream.Writable>
+
+        let retries = 0
+
+        stream.on('retry', () => {
+          retries++
+        })
+
+        const p = Bluebird.fromCallback((cb) => {
+          stream.on('error', cb)
+        })
+
+        return expect(p).to.be.rejected
+        .then((err) => {
+          expect(err.code).to.eq('ECONNREFUSED')
+
+          expect(retries).to.eq(4)
+        })
+      })
+
+      it('does not retry a POST stream reset on a fresh connection', function () {
+        const opts = {
+          url: 'http://localhost:9988/econnreset',
+          method: 'POST',
+          retryIntervals: [0, 1, 2, 3],
+          timeout: 250,
+        }
+
+        const stream = request.create(opts) as Duplexify<Stream.Readable, Stream.Writable>
+
+        let retries = 0
+
+        stream.on('retry', () => {
+          retries++
+        })
+
+        const p = Bluebird.fromCallback((cb) => {
+          stream.on('error', cb)
+        })
+
+        return expect(p).to.be.rejected
+        .then((err) => {
+          expect(err.code).to.eq('ECONNRESET')
+
+          expect(retries).to.eq(0)
+          expect(this.hits).to.eq(1)
         })
       })
     })

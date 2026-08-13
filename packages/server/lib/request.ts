@@ -5,6 +5,7 @@ import url from 'url'
 import tough from 'tough-cookie'
 import debugModule from 'debug'
 import Promise from 'bluebird'
+import type http from 'http'
 import stream from 'stream'
 import duplexify from 'duplexify'
 import { agent } from '@packages/network'
@@ -15,6 +16,10 @@ const debug = debugModule('cypress:server:request')
 
 const SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
 const NETWORK_ERRORS = 'ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND'.split(' ')
+// https://datatracker.ietf.org/doc/html/rfc9110#section-9.2.2
+const IDEMPOTENT_METHODS = 'GET HEAD PUT DELETE OPTIONS TRACE'.split(' ')
+// A connection that never came up proves the origin never received the request.
+const PRE_CONNECTION_ERRORS = 'ECONNREFUSED ENOTFOUND EAI_AGAIN EHOSTUNREACH'.split(' ')
 const VERBOSE_REQUEST_OPTS = 'followRedirect strictSSL'.split(' ')
 const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket timeout upgrade'.split(' ')
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
@@ -66,6 +71,19 @@ const isRetriableError = (err: { code?: string } = {}, retryOnNetworkFailure: bo
   return _.every([
     retryOnNetworkFailure,
     _.includes(NETWORK_ERRORS, err.code),
+  ])
+}
+
+// Replaying a request the origin already acted on would duplicate its side effects,
+// and a mid-flight ECONNRESET does not say whether that happened. Retry a
+// non-idempotent request only when the origin provably never got it: no connection
+// was established, or it went out on a pooled keep-alive socket the origin had
+// already closed. https://github.com/cypress-io/cypress/issues/24716
+const canReplayRequest = (err: { code?: string } = {}, method = 'GET', clientRequest?: { reusedSocket?: boolean }) => {
+  return _.some([
+    _.includes(IDEMPOTENT_METHODS, method.toUpperCase()),
+    _.includes(PRE_CONNECTION_ERRORS, err.code),
+    clientRequest?.reusedSocket === true,
   ])
 }
 
@@ -158,6 +176,7 @@ interface RetryCallbackOptions {
   retryOnNetworkFailure?: boolean
   retryFn?: (args: { delay: number, attempt: number }) => any
   onEnd?: (...args: any[]) => any
+  clientRequest?: { reusedSocket?: boolean }
 }
 
 export class Request {
@@ -272,6 +291,7 @@ export class Request {
 
       const reqStream = self.r(opts)
       let didReceiveResponse = false
+      let clientRequest: http.ClientRequest | undefined
 
       const retry = function ({ delay, attempt }) {
         retryStream.emit('retry', { attempt, delay })
@@ -330,13 +350,16 @@ export class Request {
           delaysRemaining,
           retryOnNetworkFailure,
           retryFn: retry,
+          clientRequest,
           onEnd () {
             return emitError(err)
           },
         })
       })
 
-      reqStream.once('request', (req) => {
+      reqStream.once('request', (outgoingReq) => {
+        clientRequest = outgoingReq
+
         // remove the pipe listener since once the request has
         // been made, we cannot pipe into the reqStream anymore
         retryStream.removeListener('pipe', onPiped)
@@ -385,6 +408,7 @@ export class Request {
       retryOnNetworkFailure,
       retryFn,
       onEnd,
+      clientRequest,
     } = options
 
     debug('received an error making http request %o', merge(opts, { err }))
@@ -404,6 +428,13 @@ export class Request {
     }
 
     if (!isTlsVersionError && !isErrEmptyResponseError(err.originalErr || err) && !isRetriableError(err, retryOnNetworkFailure ?? false)) {
+      return onEnd!()
+    }
+
+    // a TLS version error fails the handshake, so the origin never saw the request
+    if (!isTlsVersionError && !canReplayRequest(err, opts?.method, clientRequest)) {
+      debug('not retrying, the origin may have received this non-idempotent request %o', merge(opts, { err }))
+
       return onEnd!()
     }
 
@@ -436,7 +467,16 @@ export class Request {
       })
     }
 
-    return this.rp(opts)
+    // request-promise exposes the promise methods on the request itself, so the
+    // underlying `http.ClientRequest` is still reachable through its events
+    const req = this.rp(opts)
+    let clientRequest: http.ClientRequest | undefined
+
+    req.once('request', (outgoingReq: http.ClientRequest) => {
+      clientRequest = outgoingReq
+    })
+
+    return req
     .catch((err) => {
       // rp wraps network errors in a RequestError, so might need to unwrap it to check
       return this.maybeRetryOnNetworkFailure(err.error || err, {
@@ -445,6 +485,7 @@ export class Request {
         delaysRemaining,
         retryOnNetworkFailure,
         retryFn: retry,
+        clientRequest,
         onEnd () {
           throw err
         },
