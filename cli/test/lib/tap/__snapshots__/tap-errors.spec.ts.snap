@@ -345,6 +345,17 @@ Commands:
                         can read it; pass --clear to release"
 `;
 
+exports[`lib/tap error rendering catalogue > UNKNOWN_ERROR 1`] = `
+"> cypress tap status
+An unknown error occurred.
+
+Try running the command again.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
+`;
+
 exports[`lib/tap error rendering catalogue > UNKNOWN_OPTION 1`] = `
 "> cypress tap dom --bogus
 Unknown option "--bogus"

@@ -251,6 +251,19 @@ export const TAP_ERROR_COPY = {
   INVALID_VALUE: {
     description: 'An invalid value was given.',
   },
+
+  // Anything else
+  /**
+   * Raised when a failure reached the renderer with no code of its own, so nothing
+   * about it is known well enough to say. Retrying is the only remedy that fits
+   * every condition it stands in for, and the report is how it stops standing in
+   * for one of them.
+   */
+  UNKNOWN_ERROR: {
+    description: 'An unknown error occurred.',
+    solution: 'Try running the command again.',
+    recommendGhIssue: true,
+  },
 } satisfies Record<string, TapErrorCopy>
 
 /** Every failure `cypress tap` can report: the keys of the table above. */
@@ -490,5 +503,18 @@ export class MissingOptionTapError extends TapError {
 export class SpecInProgressTapError extends DetailedTapError {
   constructor (spec: string | null) {
     super('SPEC_IN_PROGRESS', spec ? `The spec ${spec} is currently running.` : 'The spec is currently running.')
+  }
+}
+
+/**
+ * Whatever reached the renderer without having been raised as a tap failure — a
+ * TypeError from a command handler, an ENOTDIR from a read that should not have
+ * failed. It has no specifics a reader was meant to see, so it carries none; the
+ * throw itself rides on `cause`, and its stack on the diagnostic `message`, for the
+ * debug log the report asks the reader to attach.
+ */
+export class UnknownTapError extends TapError {
+  constructor (cause: unknown) {
+    super('UNKNOWN_ERROR', { message: String((cause as Error | undefined)?.stack ?? cause), cause })
   }
 }

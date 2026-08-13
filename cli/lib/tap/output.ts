@@ -1,5 +1,6 @@
 import commander from 'commander'
 import chalk from 'chalk'
+import Debug from 'debug'
 
 import logger from '../logger'
 import { docsUrl } from '../errors'
@@ -7,8 +8,10 @@ import util from '../util'
 import { renderingFor } from './render'
 import { noteTapFailure } from './events'
 import type { InstanceSelection } from '../cypress-instances'
-import { tapErrorCopy, UnknownCommandTapError } from '@packages/cypress-instances'
+import { isTapError, tapErrorCopy, UnknownCommandTapError, UnknownTapError } from '@packages/cypress-instances'
 import type { TapErrorCopy, TapSchema } from '@packages/cypress-instances'
+
+const debug = Debug('cypress:cli:tap')
 
 // The registry keeps its copy dependency-free, so the commands it names arrive in
 // backticks for the CLI to colour the way the rest of the catalogue already does.
@@ -41,23 +44,36 @@ const remedyFor = (copy: TapErrorCopy, help?: string): string[] => {
  * from the instance as a wire payload: the code selects the copy and `detail`
  * carries whatever was specific to this one. It prints as paragraphs — the
  * condition, then the specifics that explain it, then what to do about it. The code
- * itself is never printed. An error with no code is not ours to render and keeps
- * unwinding.
+ * itself is never printed.
+ *
+ * Anything else — a TypeError from a command handler, an ENOTDIR from a read that
+ * should not have failed — was never raised as a tap failure, so there is no
+ * condition to state and nothing on it is copy a reader was meant to see: it renders
+ * as UNKNOWN_ERROR, and its stack goes to the debug log, which is where whoever is
+ * asked for one after reading the report will look.
+ *
+ * Which is why a code alone does not make a failure ours: `err.code` is a string on
+ * every Node system error too, and rendering an ENOENT against the registry would
+ * pick whatever the fallback copy happens to be. Only a TapError, or the wire payload
+ * the instance sends and its raisers pass here as-is, is read for its code.
  *
  * `help` is the generated help of the command that was called, passed by the callers
  * that have a parsed program to hand. Only a failure about the invocation prints it;
  * the instance raises those too, and has no help of its own to send.
  */
 export const renderTapFailure = async (err: any, help?: string): Promise<number> => {
-  if (typeof err?.code !== 'string') {
-    throw err
+  const raised = isTapError(err) || (!(err instanceof Error) && typeof err?.code === 'string')
+  const failure = raised ? err : new UnknownTapError(err)
+
+  if (!raised) {
+    debug('rendering an unrecognized failure as %s: %s', failure.code, failure.message)
   }
 
-  noteTapFailure(err.code)
+  noteTapFailure(failure.code)
 
-  const copy = tapErrorCopy(err.code)
+  const copy = tapErrorCopy(failure.code)
   const condition = copy.description ? [highlight(copy.description)] : []
-  const detail = typeof err.detail === 'string' && err.detail !== '' ? [highlight(err.detail)] : []
+  const detail = typeof failure.detail === 'string' && failure.detail !== '' ? [highlight(failure.detail)] : []
 
   logger.errorToStderr([...condition, ...detail, ...remedyFor(copy, help)].join('\n\n'))
 

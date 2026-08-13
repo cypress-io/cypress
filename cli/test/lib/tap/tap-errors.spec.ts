@@ -5,7 +5,7 @@ import Debug from 'debug'
 import logger from '../../../lib/logger'
 import { renderTapFailure, helpFor } from '../../../lib/tap/output'
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, InstanceNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-instances'
+import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, InstanceNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError, UnknownTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff: the rendering catalogue at the foot of this
@@ -51,6 +51,7 @@ describe('lib/tap error registry', () => {
         "TESTING_TYPE_NOT_CONFIGURED",
         "TEST_NOT_FOUND",
         "UNKNOWN_COMMAND",
+        "UNKNOWN_ERROR",
         "UNKNOWN_OPTION",
       ]
     `)
@@ -170,10 +171,6 @@ describe('lib/tap error rendering', () => {
       'Looked for --instance 999.',
       TAP_ERROR_COPY.INSTANCE_NOT_FOUND.solution!.replace(/`/g, ''),
     ].join('\n\n'))
-  })
-
-  it('keeps unwinding an error that is not ours to render', async () => {
-    await expect(renderTapFailure(new Error('not a tap failure'))).rejects.toThrow('not a tap failure')
   })
 
   // A tap failure is about the state of a running instance, not about which Cypress
@@ -305,6 +302,73 @@ describe('lib/tap error rendering', () => {
 
       expect(await render(code), code).not.to.contain('`')
     }
+  })
+
+  // Whatever it was, it reached the reader through a tap command, so it is answered
+  // the way every other tap failure is rather than as a bare stack.
+  it('renders an error that carries no code as an unknown one', async () => {
+    const code = await renderTapFailure(new Error('read of undefined property `pid`'))
+    const printed = stderr()
+
+    expect(code).to.eq(1)
+    expect(printed).to.eq([
+      TAP_ERROR_COPY.UNKNOWN_ERROR.description,
+      TAP_ERROR_COPY.UNKNOWN_ERROR.solution,
+      'If the problem persists, search for an existing issue or open a GitHub issue at\n\n  https://github.com/cypress-io/cypress/issues',
+    ].join('\n\n'))
+  })
+
+  // Every Node system error carries a code, and none of them are ours: read for one,
+  // an ENOTDIR from a read that should have worked would report itself to the reader
+  // as whichever registry entry the unknown-code fallback lands on.
+  it('renders a system error as unknown rather than reading its errno as a code', async () => {
+    const printed = await renderTapFailure(Object.assign(new Error('ENOTDIR: not a directory'), { code: 'ENOTDIR' })).then(stderr)
+
+    expect(printed).to.contain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
+    expect(printed).not.to.contain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+  })
+
+  // A wire payload is a bare object, and its code is the instance's — including one
+  // this CLI has no entry for, which is the protocol mismatch the fallback reports.
+  it('still reads the code off a payload the instance sent', async () => {
+    const printed = await renderTapFailure({ code: 'SOMETHING_ONLY_A_NEWER_CYPRESS_RAISES' }).then(stderr)
+
+    expect(printed).to.contain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+  })
+
+  // The diagnostic is for whoever is asked for a debug log, not for the reader: the
+  // report is what they are asked for, and it says nothing they can act on.
+  it('keeps an unknown error\'s own message out of the output', async () => {
+    await renderTapFailure(new Error('read of undefined property `pid`'))
+
+    expect(stderr()).not.to.contain('undefined property')
+  })
+
+  // Withholding the stack from the reader only works if it is somewhere to be had:
+  // the report the copy asks for is worth answering, and the debug log is the answer.
+  it('writes an unknown error\'s stack to the debug log', async () => {
+    const written = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+
+    Debug.enable('cypress:cli:tap')
+
+    try {
+      await renderTapFailure(new Error('read of undefined property `pid`'))
+    } finally {
+      Debug.disable()
+    }
+
+    const logged = stripAnsi(written.mock.calls.flat().join(' '))
+
+    expect(logged).to.contain('read of undefined property')
+    expect(logged).to.contain('tap-errors.spec.ts')
+  })
+
+  // An uncoded error has no detail of ours; whatever it carries under that name is
+  // not copy, so it renders as the bare condition.
+  it('prints no specifics under an unknown error', async () => {
+    await renderTapFailure({ detail: 'ECONNREFUSED 127.0.0.1:1234' })
+
+    expect(stderr()).not.to.contain('ECONNREFUSED')
   })
 })
 
@@ -508,6 +572,12 @@ describe('lib/tap error rendering catalogue', () => {
     MISSING_COMPANION_OPTION: {
       invocation: 'cypress tap dom --at 1',
       failure: new MissingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.'),
+    },
+    // cli/lib/tap/output.ts, standing in for anything that reached the renderer
+    // without being raised as a tap failure
+    UNKNOWN_ERROR: {
+      invocation: 'cypress tap status',
+      failure: new UnknownTapError(new TypeError('cannot read property \'pid\' of undefined')),
     },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/exec-args.ts
     INVALID_VALUE: {

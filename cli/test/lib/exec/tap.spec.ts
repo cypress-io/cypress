@@ -733,13 +733,12 @@ describe('lib/exec/tap', () => {
       expect(withTapSession).not.toHaveBeenCalled()
     })
 
-    it('rethrows unexpected errors for the generic CLI error path', async () => {
-      const unexpected = new Error('boom')
-
+    it('answers an unexpected error as an unknown failure', async () => {
       mockLiveResolved(liveInstance())
-      vi.mocked(queryInstanceGraphql).mockRejectedValue(unexpected)
+      vi.mocked(queryInstanceGraphql).mockRejectedValue(new Error('boom'))
 
-      await expect(tap.start(['specs'], {})).rejects.toBe(unexpected)
+      expect(await tap.start(['specs'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
     })
   })
 
@@ -1357,12 +1356,11 @@ describe('lib/exec/tap', () => {
       expect(printed).toContain('Looked for --instance 4321')
     })
 
-    it('rethrows unexpected errors for the generic CLI error path', async () => {
-      const unexpected = new Error('boom')
+    it('answers an unexpected error as an unknown failure', async () => {
+      failResolve(new Error('boom'))
 
-      failResolve(unexpected)
-
-      await expect(tap.start(['health'], {})).rejects.toBe(unexpected)
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
     })
   })
 })
