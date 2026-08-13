@@ -82,12 +82,15 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
         // evaluation may still complete later, trading strict ordering for
         // liveness in that degraded case
         this.evaluateChain = this.evaluateChain.then(() => {
+          let timer!: NodeJS.Timeout
+
           return Promise.race([
             evaluation.catch(() => undefined),
             new Promise<void>((resolve) => {
-              setTimeout(resolve, this.evaluateOrderTimeout).unref?.()
+              timer = setTimeout(resolve, this.evaluateOrderTimeout)
+              timer.unref?.()
             }),
-          ])
+          ]).finally(() => clearTimeout(timer))
         })
 
         return evaluation
