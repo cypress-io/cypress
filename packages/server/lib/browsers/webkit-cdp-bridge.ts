@@ -3,6 +3,7 @@ import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { CDPSocketBridge } from '@packages/socket'
 
+const debug = Debug('cypress:server:browsers:webkit-cdp-bridge')
 const debugVerbose = Debug('cypress-verbose:server:browsers:webkit-cdp-bridge')
 
 // how long a single evaluation may hold up the ordering chain before later
@@ -87,7 +88,11 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
           return Promise.race([
             evaluation.catch(() => undefined),
             new Promise<void>((resolve) => {
-              timer = setTimeout(resolve, this.evaluateOrderTimeout)
+              timer = setTimeout(() => {
+                debug('evaluation did not settle within %dms, dispatching later messages', this.evaluateOrderTimeout)
+                resolve()
+              }, this.evaluateOrderTimeout)
+
               timer.unref?.()
             }),
           ]).finally(() => clearTimeout(timer))
