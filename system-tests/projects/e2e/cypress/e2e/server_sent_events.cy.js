@@ -51,6 +51,36 @@ describe('server sent events', () => {
     }).should('deep.eq', ['1', '2', '3', '4', '5'])
   })
 
+  it('reads SSE framing from a fetch ReadableStream before cancelling', () => {
+    cy.window().then((win) => {
+      // the proxy only exempts a response from gzip compression when the
+      // request's accept header is exactly 'text/event-stream' - otherwise
+      // gzip buffers these tiny 100ms chunks indefinitely and the reader
+      // never sees a byte
+      return win.fetch('http://127.0.0.1:3039/sse', { headers: { accept: 'text/event-stream' } })
+      .then((response) => {
+        const reader = response.body.getReader()
+        const decoder = new win.TextDecoder()
+
+        // the server writes a leading `:ok` comment before the first `data:`
+        // frame, so keep reading chunks until an actual event arrives
+        const readUntilData = (received) => {
+          return reader.read().then(({ value, done }) => {
+            if (done) return received
+
+            const next = received + decoder.decode(value, { stream: true })
+
+            if (next.includes('data:')) return next
+
+            return readUntilData(next)
+          })
+        }
+
+        return readUntilData('').finally(() => reader.cancel())
+      })
+    }).should('include', 'data:')
+  })
+
   it('aborts proxied connections to prevent client connection buildup', () => {
     // there shouldn't be any leftover connections either
     cy.request('http://localhost:3038/clients')
