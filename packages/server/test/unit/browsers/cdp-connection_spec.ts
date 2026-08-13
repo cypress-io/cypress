@@ -4,6 +4,7 @@ import type { debugCdpConnection } from '../../../lib/browsers/cdp-protocol/debu
 import type { CdpEvent, CdpCommand } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { CDPTerminatedError, CDPAlreadyConnectedError, CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'
+import { fireDisconnect as fireDisconnectListeners } from '../../support/helpers/cdp-disconnect'
 import WebSocket from 'ws'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -35,6 +36,9 @@ describe('CDPConnection', () => {
       _ws: stubbedWebSocket,
     }
   }
+
+  // wraps the shared helper over the current stubbedCDPClient
+  const fireDisconnect = () => fireDisconnectListeners(stubbedCDPClient.on!, stubbedCDPClient.off!)
 
   beforeEach(() => {
     stubbedWebSocket = sinon.createStubInstance(WebSocket)
@@ -116,9 +120,20 @@ describe('CDPConnection', () => {
         await cdpConnection.connect()
       })
 
-      it('does not add a reconnect listener', async () => {
-        //@ts-expect-error
-        expect(stubbedCDPClient.on?.withArgs('disconnect')).not.to.have.been.called
+      // this connection was constructed with automaticallyReconnect: false (see outer beforeEach),
+      // so a disconnect of the underlying socket is permanent - there is no reconnection attempt
+      // to eventually bring it back.
+      it('marks the connection terminated and emits cdp-connection-closed', async () => {
+        await fireDisconnect()
+
+        expect(cdpConnection.terminated).to.be.true
+        expect(onConnectionClosedCb).to.have.been.called
+      })
+
+      it('rejects subsequent sends as terminated', async () => {
+        await fireDisconnect()
+
+        await expect(cdpConnection.send('Page.enable')).to.be.rejectedWith(CDPDisconnectedError, 'terminated')
       })
     })
   })
@@ -131,18 +146,16 @@ describe('CDPConnection', () => {
         await cdpConnection.connect()
       })
 
-      it('removes any event listeners that have been added', async () => {
+      it('removes the event and disconnect listeners it registered', async () => {
+        //@ts-expect-error
+        const eventListener = stubbedCDPClient.on?.withArgs('event').args[0][1]
+        //@ts-expect-error
+        const disconnectListener = stubbedCDPClient.on?.withArgs('disconnect').args.at(-1)[1]
+
         await cdpConnection.disconnect()
 
-        const calls = stubbedCDPClient.on?.getCalls()
-
-        if (calls?.length) {
-          for (const call of calls) {
-            const [event, listener] = call.args
-
-            expect(stubbedCDPClient.off).to.have.been.calledWith(event, listener)
-          }
-        }
+        expect(stubbedCDPClient.off).to.have.been.calledWith('event', eventListener)
+        expect(stubbedCDPClient.off).to.have.been.calledWith('disconnect', disconnectListener)
       })
 
       it('closes the CDP connection', async () => {
@@ -301,6 +314,30 @@ describe('CDPConnection', () => {
     })
   })
 
+  describe('.ws', () => {
+    it('returns undefined before a connection has been established', () => {
+      expect(cdpConnection.ws).to.be.undefined
+    })
+
+    it('returns the underlying websocket once connected', async () => {
+      CDPImport.withArgs({ target: DEBUGGER_URL, local: true }).resolves(stubbedCDPClient)
+      await cdpConnection.connect()
+
+      expect(cdpConnection.ws).to.eq(stubbedWebSocket)
+    })
+
+    it('returns undefined rather than throwing after a terminal disconnect', async () => {
+      CDPImport.withArgs({ target: DEBUGGER_URL, local: true }).resolves(stubbedCDPClient)
+      await cdpConnection.connect()
+
+      // this connection was constructed with automaticallyReconnect: false (see outer
+      // beforeEach), so this disconnect is terminal and clears out the underlying connection
+      await fireDisconnect()
+
+      expect(cdpConnection.ws).to.be.undefined
+    })
+  })
+
   describe('when created with auto reconnect behavior enabled and disconnected', () => {
     let deferredReconnection: PromiseWithResolvers<any>
 
@@ -320,9 +357,17 @@ describe('CDPConnection', () => {
       CDPImport.withArgs({ target: DEBUGGER_URL, local: true }).resolves(stubbedCDPClient)
 
       await cdpConnection.connect()
-      // @ts-expect-error
-      stubbedCDPClient.on?.withArgs('disconnect').args[0][1]()
+      fireDisconnect()
       CDPImport.reset()
+    })
+
+    it('does not mark the connection terminated (reconnection is attempted instead)', async () => {
+      expect(cdpConnection.terminated).to.be.false
+
+      // let the reconnection attempt kicked off in beforeEach settle so it doesn't
+      // leak a pending CDPImport call into the next test
+      CDPImport.resolves(stubbedCDPClient)
+      await deferredReconnection.promise
     })
 
     it('reconnects when disconnected and reconnection succeeds on the third try', async () => {
