@@ -824,7 +824,10 @@ const createRunAndRecordSpecs = (options: any = {}) => {
           // should execute. `undefined` means no filtering — run the spec in full.
           const filteredTests = getEligibleTestTitles(response.actions)
 
-          if (filteredTests && !hasShownRerunWarning) {
+          // An empty (but defined) keep-list has no eligible tests to filter down
+          // to, so the runner/reporter both treat it the same as "no filtering" -
+          // don't warn about a rerun optimization that isn't actually taking effect.
+          if (filteredTests?.length && !hasShownRerunWarning) {
             hasShownRerunWarning = true
             errorsWarning('CLOUD_RERUN_FAILED_TESTS', { anchorRunUrl: getAnchorRunUrl(response.actions) })
           }
