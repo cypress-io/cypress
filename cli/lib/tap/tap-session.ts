@@ -33,7 +33,7 @@ const matchesAnyMessage = (err: unknown, messages: string[]): boolean => {
  * An unresponsive renderer is reported as itself rather than as whatever call
  * happened to time out: it is the condition worth waiting longer on.
  */
-export const throwTapError = (code: RaisableTapErrorCode, message: string, cause?: unknown): never => {
+export const throwTapError = (code: RaisableTapErrorCode, message?: string, cause?: unknown): never => {
   if (isRendererUnresponsive(cause)) {
     throw cause
   }

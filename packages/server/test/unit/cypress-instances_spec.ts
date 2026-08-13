@@ -161,6 +161,8 @@ describe('lib/cypress-instances', () => {
         ...await fs.readJson(recordPath),
         cdpBrowserWsUrl: null,
         browserName: null,
+        machineId: null,
+        userId: null,
       })
     })
   })

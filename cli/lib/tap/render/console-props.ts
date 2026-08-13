@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapCommandOptionSchema, TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
+import type { TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
 import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth } from './format'
 
 // A command's console properties are the deepest payload the tap returns — a
@@ -28,10 +28,6 @@ const MIN_VALUE_WIDTH = 24
 // Console prop labels are short prose (`Request Headers`); anything past this is
 // a key carrying data, and it does not get to own the level's whole row.
 const MAX_KEY_WIDTH = 32
-
-export const consolePropsOptions: readonly TapCommandOptionSchema[] = [
-  { name: 'depth', alias: 'd', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
-]
 
 export interface ConsolePropsOptions {
   depth?: string

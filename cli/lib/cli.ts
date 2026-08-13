@@ -27,6 +27,14 @@ function unknownOption (this: any, flag: string, type: string = 'option'): void 
   logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
+
+  // A command that took exitOverride() means to handle its own failure — exiting
+  // here would skip the rest of its run, including anything it does on the way
+  // out. `cypress tap` relies on this to report the invocation before leaving.
+  if (this._exitCallback) {
+    this._exitCallback(new commander.CommanderError(1, 'commander.unknownOption', `unknown ${type}: ${flag}`))
+  }
+
   process.exit(1)
 }
 commander.Command.prototype.unknownOption = unknownOption

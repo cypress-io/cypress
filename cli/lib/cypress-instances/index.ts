@@ -68,6 +68,20 @@ export interface ResolveInstanceOptions {
   probeTimeoutMs?: number
 }
 
+export interface ResolvedInstanceIdentity {
+  instanceId: string
+  machineId: string | null
+  userId: string | null
+}
+
+let lastResolvedIdentity: ResolvedInstanceIdentity | null = null
+
+// Read rather than threaded through every caller: each tap command resolves its
+// own instance, several of them below this module.
+export const resolvedInstanceIdentity = (): ResolvedInstanceIdentity | null => lastResolvedIdentity
+
+export const resolvedInstanceId = (): string | null => lastResolvedIdentity?.instanceId ?? null
+
 // The specifics an instance failure carries: which pid was asked for, if any. The
 // condition and the remedy come from the error's registry entry, so this adds only
 // what that entry cannot know.
@@ -126,6 +140,8 @@ export const resolveLiveInstance = async (options: ResolveInstanceOptions): Prom
 
   const { instance, reason } = selectInstance(live, options)
 
+  lastResolvedIdentity = { instanceId: instance.instanceId, machineId: instance.machineId, userId: instance.userId }
+
   return { instance, reason, candidateCount: live.length }
 }
 
@@ -147,6 +163,8 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
   }
 
   const { instance: selected, reason } = selectInstance(ready, options)
+
+  lastResolvedIdentity = { instanceId: selected.instanceId, machineId: selected.machineId, userId: selected.userId }
 
   return { instance: selected, reason, candidateCount: ready.length }
 }

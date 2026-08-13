@@ -57,7 +57,7 @@ export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: n
       return null
     }
 
-    const live = await response.json() as { instanceId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown }
+    const live = await response.json() as { instanceId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, machineId?: unknown, userId?: unknown }
 
     if (live.instanceId !== record.instanceId) {
       return null
@@ -70,6 +70,8 @@ export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: n
       ...record,
       cdpBrowserWsUrl: attached ? cdpBrowserWsUrl : null,
       browserName: attached && typeof live.browserName === 'string' ? live.browserName : null,
+      machineId: typeof live.machineId === 'string' ? live.machineId : null,
+      userId: typeof live.userId === 'string' ? live.userId : null,
     }
   } catch (err) {
     debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)

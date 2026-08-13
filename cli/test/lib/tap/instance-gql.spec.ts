@@ -12,6 +12,8 @@ const instance: LiveInstanceState = {
   testingType: 'e2e',
   cdpBrowserWsUrl: null,
   browserName: null,
+  machineId: null,
+  userId: null,
 }
 
 const request = {

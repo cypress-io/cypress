@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { TapError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
-import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
+import { listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
+import type { LiveInstanceSelection, LiveInstanceState } from '../../../lib/cypress-instances'
 import { withTapSession } from '../../../lib/tap/tap-session'
 import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
@@ -12,33 +12,23 @@ import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
 import { buildTapSchema } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
-import { TAP_ERROR_COPY, TapError, notFoundTapError } from '@packages/cypress-instances'
+import { TAP_ERROR_COPY, notFoundTapError } from '@packages/cypress-instances'
 import tap from '../../../lib/exec/tap'
+import { mockResolved, mockSession, readyInstance, resetTapMocks, schema, tapError } from './tap-fixtures'
 
-const tapError = (code: string, message: string): Error => {
-  return new TapError(code as never, { message })
-}
-
+// vi.mock is hoisted above these imports, so the factories cannot come from
+// ./tap-fixtures — everything they don't cover does.
 vi.mock('../../../lib/tap/tap-session', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/tap/tap-session')>()
-
-  return {
-    ...actual,
-    withTapSession: vi.fn(),
-  }
+  return { ...await importActual<typeof import('../../../lib/tap/tap-session')>(), withTapSession: vi.fn() }
 })
 
 vi.mock('../../../lib/tap/instance-gql', () => {
-  return {
-    queryInstanceGraphql: vi.fn(),
-  }
+  return { queryInstanceGraphql: vi.fn() }
 })
 
 vi.mock('../../../lib/cypress-instances', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
-
   return {
-    ...actual,
+    ...await importActual<typeof import('../../../lib/cypress-instances')>(),
     listLiveInstances: vi.fn(),
     resolveLiveInstance: vi.fn(),
     resolveInstance: vi.fn(),
@@ -48,85 +38,11 @@ vi.mock('../../../lib/cypress-instances', async (importActual) => {
 // The AUT-frame reader drives CDP, covered in frame.spec.ts; here we assert only
 // that dom/aria/inspect route to it with their parsed args, so stub it out.
 vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/tap/aut/frame')>()
-
-  return {
-    ...actual,
-    withResolvedAutFrame: vi.fn(),
-  }
+  return { ...await importActual<typeof import('../../../lib/tap/aut/frame')>(), withResolvedAutFrame: vi.fn() }
 })
-
-const schema: TapSchema = {
-  schemaVersion: 1,
-  cypressVersion: '15.0.0',
-  commands: [
-    {
-      name: 'health',
-      description: 'check that a running Cypress instance is reachable and its tap binding responds',
-      params: [],
-      options: [],
-    },
-    {
-      name: 'fake-command-for-testing',
-      description: 'a fake command, advertised only by this test\'s schema, exercising schema-forwarded dispatch',
-      params: [
-        { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the spec command' },
-      ],
-      options: [
-        { name: 'browser', alias: 'b', type: 'string', required: false, description: 'which browser to run in' },
-        { name: 'headed', type: 'boolean', required: false, description: 'show the browser' },
-      ],
-    },
-  ],
-}
-
-const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
-  const call = vi.fn(async (method: string) => {
-    return method === 'getSchema' ? sessionSchema : execOutcome
-  })
-
-  // These tests drive the binding exec/status paths, which use only `call`;
-  // the frame extractors (dom/aria/inspect, which use client/sessionId) are
-  // covered separately, so the session's CDP members are stubbed away here.
-  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
-
-  return call
-}
-
-const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => ({
-  schemaVersion: 1,
-  pid: 4242,
-  projectRoot: '/projects/app',
-  serverPort: 49200,
-  instanceId: 'inst-1',
-  testingType: 'e2e',
-  cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-  browserName: 'Chrome',
-  ...overrides,
-})
-
-const mockResolved = (overrides: Partial<InstanceSelection> = {}): InstanceSelection => {
-  const selection: InstanceSelection = { instance: readyInstance(), reason: 'only', candidateCount: 1, ...overrides }
-
-  vi.mocked(resolveInstance).mockResolvedValue(selection)
-
-  return selection
-}
 
 describe('lib/exec/tap', () => {
-  beforeEach(() => {
-    vi.mocked(withTapSession).mockReset()
-    vi.mocked(queryInstanceGraphql).mockReset()
-    vi.mocked(listLiveInstances).mockReset()
-    vi.mocked(resolveLiveInstance).mockReset()
-    vi.mocked(resolveInstance).mockReset()
-    vi.mocked(withResolvedAutFrame).mockReset()
-    vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
-    mockResolved()
-    logger.reset()
-    vi.spyOn(console, 'log').mockImplementation(() => {})
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-  })
+  beforeEach(resetTapMocks)
 
   afterEach(() => {
     vi.useRealTimers()
@@ -480,6 +396,8 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      machineId: null,
+      userId: null,
       ...overrides,
     })
 
@@ -599,6 +517,8 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      machineId: null,
+      userId: null,
       ...overrides,
     })
 
@@ -611,7 +531,7 @@ describe('lib/exec/tap', () => {
     }
 
     it('reports "not connected" and exits 0 when no instance is live', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(new TapError('NO_INSTANCE', 'none'))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(tapError('NO_INSTANCE', 'none'))
 
       expect(await tap.start(['status'], {})).toBe(0)
 
@@ -624,14 +544,14 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints the raw status object with --json', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(new TapError('NO_INSTANCE', 'none'))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(tapError('NO_INSTANCE', 'none'))
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
     it('reports "not connected" for a stale discovery record too', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(new TapError('STALE_INSTANCE', 'stale'))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(tapError('STALE_INSTANCE', 'stale'))
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
@@ -819,6 +739,8 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      machineId: null,
+      userId: null,
       ...overrides,
     })
 
@@ -968,7 +890,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders the discovery failure and exits 1 when no instance is live', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['specs'], {})).toBe(1)
       expect(logger.print()).toContain(TAP_ERROR_COPY.NO_INSTANCE.description)
@@ -1017,6 +939,8 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      machineId: null,
+      userId: null,
       ...overrides,
     })
 
@@ -1135,7 +1059,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders the discovery failure and exits 1 when no instance is live', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
       expect(logger.print()).toContain(TAP_ERROR_COPY.NO_INSTANCE.description)
@@ -1242,7 +1166,7 @@ describe('lib/exec/tap', () => {
     const failSession = (err: unknown) => vi.mocked(withTapSession).mockRejectedValue(err)
 
     it('renders discovery errors with their code and exits 1', async () => {
-      failResolve(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      failResolve(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(TAP_ERROR_COPY.NO_INSTANCE.description)
@@ -1266,7 +1190,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to the baked-in CLI command help when no instance is found and help was wanted', async () => {
-      failResolve(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      failResolve(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toMatchInlineSnapshot(`
@@ -1313,7 +1237,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('lists both native and schema commands when an unknown command is requested offline', async () => {
-      failResolve(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      failResolve(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['instancs', '--help'], {})).toBe(1)
 
@@ -1325,7 +1249,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders the baked-in per-command help when no instance is found', async () => {
-      failResolve(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      failResolve(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['command', '--help'], {})).toBe(0)
       expect(logger.print()).toMatchInlineSnapshot(`
@@ -1361,14 +1285,14 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to generic help (exit 0) for a bare invocation with no instance found', async () => {
-      failResolve(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      failResolve(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
     it('falls back to generic help for --help when an instance is up but has no browser', async () => {
-      failResolve(new TapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+      failResolve(tapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -1376,7 +1300,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to generic help for `<command> --help` when an instance is up but has no browser', async () => {
-      failResolve(new TapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+      failResolve(tapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start(['run', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -1384,7 +1308,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to generic help for --help when the matched instance is stale', async () => {
-      failResolve(new TapError('STALE_INSTANCE', 'Cypress was previously running, but is no longer responding.'))
+      failResolve(tapError('STALE_INSTANCE', 'Cypress was previously running, but is no longer responding.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -1392,7 +1316,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('falls back to generic help (exit 0) for a bare invocation when an instance is up but has no browser', async () => {
-      failResolve(new TapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+      failResolve(tapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -1400,7 +1324,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('still surfaces the discovery error when an actual command was requested', async () => {
-      failResolve(new TapError('NO_INSTANCE', 'No running Cypress was found.'))
+      failResolve(tapError('NO_INSTANCE', 'No running Cypress was found.'))
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(TAP_ERROR_COPY.NO_INSTANCE.description)

@@ -121,7 +121,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['open', 'cypress/e2e/a.cy.js', '42'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js', line: '42' }, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js', line: '42' }, {})
   })
 
   it('keys only the supplied positionals, omitting an absent trailing optional', () => {
@@ -130,7 +130,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['open', 'cypress/e2e/a.cy.js'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js' }, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js' }, {})
   })
 
   it('dispatches a no-param command with an empty arg map and no options', () => {
@@ -139,7 +139,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['health'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('health', {}, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('health', {}, {})
   })
 
   it('throws a catchable missingArgument error when a required positional is absent', () => {
@@ -195,7 +195,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['launch', 'a.cy.js', '--browser', 'chrome', '--port', '8080', '--headed'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' }, {})
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' })
   })
 
   it('declares and forwards the reporter listing options from the shared contract', () => {
@@ -208,7 +208,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['reporter', '--test-id', 'r2', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { 'test-id': 'r2', attempt: '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { 'test-id': 'r2', attempt: '1' })
   })
 
   it('declares and forwards command --command-id from the shared contract', () => {
@@ -222,7 +222,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['command', '--test-id', 'r2', '--command-id', 'log-3', '--attempt', '1'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': 'log-3', 'attempt': '1' }, {})
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': 'log-3', 'attempt': '1' })
   })
 
   // `command` declares --json in its schema so the instance can be told, but the
@@ -237,10 +237,7 @@ describe('lib/tap/build-program', () => {
     expect(subcommand(program, 'reporter').helpInformation().replace(/\s+/g, ' ')).toContain('--json print the raw JSON result')
   })
 
-  // The CLI's own view options ride in the schema commands' help, but they shape
-  // only how the result reads, so they are collected apart from the options the
-  // instance is told about.
-  it('declares the rendering’s view options separately from the schema’s', () => {
+  it('forwards an option the renderer reads alongside the rest', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
     const help = subcommand(program, 'command').helpInformation()
@@ -253,8 +250,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith(
       'command',
       {},
-      { 'test-id': 'r2', 'command-id': '3' },
-      { depth: '2' },
+      { 'test-id': 'r2', 'command-id': '3', depth: '2' },
     )
   })
 
@@ -264,16 +260,16 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['launch', 'a.cy.js', '-b', 'firefox'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'firefox' }, {})
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'firefox' })
   })
 
-  it('resolves the shared contract’s aliases, schema and view options alike', () => {
+  it('resolves every alias the shared contract declares', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
 
     program.parse(['command', '-t', 'r2', '-c', '3', '-a', '1', '-d', '2'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': '3', attempt: '1' }, { depth: '2' })
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': '3', attempt: '1', depth: '2' })
   })
 
   it('renders each alias alongside its long spelling in the generated help', () => {
@@ -286,7 +282,7 @@ describe('lib/tap/build-program', () => {
 
   // Commander accepts a short flag claimed twice within one command and silently
   // lets the last declaration win, so nothing but this catches an alias that
-  // collides with another option, with a view-only one, or with -h.
+  // collides with another option or with -h.
   it('claims each short flag at most once per command', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
 
@@ -303,7 +299,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['launch', 'a.cy.js'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, {})
   })
 
   it('raises a tap failure naming a flag not in the schema, and the help that lists them', () => {
@@ -330,7 +326,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['health'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('health', {}, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('health', {}, {})
 
     expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
       expect.objectContaining({ code: 'commander.excessArguments' }),
@@ -357,7 +353,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['export', '--dry-run'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'dry-run': 'true' }, {})
+    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'dry-run': 'true' })
   })
 
   it('forwards a dashed value option keyed by its raw schema name despite commander camelCasing it', () => {
@@ -366,7 +362,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['export', '--output-file', 'out.json'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'output-file': 'out.json' }, {})
+    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'output-file': 'out.json' })
   })
 
   it('omits dashed options the user did not supply', () => {
@@ -375,7 +371,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['export'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('export', {}, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('export', {}, {})
   })
 
   it('forwards a dashed param name keyed by its raw schema name (positionals bypass camelCasing)', () => {
@@ -393,7 +389,7 @@ describe('lib/tap/build-program', () => {
 
     program.parse(['show', 'a.cy.js'], { from: 'user' })
 
-    expect(dispatch).toHaveBeenCalledWith('show', { 'spec-path': 'a.cy.js' }, {}, {})
+    expect(dispatch).toHaveBeenCalledWith('show', { 'spec-path': 'a.cy.js' }, {})
   })
 
   it('declares a required value option with requiredOption so commander enforces it', () => {

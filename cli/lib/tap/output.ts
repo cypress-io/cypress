@@ -5,6 +5,7 @@ import logger from '../logger'
 import { docsUrl } from '../errors'
 import util from '../util'
 import { renderingFor } from './render'
+import { noteTapFailure } from './events'
 import type { InstanceSelection } from '../cypress-instances'
 import { tapErrorCopy, unknownCommandTapError } from '@packages/cypress-instances'
 import type { TapErrorCopy, TapSchema } from '@packages/cypress-instances'
@@ -43,6 +44,8 @@ export const renderTapFailure = async (err: any): Promise<number> => {
   if (typeof err?.code !== 'string') {
     throw err
   }
+
+  noteTapFailure(err.code)
 
   const copy = tapErrorCopy(err.code)
   const condition = copy.description ? [highlight(copy.description)] : []

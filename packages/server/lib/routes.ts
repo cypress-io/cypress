@@ -254,14 +254,22 @@ export const createCommonRoutes = ({
   // external tool can attach to; the record is only written in open mode, so don't
   // expose the probe route for headless `cypress run`.
   if (!config.isTextTerminal) {
-    router.get(`${INSTANCES_ROUTE_PREFIX}:instanceId`, (req, res) => {
+    router.get(`${INSTANCES_ROUTE_PREFIX}:instanceId`, async (req, res) => {
       const state = cypressInstances.getCurrent()
 
       if (!state || req.params.instanceId !== state.instanceId) {
         return res.sendStatus(404)
       }
 
-      return res.json(state)
+      // Identity is read at probe time rather than stored on the state: the
+      // logged-in user can change over the instance's lifetime.
+      const ctx = getCtx()
+
+      return res.json({
+        ...state,
+        machineId: await ctx.coreData.machineId.catch(() => null),
+        userId: ctx.coreData.user?.id ?? null,
+      })
     })
   }
 

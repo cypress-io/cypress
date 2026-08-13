@@ -1,4 +1,4 @@
-import type { ClearResult, PinResult, TapCommandName, TapCommandOptionSchema, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import type { ClearResult, PinResult, TapCommandName, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
 import type { TapRunResult } from '../commands/run'
 import type { TapInstanceSummary } from '../commands/instances'
 import type { TapSpecEntry } from '../commands/specs'
@@ -18,7 +18,6 @@ import { renderAriaHuman } from './aria'
 import { renderInspectHuman } from './inspect'
 import { renderPinHuman } from './pin'
 import { renderCommandHuman } from './command'
-import { consolePropsOptions } from './console-props'
 
 /**
  * The CLI-side rendering half of a tap command's definition. A command that
@@ -29,14 +28,9 @@ import { consolePropsOptions } from './console-props'
  * options, for a command whose result shape depends on them. Returning
  * undefined declines the rendering for the invoked options, printing the raw
  * JSON as if `--json` had been passed.
- *
- * `options` here are the view's own: flags the CLI declares on top of the
- * command's schema, parsed and rendered into its help like any other but never
- * forwarded to the instance, since they only shape how the result reads.
  */
 export interface TapCommandRendering {
   renderHuman: (result: unknown, options: Record<string, string>) => string | undefined
-  options?: readonly TapCommandOptionSchema[]
 }
 
 // The selector-taking AUT reads answer an ambiguous selector in place of the
@@ -59,7 +53,6 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
     },
   },
   command: {
-    options: consolePropsOptions,
     renderHuman: (result, options) => {
       return renderCommandHuman(result as TapCommandResult, {
         depth: options.depth,
@@ -78,13 +71,4 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
 
 export const renderingFor = (command: string): TapCommandRendering | undefined => {
   return renderings[command as TapCommandName | TapNativeCommandName]
-}
-
-/**
- * The view-only options to declare on a command on top of the ones its schema
- * advertises. They stay in the CLI: the instance neither needs nor is told about
- * them, so they work against any version that has the command at all.
- */
-export const renderOptionsFor = (command: string): readonly TapCommandOptionSchema[] => {
-  return renderingFor(command)?.options ?? []
 }
