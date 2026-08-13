@@ -124,7 +124,7 @@ interface AppUrqlClientConfig {
   target: 'app'
   namespace: string
   socketIoRoute: string
-  proxyUrl?: string
+  port?: number | null
 }
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
@@ -241,13 +241,17 @@ export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Locati
 
   // With the proxy disabled the app is served at the AUT's superdomain, and CDP
   // cannot intercept a WebSocket upgrade — the handshake has to name the Cypress
-  // server or it reaches the user's app server (see #34563).
-  const origin = proxyDisabled && config.proxyUrl ? new URL(config.proxyUrl) : location
+  // server or it reaches the user's app server (see #34563). `port` is the port the
+  // server is listening on; `proxyUrl` is derived from the port that was requested and
+  // can still name a port nothing is bound to.
+  if (proxyDisabled && config.port) {
+    return `ws://localhost:${config.port}${config.socketIoRoute}-graphql`
+  }
 
   // http: -> ws:  &  https: -> wss:
-  const protocol = origin.protocol.replace('http', 'ws')
+  const protocol = location.protocol.replace('http', 'ws')
 
-  return `${protocol}//${origin.host}${config.socketIoRoute}-graphql`
+  return `${protocol}//${location.host}${config.socketIoRoute}-graphql`
 }
 
 function getSocketSource (config: UrqlClientConfig) {
