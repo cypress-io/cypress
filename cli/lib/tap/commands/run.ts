@@ -1,5 +1,5 @@
 import { resolveLiveInstance } from '../../cypress-instances'
-import { LiveInstanceState, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
+import { LiveInstanceState, TAP_TARGET, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
 import { queryInstanceGraphql } from '../instance-gql'
 import { renderOutcome, renderTapFailure } from '../output'
 import { defineNativeCommand } from './definition'
@@ -64,7 +64,7 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
 
     const failure = result?.__typename === 'RunSpecError'
       ? { code: RUN_SPEC_FAILURES[result.code] ?? 'SPEC_START_FAILED', detail: result.detailMessage ?? undefined }
-      : { code: 'SPEC_START_FAILED', detail: `The instance returned no result for "${args.spec}".` }
+      : { code: 'SPEC_START_FAILED', detail: `The ${TAP_TARGET} returned no result for "${args.spec}".` }
 
     return await renderTapFailure(failure)
   } catch (err: any) {

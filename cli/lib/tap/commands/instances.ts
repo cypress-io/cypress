@@ -1,4 +1,4 @@
-import { listLiveInstances } from '../../cypress-instances'
+import { TAP_TARGET, listLiveInstances } from '../../cypress-instances'
 import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-instances'
 import { renderOutcome, renderResult } from '../output'
 import { withTapSession } from '../tap-session'
@@ -6,7 +6,7 @@ import { FIND_INSTANCE_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
-const NO_INSTANCES_GUIDANCE = 'No running Cypress instance found. Start Cypress in open mode (e.g. `cypress open`) and select a testing type to get started.'
+const NO_INSTANCES_GUIDANCE = `No running ${TAP_TARGET} found. Start Cypress in open mode (e.g. \`cypress open\`) and select a testing type to get started.`
 
 /** One row of `cypress tap instances`: a reachable open-mode Cypress instance. */
 export interface TapInstanceSummary {

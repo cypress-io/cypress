@@ -38,11 +38,17 @@ export interface TapErrorCopy {
 
 const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
 
+/**
+ * What every failure calls the running Cypress a tap command targets. Rename it
+ * here and every error that speaks of it follows.
+ */
+export const TAP_TARGET = 'Cypress session'
+
 export const TAP_ERROR_COPY = {
   // Finding an instance to drive
   /** Raised when discovery found no instance record at all, and none was named. */
   NO_INSTANCE: {
-    description: 'Could not find an open-mode session to tap into.',
+    description: `Could not find a ${TAP_TARGET} to tap into.`,
     solution: 'Start Cypress with `cypress open`, select a testing type and launch a browser, then try again.',
   },
   /**
@@ -51,74 +57,74 @@ export const TAP_ERROR_COPY = {
    * @deprecated - raise it with notFoundTapError(), which writes its detail
    */
   INSTANCE_NOT_FOUND: {
-    description: 'No running Cypress matched that process id.',
-    solution: 'Run `cypress tap instances` to list the sessions you can tap into.',
+    description: `No ${TAP_TARGET} matched that process id.`,
+    solution: `Run \`cypress tap instances\` to list the ${TAP_TARGET}s you can tap into.`,
   },
   /** Raised when records matched, but none answered its liveness probe. */
   STALE_INSTANCE: {
-    description: 'Cypress was running, but is no longer responding.',
-    solution: 'Cypress likely exited uncleanly. Start Cypress again with `cypress open`, then try again.',
+    description: `The ${TAP_TARGET} was running, but is no longer responding.`,
+    solution: 'It likely exited uncleanly. Start Cypress again with `cypress open`, then try again.',
   },
   /** Raised when the instance is live, but has no browser open to drive. */
   NO_BROWSER_ATTACHED: {
-    description: 'Cypress is running, but no test browser is open.',
+    description: `The ${TAP_TARGET} is running, but no test browser is open.`,
     solution: 'Open a Chromium based browser in Cypress, then try again.',
   },
   /** Raised when a CDP call went unanswered until the timeout elapsed. */
   RENDERER_UNRESPONSIVE: {
-    description: 'Cypress is reachable, but the page running it is not responding.',
+    description: `The ${TAP_TARGET} is reachable, but the page running it is not responding.`,
     solution: 'It may be paused in DevTools, stuck in a loop, or starved of memory. Pass `--timeout <ms>` to wait longer.',
   },
 
   // Connecting to it
   /** Raised when the CDP connection could not be opened, or dropped mid-command. */
   CDP_UNREACHABLE: {
-    description: 'Lost the connection to the browser running Cypress.',
+    description: `Lost the connection to the ${TAP_TARGET}'s browser.`,
     solution: 'The browser may have just closed. Make sure Cypress is running with a browser open, then try again.',
   },
   /** Raised when no open page carries the tap binding. */
   BINDING_NOT_FOUND: {
-    description: 'Could not make a connection to the Cypress application.',
-    solution: 'The instance may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again.',
+    description: `Could not make a connection to the ${TAP_TARGET}.`,
+    solution: `The ${TAP_TARGET} may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again.`,
   },
   /** Raised when a binding method threw while running the command. */
   BINDING_THREW: {
-    description: 'The Cypress instance failed while running the command.',
-    solution: 'Check the instance with `cypress tap status`, then try again.',
+    description: `The ${TAP_TARGET} failed while running the command.`,
+    solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
     recommendGhIssue: true,
   },
   /** Raised when the page navigated mid-call, and the retry hit it again. */
   STALE_HANDLE: {
-    description: 'The Cypress instance navigated while running the command.',
+    description: `The ${TAP_TARGET} navigated while running the command.`,
     solution: 'Run the command again.',
   },
 
   // Agreeing on a protocol with it
   /** Raised when the instance replied in a shape this CLI has no handling for. */
   PROTOCOL_MISMATCH: {
-    description: 'The running Cypress answered in a way this CLI does not recognize.',
-    solution: `The running Cypress and this CLI are likely different versions. Update the older of the two with ${UPDATE_COMMAND}, then try again.`,
+    description: `The ${TAP_TARGET} answered in a way this CLI does not recognize.`,
+    solution: `The ${TAP_TARGET} and this CLI are likely different versions. Update the older of the two with ${UPDATE_COMMAND}, then try again.`,
   },
   /** Raised when the handshake reported a schema version newer than this CLI's. */
   CLI_OUTDATED: {
-    description: 'The running Cypress is newer than this CLI.',
+    description: `The targeted ${TAP_TARGET} is newer than this CLI.`,
     solution: `Update the CLI with ${UPDATE_COMMAND}, then try again.`,
   },
   /** Raised when the handshake reported an older schema version, or GraphQL redirected. */
   INSTANCE_OUTDATED: {
-    description: 'The running Cypress is older than this CLI.',
+    description: `The targeted ${TAP_TARGET} is older than this CLI.`,
     solution: `Update Cypress in the running project with ${UPDATE_COMMAND}, restart it, then try again.`,
   },
 
   // Reading its data
   /** Raised when a GraphQL request never got an answer over HTTP. */
   GRAPHQL_UNREACHABLE: {
-    description: 'Could not reach the Cypress instance to read its data.',
-    solution: 'The instance may have just closed. Make sure Cypress is running in open mode, then try again.',
+    description: `Could not connect to the ${TAP_TARGET} to read its data.`,
+    solution: `The ${TAP_TARGET} may have just closed. Make sure Cypress is running in open mode, then try again.`,
   },
   /** Raised when GraphQL answered, but with errors, no data, or not JSON. */
   GRAPHQL_FAILED: {
-    description: 'The Cypress instance failed while answering a data query.',
+    description: `The ${TAP_TARGET} failed while answering a data query.`,
     solution: 'Try the command again.',
     recommendGhIssue: true,
   },
@@ -139,18 +145,18 @@ export const TAP_ERROR_COPY = {
   },
   /** Raised when the runSpec mutation failed, or answered with no result. */
   SPEC_START_FAILED: {
-    description: 'The Cypress instance could not start the spec.',
-    solution: 'Check the instance with `cypress tap status`, then try again.',
+    description: `The ${TAP_TARGET} could not start the spec.`,
+    solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
     recommendGhIssue: true,
   },
   /** Raised when the given path matches no spec the instance can run. */
   SPEC_NOT_FOUND: {
-    description: 'The instance has no spec matching that path.',
-    solution: '`cypress tap specs` lists the specs this instance can run. If the spec exists but is not listed, widen `specPattern` in the Cypress config.',
+    description: `The ${TAP_TARGET} has no spec matching that path.`,
+    solution: `\`cypress tap specs\` lists the specs the ${TAP_TARGET} can run. If the spec exists but is not listed, widen \`specPattern\` in the Cypress config.`,
   },
   /** Raised when the instance is running with no project open. */
   NO_PROJECT: {
-    description: 'The Cypress instance has no project open.',
+    description: `The ${TAP_TARGET} has no project open.`,
     solution: 'Open a project in Cypress, then try again.',
   },
   /** Raised when the spec's testing type is not one this project configures. */

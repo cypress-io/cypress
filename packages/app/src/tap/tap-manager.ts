@@ -1,7 +1,7 @@
 import { tapCommands } from './commands'
 import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
-import { isTapError, unknownCommandTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
+import { isTapError, unknownCommandTapError, TAP_SCHEMA_VERSION, TAP_TARGET, TapError } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
@@ -55,7 +55,7 @@ export class TapManager implements TapBindingContract {
       : undefined
 
     if (!definition) {
-      const offers = `This Cypress (v${this.cypressVersion}) offers: ${Object.keys(tapCommands).join(', ')}.`
+      const offers = `This ${TAP_TARGET} (v${this.cypressVersion}) offers: ${Object.keys(tapCommands).join(', ')}.`
 
       return { error: unknownCommandTapError(command, offers).toPayload() }
     }

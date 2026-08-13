@@ -1,7 +1,7 @@
 import { TapManager } from './tap-manager'
 import { tapCommands } from './commands'
 import type { TapCommandDefinition } from './commands/definition'
-import { TAP_SCHEMA_VERSION } from './contract'
+import { TAP_SCHEMA_VERSION, TAP_TARGET } from './contract'
 
 const CYPRESS_VERSION = '15.0.0'
 
@@ -17,7 +17,7 @@ describe('tap/tap-manager', () => {
       const outcome = await manager.exec('bogus')
 
       expect((outcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
-      expect((outcome as { error: { detail: string } }).error.detail).to.eq(`Unknown command "bogus"\n\nThis Cypress (v${CYPRESS_VERSION}) offers: ${Object.keys(tapCommands).join(', ')}.`)
+      expect((outcome as { error: { detail: string } }).error.detail).to.eq(`Unknown command "bogus"\n\nThis ${TAP_TARGET} (v${CYPRESS_VERSION}) offers: ${Object.keys(tapCommands).join(', ')}.`)
       expect((outcome as { error: { detail: string } }).error.detail).to.contain('v15.0.0')
     })
 

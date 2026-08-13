@@ -473,7 +473,7 @@ describe('lib/exec/tap', () => {
       const output = logger.print()
 
       expect(() => JSON.parse(output)).toThrow()
-      expect(output).toContain('No running Cypress instance found')
+      expect(output).toContain('No running Cypress session found')
       expect(output).toContain('select a testing type')
     })
 

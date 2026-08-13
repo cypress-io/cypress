@@ -1,11 +1,11 @@
 import path from 'path'
 
-import { TapError, notFoundTapError } from './record'
+import { TAP_TARGET, TapError, notFoundTapError } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 import { readLiveInstances } from './store'
 
-export { TapError, isTapError, INSTANCES_DIRNAME } from './record'
+export { TAP_TARGET, TapError, isTapError, INSTANCES_DIRNAME } from './record'
 
 export type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 
@@ -156,7 +156,7 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
 
   if (ready.length === 0) {
     const detail = live.length === 1
-      ? `The instance is pid ${live[0].pid}, at ${live[0].projectRoot}.`
+      ? `The ${TAP_TARGET} is pid ${live[0].pid}, at ${live[0].projectRoot}.`
       : describeFilter(options.instance)
 
     throw new TapError('NO_BROWSER_ATTACHED', { detail })

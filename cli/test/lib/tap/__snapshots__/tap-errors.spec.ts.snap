@@ -24,16 +24,16 @@ Looked for --attempt 5. Test "r7" has 3 attempts.
 
 exports[`lib/tap error rendering catalogue > BINDING_NOT_FOUND 1`] = `
 "> cypress tap status
-Could not make a connection to the Cypress application.
+Could not make a connection to the Cypress session.
 
-The instance may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again."
+The Cypress session may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again."
 `;
 
 exports[`lib/tap error rendering catalogue > BINDING_THREW 1`] = `
 "> cypress tap reporter
-The Cypress instance failed while running the command.
+The Cypress session failed while running the command.
 
-Check the instance with cypress tap status, then try again.
+Check the Cypress session with cypress tap status, then try again.
 
 If the problem persists, search for an existing issue or open a GitHub issue at
 
@@ -42,14 +42,14 @@ If the problem persists, search for an existing issue or open a GitHub issue at
 
 exports[`lib/tap error rendering catalogue > CDP_UNREACHABLE 1`] = `
 "> cypress tap status
-Lost the connection to the browser running Cypress.
+Lost the connection to the Cypress session's browser.
 
 The browser may have just closed. Make sure Cypress is running with a browser open, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > CLI_OUTDATED 1`] = `
 "> cypress tap status
-The running Cypress is newer than this CLI.
+The targeted Cypress session is newer than this CLI.
 
 Update the CLI with npm install --save-dev cypress@latest, then try again."
 `;
@@ -76,7 +76,7 @@ If the problem persists, search for an existing issue or open a GitHub issue at
 
 exports[`lib/tap error rendering catalogue > GRAPHQL_FAILED 1`] = `
 "> cypress tap specs
-The Cypress instance failed while answering a data query.
+The Cypress session failed while answering a data query.
 
 Try the command again.
 
@@ -87,23 +87,23 @@ If the problem persists, search for an existing issue or open a GitHub issue at
 
 exports[`lib/tap error rendering catalogue > GRAPHQL_UNREACHABLE 1`] = `
 "> cypress tap specs
-Could not reach the Cypress instance to read its data.
+Could not connect to the Cypress session to read its data.
 
-The instance may have just closed. Make sure Cypress is running in open mode, then try again."
+The Cypress session may have just closed. Make sure Cypress is running in open mode, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > INSTANCE_NOT_FOUND 1`] = `
 "> cypress tap --instance 4321 dom --selector "#status"
-No running Cypress matched that process id.
+No Cypress session matched that process id.
 
 Looked for --instance 4321.
 
-Run cypress tap instances to list the sessions you can tap into."
+Run cypress tap instances to list the Cypress sessions you can tap into."
 `;
 
 exports[`lib/tap error rendering catalogue > INSTANCE_OUTDATED 1`] = `
 "> cypress tap status
-The running Cypress is older than this CLI.
+The targeted Cypress session is older than this CLI.
 
 Update Cypress in the running project with npm install --save-dev cypress@latest, restart it, then try again."
 `;
@@ -168,23 +168,23 @@ Run a spec first with cypress tap run <spec>. To read the app as it was at an ea
 
 exports[`lib/tap error rendering catalogue > NO_BROWSER_ATTACHED 1`] = `
 "> cypress tap dom --selector "#status"
-Cypress is running, but no test browser is open.
+The Cypress session is running, but no test browser is open.
 
-The instance is pid 4321, at /home/dev/shop.
+The Cypress session is pid 4321, at /home/dev/shop.
 
 Open a Chromium based browser in Cypress, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_INSTANCE 1`] = `
 "> cypress tap dom --selector "#status"
-Could not find an open-mode session to tap into.
+Could not find a Cypress session to tap into.
 
 Start Cypress with cypress open, select a testing type and launch a browser, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_PROJECT 1`] = `
 "> cypress tap run cypress/e2e/checkout.cy.ts
-The Cypress instance has no project open.
+The Cypress session has no project open.
 
 Open a project in Cypress, then try again."
 `;
@@ -198,14 +198,14 @@ Pass --test-id and --command-id, as listed by cypress tap reporter, or --clear t
 
 exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `
 "> cypress tap status
-The running Cypress answered in a way this CLI does not recognize.
+The Cypress session answered in a way this CLI does not recognize.
 
-The running Cypress and this CLI are likely different versions. Update the older of the two with npm install --save-dev cypress@latest, then try again."
+The Cypress session and this CLI are likely different versions. Update the older of the two with npm install --save-dev cypress@latest, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > RENDERER_UNRESPONSIVE 1`] = `
 "> cypress tap dom --selector "#status"
-Cypress is reachable, but the page running it is not responding.
+The Cypress session is reachable, but the page running it is not responding.
 
 No response within the specified timeout (30000ms).
 
@@ -239,11 +239,11 @@ Use cypress tap status to verify when the spec has finished."
 
 exports[`lib/tap error rendering catalogue > SPEC_NOT_FOUND 1`] = `
 "> cypress tap run cypress/e2e/checkout.cy.ts
-The instance has no spec matching that path.
+The Cypress session has no spec matching that path.
 
 Looked for "cypress/e2e/checkout.cy.ts".
 
-cypress tap specs lists the specs this instance can run. If the spec exists but is not listed, widen specPattern in the Cypress config."
+cypress tap specs lists the specs the Cypress session can run. If the spec exists but is not listed, widen specPattern in the Cypress config."
 `;
 
 exports[`lib/tap error rendering catalogue > SPEC_NOT_STARTED 1`] = `
@@ -255,11 +255,11 @@ Start a spec with the run command, then read it once it has finished."
 
 exports[`lib/tap error rendering catalogue > SPEC_START_FAILED 1`] = `
 "> cypress tap run cypress/e2e/checkout.cy.ts
-The Cypress instance could not start the spec.
+The Cypress session could not start the spec.
 
-The instance returned no result for "cypress/e2e/checkout.cy.ts".
+The Cypress session returned no result for "cypress/e2e/checkout.cy.ts".
 
-Check the instance with cypress tap status, then try again.
+Check the Cypress session with cypress tap status, then try again.
 
 If the problem persists, search for an existing issue or open a GitHub issue at
 
@@ -268,18 +268,18 @@ If the problem persists, search for an existing issue or open a GitHub issue at
 
 exports[`lib/tap error rendering catalogue > STALE_HANDLE 1`] = `
 "> cypress tap dom --selector "#status"
-The Cypress instance navigated while running the command.
+The Cypress session navigated while running the command.
 
 Run the command again."
 `;
 
 exports[`lib/tap error rendering catalogue > STALE_INSTANCE 1`] = `
 "> cypress tap --instance 4321 dom --selector "#status"
-Cypress was running, but is no longer responding.
+The Cypress session was running, but is no longer responding.
 
 Looked for --instance 4321.
 
-Cypress likely exited uncleanly. Start Cypress again with cypress open, then try again."
+It likely exited uncleanly. Start Cypress again with cypress open, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > TEST_NOT_FOUND 1`] = `
@@ -306,7 +306,7 @@ exports[`lib/tap error rendering catalogue > UNKNOWN_COMMAND 1`] = `
 "> cypress tap oel2k
 Unknown command "oel2k"
 
-This Cypress (v15.4.0) offers: status, specs, run, dom, reporter."
+This Cypress session (v15.4.0) offers: status, specs, run, dom, reporter."
 `;
 
 exports[`lib/tap error rendering catalogue > UNKNOWN_OPTION 1`] = `

@@ -216,9 +216,9 @@ describe('lib/tap error rendering', () => {
 
     // A pid is a number, so it reads without quotes where an id reads with them.
     expect(await render('INSTANCE_NOT_FOUND', notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321).detail)).to.eq([
-      'No running Cypress matched that process id.',
+      'No Cypress session matched that process id.',
       'Looked for --instance 4321.',
-      'Run cypress tap instances to list the sessions you can tap into.',
+      'Run cypress tap instances to list the Cypress sessions you can tap into.',
     ].join('\n\n'))
   })
 
@@ -314,7 +314,7 @@ describe('lib/tap error rendering catalogue', () => {
     // cli/lib/cypress-instances/index.ts (resolveInstance)
     NO_BROWSER_ATTACHED: {
       invocation: 'cypress tap dom --selector "#status"',
-      failure: new TapError('NO_BROWSER_ATTACHED', { detail: 'The instance is pid 4321, at /home/dev/shop.' }),
+      failure: new TapError('NO_BROWSER_ATTACHED', { detail: 'The Cypress session is pid 4321, at /home/dev/shop.' }),
     },
     // cli/lib/tap/cdp-timeout.ts
     RENDERER_UNRESPONSIVE: {
@@ -379,7 +379,7 @@ describe('lib/tap error rendering catalogue', () => {
     // cli/lib/tap/commands/run.ts
     SPEC_START_FAILED: {
       invocation: 'cypress tap run cypress/e2e/checkout.cy.ts',
-      failure: new TapError('SPEC_START_FAILED', { detail: 'The instance returned no result for "cypress/e2e/checkout.cy.ts".' }),
+      failure: new TapError('SPEC_START_FAILED', { detail: 'The Cypress session returned no result for "cypress/e2e/checkout.cy.ts".' }),
     },
     // cli/lib/tap/commands/run.ts
     SPEC_NOT_FOUND: {
@@ -444,7 +444,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/tap-manager.ts; also cli/lib/tap/build-program.ts
     UNKNOWN_COMMAND: {
       invocation: 'cypress tap oel2k',
-      failure: unknownCommandTapError('oel2k', 'This Cypress (v15.4.0) offers: status, specs, run, dom, reporter.'),
+      failure: unknownCommandTapError('oel2k', 'This Cypress session (v15.4.0) offers: status, specs, run, dom, reporter.'),
     },
     // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     UNKNOWN_OPTION: {
