@@ -6,9 +6,14 @@ import { noteTapFailure } from './events'
 import type { InstanceSelection } from '../cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 
+// Codes whose message already reads as a complete explanation with its own
+// guidance; printing the code in front of one adds noise rather than context.
+// The failure is still reported by code either way.
+const SELF_DESCRIBING_CODES = new Set(['UNSUPPORTED_BROWSER'])
+
 export const renderFailure = (err: { code: string, message: string }): void => {
   noteTapFailure(err.code)
-  logger.errorToStderr(`${err.code}: ${err.message}`)
+  logger.errorToStderr(SELF_DESCRIBING_CODES.has(err.code) ? err.message : `${err.code}: ${err.message}`)
 }
 
 export const renderKnownFailure = (err: { details: { description: string, solution: string } }): void => {

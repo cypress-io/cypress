@@ -385,6 +385,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -435,9 +436,23 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([
-        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome' },
-        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null },
+        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true },
+        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null, browserSupported: true },
       ])
+    })
+
+    it('lists an instance running a browser tap cannot drive, marked unsupported', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([
+        liveInstance({ pid: 111, cdpBrowserWsUrl: null, browserName: 'Firefox', browserFamily: 'firefox' }),
+      ])
+
+      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(logger.print()).toContain('Firefox (unsupported)')
+
+      logger.reset()
+
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())[0]).toMatchObject({ browserName: 'Firefox', browserSupported: false })
     })
 
     it('reports the testing type as null for an instance that has not chosen one', async () => {
@@ -506,6 +521,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -544,6 +560,21 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    // Every other resolution failure is transient — an instance running a browser
+    // tap cannot drive is not, so a poller must hear it rather than wait it out.
+    it('fails instead of reporting "not connected" when the browser is unsupported', async () => {
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('UNSUPPORTED_BROWSER', 'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium based browser to use cypress tap.'))
+
+      expect(await tap.start(['status'], {})).toBe(1)
+
+      const output = logger.print()
+
+      expect(output).toContain('running on an unsupported browser')
+      expect(output).toContain('Run Cypress open on a Chromium based browser')
+      // The message stands on its own, so it is not prefixed with its code.
+      expect(output).not.toContain('UNSUPPORTED_BROWSER')
     })
 
     it('reports "browser not selected" without opening a session when no browser is attached', async () => {
@@ -719,6 +750,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -919,6 +951,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,

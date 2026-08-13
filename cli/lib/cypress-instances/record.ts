@@ -1,6 +1,7 @@
 export {
   INSTANCES_DIRNAME,
   isCompatibleRecord,
+  isTapSupportedBrowser,
   parseRecordPid,
   cypressInstancesDir,
   instancesProbePath,
@@ -17,6 +18,7 @@ export type CypressInstanceErrorCode =
   | 'NO_INSTANCE'
   | 'STALE_INSTANCE'
   | 'NO_BROWSER_ATTACHED'
+  | 'UNSUPPORTED_BROWSER'
   | 'RENDERER_UNRESPONSIVE'
 
 export class CypressInstanceError extends Error {

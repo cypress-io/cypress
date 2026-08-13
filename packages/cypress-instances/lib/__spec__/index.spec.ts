@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   isCompatibleRecord,
+  isTapSupportedBrowser,
   recordFileName,
   parseRecordPid,
   instancesProbePath,
@@ -62,6 +63,20 @@ describe('cypress-instances contract', () => {
 
   it('exposes the instances dir name', () => {
     expect(INSTANCES_DIRNAME).toBe('instances')
+  })
+
+  describe('isTapSupportedBrowser', () => {
+    it('accepts Chromium and rejects every other family', () => {
+      expect(isTapSupportedBrowser('chromium')).toBe(true)
+      expect(isTapSupportedBrowser('firefox')).toBe(false)
+      expect(isTapSupportedBrowser('webkit')).toBe(false)
+    })
+
+    // No browser open, or a record written before the family was reported — in
+    // neither case is there a browser to call unsupported.
+    it('accepts a null family', () => {
+      expect(isTapSupportedBrowser(null)).toBe(true)
+    })
   })
 
   describe('tap command contract', () => {

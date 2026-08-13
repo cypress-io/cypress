@@ -59,6 +59,7 @@ export const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): Read
   testingType: 'e2e',
   cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
   browserName: 'Chrome',
+  browserFamily: 'chromium',
   machineId: null,
   userId: null,
   ...overrides,

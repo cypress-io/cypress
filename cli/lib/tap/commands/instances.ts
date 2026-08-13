@@ -1,4 +1,4 @@
-import { listLiveInstances } from '../../cypress-instances'
+import { isTapSupportedBrowser, listLiveInstances } from '../../cypress-instances'
 import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-instances'
 import { renderOutcome, renderResult } from '../output'
 import { withTapSession } from '../tap-session'
@@ -18,8 +18,10 @@ export interface TapInstanceSummary {
   testingType: 'e2e' | 'component' | null
   /** Whether the instance has a browser attached over CDP. */
   browserAttached: boolean
-  /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
+  /** Display name of the browser the instance has open (e.g. `Chrome`), or `null` when none is open. */
   browserName: string | null
+  /** Whether tap can drive the browser the instance has open — tap supports only Chromium based browsers. */
+  browserSupported: boolean
   /**
    * Whether the runner page answered. `browserAttached` only says the browser
    * process is reachable, so this is what separates a healthy instance from one
@@ -62,6 +64,7 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     testingType: instance.testingType,
     browserAttached: instance.cdpBrowserWsUrl !== null,
     browserName: instance.browserName,
+    browserSupported: isTapSupportedBrowser(instance.browserFamily),
     ...(responsive[index] === undefined ? {} : { rendererResponsive: responsive[index] }),
   }))
 

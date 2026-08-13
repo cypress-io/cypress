@@ -267,7 +267,7 @@ export class BrowserCriClient {
         onExtraTargetCriClientReady,
       })
 
-      cypressInstances.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl, browserName)
+      cypressInstances.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl)
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })

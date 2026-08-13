@@ -221,7 +221,11 @@ const instancesMeta = {
   name: 'instances',
   description: 'list the running Cypress instances this CLI can reach',
   details: `Lists the running Cypress instances this CLI can reach, as a JSON array. Pass
-an instance's pid to \`--instance\` to target it with another tap command.`,
+an instance's pid to \`--instance\` to target it with another tap command.
+
+tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
+An instance running any other browser is listed as unsupported, and every other
+tap command refuses it.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {

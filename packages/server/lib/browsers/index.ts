@@ -3,6 +3,7 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
+import { cypressInstances } from '../cypress-instances'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
@@ -135,6 +136,8 @@ const browsers = {
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
+    cypressInstances.setBrowser(browser)
+
     await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
 
     return this.getBrowserInstance()
@@ -196,6 +199,8 @@ const browsers = {
     if (!options.url) throw new Error('Missing url in browsers.open')
 
     debug('opening browser %o', browser)
+
+    cypressInstances.setBrowser(browser)
 
     const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
 
@@ -269,6 +274,7 @@ const browsers = {
 
       options.onBrowserClose()
       browserLauncher.clearInstanceState()
+      cypressInstances.setBrowser(null)
       instance = null
 
       if (browserDidCrash) {

@@ -167,14 +167,15 @@ describe('lib/cypress-instances', () => {
       return JSON.parse(makeRecord({ serverPort, instanceId }))
     }
 
-    it('resolves the record with the live CDP state and browser name when the instance echoes the instanceId', async () => {
-      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL, browserName: 'Chrome', machineId: 'machine-hash', userId: 'cloud-user-1' } })
+    it('resolves the record with the live CDP state and browser when the instance echoes the instanceId', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL, browserName: 'Chrome', browserFamily: 'chromium', machineId: 'machine-hash', userId: 'cloud-user-1' } })
       const record = recordFor(port)
 
       expect(await verifyInstanceRecord(record)).toEqual({
         ...record,
         cdpBrowserWsUrl: CDP_WS_URL,
         browserName: 'Chrome',
+        browserFamily: 'chromium',
         machineId: 'machine-hash',
         userId: 'cloud-user-1',
       })
@@ -188,11 +189,22 @@ describe('lib/cypress-instances', () => {
       expect(live!.userId).toBeNull()
     })
 
-    it('nulls the browser name when the CDP endpoint is unreachable', async () => {
+    it('keeps the browser the instance has open even when the CDP endpoint is unreachable', async () => {
       const deadCdpPort = await getClosedPort()
-      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: `ws://127.0.0.1:${deadCdpPort}/devtools/browser/abc`, browserName: 'Chrome' } })
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: `ws://127.0.0.1:${deadCdpPort}/devtools/browser/abc`, browserName: 'Chrome', browserFamily: 'chromium' } })
+      const live = await verifyInstanceRecord(recordFor(port))
 
-      expect((await verifyInstanceRecord(recordFor(port)))!.browserName).toBeNull()
+      expect(live!.cdpBrowserWsUrl).toBeNull()
+      expect(live!.browserName).toBe('Chrome')
+      expect(live!.browserFamily).toBe('chromium')
+    })
+
+    it('normalizes a browser an older instance omits (or junks) to null', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, browserFamily: 42 } })
+      const live = await verifyInstanceRecord(recordFor(port))
+
+      expect(live!.browserName).toBeNull()
+      expect(live!.browserFamily).toBeNull()
     })
 
     it('normalizes a missing or junk cdpBrowserWsUrl in the probe response to null', async () => {
@@ -376,6 +388,39 @@ describe('lib/cypress-instances', () => {
       await expect(resolveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
     })
 
+    it('throws UNSUPPORTED_BROWSER when the only instance runs a browser tap cannot drive', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: null, browserName: 'Firefox', browserFamily: 'firefox' } })
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      const err = await resolveInstance({ instance: 111, cwd: PROJECT }).catch((e) => e)
+
+      // Not NO_BROWSER_ATTACHED: a Firefox instance never attaches one, so the
+      // "open a browser" guidance would send the user in a circle.
+      expect(err.code).toBe('UNSUPPORTED_BROWSER')
+      expect(err.message).toBe('The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium based browser to use cypress tap.')
+    })
+
+    it('resolves a Chromium instance over a live one at the cwd running an unsupported browser', async () => {
+      const readyPort = await startReadyInstance('ready-instance')
+      const firefoxPort = await startFakeInstance({ instanceId: 'firefox-instance', respondWith: { instanceId: 'firefox-instance', cdpBrowserWsUrl: null, browserName: 'Firefox', browserFamily: 'firefox' } })
+
+      mockfs({
+        [INSTANCES_DIR]: {
+          '111.json': makeRecord({ pid: 111, projectRoot: PROJECT, serverPort: firefoxPort, instanceId: 'firefox-instance' }),
+          '222.json': makeRecord({ pid: 222, projectRoot: '/projects/other', serverPort: readyPort, instanceId: 'ready-instance' }),
+        },
+      })
+
+      stubKill({ alive: [111, 222] })
+
+      const selection = await resolveInstance({ cwd: PROJECT })
+
+      expect(selection.instance.pid).toBe(222)
+      expect(selection.candidateCount).toBe(1)
+    })
+
     it('resolves a browser-attached instance over a live one at the cwd that has none', async () => {
       const readyPort = await startReadyInstance('ready-instance')
       const browserlessPort = await startFakeInstance({ instanceId: 'browserless-instance', respondWith: { instanceId: 'browserless-instance', cdpBrowserWsUrl: null } })
@@ -526,6 +571,17 @@ describe('lib/cypress-instances', () => {
       await expect(resolveLiveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
       expect(fs.existsSync(`${INSTANCES_DIR}/111.json`)).toBe(false)
     })
+
+    // The commands that never need a browser (specs/status) still run against the
+    // instance's own runner, so an unsupported browser rules them out too.
+    it('throws UNSUPPORTED_BROWSER when the only instance runs a browser tap cannot drive', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, browserName: 'WebKit', browserFamily: 'webkit' } })
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      await expect(resolveLiveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'UNSUPPORTED_BROWSER' })
+    })
   })
 
   describe('.listLiveInstances', () => {
@@ -548,6 +604,19 @@ describe('lib/cypress-instances', () => {
       expect(instances.find((instance) => instance.pid === 111)!.cdpBrowserWsUrl).toBe(CDP_WS_URL)
       // No endpoint in the probe response — no browser attached.
       expect(instances.find((instance) => instance.pid === 222)!.cdpBrowserWsUrl).toBeNull()
+    })
+
+    // Unlike the resolvers, listing is how a user finds out an instance is
+    // running a browser tap cannot drive — so it must not hide one.
+    it('lists an instance running a browser tap cannot drive', async () => {
+      const port = await startFakeInstance({ respondWith: { instanceId: INSTANCE_ID, browserName: 'Firefox', browserFamily: 'firefox' } })
+
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      stubKill({ alive: [111] })
+
+      const instances = await listLiveInstances()
+
+      expect(instances.map((instance) => instance.browserFamily)).toEqual(['firefox'])
     })
 
     it('resolves an empty list when no record exists', async () => {

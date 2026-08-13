@@ -1,11 +1,11 @@
 import path from 'path'
 
-import { CypressInstanceError } from './record'
+import { CypressInstanceError, isTapSupportedBrowser } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 import { readLiveInstances } from './store'
 
-export { CypressInstanceError, INSTANCES_DIRNAME } from './record'
+export { CypressInstanceError, INSTANCES_DIRNAME, isTapSupportedBrowser } from './record'
 
 export type { LiveInstanceState, ReadyInstanceState, CypressInstanceErrorCode, CypressInstance } from './record'
 
@@ -110,8 +110,17 @@ const selectInstance = <T extends LiveInstanceState>(candidates: T[], options: R
   return { instance: lowestPid(candidates), reason: 'arbitrary' }
 }
 
+const describeInstance = (instances: LiveInstanceState[], instance: number | undefined): string => {
+  if (instances.length === 1) {
+    return ` (pid ${instances[0].pid}, ${instances[0].projectRoot})`
+  }
+
+  return describeFilter(instance)
+}
+
 // Reads, filters by pid, and probes for liveness. Throws NO_INSTANCE when
-// nothing matches and STALE_INSTANCE when matches exist but none responds.
+// nothing matches, STALE_INSTANCE when matches exist but none responds, and
+// UNSUPPORTED_BROWSER when every one that does has a browser tap cannot drive.
 const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanceState[]> => {
   const { instance, probeTimeoutMs } = options
   const records = await readLiveInstances()
@@ -134,7 +143,19 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
     )
   }
 
-  return live
+  // Dropped before selection so an instance running an unsupported browser never
+  // shadows one that can serve the command; when it is the only candidate the
+  // caller hears why rather than "no browser attached".
+  const supported = live.filter((record) => isTapSupportedBrowser(record.browserFamily))
+
+  if (supported.length === 0) {
+    throw new CypressInstanceError(
+      'UNSUPPORTED_BROWSER',
+      'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium based browser to use cypress tap.',
+    )
+  }
+
+  return supported
 }
 
 // Resolves a live instance without requiring a browser; `status` reports
@@ -159,13 +180,9 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
   const ready = live.filter((record): record is ReadyInstanceState => record.cdpBrowserWsUrl !== null)
 
   if (ready.length === 0) {
-    const detail = live.length === 1
-      ? ` (pid ${live[0].pid}, ${live[0].projectRoot})`
-      : describeFilter(options.instance)
-
     throw new CypressInstanceError(
       'NO_BROWSER_ATTACHED',
-      `Cypress is running${detail}, but no test browser is open. Open a browser in Cypress and try again.`,
+      `Cypress is running${describeInstance(live, options.instance)}, but no test browser is open. Open a browser in Cypress and try again.`,
     )
   }
 
