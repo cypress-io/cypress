@@ -17,7 +17,7 @@ import * as capture from '../capture'
 import * as env from '../util/env'
 import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
-import { getAnchorRunUrl, getEligibleTestTitles } from '../cloud/filter_tests'
+import { getEligibleTestTitles, getFilterMessage } from '../cloud/filter_tests'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
 import type { Cfg } from '../project-base'
@@ -827,9 +827,11 @@ const createRunAndRecordSpecs = (options: any = {}) => {
           // An empty (but defined) keep-list has no eligible tests to filter down
           // to, so the runner/reporter both treat it the same as "no filtering" -
           // don't warn about a rerun optimization that isn't actually taking effect.
-          if (filteredTests?.length && !hasShownRerunWarning) {
+          const filterMessage = getFilterMessage(response.actions)
+
+          if (filteredTests?.length && filterMessage && !hasShownRerunWarning) {
             hasShownRerunWarning = true
-            errorsWarning('CLOUD_RERUN_FAILED_TESTS', { anchorRunUrl: getAnchorRunUrl(response.actions) })
+            errorsWarning('CLOUD_RERUN_FAILED_TESTS', { message: filterMessage })
           }
 
           cb({ filteredTests })

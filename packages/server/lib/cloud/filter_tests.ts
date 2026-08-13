@@ -37,13 +37,12 @@ export const getEligibleTestTitles = (actions: any): string[] | undefined => {
 }
 
 /**
- * The run being retried (the anchor run) is not the run currently being
- * created, so its URL has to come from the FILTER action's payload rather
- * than the top-level `createRun` response. Cloud doesn't send `anchorRunUrl`
- * yet (only `anchorBuildId`), so this is read defensively until it does.
+ * Cloud supplies the warning copy to display for the rerun (e.g. explaining
+ * which statuses are being re-run), so the FILTER action's `message` is used
+ * rather than a hard-coded string here.
  */
-export const getAnchorRunUrl = (actions: any): string | undefined => {
+export const getFilterMessage = (actions: any): string | undefined => {
   const filterAction = _.find(actions, isFilterAction)
 
-  return (filterAction?.payload as any)?.anchorRunUrl
+  return filterAction?.payload.message ?? undefined
 }

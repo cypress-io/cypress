@@ -217,8 +217,7 @@ describe('visual error templates', () => {
     },
     CLOUD_RERUN_FAILED_TESTS: () => {
       return {
-        default: [{}],
-        withAnchorRunUrl: [{ anchorRunUrl: 'https://cloud.cypress.io/runs/12345' }],
+        default: [{ message: 'Re-running only the tests that did not pass in the previous run.' }],
       }
     },
     CLOUD_API_RESPONSE_FAILED_RETRYING: () => {
