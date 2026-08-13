@@ -1,4 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
+import { netStubbingState } from '@packages/net-stubbing'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
 import { CdpFetchTransport } from '../../lib/browsers/cdp-protocol/cdp-fetch-transport'
@@ -36,6 +37,9 @@ describe('lib/network-runtime', () => {
       } as any,
       serverBus: { emit: sinon.stub() } as any,
       getCurrentBrowser: () => ({}) as any,
+      // required for both runtimes: the state is created at server open and every
+      // runtime has to share it
+      netStubbingState: netStubbingState(),
     }
   }
 
@@ -89,12 +93,13 @@ describe('lib/network-runtime', () => {
     await new Promise((resolve) => setImmediate(resolve))
   }
 
-  it('createProxyRuntime constructs networkProxy and netStubbingState', () => {
-    const runtime = createProxyRuntime(baseDeps())
+  it('createProxyRuntime constructs networkProxy and reuses the provided netStubbingState', () => {
+    const deps = baseDeps()
+    const runtime = createProxyRuntime(deps)
 
     expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
-    expect(runtime.netStubbingState.routes).to.deep.equal([])
-    expect(runtime.netStubbingState.requests).to.deep.equal({})
+    expect(runtime.netStubbingState).to.equal(deps.netStubbingState)
+    expect(runtime.networkProxy.http.netStubbingState).to.equal(deps.netStubbingState)
   })
 
   it('registers default configurator network policies at startup', () => {
@@ -258,7 +263,7 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy.http.netStubbingState).to.equal(existingState)
   })
 
-  it('createCdpFetchRuntime registers blocked-hosts policy for the CDP path', () => {
+  it('createCdpFetchRuntime registers blocked-hosts policy for the browser (CDP) network path', () => {
     const client = {
       send: sinon.stub(),
       on: sinon.stub(),

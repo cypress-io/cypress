@@ -296,6 +296,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isFolder: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'forceHttp1',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'excludeSpecPattern',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultExcludeSpecPattern.component : defaultExcludeSpecPattern.e2e,
     validation: validate.isStringOrArrayOfStrings,
@@ -698,6 +703,12 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   {
     name: 'experimentalMemoryManagement',
     errorKey: 'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'forceHttp1',
+    errorKey: 'FORCE_HTTP1_DEPRECATION',
+    shouldDisplayOrThrow: (value: any) => value === true,
     isWarning: true,
   },
 ] as const

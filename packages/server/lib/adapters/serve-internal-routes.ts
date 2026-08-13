@@ -9,6 +9,10 @@ type ServeInternalRoutesConfig = InternalRouteConfig
 type CreateServeInternalRoutesMiddlewareOptions = {
   config: ServeInternalRoutesConfig
   request: ServerRequest
+  // Fixed for the lifetime of the runtime installing this middleware: the MITM
+  // runtime and the CDP Fetch runtime each own one network path, and a request
+  // only reaches this stack through the runtime that is currently installed.
+  isBrowserNetworkMode: boolean
 }
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -65,11 +69,12 @@ function parseRequestUrl (requestUrl: string, config: ServeInternalRoutesConfig)
 export function createServeInternalRoutesMiddleware ({
   config,
   request: serverRequest,
+  isBrowserNetworkMode,
 }: CreateServeInternalRoutesMiddlewareOptions): InterceptMiddleware {
   return async (request, next) => {
     const url = parseRequestUrl(request.url, config)
 
-    if (!isInternalCypressRoute(url.pathname, config)) {
+    if (!isInternalCypressRoute(url.pathname, config, isBrowserNetworkMode)) {
       return next(request)
     }
 

@@ -204,9 +204,8 @@ const TEST_CASES = [
     name: 'Chrome w/o Cypress (HTTP/2 control)',
     http2Control: true,
   },
-  // proxy-disabled mode: CYPRESS_INTERNAL_DISABLE_PROXY=1, interception via
-  // CDP Fetch, so the browser keeps its native HTTP/2 connection to the
-  // origin (#3708)
+  // default network path: interception via CDP Fetch, so the browser keeps its
+  // native HTTP/2 connection to the origin (#3708)
   {
     name: 'With proxy disabled, Intercepted (CDP)',
     proxyDisabled: true,
@@ -485,14 +484,8 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutM
     isHeadless: true,
   }
 
-  const options = {}
-
-  // cases run serially, so scoping the production proxy-disabled gate to this
-  // case cannot leak into the MITM cases
-  if (testCase.proxyDisabled) {
-    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-  } else {
-    delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+  const options = {
+    useBrowserNetworkInterception: testCase.proxyDisabled,
   }
 
   const args = _getArgs(browser, options, cdpPort).concat([
@@ -636,7 +629,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutM
             // Fetch.disable needs the still-live tab client (har-capturer destroys
             // the tab only after postHook). Failure is tolerated — the next
             // createCdpFetchNetworkRuntime stops the previous runtime itself
-            return Promise.resolve(proxyDisabledServer.stopCdpFetchRuntime()).catch(() => {})
+            return Promise.resolve(proxyDisabledServer.swapCdpFetchRuntime()).catch(() => {})
           })
         },
       })
@@ -739,7 +732,13 @@ describe('Proxy Performance', function () {
               testingType: 'e2e',
               getCurrentBrowser: () => null,
             })
-            .then(() => {
+            .then(async () => {
+              // the cyProxy cases point Chrome at this server with
+              // --proxy-server, and an https origin reaches it by CONNECT —
+              // which the server refuses until a launch resolves it onto the
+              // MITM path, as ProjectBase does before launching a proxy browser
+              await cyServer.setNetworkMode(false)
+
               // killing Chrome between measurements resets browser<->proxy
               // sockets that may not have their own error handlers yet; an
               // extra listener keeps the reset from becoming an uncaught
@@ -761,21 +760,14 @@ describe('Proxy Performance', function () {
 
             proxyDisabledServer = new ServerBase(config)
 
-            // the proxy-disabled open path (netStubbingState without a MITM
-            // NetworkProxy, no httpsProxy, no MITM catch-all route) is gated on
-            // this env var at open() time — cyServer above must open without it,
-            // which is why these opens are sequenced instead of joined
-            process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+            // the browser (CDP) network path is claimed by createCdpFetchNetworkRuntime in
+            // the capture preHook below, not at open
             return Promise.resolve(proxyDisabledServer.open(config, {
               SocketCtor: SocketE2E,
               createRoutes,
               testingType: 'e2e',
               getCurrentBrowser: () => null,
             }))
-            .finally(() => {
-              delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-            })
           }),
         )
       })

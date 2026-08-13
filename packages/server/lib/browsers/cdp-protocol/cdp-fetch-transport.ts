@@ -462,8 +462,8 @@ export class CdpFetchTransport {
       }
 
       // Extra-target sessions (popups / _blank) share this transport with
-      // isFromExtraTarget so MaybeSetBasicAuthHeaders still runs under
-      // CYPRESS_INTERNAL_DISABLE_PROXY=1 (MITM never sees those requests).
+      // isFromExtraTarget so MaybeSetBasicAuthHeaders still runs on the browser (CDP)
+      // network path (the MITM proxy never sees those requests).
       if (this.options.isFromExtraTarget) {
         debug('marking extra-target request %s', event.request.url)
         request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = 'true'

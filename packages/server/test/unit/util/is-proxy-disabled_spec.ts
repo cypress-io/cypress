@@ -1,25 +1,46 @@
 require('../../spec_helper')
 
-const { isProxyDisabled } = require('../../../lib/util/is-proxy-disabled')
+const { isBrowserNetworkMode, ensureProxyServer } = require('../../../lib/util/is-proxy-disabled')
+
+const chrome = { name: 'chrome', family: 'chromium' }
+const electron = { name: 'electron', family: 'chromium' }
+const firefox = { name: 'firefox', family: 'firefox' }
+const webkit = { name: 'webkit', family: 'webkit' }
 
 describe('lib/util/is-proxy-disabled', () => {
-  afterEach(() => {
-    delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+  context('.isBrowserNetworkMode', () => {
+    it('is true for chromium-family browsers by default', () => {
+      expect(isBrowserNetworkMode({}, chrome)).to.be.true
+      expect(isBrowserNetworkMode({ forceHttp1: false }, chrome)).to.be.true
+    })
+
+    it('is false for chromium-family browsers when forceHttp1 is true', () => {
+      expect(isBrowserNetworkMode({ forceHttp1: true }, chrome)).to.be.false
+    })
+
+    // Electron is deprecated as a test browser, so it is not carried onto the
+    // browser network path even though it is chromium-family.
+    it('is false for electron regardless of forceHttp1', () => {
+      expect(isBrowserNetworkMode({}, electron)).to.be.false
+      expect(isBrowserNetworkMode({ forceHttp1: false }, electron)).to.be.false
+      expect(isBrowserNetworkMode({ forceHttp1: true }, electron)).to.be.false
+    })
+
+    it('is false for non-chromium browsers regardless of forceHttp1', () => {
+      expect(isBrowserNetworkMode({}, firefox)).to.be.false
+      expect(isBrowserNetworkMode({ forceHttp1: true }, firefox)).to.be.false
+      expect(isBrowserNetworkMode({}, webkit)).to.be.false
+      expect(isBrowserNetworkMode({ forceHttp1: true }, webkit)).to.be.false
+    })
   })
 
-  it('returns false by default', () => {
-    expect(isProxyDisabled()).to.be.false
-  })
+  context('.ensureProxyServer', () => {
+    it('returns the configured proxyServer', () => {
+      expect(ensureProxyServer({ proxyServer: 'http://localhost:1234' })).to.eq('http://localhost:1234')
+    })
 
-  it('returns true when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
-    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
-    expect(isProxyDisabled()).to.be.true
-  })
-
-  it('returns false for other values', () => {
-    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = 'true'
-
-    expect(isProxyDisabled()).to.be.false
+    it('throws when proxyServer is missing', () => {
+      expect(() => ensureProxyServer({})).to.throw('Missing proxyServer in launch')
+    })
   })
 })

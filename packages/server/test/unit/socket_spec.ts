@@ -78,6 +78,10 @@ describe('lib/socket', () => {
         testingType: 'e2e',
         getCurrentBrowser: () => null,
       })
+      // the client below CONNECTs through this server like a proxied browser,
+      // which only happens on the MITM path — and the server refuses CONNECT
+      // until a launch resolves that path
+      .then(() => this.server.setNetworkMode(false))
       .then(() => {
         this.options = {
           getSavedState: sinon.stub(),
@@ -848,6 +852,11 @@ describe('lib/socket', () => {
         testingType: 'e2e',
         getCurrentBrowser: () => null,
       })
+
+      // the client below CONNECTs through this server like a proxied browser,
+      // which only happens on the MITM path — and the server refuses CONNECT
+      // until a launch resolves that path
+      await this.server.setNetworkMode(false)
 
       const options = {
         getSavedState: sinon.stub(),

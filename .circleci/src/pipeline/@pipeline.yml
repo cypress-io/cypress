@@ -2375,11 +2375,11 @@ jobs:
       - run:
           name: Verify browser h2 with the MITM proxy disabled
           command: |
-            CYPRESS_INTERNAL_DISABLE_PROXY=1 yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome
+            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome
       - run:
           name: Verify HTTP/1.1 downgrade with the MITM proxy enabled
           command: |
-            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --expose expectedBrowserProtocol=1.1
+            yarn cypress:run --project system-tests/projects/http2-dual-stack --browser chrome --config forceHttp1=true --expose expectedBrowserProtocol=1.1
 
   system-tests-node-modules-install:
     <<: *defaults

@@ -1136,6 +1136,12 @@ describe('visual error templates', () => {
       }
     },
 
+    FORCE_HTTP1_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+
     INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
       return {
         default: [],
