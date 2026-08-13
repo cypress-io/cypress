@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { TAP_TARGET, TapError, notFoundTapError } from './record'
+import { TapError, notFoundTapError } from './record'
 import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 import { readLiveInstances } from './store'
@@ -82,13 +82,6 @@ export const resolvedInstanceIdentity = (): ResolvedInstanceIdentity | null => l
 
 export const resolvedInstanceId = (): string | null => lastResolvedIdentity?.instanceId ?? null
 
-// The specifics an instance failure carries: which pid was asked for, if any. The
-// condition and the remedy come from the error's registry entry, so this adds only
-// what that entry cannot know.
-const describeFilter = (instance: number | undefined): string | undefined => {
-  return instance === undefined ? undefined : `Looked for \`--instance\` ${instance}.`
-}
-
 const lowestPid = <T extends LiveInstanceState>(instances: T[]): T => {
   return [...instances].sort((a, b) => a.pid - b.pid)[0]
 }
@@ -127,7 +120,7 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   const live = await probeMatches(matches, probeTimeoutMs)
 
   if (live.length === 0) {
-    throw new TapError('STALE_INSTANCE', { detail: describeFilter(instance) })
+    throw new TapError('STALE_INSTANCE')
   }
 
   return live
@@ -155,11 +148,7 @@ export const resolveInstance = async (options: ResolveInstanceOptions): Promise<
   const ready = live.filter((record): record is ReadyInstanceState => record.cdpBrowserWsUrl !== null)
 
   if (ready.length === 0) {
-    const detail = live.length === 1
-      ? `The ${TAP_TARGET} is pid ${live[0].pid}, at ${live[0].projectRoot}.`
-      : describeFilter(options.instance)
-
-    throw new TapError('NO_BROWSER_ATTACHED', { detail })
+    throw new TapError('NO_BROWSER_ATTACHED')
   }
 
   const { instance: selected, reason } = selectInstance(ready, options)

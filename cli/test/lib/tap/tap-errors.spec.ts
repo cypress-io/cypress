@@ -309,12 +309,12 @@ describe('lib/tap error rendering catalogue', () => {
     // cli/lib/cypress-instances/index.ts (liveMatches)
     STALE_INSTANCE: {
       invocation: 'cypress tap --instance 4321 dom --selector "#status"',
-      failure: new TapError('STALE_INSTANCE', { detail: 'Looked for `--instance` 4321.' }),
+      failure: new TapError('STALE_INSTANCE'),
     },
     // cli/lib/cypress-instances/index.ts (resolveInstance)
     NO_BROWSER_ATTACHED: {
       invocation: 'cypress tap dom --selector "#status"',
-      failure: new TapError('NO_BROWSER_ATTACHED', { detail: 'The Cypress session is pid 4321, at /home/dev/shop.' }),
+      failure: new TapError('NO_BROWSER_ATTACHED'),
     },
     // cli/lib/tap/cdp-timeout.ts
     RENDERER_UNRESPONSIVE: {
@@ -434,7 +434,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_UNAVAILABLE: {
       invocation: 'cypress tap pin --test-id r7 --command-id 3',
-      failure: new TapError('SNAPSHOT_UNAVAILABLE', { detail: 'The app under test did not take the pin.' }),
+      failure: new TapError('SNAPSHOT_UNAVAILABLE'),
     },
     // packages/app/src/tap/commands/pin.ts
     PIN_TARGET_REQUIRED: {

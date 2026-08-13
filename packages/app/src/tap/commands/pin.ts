@@ -160,7 +160,7 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
 
   // The app is the record of the pin, so a pin it did not take is not a result.
   if (!pinned) {
-    throw new TapError('SNAPSHOT_UNAVAILABLE', { detail: 'The app under test did not take the pin.' })
+    throw new TapError('SNAPSHOT_UNAVAILABLE')
   }
 
   return { pinned, ...(props?.url !== undefined ? { url: props.url } : {}) }

@@ -114,7 +114,7 @@ Update Cypress in the running project with npm install --save-dev cypress@latest
 
 exports[`lib/tap error rendering catalogue > INVALID_ARGUMENTS 1`] = `
 "> cypress tap run
-The command was given an argument it cannot accept.
+The command was called with invalid arguments.
 
 "run" is missing the required <spec> argument(s).
 
@@ -125,7 +125,7 @@ Run cypress tap <command> --help for the arguments it takes."
 
 exports[`lib/tap error rendering catalogue > INVALID_OPTIONS 1`] = `
 "> cypress tap reporter
-The command was given an option it cannot accept.
+The command was called with invalid options.
 
 "reporter" is missing the required --test-id option.
 
@@ -165,7 +165,7 @@ Pass --selector to choose the elements to index into, or omit --at to read the w
 
 exports[`lib/tap error rendering catalogue > NO_AUT 1`] = `
 "> cypress tap dom --selector "#status"
-No app under test is loaded.
+Failed to determine the app under test in the Cypress session.
 
 Run a spec first with cypress tap run <spec>. To read the app as it was at an earlier command, pin that command with cypress tap pin."
 `;
@@ -173,8 +173,6 @@ Run a spec first with cypress tap run <spec>. To read the app as it was at an ea
 exports[`lib/tap error rendering catalogue > NO_BROWSER_ATTACHED 1`] = `
 "> cypress tap dom --selector "#status"
 The Cypress session is running, but no test browser is open.
-
-The Cypress session is pid 4321, at /home/dev/shop.
 
 Open a Chromium based browser in Cypress, then try again."
 `;
@@ -229,8 +227,6 @@ exports[`lib/tap error rendering catalogue > SNAPSHOT_UNAVAILABLE 1`] = `
 "> cypress tap pin --test-id r7 --command-id 3
 That command has no DOM snapshot to pin.
 
-The app under test did not take the pin.
-
 Snapshots are captured in open mode and kept only for the most recent tests, as numTestsKeptInMemory sets. Run the spec again to capture fresh snapshots, or raise numTestsKeptInMemory to keep more."
 `;
 
@@ -263,11 +259,7 @@ The Cypress session could not start the spec.
 
 The Cypress session returned no result for "cypress/e2e/checkout.cy.ts".
 
-Check the Cypress session with cypress tap status, then try again.
-
-If the problem persists, search for an existing issue or open a GitHub issue at
-
-  https://github.com/cypress-io/cypress/issues"
+Check the Cypress session with cypress tap status, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > STALE_HANDLE 1`] = `
@@ -280,8 +272,6 @@ Run the command again."
 exports[`lib/tap error rendering catalogue > STALE_INSTANCE 1`] = `
 "> cypress tap --instance 4321 dom --selector "#status"
 The Cypress session was running, but is no longer responding.
-
-Looked for --instance 4321.
 
 It likely exited uncleanly. Start Cypress again with cypress open, then try again."
 `;

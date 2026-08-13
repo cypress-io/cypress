@@ -121,7 +121,6 @@ export const TAP_ERROR_COPY = {
   SPEC_START_FAILED: {
     description: `The ${TAP_TARGET} could not start the spec.`,
     solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
-    recommendGhIssue: true,
   },
   /** Raised when the given path matches no spec the instance can run. */
   SPEC_NOT_FOUND: {
@@ -143,7 +142,7 @@ export const TAP_ERROR_COPY = {
   // Reading the app under test
   /** Raised when the runner page holds no app-under-test frame to read. */
   NO_AUT: {
-    description: 'No app under test is loaded.',
+    description: `Failed to determine the app under test in the ${TAP_TARGET}.`,
     solution: 'Run a spec first with `cypress tap run <spec>`. To read the app as it was at an earlier command, pin that command with `cypress tap pin`.',
   },
   /** Raised when an injected script threw inside the AUT frame. */
@@ -221,12 +220,12 @@ export const TAP_ERROR_COPY = {
   UNKNOWN_OPTION: {},
   /** Raised when an argument is unknown, or a required one is missing. */
   INVALID_ARGUMENTS: {
-    description: 'The command was given an argument it cannot accept.',
+    description: 'The command was called with invalid arguments.',
     solution: 'Run `cypress tap <command> --help` for the arguments it takes.',
   },
   /** Raised when a required option is missing. */
   INVALID_OPTIONS: {
-    description: 'The command was given an option it cannot accept.',
+    description: 'The command was called with invalid options.',
     solution: 'Run `cypress tap <command> --help` for the options it takes.',
   },
   /**
