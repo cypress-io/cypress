@@ -148,7 +148,7 @@ export const AllCypressErrors = {
   },
   CLOUD_RERUN_FAILED_TESTS: (arg1: { runUrl: string }) => {
     return errTemplate`\
-        Re-running only the tests that did not pass in the previous run. Passing tests are skipped and are not reported to Cypress Cloud.
+        Re-running only the tests that did not pass in the previous run. It will not include tests that passed in that run.
 
         The previous run is: ${fmt.url(arg1.runUrl)}`
   },
@@ -569,17 +569,17 @@ export const AllCypressErrors = {
   CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
     return errTemplate`\
         Warning: We encountered an error while initializing the Test Replay recording for this spec.
-        
+
         These results will not display Test Replay recordings.
-        
+
         This error will not affect or change the exit code.
-        
+
         ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_CAPTURE_FAILURE: (error: Error) => {
     return errTemplate`\
         Warning: We encountered an error while recording Test Replay data for this spec.
-        
+
         These results will not display Test Replay recordings.
 
         This can happen for many reasons. If this problem persists:
@@ -588,7 +588,7 @@ export const AllCypressErrors = {
         - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
 
         This error will not affect or change the exit code.
-        
+
         ${fmt.highlightSecondary(error)}`
   },
   CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT: (error: Error) => {
@@ -620,13 +620,13 @@ export const AllCypressErrors = {
         This error will not affect or change the exit code.
 
         ${fmt.url(error.url)} responded with HTTP ${fmt.stringify(error.status)}: ${fmt.highlightSecondary(error.statusText)}
-        
+
         ${fmt.highlightTertiary(error.responseBody)}`
   },
   CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE: (error: Error & { url: string }) => {
     return errTemplate`\
         Warning: We encountered a network error while uploading the Test Replay recording for this spec.
-        
+
         Please verify your network configuration for accessing ${fmt.url(error.url)}
 
         These results will not display Test Replay recordings.
@@ -1302,9 +1302,9 @@ export const AllCypressErrors = {
   EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalStudio`)} option was removed in ${fmt.cypressVersion(`15.4.0`)}.
-        
+
         Cypress Studio is now available for all users.
-        
+
         You can safely remove this option from your config.`
   },
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
@@ -1323,9 +1323,9 @@ export const AllCypressErrors = {
   EXPERIMENTAL_PROMPT_COMMAND_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalPromptCommand`)} option was removed in ${fmt.cypressVersion(`15.13.0`)}.
-        
+
         \`cy.prompt\` is now available for all users.
-        
+
         You can safely remove this option from your config.`
   },
   JIT_COMPONENT_TESTING: () => {
@@ -1352,7 +1352,7 @@ export const AllCypressErrors = {
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\
       The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in a future version of Cypress.
-    
+
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `
   },
@@ -1614,7 +1614,7 @@ export const AllCypressErrors = {
     Warning: While proxying a ${fmt.highlight(method)} request to ${fmt.url(url)}, an HTTP header did not pass validation, and was removed. This header will not be present in the response received by the application under test.
 
     Invalid header name: ${fmt.code(JSON.stringify(header, undefined, 2))}
-    
+
     ${fmt.highlightSecondary(error)}
     `
   },
@@ -1624,7 +1624,7 @@ export const AllCypressErrors = {
     Warning: While proxying a ${fmt.highlight(method)} request to ${fmt.url(url)}, an HTTP header value did not pass validation, and was removed. This header will not be present in the response received by the application under test.
 
     Invalid header value: ${fmt.code(JSON.stringify(header, undefined, 2))}
-    
+
     ${fmt.highlightSecondary(error)}
     `
   },
