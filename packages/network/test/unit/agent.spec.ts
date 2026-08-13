@@ -1182,4 +1182,75 @@ describe('lib/agent', function () {
       expect(shouldProxyForUrl('http://localhost:1234/foo')).toBe(true)
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/24716
+  describe('free socket expiry', function () {
+    let server: http.Server
+    let port: number
+
+    const countFreeSockets = (agent: CombinedAgent) => {
+      return Object.values(agent.httpAgent.freeSockets).reduce((count, sockets) => count + sockets!.length, 0)
+    }
+
+    const get = (agent: CombinedAgent, path: string) => {
+      return new Promise<void>((resolve, reject) => {
+        // CombinedAgent is not an http.Agent, so Node cannot infer keep-alive from
+        // it — the same reason Request sends this header on every request
+        const req = http.request({ port, path, agent: agent as any, headers: { Connection: 'keep-alive' } }, (res) => {
+          res.resume()
+          // Node returns the socket to the pool a tick after the response ends
+          res.on('end', () => setImmediate(resolve))
+        })
+
+        req.on('error', reject)
+        req.end()
+      })
+    }
+
+    beforeEach(async () => {
+      server = http.createServer((req, res) => {
+        setTimeout(() => {
+          res.writeHead(200, { 'content-length': 2 })
+          res.end('ok')
+        }, req.url === '/slow' ? 300 : 0)
+      })
+
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+      port = (server.address() as net.AddressInfo).port
+    })
+
+    afterEach(() => {
+      server.close()
+    })
+
+    it('drops a socket left idle in the pool', async () => {
+      const agent = new CombinedAgent()
+
+      await get(agent, '/')
+
+      expect(countFreeSockets(agent)).toBe(1)
+
+      await new Promise((resolve) => setTimeout(resolve, 4500))
+
+      expect(countFreeSockets(agent)).toBe(0)
+
+      agent.httpAgent.destroy()
+    }, 15000)
+
+    it('clears the deadline before handing a pooled socket back out', async () => {
+      const agent = new CombinedAgent()
+
+      await get(agent, '/')
+
+      const socket = Object.values(agent.httpAgent.freeSockets)[0][0]
+      const setTimeout = vi.spyOn(socket, 'setTimeout')
+
+      // an in-flight request must not inherit the deadline the socket was parked with
+      await get(agent, '/slow')
+
+      expect(setTimeout).toHaveBeenCalledWith(0)
+
+      agent.httpAgent.destroy()
+    })
+  })
 })

@@ -14,6 +14,49 @@ const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
+// A pooled socket is only reusable until the origin's keep-alive timeout expires.
+// Node holds free sockets indefinitely, so a request can be written to a socket the
+// origin has already sent a FIN for, which surfaces as an ECONNRESET the caller
+// cannot distinguish from a real failure. Expiring idle sockets ourselves keeps us
+// on the safe side of that race; 4s sits under the 5s default that Node and Apache
+// use.
+const FREE_SOCKET_TIMEOUT = 4000
+
+type AgentCtor = new (...args: any[]) => http.Agent
+
+/**
+ * Gives sockets an expiry while they sit in the agent's free list, so one is
+ * dropped rather than handed to a request after the origin has closed it.
+ *
+ * `http.Agent` and `https.Agent` need the same treatment but cannot share a base
+ * class, so this is applied to each of them as a mixin.
+ */
+const withFreeSocketExpiry = <TBase extends AgentCtor>(Base: TBase): TBase => {
+  class FreeSocketExpiryAgent extends (Base as AgentCtor) {
+    // @types/node declares keepSocketAlive as returning void, but Node uses the
+    // return value to decide whether to pool the socket, so it is passed through.
+    keepSocketAlive (socket: net.Socket): boolean {
+      const willKeepAlive = super.keepSocketAlive(socket) as unknown as boolean
+
+      if (willKeepAlive) {
+        // the Agent destroys a socket on timeout only while it is in the free
+        // list, so this expiry never applies to an in-flight request
+        socket.setTimeout(FREE_SOCKET_TIMEOUT)
+      }
+
+      return willKeepAlive
+    }
+
+    reuseSocket (socket: net.Socket, req: http.ClientRequest) {
+      socket.setTimeout(0)
+      super.reuseSocket(socket, req)
+    }
+  }
+
+  // the mixin is checked against http.Agent, but each caller keeps its own type
+  return FreeSocketExpiryAgent as unknown as TBase
+}
+
 let baseCaOptions: CaOptions | undefined
 const getCaOptionsAsync = async (): Promise<CaOptions> => {
   try {
@@ -292,7 +335,7 @@ export const shouldProxyForUrl = (href: string): boolean => {
   return Boolean(getProxyOrTargetOverrideForUrl(href))
 }
 
-class HttpAgent extends http.Agent {
+class HttpAgent extends withFreeSocketExpiry(http.Agent) {
   httpsAgent: https.Agent
 
   constructor (opts: http.AgentOptions = {}) {
@@ -352,7 +395,7 @@ class HttpAgent extends http.Agent {
   }
 }
 
-class HttpsAgent extends https.Agent {
+class HttpsAgent extends withFreeSocketExpiry(https.Agent) {
   constructor (opts: https.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
