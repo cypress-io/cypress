@@ -176,7 +176,6 @@ jobs:
               name: Generate path-filtered pipeline parameters
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
-                RUN_PROXY_DISABLED_TESTS: << pipeline.parameters.run-proxy-disabled-tests >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json
