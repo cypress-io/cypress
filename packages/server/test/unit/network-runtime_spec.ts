@@ -6,34 +6,38 @@ import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-run
 import '../spec_helper'
 
 describe('lib/network-runtime', () => {
-  const baseDeps = () => ({
-    config: {
-      clientRoute: '/__/',
-      responseTimeout: 30000,
-    } as Cypress.Config,
-    remoteStates: {
-      hasPrimary: sinon.stub().returns(false),
-      getPrimary: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
-      get: sinon.stub().returns(undefined),
-      current: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
-      isPrimarySuperDomainBasedOrigin: sinon.stub().returns(false),
-      isPrimarySuperDomainOrigin: sinon.stub().returns(false),
-      getByStrategy: sinon.stub(),
-      reset: sinon.stub(),
-    } as any,
-    getFileServerToken: () => 'token',
-    getCookieJar: () => ({
-      getCookies: sinon.stub().returns([]),
-    }) as any,
-    socket: {
-      toDriver: sinon.stub(),
-    } as any,
-    request: {
-      rp: sinon.stub(),
-    } as any,
-    serverBus: { emit: sinon.stub() } as any,
-    getCurrentBrowser: () => ({}) as any,
-  })
+  const baseDeps = () => {
+    return {
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+      } as Cypress.Config,
+      remoteStates: {
+        hasPrimary: sinon.stub().returns(false),
+        getPrimary: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
+        get: sinon.stub().returns(undefined),
+        current: sinon.stub().returns({ origin: 'https://example.test', strategy: 'http', props: {} }),
+        isPrimarySuperDomainBasedOrigin: sinon.stub().returns(false),
+        isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        getByStrategy: sinon.stub(),
+        reset: sinon.stub(),
+      } as any,
+      getFileServerToken: () => 'token',
+      getCookieJar: () => {
+        return {
+          getCookies: sinon.stub().returns([]),
+        } as any
+      },
+      socket: {
+        toDriver: sinon.stub(),
+      } as any,
+      request: {
+        rp: sinon.stub(),
+      } as any,
+      serverBus: { emit: sinon.stub() } as any,
+      getCurrentBrowser: () => ({}) as any,
+    }
+  }
 
   function createPausedRequest (options: {
     requestId: string
@@ -860,8 +864,8 @@ describe('lib/network-runtime', () => {
     })
 
     expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
-    expect(extraClient.send.withArgs('Network.enable'))
-    .to.have.been.calledBefore(extraClient.send.withArgs('Fetch.enable'))
+    expect(extraClient.send.withArgs('Fetch.enable'))
+    .to.have.been.calledBefore(extraClient.send.withArgs('Network.enable'))
 
     const transportReset = sinon.spy(CdpFetchTransport.prototype, 'reset')
 
@@ -877,6 +881,81 @@ describe('lib/network-runtime', () => {
     await detach()
 
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+
+    await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget attaches even when Network.enable never settles on the paused target', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // models the auto-attached debugger-paused target: Network.enable's
+    // response never arrives because the renderer only unpauses after
+    // attachExtraTarget returns (#34512)
+    extraClient.send.withArgs('Network.enable').returns(new Promise(() => {}))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const detach = await runtime.attachExtraTarget(extraClient)
+
+    expect(detach).to.be.a('function')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    })
+
+    // The enable was still attempted, even though it never settles while
+    // paused — a future change should not be able to silently drop it.
+    expect(extraClient.send).to.have.been.calledWith('Network.enable')
+
+    expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
+
+    await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget does not surface an unhandled rejection when Network.enable fails', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    extraClient.send.withArgs('Network.enable').rejects(new Error('WebSocket connection closed'))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+    const unhandled = sinon.stub()
+
+    await runtime.start()
+
+    process.on('unhandledRejection', unhandled)
+
+    try {
+      await runtime.attachExtraTarget(extraClient)
+
+      await flush()
+
+      expect(unhandled).not.to.have.been.called
+    } finally {
+      process.removeListener('unhandledRejection', unhandled)
+    }
 
     await runtime.stop()
   })
