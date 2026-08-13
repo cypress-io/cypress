@@ -66,6 +66,8 @@ describe('lib/adapters/internal-routes', () => {
 describe('lib/adapters/serve-internal-routes', () => {
   afterEach(() => {
     delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+    delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
   })
 
   function createMiddleware (response: any = {
@@ -316,5 +318,102 @@ describe('lib/adapters/serve-internal-routes', () => {
       },
       body: Buffer.from('created'),
     })
+  })
+
+  it('asks the loopback for an identity-encoded response in cypress-in-cypress', async () => {
+    // The cy-in-cy parent forwards cloud-bundle loopbacks through its proxy
+    // pipeline, which rewrites a missing accept-encoding to 'gzip,identity' —
+    // and Fetch.fulfillRequest bodies are identity-only, so the loopback must
+    // ask for identity explicitly.
+    process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
+
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub()
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress/xhrs/foo',
+      method: 'GET',
+      headers: {
+        'accept-encoding': 'gzip, deflate, br',
+      },
+    }, next)
+
+    expect(serverRequest.create).to.have.been.calledWithMatch({
+      headers: {
+        'accept-encoding': 'identity',
+      },
+    }, true)
+  })
+
+  it('sends no accept-encoding on the loopback outside cypress-in-cypress', async () => {
+    // Single-hop loopbacks terminate at our own Express routes, which already
+    // serve identity when the header is absent.
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub()
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress/xhrs/foo',
+      method: 'GET',
+      headers: {
+        'accept-encoding': 'gzip, deflate, br',
+      },
+    }, next)
+
+    const headers = serverRequest.create.firstCall.args[0].headers
+
+    expect(headers).not.to.have.property('accept-encoding')
+  })
+
+  it('decodes a gzip response body and drops the content-encoding header', async () => {
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    const zlib = require('zlib')
+    const source = 'export default { StudioPanel: true }'
+    const { middleware } = createMiddleware({
+      statusCode: 200,
+      headers: {
+        'content-type': 'application/javascript',
+        'content-encoding': 'gzip',
+      },
+      body: zlib.gzipSync(source),
+    })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress-studio/app-studio.js',
+      method: 'GET',
+    }, next)
+
+    expect(response.headers).to.deep.equal({ 'content-type': 'application/javascript' })
+    expect(response.body.toString()).to.equal(source)
+  })
+
+  it('drops content-encoding from an empty-body 304 without decoding', async () => {
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    const { middleware } = createMiddleware({
+      statusCode: 304,
+      headers: {
+        'content-encoding': 'gzip',
+        etag: 'W/"80a-abc"',
+      },
+      body: Buffer.alloc(0),
+    })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress-studio/app-studio.js',
+      method: 'GET',
+    }, next)
+
+    expect(response.statusCode).to.equal(304)
+    // the cached entry being revalidated holds the identity bytes fulfilled
+    // earlier, so the refreshed headers must not claim an encoding
+    expect(response.headers).to.deep.equal({ etag: 'W/"80a-abc"' })
+    expect(response.body.length).to.equal(0)
   })
 })
