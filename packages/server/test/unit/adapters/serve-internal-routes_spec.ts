@@ -13,6 +13,10 @@ const config = {
 } as any
 
 describe('lib/adapters/internal-routes', () => {
+  afterEach(() => {
+    delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+  })
+
   it('matches Cypress internal route prefixes', () => {
     expect(isInternalCypressRoute('/__cypress/xhrs/foo', config)).to.be.true
     expect(isInternalCypressRoute('/__/assets/app.js', config)).to.be.true
@@ -24,8 +28,18 @@ describe('lib/adapters/internal-routes', () => {
     expect(isInternalCypressRoute('/__cypress/src/spec-0.js', config)).to.be.false
   })
 
-  it('does not match studio or cy-prompt module-federation entries', () => {
-    // Parent cy-in-cy Express handlers re-enter the proxy for these paths.
+  it('matches studio and cy-prompt module-federation entries when the proxy is disabled', () => {
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    expect(isInternalCypressRoute('/__cypress-studio/app-studio.js', config)).to.be.true
+    expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config)).to.be.true
+  })
+
+  it('does not match studio or cy-prompt module-federation entries under the MITM proxy', () => {
+    // The legacy pipeline already delivers these to Express; looping them back
+    // skips later intercept stages and breaks studio.
+    delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+
     expect(isInternalCypressRoute('/__cypress-studio/app-studio.js', config)).to.be.false
     expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config)).to.be.false
   })
@@ -50,6 +64,10 @@ describe('lib/adapters/internal-routes', () => {
 })
 
 describe('lib/adapters/serve-internal-routes', () => {
+  afterEach(() => {
+    delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+  })
+
   function createMiddleware (response: any = {
     statusCode: 200,
     headers: {},
@@ -180,6 +198,49 @@ describe('lib/adapters/serve-internal-routes', () => {
       headers: { 'content-type': 'text/plain' },
       body: 'Not Found',
     })
+  })
+
+  it('delegates trusted loopback re-entries for cloud-bundle routes to the next middleware', async () => {
+    // The cypress-in-cypress parent's Express handlers for studio/cy-prompt
+    // re-enter the proxy to forward to the child project — the legacy
+    // pipeline must receive the request instead of a loop-guard 404.
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+      headers: {
+        'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+      },
+    }, next)
+
+    expect(next).to.have.been.calledOnce
+    expect(serverRequest.create).not.to.have.been.called
+  })
+
+  it('strips the loopback headers from delegated cloud-bundle re-entries', async () => {
+    // The token authenticates re-entry — forwarding it to the child project or
+    // the AUT would hand a real origin the means to forge a trusted loopback.
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    const { middleware } = createMiddleware()
+    const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+      headers: {
+        'accept-encoding': 'gzip',
+        'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__cypress-cy-prompt/driver/cy-prompt.js',
+        'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+      },
+    }, next)
+
+    expect(next.firstCall.args[0].headers).to.deep.equal({ 'accept-encoding': 'gzip' })
   })
 
   it('does not short-circuit on a spoofed loopback header without the process token', async () => {

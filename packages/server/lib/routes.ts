@@ -23,7 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { isProxyDisabled } from './util/is-proxy-disabled'
-import { isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
+import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -111,7 +111,7 @@ export const createCommonRoutes = ({
   // If we are in cypress in cypress we need to pass along the studio and cy-prompt routes
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-    router.get('/__cypress-studio/*', async (req, res) => {
+    router.get(`${CYPRESS_STUDIO_ROUTE}/*`, async (req, res) => {
       const proxy = resolveNetworkProxy()
 
       if (!proxy) {
@@ -123,7 +123,7 @@ export const createCommonRoutes = ({
       return
     })
 
-    router.get('/__cypress-cy-prompt/*', async (req, res) => {
+    router.get(`${CYPRESS_CY_PROMPT_ROUTE}/*`, async (req, res) => {
       const proxy = resolveNetworkProxy()
 
       if (!proxy) {
