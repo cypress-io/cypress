@@ -5,7 +5,7 @@ import { isTapError, resolveInstance } from '../cypress-instances'
 import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
-import { renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp, renderTapFailure } from '../tap/output'
+import { renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp, renderTapFailure, helpFor } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../tap/events'
 import { reportedInvocation } from '../tap/reported-invocation'
@@ -98,17 +98,17 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
     // A command that reads its own options before resolving an instance — as the
     // AUT readers do, so a bad value is answered as itself — raises outside the
     // flow that renders the rest of its failures.
-    return await renderTapFailure(err)
+    return await renderTapFailure(err, helpFor(program, native.name))
   }
 
   return dispatchCode ?? 1
 }
 
-const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined): Promise<number> => {
+const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined, help: string): Promise<number> => {
   const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
-    return await renderTapFailure(outcome.error)
+    return await renderTapFailure(outcome.error, help)
   }
 
   renderOutcome(command, outcome.result, json, commandOptions)
@@ -140,9 +140,9 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
       const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
 
       let dispatchCode = 0
-      const program = buildTapProgram(schema, async (name, args, commandOptions) => {
+      const program: commander.Command = buildTapProgram(schema, async (name, args, commandOptions) => {
         noteTapCommand(name, args, commandOptions)
-        dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json)
+        dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, helpFor(program, name))
       })
 
       if (wantsHelp || !command) {
@@ -156,6 +156,12 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
           noteTapFailure(INVALID_USAGE)
 
           return 1
+        }
+
+        // A name or flag commander could not place is answered here, where the
+        // program that knows the real ones is still in scope to list them.
+        if (isTapError(err)) {
+          return await renderTapFailure(err, helpFor(program, command))
         }
 
         throw err

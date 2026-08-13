@@ -8,6 +8,14 @@ export interface TapErrorCopy {
   recommendGhIssue?: boolean
   /** Path under the Cypress docs site, rendered as a "Learn more" block. */
   docs?: string
+  /**
+   * The invocation itself is what failed, so the called command's generated help
+   * is the remedy: it names every argument and option that would have worked. The
+   * CLI holds that help and prints it in place of `solution`, which could only
+   * point at the same thing. `solution` still answers for a raiser with no help to
+   * hand.
+   */
+  attachHelp?: boolean
 }
 
 const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
@@ -199,11 +207,6 @@ export const TAP_ERROR_COPY = {
     description: 'That command has no DOM snapshot to pin.',
     solution: 'Snapshots are captured in open mode and kept only for the most recent tests, as `numTestsKeptInMemory` sets. Run the spec again to capture fresh snapshots, or raise `numTestsKeptInMemory` to keep more.',
   },
-  /** Raised when `pin` ran with neither a command to pin nor `--clear`. */
-  PIN_TARGET_REQUIRED: {
-    description: 'The `pin` command was not told what to pin.',
-    solution: 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.',
-  },
 
   // Checking the invocation
   /**
@@ -211,22 +214,28 @@ export const TAP_ERROR_COPY = {
    *
    * @deprecated - raise it with unknownCommandTapError(), which writes its copy
    */
-  UNKNOWN_COMMAND: {},
+  UNKNOWN_COMMAND: {
+    attachHelp: true,
+  },
   /**
    * Raised when the invocation passed a flag the command does not declare.
    *
    * @deprecated - raise it with unknownOptionTapError(), which writes its copy
    */
-  UNKNOWN_OPTION: {},
+  UNKNOWN_OPTION: {
+    attachHelp: true,
+  },
   /** Raised when an argument is unknown, or a required one is missing. */
   INVALID_ARGUMENTS: {
     description: 'The command was called with invalid arguments.',
     solution: 'Run `cypress tap <command> --help` for the arguments it takes.',
+    attachHelp: true,
   },
   /** Raised when a required option is missing. */
   INVALID_OPTIONS: {
     description: 'The command was called with invalid options.',
     solution: 'Run `cypress tap <command> --help` for the options it takes.',
+    attachHelp: true,
   },
   /**
    * Raised when a flag was passed without the flag it depends on.
@@ -234,12 +243,6 @@ export const TAP_ERROR_COPY = {
    * @deprecated - raise it with missingCompanionOptionTapError(), which writes its copy
    */
   MISSING_COMPANION_OPTION: {},
-  /** Raised when args or options crossed the wire as something other than an object. */
-  INVALID_PAYLOAD: {
-    description: 'The command was given input this CLI could not read.',
-    solution: 'Run `cypress tap <command> --help` for the arguments and options it takes.',
-    recommendGhIssue: true,
-  },
   /**
    * Raised when a known input was given a value of the wrong type or range.
    *
@@ -385,16 +388,17 @@ export const missingCompanionOptionTapError = (given: string, required: string, 
 
 /**
  * A name no command answers to, and a flag no command declares: say which one was
- * given, then list the real ones. `listing` is whatever names them where the failure
- * was noticed — the CLI's generated help, or the commands the binding offers — and
- * is the remedy, which is why neither carries a solution of its own.
+ * given, then list the real ones. The listing is the remedy, which is why neither
+ * carries a solution of its own — and it is the generated help of whatever was
+ * called, which the CLI holds and appends as it renders. `listing` is for a raiser
+ * with one of its own and no renderer to defer to.
  */
-export const unknownCommandTapError = (name: string, listing: string): TapError => {
-  return factoryRaised('UNKNOWN_COMMAND', `Unknown command "${name}"\n\n${listing}`)
+export const unknownCommandTapError = (name: string, listing?: string): TapError => {
+  return factoryRaised('UNKNOWN_COMMAND', listing ? `Unknown command "${name}"\n\n${listing}` : `Unknown command "${name}"`)
 }
 
-export const unknownOptionTapError = (flag: string, listing: string): TapError => {
-  return factoryRaised('UNKNOWN_OPTION', `Unknown option "${flag}"\n\n${listing}`)
+export const unknownOptionTapError = (flag: string, listing?: string): TapError => {
+  return factoryRaised('UNKNOWN_OPTION', listing ? `Unknown option "${flag}"\n\n${listing}` : `Unknown option "${flag}"`)
 }
 
 /**

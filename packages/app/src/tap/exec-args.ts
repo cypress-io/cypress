@@ -1,20 +1,6 @@
 import { invalidValueTapError, TapError, unknownOptionTapError } from './contract'
 import type { TapCommandOptionSchema, TapCommandParamSchema } from './contract'
 
-const signatureOf = (name: string, params: readonly TapCommandParamSchema[], options: readonly TapCommandOptionSchema[] = []): string => {
-  const parts = [name, ...params.map(({ name: param, required }) => required ? `<${param}>` : `[${param}]`)]
-
-  if (options.length) {
-    parts.push('[options]')
-  }
-
-  return parts.join(' ')
-}
-
-const usageOf = (name: string, params: readonly TapCommandParamSchema[], options: readonly TapCommandOptionSchema[] = []): string => {
-  return `Usage: cypress tap ${signatureOf(name, params, options)}`
-}
-
 type ExpectedType = TapCommandParamSchema['type']
 
 type CoercedScalar =
@@ -75,9 +61,9 @@ type CoercedCommandArgs =
   | { ok: true, args: Record<string, unknown> }
   | CoercionFailure
 
-export const coerceCommandArgs = (name: string, params: readonly TapCommandParamSchema[], args: Record<string, string>, options: readonly TapCommandOptionSchema[] = []): CoercedCommandArgs => {
+export const coerceCommandArgs = (name: string, params: readonly TapCommandParamSchema[], args: Record<string, string>): CoercedCommandArgs => {
   const invalid = (message: string): CoercedCommandArgs => {
-    return { ok: false, error: new TapError('INVALID_ARGUMENTS', { detail: `${message}\n\n${usageOf(name, params, options)}` }) }
+    return { ok: false, error: new TapError('INVALID_ARGUMENTS', { detail: message }) }
   }
 
   const known = new Set(params.map(({ name: param }) => param))
@@ -118,9 +104,9 @@ type CoercedCommandOptions =
   | { ok: true, options: Record<string, unknown> }
   | CoercionFailure
 
-export const coerceCommandOptions = (name: string, params: readonly TapCommandParamSchema[], options: readonly TapCommandOptionSchema[], raw: Record<string, string>): CoercedCommandOptions => {
+export const coerceCommandOptions = (name: string, options: readonly TapCommandOptionSchema[], raw: Record<string, string>): CoercedCommandOptions => {
   const invalid = (message: string): CoercedCommandOptions => {
-    return { ok: false, error: new TapError('INVALID_OPTIONS', { detail: `${message}\n\n${usageOf(name, params, options)}` }) }
+    return { ok: false, error: new TapError('INVALID_OPTIONS', { detail: message }) }
   }
 
   const known = new Set(options.map(({ name: option }) => option))
@@ -129,7 +115,7 @@ export const coerceCommandOptions = (name: string, params: readonly TapCommandPa
   // A flag this command has no such thing as, rather than one it has and was given
   // wrongly — the same condition the CLI answers before a call ever gets here.
   if (unknown) {
-    return { ok: false, error: unknownOptionTapError(`--${unknown}`, usageOf(name, params, options)) }
+    return { ok: false, error: unknownOptionTapError(`--${unknown}`) }
   }
 
   const coerced: Record<string, unknown> = {}

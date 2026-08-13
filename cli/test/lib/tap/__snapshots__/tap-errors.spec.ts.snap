@@ -118,9 +118,22 @@ The command was called with invalid arguments.
 
 "run" is missing the required <spec> argument(s).
 
-Usage: cypress tap run <spec>
+Usage: cypress tap run [options] <spec>
 
-Run cypress tap <command> --help for the arguments it takes."
+run (or rerun) a spec by its project-relative path
+
+Arguments:
+  spec                  project-relative spec path, as listed by the specs
+                        command
+
+Options:
+  -i, --instance <pid>  target a specific running Cypress instance by its
+                        server process id (pid)
+  --json                print the raw JSON result instead of the human-readable
+                        rendering
+  --timeout <ms>        how long to wait on any single call into the running
+                        Cypress, in milliseconds (default 30000)
+  -h, --help            display help for command"
 `;
 
 exports[`lib/tap error rendering catalogue > INVALID_OPTIONS 1`] = `
@@ -131,20 +144,19 @@ The command was called with invalid options.
 
 Usage: cypress tap reporter [options]
 
-Run cypress tap <command> --help for the options it takes."
-`;
+render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: the spec’s stats and every suite’s tests
 
-exports[`lib/tap error rendering catalogue > INVALID_PAYLOAD 1`] = `
-"> cypress tap dom --selector "#status"
-The command was given input this CLI could not read.
-
-"dom" received a non-object args payload, rather than one keyed by name.
-
-Run cypress tap <command> --help for the arguments and options it takes.
-
-If the problem persists, search for an existing issue or open a GitHub issue at
-
-  https://github.com/cypress-io/cypress/issues"
+Options:
+  -t, --test-id <test-id>  test id, as listed by the reporter command
+  -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
+                           the latest
+  -i, --instance <pid>     target a specific running Cypress instance by its
+                           server process id (pid)
+  --json                   print the raw JSON result instead of the
+                           human-readable rendering
+  --timeout <ms>           how long to wait on any single call into the running
+                           Cypress, in milliseconds (default 30000)
+  -h, --help               display help for command"
 `;
 
 exports[`lib/tap error rendering catalogue > INVALID_VALUE 1`] = `
@@ -189,13 +201,6 @@ exports[`lib/tap error rendering catalogue > NO_PROJECT 1`] = `
 The Cypress session has no project open.
 
 Open a project in Cypress, then try again."
-`;
-
-exports[`lib/tap error rendering catalogue > PIN_TARGET_REQUIRED 1`] = `
-"> cypress tap pin
-The pin command was not told what to pin.
-
-Pass --test-id and --command-id, as listed by cypress tap reporter, or --clear to release the current pin."
 `;
 
 exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `
@@ -300,12 +305,65 @@ exports[`lib/tap error rendering catalogue > UNKNOWN_COMMAND 1`] = `
 "> cypress tap oel2k
 Unknown command "oel2k"
 
-This Cypress session (v15.4.0) offers: status, specs, run, dom, reporter."
+Usage: cypress tap [command] [args...] [options]
+
+Interacts with a running Cypress instance
+
+Options:
+  -i, --instance <pid>  target a specific running Cypress instance by its
+                        server process id (pid)
+  --json                print the raw JSON result instead of the human-readable
+                        rendering
+  --timeout <ms>        how long to wait on any single call into the running
+                        Cypress, in milliseconds (default 30000)
+  -h, --help            display help for command
+
+Commands:
+  instances [options]   list the running Cypress instances this CLI can reach
+  status [options]      report where a running Cypress instance is in its
+                        lifecycle
+  specs [options]       list the specs the running Cypress instance can run,
+                        most recently modified first
+  run [options] <spec>  run (or rerun) a spec by its project-relative path
+  dom [options]         read the app-under-test DOM as HTML: the whole page,
+                        or the one element a selector matches (with its
+                        subtree)
+  aria [options]        read the accessibility (ARIA) tree of the
+                        app-under-test frame, or the subtree at a selector
+  inspect [options]     inspect the element a selector matches: its tag,
+                        attributes, computed styles, box model, and
+                        accessibility node
+  command [options]     detail one command log entry of a test — its reporter
+                        row, the DOM snapshots pinnable on it, and its console
+                        properties
+  reporter [options]    render a test’s full reporter view — its routes,
+                        hooks, and command log — or, without --test-id, the
+                        spec-level overview: the spec’s stats and every suite’s
+                        tests
+  pin [options]         pin a command’s DOM snapshot into the live
+                        app-under-test frame so the dom/aria/inspect commands
+                        can read it; pass --clear to release"
 `;
 
 exports[`lib/tap error rendering catalogue > UNKNOWN_OPTION 1`] = `
 "> cypress tap dom --bogus
 Unknown option "--bogus"
 
-Usage: cypress tap dom [options]"
+Usage: cypress tap dom [options]
+
+read the app-under-test DOM as HTML: the whole page, or the one element a selector matches (with its subtree)
+
+Options:
+  -s, --selector <selector>    a CSS selector matching exactly one element;
+                               omit to read the whole document
+  -m, --max-chars <max-chars>  cap on returned HTML characters (default 30000)
+  --at <at>                    0-based index of the match to read, as listed by
+                               the index column when a selector matches several
+  -i, --instance <pid>         target a specific running Cypress instance by
+                               its server process id (pid)
+  --json                       print the raw JSON result instead of the
+                               human-readable rendering
+  --timeout <ms>               how long to wait on any single call into the
+                               running Cypress, in milliseconds (default 30000)
+  -h, --help                   display help for command"
 `;

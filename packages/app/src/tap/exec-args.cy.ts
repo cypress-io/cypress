@@ -28,12 +28,11 @@ describe('tap/exec-args', () => {
       expect(coerceCommandArgs('probe', PARAMS, { path: 'a/b.ts' })).to.deep.eq({ ok: true, args: { path: 'a/b.ts' } })
     })
 
-    it('rejects missing required params with a usage hint', () => {
+    it('rejects missing required params, naming them', () => {
       const outcome = coerceCommandArgs('probe', PARAMS, {})
 
       expect(failure(outcome).code).to.eq('INVALID_ARGUMENTS')
       expect(failure(outcome).detail).to.contain('missing the required <path>')
-      expect(failure(outcome).detail).to.contain('Usage: cypress tap probe <path> [count] [exact]')
     })
 
     it('rejects an arg not named by the param schema', () => {
@@ -74,9 +73,6 @@ describe('tap/exec-args', () => {
   })
 
   describe('coerceCommandOptions', () => {
-    const PARAMS: TapCommandParamSchema[] = [
-      { name: 'spec', type: 'string', required: true, description: 'a spec' },
-    ]
     const OPTIONS: TapCommandOptionSchema[] = [
       { name: 'browser', type: 'string', required: false, description: 'which browser' },
       { name: 'port', type: 'number', required: false, description: 'a port' },
@@ -85,40 +81,39 @@ describe('tap/exec-args', () => {
     ]
 
     it('coerces each supplied option to its declared wire type', () => {
-      expect(coerceCommandOptions('run', PARAMS, OPTIONS, { browser: 'chrome', port: '8080', headed: 'true', config: 'a.json' })).to.deep.eq({
+      expect(coerceCommandOptions('run', OPTIONS, { browser: 'chrome', port: '8080', headed: 'true', config: 'a.json' })).to.deep.eq({
         ok: true,
         options: { browser: 'chrome', port: 8080, headed: true, config: 'a.json' },
       })
     })
 
     it('defaults an absent boolean flag to false and omits absent value options', () => {
-      expect(coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json' })).to.deep.eq({
+      expect(coerceCommandOptions('run', OPTIONS, { config: 'a.json' })).to.deep.eq({
         ok: true,
         options: { headed: false, config: 'a.json' },
       })
     })
 
-    it('rejects a missing required option with a usage hint', () => {
-      const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, {})
+    it('rejects a missing required option, naming it', () => {
+      const outcome = coerceCommandOptions('run', OPTIONS, {})
 
       expect(failure(outcome).code).to.eq('INVALID_OPTIONS')
       expect(failure(outcome).detail).to.contain('missing the required --config option')
-      expect(failure(outcome).detail).to.contain('Usage: cypress tap run <spec> [options]')
     })
 
     // A flag the command has no such thing as reads as its own condition, not as
     // one of the ways a flag it does have can be wrong.
-    it('rejects an option not in the schema, naming it and the usage', () => {
-      const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json', bogus: 'x' })
+    it('rejects an option not in the schema, naming it', () => {
+      const outcome = coerceCommandOptions('run', OPTIONS, { config: 'a.json', bogus: 'x' })
 
       expect(failure(outcome)).to.deep.eq({
         code: 'UNKNOWN_OPTION',
-        detail: 'Unknown option "--bogus"\n\nUsage: cypress tap run <spec> [options]',
+        detail: 'Unknown option "--bogus"',
       })
     })
 
     it('rejects a value that does not parse as the declared number type', () => {
-      const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json', port: 'abc' })
+      const outcome = coerceCommandOptions('run', OPTIONS, { config: 'a.json', port: 'abc' })
 
       expect(failure(outcome)).to.deep.eq({
         code: 'INVALID_VALUE',
@@ -127,7 +122,7 @@ describe('tap/exec-args', () => {
     })
 
     it('rejects a non true/false value for a boolean option', () => {
-      const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, { config: 'a.json', headed: 'yes' })
+      const outcome = coerceCommandOptions('run', OPTIONS, { config: 'a.json', headed: 'yes' })
 
       expect(failure(outcome)).to.deep.eq({
         code: 'INVALID_VALUE',

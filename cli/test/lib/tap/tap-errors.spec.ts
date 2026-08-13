@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import logger from '../../../lib/logger'
-import { renderTapFailure } from '../../../lib/tap/output'
-import { TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, invalidValueTapError, missingCompanionOptionTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
+import { renderTapFailure, helpFor } from '../../../lib/tap/output'
+import { buildTapProgram } from '../../../lib/tap/build-program'
+import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, invalidValueTapError, missingCompanionOptionTapError, notFoundTapError, specInProgressTapError, tapErrorCopy, unknownCommandTapError, unknownOptionTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff: the rendering catalogue at the foot of this
@@ -30,14 +31,12 @@ describe('lib/tap error registry', () => {
         "INSTANCE_OUTDATED",
         "INVALID_ARGUMENTS",
         "INVALID_OPTIONS",
-        "INVALID_PAYLOAD",
         "INVALID_VALUE",
         "MISSING_COMPANION_OPTION",
         "NO_AUT",
         "NO_BROWSER_ATTACHED",
         "NO_INSTANCE",
         "NO_PROJECT",
-        "PIN_TARGET_REQUIRED",
         "PROTOCOL_MISMATCH",
         "RENDERER_UNRESPONSIVE",
         "SNAPSHOT_NOT_FOUND",
@@ -79,6 +78,16 @@ describe('lib/tap error registry', () => {
     })
 
     expect(offenders).to.deep.eq([])
+  })
+
+  // The help is the remedy only where what failed was the invocation itself, so
+  // the entries asking for it are exactly the ones about how the command was called.
+  it('takes the generated help in place of a remedy only where the invocation failed', () => {
+    const attaching = entries
+    .filter(([, copy]) => copy.attachHelp)
+    .map(([code]) => code)
+
+    expect(attaching.sort()).to.deep.eq(['INVALID_ARGUMENTS', 'INVALID_OPTIONS', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
   })
 
   it('leaves the specifics to the throw site, never interpolating them', () => {
@@ -238,6 +247,33 @@ describe('lib/tap error rendering', () => {
     expect(printed).to.eq('The spec cypress/e2e/slow.cy.js is currently running.\n\nUse cypress tap status to verify when the spec has finished.')
   })
 
+  // The entry's own solution only points at the help, so where the caller has that
+  // help the reader gets it instead of being told to go and ask for it.
+  it('prints the help an entry asks for in place of its solution', async () => {
+    const help = 'Usage: cypress tap reporter [options]\n\nOptions:\n  -t, --test-id <test-id>  the test to read\n'
+
+    await renderTapFailure({ code: 'INVALID_OPTIONS', detail: '"reporter" is missing the required --test-id option.' }, help)
+
+    const printed = stderr()
+
+    expect(printed).to.contain('-t, --test-id <test-id>  the test to read')
+    expect(printed).not.to.contain(TAP_ERROR_COPY.INVALID_OPTIONS.solution!.replace(/`/g, ''))
+  })
+
+  // Only the entries that ask for it: a failure about the state of the session is
+  // not answered by listing the flags of the command that found it.
+  it('leaves the help off an entry that does not ask for it', async () => {
+    await renderTapFailure({ code: 'NO_INSTANCE' }, 'Usage: cypress tap dom [options]')
+
+    expect(stderr()).not.to.contain('Usage: cypress tap dom')
+  })
+
+  it('falls back to the solution when the caller has no help to hand', async () => {
+    await renderTapFailure({ code: 'INVALID_OPTIONS', detail: 'missing --test-id' })
+
+    expect(stderr()).to.contain(TAP_ERROR_COPY.INVALID_OPTIONS.solution!.replace(/`/g, ''))
+  })
+
   it('expands recommendGhIssue into the CLI\'s standard issue block', async () => {
     const printed = await render('BINDING_THREW')
 
@@ -282,10 +318,17 @@ describe('lib/tap error rendering catalogue', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
+  // The generated help of the program a caller really parses against, so an entry
+  // that takes help in place of its remedy snapshots the help it would actually
+  // print rather than a stand-in written here.
+  const program = buildTapProgram(buildTapSchema('15.4.0'), () => {})
+
   interface RepresentativeFailure {
     /** A `cypress tap` invocation that produces this failure in practice. */
     invocation: string
     failure: TapError
+    /** The command whose help the CLI has to hand when it renders this one. */
+    helpOf?: string
   }
 
   // One realistic failure per code — factory-raised codes through their factory,
@@ -436,40 +479,34 @@ describe('lib/tap error rendering catalogue', () => {
       invocation: 'cypress tap pin --test-id r7 --command-id 3',
       failure: new TapError('SNAPSHOT_UNAVAILABLE'),
     },
-    // packages/app/src/tap/commands/pin.ts
-    PIN_TARGET_REQUIRED: {
-      invocation: 'cypress tap pin',
-      failure: new TapError('PIN_TARGET_REQUIRED'),
-    },
     // packages/app/src/tap/tap-manager.ts; also cli/lib/tap/build-program.ts
     UNKNOWN_COMMAND: {
       invocation: 'cypress tap oel2k',
-      failure: unknownCommandTapError('oel2k', 'This Cypress session (v15.4.0) offers: status, specs, run, dom, reporter.'),
+      failure: unknownCommandTapError('oel2k'),
+      helpOf: 'oel2k',
     },
     // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
     UNKNOWN_OPTION: {
       invocation: 'cypress tap dom --bogus',
-      failure: unknownOptionTapError('--bogus', 'Usage: cypress tap dom [options]'),
+      failure: unknownOptionTapError('--bogus'),
+      helpOf: 'dom',
     },
     // packages/app/src/tap/exec-args.ts
     INVALID_ARGUMENTS: {
       invocation: 'cypress tap run',
-      failure: new TapError('INVALID_ARGUMENTS', { detail: '"run" is missing the required <spec> argument(s).\n\nUsage: cypress tap run <spec>' }),
+      failure: new TapError('INVALID_ARGUMENTS', { detail: '"run" is missing the required <spec> argument(s).' }),
+      helpOf: 'run',
     },
     // packages/app/src/tap/exec-args.ts
     INVALID_OPTIONS: {
       invocation: 'cypress tap reporter',
-      failure: new TapError('INVALID_OPTIONS', { detail: '"reporter" is missing the required --test-id option.\n\nUsage: cypress tap reporter [options]' }),
+      failure: new TapError('INVALID_OPTIONS', { detail: '"reporter" is missing the required --test-id option.' }),
+      helpOf: 'reporter',
     },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/commands/reporter.ts
     MISSING_COMPANION_OPTION: {
       invocation: 'cypress tap dom --at 1',
       failure: missingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.'),
-    },
-    // packages/app/src/tap/tap-manager.ts
-    INVALID_PAYLOAD: {
-      invocation: 'cypress tap dom --selector "#status"',
-      failure: new TapError('INVALID_PAYLOAD', { detail: '"dom" received a non-object args payload, rather than one keyed by name.' }),
     },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/exec-args.ts
     INVALID_VALUE: {
@@ -486,9 +523,9 @@ describe('lib/tap error rendering catalogue', () => {
 
   for (const code of Object.keys(TAP_ERROR_COPY) as TapErrorCode[]) {
     it(code, async () => {
-      const { invocation, failure } = REPRESENTATIVE[code]
+      const { invocation, failure, helpOf } = REPRESENTATIVE[code]
 
-      await renderTapFailure(failure)
+      await renderTapFailure(failure, helpOf === undefined ? undefined : helpFor(program, helpOf))
 
       const printed = stripAnsi(vi.mocked(console.error).mock.calls.flat().join(' '))
 

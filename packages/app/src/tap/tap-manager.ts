@@ -1,7 +1,7 @@
 import { tapCommands } from './commands'
 import type { TapCommandDefinition } from './commands/definition'
 import { coerceCommandArgs, coerceCommandOptions } from './exec-args'
-import { isTapError, unknownCommandTapError, TAP_SCHEMA_VERSION, TAP_TARGET, TapError } from './contract'
+import { isTapError, unknownCommandTapError, TAP_SCHEMA_VERSION, TapError } from './contract'
 import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 
 // Normalize a wire payload to a plain object, or null if malformed. `null` maps
@@ -55,9 +55,7 @@ export class TapManager implements TapBindingContract {
       : undefined
 
     if (!definition) {
-      const offers = `This ${TAP_TARGET} (v${this.cypressVersion}) offers: ${Object.keys(tapCommands).join(', ')}.`
-
-      return { error: unknownCommandTapError(command, offers).toPayload() }
+      return { error: unknownCommandTapError(command).toPayload() }
     }
 
     const normalizedArgs = normalizePayload(args)
@@ -67,18 +65,18 @@ export class TapManager implements TapBindingContract {
       const field = normalizedArgs ? 'options' : 'args'
       const detail = `"${command}" received a non-object ${field} payload, rather than one keyed by name.`
 
-      return { error: new TapError('INVALID_PAYLOAD', { detail }).toPayload() }
+      return { error: new TapError('PROTOCOL_MISMATCH', { detail }).toPayload() }
     }
 
     const optionSchema = definition.options ?? []
 
-    const coercedArgs = coerceCommandArgs(command, definition.params, normalizedArgs, optionSchema)
+    const coercedArgs = coerceCommandArgs(command, definition.params, normalizedArgs)
 
     if (!coercedArgs.ok) {
       return { error: coercedArgs.error.toPayload() }
     }
 
-    const coercedOptions = coerceCommandOptions(command, definition.params, optionSchema, normalizedOptions)
+    const coercedOptions = coerceCommandOptions(command, optionSchema, normalizedOptions)
 
     if (!coercedOptions.ok) {
       return { error: coercedOptions.error.toPayload() }

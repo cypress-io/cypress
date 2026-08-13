@@ -571,7 +571,7 @@ describe('tap binding pin lifecycle', () => {
       // clear with nothing pinned is a no-op, and a pin needs a run to read.
       const noTarget = await binding.exec('pin')
 
-      expect((noTarget as { error: { code: string } }).error.code).to.eq('PIN_TARGET_REQUIRED')
+      expect((noTarget as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
 
       const clearNoop = await binding.exec('pin', {}, { clear: 'true' })
 

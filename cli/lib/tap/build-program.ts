@@ -90,13 +90,13 @@ const answerUnknownOption = (command: commander.Command): void => {
       return
     }
 
-    throw unknownOptionTapError(flag, this.helpInformation())
+    throw unknownOptionTapError(flag)
   }
 }
 
 const answerUnknownCommand = (program: commander.Command): void => {
   (program as UnknownInputHandlers).unknownCommand = function (): void {
-    throw unknownCommandTapError(this.args[0], this.helpInformation())
+    throw unknownCommandTapError(this.args[0])
   }
 }
 

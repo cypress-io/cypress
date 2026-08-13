@@ -16,10 +16,14 @@ const highlight = (copy: string): string => copy.replace(/`([^`]+)`/g, (_match, 
 
 /**
  * The remedy and the trailing blocks an entry asks for, so guidance repeated across
- * errors is declared once per entry rather than written out again in each one.
+ * errors is declared once per entry rather than written out again in each one. An
+ * entry that asks for the help takes it in place of its solution, which is written
+ * to point at the very help now being printed.
  */
-const remedyFor = (copy: TapErrorCopy): string[] => {
-  const parts = copy.solution ? [highlight(copy.solution)] : []
+const remedyFor = (copy: TapErrorCopy, help?: string): string[] => {
+  const attached = copy.attachHelp && help ? help.trimEnd() : undefined
+  const solution = attached ?? (copy.solution ? highlight(copy.solution) : undefined)
+  const parts = solution ? [solution] : []
 
   if (copy.docs) {
     parts.push(`Learn more:\n\n  ${chalk.blue(`${docsUrl}${copy.docs}`)}`)
@@ -39,8 +43,12 @@ const remedyFor = (copy: TapErrorCopy): string[] => {
  * condition, then the specifics that explain it, then what to do about it. The code
  * itself is never printed. An error with no code is not ours to render and keeps
  * unwinding.
+ *
+ * `help` is the generated help of the command that was called, passed by the callers
+ * that have a parsed program to hand. Only a failure about the invocation prints it;
+ * the instance raises those too, and has no help of its own to send.
  */
-export const renderTapFailure = async (err: any): Promise<number> => {
+export const renderTapFailure = async (err: any, help?: string): Promise<number> => {
   if (typeof err?.code !== 'string') {
     throw err
   }
@@ -51,9 +59,19 @@ export const renderTapFailure = async (err: any): Promise<number> => {
   const condition = copy.description ? [highlight(copy.description)] : []
   const detail = typeof err.detail === 'string' && err.detail !== '' ? [highlight(err.detail)] : []
 
-  logger.errorToStderr([...condition, ...detail, ...remedyFor(copy)].join('\n\n'))
+  logger.errorToStderr([...condition, ...detail, ...remedyFor(copy, help)].join('\n\n'))
 
   return 1
+}
+
+/**
+ * The help for the command that was called, or the whole program's when the name
+ * matched nothing — which is the case a reader who mistyped a command needs.
+ */
+export const helpFor = (program: commander.Command, command: string | undefined): string => {
+  const subcommand = program.commands.find((sub) => sub.name() === command)
+
+  return (subcommand ?? program).helpInformation()
 }
 
 export const renderResult = (result: unknown): void => {

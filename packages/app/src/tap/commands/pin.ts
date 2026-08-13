@@ -112,8 +112,10 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
     return { cleared: true }
   }
 
+  // Either the pair that names a command or `--clear`, which no one option can be
+  // marked required to express.
   if (test === undefined || command === undefined) {
-    throw new TapError('PIN_TARGET_REQUIRED')
+    throw new TapError('INVALID_OPTIONS', { detail: 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.' })
   }
 
   if (!runner) {

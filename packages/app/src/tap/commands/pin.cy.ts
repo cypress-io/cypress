@@ -479,7 +479,7 @@ describe('tap/commands/pin', () => {
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2' })
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('PIN_TARGET_REQUIRED')
+    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
     // A malformed pin never drives the app pin.
     expect(pinSnapshot).not.to.have.been.called
   })
