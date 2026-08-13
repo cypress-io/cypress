@@ -5,7 +5,7 @@ import type { Protocol } from 'devtools-protocol'
 // which wedges the pause and the run along with it (#34470). Streaming the
 // body via Network.streamResourceContent instead was rejected: the
 // capture-loss PoC measured heavy render-critical body loss under load. See
-// cypress-io/engineering-documentation, technical-documentation/technical-decisions/tech-briefs/app/http2/supporting-documents/experimental-fetch/findings.md.
+// https://github.com/cypress-io/engineering-documentation/blob/main/technical-documentation/technical-decisions/tech-briefs/app/http2/supporting-documents/experimental-fetch/findings.md.
 // Deny-listing these provably stream-shaped responses and continuing them
 // untouched avoids the eager fetch entirely.
 const STREAM_CONTENT_TYPES = new Set(['text/event-stream', 'multipart/x-mixed-replace'])

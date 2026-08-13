@@ -613,6 +613,12 @@ export class CdpFetchTransport {
 
     if (bodySkipped) {
       debug('skipping eager body fetch for stream-shaped response %s (resourceType=%s)', event.request.url, event.resourceType)
+
+      // Stand in an empty body: its digest matches the empty body the
+      // middleware materializes, so an untouched response takes
+      // continueResponse and the browser reads the origin stream directly.
+      // Middleware that sets a body still diffs against this digest and
+      // fulfills.
       originalBody = Buffer.alloc(0)
     } else {
       try {
