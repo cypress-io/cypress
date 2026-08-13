@@ -849,6 +849,7 @@
     "./packages/server/lib/automation/cookie/jar.ts",
     "./packages/server/lib/browsers/chrome.ts",
     "./packages/server/lib/browsers/firefox.ts",
+    "./packages/server/lib/browsers/webkit-cdp-bridge.ts",
     "./packages/server/lib/cache.ts",
     "./packages/server/lib/cloud/api/cloud_request.ts",
     "./packages/server/lib/cloud/api/index.ts",
