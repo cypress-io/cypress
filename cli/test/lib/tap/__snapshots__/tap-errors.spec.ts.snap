@@ -131,3 +131,279 @@ TESTING_TYPE_NOT_CONFIGURED
   That testing type is not configured for this project.
   Configure it in the Cypress config, or start Cypress in a testing type the project supports."
 `;
+
+exports[`lib/tap error rendering catalogue > renders AMBIGUOUS_COMMAND as a caller sees it 1`] = `
+"That command id matches more than one row of the test.
+
+"3" matches h2:3 (before each) and r4:3 — e.g. "h2:3".
+
+Qualify the id with the section it belongs to, as cypress tap reporter lists it."
+`;
+
+exports[`lib/tap error rendering catalogue > renders ATTEMPT_NOT_FOUND as a caller sees it 1`] = `
+"No attempt of this test matched that number.
+
+Looked for --attempt 5. Test "r7" has 3 attempts.
+
+--attempt takes a 1-based attempt number and selects an earlier attempt of a retried test; omit it for the latest."
+`;
+
+exports[`lib/tap error rendering catalogue > renders BINDING_NOT_FOUND as a caller sees it 1`] = `
+"Could not make a connection to the Cypress application.
+
+The instance may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders BINDING_THREW as a caller sees it 1`] = `
+"The Cypress instance failed while running the command.
+
+Check the instance with cypress tap status, then try again.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
+`;
+
+exports[`lib/tap error rendering catalogue > renders CDP_UNREACHABLE as a caller sees it 1`] = `
+"Lost the connection to the browser running Cypress.
+
+The browser may have just closed. Make sure Cypress is running with a browser open, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders CLI_OUTDATED as a caller sees it 1`] = `
+"The running Cypress is newer than this CLI.
+
+Update the CLI with npm install --save-dev cypress@latest, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders COMMAND_NOT_FOUND as a caller sees it 1`] = `
+"No command in this test matched that id.
+
+Looked for --command-id "9".
+
+Run cypress tap reporter --test-id <id> to list the commands in the test."
+`;
+
+exports[`lib/tap error rendering catalogue > renders FRAME_READ_FAILED as a caller sees it 1`] = `
+"Reading the app under test failed.
+
+The page may have navigated mid-read. Try again once it has settled.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
+`;
+
+exports[`lib/tap error rendering catalogue > renders GRAPHQL_FAILED as a caller sees it 1`] = `
+"The Cypress instance failed while answering a data query.
+
+Try the command again.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
+`;
+
+exports[`lib/tap error rendering catalogue > renders GRAPHQL_UNREACHABLE as a caller sees it 1`] = `
+"Could not reach the Cypress instance to read its data.
+
+The instance may have just closed. Make sure Cypress is running in open mode, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders INSTANCE_NOT_FOUND as a caller sees it 1`] = `
+"No running Cypress matched that process id.
+
+Looked for --instance 4321.
+
+Run cypress tap instances to list the sessions you can tap into."
+`;
+
+exports[`lib/tap error rendering catalogue > renders INSTANCE_OUTDATED as a caller sees it 1`] = `
+"The running Cypress is older than this CLI.
+
+Update Cypress in the running project with npm install --save-dev cypress@latest, restart it, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders INVALID_ARGUMENTS as a caller sees it 1`] = `
+"The command was given an argument it cannot accept.
+
+"run" is missing the required <spec> argument(s).
+
+Usage: cypress tap run <spec>
+
+Run cypress tap <command> --help for the arguments it takes."
+`;
+
+exports[`lib/tap error rendering catalogue > renders INVALID_OPTIONS as a caller sees it 1`] = `
+"The command was given an option it cannot accept.
+
+"reporter" is missing the required --test-id option.
+
+Usage: cypress tap reporter [options]
+
+Run cypress tap <command> --help for the options it takes."
+`;
+
+exports[`lib/tap error rendering catalogue > renders INVALID_PAYLOAD as a caller sees it 1`] = `
+"The command was given input this CLI could not read.
+
+"dom" received a non-object args payload, rather than one keyed by name.
+
+Run cypress tap <command> --help for the arguments and options it takes.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
+`;
+
+exports[`lib/tap error rendering catalogue > renders INVALID_VALUE as a caller sees it 1`] = `
+"An invalid value was given.
+
+Expected --at to be 0 to 2, since ".item" matched 3 elements.
+
+Instead the value was: "5""
+`;
+
+exports[`lib/tap error rendering catalogue > renders MISSING_COMPANION_OPTION as a caller sees it 1`] = `
+"You passed the --at flag without also passing the --selector flag.
+
+Pass --selector to choose the elements to index into, or omit --at to read the whole document."
+`;
+
+exports[`lib/tap error rendering catalogue > renders NO_AUT as a caller sees it 1`] = `
+"No app under test is loaded.
+
+Run a spec first with cypress tap run <spec>. To read the app as it was at an earlier command, pin that command with cypress tap pin."
+`;
+
+exports[`lib/tap error rendering catalogue > renders NO_BROWSER_ATTACHED as a caller sees it 1`] = `
+"Cypress is running, but no test browser is open.
+
+The instance is pid 4321, at /home/dev/shop.
+
+Open a Chromium based browser in Cypress, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders NO_INSTANCE as a caller sees it 1`] = `
+"Could not find an open-mode session to tap into.
+
+Start Cypress with cypress open, select a testing type and launch a browser, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders NO_PROJECT as a caller sees it 1`] = `
+"The Cypress instance has no project open.
+
+Open a project in Cypress, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders PIN_TARGET_REQUIRED as a caller sees it 1`] = `
+"The pin command was not told what to pin.
+
+Pass --test-id and --command-id, as listed by cypress tap reporter, or --clear to release the current pin."
+`;
+
+exports[`lib/tap error rendering catalogue > renders PROTOCOL_MISMATCH as a caller sees it 1`] = `
+"The running Cypress answered in a way this CLI does not recognize.
+
+The running Cypress and this CLI are likely different versions. Update the older of the two with npm install --save-dev cypress@latest, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders RENDERER_UNRESPONSIVE as a caller sees it 1`] = `
+"Cypress is reachable, but the page running it is not responding.
+
+No response within the specified timeout (30000ms).
+
+It may be paused in DevTools, stuck in a loop, or starved of memory. Pass --timeout <ms> to wait longer."
+`;
+
+exports[`lib/tap error rendering catalogue > renders SNAPSHOT_NOT_FOUND as a caller sees it 1`] = `
+"No snapshot of this command matched that name or index.
+
+Looked for --at "middle". This command has: before, after.
+
+Run cypress tap command --test-id <id> --command-id <id> to list the snapshots a command has. --at takes a snapshot name or a 1-based index; omit it to pin the command’s final state."
+`;
+
+exports[`lib/tap error rendering catalogue > renders SNAPSHOT_UNAVAILABLE as a caller sees it 1`] = `
+"That command has no DOM snapshot to pin.
+
+The app under test did not take the pin.
+
+Snapshots are captured in open mode and kept only for the most recent tests, as numTestsKeptInMemory sets. Run the spec again to capture fresh snapshots, or raise numTestsKeptInMemory to keep more."
+`;
+
+exports[`lib/tap error rendering catalogue > renders SPEC_IN_PROGRESS as a caller sees it 1`] = `
+"The spec cypress/e2e/checkout.cy.ts is currently running.
+
+Use cypress tap status to verify when the spec has finished."
+`;
+
+exports[`lib/tap error rendering catalogue > renders SPEC_NOT_FOUND as a caller sees it 1`] = `
+"The instance has no spec matching that path.
+
+Looked for "cypress/e2e/checkout.cy.ts".
+
+cypress tap specs lists the specs this instance can run. If the spec exists but is not listed, widen specPattern in the Cypress config."
+`;
+
+exports[`lib/tap error rendering catalogue > renders SPEC_NOT_STARTED as a caller sees it 1`] = `
+"No spec is available to read.
+
+Start a spec with the run command, then read it once it has finished."
+`;
+
+exports[`lib/tap error rendering catalogue > renders SPEC_START_FAILED as a caller sees it 1`] = `
+"The Cypress instance could not start the spec.
+
+The instance returned no result for "cypress/e2e/checkout.cy.ts".
+
+Check the instance with cypress tap status, then try again.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  https://github.com/cypress-io/cypress/issues"
+`;
+
+exports[`lib/tap error rendering catalogue > renders STALE_HANDLE as a caller sees it 1`] = `
+"The Cypress instance navigated while running the command.
+
+Run the command again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders STALE_INSTANCE as a caller sees it 1`] = `
+"Cypress was running, but is no longer responding.
+
+Looked for --instance 4321.
+
+Cypress likely exited uncleanly. Start Cypress again with cypress open, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > renders TEST_NOT_FOUND as a caller sees it 1`] = `
+"No test in this spec matched that id.
+
+Looked for --test-id "r7".
+
+Run cypress tap reporter to list the tests in the spec."
+`;
+
+exports[`lib/tap error rendering catalogue > renders TESTING_TYPE_NOT_CONFIGURED as a caller sees it 1`] = `
+"That testing type is not configured for this project.
+
+Configure it in the Cypress config, or start Cypress in a testing type the project supports.
+
+Learn more:
+
+  https://on.cypress.io/configuration"
+`;
+
+exports[`lib/tap error rendering catalogue > renders UNKNOWN_COMMAND as a caller sees it 1`] = `
+"Unknown command "oel2k"
+
+This Cypress (v15.4.0) offers: status, specs, run, dom, reporter."
+`;
+
+exports[`lib/tap error rendering catalogue > renders UNKNOWN_OPTION as a caller sees it 1`] = `
+"Unknown option "--bogus"
+
+Usage: cypress tap dom [options]"
+`;

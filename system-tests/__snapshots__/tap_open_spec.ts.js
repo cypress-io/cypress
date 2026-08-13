@@ -22,7 +22,11 @@ region  Controls
 `
 
 exports['dom invalid selector'] = `
-INVALID_SELECTOR: "#status[" is not a valid CSS selector
+An invalid value was given.
+
+Expected --selector to be a valid CSS selector.
+
+Instead the value was: "#status["
 `
 
 exports['status'] = `

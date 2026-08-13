@@ -3,6 +3,8 @@
 import { expect } from 'chai'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
+import { TAP_ERROR_COPY } from '@packages/cypress-instances'
+import type { TapErrorCopy } from '@packages/cypress-instances'
 import { openTapInstance, openTapInstanceViaModuleApi, tapWithoutInstance } from '../lib/tap-open'
 import type { TapInstance } from '../lib/tap-open'
 
@@ -15,8 +17,14 @@ const STATUS_DIV = '<div id="status" data-cy="status">ready</div>'
 
 const SUITE_TIMEOUT_MS = 360000
 
-/** Failures render as `CODE: message` on stderr, so the code is the stable assertion. */
 const failureOutput = (result: { stdout: string, stderr: string }) => `${result.stdout}${result.stderr}`
+
+// Failures render the registry copy on stderr and never print the code, so the
+// entry's description — with the backticks the CLI renders as colour stripped —
+// is the stable assertion.
+const copyFor = (code: keyof typeof TAP_ERROR_COPY): string => {
+  return (TAP_ERROR_COPY[code] as TapErrorCopy).description!.replace(/`/g, '')
+}
 
 /**
  * Snapshots human-readable output after scrubbing paths, ports, and timing so failures
@@ -77,14 +85,14 @@ describe('tap CLI with no running instance', function () {
     const result = await tapWithoutInstance(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_INSTANCE')
+    expect(failureOutput(result)).to.include(copyFor('NO_INSTANCE'))
   })
 
   it('names the pid that was asked for when --instance matches nothing', async () => {
     const result = await tapWithoutInstance(['--instance', '999999', 'inspect', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_INSTANCE')
+    expect(failureOutput(result)).to.include(copyFor('INSTANCE_NOT_FOUND'))
     expect(failureOutput(result)).to.include('999999')
   })
 })
@@ -121,13 +129,13 @@ describe('tap CLI before any spec has run', function () {
     expect(result.exitCode).to.not.eq(0)
   })
 
-  it('exits 1 with NO_RUN for an AUT read', async () => {
+  it('exits 1 with SPEC_NOT_STARTED for an AUT read', async () => {
     // Short of a verdict there is no run to read: the resolved frame would be the
     // runner shell, so the read is refused rather than returning a misleading page.
     const result = await instance.tap(['dom'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_RUN')
+    expect(failureOutput(result)).to.include(copyFor('SPEC_NOT_STARTED'))
   })
 })
 
@@ -286,21 +294,21 @@ describe('tap CLI against a settled run', function () {
     const result = await instance.tap(['dom', '--selector', '.item', '--at', '3'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('pass --at 0-2')
+    expect(failureOutput(result)).to.include('0 to 2, since ".item" matched 3 elements')
   })
 
   it('exits 1 when --at is given without a selector to index into', async () => {
     const result = await instance.tap(['dom', '--at', '1'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('INVALID_INDEX')
+    expect(failureOutput(result)).to.include('You passed the --at flag without also passing the --selector flag')
   })
 
   it('exits 1 for an invalid selector', async () => {
     const result = await instance.tap(['dom', '--selector', '#status['])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('is not a valid CSS selector')
+    expect(failureOutput(result)).to.include('Expected --selector to be a valid CSS selector')
   })
 
   it('projects the accessibility tree', async () => {
@@ -391,17 +399,17 @@ describe('tap CLI across the run lifecycle', function () {
     await instance?.kill()
   })
 
-  it('exits 1 with RUN_IN_PROGRESS while a spec is still running', async () => {
+  it('exits 1 with SPEC_IN_PROGRESS while a spec is still running', async () => {
     await instance.requestRun(SLOW_SPEC)
 
     // `running` is the only stage the reads reject as in-progress; `loading` is still
-    // short of a run of its own and reports NO_RUN.
+    // short of a run of its own and reports SPEC_NOT_STARTED.
     await instance.waitForStatus((status) => status.status === 'running', 'the running stage')
 
     const result = await instance.tap(['dom'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('RUN_IN_PROGRESS')
+    expect(failureOutput(result)).to.include('is currently running')
   })
 
   it('becomes readable once that run settles', async () => {
@@ -460,7 +468,7 @@ describe('tap CLI across the run lifecycle', function () {
     const result = await instance.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_INSTANCE')
+    expect(failureOutput(result)).to.include(copyFor('NO_INSTANCE'))
   })
 })
 
