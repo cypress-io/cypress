@@ -152,9 +152,9 @@ export interface TapInstance {
   waitForStatus (match: (status: TapStatus) => boolean, label: string): Promise<TapStatus>
   runSpec (spec: string): Promise<TapStatus>
   /**
-   * Freezes the process tree: the record stays and the pid stays alive while
-   * nothing answers, which is what reports STALE_INSTANCE rather than
-   * NO_INSTANCE. SIGKILL reaps a stopped tree, so `kill` needs no resume first.
+   * Freezes the server (and its process tree where supported): the record stays
+   * and the pid stays alive while nothing answers, which is what reports
+   * STALE_INSTANCE rather than NO_INSTANCE. `kill` needs no resume first.
    */
   suspend (): Promise<void>
   resume (): Promise<void>
@@ -350,8 +350,8 @@ export const openTapInstance = async (project: ProjectFixtureDir, options: OpenT
   return buildInstance({
     projectRoot,
     terminate: () => signalTree('SIGKILL'),
-    suspend: () => signalTree('SIGSTOP'),
-    resume: () => signalTree('SIGCONT'),
+    suspend: () => process.platform === 'win32' ? signalRecorded(projectRoot, 'SIGSTOP') : signalTree('SIGSTOP'),
+    resume: () => process.platform === 'win32' ? signalRecorded(projectRoot, 'SIGCONT') : signalTree('SIGCONT'),
     context: () => output || '(no output captured)',
     exitReason: () => (child.exitCode === null ? null : `exited with ${child.exitCode}`),
   }, options)
@@ -374,6 +374,66 @@ const recordedPid = async (projectRoot: string): Promise<number | undefined> => 
   }
 
   return undefined
+}
+
+// Windows has no SIGSTOP/SIGCONT, and tree-kill maps every signal to forced
+// termination. Suspending the recorded server process keeps its pid live while
+// making the instance probe unresponsive.
+const setWindowsProcessSuspended = async (pid: number, suspended: boolean): Promise<void> => {
+  const method = suspended ? 'NtSuspendProcess' : 'NtResumeProcess'
+  const script = `
+Add-Type -TypeDefinition @'
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+public static class ProcessControl {
+  [DllImport("ntdll.dll")]
+  public static extern int NtSuspendProcess(IntPtr processHandle);
+
+  [DllImport("ntdll.dll")]
+  public static extern int NtResumeProcess(IntPtr processHandle);
+}
+'@
+
+$process = [System.Diagnostics.Process]::GetProcessById(${pid})
+try {
+  $status = [ProcessControl]::${method}($process.Handle)
+  if ($status -ne 0) {
+    throw "${method} failed with NTSTATUS $status"
+  }
+} finally {
+  $process.Dispose()
+}
+`
+
+  await new Promise<void>((resolve, reject) => {
+    cp.execFile('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script], (err) => {
+      if (err) {
+        reject(err)
+
+        return
+      }
+
+      resolve()
+    })
+  })
+}
+
+const signalRecorded = async (projectRoot: string, signal: 'SIGKILL' | 'SIGSTOP' | 'SIGCONT'): Promise<void> => {
+  const pid = await recordedPid(projectRoot)
+
+  if (!pid) {
+    throw new Error(`No instance pid recorded for ${projectRoot}`)
+  }
+
+  if (process.platform === 'win32' && signal !== 'SIGKILL') {
+    await setWindowsProcessSuspended(pid, signal === 'SIGSTOP')
+
+    return
+  }
+
+  await new Promise<void>((resolve) => treeKill(pid, signal, () => resolve()))
 }
 
 /**
@@ -422,23 +482,15 @@ export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): P
     settled = `failed: ${err.message}`
   })
 
-  const signalRecorded = async (signal: string): Promise<void> => {
-    const pid = await recordedPid(projectRoot)
-
-    if (pid) {
-      await new Promise<void>((resolve) => treeKill(pid, signal, () => resolve()))
-    }
-  }
-
   try {
     return await buildInstance({
       projectRoot,
       terminate: async () => {
-        await signalRecorded('SIGKILL')
+        await signalRecorded(projectRoot, 'SIGKILL')
         applyEnv(previous)
       },
-      suspend: () => signalRecorded('SIGSTOP'),
-      resume: () => signalRecorded('SIGCONT'),
+      suspend: () => signalRecorded(projectRoot, 'SIGSTOP'),
+      resume: () => signalRecorded(projectRoot, 'SIGCONT'),
       context: () => 'stdio is inherited through the Module API, so the instance\'s own output is above, interleaved with the test output',
       exitReason: () => settled,
     })
