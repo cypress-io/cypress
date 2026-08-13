@@ -2,13 +2,9 @@ const _ = require('lodash')
 const express = require('express')
 const path = require('path')
 const debug = require('debug')('cypress:server:network-error-handling-spec')
-const Promise = require('bluebird')
 const bodyParser = require('body-parser')
 const DebugProxy = require('@cypress/debugging-proxy')
-const launcher = require('@packages/launcher')
-const chrome = require('@packages/server/lib/browsers/chrome')
 const systemTests = require('../lib/system-tests').default
-const random = require('@packages/server/lib/util/random')
 const Fixtures = require('../lib/fixtures')
 
 const PORT = 13370
@@ -28,31 +24,6 @@ let counts = {}
 let killedOnReusedSocket = 0
 
 const servedSockets = new WeakSet()
-
-const launchBrowser = (url, opts = {}) => {
-  return launcher.detect().then((browsers) => {
-    const browser = _.find(browsers, { name: 'chrome' })
-
-    const args = [
-      `--user-data-dir=/tmp/cy-e2e-${random.id()}`,
-    // headless breaks automatic retries
-    // "--headless"
-    ].concat(
-      chrome._getArgs(browser),
-    ).filter((arg) => {
-      return ![
-        // seems to break chrome's automatic retries
-        '--enable-automation',
-      ].includes(arg)
-    })
-
-    if (opts.withProxy) {
-      args.push(`--proxy-server=http://localhost:${PORT}`)
-    }
-
-    return launcher.launch(browser, url, args)
-  })
-}
 
 const controllers = {
   loadScriptNetError (req, res) {
@@ -94,26 +65,6 @@ const controllers = {
     return req.socket.destroy()
   },
 
-  afterHeadersReset (req, res) {
-    res.writeHead(200)
-    res.write('')
-
-    return setTimeout(() => {
-      return req.socket.destroy()
-    }
-    , 1000)
-  },
-
-  duringBodyReset (req, res) {
-    res.writeHead(200)
-    res.write('<html>')
-
-    return setTimeout(() => {
-      return req.socket.destroy()
-    }
-    , 1000)
-  },
-
   worksThirdTime (req, res) {
     if (counts[req.url] === 3) {
       return res.send('ok')
@@ -128,22 +79,6 @@ const controllers = {
     }
 
     return res.sendStatus(500)
-  },
-
-  proxyInternalServerError (req, res) {
-    return res.sendStatus(500)
-  },
-
-  proxyBadGateway (req, res) {
-    // https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.3
-    // "The server, while acting as a gateway or proxy, received an invalid response"
-    return res.sendStatus(502)
-  },
-
-  proxyServiceUnavailable (req, res) {
-    // https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4
-    // "The implication is that this is a temporary condition which will be alleviated after some delay."
-    return res.sendStatus(503)
   },
 
   load304 (req, res) {
@@ -201,8 +136,6 @@ describe('e2e network error handling', function () {
           app.use(bodyParser.urlencoded({ extended: true }))
 
           app.get('/immediate-reset', controllers.immediateReset)
-          app.get('/after-headers-reset', controllers.afterHeadersReset)
-          app.get('/during-body-reset', controllers.duringBodyReset)
           app.get('/works-third-time/:id', controllers.worksThirdTime)
           app.get('/works-third-time-else-500/:id', controllers.worksThirdTimeElse500)
           app.post('/print-body-third-time', controllers.printBodyThirdTime)
@@ -216,22 +149,6 @@ describe('e2e network error handling', function () {
           app.get('/print-body-third-time-form', controllers.printBodyThirdTimeForm)
 
           return app.get('*', (req, res) => {
-            // pretending we're a http proxy
-            const controller = ({
-              'http://immediate-reset.invalid/': controllers.immediateReset,
-              'http://after-headers-reset.invalid/': controllers.afterHeadersReset,
-              'http://during-body-reset.invalid/': controllers.duringBodyReset,
-              'http://proxy-internal-server-error.invalid/': controllers.proxyInternalServerError,
-              'http://proxy-bad-gateway.invalid/': controllers.proxyBadGateway,
-              'http://proxy-service-unavailable.invalid/': controllers.proxyServiceUnavailable,
-            })[req.url]
-
-            if (controller) {
-              debug('got controller for request')
-
-              return controller(req, res)
-            }
-
             return res.sendStatus(404)
           })
         },
@@ -278,102 +195,6 @@ describe('e2e network error handling', function () {
   afterEach(() => {
     onVisit = null
     counts = {}
-  })
-
-  // NOTE: We can just skip these tests, they are really only useful for learning
-  // about how Chrome does it.
-  context.skip('Google Chrome', () => {
-    const testRetries = (path) => {
-      return launchBrowser(`http://127.0.0.1:${PORT}${path}`)
-      .then((proc) => {
-        return Promise.fromCallback((cb) => {
-          return onVisit = function () {
-            if (counts[path] >= 3) {
-              return cb()
-            }
-          }
-        }).then(() => {
-          proc.kill(9)
-
-          expect(counts[path]).to.be.at.least(3)
-        })
-      })
-    }
-
-    const testNoRetries = (path) => {
-      return launchBrowser(`http://localhost:${PORT}${path}`)
-      .delay(6000)
-      .then((proc) => {
-        proc.kill(9)
-
-        expect(counts[path]).to.eq(1)
-      })
-    }
-
-    it('retries 3+ times when receiving immediate reset', () => {
-      return testRetries('/immediate-reset')
-    })
-
-    it('retries 3+ times when receiving reset after headers', () => {
-      return testRetries('/after-headers-reset')
-    })
-
-    it('does not retry if reset during body', () => {
-      return testNoRetries('/during-body-reset')
-    })
-
-    context('behind a proxy server', () => {
-      const testProxiedRetries = (url) => {
-        return launchBrowser(url, { withProxy: true })
-        .then((proc) => {
-          return Promise.fromCallback((cb) => {
-            return onVisit = function () {
-              if (counts[url] >= 3) {
-                return cb()
-              }
-            }
-          }).then(() => {
-            proc.kill(9)
-
-            expect(counts[url]).to.be.at.least(3)
-          })
-        })
-      }
-
-      const testProxiedNoRetries = (url) => {
-        return launchBrowser('http://during-body-reset.invalid/', { withProxy: true })
-        .delay(6000)
-        .then((proc) => {
-          proc.kill(9)
-
-          expect(counts[url]).to.eq(1)
-        })
-      }
-
-      it('retries 3+ times when receiving immediate reset', () => {
-        return testProxiedRetries('http://immediate-reset.invalid/')
-      })
-
-      it('retries 3+ times when receiving reset after headers', () => {
-        return testProxiedRetries('http://after-headers-reset.invalid/')
-      })
-
-      it('does not retry if reset during body', () => {
-        return testProxiedNoRetries('http://during-body-reset.invalid/')
-      })
-
-      it('does not retry on \'500 Internal Server Error\'', () => {
-        return testProxiedNoRetries('http://proxy-internal-server-error.invalid/')
-      })
-
-      it('does not retry on \'502 Bad Gateway\'', () => {
-        return testProxiedNoRetries('http://proxy-bad-gateway.invalid/')
-      })
-
-      it('does not retry on \'503 Service Unavailable\'', () => {
-        return testProxiedNoRetries('http://proxy-service-unavailable.invalid/')
-      })
-    })
   })
 
   context('Cypress', () => {
@@ -449,6 +270,29 @@ describe('e2e network error handling', function () {
             port: HTTPS_PORT,
           })
         })
+      })
+    })
+
+    it('retries network errors for cy.visit, cy.request, and subresources', function () {
+      return systemTests.exec(this, {
+        spec: 'network_error_handling.cy.js',
+        config: {
+          baseUrl: `http://localhost:${PORT}`,
+        },
+        expectedExitCode: 2,
+      })
+    })
+
+    // NOTE: only the Node hop replays a POST body — the browser will not replay a
+    // non-idempotent request — so this holds only while Cypress proxies.
+    const itReplaysFormBody = process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1' ? it.skip : it
+
+    itReplaysFormBody('re-sends a <form> body when the origin resets the connection', function () {
+      return systemTests.exec(this, {
+        spec: 'network_error_form_retry.cy.js',
+        config: {
+          baseUrl: `http://localhost:${PORT}`,
+        },
       })
     })
 

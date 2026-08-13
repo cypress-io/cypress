@@ -20,19 +20,6 @@ describe('network error handling', function () {
       })
       .contains('ok')
     })
-
-    it('re-sends a <form> body on failures', function () {
-      cy.visit({
-        url: '/print-body-third-time-form',
-      })
-      .get('input[type=text]')
-      .type('bar')
-
-      cy.get('input[type=submit]')
-      .click()
-
-      cy.contains('{"foo":"bar"}')
-    })
   })
 
   context('cy.request() retries', function () {
