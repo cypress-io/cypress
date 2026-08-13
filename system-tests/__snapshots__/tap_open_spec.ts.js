@@ -612,3 +612,125 @@ TEST BODY · r3
     12 | })
     13 |
 `
+
+exports['complete failed run debugging journey'] = `
+$ cypress tap instances
+INSTANCES (1)
+  PID  PROJECT  TYPE  BROWSER
+  <pid>  <project>  e2e  Chrome
+
+$ cypress tap --instance <pid> specs
+SPECS (15)
+  cypress/e2e/agents.cy.js  <modified>
+  cypress/e2e/aut-content.cy.js  <modified>
+  cypress/e2e/console-props-shapes.cy.js  <modified>
+  cypress/e2e/console-props.cy.js  <modified>
+  cypress/e2e/failing.cy.js  <modified>
+  cypress/e2e/hook-failure.cy.js  <modified>
+  cypress/e2e/hooks.cy.js  <modified>
+  cypress/e2e/journey.cy.js  <modified>
+  cypress/e2e/lifecycle.cy.js  <modified>
+  cypress/e2e/long-run.cy.js  <modified>
+  cypress/e2e/network.cy.js  <modified>
+  cypress/e2e/pin-target.cy.js  <modified>
+  cypress/e2e/retries.cy.js  <modified>
+  cypress/e2e/slow.cy.js  <modified>
+  cypress/e2e/unbuildable.cy.js  <modified>
+
+$ cypress tap --instance <pid> run cypress/e2e/failing.cy.js
+▶ cypress/e2e/failing.cy.js
+
+  testing type  e2e
+  browser  Chrome
+
+$ cypress tap --instance <pid> status
+PID  PROJECT  TYPE  BROWSER
+<pid>  <project>  e2e  Chrome
+
+✖ cypress/e2e/failing.cy.js  (started at <time>)
+✓ --  ✖ 1  ○ --
+
+$ cypress tap --instance <pid> reporter
+cypress/e2e/failing.cy.js  (started at <time>)
+✓ --  ✖ 1  ○ --  <duration>
+
+Failing
+  r3  ✖ fails after loading the fixture page  <duration>
+
+$ cypress tap --instance <pid> reporter --test-id r3
+✖ Failing > fails after loading the fixture page  failed
+
+TEST BODY · r3
+  1  visit  cypress/e2e/aut-content.html
+  2  get  #status
+  3  -assert  expected <div#status> to have text this is not what the page says, but the text was ready ✖
+
+✖ AssertionError
+  Timed out retrying after <duration>: expected '<div#status>' to have text 'this is not what the page says', but the text was 'ready'
+
+  cypress/e2e/failing.cy.js:10:23
+  8 |  it('fails after loading the fixture page', () => {
+  9 |  cy.visit('cypress/e2e/aut-content.html')
+  > 10 |  cy.get('#status').should('have.text', expectedText)
+  |  ^
+  11 |  })
+  12 | })
+  13 |
+
+$ cypress tap --instance <pid> command --test-id r3 --command-id 3
+TEST BODY · r3
+✖  3  -assert  expected <div#status> to have text this is not what the page says, but the text was ready  failed
+
+SNAPSHOTS (1)
+  #  NAME  TIME
+  1  —  <time>
+
+CONSOLE PROPS
+  subject  <div#status>
+  Message  expected <div#status> to have text this is not what the page says, but the text was ready
+
+ERROR
+  AssertionError: Timed out retrying after <duration>: expected '<div#status>' to have text 'this is not what the page says…
+  at Context.eval (webpack:///./cypress/e2e/failing.cy.js:10:22)
+
+$ cypress tap --instance <pid> dom --selector #status
+<div id="status" data-cy="status" data-cypress-el="true">ready</div>
+
+$ cypress tap --instance <pid> inspect --selector #status
+ATTRIBUTES (3)
+  id  status
+  data-cy  status
+  data-cypress-el  true
+
+ACCESSIBILITY
+  role  generic
+
+BOX
+  x 8  y 80  width 200  height 24
+
+STYLES (24)
+  display  block
+  visibility  visible
+  opacity  1
+  position  static
+  top  auto
+  right  auto
+  bottom  auto
+  left  auto
+  width  200px
+  height  24px
+  margin  0px
+  padding  0px
+  border  0px none rgb(0, 100, 0)
+  box-sizing  content-box
+  color  rgb(0, 100, 0)
+  background-color  rgb(240, 240, 240)
+  font-size  16px
+  font-weight  400
+  line-height  normal
+  text-align  start
+  z-index  auto
+  overflow  visible
+  pointer-events  auto
+  cursor  auto
+`

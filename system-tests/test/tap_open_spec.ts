@@ -1267,25 +1267,90 @@ describe('tap CLI debugging a failed run end to end', function () {
 
   before(async () => {
     instance = await openTapInstance('tap-retries')
-    await instance.runSpec(FAILING_SPEC)
   })
 
   after(async () => {
     await instance?.kill()
   })
 
-  it('walks from the failed verdict to the DOM that explains it', async () => {
-    const status = await instance.status()
+  it('walks from instance discovery to the DOM that explains a failed run', async () => {
+    const journeyOutput: string[] = []
 
+    const instancesResult = await instance.tap(['--json', 'instances'])
+    const instances = instancesResult.json<Array<{
+      pid: number
+      projectRoot: string
+      testingType: string
+      browserAttached: boolean
+      rendererResponsive?: boolean
+    }>>()
+
+    expect(instancesResult.exitCode).to.eq(0)
+    expect(instances).to.have.length(1)
+    expect(instances[0]).to.deep.include({
+      projectRoot: instance.projectRoot,
+      testingType: 'e2e',
+      browserAttached: true,
+      rendererResponsive: true,
+    })
+
+    const renderedInstances = await instance.tap(['instances'])
+
+    journeyOutput.push(`$ cypress tap instances\n${renderedInstances.stdout.trimEnd()}`)
+
+    const pid = String(instances[0].pid)
+    const specsResult = await instance.tap(['--json', '--instance', pid, 'specs'])
+    const specs = specsResult.json<Array<{ relativePath: string }>>()
+    const failingSpec = specs.find((spec) => spec.relativePath === FAILING_SPEC)
+
+    expect(specsResult.exitCode).to.eq(0)
+    expect(failingSpec, 'the failing spec listed for the discovered instance').to.exist
+
+    const renderedSpecs = await instance.tap(['--instance', pid, 'specs'])
+
+    journeyOutput.push(`$ cypress tap --instance ${pid} specs\n${renderedSpecs.stdout.trimEnd()}`)
+
+    const before = await instance.status()
+    const runResult = await instance.tap(['--instance', pid, 'run', failingSpec!.relativePath])
+
+    expect(runResult.exitCode).to.eq(0)
+
+    journeyOutput.push(`$ cypress tap --instance ${pid} run ${failingSpec!.relativePath}\n${runResult.stdout.trimEnd()}`)
+
+    await instance.waitForStatus(
+      (current) => current.status === 'failed' && current.startedAt !== before.startedAt,
+      `a failed verdict for ${failingSpec!.relativePath}`,
+    )
+
+    const statusResult = await instance.tap(['--json', '--instance', pid, 'status'])
+    const status = statusResult.json()
+
+    expect(statusResult.exitCode).to.eq(0)
     expect(status.status).to.eq('failed')
     expect(status.results).to.deep.include({ passed: 0, failed: 1 })
     expect(status.spec).to.eq(FAILING_SPEC)
 
-    const test = await firstTest(instance)
+    const renderedStatus = await instance.tap(['--instance', pid, 'status'])
 
+    journeyOutput.push(`$ cypress tap --instance ${pid} status\n${renderedStatus.stdout.trimEnd()}`)
+
+    const overviewResult = await instance.tap(['--json', '--instance', pid, 'reporter'])
+    const overview = overviewResult.json()
+    const tests: ReporterTest[] = [
+      ...overview.tests,
+      ...overview.suites.flatMap((suite: { tests: ReporterTest[] }) => suite.tests),
+    ]
+    const [test] = tests
+
+    expect(overviewResult.exitCode).to.eq(0)
+    expect(test, 'the failed test listed in the reporter').to.exist
     expect(test.state).to.eq('failed')
 
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', test.id])).json()
+    const renderedOverview = await instance.tap(['--instance', pid, 'reporter'])
+
+    journeyOutput.push(`$ cypress tap --instance ${pid} reporter\n${renderedOverview.stdout.trimEnd()}`)
+
+    const view = (await instance.tap(['--json', '--instance', pid, 'reporter', '--test-id', test.id])).json()
 
     expect(view.error.name).to.eq('AssertionError')
     expect(view.error.codeFrame.file).to.include('failing.cy.js')
@@ -1295,14 +1360,22 @@ describe('tap CLI debugging a failed run end to end', function () {
     expect(failed, 'the failed row').to.exist
     expect(failed!.name).to.eq('assert')
 
-    const detail = (await instance.tap(['--json', 'command', '--test-id', test.id, '--command-id', failed!.id])).json()
+    const renderedReporter = await instance.tap(['--instance', pid, 'reporter', '--test-id', test.id])
+
+    journeyOutput.push(`$ cypress tap --instance ${pid} reporter --test-id ${test.id}\n${renderedReporter.stdout.trimEnd()}`)
+
+    const detail = (await instance.tap(['--json', '--instance', pid, 'command', '--test-id', test.id, '--command-id', failed!.id])).json()
 
     expect(detail.state).to.eq('failed')
     expect(detail.consoleProps.name).to.eq('assert')
     expect(detail.snapshots, 'a snapshot to pin the failure at').to.have.length.greaterThan(0)
 
+    const renderedCommand = await instance.tap(['--instance', pid, 'command', '--test-id', test.id, '--command-id', failed!.id])
+
+    journeyOutput.push(`$ cypress tap --instance ${pid} command --test-id ${test.id} --command-id ${failed!.id}\n${renderedCommand.stdout.trimEnd()}`)
+
     // Pin the failed row, and the frame answers as of the failure rather than now.
-    const pinned = await instance.tap(['--json', 'pin', '--test-id', test.id, '--command-id', failed!.id])
+    const pinned = await instance.tap(['--json', '--instance', pid, 'pin', '--test-id', test.id, '--command-id', failed!.id])
 
     expect(pinned.exitCode).to.eq(0)
     expect(pinned.json().pinned).to.deep.include({ test: test.id })
@@ -1320,6 +1393,20 @@ describe('tap CLI debugging a failed run end to end', function () {
 
     expect(inspected).to.deep.include({ found: true, tag: 'div' })
     expect(inspected.attributes).to.deep.eq({ 'id': 'status', 'data-cy': 'status', 'data-cypress-el': 'true' })
+
+    const renderedDom = await instance.tap(['--instance', pid, 'dom', '--selector', '#status'])
+    const renderedInspect = await instance.tap(['--instance', pid, 'inspect', '--selector', '#status'])
+
+    journeyOutput.push(
+      `$ cypress tap --instance ${pid} dom --selector #status\n${renderedDom.stdout.trimEnd()}`,
+      `$ cypress tap --instance ${pid} inspect --selector #status\n${renderedInspect.stdout.trimEnd()}`,
+    )
+
+    snapshotRendering('complete failed run debugging journey', journeyOutput.join('\n\n'), [
+      [/ {2,}[\w ]+ ago$/gm, '  <modified>'],
+      [new RegExp(pid, 'g'), '<pid>'],
+      [/ {2,}/g, '  '],
+    ])
 
     // Released, the same read answers with the live element, highlight and all gone.
     expect((await instance.tap(['pin', '--clear'])).exitCode).to.eq(0)
