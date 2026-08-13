@@ -105,12 +105,16 @@ const getTitlePath = function (runnable: InternalRunnable, titles: string[] = []
     runnable.title = runnable.originalTitle
   }
 
-  if (runnable.title) {
+  // only the root suite is omitted (matching Mocha's native `titlePath()`);
+  // a non-root suite/test with an empty title still contributes a segment,
+  // so this stays byte-for-byte compatible with the title path Cloud stores
+  // for the rerun keep-list (built from the driver's native `titlePath()`)
+  if (!runnable.root) {
     // sanitize the title which may have been altered by a suite-/
     // test-level browser skip to ensure the original title is used
     const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
 
-    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
+    titles.unshift((runnable.title || '').replace(BROWSER_SKIP_TITLE, ''))
   }
 
   if (runnable.parent) {

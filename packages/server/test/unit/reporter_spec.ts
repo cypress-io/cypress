@@ -172,6 +172,42 @@ describe('lib/reporter', () => {
       expect(tests.map((t) => t.testId)).to.deep.eq(['r4', 'r5'])
     })
 
+    it('matches a test under a suite with an empty title, mirroring Mocha\'s native titlePath()', function () {
+      const root = {
+        id: 'e1',
+        root: true,
+        title: '',
+        tests: [],
+        suites: [
+          {
+            id: 'e2',
+            title: '',
+            tests: [
+              {
+                id: 'e3',
+                title: 'runs',
+                duration: 4,
+                state: 'passed',
+                timedOut: false,
+                async: 0,
+                sync: true,
+              },
+            ],
+            suites: [],
+          },
+        ],
+      }
+
+      this.reporter.setRunnables(root)
+      // matches Mocha's native `titlePath()`, which pushes the empty suite
+      // title as its own segment (only the root suite is omitted)
+      this.reporter.setTestFilter([' runs'])
+
+      const { tests } = this.reporter.results()
+
+      expect(tests.map((t) => t.testId)).to.deep.eq(['e3'])
+    })
+
     it('treats an empty keep-list as no filter', function () {
       this.reporter.setTestFilter([])
 
