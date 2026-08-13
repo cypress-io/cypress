@@ -35,3 +35,15 @@ export const getEligibleTestTitles = (actions: any): string[] | undefined => {
   .map((test) => test.titleParts.join(' ').replaceAll(SKIPPED_DUE_TO_BROWSER_MESSAGE, ''))
   .value()
 }
+
+/**
+ * The run being retried (the anchor run) is not the run currently being
+ * created, so its URL has to come from the FILTER action's payload rather
+ * than the top-level `createRun` response. Cloud doesn't send `anchorRunUrl`
+ * yet (only `anchorBuildId`), so this is read defensively until it does.
+ */
+export const getAnchorRunUrl = (actions: any): string | undefined => {
+  const filterAction = _.find(actions, isFilterAction)
+
+  return (filterAction?.payload as any)?.anchorRunUrl
+}

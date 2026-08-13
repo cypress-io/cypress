@@ -17,7 +17,7 @@ import * as capture from '../capture'
 import * as env from '../util/env'
 import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
-import { getEligibleTestTitles } from '../cloud/filter_tests'
+import { getAnchorRunUrl, getEligibleTestTitles } from '../cloud/filter_tests'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
 import type { Cfg } from '../project-base'
@@ -826,7 +826,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
           if (filteredTests && !hasShownRerunWarning) {
             hasShownRerunWarning = true
-            errorsWarning('CLOUD_RERUN_FAILED_TESTS', { runUrl })
+            errorsWarning('CLOUD_RERUN_FAILED_TESTS', { anchorRunUrl: getAnchorRunUrl(response.actions) })
           }
 
           cb({ filteredTests })
