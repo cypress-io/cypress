@@ -251,7 +251,7 @@ const findCommandLog = (attempt: SerializedTest, logs: SerializedCommandLog[], i
     return `${hookId}:${rowId}${hookName ? ` (${hookName})` : ''}`
   })
 
-  throw new TapError('AMBIGUOUS_COMMAND', { detail: `"${tapId}" matches ${qualified.join(' and ')} — e.g. "${qualified[0].split(' ')[0]}".` })
+  throw new TapError('AMBIGUOUS_COMMAND', { detail: `"${tapId}" matches:\n\n${qualified.map((id) => `  ${id}`).join('\n')}` })
 }
 
 /**

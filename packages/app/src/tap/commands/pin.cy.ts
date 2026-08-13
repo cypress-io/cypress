@@ -564,7 +564,7 @@ describe('tap/commands/pin', () => {
     expect(outcome).to.deep.eq({
       error: {
         code: 'AMBIGUOUS_COMMAND',
-        detail: '"2" matches h1:2 (before each) and h2:2 (before each) — e.g. "h1:2".',
+        detail: '"2" matches:\n\n  h1:2 (before each)\n  h2:2 (before each)',
       },
     })
 

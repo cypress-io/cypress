@@ -423,8 +423,8 @@ describe('lib/tap error rendering catalogue', () => {
     },
     // packages/app/src/tap/test-state.ts
     AMBIGUOUS_COMMAND: {
-      invocation: 'cypress tap command --test-id r7 --command-id 3',
-      failure: new TapError('AMBIGUOUS_COMMAND', { detail: '"3" matches h2:3 (before each) and r4:3 — e.g. "h2:3".' }),
+      invocation: 'cypress tap command --test-id r7 --command-id 1',
+      failure: new TapError('AMBIGUOUS_COMMAND', { detail: '"1" matches:\n\n  h2:1 (before each)\n  h3:1 (before each)\n  h5:1 (after each)' }),
     },
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_NOT_FOUND: {

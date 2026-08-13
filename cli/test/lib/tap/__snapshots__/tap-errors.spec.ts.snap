@@ -1,10 +1,14 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`lib/tap error rendering catalogue > AMBIGUOUS_COMMAND 1`] = `
-"> cypress tap command --test-id r7 --command-id 3
+"> cypress tap command --test-id r7 --command-id 1
 That command id matches more than one row of the test.
 
-"3" matches h2:3 (before each) and r4:3 — e.g. "h2:3".
+"1" matches:
+
+  h2:1 (before each)
+  h3:1 (before each)
+  h5:1 (after each)
 
 Qualify the id with the section it belongs to, as cypress tap reporter lists it."
 `;
