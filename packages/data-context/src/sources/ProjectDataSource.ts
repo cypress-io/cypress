@@ -210,6 +210,17 @@ export function getPathFromSpecPattern ({
   return randExp.gen()
 }
 
+/**
+ * `minimatch` only understands posix separators, but `path.relative` emits `\` on
+ * Windows, so the relative path has to be normalized or a specPattern containing a
+ * directory segment (like the `cypress/e2e/**` default) can never match.
+ */
+export function matchesAnySpecPattern (relativeSpecPath: string, specPattern: string[], sep: string = path.sep): boolean {
+  const posixPath = toPosix(relativeSpecPath, sep)
+
+  return specPattern.some((s) => minimatch(posixPath, s))
+}
+
 export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: SpecWithRelativeRoot[] = []
@@ -442,7 +453,7 @@ export class ProjectDataSource {
         }
 
         // If none of the spec patterns match, we don't need to watch it
-        return !specPattern.some((s) => minimatch(path.relative(projectRoot, file), s))
+        return !matchesAnySpecPattern(path.relative(projectRoot, file), specPattern)
       }],
     })
   }

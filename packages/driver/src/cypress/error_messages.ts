@@ -168,6 +168,10 @@ export default {
   chai: {
     length_invalid_argument: 'You must provide a valid number to a `length` assertion. You passed: `{{length}}`',
     match_invalid_argument: '`match` requires its argument be a `RegExp`. You passed: `{{regExp}}`',
+    invalid_jquery_accessor_arg: stripIndent`\
+      The \`{{assertion}}\` assertion requires the {{description}} name to be a string. You passed: \`{{arg}}\`
+
+      Assert on one {{description}} at a time by passing its name and, optionally, its expected value.`,
     invalid_jquery_obj (obj) {
       return stripIndent`\
         You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.
@@ -458,6 +462,13 @@ export default {
     non_array: {
       message: `${cmd('each')} can only operate on an array like subject. Your subject was: \`{{subject}}\``,
       docsUrl: 'https://on.cypress.io/each',
+    },
+  },
+
+  end: {
+    removed: {
+      message: `${cmd('end')} was removed in Cypress version 16.0.0. A Cypress chain is already terminated when the next \`cy.<command>()\` starts a new chain, so \`.end()\` calls can be removed.`,
+      docsUrl: 'https://on.cypress.io/migration-guide',
     },
   },
 

@@ -148,6 +148,16 @@ describe('config/src/index', () => {
       expect(errorFn).toHaveBeenCalledTimes(0)
     })
 
+    it('calls error callback if manageBrowserMemory is not a boolean', () => {
+      const errorFn = vi.fn()
+
+      configUtil.validate({
+        manageBrowserMemory: 'true',
+      }, errorFn, 'e2e')
+
+      expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({ key: 'manageBrowserMemory', type: 'a boolean' }))
+    })
+
     it('calls error callback if config is invalid', () => {
       const errorFn = vi.fn()
 
@@ -212,6 +222,26 @@ describe('config/src/index', () => {
 
       expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_SOURCE_REWRITING_REMOVED', {
         name: 'experimentalSourceRewriting',
+        newName: undefined,
+        value: undefined,
+        testingType: 'e2e',
+        configFile: 'config.js',
+      })
+
+      expect(errorFn).toHaveBeenCalledTimes(0)
+    })
+
+    it('calls warning callback if config contains experimentalMemoryManagement', () => {
+      const warningFn = vi.fn()
+      const errorFn = vi.fn()
+
+      configUtil.validateNoBreakingConfig({
+        experimentalMemoryManagement: false,
+        configFile: 'config.js',
+      }, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED', {
+        name: 'experimentalMemoryManagement',
         newName: undefined,
         value: undefined,
         testingType: 'e2e',
@@ -292,7 +322,7 @@ describe('config/src/index', () => {
       it('does not call onError handler if validating level is suite', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportWidth: 200 }, 'suite', errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, blockHosts: 'example.com' }, 'suite', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
@@ -300,7 +330,7 @@ describe('config/src/index', () => {
       it('does not call onError handler if validating level is test', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportHeight: 100 }, 'test', errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportHeight: 100, blockHosts: 'example.com' }, 'test', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
@@ -308,7 +338,7 @@ describe('config/src/index', () => {
       it('does not call onError handler outside test execution (e.g. file load)', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, undefined, errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' }, undefined, errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
@@ -316,9 +346,9 @@ describe('config/src/index', () => {
       it('calls onError handler if validating level is run-time', () => {
         const errorFn = vi.fn()
 
-        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, 'runtime', errorFn)
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' }, 'runtime', errorFn)
 
-        expect(errorFn).toHaveBeenCalledTimes(2)
+        expect(errorFn).toHaveBeenCalledTimes(3)
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
           invalidConfigKey: 'viewportWidth',
           supportedOverrideLevel: 'suiteOrTest',
@@ -326,6 +356,11 @@ describe('config/src/index', () => {
 
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
           invalidConfigKey: 'viewportHeight',
+          supportedOverrideLevel: 'suiteOrTest',
+        }))
+
+        expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
+          invalidConfigKey: 'blockHosts',
           supportedOverrideLevel: 'suiteOrTest',
         }))
       })

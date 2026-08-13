@@ -532,7 +532,7 @@ export class SocketBase implements SocketBroadcaster {
               case 'http:request':
                 return options.onRequest(userAgent, automationRequest, args[0])
               case 'reset:server:state':
-                return options.onResetServerState()
+                return options.onResetServerState(args[0])
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':

@@ -291,9 +291,11 @@ jobs:
       parallelism: 1
       # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses;
       # #34514 strategy:file origin serving + #34379 intercept-matched visit pre-flights (visits, web security, service workers).
+      # #34563 graphql-ws upgrades target the Cypress server origin (request_spec); non_proxied_spec asserts proxy
+      # semantics that do not exist here and skips itself.
       # proxy_correlation_spec omitted: Chrome CI flakes on CorrelateBrowserPreRequest timeouts under
       # concurrent large-body CDP Fetch (47 unmatched localhost requests); Electron was green.
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js test/base_url_spec.js test/visit_spec.js test/web_security_spec.js test/service_worker_spec.js test/service_worker_protocol_spec.js
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js test/base_url_spec.js test/visit_spec.js test/web_security_spec.js test/service_worker_spec.js test/service_worker_protocol_spec.js test/request_spec.ts test/non_proxied_spec.ts
       requires:
         - system-tests-node-modules-install
   - system-tests-cookies-cdp:
@@ -306,9 +308,10 @@ jobs:
       disable-proxy: true
       require-opt-in: false
       parallelism: 1
-      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses.
+      # #34351 upstream HTTP_PROXY/NO_PROXY; #34271 strategy:file downloads; #34467 continue unmodified CDP Fetch responses;
+      # #34563 graphql-ws upgrades target the Cypress server origin.
       # proxy_correlation_spec omitted — see chrome-cdp-remediated note above.
-      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js
+      spec: test/network_error_handling_spec.js test/downloads_spec.ts test/proxying_spec.ts test/images_spec.js test/form_submissions_spec.js test/page_loading_spec.js test/interception_spec.js test/cache_spec.js test/request_spec.ts
       requires:
         - system-tests-node-modules-install
   - run-launchpad-integration-tests-chrome:
@@ -335,9 +338,12 @@ jobs:
       parallelism: 1
       record-group-suffix: '-remediated'
       # #34467 continue unmodified CDP Fetch responses; #34465 extra-target shared
-      # middleware. Excludes downloads_basic_auth.cy.ts — #34512 Network.enable
-      # never settles on the extra target's session. Add it here once that is fixed.
-      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts
+      # middleware; #34557 encoding drifts pinned per-pipeline (#34554, #34384, #34386);
+      # #34555 service worker session interception; #34562 synthetic request query +
+      # httpVersion drift; #34559 cloud-bundle loopback routes. Excludes
+      # downloads_basic_auth.cy.ts — #34512 Network.enable never settles on the
+      # extra target's session. Add it here once that is fixed.
+      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/service-worker.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/commands/prompt/prompt.cy.ts
       requires:
         - ready-to-test
   - driver-integration-tests-electron:
@@ -347,10 +353,10 @@ jobs:
       require-opt-in: false
       parallelism: 1
       record-group-suffix: '-remediated'
-      # #34465 extra-target shared middleware. Excludes
-      # downloads_basic_auth.cy.ts — #34512 Network.enable never settles on the
-      # extra target's session. Add it here once that is fixed.
-      spec: cypress/e2e/cypress/downloads.cy.ts
+      # #34465 extra-target shared middleware; #34555 service worker session
+      # interception. Excludes downloads_basic_auth.cy.ts — #34512 Network.enable
+      # never settles on the extra target's session. Add it here once that is fixed.
+      spec: cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/e2e/service-worker.cy.js
       requires:
         - ready-to-test
   - unit-tests-proxy-disabled:

@@ -1,0 +1,3 @@
+[31mThe [33mexperimentalMemoryManagement[39m[31m configuration option was removed in Cypress version 16.0.0. Memory management is now enabled by default under the [33mmanageBrowserMemory[39m[31m option.[39m
+[31m[39m
+[31mPlease remove [33mexperimentalMemoryManagement[39m[31m from your configuration. To keep memory management disabled, set [95mmanageBrowserMemory: false[39m[31m.[39m

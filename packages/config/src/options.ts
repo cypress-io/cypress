@@ -33,6 +33,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'ALLOW_CYPRESS_ENV_REMOVED',
   'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
   'VISIBILITY_STRATEGY_DEPRECATION',
+  'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
 ] as const
 
 type ValidationOptions = {
@@ -172,7 +173,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
     requireRestartOnChange: 'server',
   }, {
     name: 'chromeWebSecurity',
@@ -248,11 +249,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalMemoryManagement',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -319,6 +315,10 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: null,
     validation: validate.isNumberOrFalse,
     overrideLevel: 'any',
+  }, {
+    name: 'manageBrowserMemory',
+    defaultValue: true,
+    validation: validate.isBoolean,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
@@ -693,6 +693,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     name: 'visibilityStrategy',
     errorKey: 'VISIBILITY_STRATEGY_DEPRECATION',
     shouldDisplayOrThrow: (value: any) => value === 'legacy',
+    isWarning: true,
+  },
+  {
+    name: 'experimentalMemoryManagement',
+    errorKey: 'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
     isWarning: true,
   },
 ] as const

@@ -66,23 +66,23 @@
     rxjs "7.8.2"
 
 "@angular/common@^21.0.0":
-  version "21.0.1"
-  resolved "https://registry.yarnpkg.com/@angular/common/-/common-21.0.1.tgz#de7098aa800b6f5af3f1684369dfc26c0d50f7c8"
-  integrity sha512-EqdTGpFp7PVdTVztO7TB6+QxdzUbYXKKT2jwG2Gg+PIQZ2A8XrLPRmGXyH/DLlc5IhnoJlLbngmBRCLCO4xWog==
+  version "21.2.19"
+  resolved "https://registry.yarnpkg.com/@angular/common/-/common-21.2.19.tgz#0e4030a71e0f38a0bc63cf74347d142617073e68"
+  integrity sha512-Rvo/VXI0kUmfQT7+OeAjv526OJlf/WrLnJq1Tz84Jkyv9bs9SOMTCT6m4+boo8gxVNdrcxvGU3Q0o2jZzKceSg==
   dependencies:
     tslib "^2.3.0"
 
 "@angular/core@^21.0.0":
-  version "21.0.1"
-  resolved "https://registry.yarnpkg.com/@angular/core/-/core-21.0.1.tgz#78130bcdab520257573709d27eab83ee653ec286"
-  integrity sha512-z0G9Bwzgqr0fQVbtMgqwl+SbbiqtJD7I2xT6U5p45LetKHojcfigH29dxi/vqALPwEdgb2nSIx7RqVhoyynraQ==
+  version "21.2.19"
+  resolved "https://registry.yarnpkg.com/@angular/core/-/core-21.2.19.tgz#34273628395bd05988b71403a4c296f04fdb43a7"
+  integrity sha512-PVoXD1kBexOJLkFzKx2zBY/0oZJXGru0eGn2hu0q5n3vkZlYsR1yRolfGenK1gZE48Qibiw/ttg/X/pAIPEZGg==
   dependencies:
     tslib "^2.3.0"
 
 "@angular/platform-browser@^21.0.0":
-  version "21.2.18"
-  resolved "https://registry.yarnpkg.com/@angular/platform-browser/-/platform-browser-21.2.18.tgz#6199d46803081e1edb75a8a500020860b0d85437"
-  integrity sha512-zltF+3HrlgtZbYg8U98LhG0dyGm1aHT3Px8//9wjqi/TUY8UlHsYKByL197QtVWDBjf/dekzXdz5c+iyVtanLQ==
+  version "21.2.19"
+  resolved "https://registry.yarnpkg.com/@angular/platform-browser/-/platform-browser-21.2.19.tgz#4d36eb96f775eca4db9e9c5540542d6630e80e0e"
+  integrity sha512-YMguYVhdkV8tr9MvbN+VpMjbdmsYq6g12M9WPvAYM51BkL2iREbWeoXDGmfCw9G0it6+0pMdgrSPFFUFuOqpAQ==
   dependencies:
     tslib "^2.3.0"
 
@@ -7674,7 +7674,14 @@
   dependencies:
     type-detect "4.0.8"
 
-"@sinonjs/fake-timers@11.3.1", "@sinonjs/fake-timers@^11.2.2":
+"@sinonjs/fake-timers@14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@sinonjs/fake-timers/-/fake-timers-14.0.0.tgz#54b3daa30da6fcca71b2da934ff96b3095b3e28d"
+  integrity sha512-QfoXRaUTjMVVn/ZbnD4LS3TPtqOkOdKIYCKldIVPnuClcwRKat6LI2mRZ2s5qiBfO6Fy03An35dSls/2/FEc0Q==
+  dependencies:
+    "@sinonjs/commons" "^3.0.1"
+
+"@sinonjs/fake-timers@^11.2.2":
   version "11.3.1"
   resolved "https://registry.yarnpkg.com/@sinonjs/fake-timers/-/fake-timers-11.3.1.tgz#51d6e8d83ca261ff02c0ab0e68e9db23d5cd5999"
   integrity sha512-EVJO7nW5M/F5Tur0Rf2z/QoMo+1Ia963RiMtapiQrEWvY0iBUvADo8Beegwjpnle5BHkyHuoxSTW3jF43H1XRA==
@@ -10754,11 +10761,6 @@ add-stream@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/add-stream/-/add-stream-1.0.0.tgz#6a7990437ca736d5e1288db92bd3266d5f5cb2aa"
   integrity sha512-qQLMr+8o0WC4FZGQTcJiKBVC59JylcPSrTtk6usvmIDFUOCKegapy1VHQwRbFMOFyb/inzUVqHs+eMYKDM1YeQ==
-
-address@^2.0.1:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/address/-/address-2.0.3.tgz#e910900615db3d8a20c040d4c710631062fc4ba8"
-  integrity sha512-XNAb/a6TCqou+TufU8/u11HCu9x1gYvOoxLwtlXgIqmkrYQADVv6ljyW2zwiPhHz9R1gItAWpuDrdJMmrOBFEA==
 
 adjust-sourcemap-loader@^4.0.0:
   version "4.0.0"
@@ -14921,13 +14923,6 @@ detect-node@^2.0.4:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
   integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
-
-detect-port@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/detect-port/-/detect-port-2.1.0.tgz#03d72644891fa451ca5609b83107a8a0ebd03f91"
-  integrity sha512-epZuWb/6Q62L+nDHJc/hQAqf8pylsqgk3BpZXVBx1CDnr3nkrVNn73Uu1rXcFzkNcc+hkP3whuOg7JZYaQB65Q==
-  dependencies:
-    address "^2.0.1"
 
 devtools-protocol@0.0.1159816, devtools-protocol@0.0.1575685, devtools-protocol@0.0.927104:
   version "0.0.1575685"

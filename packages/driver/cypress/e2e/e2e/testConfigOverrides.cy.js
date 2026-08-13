@@ -392,6 +392,16 @@ describe('cannot set override configuration options that', () => {
     Cypress.config('viewportHeight', 100)
   })
 
+  it('throws if mutating blockHosts with Cypress.config() during test execution', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot override `blockHosts` during test execution')
+      done()
+    })
+
+    Cypress.config('blockHosts', 'example.com')
+  })
+
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
       Cypress.config('foo', 'bar')

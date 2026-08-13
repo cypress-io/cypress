@@ -3580,7 +3580,6 @@
     "./packages/scaffold-config/node_modules/p-locate/index.js",
     "./packages/server/config/app.json",
     "./packages/server/lib/adapters/configurator-network-policy.ts",
-    "./packages/server/lib/adapters/file-server-origin.ts",
     "./packages/server/lib/adapters/internal-routes.ts",
     "./packages/server/lib/adapters/serve-internal-routes.ts",
     "./packages/server/lib/append_electron_switches.ts",
@@ -3923,5 +3922,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "be7cc0343d263afc756aa8e7714fb6029a458bf85b6569e43becc6dd2f523c09"
+  "deferredHash": "028aa9e67aa6e12cf3bc35138decab3722b09cfd309755d09e1b8a9f650170f2"
 }
