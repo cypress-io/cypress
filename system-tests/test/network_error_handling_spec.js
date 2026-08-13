@@ -25,6 +25,9 @@ const getElapsed = () => {
 
 let onVisit = null
 let counts = {}
+let killedOnReusedSocket = 0
+
+const servedSockets = new WeakSet()
 
 const launchBrowser = (url, opts = {}) => {
   return launcher.detect().then((browsers) => {
@@ -146,6 +149,28 @@ const controllers = {
   load304 (req, res) {
     return res.type('html').end('<img src="/static/javascript-logo.png"/>')
   },
+
+  staleKeepAlivePage (req, res) {
+    return res.type('html').end('<html><body>stale keep-alive</body></html>')
+  },
+
+  // A request on an already-served socket is met with a FIN and no response — what
+  // a client sees when the origin's keep-alive timeout crosses a request in flight.
+  staleSocket (req, res) {
+    if (servedSockets.has(req.socket)) {
+      killedOnReusedSocket++
+
+      return req.socket.end()
+    }
+
+    servedSockets.add(req.socket)
+
+    return res.send('ok')
+  },
+
+  staleSocketStats (req, res) {
+    return res.json({ killedOnReusedSocket })
+  },
 }
 
 describe('e2e network error handling', function () {
@@ -183,6 +208,9 @@ describe('e2e network error handling', function () {
           app.post('/print-body-third-time', controllers.printBodyThirdTime)
 
           app.get('/load-304.html', controllers.load304)
+          app.get('/stale-keepalive.html', controllers.staleKeepAlivePage)
+          app.get('/stale-socket', controllers.staleSocket)
+          app.get('/stale-socket-stats', controllers.staleSocketStats)
           app.get('/load-img-net-error.html', controllers.loadImgNetError)
           app.get('/load-script-net-error.html', controllers.loadScriptNetError)
           app.get('/print-body-third-time-form', controllers.printBodyThirdTimeForm)
@@ -420,6 +448,26 @@ describe('e2e network error handling', function () {
             host: 'localhost',
             port: HTTPS_PORT,
           })
+        })
+      })
+    })
+
+    // NOTE: only with the proxy disabled does the browser reach the origin
+    // directly, so this contract exists solely in that mode.
+    const contextStaleKeepAlive = process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1' ? context : context.skip
+
+    contextStaleKeepAlive('stale keep-alive sockets', () => {
+      beforeEach(() => {
+        killedOnReusedSocket = 0
+      })
+
+      it('lets the browser recover a request written to a dead pooled socket', function () {
+        return systemTests.exec(this, {
+          spec: 'network_error_stale_keepalive.cy.js',
+          browser: 'chrome',
+          config: {
+            baseUrl: `http://localhost:${PORT}`,
+          },
         })
       })
     })
