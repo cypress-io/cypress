@@ -1,3 +1,4 @@
+import Debug from 'debug'
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
@@ -20,6 +21,8 @@ import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './brow
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
+const debug = Debug('cypress:server:network-runtime')
+
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
@@ -40,7 +43,9 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 }
 
 export type CreateCdpFetchRuntimeDeps = {
-  client: Pick<ICriClient, 'send' | 'on' | 'off'>
+  // onServiceWorkerTargetAttached is a settable hook: the runtime assigns it
+  // so service worker sessions get Fetch enabled before they start running.
+  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onServiceWorkerTargetAttached'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
   // Protocol-neutral subscription to AUT document navigation commits,
   // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
@@ -280,11 +285,6 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         throw new Error(RUNTIME_STOPPED_ERROR)
       }
 
-      // CDPNetworkExtraInfo (used by CdpFetchTransport for Set-Cookie) requires
-      // Network on this session. The browser-level Network.enable in
-      // _onAttachToTarget does not apply to this dedicated extra-target CRI client.
-      await client.send('Network.enable', DEFAULT_NETWORK_ENABLE_OPTIONS)
-
       const extraTransport = new CdpFetchTransport(client, networkInterception, {
         isFromExtraTarget: true,
         resolveOriginRedirect,
@@ -302,6 +302,18 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         throw new Error(RUNTIME_STOPPED_ERROR)
       }
 
+      // CDPNetworkExtraInfo (Set-Cookie capture) needs Network on this dedicated
+      // session — the browser-level Network.enable in _onAttachToTarget does not
+      // apply here. It cannot be awaited: the target is auto-attached
+      // debugger-paused, and Network.enable's response requires the paused
+      // renderer, which only unpauses after this hook returns (#34512).
+      // Fetch.enable above is browser-serviced, so interception is already in
+      // place while paused; extra-info merging degrades gracefully if this
+      // settles late or the target is already closing.
+      client.send('Network.enable', DEFAULT_NETWORK_ENABLE_OPTIONS).catch((err) => {
+        debug('extra-target Network.enable failed: %s', err?.message || err)
+      })
+
       extraTargetTransports.add(extraTransport)
 
       return async () => {
@@ -317,9 +329,17 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
+      // A service worker's network runs on its own CDP session — without
+      // enabling Fetch there, its script fetch and fetch-handler requests
+      // bypass the middleware onion (and cy.intercept) entirely.
+      deps.client.onServiceWorkerTargetAttached = (sessionId) => {
+        return fetchTransport.attachServiceWorkerSession(sessionId)
+      }
+
       try {
         await fetchTransport.start()
       } catch (err) {
+        deps.client.onServiceWorkerTargetAttached = undefined
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
 
@@ -337,6 +357,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     },
     async stop () {
       stopped = true
+      deps.client.onServiceWorkerTargetAttached = undefined
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 

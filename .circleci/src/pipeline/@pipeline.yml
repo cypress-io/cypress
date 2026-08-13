@@ -31,6 +31,11 @@ parameters:
   run-proxy-disabled-tests:
     type: boolean
     default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
+  # (can also be set manually to run the Windows workflow)
+  run-windows-workflow:
+    type: boolean
+    default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
   # Default true so develop/release branches run everything without explicit params.
   run-driver-tests:
@@ -2151,10 +2156,6 @@ jobs:
               sudo apt-get install -y libgbm-dev
             fi
 
-            if << parameters.disable-proxy >> ; then
-              export CYPRESS_INTERNAL_DISABLE_PROXY=1
-            fi
-
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
@@ -2548,33 +2549,15 @@ jobs:
           spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
+  # electron is deprecated as a test browser, so it only runs on the HTTP/1 proxy
+  # path (no disable-proxy parameter)
   system-tests-electron:
     <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      disable-proxy:
-        description: run with the MITM proxy disabled (CDP Fetch network interception path)
-        type: boolean
-        default: false
-      require-opt-in:
-        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
-        type: boolean
-        default: true
-      spec:
-        description: optional space-separated system-test paths; empty runs the full suite
-        type: string
-        default: ''
-      parallelism:
-        type: integer
-        default: 8
     resource_class: medium+.gen2
-    parallelism: << parameters.parallelism >>
+    parallelism: 8
     steps:
       - run-system-tests:
           browser: electron
-          disable-proxy: << parameters.disable-proxy >>
-          require-opt-in: << parameters.require-opt-in >>
-          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-firefox:
@@ -2842,38 +2825,15 @@ jobs:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
+  # electron is deprecated as a test browser, so it only runs on the HTTP/1 proxy
+  # path (no disable-proxy parameter)
   driver-integration-tests-electron:
     <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      disable-proxy:
-        description: run with the MITM proxy disabled (CDP Fetch network interception path)
-        type: boolean
-        default: false
-      require-opt-in:
-        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
-        type: boolean
-        default: true
-      spec:
-        description: optional Cypress --spec glob(s); empty runs the full driver suite
-        type: string
-        default: ''
-      record-group-suffix:
-        description: optional Cypress Cloud group name suffix
-        type: string
-        default: ''
-      parallelism:
-        type: integer
-        default: 5
     resource_class: medium+.gen2
-    parallelism: << parameters.parallelism >>
+    parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: electron
-          disable-proxy: << parameters.disable-proxy >>
-          require-opt-in: << parameters.require-opt-in >>
-          spec: << parameters.spec >>
-          record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-webkit:
