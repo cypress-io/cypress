@@ -1,14 +1,31 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.20.2
+
+**Bugfixes:**
+
+- Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
+- Fixed an issue where passing an object to the [`have.attr`, `have.css`, or `have.prop` assertions](https://on.cypress.io/assertions), such as `.should('have.css', { backgroundColor: 'rgb(128, 0, 0)' })`, applied those styles, attributes, or properties to the element and passed instead of asserting on them. These assertions now fail with an error stating that the name must be a string. Fixes [#26451](https://github.com/cypress-io/cypress/issues/26451).
+- Fixed an issue on Windows where adding, renaming, moving or deleting a spec file while `cypress open` was running was not reflected in the specs list, leaving stale specs until Cypress was restarted. Clicking a spec that had been renamed or moved could then fail to run. Projects whose [`specPattern`](https://docs.cypress.io/app/references/configuration#e2e) contains a directory, such as the End-to-End Testing default `cypress/e2e/**/*.cy.{js,jsx,ts,tsx}`, were affected. Fixes [#22303](https://github.com/cypress-io/cypress/issues/22303).
+
+**Dependency Updates:**
+
+- Upgraded `@sinonjs/fake-timers` from `11.3.1` to `14.0.0`. While [`cy.clock()`](https://on.cypress.io/clock) is active, the faked `performance` object now implements `performance.mark()` and `performance.measure()` (previously no-ops that returned `undefined`) and reports a faked `performance.timeOrigin`. Addressed in [#34377](https://github.com/cypress-io/cypress/pull/34377).
+
 ## 15.20.1
 
 **Bugfixes:**
 
 - Fixed an issue where `cypress run` with [`trashAssetsBeforeRuns`](https://docs.cypress.io/app/references/configuration#Videos) enabled deleted the contents of the project, or of a directory above it, when [`downloadsFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files), [`screenshotsFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files), or [`videosFolder`](https://docs.cypress.io/app/references/configuration#Folders--Files) resolved to such a directory (for example `downloadsFolder: ''` or `'../'`). Cypress now leaves those folders alone and warns instead. Fixes [#26393](https://github.com/cypress-io/cypress/issues/26393).
+- Fixed a regression in [15.20.0](#15-20-0) where the Cypress app sent all Cypress Cloud requests to `http://localhost:3000` instead of Cypress Cloud. Logging in could not complete, and the Runs and Debug pages reported no data. Addressed in [#34536](https://github.com/cypress-io/cypress/pull/34536).
 - Fixed a regression in [15.18.0](#15-18-0) where pinning a command in the Command Log could leave the AUT snapshot permanently blank, with the pin stuck on. Stopping a run in open mode also no longer clears the AUT. Addressed in [#34502](https://github.com/cypress-io/cypress/pull/34502).
 
 **Misc:**
 
 - Fixed an issue where the error reported in CI when the Cypress binary is missing suggested caching and persisting the default binary cache location, ignoring any [`CYPRESS_CACHE_FOLDER`](https://docs.cypress.io/app/references/advanced-installation#Binary-cache) override. The suggestions now name the directory Cypress actually looked in. Addresses [#23009](https://github.com/cypress-io/cypress/discussions/23009). Addressed in [#34543](https://github.com/cypress-io/cypress/pull/34543).
+
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.22.4` to `4.23.12`. Fixes [#34461](https://github.com/cypress-io/cypress/issues/34461).
 
 ## 15.20.0
 

@@ -336,6 +336,104 @@ describe('CdpFetchTransport', () => {
     })
   })
 
+  // Fetch.enable is scoped to the session it is sent on, so every session
+  // whose traffic must run the middleware onion needs its own enable — with
+  // one shared pattern list, since a session pausing a different set of stages
+  // than its siblings would silently skip middleware for that traffic.
+  describe('session-scoped Fetch interception', () => {
+    const FETCH_PATTERNS = {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    }
+
+    it('enables Fetch on its own session at start', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+
+      expect(client.send).to.have.been.calledWith('Fetch.enable', FETCH_PATTERNS, undefined)
+    })
+
+    it('enables a service worker session with the same patterns as its own session', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+      await transport.attachServiceWorkerSession('sw-session')
+
+      const enableCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.enable')
+
+      expect(enableCalls).to.have.length(2)
+      expect(enableCalls.map((call) => call.args[2])).to.deep.equal([undefined, 'sw-session'])
+      // one pattern list for every session — not two that can drift apart
+      expect(enableCalls[1].args[1]).to.equal(enableCalls[0].args[1])
+      expect(enableCalls[1].args[1]).to.deep.equal(FETCH_PATTERNS)
+    })
+
+    it('does not enable a service worker session before the transport has started', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.attachServiceWorkerSession('sw-session')
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.enable')
+    })
+
+    it('rejects when a service worker session cannot be enabled so the caller can report it', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+
+      client.send.withArgs('Fetch.enable', sinon.match.any, 'sw-session')
+      .rejects(new Error('ProtocolError: Inspected target closed'))
+
+      await expect(transport.attachServiceWorkerSession('sw-session'))
+      .to.be.rejectedWith('Inspected target closed')
+    })
+
+    // The whole point of enabling per session rather than per transport: pauses
+    // from every session land on the shared connection handlers, and each reply
+    // has to go back to the session the pause came from.
+    it('intercepts a service worker session pause and replies on that session', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+      const onRequestPaused = await startTransport(transport, client)
+
+      await transport.attachServiceWorkerSession('sw-session')
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'sw-fetch-request',
+        networkId: 'sw-network-1',
+        url: 'https://example.test/fixtures/service-worker.js',
+      }), 'sw-session')
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'sw-fetch-request',
+      }, 'sw-session')
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'sw-fetch-request',
+        networkId: 'sw-network-1',
+        url: 'https://example.test/fixtures/service-worker.js',
+        responseStatusCode: 200,
+      }), 'sw-session')
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'sw-fetch-request',
+        responseCode: 200,
+      }, 'sw-session')
+    })
+  })
+
   describe('request pause handling', () => {
     it('continues the request and resolves the pending flow from a matching response pause', async () => {
       const client = createClient()
@@ -760,6 +858,107 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
+    // Network.responseReceived derives mimeType/charset from the wire
+    // content-type; a continueResponse header override does not update them,
+    // so a changed content-type must take the fulfill path to be recorded
+    // truthfully (e.g. Test Replay keys stylesheet handling off mimeType).
+    it('fulfills when middleware changes only the content-type of an untouched body', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            'content-type': 'text/css',
+          },
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = [{ name: 'Content-Type', value: 'application/octet-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/css',
+        }],
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    // Overrides other than content-type are recorded truthfully by CDP on
+    // continueResponse, so they keep the cheaper wire release.
+    it('continues when middleware changes headers other than content-type', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            'x-custom': 'yes',
+          },
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = [{ name: 'Content-Type', value: 'application/octet-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [
+          { name: 'content-type', value: 'application/octet-stream' },
+          { name: 'x-custom', value: 'yes' },
+        ],
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
@@ -1688,8 +1887,10 @@ describe('CdpFetchTransport', () => {
         return {
           ...response,
           body: await readStream(response.bodyStream!),
+          // a content-type change would force the fulfill path (mimeType
+          // derivation) — use a neutral header to stay on continueResponse
           headers: {
-            'content-type': 'text/plain',
+            'x-verbatim': 'empty',
           },
           statusCode: 204,
         }
@@ -1718,8 +1919,8 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 204,
         responseHeaders: [{
-          name: 'content-type',
-          value: 'text/plain',
+          name: 'x-verbatim',
+          value: 'empty',
         }],
       })
 

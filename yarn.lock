@@ -7616,7 +7616,14 @@
   dependencies:
     type-detect "4.0.8"
 
-"@sinonjs/fake-timers@11.3.1", "@sinonjs/fake-timers@^11.2.2":
+"@sinonjs/fake-timers@14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@sinonjs/fake-timers/-/fake-timers-14.0.0.tgz#54b3daa30da6fcca71b2da934ff96b3095b3e28d"
+  integrity sha512-QfoXRaUTjMVVn/ZbnD4LS3TPtqOkOdKIYCKldIVPnuClcwRKat6LI2mRZ2s5qiBfO6Fy03An35dSls/2/FEc0Q==
+  dependencies:
+    "@sinonjs/commons" "^3.0.1"
+
+"@sinonjs/fake-timers@^11.2.2":
   version "11.3.1"
   resolved "https://registry.yarnpkg.com/@sinonjs/fake-timers/-/fake-timers-11.3.1.tgz#51d6e8d83ca261ff02c0ab0e68e9db23d5cd5999"
   integrity sha512-EVJO7nW5M/F5Tur0Rf2z/QoMo+1Ia963RiMtapiQrEWvY0iBUvADo8Beegwjpnle5BHkyHuoxSTW3jF43H1XRA==
@@ -31091,10 +31098,10 @@ tsutils@^2.29.0:
   dependencies:
     tslib "^1.8.1"
 
-tsx@4.22.4, tsx@^4.22.4:
-  version "4.22.4"
-  resolved "https://registry.yarnpkg.com/tsx/-/tsx-4.22.4.tgz#0ab3b7fb4ec7feeee74e5b1f26337caa71e44700"
-  integrity sha512-X8EX+XV4QR5xCsrgxaED954zTDfY8KqlDtskKEL0cHhyS/P8b4IFOvGDQpsC9Q1XnLq915wEfwwY/zzskCtmhg==
+tsx@4.23.12, tsx@^4.23.12:
+  version "4.23.12"
+  resolved "https://registry.yarnpkg.com/tsx/-/tsx-4.23.12.tgz#3a4919591cd9b9e00011b75e596c8ab8db23c09c"
+  integrity sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==
   dependencies:
     esbuild "~0.28.0"
   optionalDependencies:

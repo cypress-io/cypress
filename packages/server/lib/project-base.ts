@@ -45,6 +45,7 @@ import type { StudioInitOptions } from './types/studio'
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
   projectRoot: string
+  blockHosts?: Cypress.ResolvedConfigOptions['blockHosts']
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType

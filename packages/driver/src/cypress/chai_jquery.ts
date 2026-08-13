@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import $dom from '../dom'
 import $elements from '../dom/elements'
-import type { Methods, PartialAssertionArgs } from './assertions/assert'
+import type { Callbacks as AssertCallbacks, Methods, PartialAssertionArgs } from './assertions/assert'
 import { assert, assertDom, accessors, selectors, wrap } from './assertions/assert'
 
 const maybeCastNumberToString = (num: number | string) => {
@@ -10,9 +10,8 @@ const maybeCastNumberToString = (num: number | string) => {
   return _.isFinite(num) ? `${num}` : num
 }
 
-interface Callbacks {
-  onInvalid: (method, obj) => void
-  onError: (err, method, obj, negated) => void
+interface Callbacks extends AssertCallbacks {
+  onInvalidArg: (method, description, arg) => void
 }
 
 const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks: Callbacks) => {
@@ -268,6 +267,13 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         `expected #{this} not to have ${description} #{exp}`,
         name,
       )
+
+      // jQuery's accessors double as setters when handed an object, which would
+      // mutate the subject instead of asserting on it. Other non-names read back
+      // a value that always satisfies the assertion.
+      if (!_.isString(name) && !_.isFinite(name)) {
+        callbacks.onInvalidArg(acc, description, chaiUtils.inspect(name))
+      }
 
       const actual = wrap(this)[acc](name)
 
