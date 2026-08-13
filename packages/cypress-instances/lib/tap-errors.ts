@@ -1,31 +1,5 @@
-// The copy for every `cypress tap` failure, keyed by its code.
-//
-// A code is a registry key, not output: the CLI prints the condition, the specifics
-// and the remedy as plain paragraphs, and never prints the key. That is why codes
-// raised only CLI-side live here too, alongside the ones the app raises over the
-// wire: one lookup table means one answer to what a tap failure means, and one place
-// to add the next one.
-//
-// A failure fills the slots like so:
-//
-//   description  the condition, generic — never interpolated
-//   detail       the specifics, at the throw site: the selector, the available
-//                snapshots, the valid range. Omitted where there are none.
-//   solution     what to do about it, generic — never interpolated. Omitted where
-//                the specifics already say it.
-//
-// A condition whose opening line names its subject — the value that will not do,
-// the command that does not exist — cannot be written as a generic sentence, so
-// its copy lives in a factory at the foot of this module instead of in the table.
-// Both sides of the wire raise it through that factory, which is what keeps the
-// wording in one place; the entry is then the code and its doc comment alone.
-//
-// The raw underlying failure (a CDP rejection, an HTTP status) is a diagnostic
-// rather than copy: it rides on the error's `message`/`cause` for logs and
-// `DEBUG=cypress:cli:tap`, and is never rendered.
-//
-// Keep this module dependency-free: plain strings, commands in backticks for the
-// CLI to highlight, and `docs` as a path rather than a URL.
+// The copy for every `cypress tap` failure, keyed by its code. Code is not usefacing and is
+// just used in debug logs and telemetry.
 
 export interface TapErrorCopy {
   description?: string
@@ -39,8 +13,7 @@ export interface TapErrorCopy {
 const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
 
 /**
- * What every failure calls the running Cypress a tap command targets. Rename it
- * here and every error that speaks of it follows.
+ * What every failure calls the running Cypress a tap command targets.
  */
 export const TAP_TARGET = 'Cypress session'
 
