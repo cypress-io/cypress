@@ -1,3 +1,5 @@
+import { TAP_DEFAULT_SELECTOR } from '@packages/cypress-instances'
+
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
 import { withResolvedAutFrame } from '../aut/frame'
@@ -202,5 +204,5 @@ export const extractAria = (
 }
 
 export const ariaCommand = defineNativeCommand('aria', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'), parseIndex(commandOptions.at))
+  return extractAria(session, frame, commandOptions.selector ?? TAP_DEFAULT_SELECTOR, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'), parseIndex(commandOptions.at))
 }, 'aria'))

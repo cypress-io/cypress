@@ -92,7 +92,7 @@ export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
 const testIdField = { name: 'test-id', alias: 't', type: 'string', description: 'test id, as listed by the reporter command' } as const
 const commandIdField = { name: 'command-id', alias: 'c', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
 const attemptField = { name: 'attempt', alias: 'a', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
-const selectorField = { name: 'selector', alias: 's', type: 'string', required: false, description: 'a CSS selector; omit to read the whole document' } as const
+const selectorField = { name: 'selector', alias: 's', type: 'string', required: false, description: 'a CSS selector' } as const
 
 const commandMeta = {
   name: 'command',
@@ -262,6 +262,10 @@ read: the command answers with a numbered list of the matches, each with a
 unique selector. Re-run with --at <index> to read one of them, or with whichever
 selector you meant.`
 
+// Where `dom` and `aria` read from with no selector: the document element only
+// adds a <head> of script and style text; `--selector html` still reads it.
+export const TAP_DEFAULT_SELECTOR = 'body'
+
 // Shared by the three selector-taking reads, so the way you pick one match out
 // of several is identical across them.
 const atField = {
@@ -273,15 +277,16 @@ const atField = {
 
 const domMeta = {
   name: 'dom',
-  description: 'read the app-under-test DOM as HTML: the whole page, or the one element a selector matches (with its subtree)',
-  details: `Reads the app-under-test DOM as HTML: the whole page, or the outerHTML of the
-element a CSS selector matches (including its full subtree). Output is capped
+  description: 'read the app-under-test DOM as HTML: the page body, or the one element a selector matches (with its subtree)',
+  details: `Reads the app-under-test DOM as HTML: the outerHTML of the element a CSS
+selector matches, including its full subtree. Without --selector it reads the
+page body; pass --selector html for the whole document. Output is capped
 browser-side so a heavy page never ships megabytes at once.
 
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR}; omit to read the whole document` },
+    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR}; defaults to ${TAP_DEFAULT_SELECTOR}` },
     { name: 'max-chars', alias: 'm', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' },
     atField,
   ],
@@ -289,15 +294,15 @@ ${AMBIGUOUS_SELECTOR_HELP}`,
 
 const ariaMeta = {
   name: 'aria',
-  description: 'read the accessibility (ARIA) tree of the app-under-test frame, or the subtree at a selector',
-  details: `Reads the accessibility (ARIA) tree of the app-under-test frame, or the
-subtree rooted at a CSS selector. Structural and text-only roles are dropped,
-leaving the compact role/name/state tree DevTools shows.
+  description: 'read the accessibility (ARIA) tree of the app-under-test page body, or the subtree at a selector',
+  details: `Reads the accessibility (ARIA) tree of the app under test, rooted at the page
+body or at the element a CSS selector matches. Structural and text-only roles
+are dropped, leaving the compact role/name/state tree DevTools shows.
 
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at; omit for the whole frame` },
+    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at; defaults to ${TAP_DEFAULT_SELECTOR}` },
     { name: 'max-nodes', alias: 'm', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' },
     atField,
   ],

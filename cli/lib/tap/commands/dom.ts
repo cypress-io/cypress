@@ -1,3 +1,5 @@
+import { TAP_DEFAULT_SELECTOR } from '@packages/cypress-instances'
+
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
 import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
@@ -11,11 +13,11 @@ import { defineNativeCommand } from './definition'
 
 const DEFAULT_MAX_CHARS = 30000
 
-/** What `cypress tap dom` returns: the whole document, or the matched element. */
+/** What `cypress tap dom` returns: the matched element, or the whole document. */
 export interface FrameDomResult {
   /** Whether the selector matched — present only in selector mode. */
   found?: boolean
-  /** The matched element's outerHTML, or the whole document in whole-page mode. */
+  /** The matched element's outerHTML, or the whole document when no selector was given. */
   html?: string
   /** Present (always `true`) when the browser-side cap clipped the output. */
   truncated?: true
@@ -56,5 +58,5 @@ export const extractDom = (
 })
 
 export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'), parseIndex(commandOptions.at))
+  return extractDom(session, frame, commandOptions.selector ?? TAP_DEFAULT_SELECTOR, parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars'), parseIndex(commandOptions.at))
 }, 'dom'))
