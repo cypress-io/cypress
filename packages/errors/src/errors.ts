@@ -146,6 +146,12 @@ export const AllCypressErrors = {
   CLOUD_CANCEL_SKIPPED_SPEC: () => {
     return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
+  CLOUD_RERUN_FAILED_TESTS: (arg1: { runUrl: string }) => {
+    return errTemplate`\
+        Re-running only the tests that did not pass in the previous run. Passing tests are skipped and are not reported to Cypress Cloud.
+
+        The previous run is: ${fmt.url(arg1.runUrl)}`
+  },
   CLOUD_API_RESPONSE_FAILED_RETRYING: (
     arg1: { tries: number, delay: string, response: Error },
   ) => {

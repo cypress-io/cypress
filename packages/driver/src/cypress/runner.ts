@@ -1338,6 +1338,9 @@ export default {
       ended: {},
     }
     let _startTime: string | null = null
+    // the Cloud FILTER keep-list (test full titles) for test-level rerun
+    // optimization; retained so it can be re-applied after a cross-origin reload
+    let _testFilter: string[] | null = null
     let _onlyTestId = null
     let _newTestLineNumber = null
     let _isStudioCreatedTest = false
@@ -2012,6 +2015,41 @@ export default {
 
       getResumedAtTestIndex () {
         return _resumedAtTestIndex
+      },
+
+      // Keep-list for test-level rerun optimization (Cloud's FILTER action).
+      // Physically prunes every non-eligible test — and any suite left empty,
+      // along with its before/after hooks — from the live Mocha tree, so Mocha
+      // never descends into them: they behave as if they were not defined in
+      // this re-run. Runs after `normalizeAll` (so `_tests`/`_runner.suite` are
+      // populated) but before `_runner.run()`, while the tree is still quiescent.
+      setTestFilter (eligibleFullTitles?: string[] | null) {
+        if (!eligibleFullTitles?.length) {
+          return
+        }
+
+        // retained so it can be re-applied after a cross-origin reload resumes
+        // the spec (the FILTER action is only delivered on the first load)
+        _testFilter = eligibleFullTitles
+
+        // reuses the open-mode pruning: removes non-matching tests, deletes their
+        // fn, prunes now-empty suites (Mocha's cleanReferences clears their hooks)
+        pruneEmptySuites(_runner.suite, eligibleFullTitles)
+
+        // reconcile the derived lookups with the pruned tree so getTestById /
+        // getTestResults / getTestsState don't surface pruned tests. Uses the
+        // same predicate as pruneEmptySuites, so the survivor sets agree exactly.
+        const eligible = new Set(eligibleFullTitles)
+        const survivors = _tests.filter((test) => {
+          return eligible.has(test.fullTitle().replaceAll(SKIPPED_DUE_TO_BROWSER_MESSAGE, ''))
+        })
+
+        setTests(survivors)
+        setTestsById(_.keyBy(survivors, 'id'))
+      },
+
+      getTestFilter () {
+        return _testFilter
       },
 
       cleanupQueue (numTestsKeptInMemory) {

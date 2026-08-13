@@ -598,7 +598,12 @@ export class ProjectBase extends EE {
 
         if (this._recordTests) {
           this._protocolManager?.addRunnables(runnables)
-          await this._recordTests?.(runnables, cb)
+          // when test-level rerun optimization is armed, this resolves to the
+          // full titles of the tests that will actually execute; tell the
+          // reporter to omit the rest from what it reports to Cloud
+          const filteredTests = await this._recordTests?.(runnables, cb)
+
+          reporterInstance?.setTestFilter(filteredTests)
 
           this._recordTests = null
 
