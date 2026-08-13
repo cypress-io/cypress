@@ -5,6 +5,13 @@
 
 - Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
+- Fixed an issue where `cypress run` printed the `(Attempt N of M)` line twice for the same attempt when a `beforeEach` and an `afterEach` hook both failed during that attempt. Fixes [#26143](https://github.com/cypress-io/cypress/issues/26143).
+- Fixed an issue where passing an object to the [`have.attr`, `have.css`, or `have.prop` assertions](https://on.cypress.io/assertions), such as `.should('have.css', { backgroundColor: 'rgb(128, 0, 0)' })`, applied those styles, attributes, or properties to the element and passed instead of asserting on them. These assertions now fail with an error stating that the name must be a string. Fixes [#26451](https://github.com/cypress-io/cypress/issues/26451).
+- Fixed an issue on Windows where adding, renaming, moving or deleting a spec file while `cypress open` was running was not reflected in the specs list, leaving stale specs until Cypress was restarted. Clicking a spec that had been renamed or moved could then fail to run. Projects whose [`specPattern`](https://docs.cypress.io/app/references/configuration#e2e) contains a directory, such as the End-to-End Testing default `cypress/e2e/**/*.cy.{js,jsx,ts,tsx}`, were affected. Fixes [#22303](https://github.com/cypress-io/cypress/issues/22303).
+
+**Dependency Updates:**
+
+- Upgraded `@sinonjs/fake-timers` from `11.3.1` to `14.0.0`. While [`cy.clock()`](https://on.cypress.io/clock) is active, the faked `performance` object now implements `performance.mark()` and `performance.measure()` (previously no-ops that returned `undefined`) and reports a faked `performance.timeOrigin`. Addressed in [#34377](https://github.com/cypress-io/cypress/pull/34377).
 
 ## 15.20.1
 
