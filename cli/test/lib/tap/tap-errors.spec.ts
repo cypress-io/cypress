@@ -283,14 +283,22 @@ describe('lib/tap error rendering', () => {
   })
 })
 
-// Every code, rendered end to end as a caller sees it: the registry copy assembled
-// with the specifics a real throw site writes. One snapshot per code, so a change
-// to any failure's assembled output lands as a reviewable diff under its name.
+// Every code, rendered end to end as a caller sees it: an invocation that produces
+// the failure in practice, then the registry copy assembled with the specifics a
+// real throw site writes. One snapshot per code, named by the code, so the file
+// reads as a transcript of what each failure looks like at the terminal — and a
+// change to any failure's assembled output lands as a reviewable diff under it.
 describe('lib/tap error rendering catalogue', () => {
   beforeEach(() => {
     logger.reset()
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
+
+  interface RepresentativeFailure {
+    /** A `cypress tap` invocation that produces this failure in practice. */
+    invocation: string
+    failure: TapError
+  }
 
   // One realistic failure per code — factory-raised codes through their factory,
   // the rest as their throw sites raise them: with the detail the site writes, or
@@ -299,79 +307,187 @@ describe('lib/tap error rendering catalogue', () => {
   // several places names the one the representative mimics.
   // `Record<TapErrorCode, ...>` makes a new registry entry a compile error here
   // until it gets a representative.
-  const REPRESENTATIVE: Record<TapErrorCode, TapError> = {
+  const REPRESENTATIVE: Record<TapErrorCode, RepresentativeFailure> = {
+    // cli/lib/cypress-instances/index.ts (resolveInstance), with no Cypress open
+    NO_INSTANCE: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('NO_INSTANCE'),
+    },
     // cli/lib/cypress-instances/index.ts (resolveInstance)
-    NO_INSTANCE: new TapError('NO_INSTANCE'),
-    // cli/lib/cypress-instances/index.ts (resolveInstance)
-    INSTANCE_NOT_FOUND: notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321),
+    INSTANCE_NOT_FOUND: {
+      invocation: 'cypress tap --instance 4321 dom --selector "#status"',
+      failure: notFoundTapError('INSTANCE_NOT_FOUND', '--instance', 4321),
+    },
     // cli/lib/cypress-instances/index.ts (liveMatches)
-    STALE_INSTANCE: new TapError('STALE_INSTANCE', { detail: 'Looked for `--instance` 4321.' }),
+    STALE_INSTANCE: {
+      invocation: 'cypress tap --instance 4321 dom --selector "#status"',
+      failure: new TapError('STALE_INSTANCE', { detail: 'Looked for `--instance` 4321.' }),
+    },
     // cli/lib/cypress-instances/index.ts (resolveInstance)
-    NO_BROWSER_ATTACHED: new TapError('NO_BROWSER_ATTACHED', { detail: 'The instance is pid 4321, at /home/dev/shop.' }),
+    NO_BROWSER_ATTACHED: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('NO_BROWSER_ATTACHED', { detail: 'The instance is pid 4321, at /home/dev/shop.' }),
+    },
     // cli/lib/tap/cdp-timeout.ts
-    RENDERER_UNRESPONSIVE: new TapError('RENDERER_UNRESPONSIVE', { detail: 'No response within the specified timeout (30000ms).' }),
+    RENDERER_UNRESPONSIVE: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('RENDERER_UNRESPONSIVE', { detail: 'No response within the specified timeout (30000ms).' }),
+    },
     // cli/lib/tap/tap-session.ts
-    CDP_UNREACHABLE: new TapError('CDP_UNREACHABLE'),
+    CDP_UNREACHABLE: {
+      invocation: 'cypress tap status',
+      failure: new TapError('CDP_UNREACHABLE'),
+    },
     // cli/lib/tap/tap-session.ts
-    BINDING_NOT_FOUND: new TapError('BINDING_NOT_FOUND'),
+    BINDING_NOT_FOUND: {
+      invocation: 'cypress tap status',
+      failure: new TapError('BINDING_NOT_FOUND'),
+    },
     // cli/lib/tap/tap-session.ts
-    BINDING_THREW: new TapError('BINDING_THREW'),
+    BINDING_THREW: {
+      invocation: 'cypress tap reporter',
+      failure: new TapError('BINDING_THREW'),
+    },
     // cli/lib/tap/tap-session.ts
-    STALE_HANDLE: new TapError('STALE_HANDLE'),
+    STALE_HANDLE: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('STALE_HANDLE'),
+    },
     // cli/lib/tap/tap-session.ts (validateExecResult); also the schema handshake in cli/lib/exec/tap.ts
-    PROTOCOL_MISMATCH: new TapError('PROTOCOL_MISMATCH'),
+    PROTOCOL_MISMATCH: {
+      invocation: 'cypress tap status',
+      failure: new TapError('PROTOCOL_MISMATCH'),
+    },
     // cli/lib/exec/tap.ts (schema handshake)
-    CLI_OUTDATED: new TapError('CLI_OUTDATED'),
+    CLI_OUTDATED: {
+      invocation: 'cypress tap status',
+      failure: new TapError('CLI_OUTDATED'),
+    },
     // cli/lib/exec/tap.ts (schema handshake); also cli/lib/tap/instance-gql.ts
-    INSTANCE_OUTDATED: new TapError('INSTANCE_OUTDATED'),
+    INSTANCE_OUTDATED: {
+      invocation: 'cypress tap status',
+      failure: new TapError('INSTANCE_OUTDATED'),
+    },
     // cli/lib/tap/instance-gql.ts
-    GRAPHQL_UNREACHABLE: new TapError('GRAPHQL_UNREACHABLE'),
+    GRAPHQL_UNREACHABLE: {
+      invocation: 'cypress tap specs',
+      failure: new TapError('GRAPHQL_UNREACHABLE'),
+    },
     // cli/lib/tap/instance-gql.ts
-    GRAPHQL_FAILED: new TapError('GRAPHQL_FAILED'),
+    GRAPHQL_FAILED: {
+      invocation: 'cypress tap specs',
+      failure: new TapError('GRAPHQL_FAILED'),
+    },
     // cli/lib/tap/aut/frame.ts; also the app-side commands in packages/app/src/tap/commands/
-    SPEC_NOT_STARTED: new TapError('SPEC_NOT_STARTED'),
+    SPEC_NOT_STARTED: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('SPEC_NOT_STARTED'),
+    },
     // cli/lib/tap/aut/frame.ts; also packages/app/src/tap/commands/pin.ts
-    SPEC_IN_PROGRESS: specInProgressTapError('cypress/e2e/checkout.cy.ts'),
+    SPEC_IN_PROGRESS: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: specInProgressTapError('cypress/e2e/checkout.cy.ts'),
+    },
     // cli/lib/tap/commands/run.ts
-    SPEC_START_FAILED: new TapError('SPEC_START_FAILED', { detail: 'The instance returned no result for "cypress/e2e/checkout.cy.ts".' }),
+    SPEC_START_FAILED: {
+      invocation: 'cypress tap run cypress/e2e/checkout.cy.ts',
+      failure: new TapError('SPEC_START_FAILED', { detail: 'The instance returned no result for "cypress/e2e/checkout.cy.ts".' }),
+    },
     // cli/lib/tap/commands/run.ts
-    SPEC_NOT_FOUND: new TapError('SPEC_NOT_FOUND', { detail: 'Looked for "cypress/e2e/checkout.cy.ts".' }),
+    SPEC_NOT_FOUND: {
+      invocation: 'cypress tap run cypress/e2e/checkout.cy.ts',
+      failure: new TapError('SPEC_NOT_FOUND', { detail: 'Looked for "cypress/e2e/checkout.cy.ts".' }),
+    },
     // cli/lib/tap/commands/run.ts (mapped from the runSpec mutation's failure)
-    NO_PROJECT: new TapError('NO_PROJECT'),
+    NO_PROJECT: {
+      invocation: 'cypress tap run cypress/e2e/checkout.cy.ts',
+      failure: new TapError('NO_PROJECT'),
+    },
     // cli/lib/tap/commands/run.ts (mapped from the runSpec mutation's failure)
-    TESTING_TYPE_NOT_CONFIGURED: new TapError('TESTING_TYPE_NOT_CONFIGURED'),
+    TESTING_TYPE_NOT_CONFIGURED: {
+      invocation: 'cypress tap run cypress/e2e/checkout.cy.ts',
+      failure: new TapError('TESTING_TYPE_NOT_CONFIGURED'),
+    },
     // cli/lib/tap/aut/frame.ts; also packages/app/src/tap/commands/resolve-selector.ts
-    NO_AUT: new TapError('NO_AUT'),
+    NO_AUT: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('NO_AUT'),
+    },
     // cli/lib/tap/aut/single-match.ts; also the dom/inspect extractors
-    FRAME_READ_FAILED: new TapError('FRAME_READ_FAILED'),
+    FRAME_READ_FAILED: {
+      invocation: 'cypress tap dom --selector ".item"',
+      failure: new TapError('FRAME_READ_FAILED'),
+    },
     // packages/app/src/tap/test-state.ts
-    TEST_NOT_FOUND: notFoundTapError('TEST_NOT_FOUND', '--test-id', 'r7'),
+    TEST_NOT_FOUND: {
+      invocation: 'cypress tap reporter --test-id r7',
+      failure: notFoundTapError('TEST_NOT_FOUND', '--test-id', 'r7'),
+    },
     // packages/app/src/tap/test-state.ts
-    ATTEMPT_NOT_FOUND: notFoundTapError('ATTEMPT_NOT_FOUND', '--attempt', 5, 'Test "r7" has 3 attempts.'),
+    ATTEMPT_NOT_FOUND: {
+      invocation: 'cypress tap reporter --test-id r7 --attempt 5',
+      failure: notFoundTapError('ATTEMPT_NOT_FOUND', '--attempt', 5, 'Test "r7" has 3 attempts.'),
+    },
     // packages/app/src/tap/commands/command.ts; also pin.ts
-    COMMAND_NOT_FOUND: notFoundTapError('COMMAND_NOT_FOUND', '--command-id', '9'),
+    COMMAND_NOT_FOUND: {
+      invocation: 'cypress tap command --test-id r7 --command-id 9',
+      failure: notFoundTapError('COMMAND_NOT_FOUND', '--command-id', '9'),
+    },
     // packages/app/src/tap/test-state.ts
-    AMBIGUOUS_COMMAND: new TapError('AMBIGUOUS_COMMAND', { detail: '"3" matches h2:3 (before each) and r4:3 — e.g. "h2:3".' }),
+    AMBIGUOUS_COMMAND: {
+      invocation: 'cypress tap command --test-id r7 --command-id 3',
+      failure: new TapError('AMBIGUOUS_COMMAND', { detail: '"3" matches h2:3 (before each) and r4:3 — e.g. "h2:3".' }),
+    },
     // packages/app/src/tap/commands/pin.ts
-    SNAPSHOT_NOT_FOUND: notFoundTapError('SNAPSHOT_NOT_FOUND', '--at', 'middle', 'This command has: before, after.'),
+    SNAPSHOT_NOT_FOUND: {
+      invocation: 'cypress tap pin --test-id r7 --command-id 3 --at middle',
+      failure: notFoundTapError('SNAPSHOT_NOT_FOUND', '--at', 'middle', 'This command has: before, after.'),
+    },
     // packages/app/src/tap/commands/pin.ts
-    SNAPSHOT_UNAVAILABLE: new TapError('SNAPSHOT_UNAVAILABLE', { detail: 'The app under test did not take the pin.' }),
+    SNAPSHOT_UNAVAILABLE: {
+      invocation: 'cypress tap pin --test-id r7 --command-id 3',
+      failure: new TapError('SNAPSHOT_UNAVAILABLE', { detail: 'The app under test did not take the pin.' }),
+    },
     // packages/app/src/tap/commands/pin.ts
-    PIN_TARGET_REQUIRED: new TapError('PIN_TARGET_REQUIRED'),
+    PIN_TARGET_REQUIRED: {
+      invocation: 'cypress tap pin',
+      failure: new TapError('PIN_TARGET_REQUIRED'),
+    },
     // packages/app/src/tap/tap-manager.ts; also cli/lib/tap/build-program.ts
-    UNKNOWN_COMMAND: unknownCommandTapError('oel2k', 'This Cypress (v15.4.0) offers: status, specs, run, dom, reporter.'),
+    UNKNOWN_COMMAND: {
+      invocation: 'cypress tap oel2k',
+      failure: unknownCommandTapError('oel2k', 'This Cypress (v15.4.0) offers: status, specs, run, dom, reporter.'),
+    },
     // cli/lib/tap/build-program.ts; also packages/app/src/tap/exec-args.ts
-    UNKNOWN_OPTION: unknownOptionTapError('--bogus', 'Usage: cypress tap dom [options]'),
+    UNKNOWN_OPTION: {
+      invocation: 'cypress tap dom --bogus',
+      failure: unknownOptionTapError('--bogus', 'Usage: cypress tap dom [options]'),
+    },
     // packages/app/src/tap/exec-args.ts
-    INVALID_ARGUMENTS: new TapError('INVALID_ARGUMENTS', { detail: '"run" is missing the required <spec> argument(s).\n\nUsage: cypress tap run <spec>' }),
+    INVALID_ARGUMENTS: {
+      invocation: 'cypress tap run',
+      failure: new TapError('INVALID_ARGUMENTS', { detail: '"run" is missing the required <spec> argument(s).\n\nUsage: cypress tap run <spec>' }),
+    },
     // packages/app/src/tap/exec-args.ts
-    INVALID_OPTIONS: new TapError('INVALID_OPTIONS', { detail: '"reporter" is missing the required --test-id option.\n\nUsage: cypress tap reporter [options]' }),
+    INVALID_OPTIONS: {
+      invocation: 'cypress tap reporter',
+      failure: new TapError('INVALID_OPTIONS', { detail: '"reporter" is missing the required --test-id option.\n\nUsage: cypress tap reporter [options]' }),
+    },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/commands/reporter.ts
-    MISSING_COMPANION_OPTION: missingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.'),
+    MISSING_COMPANION_OPTION: {
+      invocation: 'cypress tap dom --at 1',
+      failure: missingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.'),
+    },
     // packages/app/src/tap/tap-manager.ts
-    INVALID_PAYLOAD: new TapError('INVALID_PAYLOAD', { detail: '"dom" received a non-object args payload, rather than one keyed by name.' }),
+    INVALID_PAYLOAD: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('INVALID_PAYLOAD', { detail: '"dom" received a non-object args payload, rather than one keyed by name.' }),
+    },
     // cli/lib/tap/aut/single-match.ts; also packages/app/src/tap/exec-args.ts
-    INVALID_VALUE: invalidValueTapError('--at', '0 to 2, since ".item" matched 3 elements', '5'),
+    INVALID_VALUE: {
+      invocation: 'cypress tap dom --selector ".item" --at 5',
+      failure: invalidValueTapError('--at', '0 to 2, since ".item" matched 3 elements', '5'),
+    },
   }
 
   // The Record type already forces this at compile time; asserting it too makes a
@@ -381,10 +497,14 @@ describe('lib/tap error rendering catalogue', () => {
   })
 
   for (const code of Object.keys(TAP_ERROR_COPY) as TapErrorCode[]) {
-    it(`renders ${code} as a caller sees it`, async () => {
-      await renderTapFailure(REPRESENTATIVE[code])
+    it(code, async () => {
+      const { invocation, failure } = REPRESENTATIVE[code]
 
-      expect(stripAnsi(vi.mocked(console.error).mock.calls.flat().join(' '))).toMatchSnapshot()
+      await renderTapFailure(failure)
+
+      const printed = stripAnsi(vi.mocked(console.error).mock.calls.flat().join(' '))
+
+      expect(`> ${invocation}\n${printed}`).toMatchSnapshot()
     })
   }
 })
