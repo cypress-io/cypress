@@ -31,6 +31,8 @@ const READY_TIMEOUT_MS = 120000
 const SETTLE_TIMEOUT_MS = 120000
 const POLL_INTERVAL_MS = 500
 
+const STATUS_TIMEOUT_MS = 30000
+
 // Mirrors app_data.path(): join(ospath.data(), PRODUCT_NAME, 'cy', folder, ...) where
 // folder is CYPRESS_CONFIG_ENV. Computed rather than read from app_data, because
 // app_data reads process.env at call time and mutating it here would move the app-data
@@ -196,7 +198,7 @@ const buildInstance = async (booted: BootedInstance, options: OpenTapInstanceOpt
 
   const status = async (): Promise<TapStatus> => {
     // status exits 0 for any determinable stage, so the JSON field is the signal.
-    return (await runTap(['--json', 'status'], projectRoot)).json<TapStatus>()
+    return (await runTap(['--json', '--timeout', String(STATUS_TIMEOUT_MS), 'status'], projectRoot)).json<TapStatus>()
   }
 
   const failWithContext = async (message: string): Promise<never> => {
