@@ -1136,7 +1136,12 @@ describe('tap CLI reading a pinned snapshot', function () {
 
     expect(result.exitCode).to.eq(0)
 
-    snapshotRendering('command detail of a click', result.stdout)
+    snapshotRendering('command detail of a click', result.stdout, [
+      // The click lands in the middle of the button, so where that is depends on how the
+      // browser lays the fixture out — a pixel either way across platforms and font metrics.
+      [/^( +)x +\d+$/m, '$1x  <x>'],
+      [/^( +)y +\d+$/m, '$1y  <y>'],
+    ])
   })
 
   it('exits 1 with PIN_TARGET_REQUIRED when given nothing to pin or clear', async () => {

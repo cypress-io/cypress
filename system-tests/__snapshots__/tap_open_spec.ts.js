@@ -175,8 +175,8 @@ CONSOLE PROPS
   Applied To  <button#toggle>
   Elements    1
   Coords
-    x  34
-    y  37
+    x  <x>
+    y  <y>
 
 MOUSE EVENTS (9)
   Event Type   Target Element   Prevented Default  Stopped Propagation  Active Modifiers
