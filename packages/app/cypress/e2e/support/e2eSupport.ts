@@ -8,6 +8,9 @@ Cypress.on('window:before:load', (win) => {
   // graphql over fetch instead of web sockets.
   // This allows you to intercept GraphQL with `cy.intercept`.
   // By default, we use web sockets.
+  // DIAGNOSTIC(proxy-off debug pair): remove before merge
+  // eslint-disable-next-line no-console
+  console.error('[gql-no-socket] SUPPORT before:load fired; flag was:', win.__CYPRESS_GQL_NO_SOCKET__, 'href:', win.location.href)
   win.__CYPRESS_GQL_NO_SOCKET__ = undefined
 })
 

@@ -382,6 +382,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     const autFrame = this._findAutFrame(this.frameTree)
 
+    // DIAGNOSTIC(proxy-off debug pair): remove before merge
+    // eslint-disable-next-line no-console
+    console.log(
+      '[aut-check] frameId:', frameId,
+      '->', !!autFrame && autFrame.frame.id === frameId,
+      '| autFrame:', autFrame?.frame?.id, JSON.stringify(autFrame?.frame?.name),
+      '| top children:', JSON.stringify((this.frameTree?.childFrames || []).map((f) => ({ id: f.frame?.id, name: f.frame?.name, url: f.frame?.url }))),
+      '| selfEnv:', !!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF,
+    )
+
     return !!autFrame && autFrame.frame.id === frameId
   }
 

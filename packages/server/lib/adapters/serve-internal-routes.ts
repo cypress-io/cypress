@@ -1,7 +1,7 @@
 import { toIdentityResponse } from '@packages/proxy'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 type ServeInternalRoutesConfig = InternalRouteConfig
@@ -99,6 +99,18 @@ export function createServeInternalRoutesMiddleware ({
         headers: { 'content-type': 'text/plain' },
         body: 'Not Found',
       }
+    }
+
+    // In cypress-in-cypress the inner Cypress shares the browser page with the
+    // parent, so a request can belong to both pipelines at once — the inner's
+    // runner document IS the parent's AUT document. Fulfilling it here answers
+    // the pause before the parent's interception ever sees it, so the parent
+    // cannot inject (window:before:load dies silently). Requests that already
+    // target our own server reach Express over the wire without our help, so
+    // release them and leave the pause chain to the parent. Foreign-origin
+    // internal routes (e.g. the CT dev server origin) still need the loopback.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && isCypressServerOrigin(request.url, config)) {
+      return next(request)
     }
 
     // Fulfill via Express for both same-origin and cross-origin internals.

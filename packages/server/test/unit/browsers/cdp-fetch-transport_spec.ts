@@ -273,6 +273,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -318,6 +319,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
       })
@@ -345,6 +347,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -377,6 +380,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -411,6 +415,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -426,6 +431,7 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('origin').toString('base64'),
         fulfilled: true,
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -588,6 +594,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'sw-fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       }, 'sw-session')
     })
   })
@@ -614,6 +621,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -939,6 +947,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -984,6 +993,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -1016,6 +1026,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
@@ -1063,6 +1074,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/css',
@@ -1113,6 +1125,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [
           { name: 'content-type', value: 'application/octet-stream' },
           { name: 'x-custom', value: 'yes' },
@@ -1145,6 +1158,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -1191,6 +1205,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'download-pause-id',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -1251,11 +1266,13 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'first-request-pause-id',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'second-request-pause-id',
         responseCode: 201,
+        responsePhrase: 'Created',
       })
     })
 
@@ -1296,6 +1313,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'second-request-pause-id',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -1355,6 +1373,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 0,
+        responsePhrase: 'unknown',
       })
     })
 
@@ -1407,6 +1426,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       }, 'session-1')
     })
 
@@ -1451,6 +1471,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -1491,6 +1512,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -1660,7 +1682,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'fetch-request',
         method: 'POST',
-        postData: 'payload',
+        postData: 'cGF5bG9hZA==',
         headers: [{
           name: 'accept-encoding',
           value: 'gzip, deflate',
@@ -1717,7 +1739,7 @@ describe('CdpFetchTransport', () => {
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
 
-      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200 }).rejects(new Error('continueResponse failed'))
+      client.send.withArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200, responsePhrase: 'OK' }).rejects(new Error('continueResponse failed'))
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
@@ -1732,6 +1754,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
 
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
@@ -1786,6 +1809,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 201,
+        responsePhrase: 'Created',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -1891,6 +1915,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 302,
+        responsePhrase: 'Found',
       })
     })
 
@@ -1972,6 +1997,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
 
       expect(middlewareSawResponse).to.have.been.calledWith({
@@ -2022,6 +2048,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -2073,6 +2100,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 202,
+        responsePhrase: 'Accepted',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2129,6 +2157,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 204,
+        responsePhrase: 'No Content',
         responseHeaders: [{
           name: 'x-verbatim',
           value: 'empty',
@@ -2408,6 +2437,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
@@ -2454,6 +2484,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2503,6 +2534,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2555,6 +2587,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -2612,6 +2645,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 418,
+        responsePhrase: 'I\'m a Teapot',
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
@@ -2642,6 +2676,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -2670,6 +2705,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'application/json',
@@ -2711,6 +2747,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -2745,6 +2782,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'Content-Encoding',
           value: 'gzip',
@@ -2791,6 +2829,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [],
         body: Buffer.from('mutated').toString('base64'),
       })

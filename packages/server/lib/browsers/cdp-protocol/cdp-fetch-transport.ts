@@ -1,5 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
+import { STATUS_CODES } from 'http'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
@@ -390,6 +391,12 @@ export class CdpFetchTransport {
         ? await this.options.isAUTFrame(event.frameId)
         : false
 
+      // DIAGNOSTIC(proxy-off debug pair): remove before merge
+      if (event.resourceType === 'Document') {
+        // eslint-disable-next-line no-console
+        console.log('[aut-mark]', event.request.url, 'frameId:', event.frameId, 'marked:', markAsAUTFrame)
+      }
+
       if (markAsAUTFrame) {
         debug('marking AUT frame document %s', event.request.url)
         // Node's IncomingMessage lowercases headers on the MITM path; the
@@ -440,7 +447,14 @@ export class CdpFetchTransport {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
           ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
-          ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
+          // Fetch.continueRequest's postData is a CDP binary param (base64
+          // over JSON); the pause's event.request.postData is plaintext, so
+          // only the outgoing value is encoded. Sending plaintext makes CDP
+          // reject the continue ("invalid base64 string") — or worse, accept
+          // base64-shaped plaintext and hand the origin corrupted bytes.
+          ...(outbound.postData !== event.request.postData
+            ? { postData: Buffer.from(outbound.postData ?? '', 'utf8').toString('base64') }
+            : {}),
           ...(headers ? { headers } : {}),
         }, outbound.sessionId)
 
@@ -479,6 +493,11 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // CDP rejects a status code it has no built-in reason phrase for
+          // ("Invalid http status code or phrase"), which turns req.reply(777)
+          // into a silently released pause. Node's MITM path serves unknown
+          // codes with the phrase "unknown"; mirror that.
+          responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
@@ -488,6 +507,7 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
         }, response.sessionId)
       }
