@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { querySessionGraphql } from '../../../lib/tap/session-gql'
 import type { LiveSessionState } from '../../../lib/cypress-sessions'
-import { errors } from '../../../lib/errors'
 
 const session: LiveSessionState = {
   schemaVersion: 1,
@@ -56,8 +55,7 @@ describe('lib/tap/session-gql', () => {
     fetchMock.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlUnreachable,
+      code: 'GRAPHQL_UNREACHABLE',
       message: expect.stringContaining('ECONNREFUSED'),
     })
   })
@@ -66,8 +64,7 @@ describe('lib/tap/session-gql', () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500))
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlUnreachable,
+      code: 'GRAPHQL_UNREACHABLE',
       message: expect.stringContaining('500'),
     })
   })
@@ -76,8 +73,7 @@ describe('lib/tap/session-gql', () => {
     fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapOutdatedProtocol,
+      code: 'SESSION_OUTDATED',
       message: expect.stringContaining('redirected'),
     })
   })
@@ -86,8 +82,7 @@ describe('lib/tap/session-gql', () => {
     fetchMock.mockResolvedValue(jsonResponse({ errors: [{ message: 'resolver exploded' }] }))
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlFailed,
+      code: 'GRAPHQL_FAILED',
       message: expect.stringContaining('resolver exploded'),
     })
   })
@@ -97,8 +92,7 @@ describe('lib/tap/session-gql', () => {
       fetchMock.mockResolvedValue(jsonResponse({ errors: malformedErrors }))
 
       await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-        known: true,
-        details: errors.tapGraphqlFailed,
+        code: 'GRAPHQL_FAILED',
       })
     }
   })
@@ -109,8 +103,7 @@ describe('lib/tap/session-gql', () => {
     } })
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      known: true,
-      details: errors.tapGraphqlFailed,
+      code: 'GRAPHQL_FAILED',
     })
   })
 
@@ -119,8 +112,7 @@ describe('lib/tap/session-gql', () => {
       fetchMock.mockResolvedValue(jsonResponse(payload))
 
       await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-        known: true,
-        details: errors.tapGraphqlFailed,
+        code: 'GRAPHQL_FAILED',
       })
     }
   })

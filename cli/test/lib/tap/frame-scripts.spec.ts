@@ -12,24 +12,6 @@ afterEach(() => {
 const stubDocument = (doc: unknown) => vi.stubGlobal('document', doc)
 
 describe('lib/tap/aut/scripts readDom', () => {
-  it('returns the whole-document HTML when no selector is given', () => {
-    stubDocument({ documentElement: { outerHTML: '<html>hi</html>' } })
-
-    expect(readDom(null, 30000, 0)).to.deep.eq({ html: '<html>hi</html>' })
-  })
-
-  it('truncates and flags the whole-document HTML past the cap', () => {
-    stubDocument({ documentElement: { outerHTML: '<html>too long</html>' } })
-
-    expect(readDom(null, 4, 0)).to.deep.eq({ html: '<htm', truncated: true })
-  })
-
-  it('returns an empty string when there is no documentElement', () => {
-    stubDocument({ documentElement: null })
-
-    expect(readDom(null, 30000, 0)).to.deep.eq({ html: '' })
-  })
-
   it('returns the matched element in selector mode', () => {
     stubDocument({ querySelectorAll: () => [{ outerHTML: '<a></a>' }] })
 

@@ -1,32 +1,6 @@
 import { TAP_COMMANDS } from '../contract'
 import type { TapCoercedOptions, TapCoercedParams, TapCommandName, TapCommandOptionSchema, TapCommandParamSchema } from '../contract'
 
-/**
- * Thrown by a handler to report a domain failure (no run mounted, no such test
- * or spec). `exec` turns it into an `{ error: { code, message } }` envelope; any
- * other throw escapes as a binding bug. `code` is command-defined, not part of
- * the frozen contract.
- */
-export class TapCommandError extends Error {
-  code: string
-
-  constructor (code: string, message: string) {
-    super(message)
-    this.name = 'TapCommandError'
-    this.code = code
-  }
-}
-
-/**
- * The domain failure every command that reads a run reports when there is no
- * run to read: none has been requested, or the requested one has not started
- * yet (its spec is still building). Shared so every command that reads a run
- * answers a poller with one wording.
- */
-export const noRunError = (): TapCommandError => {
-  return new TapCommandError('NO_RUN', 'No spec has been started yet. Use the run command to start a spec.')
-}
-
 type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[number], { name: N }>
 
 /**
@@ -36,6 +10,9 @@ type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[numbe
  * app-side handler and types the handler against the named entry — no annotations,
  * `handler: async ({ spec }, { headed }) => …`. Everything a handler takes or
  * returns must be JSON-serializable per `../contract`.
+ *
+ * A handler reports a domain failure by throwing `TapError`, which `exec` turns
+ * into the wire envelope; any other throw escapes as a binding bug.
  */
 export const defineCommand = <N extends TapCommandName>(
   name: N,

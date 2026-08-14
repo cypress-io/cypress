@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { extractDom } from '../../../lib/tap/commands/dom'
-import { FrameCommandError } from '../../../lib/tap/aut/frame'
+import { TapError } from '@packages/cypress-sessions'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
-// In selector mode the single-element guard counts matches first, so a session
+// In selector mode the single-element guard counts matches first, so a connection
 // serves its responses in order: the count, then the read.
 const MATCHED_ONE = { value: { count: 1 } }
 
@@ -19,13 +19,13 @@ describe('lib/tap/commands/dom extractDom', () => {
       callFunctionOn.mockResolvedValueOnce({ result: { value }, exceptionDetails })
     }
 
-    const session = {
+    const connection = {
       call: vi.fn(),
       client: { Page: { createIsolatedWorld }, Runtime: { callFunctionOn } },
       sessionId: SESSION_ID,
     } as unknown as TapConnection
 
-    return { session, createIsolatedWorld, callFunctionOn }
+    return { connection, createIsolatedWorld, callFunctionOn }
   }
 
   const frame = { frameId: 'aut-frame-id' }
@@ -42,80 +42,71 @@ describe('lib/tap/commands/dom extractDom', () => {
     return result
   }
 
-  it('returns the whole-document HTML when no selector is given', async () => {
-    const { session, createIsolatedWorld, callFunctionOn } = makeSession([{ value: { html: '<html>hi</html>' } }])
+  it('returns the matched element, forwarding the selector and maxChars', async () => {
+    const { connection, createIsolatedWorld, callFunctionOn } = makeSession([MATCHED_ONE, { value: { found: true, html: '<a></a>' } }])
 
-    const result = await extractDom(session, frame, undefined, 30000)
+    const result = await extractDom(connection, frame, '.x', 100)
 
-    expect(result).to.deep.eq({ html: '<html>hi</html>' })
-    // Isolated world is created for the resolved AUT frame, on its session.
+    expect(result).to.deep.eq({ found: true, html: '<a></a>' })
+    // Isolated world is created for the resolved AUT frame, on its connection.
     expect(createIsolatedWorld).toHaveBeenCalledWith({ frameId: 'aut-frame-id', worldName: 'cypress-tap' }, SESSION_ID)
-    // selector (null when absent) and maxChars are forwarded as call arguments.
-    expect(callFunctionOn.mock.calls[0][0]).toMatchObject({
+    expect(callFunctionOn.mock.calls[1][0]).toMatchObject({
       executionContextId: 42,
-      arguments: [{ value: null }, { value: 30000 }, { value: 0 }],
+      arguments: [{ value: '.x' }, { value: 100 }, { value: 0 }],
       returnByValue: true,
     })
 
-    expect(callFunctionOn.mock.calls[0][1]).to.eq(SESSION_ID)
-  })
-
-  it('returns the matched element (and forwards the selector) in selector mode', async () => {
-    const { session, callFunctionOn } = makeSession([MATCHED_ONE, { value: { found: true, html: '<a></a>' } }])
-
-    const result = await extractDom(session, frame, '.x', 100)
-
-    expect(result).to.deep.eq({ found: true, html: '<a></a>' })
-    expect(callFunctionOn.mock.calls[1][0].arguments).to.deep.eq([{ value: '.x' }, { value: 100 }, { value: 0 }])
+    expect(callFunctionOn.mock.calls[1][1]).to.eq(SESSION_ID)
   })
 
   it('returns found:false when the selector matches nothing', async () => {
-    const { session } = makeSession([{ value: { count: 0 } }, { value: { found: false } }])
+    const { connection } = makeSession([{ value: { count: 0 } }, { value: { found: false } }])
 
-    const result = await extractDom(session, frame, '.missing', 100)
+    const result = await extractDom(connection, frame, '.missing', 100)
 
     expect(result).to.deep.eq({ found: false })
   })
 
   it('answers a selector matching more than one element instead of reading', async () => {
-    const { session, callFunctionOn } = makeSession([{ value: { count: 3 } }])
+    const { connection, callFunctionOn } = makeSession([{ value: { count: 3 } }])
 
-    expect(await extractDom(session, frame, '.x', 100)).to.deep.include({ ambiguous: true, selector: '.x', count: 3 })
+    expect(await extractDom(connection, frame, '.x', 100)).to.deep.include({ ambiguous: true, selector: '.x', count: 3 })
     // The read itself never runs — the count is the only call.
     expect(callFunctionOn).toHaveBeenCalledTimes(1)
   })
 
   it('reads the match --at names instead of answering with the list', async () => {
-    const { session, callFunctionOn } = makeSession([{ value: { count: 3 } }, { value: { found: true, html: '<c></c>' } }])
+    const { connection, callFunctionOn } = makeSession([{ value: { count: 3 } }, { value: { found: true, html: '<c></c>' } }])
 
-    const result = await readDom(session, frame, '.x', 100, 2)
+    const result = await readDom(connection, frame, '.x', 100, 2)
 
     expect(result).to.deep.eq({ found: true, html: '<c></c>' })
     expect(callFunctionOn.mock.calls[1][0].arguments).to.deep.eq([{ value: '.x' }, { value: 100 }, { value: 2 }])
   })
 
   it('reports truncation from the browser-side cap', async () => {
-    const { session } = makeSession([{ value: { html: '<htm', truncated: true } }])
+    const { connection } = makeSession([MATCHED_ONE, { value: { found: true, html: '<htm', truncated: true } }])
 
-    const result = await readDom(session, frame, undefined, 4)
+    const result = await readDom(connection, frame, '.x', 4)
 
     expect(result.truncated).to.eq(true)
     expect(result.html).to.eq('<htm')
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
-    const { session } = makeSession([{ value: { invalidSelector: true } }])
+  it('reports a rejected selector as the value it was given', async () => {
+    const { connection } = makeSession([{ value: { invalidSelector: true } }])
 
-    await expect(extractDom(session, frame, '>>bad', 100)).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'INVALID_SELECTOR',
+    await expect(extractDom(connection, frame, '>>bad', 100)).rejects.toMatchObject({
+      name: 'TapError',
+      code: 'INVALID_VALUE',
+      detail: 'Expected `--selector` to be a valid CSS selector.\n\nInstead the value was: ">>bad"',
     })
   })
 
   it('maps a CDP evaluation exception to FRAME_READ_FAILED', async () => {
-    const failing = () => makeSession([{ exceptionDetails: { text: 'boom', exception: { description: 'boom' } } }]).session
+    const failing = () => makeSession([MATCHED_ONE, { exceptionDetails: { text: 'boom', exception: { description: 'boom' } } }]).connection
 
-    await expect(extractDom(failing(), frame, undefined, 100)).rejects.toBeInstanceOf(FrameCommandError)
-    await expect(extractDom(failing(), frame, undefined, 100)).rejects.toMatchObject({ code: 'FRAME_READ_FAILED' })
+    await expect(extractDom(failing(), frame, '.x', 100)).rejects.toBeInstanceOf(TapError)
+    await expect(extractDom(failing(), frame, '.x', 100)).rejects.toMatchObject({ code: 'FRAME_READ_FAILED' })
   })
 })

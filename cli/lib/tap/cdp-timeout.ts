@@ -1,6 +1,6 @@
 import type CRI from 'chrome-remote-interface'
 
-import { CypressSessionError } from '../cypress-sessions'
+import { isTapError, TapError } from '../cypress-sessions'
 
 /** Bound for a protocol call, including one awaiting app-side work. */
 export const DEFAULT_CDP_TIMEOUT_MS = 30_000
@@ -12,15 +12,17 @@ export const DEFAULT_CDP_TIMEOUT_MS = 30_000
  */
 export const FIND_SESSION_TIMEOUT_MS = 2_000
 
-const unresponsive = (what: string, ms: number): CypressSessionError => {
-  return new CypressSessionError(
-    'RENDERER_UNRESPONSIVE',
-    `The targeted Cypress session did not answer ${what} within ${ms}ms. The browser is reachable, but the page running Cypress is not responding — it may be paused in devtools, stuck in a loop, or starved of memory. Pass --timeout <ms> to wait longer.`,
-  )
+// Which call went unanswered is a protocol detail, so it stays on the diagnostic;
+// how long we waited is the part the user can act on with `--timeout`.
+const unresponsive = (what: string, ms: number): TapError => {
+  return new TapError('RENDERER_UNRESPONSIVE', {
+    detail: `No response within the specified timeout (${ms}ms).`,
+    message: `No reply to ${what} within ${ms}ms.`,
+  })
 }
 
 export const isRendererUnresponsive = (err: unknown): boolean => {
-  return err instanceof CypressSessionError && err.code === 'RENDERER_UNRESPONSIVE'
+  return isTapError(err) && err.code === 'RENDERER_UNRESPONSIVE'
 }
 
 /**

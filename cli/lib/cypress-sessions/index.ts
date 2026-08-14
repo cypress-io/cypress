@@ -1,13 +1,13 @@
 import path from 'path'
 
-import { CypressSessionError, isTapSupportedBrowser } from './record'
+import { TapError, SessionNotFoundTapError, isTapSupportedBrowser } from './record'
 import type { LiveSessionState, ReadySessionState, CypressSession } from './record'
 import { isPidAlive, verifySessionRecord } from './liveness'
 import { readLiveSessions } from './store'
 
-export { CypressSessionError, SESSIONS_DIRNAME, isTapSupportedBrowser } from './record'
+export { TAP_TARGET, TapError, isTapError, SESSIONS_DIRNAME, isTapSupportedBrowser } from './record'
 
-export type { LiveSessionState, ReadySessionState, CypressSessionErrorCode, CypressSession } from './record'
+export type { LiveSessionState, ReadySessionState, CypressSession } from './record'
 
 export { isPidAlive, verifySessionRecord } from './liveness'
 
@@ -82,14 +82,6 @@ export const resolvedSessionIdentity = (): ResolvedSessionIdentity | null => las
 
 export const resolvedSessionId = (): string | null => lastResolvedIdentity?.sessionId ?? null
 
-const describeFilter = (session: number | undefined): string => {
-  if (session !== undefined) {
-    return ` with pid ${session}`
-  }
-
-  return ''
-}
-
 const lowestPid = <T extends LiveSessionState>(sessions: T[]): T => {
   return [...sessions].sort((a, b) => a.pid - b.pid)[0]
 }
@@ -110,16 +102,9 @@ const selectSession = <T extends LiveSessionState>(candidates: T[], options: Res
   return { session: lowestPid(candidates), reason: 'arbitrary' }
 }
 
-const describeSession = (sessions: LiveSessionState[], session: number | undefined): string => {
-  if (sessions.length === 1) {
-    return ` (pid ${sessions[0].pid}, ${sessions[0].projectRoot})`
-  }
-
-  return describeFilter(session)
-}
-
-// Reads, filters by pid, and probes for liveness. Throws NO_SESSION when
-// nothing matches, STALE_SESSION when matches exist but none responds, and
+// Reads, filters by pid, and probes for liveness. Throws when nothing matches —
+// SESSION_NOT_FOUND for a pid that named nothing, NO_SESSION when none was asked
+// for — STALE_SESSION when matches exist but none responds, and
 // UNSUPPORTED_BROWSER when every one that does has a browser tap cannot drive.
 const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionState[]> => {
   const { session, probeTimeoutMs } = options
@@ -128,19 +113,15 @@ const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionS
   const matches = records.filter((record) => matchesSession(record, session))
 
   if (matches.length === 0) {
-    throw new CypressSessionError(
-      'NO_SESSION',
-      `No Cypress session found${describeFilter(session)}. This command requires Cypress running in open mode. Start Cypress in open mode and try again.`,
-    )
+    throw session === undefined
+      ? new TapError('NO_SESSION')
+      : new SessionNotFoundTapError(session)
   }
 
   const live = await probeMatches(matches, probeTimeoutMs)
 
   if (live.length === 0) {
-    throw new CypressSessionError(
-      'STALE_SESSION',
-      `Cypress was previously running${describeFilter(session)}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode and try again.`,
-    )
+    throw new TapError('STALE_SESSION')
   }
 
   // Dropped before selection so a session running an unsupported browser never
@@ -149,10 +130,7 @@ const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionS
   const supported = live.filter((record) => isTapSupportedBrowser(record.browserFamily))
 
   if (supported.length === 0) {
-    throw new CypressSessionError(
-      'UNSUPPORTED_BROWSER',
-      'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.',
-    )
+    throw new TapError('UNSUPPORTED_BROWSER')
   }
 
   return supported
@@ -180,10 +158,7 @@ export const resolveSession = async (options: ResolveSessionOptions): Promise<Se
   const ready = live.filter((record): record is ReadySessionState => record.cdpBrowserWsUrl !== null)
 
   if (ready.length === 0) {
-    throw new CypressSessionError(
-      'NO_BROWSER_ATTACHED',
-      `Cypress is running${describeSession(live, options.session)}, but no test browser is open. Open a browser in Cypress and try again.`,
-    )
+    throw new TapError('NO_BROWSER_ATTACHED')
   }
 
   const { session: selected, reason } = selectSession(ready, options)

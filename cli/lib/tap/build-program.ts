@@ -3,6 +3,7 @@ import commander from 'commander'
 import { tapCliCommands } from './commands'
 import { DEFAULT_CDP_TIMEOUT_MS } from './cdp-timeout'
 import type { TapCliCommand } from './types'
+import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-sessions'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-sessions'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
@@ -81,15 +82,76 @@ const forwardedArgs = (params: readonly TapCommandParamSchema[], args: readonly 
   return forwarded
 }
 
+// commander's own answers to a malformed invocation — an unknown name or flag, a
+// required input left out — are patched CLI-wide (see `lib/cli.ts`) to print their
+// own wording and exit the process. tap raises them as the tap failures they are and
+// lets them unwind to the one place every tap failure renders, so the replacements
+// land on the instance, where they take precedence over that patched prototype. The
+// generated help is the remedy for all of them: whatever the reader typed, it names
+// what they could have.
+type InvalidInputHandlers = commander.Command & {
+  _allowUnknownOption?: boolean
+  unknownOption(flag: string): void
+  unknownCommand(): void
+  missingArgument(name: string): void
+  optionMissingArgument(option: commander.Option): void
+  missingMandatoryOptionValue(option: commander.Option): void
+}
+
+const answerUnknownOption = (command: commander.Command): void => {
+  (command as InvalidInputHandlers).unknownOption = function (flag: string): void {
+    if (this._allowUnknownOption) {
+      return
+    }
+
+    throw new UnknownOptionTapError(flag)
+  }
+}
+
+const answerUnknownCommand = (program: commander.Command): void => {
+  (program as InvalidInputHandlers).unknownCommand = function (): void {
+    throw new UnknownCommandTapError(this.args[0])
+  }
+}
+
+// The flag as the reader would have typed it: every tap option declares a long
+// form, and the raw flags stand in for anything that somehow does not.
+const flagOf = (option: commander.Option): string => option.long || option.flags
+
+/**
+ * The three ways commander finds an invocation short of what the command declares.
+ * A missing positional is reported for all of them at once — commander announces
+ * only the first, while the reader is better served by the whole list — hence the
+ * declared params rather than the name commander passed, which stands in only if
+ * nothing else can be matched to it.
+ */
+const answerMissingInput = (command: commander.Command, name: string, params: readonly TapCommandParamSchema[]): void => {
+  const handlers = command as InvalidInputHandlers
+
+  handlers.missingArgument = function (missing: string): void {
+    const absent = params.filter(({ required }, index) => required && this.args[index] === undefined).map((param) => param.name)
+
+    throw new MissingArgumentsTapError(name, absent.length ? absent : [missing])
+  }
+
+  handlers.optionMissingArgument = function (option: commander.Option): void {
+    throw new TapError('INVALID_OPTIONS', { detail: `"${name}" was given the ${flagOf(option)} option without a value.` })
+  }
+
+  handlers.missingMandatoryOptionValue = function (option: commander.Option): void {
+    throw new MissingOptionTapError(name, flagOf(option).replace(/^--/, ''))
+  }
+}
+
 const rejectExcessArguments = (name: string, params: readonly TapCommandParamSchema[], args: readonly string[]): void => {
   if (args.length <= params.length) {
     return
   }
 
-  const message = `error: too many arguments for '${name}'. Expected ${params.length} argument(s) but got ${args.length}.`
+  const given = args.length === 1 ? '1 argument was' : `${args.length} arguments were`
+  const takes = params.length === 0 ? 'takes none' : `takes at most ${params.length}`
 
-  console.error(message)
-  throw new commander.CommanderError(1, 'commander.excessArguments', message)
+  throw new TapError('INVALID_ARGUMENTS', { detail: `${given} passed to "${name}", but it ${takes}.` })
 }
 
 const forwardedOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): Record<string, string> => {
@@ -127,6 +189,8 @@ const declareCommand = (program: commander.Command, spec: CommandSpec, dispatch?
   }
 
   declareOptions(command, options)
+  answerUnknownOption(command)
+  answerMissingInput(command, name, params)
 
   if (dispatch) {
     command.action(() => {
@@ -144,6 +208,9 @@ const newProgram = (): commander.Command => {
   program.addHelpCommand(false)
   program.description('Interacts with a running Cypress session')
   program.usage('[command] [args...] [options]')
+  answerUnknownOption(program)
+  answerUnknownCommand(program)
+  answerMissingInput(program, program.name(), [])
 
   return program
 }

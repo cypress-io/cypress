@@ -5,7 +5,8 @@ import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
 
-const docsUrl = 'https://on.cypress.io'
+export const docsUrl = 'https://on.cypress.io'
+
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
 
@@ -403,60 +404,6 @@ export const exitWithError = (info: any) => {
   }
 }
 
-const tapCdpUnreachable = {
-  description: 'Lost the debugging connection to the browser Cypress is running.',
-  solution: 'The browser may have just closed. Make sure Cypress is running with a browser open, then try again.',
-}
-
-const tapBindingNotFound = {
-  description: 'Could not connect to the Cypress session.',
-  solution: stripIndent`
-    The session may still be loading — try again in a moment.
-
-    If the problem persists, the browser tab running Cypress may have been closed. Open a browser in Cypress and try again.
-  `,
-}
-
-const tapBindingThrew = {
-  description: 'The Cypress session failed while running the tap command.',
-  solution: genericErrorSolution,
-}
-
-const tapStaleHandle = {
-  description: 'The Cypress session navigated while running the command.',
-  solution: 'Try running the command again.',
-}
-
-const tapInvalidSchema = {
-  description: 'The running Cypress returned a tap schema this CLI does not recognize.',
-  solution: `The running version of Cypress may not support ${chalk.cyan('cypress tap')}.`,
-}
-
-const tapUnsupportedProtocol = {
-  description: 'The running Cypress is newer than this CLI and uses a tap protocol it does not understand.',
-  solution: `Update the CLI (${chalk.cyan('npm install --save-dev cypress@latest')}) and try again.`,
-}
-
-const tapOutdatedProtocol = {
-  description: 'The running Cypress is older than this CLI and speaks an earlier tap protocol.',
-  solution: `Update Cypress in the running project to match this CLI (${chalk.cyan('npm install --save-dev cypress@latest')}), then try again.`,
-}
-
-const tapInvalidExecResult = {
-  description: 'The running Cypress returned a result this CLI does not recognize.',
-  solution: `The running version of Cypress may not support ${chalk.cyan('cypress tap')}.`,
-}
-
-const tapGraphqlUnreachable = {
-  description: 'Could not reach the Cypress session to read its data.',
-  solution: 'The session may have just closed. Make sure Cypress is running in open mode, then try again.',
-}
-
-const tapGraphqlFailed = {
-  description: 'The Cypress session failed while answering a data query.',
-  solution: genericErrorSolution,
-}
-
 export const errors = {
   unknownError,
   nonZeroExitCodeXvfb,
@@ -482,14 +429,4 @@ export const errors = {
   incompatibleTestTypeFlags,
   incompatibleTestingTypeAndFlag,
   invalidConfigFile,
-  tapCdpUnreachable,
-  tapBindingNotFound,
-  tapBindingThrew,
-  tapStaleHandle,
-  tapInvalidSchema,
-  tapUnsupportedProtocol,
-  tapOutdatedProtocol,
-  tapInvalidExecResult,
-  tapGraphqlUnreachable,
-  tapGraphqlFailed,
 }

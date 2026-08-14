@@ -29,17 +29,17 @@ const firstErrorMessage = (envelopeErrors: unknown): string | null => {
 
 const validateEnvelope = <T>(operationName: string, envelope: GraphqlEnvelope | null): T => {
   if (!envelope || typeof envelope !== 'object') {
-    return throwTapError(errors.tapGraphqlFailed, `The session answered ${operationName} with an unrecognizable response.`)
+    return throwTapError('GRAPHQL_FAILED', `The session answered ${operationName} with an unrecognizable response.`)
   }
 
   const errorMessage = firstErrorMessage(envelope.errors)
 
   if (errorMessage !== null) {
-    return throwTapError(errors.tapGraphqlFailed, `The session failed to run ${operationName}: ${errorMessage}`)
+    return throwTapError('GRAPHQL_FAILED', `The session failed to run ${operationName}: ${errorMessage}`)
   }
 
   if (!envelope.data || typeof envelope.data !== 'object') {
-    return throwTapError(errors.tapGraphqlFailed, `The session answered ${operationName} without data.`)
+    return throwTapError('GRAPHQL_FAILED', `The session answered ${operationName} without data.`)
   }
 
   return envelope.data as T
@@ -61,7 +61,7 @@ export const querySessionGraphql = async <TResult>(session: LiveSessionState, op
   } catch (err: any) {
     debug('graphql request %s to pid %d failed: %o', operationName, session.pid, err)
 
-    return throwTapError(errors.tapGraphqlUnreachable, `Could not reach the session to run ${operationName}: ${err.message}`, err)
+    return throwTapError('GRAPHQL_UNREACHABLE', `Could not reach the session to run ${operationName}: ${err.message}`, err)
   }
 
   // A valid request passes the server's force-proxy guard untouched; a redirect
@@ -69,7 +69,7 @@ export const querySessionGraphql = async <TResult>(session: LiveSessionState, op
   // direct tap GraphQL — an older Cypress that predates it (or one that rejected
   // our session-id). Report that instead of the runner HTML as a data error.
   if (response.redirected) {
-    return throwTapError(errors.tapOutdatedProtocol, `The session redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
+    return throwTapError('SESSION_OUTDATED', `The session redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
   }
 
   if (response.status !== 200) {
@@ -79,11 +79,11 @@ export const querySessionGraphql = async <TResult>(session: LiveSessionState, op
 
     debug('graphql request %s to pid %d answered %d: %o', operationName, session.pid, response.status, envelope)
 
-    return throwTapError(errors.tapGraphqlUnreachable, `The session answered ${operationName} with status ${response.status}.`)
+    return throwTapError('GRAPHQL_UNREACHABLE', `The session answered ${operationName} with status ${response.status}.`)
   }
 
   const envelope = await response.json().catch((err) => {
-    return throwTapError(errors.tapGraphqlFailed, `The session answered ${operationName} with a non-JSON response.`, err)
+    return throwTapError('GRAPHQL_FAILED', `The session answered ${operationName} with a non-JSON response.`, err)
   })
 
   return validateEnvelope<TResult>(operationName, envelope as GraphqlEnvelope | null)

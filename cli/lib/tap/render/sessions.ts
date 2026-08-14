@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import type { TapSessionSummary } from '../commands/sessions'
 import { color, columns, layout, panel } from './format'
 
-/** The facts an session row shows — carried by a summary, and by a status. */
+/** The facts a session row shows — carried by a summary, and by a status. */
 export interface SessionRow {
   pid: number
   projectRoot: string

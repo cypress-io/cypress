@@ -1,6 +1,7 @@
 import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from '../aut/frame'
-import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
+import { withResolvedAutFrame } from '../aut/frame'
+import { TapError } from '@packages/cypress-sessions'
 import { parseIndex } from '../utils'
 import { collectTrueStates, querySelectorObjectId } from '../aut/cdp'
 import type { AXValue } from '../aut/cdp'
@@ -115,7 +116,7 @@ export const extractInspect = (
   }, sessionId)
 
   if (info.exceptionDetails) {
-    throw new FrameCommandError('FRAME_READ_FAILED', `inspecting the element failed: ${info.exceptionDetails.exception?.description || info.exceptionDetails.text}`)
+    throw new TapError('FRAME_READ_FAILED', { message: `inspecting the element failed: ${info.exceptionDetails.exception?.description || info.exceptionDetails.text}` })
   }
 
   const { tag, attributes, styles, box } = info.result.value as ElementInfo
@@ -132,6 +133,10 @@ export const extractInspect = (
   }
 })
 
-export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => withResolvedAutFrame(options, (connection, frame) => {
-  return extractInspect(connection, frame, commandOptions.selector, parseIndex(commandOptions.at))
-}, 'inspect'))
+export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => {
+  const at = parseIndex(commandOptions.at)
+
+  return withResolvedAutFrame(options, (connection, frame) => {
+    return extractInspect(connection, frame, commandOptions.selector, at)
+  }, 'inspect')
+})

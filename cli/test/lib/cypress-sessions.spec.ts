@@ -16,8 +16,9 @@ import {
   pruneDeadSessionRecords,
   resolvedSessionId,
   resolvedSessionIdentity,
-  CypressSessionError,
+  TapError,
 } from '../../lib/cypress-sessions'
+import { tapErrorCopy } from '@packages/cypress-sessions'
 
 vi.mock('../../lib/tasks/state', async (importActual) => {
   const actual = await importActual()
@@ -323,11 +324,14 @@ describe('lib/cypress-sessions', () => {
       expect(selection.session.cdpBrowserWsUrl).toBe(CDP_WS_URL)
     })
 
-    it('throws NO_SESSION when no record matches the filters', async () => {
+    it('throws SESSION_NOT_FOUND, naming the pid, when no record matches the filters', async () => {
       mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [111] })
 
-      await expect(resolveSession({ session: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_SESSION' })
+      await expect(resolveSession({ session: 999, cwd: PROJECT })).rejects.toMatchObject({
+        code: 'SESSION_NOT_FOUND',
+        detail: 'Looked for `--session` 999.',
+      })
     })
 
     it('remembers the id of the session it selected', async () => {
@@ -360,8 +364,10 @@ describe('lib/cypress-sessions', () => {
 
       const err = await resolveSession({ cwd: PROJECT }).catch((e) => e)
 
-      expect(err).toBeInstanceOf(CypressSessionError)
+      expect(err).toBeInstanceOf(TapError)
       expect(err.code).toBe('NO_SESSION')
+      // Nothing was asked for, so there is nothing to name back.
+      expect(err.detail).toBeUndefined()
       // The dead-process leftover is reaped, so it stops masquerading as a
       // still-running-but-unresponsive (stale) session on later commands.
       expect(fs.existsSync(`${SESSIONS_DIR}/111.json`)).toBe(false)
@@ -399,7 +405,7 @@ describe('lib/cypress-sessions', () => {
       // Not NO_BROWSER_ATTACHED: a Firefox session never attaches one, so the
       // "open a browser" guidance would send the user in a circle.
       expect(err.code).toBe('UNSUPPORTED_BROWSER')
-      expect(err.message).toBe('The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.')
+      expect(tapErrorCopy(err.code).solution).not.toMatch(/open a .*browser in Cypress/i)
     })
 
     it('resolves a Chromium session over a live one at the cwd running an unsupported browser', async () => {
@@ -481,7 +487,7 @@ describe('lib/cypress-sessions', () => {
 
       expect(selection.session.pid).toBe(222)
       expect(selection.reason).toBe('explicit')
-      await expect(resolveSession({ session: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_SESSION' })
+      await expect(resolveSession({ session: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'SESSION_NOT_FOUND' })
     })
 
     it('prefers the session rooted at the cwd when several are live (reason: cwd-match)', async () => {
@@ -552,16 +558,16 @@ describe('lib/cypress-sessions', () => {
       expect(selection.session.cdpBrowserWsUrl).toBe(CDP_WS_URL)
     })
 
-    it('throws NO_SESSION when no record matches the filters', async () => {
+    it('throws SESSION_NOT_FOUND when no record matches the filters', async () => {
       mockfs({ [SESSIONS_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
       stubKill({ alive: [111] })
 
       const err = await resolveLiveSession({ session: 999, cwd: PROJECT }).catch((e) => e)
 
-      expect(err.code).toBe('NO_SESSION')
+      expect(err.code).toBe('SESSION_NOT_FOUND')
       // resolveLiveSession serves pre-browser commands (specs/status), so the
       // guidance must not tell the user to open a browser.
-      expect(err.message).not.toMatch(/browser/i)
+      expect(tapErrorCopy(err.code).solution).not.toMatch(/browser/i)
     })
 
     it('reaps the leftover record and throws NO_SESSION when the only match’s process is dead', async () => {

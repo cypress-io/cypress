@@ -7,10 +7,11 @@ import { withTapConnection } from '../../../lib/tap/tap-connection'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 import { querySessionGraphql } from '../../../lib/tap/session-gql'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
+import { TapError } from '@packages/cypress-sessions'
 import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
 
-export const tapError = (details: { description: string, solution: string }, message: string): Error => {
-  return Object.assign(new Error(message), { details, known: true })
+export const tapError = (code: string, message?: string): Error => {
+  return new TapError(code as never, { message })
 }
 
 export const schema: TapSchema = {

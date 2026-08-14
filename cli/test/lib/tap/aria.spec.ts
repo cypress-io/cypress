@@ -16,7 +16,7 @@ describe('lib/tap/commands/aria extractAria', () => {
 
   // RootWebArea → (generic, noise) → heading + a disabled textbox with a value.
   const tree = [
-    ax('1', 'RootWebArea', { name: { value: 'Login' }, childIds: ['2'] }),
+    ax('1', 'RootWebArea', { name: { value: 'Login' }, childIds: ['2'], backendDOMNodeId: 1 }),
     ax('2', 'generic', { parentId: '1', childIds: ['3', '4'] }),
     ax('3', 'heading', { parentId: '2', name: { value: 'Sign in' } }),
     ax('4', 'textbox', {
@@ -70,9 +70,9 @@ describe('lib/tap/commands/aria extractAria', () => {
   }
 
   it('projects the whole tree, collapsing noise roles and reporting states/value', async () => {
-    const { session } = makeAxSession()
+    const { session } = makeAxSession({ selectorObjectId: 'obj-root', backendNodeId: 1 })
 
-    const result = await readAria(session, frame, undefined, 200)
+    const result = await readAria(session, frame, 'body', 200)
 
     expect(result.nodeCount).to.eq(3)
     // The generic node is dropped; the heading and textbox promote under the root.
@@ -108,16 +108,16 @@ describe('lib/tap/commands/aria extractAria', () => {
     expect(client.Accessibility.getFullAXTree).not.toHaveBeenCalled()
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
+  it('reports a rejected selector as the value it was given', async () => {
     const { session } = makeAxSession({ invalidSelector: true })
 
-    await expect(extractAria(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_SELECTOR' })
+    await expect(extractAria(session, frame, '>>bad', 200)).rejects.toMatchObject({ code: 'INVALID_VALUE' })
   })
 
   it('caps the tree at max-nodes and flags truncation', async () => {
-    const { session } = makeAxSession()
+    const { session } = makeAxSession({ selectorObjectId: 'obj-root', backendNodeId: 1 })
 
-    const result = await readAria(session, frame, undefined, 2)
+    const result = await readAria(session, frame, 'body', 2)
 
     expect(result.nodeCount).to.eq(2)
     expect(result.truncated).to.eq(true)

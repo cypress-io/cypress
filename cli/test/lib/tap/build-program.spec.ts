@@ -160,35 +160,65 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('health', {}, {})
   })
 
-  it('throws a catchable missingArgument error when a required positional is absent', () => {
+  // An invocation short of what the command declares is a tap failure like any
+  // other — not commander's own message on stderr and its own exit code — and it
+  // reads as the instance would report the same omission.
+  it('raises a tap failure naming every required positional left out', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.missingArgument' }),
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '"launch" is missing the required <spec> argument.',
+      }),
     )
+
+    expect(console.error).not.toHaveBeenCalled()
   })
 
-  it('throws a catchable excessArguments error for operands beyond the declared params', () => {
+  it('raises a tap failure counting operands beyond the declared params', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch', 'a.cy.js', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '2 arguments were passed to "launch", but it takes at most 1.',
+      }),
     )
   })
 
-  it('throws a catchable excessArguments error for operands passed to a no-param command', () => {
+  it('raises a tap failure for operands passed to a no-param command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '1 argument was passed to "health", but it takes none.',
+      }),
     )
   })
 
-  it('throws a catchable unknownCommand error for a command not in the schema', () => {
+  it('raises a tap failure for an option given without its value', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['launch', 'a.cy.js', '--browser'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_OPTIONS',
+        detail: '"launch" was given the --browser option without a value.',
+      }),
+    )
+  })
+
+  // A name the schema has no command for is a tap failure like any other, raised
+  // with the listing that answers it rather than reported in commander's voice.
+  it('raises a tap failure naming a command not in the schema, and the help that lists them', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['bogus'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.unknownCommand' }),
+      expect.objectContaining({
+        code: 'UNKNOWN_COMMAND',
+        detail: expect.stringContaining('Unknown command "bogus"'),
+      }),
     )
   })
 
@@ -346,11 +376,14 @@ describe('lib/tap/build-program', () => {
     expect(helpOf('inspect').match(/\(default:/g)).toHaveLength(1)
   })
 
-  it('throws a catchable unknownOption error for a flag not in the schema', () => {
+  it('raises a tap failure naming a flag not in the schema, and the help that lists them', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.unknownOption' }),
+      expect.objectContaining({
+        code: 'UNKNOWN_OPTION',
+        detail: expect.stringContaining('Unknown option "--nope"'),
+      }),
     )
   })
 
@@ -370,7 +403,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('health', {}, {})
 
     expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
+      expect.objectContaining({ code: 'INVALID_ARGUMENTS' }),
     )
   })
 
@@ -433,7 +466,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('show', { 'spec-path': 'a.cy.js' }, {})
   })
 
-  it('declares a required value option with requiredOption so commander enforces it', () => {
+  it('declares a required value option with requiredOption, and names it when left out', () => {
     const program = buildTapProgram({
       schemaVersion: 1,
       cypressVersion: '15.0.0',
@@ -446,7 +479,10 @@ describe('lib/tap/build-program', () => {
     }, vi.fn())
 
     expect(() => program.parse(['login'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.missingMandatoryOptionValue' }),
+      expect.objectContaining({
+        code: 'INVALID_OPTIONS',
+        detail: '"login" is missing the required --token option.',
+      }),
     )
   })
 })

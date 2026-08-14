@@ -30,13 +30,7 @@ export interface DomReadResult {
 // tagged object rather than throwing, so a bad selector round-trips as data
 // instead of a CDP exception. `index` picks one of several matches (`--at`); the
 // caller has already checked it against the match count.
-export function readDom (selector: string | null, maxChars: number, index: number): DomReadResult {
-  if (selector === null) {
-    const html = document.documentElement ? document.documentElement.outerHTML : ''
-
-    return html.length > maxChars ? { html: html.slice(0, maxChars), truncated: true } : { html }
-  }
-
+export function readDom (selector: string, maxChars: number, index: number): DomReadResult {
   let el: Element | undefined
 
   try {

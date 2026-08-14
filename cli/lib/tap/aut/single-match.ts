@@ -1,10 +1,10 @@
-import { TAP_EXEC_METHOD } from '@packages/cypress-sessions'
+import { TAP_EXEC_METHOD, TapError, InvalidValueTapError } from '@packages/cypress-sessions'
 import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-sessions'
 
 import { validateExecResult } from '../tap-connection'
 import type { TapConnection } from '../tap-connection'
 import { createFrameIsolatedWorld } from './cdp'
-import { FrameCommandError } from './frame'
+import { invalidSelectorError } from './frame'
 import type { AutFrame } from './frame'
 import { countMatches } from './scripts'
 import type { MatchCountResult } from './scripts'
@@ -52,17 +52,9 @@ const disambiguatingSelectors = async (connection: TapConnection, selector: stri
 export const resolveAmbiguity = async (
   connection: TapConnection,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   at?: number,
 ): Promise<FrameAmbiguousResult | undefined> => {
-  if (selector === undefined) {
-    if (at !== undefined) {
-      throw new FrameCommandError('INVALID_INDEX', '--at needs a selector to index into')
-    }
-
-    return undefined
-  }
-
   const { client, sessionId } = connection
   const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
@@ -74,13 +66,13 @@ export const resolveAmbiguity = async (
   }, sessionId)
 
   if (exceptionDetails) {
-    throw new FrameCommandError('FRAME_READ_FAILED', `resolving "${selector}" in the app under test failed: ${exceptionDetails.exception?.description || exceptionDetails.text}`)
+    throw new TapError('FRAME_READ_FAILED', { message: `resolving "${selector}" in the app under test failed: ${exceptionDetails.exception?.description || exceptionDetails.text}` })
   }
 
   const { count, invalidSelector } = result.value as MatchCountResult
 
   if (invalidSelector) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw invalidSelectorError(selector)
   }
 
   // Nothing matched: each command reports that in its own shape, and an `--at`
@@ -91,7 +83,7 @@ export const resolveAmbiguity = async (
 
   if (at !== undefined) {
     if (at >= count) {
-      throw new FrameCommandError('INVALID_INDEX', `"${selector}" matched ${count} element${count === 1 ? '' : 's'}; pass --at 0-${count - 1}`)
+      throw new InvalidValueTapError('--at', `0 to ${count - 1}, since "${selector}" matched ${count} element${count === 1 ? '' : 's'}`, at)
     }
 
     return undefined
@@ -112,7 +104,7 @@ export const resolveAmbiguity = async (
 export const withAmbiguous = async <T>(
   connection: TapConnection,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   at: number | undefined,
   read: () => Promise<T>,
 ): Promise<T | FrameAmbiguousResult> => {

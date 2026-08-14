@@ -1,10 +1,17 @@
-import { CypressSessionError, resolveLiveSession } from '../../cypress-sessions'
+import { isTapError, resolveLiveSession } from '../../cypress-sessions'
 import type { ReadySessionState } from '../../cypress-sessions'
 import { withTapConnection, validateExecResult } from '../tap-connection'
-import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
+import { renderOutcome, renderTapFailure } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-sessions'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions, TapRunState, TapStatus } from '../types'
+
+// The ways a session can fail to resolve that are lifecycle stages `status`
+// reports rather than failures it exits on; anything else really did fail — a
+// browser tap cannot drive is not a stage polling can outlast, so it is absent.
+// A named `--session` that has gone is one of them, so a poller watching one pid
+// keeps reading `not connected` after it exits rather than starting to error.
+const NOT_CONNECTED_CODES: ReadonlySet<string> = new Set(['NO_SESSION', 'SESSION_NOT_FOUND', 'STALE_SESSION'])
 
 const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   const pinned = runState.pinned ? { pinned: runState.pinned } : {}
@@ -32,16 +39,8 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   try {
     selection = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
   } catch (err) {
-    if (err instanceof CypressSessionError) {
-      // Polling cannot outlast an session tap will never be able to drive, so
-      // that one is a failure where every other resolution error is a status a
-      // poller waits on.
-      if (err.code === 'UNSUPPORTED_BROWSER') {
-        renderFailure(err)
-
-        return 1
-      }
-
+    // No live session is a status a poller waits on, not a failure.
+    if (isTapError(err) && NOT_CONNECTED_CODES.has(err.code)) {
       renderOutcome('status', { status: 'not connected' } satisfies TapStatus, options.json)
 
       return 0
@@ -74,30 +73,16 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
     }, options.timeout)
 
     if ('error' in outcome) {
-      renderFailure(outcome.error)
-
-      return 1
+      return await renderTapFailure(outcome.error)
     }
 
     renderOutcome('status', mergeRunState(base, outcome.result as TapRunState), options.json)
 
     return 0
   } catch (err: any) {
-    // A degraded session reached this far carries a code (e.g. an unresponsive
-    // renderer); the earlier catch only covers sessions that never resolved.
-    if (err instanceof CypressSessionError) {
-      renderFailure(err)
-
-      return 1
-    }
-
-    if (err.known && err.details) {
-      renderKnownFailure(err)
-
-      return 1
-    }
-
-    throw err
+    // A degraded session reached this far (e.g. an unresponsive renderer); the
+    // earlier catch only covers sessions that never resolved.
+    return await renderTapFailure(err)
   }
 }
 

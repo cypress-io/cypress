@@ -3,6 +3,8 @@
 import { expect } from 'chai'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
+import { TAP_ERROR_COPY } from '@packages/cypress-sessions'
+import type { TapErrorCopy } from '@packages/cypress-sessions'
 import { openTapSession, openTapSessionViaModuleApi, tapWithoutSession } from '../lib/tap-open'
 import type { TapSession } from '../lib/tap-open'
 
@@ -46,8 +48,14 @@ const STATUS_DIV = '<div id="status" data-cy="status">ready</div>'
 
 const SUITE_TIMEOUT_MS = 360000
 
-/** Failures render as `CODE: message` on stderr, so the code is the stable assertion. */
 const failureOutput = (result: { stdout: string, stderr: string }) => `${result.stdout}${result.stderr}`
+
+// Failures render the registry copy on stderr and never print the code, so the
+// entry's description — with the backticks the CLI renders as colour stripped —
+// is the stable assertion.
+const copyFor = (code: keyof typeof TAP_ERROR_COPY): string => {
+  return (TAP_ERROR_COPY[code] as TapErrorCopy).description!.replace(/`/g, '')
+}
 
 /**
  * Snapshots human-readable output after scrubbing paths, ports, and timing so failures
@@ -164,14 +172,14 @@ describe('tap CLI with no running session', function () {
     const result = await tapWithoutSession(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_SESSION')
+    expect(failureOutput(result)).to.include(copyFor('NO_SESSION'))
   })
 
   it('names the pid that was asked for when --session matches nothing', async () => {
     const result = await tapWithoutSession(['--session', '999999', 'inspect', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_SESSION')
+    expect(failureOutput(result)).to.include(copyFor('SESSION_NOT_FOUND'))
     expect(failureOutput(result)).to.include('999999')
   })
 })
@@ -210,11 +218,12 @@ describe('tap CLI argument handling', function () {
     expect(result.exitCode).to.eq(1)
   })
 
-  it('exits 1 and says so for more arguments than a command takes', async () => {
+  it('exits 1 and counts the arguments a command takes against what it was given', async () => {
     const result = await tapWithoutSession(['run', 'a.cy.js', 'b.cy.js'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('too many arguments')
+    expect(failureOutput(result)).to.include(copyFor('INVALID_ARGUMENTS'))
+    expect(failureOutput(result)).to.include('2 arguments were passed to "run", but it takes at most 1.')
   })
 
   it('renders a command’s help without needing a session', async () => {
@@ -256,16 +265,16 @@ describe('tap CLI before any spec has run', function () {
     const result = await session.tap(['run', 'cypress/e2e/not-a-real-spec.cy.js'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('SPEC_NOT_FOUND')
+    expect(failureOutput(result)).to.include(copyFor('SPEC_NOT_FOUND'))
   })
 
-  it('exits 1 with NO_RUN for an AUT read', async () => {
+  it('exits 1 with SPEC_NOT_STARTED for an AUT read', async () => {
     // Short of a verdict there is no run to read: the resolved frame would be the
     // runner shell, so the read is refused rather than returning a misleading page.
     const result = await session.tap(['dom'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_RUN')
+    expect(failureOutput(result)).to.include(copyFor('SPEC_NOT_STARTED'))
   })
 
   it('reports the spec-not-selected phase for humans', async () => {
@@ -465,22 +474,21 @@ describe('tap CLI against a settled run', function () {
     const result = await session.tap(['dom', '--selector', '.item', '--at', '3'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('pass --at 0-2')
+    expect(failureOutput(result)).to.include('0 to 2, since ".item" matched 3 elements')
   })
 
   it('exits 1 for an --at beyond the default selector’s single match', async () => {
     const result = await session.tap(['dom', '--at', '1'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('INVALID_INDEX')
-    expect(failureOutput(result)).to.include('pass --at 0-0')
+    expect(failureOutput(result)).to.include('0 to 0, since "body" matched 1 element')
   })
 
   it('exits 1 for an invalid selector', async () => {
     const result = await session.tap(['dom', '--selector', '#status['])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('is not a valid CSS selector')
+    expect(failureOutput(result)).to.include('Expected --selector to be a valid CSS selector')
   })
 
   it('projects the accessibility tree of the body', async () => {
@@ -648,20 +656,20 @@ describe('tap CLI against a settled run', function () {
     expect(result.stdout).to.include('--at takes any index up to')
   })
 
-  it('exits 1 with INVALID_LIMIT for a cap that is not a positive integer', async () => {
+  it('exits 1 for a cap that is not a positive integer', async () => {
     for (const args of [['dom', '--max-chars', '0'], ['dom', '--max-chars', 'lots'], ['aria', '--max-nodes', '0']]) {
       const result = await session.tap(args)
 
       expect(result.exitCode, args.join(' ')).to.eq(1)
-      expect(failureOutput(result), args.join(' ')).to.include('INVALID_LIMIT')
+      expect(failureOutput(result), args.join(' ')).to.include('to be a positive integer')
     }
   })
 
-  it('exits 1 with INVALID_INDEX for an --at that is not a whole number', async () => {
+  it('exits 1 for an --at that is not a whole number', async () => {
     const result = await session.tap(['dom', '--selector', '.item', '--at', '1.5'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('INVALID_INDEX')
+    expect(failureOutput(result)).to.include('Expected --at to be a whole number, 0 or greater')
   })
 
   it('reads within an explicit --timeout', async () => {
@@ -727,17 +735,17 @@ describe('tap CLI across the run lifecycle', function () {
     await session?.kill()
   })
 
-  it('exits 1 with RUN_IN_PROGRESS while a spec is still running', async () => {
+  it('exits 1 with SPEC_IN_PROGRESS while a spec is still running', async () => {
     await session.requestRun(SLOW_SPEC)
 
     // `running` is the only stage the reads reject as in-progress; `loading` is still
-    // short of a run of its own and reports NO_RUN.
+    // short of a run of its own and reports SPEC_NOT_STARTED.
     await session.waitForStatus((status) => status.status === 'running', 'the running stage')
 
     const result = await session.tap(['dom'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('RUN_IN_PROGRESS')
+    expect(failureOutput(result)).to.include('is currently running')
   })
 
   it('becomes readable once that run settles', async () => {
@@ -795,7 +803,7 @@ describe('tap CLI across the run lifecycle', function () {
     const result = await session.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_SESSION')
+    expect(failureOutput(result)).to.include(copyFor('NO_SESSION'))
   })
 })
 
@@ -841,14 +849,14 @@ describe('tap CLI while a spec is running', function () {
       const refused = await session.tap(args)
 
       expect(refused.exitCode, args.join(' ')).to.eq(1)
-      expect(failureOutput(refused), args.join(' ')).to.include('RUN_IN_PROGRESS')
+      expect(failureOutput(refused), args.join(' ')).to.include('is currently running')
     }
 
     // pin has its own guard: pinning would swap the frame under the run.
     const pinned = await session.tap(['pin', '--test-id', tests[0].id, '--command-id', '1'])
 
     expect(pinned.exitCode).to.eq(1)
-    expect(failureOutput(pinned)).to.include('RUN_IN_PROGRESS')
+    expect(failureOutput(pinned)).to.include('is currently running')
 
     const cleared = await session.tap(['--json', 'pin', '--clear'])
 
@@ -944,12 +952,12 @@ describe('tap CLI against a session that stopped answering', function () {
     await session?.kill()
   })
 
-  it('exits 1 with STALE_SESSION, saying Cypress was running and is not now', async () => {
+  it('exits 1 with STALE_SESSION, saying Cypress could not be reached rather than not found', async () => {
     const result = await session.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('STALE_SESSION')
-    expect(failureOutput(result)).to.include('no longer responding')
+    expect(failureOutput(result)).to.include(copyFor('STALE_SESSION'))
+    expect(failureOutput(result), 'the record is still on disk, so this is not NO_SESSION').to.not.include(copyFor('NO_SESSION'))
   })
 
   it('reports "not connected" from status rather than failing', async () => {
@@ -1156,19 +1164,19 @@ describe('tap CLI reading a pinned snapshot', function () {
     ])
   })
 
-  it('exits 1 with PIN_TARGET_REQUIRED when given nothing to pin or clear', async () => {
+  it('exits 1 with INVALID_OPTIONS when given nothing to pin or clear', async () => {
     const result = await session.tap(['pin'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('PIN_TARGET_REQUIRED')
+    expect(failureOutput(result)).to.include(copyFor('INVALID_OPTIONS'))
   })
 
   it('exits 1 with SNAPSHOT_NOT_FOUND and names the snapshots there are', async () => {
     const result = await session.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'midway'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('SNAPSHOT_NOT_FOUND')
-    expect(failureOutput(result), 'the names it would have taken').to.include('"before" (1)')
+    expect(failureOutput(result)).to.include(copyFor('SNAPSHOT_NOT_FOUND'))
+    expect(failureOutput(result), 'the names it would have taken').to.include('["before", "after"]')
   })
 
   it('reads the pinned snapshot rather than the live page', async () => {
@@ -1721,7 +1729,7 @@ describe('tap CLI reading a command’s console properties', function () {
       const result = await session.tap(['pin', '--test-id', testId, '--command-id', shapesId])
 
       expect(result.exitCode).to.eq(1)
-      expect(failureOutput(result)).to.include('SNAPSHOT_UNAVAILABLE')
+      expect(failureOutput(result)).to.include(copyFor('SNAPSHOT_UNAVAILABLE'))
     })
 
     it('renders the envelope sections that sit beside props', async () => {
@@ -1802,8 +1810,9 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
     const result = await session.tap(['command', '--test-id', testId, '--command-id', '1'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('AMBIGUOUS_COMMAND')
-    expect(failureOutput(result), 'the qualified id to retry with').to.match(/qualify the id with its section, e.g. "h\d+:1"/)
+    expect(failureOutput(result)).to.include(copyFor('AMBIGUOUS_COMMAND'))
+    expect(failureOutput(result)).to.include('"1" matches:')
+    expect(failureOutput(result), 'the qualified ids to retry with').to.match(/h\d+:1/)
   })
 
   it('resolves the same number once qualified with its section', async () => {
@@ -1946,7 +1955,7 @@ describe('tap CLI against a spec that cannot be built', function () {
     const missing = await session.tap(['reporter', '--test-id', 'r3'])
 
     expect(missing.exitCode).to.eq(1)
-    expect(failureOutput(missing)).to.include('TEST_NOT_FOUND')
+    expect(failureOutput(missing)).to.include(copyFor('TEST_NOT_FOUND'))
   })
 
   it('renders the empty run for humans', async () => {
@@ -2097,7 +2106,7 @@ describe('tap CLI against a test the driver evicted from memory', function () {
     const result = await session.tap(['pin', '--test-id', tests[0].id, '--command-id', evicted[0].id])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('SNAPSHOT_UNAVAILABLE')
+    expect(failureOutput(result)).to.include(copyFor('SNAPSHOT_UNAVAILABLE'))
     expect(failureOutput(result), 'the reason names the setting that decided it').to.include('numTestsKeptInMemory')
   })
 
@@ -2287,27 +2296,27 @@ describe('tap CLI against a retried test', function () {
     const result = await session.tap(['reporter', '--test-id', testId, '--attempt', '3'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('ATTEMPT_NOT_FOUND')
+    expect(failureOutput(result)).to.include(copyFor('ATTEMPT_NOT_FOUND'))
   })
 
   it('exits 1 when --attempt is given without the test it selects within', async () => {
     const result = await session.tap(['reporter', '--attempt', '1'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('ATTEMPT_NOT_FOUND')
+    expect(failureOutput(result)).to.include('You passed the --attempt flag without also passing the --test-id flag.')
   })
 
   it('exits 1 with TEST_NOT_FOUND for an unknown test id', async () => {
     const result = await session.tap(['reporter', '--test-id', 'not-a-test'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('TEST_NOT_FOUND')
+    expect(failureOutput(result)).to.include(copyFor('TEST_NOT_FOUND'))
   })
 
   it('exits 1 with COMMAND_NOT_FOUND for an unknown command id', async () => {
     const result = await session.tap(['command', '--test-id', testId, '--command-id', '9999'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('COMMAND_NOT_FOUND')
+    expect(failureOutput(result)).to.include(copyFor('COMMAND_NOT_FOUND'))
   })
 })

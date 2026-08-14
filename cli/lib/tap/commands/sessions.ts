@@ -1,4 +1,4 @@
-import { isTapSupportedBrowser, listLiveSessions } from '../../cypress-sessions'
+import { TAP_TARGET, isTapSupportedBrowser, listLiveSessions } from '../../cypress-sessions'
 import type { LiveSessionState, ReadySessionState } from '../../cypress-sessions'
 import { renderOutcome, renderResult } from '../output'
 import { withTapConnection } from '../tap-connection'
@@ -6,7 +6,7 @@ import { FIND_SESSION_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
-const NO_SESSIONS_GUIDANCE = 'No running Cypress session found. Start Cypress in open mode (e.g. `cypress open`) and select a testing type to get started.'
+const NO_SESSIONS_GUIDANCE = `No running ${TAP_TARGET} found. Start Cypress in open mode (e.g. \`cypress open\`) and select a testing type to get started.`
 
 /** One row of `cypress tap sessions`: a reachable open-mode Cypress session. */
 export interface TapSessionSummary {

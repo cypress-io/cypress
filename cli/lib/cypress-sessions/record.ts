@@ -14,19 +14,6 @@ export type {
   SessionTestingType,
 } from '@packages/cypress-sessions'
 
-export type CypressSessionErrorCode =
-  | 'NO_SESSION'
-  | 'STALE_SESSION'
-  | 'NO_BROWSER_ATTACHED'
-  | 'UNSUPPORTED_BROWSER'
-  | 'RENDERER_UNRESPONSIVE'
-
-export class CypressSessionError extends Error {
-  code: CypressSessionErrorCode
-
-  constructor (code: CypressSessionErrorCode, message: string) {
-    super(message)
-    this.name = 'CypressSessionError'
-    this.code = code
-  }
-}
+// Session discovery raises the same `TapError` every other tap failure is raised
+// as, so one catch and one renderer cover the whole surface.
+export { TapError, isTapError, SessionNotFoundTapError, TAP_TARGET } from '@packages/cypress-sessions'

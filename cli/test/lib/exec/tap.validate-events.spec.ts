@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CypressSessionError, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
+import { resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { buildTapSchema } from '@packages/cypress-sessions'
-import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
 import { fetchMock, mockConnection, reportedEvent, resetTapMocks, schema, tapError } from './tap-fixtures'
 
@@ -63,7 +62,7 @@ describe('lib/exec/tap reporting the invocation', () => {
   // A schema command's flags are named by the schema, which a discovery failure
   // never fetched, so the code is all such an invocation has to report.
   it('reports a discovery failure by its code', async () => {
-    vi.mocked(resolveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
+    vi.mocked(resolveSession).mockRejectedValue(tapError('NO_SESSION', 'No running Cypress was found.'))
 
     expect(await tap.start(['reporter', '--test-id', 'r2'], {})).toBe(1)
     expect(reportedEvent()).toMatchObject({ command: 'reporter', exitCode: 1, errorCode: 'NO_SESSION' })
@@ -73,7 +72,7 @@ describe('lib/exec/tap reporting the invocation', () => {
   // A CLI-native command is dispatched before it looks for a session, so it
   // reports what was typed as well as the code it failed with.
   it('reports a discovery failure a CLI-native command handled itself', async () => {
-    vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
+    vi.mocked(resolveLiveSession).mockRejectedValue(tapError('NO_SESSION', 'No running Cypress was found.'))
 
     expect(await tap.start(['run', 'cypress/e2e/a.cy.js'], {})).toBe(1)
     expect(reportedEvent()).toMatchObject({ command: 'run', exitCode: 1, errorCode: 'NO_SESSION', flags: ['spec'] })
@@ -87,22 +86,19 @@ describe('lib/exec/tap reporting the invocation', () => {
     expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'INVALID_ARGUMENTS' })
   })
 
-  // A known transport failure has no code of its own to report, only the
-  // description and solution the user was shown.
-  it('reports a known transport failure without a code', async () => {
+  it('reports a transport failure by its code', async () => {
     mockConnection()
-    vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapCdpUnreachable, 'socket hang up'))
+    vi.mocked(withTapConnection).mockRejectedValue(tapError('CDP_UNREACHABLE', 'socket hang up'))
 
     expect(await tap.start(['health'], {})).toBe(1)
-    expect(reportedEvent()).toMatchObject({ exitCode: 1 })
-    expect(reportedEvent()).not.toHaveProperty('errorCode')
+    expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'CDP_UNREACHABLE' })
   })
 
-  it('reports a mistyped flag as invalid usage', async () => {
+  it('reports a mistyped flag by its code', async () => {
     mockConnection(buildTapSchema('15.0.0'))
 
     expect(await tap.start(['reporter', '--nope'], {})).toBe(1)
-    expect(reportedEvent()).toMatchObject({ command: 'reporter', exitCode: 1, errorCode: 'INVALID_USAGE' })
+    expect(reportedEvent()).toMatchObject({ command: 'reporter', exitCode: 1, errorCode: 'UNKNOWN_OPTION' })
   })
 
   it('reports a command this CLI does not know as unknown', async () => {
@@ -144,13 +140,14 @@ describe('lib/exec/tap reporting the invocation', () => {
       expect(reportedEvent().flags).toEqual(['help'])
     })
 
-    // An undeclared flag is rejected before dispatch, so it reports as the usage
-    // error it is, under no flag at all — and the value it carried stays home.
+    // An undeclared flag is rejected before dispatch, so it reports as the
+    // unknown option it is, under no flag at all — and the value it carried
+    // stays home.
     it('reports no flag for one this CLI does not declare, and never its value', async () => {
       mockConnection(buildTapSchema('15.0.0'))
 
       expect(await tap.start(['reporter', '--secret-token=abc123'], {})).toBe(1)
-      expect(reportedEvent()).toMatchObject({ command: 'reporter', errorCode: 'INVALID_USAGE' })
+      expect(reportedEvent()).toMatchObject({ command: 'reporter', errorCode: 'UNKNOWN_OPTION' })
       expect(reportedEvent().flags).toEqual([])
       expect(JSON.stringify(reportedEvent())).not.toContain('abc123')
     })
@@ -163,11 +160,11 @@ describe('lib/exec/tap reporting the invocation', () => {
     })
   })
 
-  it('reports an unexpected error before rethrowing it', async () => {
+  it('reports an error raised as no failure of ours as an unknown one', async () => {
     vi.mocked(resolveSession).mockRejectedValue(new Error('boom'))
 
-    await expect(tap.start(['health'], {})).rejects.toThrow('boom')
-    expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'UNHANDLED' })
+    expect(await tap.start(['health'], {})).toBe(1)
+    expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'UNKNOWN_ERROR' })
   })
 
   it('leaves the exit code alone when the collector cannot be reached', async () => {
