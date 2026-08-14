@@ -134,7 +134,7 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
-  instance: 'target a specific running Cypress instance by its server process id (pid)',
+  session: 'target a specific running Cypress session by its server process id (pid)',
   json: 'print the raw JSON result instead of the human-readable rendering',
   tapTimeout: 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
@@ -595,16 +595,16 @@ const cliModule = {
     program
     .command('tap')
     .usage('[command] [args...]')
-    .description('Interacts with a running Cypress instance')
+    .description('Interacts with a running Cypress session')
     .helpOption(false)
     .allowUnknownOption(true)
-    .option('-i, --instance <pid>', text('instance'), coerceAnyStringToInt)
+    .option('-s, --session <pid>', text('session'), coerceAnyStringToInt)
     .option('--json', text('json'))
     .option('--timeout <ms>', text('tapTimeout'), coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {
       try {
         const { default: tapModule } = await import('./exec/tap')
-        const code = await tapModule.start(args || [], _.pick(opts, ['instance', 'json', 'timeout']))
+        const code = await tapModule.start(args || [], _.pick(opts, ['session', 'json', 'timeout']))
 
         process.exit(code)
       } catch (e: any) {

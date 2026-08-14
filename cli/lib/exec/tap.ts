@@ -1,28 +1,29 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { isTapError, resolveInstance } from '../cypress-instances'
-import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
-import type { TapSession } from '../tap/tap-session'
+import { isTapError, resolveSession } from '../cypress-sessions'
+import { withTapConnection, throwTapError, validateExecResult } from '../tap/tap-connection'
+import type { TapConnection } from '../tap/tap-connection'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
 import { renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp, renderTapFailure, helpFor } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
 import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../tap/events'
 import { reportedInvocation } from '../tap/reported-invocation'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
-import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, VersionSkewTapError, buildTapSchema } from '@packages/cypress-instances'
-import type { TapSchema } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, VersionSkewTapError, buildTapSchema } from '@packages/cypress-sessions'
+import type { TapSchema } from '@packages/cypress-sessions'
 import util from '../util'
 
 const debug = Debug('cypress:cli:tap')
 
-// The failures that mean no instance was reachable to ask. Help is answerable
+// The failures that mean no session was reachable to ask. Help is answerable
 // without one, so these — and only these — lose to a help invocation.
 const DISCOVERY_CODES: ReadonlySet<string> = new Set([
-  'NO_INSTANCE',
-  'INSTANCE_NOT_FOUND',
-  'STALE_INSTANCE',
+  'NO_SESSION',
+  'SESSION_NOT_FOUND',
+  'STALE_SESSION',
   'NO_BROWSER_ATTACHED',
+  'UNSUPPORTED_BROWSER',
   'RENDERER_UNRESPONSIVE',
 ])
 
@@ -37,9 +38,9 @@ const validateSchema = (value: unknown): TapSchema => {
 
   if (schema.schemaVersion !== TAP_SCHEMA_VERSION) {
     throw new VersionSkewTapError({
-      instanceSchema: schema.schemaVersion,
+      sessionSchema: schema.schemaVersion,
       cliSchema: TAP_SCHEMA_VERSION,
-      instanceCypress: schema.cypressVersion,
+      sessionCypress: schema.cypressVersion,
       cliCypress: util.pkgVersion(),
     })
   }
@@ -66,7 +67,7 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
 // `--json` is parsed by the outer `cypress tap` command, so commander never
 // routes it to the command being run. A command that declares it in its own
 // schema needs it anyway — for that command the flag also changes what the
-// instance returns, not just how the CLI prints it — so it is handed over here.
+// session returns, not just how the CLI prints it — so it is handed over here.
 const withJson = (schema: TapSchema, name: string, options: Record<string, string>, json: boolean | undefined): Record<string, string> => {
   const declared = schema.commands.find((command) => command.name === name)?.options.some((option) => option.name === 'json')
 
@@ -95,7 +96,7 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
       return 1
     }
 
-    // A command that reads its own options before resolving an instance — as the
+    // A command that reads its own options before resolving a session — as the
     // AUT readers do, so a bad value is answered as itself — raises outside the
     // flow that renders the rest of its failures.
     return await renderTapFailure(err, helpFor(program, native.name))
@@ -104,8 +105,8 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
   return dispatchCode ?? 1
 }
 
-const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined, help: string): Promise<number> => {
-  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
+const execCommand = async (connection: TapConnection, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined, help: string): Promise<number> => {
+  const outcome = validateExecResult(await connection.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
     return await renderTapFailure(outcome.error, help)
@@ -116,9 +117,9 @@ const execCommand = async (session: TapSession, command: string, commandArgs: Re
   return 0
 }
 
-// With no instance to query, fall back to the schema this CLI ships with so the
+// With no session to query, fall back to the schema this CLI ships with so the
 // help listing still reflects every command the CLI knows — the query path stays
-// authoritative when an instance is attached (it may run a different version).
+// authoritative when a session is attached (it may run a different version).
 const renderKnownSchema = (command: string | undefined): Promise<number> => {
   const schema = buildTapSchema(util.pkgVersion())
   const program = buildTapProgram(schema, () => {})
@@ -134,15 +135,15 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
   }
 
   try {
-    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+    const selection = await resolveSession({ session: options.session, cwd: process.cwd() })
 
-    return await withTapSession(selection.instance, async (session) => {
-      const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
+    return await withTapConnection(selection.session, async (connection) => {
+      const schema = validateSchema(await connection.call(TAP_SCHEMA_METHOD))
 
       let dispatchCode = 0
       const program: commander.Command = buildTapProgram(schema, async (name, args, commandOptions) => {
         noteTapCommand(name, args, commandOptions)
-        dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json, helpFor(program, name))
+        dispatchCode = await execCommand(connection, name, args, withJson(schema, name, commandOptions, options.json), options.json, helpFor(program, name))
       })
 
       if (wantsHelp || !command) {
@@ -170,7 +171,7 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
       return dispatchCode
     }, options.timeout)
   } catch (err: any) {
-    // Help is answerable without an instance, so a discovery failure falls back
+    // Help is answerable without a session, so a discovery failure falls back
     // to the schema the CLI ships with rather than reporting the failure.
     if (isTapError(err) && DISCOVERY_CODES.has(err.code) && (wantsHelp || !command)) {
       return await renderKnownSchema(command)

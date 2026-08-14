@@ -1,16 +1,16 @@
 import { vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
-import type { ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
-import { withTapSession } from '../../../lib/tap/tap-session'
-import type { TapSession } from '../../../lib/tap/tap-session'
-import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
+import { listLiveSessions, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
+import type { ReadySessionState, SessionSelection } from '../../../lib/cypress-sessions'
+import { withTapConnection } from '../../../lib/tap/tap-connection'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
+import { querySessionGraphql } from '../../../lib/tap/session-gql'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
-import { TapError } from '@packages/cypress-instances'
-import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
+import { TapError } from '@packages/cypress-sessions'
+import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
 
-export const tapError = (code: string, message: string): Error => {
+export const tapError = (code: string, message?: string): Error => {
   return new TapError(code as never, { message })
 }
 
@@ -20,7 +20,7 @@ export const schema: TapSchema = {
   commands: [
     {
       name: 'health',
-      description: 'check that a running Cypress instance is reachable and its tap binding responds',
+      description: 'check that a running Cypress session is reachable and its tap binding responds',
       params: [],
       options: [],
     },
@@ -38,39 +38,38 @@ export const schema: TapSchema = {
   ],
 }
 
-export const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
+export const mockConnection = (connectionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
   const call = vi.fn(async (method: string) => {
-    return method === 'getSchema' ? sessionSchema : execOutcome
+    return method === 'getSchema' ? connectionSchema : execOutcome
   })
 
   // These tests drive the binding exec/status paths, which use only `call`;
   // the frame extractors (dom/aria/inspect, which use client/sessionId) are
   // covered separately, so the session's CDP members are stubbed away here.
-  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
+  vi.mocked(withTapConnection).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapConnection))
 
   return call
 }
 
-export const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => {
-  return {
-    schemaVersion: 1,
-    pid: 4242,
-    projectRoot: '/projects/app',
-    serverPort: 49200,
-    instanceId: 'inst-1',
-    testingType: 'e2e',
-    cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-    browserName: 'Chrome',
-    machineId: null,
-    userId: null,
-    ...overrides,
-  }
-}
+export const readySession = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => ({
+  schemaVersion: 1,
+  pid: 4242,
+  projectRoot: '/projects/app',
+  serverPort: 49200,
+  sessionId: 'inst-1',
+  testingType: 'e2e',
+  cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+  browserName: 'Chrome',
+  browserFamily: 'chromium',
+  machineId: null,
+  userId: null,
+  ...overrides,
+})
 
-export const mockResolved = (overrides: Partial<InstanceSelection> = {}): InstanceSelection => {
-  const selection: InstanceSelection = { instance: readyInstance(), reason: 'only', candidateCount: 1, ...overrides }
+export const mockResolved = (overrides: Partial<SessionSelection> = {}): SessionSelection => {
+  const selection: SessionSelection = { session: readySession(), reason: 'only', candidateCount: 1, ...overrides }
 
-  vi.mocked(resolveInstance).mockResolvedValue(selection)
+  vi.mocked(resolveSession).mockResolvedValue(selection)
 
   return selection
 }
@@ -85,11 +84,11 @@ export const resetTapMocks = (): void => {
   fetchMock.mockReset()
   fetchMock.mockResolvedValue({ status: 200 })
   vi.stubGlobal('fetch', fetchMock)
-  vi.mocked(withTapSession).mockReset()
-  vi.mocked(queryInstanceGraphql).mockReset()
-  vi.mocked(listLiveInstances).mockReset()
-  vi.mocked(resolveLiveInstance).mockReset()
-  vi.mocked(resolveInstance).mockReset()
+  vi.mocked(withTapConnection).mockReset()
+  vi.mocked(querySessionGraphql).mockReset()
+  vi.mocked(listLiveSessions).mockReset()
+  vi.mocked(resolveLiveSession).mockReset()
+  vi.mocked(resolveSession).mockReset()
   vi.mocked(withResolvedAutFrame).mockReset()
   vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
   mockResolved()

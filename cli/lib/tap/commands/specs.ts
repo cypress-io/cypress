@@ -1,9 +1,9 @@
-import { resolveLiveInstance } from '../../cypress-instances'
-import { TapSpecsOperation } from '@packages/cypress-instances'
-import { queryInstanceGraphql } from '../instance-gql'
+import { resolveLiveSession } from '../../cypress-sessions'
+import { TapSpecsOperation } from '@packages/cypress-sessions'
+import { querySessionGraphql } from '../session-gql'
 import { renderOutcome, renderTapFailure } from '../output'
 import { defineNativeCommand } from './definition'
-import type { TapSpecsQuery } from '@packages/cypress-instances'
+import type { TapSpecsQuery } from '@packages/cypress-sessions'
 import type { TapCliOptions } from '../types'
 
 /** One row of `cypress tap specs`: a runnable spec of the active project. */
@@ -51,8 +51,8 @@ const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
 
 const listSpecs = async (options: TapCliOptions): Promise<number> => {
   try {
-    const { instance } = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
-    const data = await queryInstanceGraphql(instance, TapSpecsOperation)
+    const { session } = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
+    const data = await querySessionGraphql(session, TapSpecsOperation)
 
     renderOutcome('specs', toSpecList(data), options.json)
 

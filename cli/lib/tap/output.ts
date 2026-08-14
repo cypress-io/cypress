@@ -7,9 +7,9 @@ import { docsUrl } from '../errors'
 import util from '../util'
 import { renderingFor } from './render'
 import { noteTapFailure } from './events'
-import type { InstanceSelection } from '../cypress-instances'
-import { isTapError, tapErrorCopy, UnknownCommandTapError, UnknownTapError } from '@packages/cypress-instances'
-import type { TapErrorCopy, TapSchema } from '@packages/cypress-instances'
+import type { SessionSelection } from '../cypress-sessions'
+import { isTapError, tapErrorCopy, UnknownCommandTapError, UnknownTapError } from '@packages/cypress-sessions'
+import type { TapErrorCopy, TapSchema } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -41,7 +41,7 @@ const remedyFor = (copy: TapErrorCopy, help?: string): string[] => {
 
 /**
  * The single exit for every tap failure, whether the CLI raised it or it arrived
- * from the instance as a wire payload: the code selects the copy and `detail`
+ * from the session as a wire payload: the code selects the copy and `detail`
  * carries whatever was specific to this one. It prints as paragraphs — the
  * condition, then the specifics that explain it, then what to do about it. The code
  * itself is never printed.
@@ -55,11 +55,11 @@ const remedyFor = (copy: TapErrorCopy, help?: string): string[] => {
  * Which is why a code alone does not make a failure ours: `err.code` is a string on
  * every Node system error too, and rendering an ENOENT against the registry would
  * pick whatever the fallback copy happens to be. Only a TapError, or the wire payload
- * the instance sends and its raisers pass here as-is, is read for its code.
+ * the session sends and its raisers pass here as-is, is read for its code.
  *
  * `help` is the generated help of the command that was called, passed by the callers
  * that have a parsed program to hand. Only a failure about the invocation prints it;
- * the instance raises those too, and has no help of its own to send.
+ * the session raises those too, and has no help of its own to send.
  */
 export const renderTapFailure = async (err: any, help?: string): Promise<number> => {
   const raised = isTapError(err) || (!(err instanceof Error) && typeof err?.code === 'string')
@@ -117,16 +117,16 @@ export const renderNativeHelp = (program: commander.Command, command: string): v
   logger.always(program.commands.find((subcommand) => subcommand.name() === command)!.helpInformation())
 }
 
-const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string => {
-  const { instance, candidateCount } = selection
+const sessionBanner = (schema: TapSchema, selection: SessionSelection): string => {
+  const { session, candidateCount } = selection
 
   const target = `Target:
-  ${instance.projectRoot}
+  ${session.projectRoot}
   v${schema.cypressVersion}
-  pid:${instance.pid}`
+  pid:${session.pid}`
 
   if (candidateCount > 1) {
-    return `${target}\n${candidateCount} running instances matched; targeting pid ${instance.pid}. Pass --instance <pid> to target another.`
+    return `${target}\n${candidateCount} running sessions matched; targeting pid ${session.pid}. Pass --session <pid> to target another.`
   }
 
   return target
@@ -161,8 +161,8 @@ const renderHelp = async (program: commander.Command, schema: TapSchema, command
   return 0
 }
 
-export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined): Promise<number> => {
-  return renderHelp(program, schema, command, instanceBanner(schema, selection))
+export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: SessionSelection, command: string | undefined): Promise<number> => {
+  return renderHelp(program, schema, command, sessionBanner(schema, selection))
 }
 
 export const renderStaticHelp = (program: commander.Command, schema: TapSchema, command: string | undefined): Promise<number> => {

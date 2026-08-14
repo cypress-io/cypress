@@ -1,9 +1,9 @@
-import { resolveLiveInstance } from '../../cypress-instances'
-import { LiveInstanceState, TAP_TARGET, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
-import { queryInstanceGraphql } from '../instance-gql'
+import { resolveLiveSession } from '../../cypress-sessions'
+import { LiveSessionState, TAP_TARGET, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-sessions'
+import { querySessionGraphql } from '../session-gql'
 import { renderOutcome, renderTapFailure } from '../output'
 import { defineNativeCommand } from './definition'
-import type { TapErrorCode } from '@packages/cypress-instances'
+import type { TapErrorCode } from '@packages/cypress-sessions'
 import type { TapCliOptions } from '../types'
 import { posixify } from '../../util'
 
@@ -19,9 +19,9 @@ export interface TapRunResult {
 
 const RUN_SPEC_TIMEOUT_MS = 60_000
 
-// The instance's runSpec mutation names its failures with its own codes; each maps
+// The session's runSpec mutation names its failures with its own codes; each maps
 // to the tap code whose copy describes it. A code this CLI does not know reads as
-// the instance failing to start the spec, which is what it observed.
+// the session failing to start the spec, which is what it observed.
 const RUN_SPEC_FAILURES: Record<string, TapErrorCode> = {
   GENERAL_ERROR: 'SPEC_START_FAILED',
   NO_PROJECT: 'NO_PROJECT',
@@ -30,8 +30,8 @@ const RUN_SPEC_FAILURES: Record<string, TapErrorCode> = {
   TESTING_TYPE_NOT_CONFIGURED: 'TESTING_TYPE_NOT_CONFIGURED',
 }
 
-const findTargetSpec = async (instance: LiveInstanceState, relative: string) => {
-  const specsData = await queryInstanceGraphql(instance, TapSpecsOperation)
+const findTargetSpec = async (session: LiveSessionState, relative: string) => {
+  const specsData = await querySessionGraphql(session, TapSpecsOperation)
   const wanted = posixify(relative)
 
   return (specsData.currentProject?.specs ?? []).find((spec) => posixify(spec.relative) === wanted)
@@ -39,15 +39,15 @@ const findTargetSpec = async (instance: LiveInstanceState, relative: string) => 
 
 const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<number> => {
   try {
-    const { instance } = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
+    const { session } = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
 
-    const match = await findTargetSpec(instance, args.spec)
+    const match = await findTargetSpec(session, args.spec)
 
     if (!match) {
       return await renderTapFailure({ code: 'SPEC_NOT_FOUND', detail: `Looked for "${args.spec}".` })
     }
 
-    const { runSpec: result } = await queryInstanceGraphql(instance, tapRunSpecOperation(match.absolute), RUN_SPEC_TIMEOUT_MS)
+    const { runSpec: result } = await querySessionGraphql(session, tapRunSpecOperation(match.absolute), RUN_SPEC_TIMEOUT_MS)
 
     if (result?.__typename === 'RunSpecResponse') {
       const launched: TapRunResult = {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parseIndex, parsePositiveInt } from '../../../lib/tap/utils'
-import { TapError } from '@packages/cypress-instances'
+import { TapError } from '@packages/cypress-sessions'
 
 // Every input shape both parsers must reject, shared so they reject the same
 // class: text `Number()` coerces to a number that passes an isInteger check,

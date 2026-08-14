@@ -149,7 +149,7 @@ describe('tap binding', () => {
       expect((reporterBeforeRun as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
 
       // specs and run are CLI-native commands now — the CLI reads the spec list and
-      // triggers runs directly over the instance's GraphQL — so the binding no longer serves them.
+      // triggers runs directly over the session's GraphQL — so the binding no longer serves them.
       const specsOutcome = await binding.exec('specs')
 
       expect((specsOutcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')

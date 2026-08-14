@@ -3,8 +3,8 @@ import commander from 'commander'
 import { tapCliCommands } from './commands'
 import { DEFAULT_CDP_TIMEOUT_MS } from './cdp-timeout'
 import type { TapCliCommand } from './types'
-import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-instances'
-import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
+import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-sessions'
+import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-sessions'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
 
@@ -36,13 +36,13 @@ const declareOption = (command: commander.Command, flags: string, description: s
   command.option(flags, description, defaultValue as string | undefined)
 }
 
-// Every tap command accepts `--instance`, `--json` and `--timeout`; all are
+// Every tap command accepts `--session`, `--json` and `--timeout`; all are
 // consumed by the top-level `cypress tap` command before a subprogram parses, so
 // declaring them on a command is purely so they render in its generated help.
 // `--timeout` keeps no alias: `-t` is worth more to `--test-id`, which is typed
 // far more often, and the shared flags have to spell the same on every command.
 const declareSharedOptions = (command: commander.Command, jsonDescription: string): void => {
-  command.option('-i, --instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
+  command.option('-s, --session <pid>', 'target a specific running Cypress session by its server process id (pid)')
   command.option('--json', jsonDescription)
   declareOption(command, '--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds', DEFAULT_CDP_TIMEOUT_MS)
 }
@@ -206,7 +206,7 @@ const newProgram = (): commander.Command => {
 
   program.exitOverride()
   program.addHelpCommand(false)
-  program.description('Interacts with a running Cypress instance')
+  program.description('Interacts with a running Cypress session')
   program.usage('[command] [args...] [options]')
   answerUnknownOption(program)
   answerUnknownCommand(program)
@@ -218,7 +218,7 @@ const newProgram = (): commander.Command => {
 export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): commander.Command => {
   const program = newProgram()
 
-  // The outer `tap` command owns --instance/--json/--timeout and parses them
+  // The outer `tap` command owns --session/--json/--timeout and parses them
   // before this program runs, so they never reach here — declared only so help
   // lists them. The outer command disables its own help, making this the sole
   // place they surface.
@@ -228,7 +228,7 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     declareCommand(program, native)
   }
 
-  // An older instance may still advertise a command the CLI has since made
+  // An older session may still advertise a command the CLI has since made
   // native; start() dispatches natives before ever consulting the schema, so
   // skip the shadowed advertisement rather than registering a duplicate.
   const nativeNames = new Set(tapCliCommands.map(({ name }) => name))

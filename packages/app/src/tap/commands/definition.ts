@@ -6,7 +6,7 @@ type CommandByName<N extends TapCommandName> = Extract<typeof TAP_COMMANDS[numbe
 /**
  * Authoring helper for one `cypress tap` subcommand. The command's schema (its
  * params/options metadata) lives in the shared `TAP_COMMANDS` contract so the CLI
- * can list it without an instance attached; this pairs that metadata with the
+ * can list it without a session attached; this pairs that metadata with the
  * app-side handler and types the handler against the named entry — no annotations,
  * `handler: async ({ spec }, { headed }) => …`. Everything a handler takes or
  * returns must be JSON-serializable per `../contract`.

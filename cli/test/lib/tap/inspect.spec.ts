@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { TapError } from '../../../lib/cypress-instances'
+import { TapError } from '../../../lib/cypress-sessions'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
@@ -54,7 +54,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
       Runtime: { callFunctionOn },
     }
 
-    return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapSession }
+    return { connection: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapConnection }
   }
 
   // A read returns the element; an ambiguous selector returns the candidates
@@ -70,9 +70,9 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   }
 
   it('returns tag, attributes, curated styles, box, and the ax node for a match', async () => {
-    const { session } = makeInspectSession({ selectorObjectId: 'obj-1' })
+    const { connection } = makeInspectSession({ selectorObjectId: 'obj-1' })
 
-    const result = await readInspect(session, frame, '[data-testid=username-input]')
+    const result = await readInspect(connection, frame, '[data-testid=username-input]')
 
     expect(result.found).to.eq(true)
     expect(result.tag).to.eq('input')
@@ -83,17 +83,17 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   })
 
   it('returns found:false when the selector matches nothing', async () => {
-    const { session } = makeInspectSession({ matchCount: 0, selectorObjectId: undefined, selectorSubtype: 'null' })
+    const { connection } = makeInspectSession({ matchCount: 0, selectorObjectId: undefined, selectorSubtype: 'null' })
 
-    const result = await extractInspect(session, frame, '.missing')
+    const result = await extractInspect(connection, frame, '.missing')
 
     expect(result).to.deep.eq({ selector: '.missing', found: false })
   })
 
   it('answers a selector matching more than one element instead of reading', async () => {
-    const { session } = makeInspectSession({ matchCount: 4 })
+    const { connection } = makeInspectSession({ matchCount: 4 })
 
-    expect(await extractInspect(session, frame, '.item')).to.deep.eq({
+    expect(await extractInspect(connection, frame, '.item')).to.deep.eq({
       ambiguous: true,
       selector: '.item',
       count: 4,
@@ -102,15 +102,15 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   })
 
   it('reports a rejected selector as the value it was given', async () => {
-    const { session } = makeInspectSession({ invalidSelector: true })
+    const { connection } = makeInspectSession({ invalidSelector: true })
 
-    await expect(extractInspect(session, frame, '>>bad')).rejects.toMatchObject({ code: 'INVALID_VALUE' })
+    await expect(extractInspect(connection, frame, '>>bad')).rejects.toMatchObject({ code: 'INVALID_VALUE' })
   })
 
   it('still returns the element when the accessibility node is unavailable', async () => {
-    const { session } = makeInspectSession({ selectorObjectId: 'obj-1', axError: new Error('no ax') })
+    const { connection } = makeInspectSession({ selectorObjectId: 'obj-1', axError: new Error('no ax') })
 
-    const result = await readInspect(session, frame, '.plain')
+    const result = await readInspect(connection, frame, '.plain')
 
     expect(result.found).to.eq(true)
     expect(result.aria).to.be.undefined
@@ -118,11 +118,11 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   })
 
   it('fails instead of reporting a partial element when the renderer stops answering', async () => {
-    const { session } = makeInspectSession({
+    const { connection } = makeInspectSession({
       selectorObjectId: 'obj-1',
-      axError: new TapError('RENDERER_UNRESPONSIVE', { detail: 'The targeted Cypress instance did not answer Accessibility.getPartialAXTree within 30000ms.' }),
+      axError: new TapError('RENDERER_UNRESPONSIVE', { detail: 'The targeted Cypress session did not answer Accessibility.getPartialAXTree within 30000ms.' }),
     })
 
-    await expect(extractInspect(session, frame, '.wedged')).rejects.toMatchObject({ code: 'RENDERER_UNRESPONSIVE' })
+    await expect(extractInspect(connection, frame, '.wedged')).rejects.toMatchObject({ code: 'RENDERER_UNRESPONSIVE' })
   })
 })

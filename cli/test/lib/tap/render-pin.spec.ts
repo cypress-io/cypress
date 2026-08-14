@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
-import type { ClearResult, PinResult } from '@packages/cypress-instances'
+import type { ClearResult, PinResult } from '@packages/cypress-sessions'
 import { renderPinHuman } from '../../../lib/tap/render/pin'
 
 const render = (result: PinResult | ClearResult): string => stripAnsi(renderPinHuman(result))

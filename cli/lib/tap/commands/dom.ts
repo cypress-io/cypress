@@ -1,7 +1,7 @@
-import type { TapSession } from '../tap-session'
+import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from '../aut/frame'
 import { invalidSelectorError, withResolvedAutFrame } from '../aut/frame'
-import { TapError } from '@packages/cypress-instances'
+import { TapError } from '@packages/cypress-sessions'
 import { parseIndex, parsePositiveInt } from '../utils'
 import { createFrameIsolatedWorld } from '../aut/cdp'
 import { withAmbiguous } from '../aut/single-match'
@@ -21,14 +21,14 @@ export interface FrameDomResult {
 }
 
 export const extractDom = (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string,
   maxChars: number,
   at?: number,
-): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameDomResult> => {
-  const { client, sessionId } = session
-  const executionContextId = await createFrameIsolatedWorld(session, frame)
+): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(connection, frame, selector, at, async (): Promise<FrameDomResult> => {
+  const { client, sessionId } = connection
+  const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: readDom.toString(),
@@ -55,14 +55,14 @@ export const extractDom = (
   }
 })
 
-// The options are read before an instance is resolved, so a value this command
+// The options are read before a session is resolved, so a value this command
 // cannot use is reported as itself rather than as whatever the search for a
 // Cypress to run it against happened to find.
 export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => {
   const maxChars = parsePositiveInt(commandOptions['max-chars'], 'max-chars')
   const at = parseIndex(commandOptions.at)
 
-  return withResolvedAutFrame(options, (session, frame) => {
-    return extractDom(session, frame, commandOptions.selector, maxChars, at)
+  return withResolvedAutFrame(options, (connection, frame) => {
+    return extractDom(connection, frame, commandOptions.selector, maxChars, at)
   }, 'dom')
 })

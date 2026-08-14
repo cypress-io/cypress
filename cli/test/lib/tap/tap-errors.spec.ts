@@ -6,7 +6,7 @@ import Debug from 'debug'
 import logger from '../../../lib/logger'
 import { renderTapFailure, helpFor } from '../../../lib/tap/output'
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, InstanceNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError, UnknownTapError, VersionSkewTapError } from '@packages/cypress-instances'
+import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, SessionNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError, UnknownTapError, VersionSkewTapError } from '@packages/cypress-sessions'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff: the rendering catalogue at the foot of this
@@ -29,18 +29,18 @@ describe('lib/tap error registry', () => {
         "FRAME_READ_FAILED",
         "GRAPHQL_FAILED",
         "GRAPHQL_UNREACHABLE",
-        "INSTANCE_NOT_FOUND",
-        "INSTANCE_OUTDATED",
         "INVALID_ARGUMENTS",
         "INVALID_OPTIONS",
         "INVALID_VALUE",
         "MISSING_COMPANION_OPTION",
         "NO_AUT",
         "NO_BROWSER_ATTACHED",
-        "NO_INSTANCE",
         "NO_PROJECT",
+        "NO_SESSION",
         "PROTOCOL_MISMATCH",
         "RENDERER_UNRESPONSIVE",
+        "SESSION_NOT_FOUND",
+        "SESSION_OUTDATED",
         "SNAPSHOT_NOT_FOUND",
         "SNAPSHOT_UNAVAILABLE",
         "SPEC_IN_PROGRESS",
@@ -48,12 +48,13 @@ describe('lib/tap error registry', () => {
         "SPEC_NOT_STARTED",
         "SPEC_START_FAILED",
         "STALE_HANDLE",
-        "STALE_INSTANCE",
+        "STALE_SESSION",
         "TESTING_TYPE_NOT_CONFIGURED",
         "TEST_NOT_FOUND",
         "UNKNOWN_COMMAND",
         "UNKNOWN_ERROR",
         "UNKNOWN_OPTION",
+        "UNSUPPORTED_BROWSER",
       ]
     `)
   })
@@ -139,7 +140,7 @@ describe('lib/tap error registry', () => {
     .map((codes) => codes.sort())
 
     expect(shared.sort()).to.deep.eq([
-      ['BINDING_NOT_FOUND', 'CDP_UNREACHABLE', 'GRAPHQL_UNREACHABLE', 'STALE_INSTANCE'],
+      ['BINDING_NOT_FOUND', 'CDP_UNREACHABLE', 'GRAPHQL_UNREACHABLE', 'STALE_SESSION'],
       ['BINDING_THREW', 'FRAME_READ_FAILED', 'GRAPHQL_FAILED', 'STALE_HANDLE'],
       ['PROTOCOL_MISMATCH', 'UNKNOWN_ERROR'],
     ])
@@ -148,10 +149,10 @@ describe('lib/tap error registry', () => {
 
 describe('lib/tap error registry lookup', () => {
   it('resolves a code it ships', () => {
-    expect(tapErrorCopy('NO_INSTANCE')).to.eq(TAP_ERROR_COPY.NO_INSTANCE)
+    expect(tapErrorCopy('NO_SESSION')).to.eq(TAP_ERROR_COPY.NO_SESSION)
   })
 
-  // The code arrives from the instance over the wire, so anything that is not a code
+  // The code arrives from the session over the wire, so anything that is not a code
   // this CLI ships has to land somewhere rather than resolving to nothing — or, for
   // an inherited name, to a member of Object.prototype.
   it('falls back to the protocol-mismatch copy, plus a report, for a code only a newer Cypress knows', () => {
@@ -177,24 +178,24 @@ describe('lib/tap error registry lookup', () => {
 // One raiser for both directions of a version disagreement, so the code it picks
 // and the remedy that code carries always name the same side.
 describe('lib/tap version skew', () => {
-  it('names the CLI as behind when the instance speaks a newer schema', () => {
-    const err = new VersionSkewTapError({ instanceSchema: 2, cliSchema: 1, instanceCypress: '16.2.0', cliCypress: '15.20.1' })
+  it('names the CLI as behind when the session speaks a newer schema', () => {
+    const err = new VersionSkewTapError({ sessionSchema: 2, cliSchema: 1, sessionCypress: '16.2.0', cliCypress: '15.20.1' })
 
     expect(err.code).to.eq('CLI_OUTDATED')
     expect(err.detail).to.eq('The Cypress session is running Cypress v16.2.0; this CLI is v15.20.1.')
   })
 
-  it('names the instance as behind when it speaks an older schema', () => {
-    const err = new VersionSkewTapError({ instanceSchema: 1, cliSchema: 2, instanceCypress: '15.20.1', cliCypress: '16.2.0' })
+  it('names the session as behind when it speaks an older schema', () => {
+    const err = new VersionSkewTapError({ sessionSchema: 1, cliSchema: 2, sessionCypress: '15.20.1', cliCypress: '16.2.0' })
 
-    expect(err.code).to.eq('INSTANCE_OUTDATED')
+    expect(err.code).to.eq('SESSION_OUTDATED')
     expect(err.detail).to.eq('The Cypress session is running Cypress v15.20.1; this CLI is v16.2.0.')
   })
 
   // Whoever has to update acts on a Cypress version, so the schema versions that
   // decided it belong to the debug log rather than the output.
   it('keeps the schema versions on the diagnostic, out of what a caller reads', () => {
-    const err = new VersionSkewTapError({ instanceSchema: 7, cliSchema: 3, instanceCypress: '16.2.0', cliCypress: '15.20.1' })
+    const err = new VersionSkewTapError({ sessionSchema: 7, cliSchema: 3, sessionCypress: '16.2.0', cliCypress: '15.20.1' })
 
     expect(err.detail).not.to.contain('schema')
     expect(err.message).to.contain('v7')
@@ -229,19 +230,19 @@ describe('lib/tap error rendering', () => {
   // The condition, then the specifics that explain it, then what to do about it —
   // as paragraphs, with nothing between them to separate.
   it('lays a failure out as condition, specifics, remedy', async () => {
-    const printed = await render('INSTANCE_NOT_FOUND', 'Looked for `--instance` 999.')
+    const printed = await render('SESSION_NOT_FOUND', 'Looked for `--session` 999.')
 
     expect(printed).to.eq([
-      TAP_ERROR_COPY.INSTANCE_NOT_FOUND.description,
-      'Looked for --instance 999.',
-      TAP_ERROR_COPY.INSTANCE_NOT_FOUND.solution!.replace(/`/g, ''),
+      TAP_ERROR_COPY.SESSION_NOT_FOUND.description,
+      'Looked for --session 999.',
+      TAP_ERROR_COPY.SESSION_NOT_FOUND.solution!.replace(/`/g, ''),
     ].join('\n\n'))
   })
 
-  // A tap failure is about the state of a running instance, not about which Cypress
+  // A tap failure is about the state of a running session, not about which Cypress
   // is installed or the machine it runs on.
   it('carries no rule and no platform footer', async () => {
-    const printed = await render('NO_INSTANCE')
+    const printed = await render('NO_SESSION')
 
     expect(printed).not.to.contain('----------')
     expect(printed).not.to.contain('Cypress Version:')
@@ -259,9 +260,9 @@ describe('lib/tap error rendering', () => {
   // Both open by naming what was given, and close with the listing that answers it —
   // whatever named the real ones where the failure was noticed.
   it('reports an unknown command as the name given, then the listing', async () => {
-    const printed = await render('UNKNOWN_COMMAND', new UnknownCommandTapError('oel2k', 'Commands:\n  instances\n  status').detail)
+    const printed = await render('UNKNOWN_COMMAND', new UnknownCommandTapError('oel2k', 'Commands:\n  sessions\n  status').detail)
 
-    expect(printed).to.eq('Unknown command "oel2k"\n\nCommands:\n  instances\n  status')
+    expect(printed).to.eq('Unknown command "oel2k"\n\nCommands:\n  sessions\n  status')
   })
 
   it('reports an unknown option as the flag given, then the listing', async () => {
@@ -293,10 +294,10 @@ describe('lib/tap error rendering', () => {
     vi.mocked(console.error).mockClear()
 
     // A pid is a number, so it reads without quotes where an id reads with them.
-    expect(await render('INSTANCE_NOT_FOUND', new InstanceNotFoundTapError(4321).detail)).to.eq([
-      'No Cypress session matched the provided instance id.',
-      'Looked for --instance 4321.',
-      'Run cypress tap instances to list the Cypress sessions you can tap into.',
+    expect(await render('SESSION_NOT_FOUND', new SessionNotFoundTapError(4321).detail)).to.eq([
+      'No Cypress session matched the provided session id.',
+      'Looked for --session 4321.',
+      'Run cypress tap sessions to list the Cypress sessions you can tap into.',
     ].join('\n\n'))
   })
 
@@ -332,7 +333,7 @@ describe('lib/tap error rendering', () => {
   // Only the entries that ask for it: a failure about the state of the session is
   // not answered by listing the flags of the command that found it.
   it('leaves the help off an entry that does not ask for it', async () => {
-    await renderTapFailure({ code: 'NO_INSTANCE' }, 'Usage: cypress tap dom [options]')
+    await renderTapFailure({ code: 'NO_SESSION' }, 'Usage: cypress tap dom [options]')
 
     expect(stderr()).not.to.contain('Usage: cypress tap dom')
   })
@@ -351,7 +352,7 @@ describe('lib/tap error rendering', () => {
   })
 
   it('leaves the issue block off an entry that does not ask for it', async () => {
-    expect(await render('NO_INSTANCE')).not.to.contain('github.com/cypress-io/cypress/issues')
+    expect(await render('NO_SESSION')).not.to.contain('github.com/cypress-io/cypress/issues')
   })
 
   it('expands docs into a Learn more block under the docs site', async () => {
@@ -399,17 +400,17 @@ describe('lib/tap error rendering', () => {
   // collides with a registry key would render as that entry, describing a condition
   // nothing had established. What the code is read off, not what it says, is what
   // decides — so the contrast is against the same code arriving as a wire payload.
-  it('reads a code off a payload the instance sent, and never off an Error', async () => {
-    const asPayload = await renderTapFailure({ code: 'NO_INSTANCE' }).then(stderr)
+  it('reads a code off a payload the session sent, and never off an Error', async () => {
+    const asPayload = await renderTapFailure({ code: 'NO_SESSION' }).then(stderr)
 
-    expect(asPayload).to.contain(TAP_ERROR_COPY.NO_INSTANCE.description)
+    expect(asPayload).to.contain(TAP_ERROR_COPY.NO_SESSION.description)
 
     vi.mocked(console.error).mockClear()
 
-    const asThrow = await renderTapFailure(Object.assign(new Error('read of undefined'), { code: 'NO_INSTANCE' })).then(stderr)
+    const asThrow = await renderTapFailure(Object.assign(new Error('read of undefined'), { code: 'NO_SESSION' })).then(stderr)
 
     expect(asThrow).to.contain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
-    expect(asThrow).not.to.contain(TAP_ERROR_COPY.NO_INSTANCE.description)
+    expect(asThrow).not.to.contain(TAP_ERROR_COPY.NO_SESSION.description)
   })
 
   // A code only a newer Cypress raises has no copy here, so it falls back — and the
@@ -525,52 +526,57 @@ describe('lib/tap error rendering catalogue', () => {
   // `Record<TapErrorCode, ...>` makes a new registry entry a compile error here
   // until it gets a representative.
   const REPRESENTATIVE: Record<TapErrorCode, RepresentativeFailure> = {
-    // cli/lib/cypress-instances/index.ts (resolveInstance), with no Cypress open
-    NO_INSTANCE: {
+    // cli/lib/cypress-sessions/index.ts (resolveSession), with no Cypress open
+    NO_SESSION: {
       invocation: 'cypress tap dom --selector "#status"',
-      failure: new TapError('NO_INSTANCE'),
+      failure: new TapError('NO_SESSION'),
     },
-    // cli/lib/cypress-instances/index.ts (resolveInstance)
-    INSTANCE_NOT_FOUND: {
-      invocation: 'cypress tap --instance 4321 dom --selector "#status"',
-      failure: new InstanceNotFoundTapError(4321),
+    // cli/lib/cypress-sessions/index.ts (resolveSession)
+    SESSION_NOT_FOUND: {
+      invocation: 'cypress tap --session 4321 dom --selector "#status"',
+      failure: new SessionNotFoundTapError(4321),
     },
-    // cli/lib/cypress-instances/index.ts (liveMatches)
-    STALE_INSTANCE: {
-      invocation: 'cypress tap --instance 4321 dom --selector "#status"',
-      failure: new TapError('STALE_INSTANCE'),
+    // cli/lib/cypress-sessions/index.ts (liveMatches)
+    STALE_SESSION: {
+      invocation: 'cypress tap --session 4321 dom --selector "#status"',
+      failure: new TapError('STALE_SESSION'),
     },
-    // cli/lib/cypress-instances/index.ts (resolveInstance)
+    // cli/lib/cypress-sessions/index.ts (resolveSession)
     NO_BROWSER_ATTACHED: {
       invocation: 'cypress tap dom --selector "#status"',
       failure: new TapError('NO_BROWSER_ATTACHED'),
+    },
+    // cli/lib/cypress-sessions/index.ts (liveMatches), with Cypress open in Firefox
+    UNSUPPORTED_BROWSER: {
+      invocation: 'cypress tap dom --selector "#status"',
+      failure: new TapError('UNSUPPORTED_BROWSER'),
     },
     // cli/lib/tap/cdp-timeout.ts
     RENDERER_UNRESPONSIVE: {
       invocation: 'cypress tap dom --selector "#status"',
       failure: new TapError('RENDERER_UNRESPONSIVE', { detail: 'No response within the specified timeout (30000ms).' }),
     },
-    // cli/lib/tap/tap-session.ts
+    // cli/lib/tap/tap-connection.ts
     CDP_UNREACHABLE: {
       invocation: 'cypress tap status',
       failure: new TapError('CDP_UNREACHABLE'),
     },
-    // cli/lib/tap/tap-session.ts
+    // cli/lib/tap/tap-connection.ts
     BINDING_NOT_FOUND: {
       invocation: 'cypress tap status',
       failure: new TapError('BINDING_NOT_FOUND'),
     },
-    // cli/lib/tap/tap-session.ts
+    // cli/lib/tap/tap-connection.ts
     BINDING_THREW: {
       invocation: 'cypress tap reporter',
       failure: new TapError('BINDING_THREW'),
     },
-    // cli/lib/tap/tap-session.ts
+    // cli/lib/tap/tap-connection.ts
     STALE_HANDLE: {
       invocation: 'cypress tap dom --selector "#status"',
       failure: new TapError('STALE_HANDLE'),
     },
-    // cli/lib/tap/tap-session.ts (validateExecResult); also the schema handshake in cli/lib/exec/tap.ts
+    // cli/lib/tap/tap-connection.ts (validateExecResult); also the schema handshake in cli/lib/exec/tap.ts
     PROTOCOL_MISMATCH: {
       invocation: 'cypress tap status',
       failure: new TapError('PROTOCOL_MISMATCH'),
@@ -580,20 +586,20 @@ describe('lib/tap error rendering catalogue', () => {
     // versions — so these two entries differ only in which side is ahead.
     CLI_OUTDATED: {
       invocation: 'cypress tap status',
-      failure: new VersionSkewTapError({ instanceSchema: 2, cliSchema: 1, instanceCypress: '16.2.0', cliCypress: '15.20.1' }),
+      failure: new VersionSkewTapError({ sessionSchema: 2, cliSchema: 1, sessionCypress: '16.2.0', cliCypress: '15.20.1' }),
     },
-    // cli/lib/exec/tap.ts (schema handshake); also cli/lib/tap/instance-gql.ts, which
+    // cli/lib/exec/tap.ts (schema handshake); also cli/lib/tap/session-gql.ts, which
     // has no schema to hand and so names no versions
-    INSTANCE_OUTDATED: {
+    SESSION_OUTDATED: {
       invocation: 'cypress tap status',
-      failure: new VersionSkewTapError({ instanceSchema: 1, cliSchema: 2, instanceCypress: '15.20.1', cliCypress: '16.2.0' }),
+      failure: new VersionSkewTapError({ sessionSchema: 1, cliSchema: 2, sessionCypress: '15.20.1', cliCypress: '16.2.0' }),
     },
-    // cli/lib/tap/instance-gql.ts
+    // cli/lib/tap/session-gql.ts
     GRAPHQL_UNREACHABLE: {
       invocation: 'cypress tap specs',
       failure: new TapError('GRAPHQL_UNREACHABLE'),
     },
-    // cli/lib/tap/instance-gql.ts
+    // cli/lib/tap/session-gql.ts
     GRAPHQL_FAILED: {
       invocation: 'cypress tap specs',
       failure: new TapError('GRAPHQL_FAILED'),

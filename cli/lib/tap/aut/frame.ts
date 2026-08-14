@@ -1,13 +1,13 @@
 import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
-import { resolveInstance } from '../../cypress-instances'
-import { withTapSession, validateExecResult } from '../tap-session'
-import type { TapSession } from '../tap-session'
+import { resolveSession } from '../../cypress-sessions'
+import { withTapConnection, validateExecResult } from '../tap-connection'
+import type { TapConnection } from '../tap-connection'
 import { renderOutcome, renderTapFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
 import type { FrameAmbiguousResult } from './single-match'
-import { TAP_EXEC_METHOD, TapError, InvalidValueTapError, SpecInProgressTapError } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError, InvalidValueTapError, SpecInProgressTapError } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -53,7 +53,7 @@ const findAutFrame = (node: FrameNode): { id: string, url: string } | undefined 
 /**
  * Locates the app-under-test frame within the runner page. Verified empirically:
  * the AUT is a same-process child frame of the runner-page target, so one
- * attached session reaches it — no separate target attach. A pinned snapshot is
+ * attached connection reaches it — no separate target attach. A pinned snapshot is
  * always same-super-domain, so it is reliably this child frame too.
  */
 export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Promise<AutFrame> => {
@@ -83,11 +83,11 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
  * errors a poller can branch on, mirroring the `status` lifecycle contract
  * (wait until `passed`/`failed`).
  */
-export const assertFrameReadable = async (session: TapSession): Promise<void> => {
-  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
+export const assertFrameReadable = async (connection: TapConnection): Promise<void> => {
+  const outcome = validateExecResult(await connection.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
 
   if ('error' in outcome) {
-    // The instance already named the condition; re-raise it as ours so it renders
+    // The session already named the condition; re-raise it as ours so it renders
     // through the one path rather than being reported as a frame read failure.
     throw TapError.fromPayload(outcome.error)
   }
@@ -104,26 +104,26 @@ export const assertFrameReadable = async (session: TapSession): Promise<void> =>
 }
 
 /**
- * Shared flow for the AUT-frame commands: resolve a running instance, open a
- * tap session, gate on the run lifecycle, locate the AUT frame, run `read`, and
+ * Shared flow for the AUT-frame commands: resolve a running session, open a
+ * tap connection, gate on the run lifecycle, locate the AUT frame, run `read`, and
  * render the result. Every failure along the way — the read's own, the run-state
  * gate's, discovery's, transport's — is a `TapError`, so one catch renders them
  * all the way the schema commands render theirs.
  */
 export const withResolvedAutFrame = async (
   options: TapCliOptions,
-  read: (session: TapSession, frame: AutFrame) => Promise<unknown>,
+  read: (connection: TapConnection, frame: AutFrame) => Promise<unknown>,
   command: string,
 ): Promise<number> => {
   try {
-    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+    const selection = await resolveSession({ session: options.session, cwd: process.cwd() })
 
-    return await withTapSession(selection.instance, async (session) => {
-      await assertFrameReadable(session)
+    return await withTapConnection(selection.session, async (connection) => {
+      await assertFrameReadable(connection)
 
-      const frame = await resolveAutFrame(session.client, session.sessionId)
+      const frame = await resolveAutFrame(connection.client, connection.sessionId)
 
-      const result = await read(session, frame)
+      const result = await read(connection, frame)
 
       renderOutcome(command, result, options.json)
 

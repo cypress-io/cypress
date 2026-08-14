@@ -1,17 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
-import type { LiveInstanceState } from '../../../lib/cypress-instances'
+import { querySessionGraphql } from '../../../lib/tap/session-gql'
+import type { LiveSessionState } from '../../../lib/cypress-sessions'
 
-const instance: LiveInstanceState = {
+const session: LiveSessionState = {
   schemaVersion: 1,
   pid: 4242,
   projectRoot: '/projects/app',
   serverPort: 49200,
-  instanceId: 'inst-1',
+  sessionId: 'inst-1',
   testingType: 'e2e',
   cdpBrowserWsUrl: null,
   browserName: null,
+  browserFamily: null,
   machineId: null,
   userId: null,
 }
@@ -23,7 +24,7 @@ const request = {
 
 const jsonResponse = (payload: unknown, status = 200) => ({ status, json: async () => payload })
 
-describe('lib/tap/instance-gql', () => {
+describe('lib/tap/session-gql', () => {
   const fetchMock = vi.fn()
 
   beforeEach(() => {
@@ -35,10 +36,10 @@ describe('lib/tap/instance-gql', () => {
     vi.unstubAllGlobals()
   })
 
-  it('posts the operation to the instance server port and returns the data', async () => {
+  it('posts the operation to the session server port and returns the data', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ data: { currentProject: null } }))
 
-    const data = await queryInstanceGraphql(instance, request)
+    const data = await querySessionGraphql(session, request)
 
     expect(data).toEqual({ currentProject: null })
 
@@ -46,15 +47,15 @@ describe('lib/tap/instance-gql', () => {
 
     expect(url).toBe('http://127.0.0.1:49200/__cypress/graphql/TapSpecs')
     expect(init.method).toBe('POST')
-    expect(init.headers).toEqual({ 'content-type': 'application/json', 'x-cypress-instance-id': 'inst-1' })
+    expect(init.headers).toEqual({ 'content-type': 'application/json', 'x-cypress-session-id': 'inst-1' })
     expect(JSON.parse(init.body)).toEqual({ ...request, variables: {} })
   })
 
   it('maps a network failure to the unreachable error', async () => {
     fetchMock.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-            code: 'GRAPHQL_UNREACHABLE',
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+      code: 'GRAPHQL_UNREACHABLE',
       message: expect.stringContaining('ECONNREFUSED'),
     })
   })
@@ -62,17 +63,17 @@ describe('lib/tap/instance-gql', () => {
   it('maps a non-200 answer to the unreachable error', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500))
 
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-            code: 'GRAPHQL_UNREACHABLE',
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+      code: 'GRAPHQL_UNREACHABLE',
       message: expect.stringContaining('500'),
     })
   })
 
-  it('reports an unsupported instance when the request is redirected away from GraphQL', async () => {
+  it('reports an unsupported session when the request is redirected away from GraphQL', async () => {
     fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
 
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-            code: 'INSTANCE_OUTDATED',
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+      code: 'SESSION_OUTDATED',
       message: expect.stringContaining('redirected'),
     })
   })
@@ -80,8 +81,8 @@ describe('lib/tap/instance-gql', () => {
   it('surfaces a GraphQL error payload with its message', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ errors: [{ message: 'resolver exploded' }] }))
 
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-            code: 'GRAPHQL_FAILED',
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+      code: 'GRAPHQL_FAILED',
       message: expect.stringContaining('resolver exploded'),
     })
   })
@@ -90,8 +91,8 @@ describe('lib/tap/instance-gql', () => {
     for (const malformedErrors of [[null], ['boom'], [{}]]) {
       fetchMock.mockResolvedValue(jsonResponse({ errors: malformedErrors }))
 
-      await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-                code: 'GRAPHQL_FAILED',
+      await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+        code: 'GRAPHQL_FAILED',
       })
     }
   })
@@ -101,8 +102,8 @@ describe('lib/tap/instance-gql', () => {
       throw new Error('unexpected token')
     } })
 
-    await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-            code: 'GRAPHQL_FAILED',
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+      code: 'GRAPHQL_FAILED',
     })
   })
 
@@ -110,8 +111,8 @@ describe('lib/tap/instance-gql', () => {
     for (const payload of [null, 'junk', {}, { data: null }, { data: 'nope' }, { errors: [] }]) {
       fetchMock.mockResolvedValue(jsonResponse(payload))
 
-      await expect(queryInstanceGraphql(instance, request)).rejects.toMatchObject({
-                code: 'GRAPHQL_FAILED',
+      await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+        code: 'GRAPHQL_FAILED',
       })
     }
   })

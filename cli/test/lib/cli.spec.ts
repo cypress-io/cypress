@@ -900,12 +900,12 @@ describe('cli', () => {
       expect(tap.start).toBeCalledWith(['--frobnicate'], {})
     })
 
-    it('forwards --instance', async () => {
-      await exec('tap health --instance 123')
+    it('forwards --session', async () => {
+      await exec('tap health --session 123')
 
       await flushPromises()
 
-      expect(tap.start).toBeCalledWith(['health'], { instance: 123 })
+      expect(tap.start).toBeCalledWith(['health'], { session: 123 })
     })
 
     // The invocation reports the keys of what commander parsed, so an option left

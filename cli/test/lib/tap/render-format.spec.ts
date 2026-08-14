@@ -32,10 +32,10 @@ describe('lib/tap/render/format', () => {
 
   describe('table', () => {
     it('renders a counted heading and pads columns to their widest cell', () => {
-      const rendered = plain(layout([table('INSTANCES', ['PID', 'TYPE'], [['111', 'e2e'], ['2', 'component']])]))
+      const rendered = plain(layout([table('SESSIONS', ['PID', 'TYPE'], [['111', 'e2e'], ['2', 'component']])]))
 
       expect(rendered).toBe([
-        'INSTANCES (2)',
+        'SESSIONS (2)',
         '  PID  TYPE',
         '  111  e2e',
         '  2    component',

@@ -1,4 +1,4 @@
-import type { PinnedView } from '@packages/cypress-instances'
+import type { PinnedView } from '@packages/cypress-sessions'
 import { color } from './format'
 import { renderCommandSection } from './reporter'
 

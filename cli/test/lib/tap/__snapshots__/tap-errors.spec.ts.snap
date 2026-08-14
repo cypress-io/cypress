@@ -94,24 +94,6 @@ Could not reach the Cypress session.
 Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
 `;
 
-exports[`lib/tap error rendering catalogue > INSTANCE_NOT_FOUND 1`] = `
-"> cypress tap --instance 4321 dom --selector "#status"
-No Cypress session matched the provided instance id.
-
-Looked for {color:cyan}--instance{/color} 4321.
-
-Run {color:cyan}cypress tap instances{/color} to list the Cypress sessions you can tap into."
-`;
-
-exports[`lib/tap error rendering catalogue > INSTANCE_OUTDATED 1`] = `
-"> cypress tap status
-The targeted Cypress session is older than this CLI.
-
-The Cypress session is running Cypress v15.20.1; this CLI is v16.2.0.
-
-Update Cypress in the running project with {color:cyan}npm install --save-dev cypress@latest{/color}, restart it, then try again."
-`;
-
 exports[`lib/tap error rendering catalogue > INVALID_ARGUMENTS 1`] = `
 "> cypress tap run
 The command was called with invalid arguments.
@@ -123,17 +105,17 @@ Usage: cypress tap run [options] <spec>
 run (or rerun) a spec by its project-relative path
 
 Arguments:
-  spec                  project-relative spec path, as listed by the specs
-                        command
+  spec                 project-relative spec path, as listed by the specs
+                       command
 
 Options:
-  -i, --instance <pid>  target a specific running Cypress instance by its
-                        server process id (pid)
-  --json                print the raw JSON result instead of the human-readable
-                        rendering
-  --timeout <ms>        how long to wait on any single call into the running
-                        Cypress, in milliseconds (default: 30000)
-  -h, --help            display help for command"
+  -s, --session <pid>  target a specific running Cypress session by its server
+                       process id (pid)
+  --json               print the raw JSON result instead of the human-readable
+                       rendering
+  --timeout <ms>       how long to wait on any single call into the running
+                       Cypress, in milliseconds (default: 30000)
+  -h, --help           display help for command"
 `;
 
 exports[`lib/tap error rendering catalogue > INVALID_OPTIONS 1`] = `
@@ -150,7 +132,7 @@ Options:
   -t, --test-id <test-id>  test id, as listed by the reporter command
   -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
                            the latest
-  -i, --instance <pid>     target a specific running Cypress instance by its
+  -s, --session <pid>      target a specific running Cypress session by its
                            server process id (pid)
   --json                   print the raw JSON result instead of the
                            human-readable rendering
@@ -189,18 +171,18 @@ The Cypress session is running, but no test browser is open.
 Open a Chromium-based browser in Cypress, then try again."
 `;
 
-exports[`lib/tap error rendering catalogue > NO_INSTANCE 1`] = `
-"> cypress tap dom --selector "#status"
-Could not find a Cypress session to tap into.
-
-Start Cypress with {color:cyan}cypress open{/color}, select a testing type and launch a browser, then try again."
-`;
-
 exports[`lib/tap error rendering catalogue > NO_PROJECT 1`] = `
 "> cypress tap run cypress/e2e/checkout.cy.ts
 The Cypress session has no project open.
 
 Open a project in Cypress, then try again."
+`;
+
+exports[`lib/tap error rendering catalogue > NO_SESSION 1`] = `
+"> cypress tap dom --selector "#status"
+Could not find a Cypress session to tap into.
+
+Start Cypress with {color:cyan}cypress open{/color}, select a testing type and launch a browser, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `
@@ -221,6 +203,24 @@ The Cypress session is reachable, but the page running it is not responding.
 No response within the specified timeout (30000ms).
 
 It may be paused in DevTools, stuck in a loop, or starved of memory. Pass {color:cyan}--timeout <ms>{/color} to wait longer."
+`;
+
+exports[`lib/tap error rendering catalogue > SESSION_NOT_FOUND 1`] = `
+"> cypress tap --session 4321 dom --selector "#status"
+No Cypress session matched the provided session id.
+
+Looked for {color:cyan}--session{/color} 4321.
+
+Run {color:cyan}cypress tap sessions{/color} to list the Cypress sessions you can tap into."
+`;
+
+exports[`lib/tap error rendering catalogue > SESSION_OUTDATED 1`] = `
+"> cypress tap status
+The targeted Cypress session is older than this CLI.
+
+The Cypress session is running Cypress v15.20.1; this CLI is v16.2.0.
+
+Update Cypress in the running project with {color:cyan}npm install --save-dev cypress@latest{/color}, restart it, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > SNAPSHOT_NOT_FOUND 1`] = `
@@ -278,8 +278,8 @@ The Cypress session failed while running the command.
 Check the Cypress session with {color:cyan}cypress tap status{/color}, then try again."
 `;
 
-exports[`lib/tap error rendering catalogue > STALE_INSTANCE 1`] = `
-"> cypress tap --instance 4321 dom --selector "#status"
+exports[`lib/tap error rendering catalogue > STALE_SESSION 1`] = `
+"> cypress tap --session 4321 dom --selector "#status"
 Could not reach the Cypress session.
 
 Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
@@ -311,11 +311,11 @@ Unknown command "oel2k"
 
 Usage: cypress tap [command] [args...] [options]
 
-Interacts with a running Cypress instance
+Interacts with a running Cypress session
 
 Options:
-  -i, --instance <pid>  target a specific running Cypress instance by its
-                        server process id (pid)
+  -s, --session <pid>   target a specific running Cypress session by its server
+                        process id (pid)
   --json                print the raw JSON result instead of the human-readable
                         rendering
   --timeout <ms>        how long to wait on any single call into the running
@@ -323,10 +323,10 @@ Options:
   -h, --help            display help for command
 
 Commands:
-  instances [options]   list the running Cypress instances this CLI can reach
-  status [options]      report where a running Cypress instance is in its
+  sessions [options]    list the running Cypress sessions this CLI can reach
+  status [options]      report where a running Cypress session is in its
                         lifecycle
-  specs [options]       list the specs the running Cypress instance can run,
+  specs [options]       list the specs the running Cypress session can run,
                         most recently modified first
   run [options] <spec>  run (or rerun) a spec by its project-relative path
   dom [options]         read the app-under-test DOM as HTML: the page body,
@@ -369,17 +369,24 @@ Usage: cypress tap dom [options]
 read the app-under-test DOM as HTML: the page body, or the one element a selector matches (with its subtree)
 
 Options:
-  -s, --selector <selector>    a CSS selector matching exactly one element
+  -e, --selector <selector>    a CSS selector matching exactly one element
                                (default: "body")
   -m, --max-chars <max-chars>  cap on returned HTML characters (default: 30000)
   --at <at>                    0-based index of the match to read, as listed by
                                the index column when a selector matches several
-  -i, --instance <pid>         target a specific running Cypress instance by
-                               its server process id (pid)
+  -s, --session <pid>          target a specific running Cypress session by its
+                               server process id (pid)
   --json                       print the raw JSON result instead of the
                                human-readable rendering
   --timeout <ms>               how long to wait on any single call into the
                                running Cypress, in milliseconds (default:
                                30000)
   -h, --help                   display help for command"
+`;
+
+exports[`lib/tap error rendering catalogue > UNSUPPORTED_BROWSER 1`] = `
+"> cypress tap dom --selector "#status"
+The Cypress session is running an unsupported browser.
+
+{color:cyan}cypress tap{/color} drives Chromium-based browsers only. Reopen Cypress in a supported browser and try again."
 `;

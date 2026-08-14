@@ -1,4 +1,4 @@
-import { InvalidValueTapError } from '@packages/cypress-instances'
+import { InvalidValueTapError } from '@packages/cypress-sessions'
 
 const WHOLE_NUMBER = /^\d+$/
 

@@ -1,4 +1,4 @@
-import type { TapSession } from '../tap-session'
+import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from '../aut/frame'
 import { withResolvedAutFrame } from '../aut/frame'
 import { parseIndex, parsePositiveInt } from '../utils'
@@ -120,13 +120,13 @@ const projectTree = (byId: Map<string, AXNode>, rootId: string, maxNodes: number
 }
 
 const resolveSelectorBackendNodeId = async (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string,
   index: number,
 ): Promise<number | undefined> => {
-  const { client, sessionId } = session
-  const objectId = await querySelectorObjectId(session, frame, selector, index)
+  const { client, sessionId } = connection
+  const objectId = await querySelectorObjectId(connection, frame, selector, index)
 
   if (objectId === undefined) {
     return undefined
@@ -138,15 +138,15 @@ const resolveSelectorBackendNodeId = async (
 }
 
 export const extractAria = (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string,
   maxNodes: number,
   at?: number,
 ): Promise<FrameAriaResult | FrameAmbiguousResult> => {
   // Ahead of the tree fetch: an ambiguous selector shouldn't cost a full AX tree.
-  return withAmbiguous(session, frame, selector, at, async (): Promise<FrameAriaResult> => {
-    const { client, sessionId } = session
+  return withAmbiguous(connection, frame, selector, at, async (): Promise<FrameAriaResult> => {
+    const { client, sessionId } = connection
 
     await client.DOM.enable({}, sessionId)
     await client.Accessibility.enable(sessionId)
@@ -161,7 +161,7 @@ export const extractAria = (
 
     const base: FrameAriaResult = { nodes: [], nodeCount: 0 }
 
-    const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector, at ?? 0)
+    const backendNodeId = await resolveSelectorBackendNodeId(connection, frame, selector, at ?? 0)
 
     if (backendNodeId === undefined) {
       // Selector matched nothing, or the match is absent from the a11y tree.
@@ -189,7 +189,7 @@ export const ariaCommand = defineNativeCommand('aria', (options, _args, commandO
   const maxNodes = parsePositiveInt(commandOptions['max-nodes'], 'max-nodes')
   const at = parseIndex(commandOptions.at)
 
-  return withResolvedAutFrame(options, (session, frame) => {
-    return extractAria(session, frame, commandOptions.selector, maxNodes, at)
+  return withResolvedAutFrame(options, (connection, frame) => {
+    return extractAria(connection, frame, commandOptions.selector, maxNodes, at)
   }, 'aria')
 })

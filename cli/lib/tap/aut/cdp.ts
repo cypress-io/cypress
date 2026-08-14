@@ -1,4 +1,4 @@
-import type { TapSession } from '../tap-session'
+import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from './frame'
 import { invalidSelectorError } from './frame'
 
@@ -6,8 +6,8 @@ import { invalidSelectorError } from './frame'
 // nothing the tap reads pollutes the page.
 const TAP_WORLD_NAME = 'cypress-tap'
 
-export const createFrameIsolatedWorld = async (session: TapSession, frame: AutFrame): Promise<number> => {
-  const { client, sessionId } = session
+export const createFrameIsolatedWorld = async (connection: TapConnection, frame: AutFrame): Promise<number> => {
+  const { client, sessionId } = connection
 
   const { executionContextId } = await client.Page.createIsolatedWorld({
     frameId: frame.frameId,
@@ -25,13 +25,13 @@ export const createFrameIsolatedWorld = async (session: TapSession, frame: AutFr
  * selector is valid but nothing matched.
  */
 export const querySelectorObjectId = async (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string,
   index: number,
 ): Promise<string | undefined> => {
-  const { client, sessionId } = session
-  const executionContextId = await createFrameIsolatedWorld(session, frame)
+  const { client, sessionId } = connection
+  const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: 'function (selector, index) { return document.querySelectorAll(selector)[index] }',

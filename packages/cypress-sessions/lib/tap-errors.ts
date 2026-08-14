@@ -56,27 +56,32 @@ const NOTHING_KNOWN = {
 } satisfies TapErrorCopy
 
 export const TAP_ERROR_COPY = {
-  // Finding an instance to drive
-  /** Raised when discovery found no instance record at all, and none was named. */
-  NO_INSTANCE: {
+  // Finding a session to drive
+  /** Raised when discovery found no session record at all, and none was named. */
+  NO_SESSION: {
     description: `Could not find a ${TAP_TARGET} to tap into.`,
     solution: 'Start Cypress with `cypress open`, select a testing type and launch a browser, then try again.',
   },
   /**
-   * Raised when `--instance` named a pid no record on disk matches.
+   * Raised when `--session` named a pid no record on disk matches.
    *
-   * @deprecated - raise it with new InstanceNotFoundTapError(), which writes its detail
+   * @deprecated - raise it with new SessionNotFoundTapError(), which writes its detail
    */
-  INSTANCE_NOT_FOUND: {
-    description: `No ${TAP_TARGET} matched the provided instance id.`,
-    solution: `Run \`cypress tap instances\` to list the ${TAP_TARGET}s you can tap into.`,
+  SESSION_NOT_FOUND: {
+    description: `No ${TAP_TARGET} matched the provided session id.`,
+    solution: `Run \`cypress tap sessions\` to list the ${TAP_TARGET}s you can tap into.`,
   },
   /** Raised when records matched, but none answered its liveness probe. */
-  STALE_INSTANCE: { ...UNREACHABLE },
-  /** Raised when the instance is live, but has no browser open to drive. */
+  STALE_SESSION: { ...UNREACHABLE },
+  /** Raised when the session is live, but has no browser open to drive. */
   NO_BROWSER_ATTACHED: {
     description: `The ${TAP_TARGET} is running, but no test browser is open.`,
     solution: 'Open a Chromium-based browser in Cypress, then try again.',
+  },
+  /** Raised when every live session has a browser open that tap cannot drive. */
+  UNSUPPORTED_BROWSER: {
+    description: `The ${TAP_TARGET} is running an unsupported browser.`,
+    solution: '`cypress tap` drives Chromium-based browsers only. Reopen Cypress in a supported browser and try again.',
   },
   /** Raised when a CDP call went unanswered until the timeout elapsed. */
   RENDERER_UNRESPONSIVE: {
@@ -102,7 +107,7 @@ export const TAP_ERROR_COPY = {
 
   // Agreeing on a protocol with it
   /**
-   * Raised when the instance replied in a shape this CLI has no handling for: an
+   * Raised when the session replied in a shape this CLI has no handling for: an
    * unreadable schema, an exec result that is neither outcome, a call whose args
    * arrived as something other than a map. A version disagreement is not among
    * them — the handshake compares versions and answers for that itself, naming
@@ -118,7 +123,7 @@ export const TAP_ERROR_COPY = {
     solution: `Update the CLI with ${UPDATE_COMMAND}, then try again.`,
   },
   /** Raised when the handshake reported an older schema version, or GraphQL redirected. */
-  INSTANCE_OUTDATED: {
+  SESSION_OUTDATED: {
     description: `The targeted ${TAP_TARGET} is older than this CLI.`,
     solution: `Update Cypress in the running project with ${UPDATE_COMMAND}, restart it, then try again.`,
   },
@@ -151,12 +156,12 @@ export const TAP_ERROR_COPY = {
     description: `The ${TAP_TARGET} could not start the spec.`,
     solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
   },
-  /** Raised when the given path matches no spec the instance can run. */
+  /** Raised when the given path matches no spec the session can run. */
   SPEC_NOT_FOUND: {
     description: `The ${TAP_TARGET} has no spec matching that path.`,
     solution: `\`cypress tap specs\` lists the specs the ${TAP_TARGET} can run. If the spec exists but is not listed, widen \`specPattern\` in the Cypress configuration.`,
   },
-  /** Raised when the instance is running with no project open. */
+  /** Raised when the session is running with no project open. */
   NO_PROJECT: {
     description: `The ${TAP_TARGET} has no project open.`,
     solution: 'Open a project in Cypress, then try again.',
@@ -287,13 +292,13 @@ export const TAP_ERROR_COPY = {
 /** Every failure `cypress tap` can report: the keys of the table above. */
 export type TapErrorCode = keyof typeof TAP_ERROR_COPY
 
-// An unknown code is a protocol mismatch by definition: the instance speaks of a
+// An unknown code is a protocol mismatch by definition: the session speaks of a
 // failure this CLI has no copy for, which is one more thing about its answer that
 // cannot be read.
 const FALLBACK: TapErrorCopy = TAP_ERROR_COPY.PROTOCOL_MISMATCH
 
 /**
- * Copy for a code, which arrives from the instance over the wire — so anything that
+ * Copy for a code, which arrives from the session over the wire — so anything that
  * is not a code we ship falls back rather than being trusted: a non-string, an
  * inherited name like `constructor`, or a code only a newer Cypress knows about.
  */
@@ -305,7 +310,7 @@ export const tapErrorCopy = (code: unknown): TapErrorCopy => {
   return TAP_ERROR_COPY[code as TapErrorCode]
 }
 
-/** How a failure crosses the wire from the instance to the CLI. */
+/** How a failure crosses the wire from the session to the CLI. */
 export interface TapErrorPayload {
   code: string
   /** The specifics of this one, if it has any the copy cannot know. */
@@ -328,7 +333,7 @@ export interface TapErrorOptions {
  */
 export type DetailedTapErrorCode =
   | 'INVALID_VALUE'
-  | 'INSTANCE_NOT_FOUND'
+  | 'SESSION_NOT_FOUND'
   | 'TEST_NOT_FOUND'
   | 'ATTEMPT_NOT_FOUND'
   | 'COMMAND_NOT_FOUND'
@@ -373,7 +378,7 @@ export class TapError extends Error {
   }
 
   /**
-   * Re-raise a failure the instance already named. The code is whatever crossed the
+   * Re-raise a failure the session already named. The code is whatever crossed the
    * wire — including one a subclass built over there, whose copy arrived with it —
    * so this takes what the constructor will not.
    */
@@ -402,7 +407,7 @@ abstract class DetailedTapError extends TapError {
 /**
  * The one way to report a value a command cannot use: what was expected of the named
  * input, then the value as it arrived. Both sides of the wire raise it through here,
- * so a bad `--at` reads the same whether the CLI caught it or the instance did.
+ * so a bad `--at` reads the same whether the CLI caught it or the session did.
  */
 export class InvalidValueTapError extends DetailedTapError {
   constructor (name: string, expected: string, value: unknown) {
@@ -411,7 +416,7 @@ export class InvalidValueTapError extends DetailedTapError {
 }
 
 /** The lookups that answer the same way: a well-formed id that named nothing. */
-type NotFoundTapErrorCode = 'INSTANCE_NOT_FOUND' | 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
+type NotFoundTapErrorCode = 'SESSION_NOT_FOUND' | 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
 
 interface NotFoundDetail {
   /** What narrows the search, such as how many attempts the test actually has. */
@@ -439,9 +444,9 @@ abstract class NotFoundTapError extends DetailedTapError {
   }
 }
 
-export class InstanceNotFoundTapError extends NotFoundTapError {
+export class SessionNotFoundTapError extends NotFoundTapError {
   constructor (value: unknown) {
-    super('INSTANCE_NOT_FOUND', '--instance', value)
+    super('SESSION_NOT_FOUND', '--session', value)
   }
 }
 
@@ -509,7 +514,7 @@ export class UnknownOptionTapError extends DetailedTapError {
 
 /**
  * A required input the invocation left out. Both sides raise these through here —
- * the CLI when its own grammar catches the omission, the instance when a call
+ * the CLI when its own grammar catches the omission, the session when a call
  * reaches it without one — so an omission reads the same whichever side caught it.
  * Their entries name no remedy of their own: the called command's help lists every
  * input it takes, and the CLI appends it as it renders. The table describes both
@@ -532,17 +537,17 @@ export class MissingOptionTapError extends TapError {
 
 /** What the handshake compared, and what each side is actually running. */
 export interface VersionSkew {
-  /** The tap schema version the instance answered the handshake with. */
-  instanceSchema: number
+  /** The tap schema version the session answered the handshake with. */
+  sessionSchema: number
   /** The schema version this CLI speaks. Passed rather than read, so this module
    * stays free of the contract that declares it. */
   cliSchema: number
-  instanceCypress: string
+  sessionCypress: string
   cliCypress: string
 }
 
 /**
- * A CLI and an instance that do not speak the same tap schema. Which of the two is
+ * A CLI and a session that do not speak the same tap schema. Which of the two is
  * behind is decided here rather than at the throw site, so the code and the copy
  * cannot disagree about who has to update — the schema versions settle it, and the
  * table describes both outcomes, so this writes only the specifics.
@@ -550,13 +555,13 @@ export interface VersionSkew {
  * Those specifics name the Cypress versions, not the schema versions: the schema is
  * what disagreed, but it is not what anyone can act on. The schema numbers stay on
  * the diagnostic. Construct this only for a genuine mismatch; equal versions are
- * not a failure, and would read here as the instance being behind.
+ * not a failure, and would read here as the session being behind.
  */
 export class VersionSkewTapError extends TapError {
-  constructor ({ instanceSchema, cliSchema, instanceCypress, cliCypress }: VersionSkew) {
-    super(instanceSchema > cliSchema ? 'CLI_OUTDATED' : 'INSTANCE_OUTDATED', {
-      detail: `The ${TAP_TARGET} is running Cypress v${instanceCypress}; this CLI is v${cliCypress}.`,
-      message: `the ${TAP_TARGET} speaks tap schema v${instanceSchema}; this CLI speaks v${cliSchema}.`,
+  constructor ({ sessionSchema, cliSchema, sessionCypress, cliCypress }: VersionSkew) {
+    super(sessionSchema > cliSchema ? 'CLI_OUTDATED' : 'SESSION_OUTDATED', {
+      detail: `The ${TAP_TARGET} is running Cypress v${sessionCypress}; this CLI is v${cliCypress}.`,
+      message: `the ${TAP_TARGET} speaks tap schema v${sessionSchema}; this CLI speaks v${cliSchema}.`,
     })
   }
 }

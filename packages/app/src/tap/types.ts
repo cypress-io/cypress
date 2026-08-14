@@ -2,7 +2,7 @@ import type { SerializedTest } from '@packages/types'
 import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapConsoleProps } from './contract'
 
 // The command-log and console-props result shapes are the cross-process
-// contract, so they live in `@packages/cypress-instances` alongside the CLI-side
+// contract, so they live in `@packages/cypress-sessions` alongside the CLI-side
 // rendering that consumes them; aliased here to the names the app uses.
 export type CommandEntry = TapCommandEntry
 

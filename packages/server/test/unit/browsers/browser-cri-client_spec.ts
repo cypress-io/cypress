@@ -7,7 +7,7 @@ import net from 'net'
 import { ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { cypressInstances } from '../../../lib/cypress-instances'
+import { cypressSessions } from '../../../lib/cypress-sessions'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -135,16 +135,16 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(criImport.Version).to.be.calledTwice
     })
 
-    it('advertises the browser websocket url and name to cypress instances once connected', async function () {
-      const setCdpBrowserWsUrl = sinon.stub(cypressInstances, 'setCdpBrowserWsUrl')
+    it('advertises the browser websocket url to cypress sessions once connected', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(cypressSessions, 'setCdpBrowserWsUrl')
 
       await getClient()
 
-      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url', 'Chrome')
+      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url')
     })
 
-    it('clears the cypress instances cdp url when the browser connection is lost', async function () {
-      const setCdpBrowserWsUrl = sinon.stub(cypressInstances, 'setCdpBrowserWsUrl')
+    it('clears the cypress sessions cdp url when the browser connection is lost', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(cypressSessions, 'setCdpBrowserWsUrl')
 
       await getClient()
 

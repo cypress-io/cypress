@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tap journey</title>
+</head>
+<body>
+  <h1>Journey</h1>
+  <div id="status">ready</div>
+  <label for="name">Name</label>
+  <input id="name" type="text">
+  <button id="toggle" onclick="document.getElementById('status').textContent = 'clicked'">toggle</button>
+  <script>
+    // A request cy.intercept stubs, so the run has a route to report and an
+    // event row to annotate the command that waited on it.
+    fetch('/api/users').then((res) => res.json()).catch(() => ({}))
+  </script>
+</body>
+</html>

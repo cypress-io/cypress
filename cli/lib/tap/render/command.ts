@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapCommandSnapshot, TapConsoleProps, TapNetworkInfo } from '@packages/cypress-instances'
+import type { TapCommandEntry, TapCommandHook, TapCommandResult, TapCommandSnapshot, TapConsoleProps, TapNetworkInfo } from '@packages/cypress-sessions'
 import { color, definitionList, emptyState, heading, indent, layout, stateBadge, table } from './format'
 import { aliasSuffix, cleanedSuffix, commandLabel, formatMessage, networkDot, networkSuffix, sectionHeading } from './command-row'
 import { renderConsolePropsHuman } from './console-props'
