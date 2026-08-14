@@ -55,7 +55,7 @@ const coerceField = (label: string, type: ExpectedType, raw: string): CoercedFie
  * one: which condition an unusable input is — an unknown flag, a value of the wrong
  * type, a required argument left out — is known here and nowhere else.
  */
-export type CoercionFailure = { ok: false, error: TapError }
+type CoercionFailure = { ok: false, error: TapError }
 
 type CoercedCommandArgs =
   | { ok: true, args: Record<string, unknown> }

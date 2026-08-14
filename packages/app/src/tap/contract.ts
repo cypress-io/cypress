@@ -10,7 +10,6 @@ import type { TapSchema, TapExecResult } from '@packages/cypress-instances/lib/t
 export {
   TAP_SCHEMA_VERSION,
   TAP_COMMANDS,
-  TAP_TARGET,
   MAX_DERIVED_SELECTORS,
   TapError,
   isTapError,
