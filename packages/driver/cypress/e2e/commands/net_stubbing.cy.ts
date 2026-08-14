@@ -1660,8 +1660,16 @@ describe('network stubbing', { retries: 15 }, function () {
 
         expect(req).to.include({
           method: 'GET',
-          httpVersion: '1.1',
         })
+
+        // NOTE: accepted MITM → CDP drift (#34562): proxy-off there is no browser→proxy
+        // hop to report, and the protocol negotiated with the origin is not knowable
+        // while the request is paused, so httpVersion is honestly absent.
+        if (Cypress.expose('PROXY_DISABLED')) {
+          expect(req.httpVersion).to.be.undefined
+        } else {
+          expect(req.httpVersion).to.eq('1.1')
+        }
 
         expect(req.url).to.match(/^http:\/\/localhost:3500\/def456/)
 

@@ -18,3 +18,10 @@ dom  read the app-under-test DOM as HTML, whole-page or by selector
 This text lives in the `description` / `details` fields in `commands/*.ts` and, for binding commands, the shared `TAP_COMMANDS` contract in `@packages/cypress-instances` — audit those when adding or editing a command.
 
 Internal mechanism belongs in code comments explaining *why*, not in help text.
+
+## Telemetry and its opt-out
+
+Every tap invocation reports itself once, on the way out, from `events.ts`: the command name, the names of the flags it parsed, the exit code, an error code, a duration, and the ids identifying the machine and Cloud user. Never the values — selectors, spec paths, test titles and project roots all travel in option values and error messages, so the payload is a fixed list of names and codes, and adding a field to it is a deliberate change to what Cypress collects.
+
+Setting `CYPRESS_DISABLE_GUEST_TELEMETRY` to any value turns that report off, and it is not a tap-only knob: it is the opt-out for everything Cypress collects without an account behind it. The paths that answer to it:
+

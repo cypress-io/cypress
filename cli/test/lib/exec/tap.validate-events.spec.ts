@@ -173,4 +173,16 @@ describe('lib/exec/tap reporting the invocation', () => {
 
     expect(await tap.start(['health'], {})).toBe(0)
   })
+
+  it('sends nothing when telemetry is turned off', async () => {
+    vi.stubEnv('CYPRESS_DISABLE_GUEST_TELEMETRY', '1')
+    mockSession()
+
+    try {
+      expect(await tap.start(['health'], {})).toBe(0)
+      expect(fetchMock).not.toHaveBeenCalled()
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
 })

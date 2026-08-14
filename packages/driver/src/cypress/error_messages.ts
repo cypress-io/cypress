@@ -168,6 +168,10 @@ export default {
   chai: {
     length_invalid_argument: 'You must provide a valid number to a `length` assertion. You passed: `{{length}}`',
     match_invalid_argument: '`match` requires its argument be a `RegExp`. You passed: `{{regExp}}`',
+    invalid_jquery_accessor_arg: stripIndent`\
+      The \`{{assertion}}\` assertion requires the {{description}} name to be a string. You passed: \`{{arg}}\`
+
+      Assert on one {{description}} at a time by passing its name and, optionally, its expected value.`,
     invalid_jquery_obj (obj) {
       return stripIndent`\
         You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.

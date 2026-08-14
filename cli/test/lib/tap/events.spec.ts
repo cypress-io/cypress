@@ -51,6 +51,7 @@ describe('lib/tap/events', () => {
     vi.stubGlobal('fetch', fetchMock)
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     delete process.env.CYPRESS_INTERNAL_ENV
+    delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
     vi.mocked(resolvedInstanceIdentity).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
     vi.mocked(util.pkgVersion).mockReturnValue('15.0.0')
@@ -262,6 +263,30 @@ describe('lib/tap/events', () => {
     await reportTapTrace(0)
 
     expect(fetchMock.mock.calls[0][0]).toBe('https://cloud-staging.cypress.io/anon-collect')
+  })
+
+  it('sends nothing when telemetry is turned off', async () => {
+    process.env.CYPRESS_DISABLE_GUEST_TELEMETRY = '1'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('sends nothing when telemetry is turned off by npm config', async () => {
+    process.env.npm_config_cypress_disable_guest_telemetry = 'true'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('reports when the opt-out carries no value', async () => {
+    process.env.CYPRESS_DISABLE_GUEST_TELEMETRY = ''
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   it('reports no more flags than the payload holds', async () => {
