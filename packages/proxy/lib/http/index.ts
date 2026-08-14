@@ -396,7 +396,17 @@ export class Http {
         // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
         // In this case we don't want to run the response middleware and should just exit.
         if (ctx.res.destroyed) {
-          const error = createBrowserConnectionClosedError()
+          const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
+
+          // forceNetworkError destroys the res itself; carry its tag through
+          // so the CDP Fetch transport can map the rejection to
+          // Fetch.failRequest. Everything else about this path — the error
+          // stage re-run, the thrown type — is unchanged, so MITM behavior
+          // (where the destroyed socket already delivered the network error)
+          // is untouched.
+          if ((ctx.error as Error & { isForceNetworkError?: boolean } | undefined)?.isForceNetworkError) {
+            error.isForceNetworkError = true
+          }
 
           await onError(error)
 
