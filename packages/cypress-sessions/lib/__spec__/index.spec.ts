@@ -21,7 +21,7 @@ const validRecord = {
   testingType: 'e2e',
 }
 
-describe('cypress-instances contract', () => {
+describe('cypress-sessions contract', () => {
   describe('isCompatibleRecord', () => {
     it('accepts a well-formed record', () => {
       expect(isCompatibleRecord(validRecord)).toBe(true)

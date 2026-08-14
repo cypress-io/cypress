@@ -1,5 +1,5 @@
-import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
-import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD } from '@packages/cypress-sessions'
+import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-sessions'
 
 import { validateExecResult } from '../tap-connection'
 import type { TapConnection } from '../tap-connection'

@@ -1,13 +1,13 @@
 import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
-import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
+import { CypressInstanceError, resolveInstance } from '../../cypress-sessions'
 import { withTapConnection, validateExecResult } from '../tap-connection'
 import type { TapConnection } from '../tap-connection'
 import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
 import type { FrameAmbiguousResult } from './single-match'
-import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 

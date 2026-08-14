@@ -8,7 +8,7 @@ export const monorepoPaths = {
   pkgAgentInfo: path.join(__dirname, '../../packages/agent-info'),
   pkgApp: path.join(__dirname, '../../packages/app'),
   pkgConfig: path.join(__dirname, '../../packages/config'),
-  pkgCypressInstances: path.join(__dirname, '../../packages/cypress-instances'),
+  pkgCypressSessions: path.join(__dirname, '../../packages/cypress-sessions'),
   pkgDataContext: path.join(__dirname, '../../packages/data-context'),
   pkgDriver: path.join(__dirname, '../../packages/driver'),
   pkgElectron: path.join(__dirname, '../../packages/electron'),

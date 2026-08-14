@@ -1,13 +1,13 @@
 import { vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
-import type { ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
+import { listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-sessions'
+import type { ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
-import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
+import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
 
 export const tapError = (details: { description: string, solution: string }, message: string): Error => {
   return Object.assign(new Error(message), { details, known: true })

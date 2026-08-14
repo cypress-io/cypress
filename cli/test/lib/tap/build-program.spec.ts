@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import commander from 'commander'
 
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, type TapSchema } from '@packages/cypress-instances'
+import { buildTapSchema, type TapSchema } from '@packages/cypress-sessions'
 
 const schema: TapSchema = {
   schemaVersion: 1,

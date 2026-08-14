@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { CypressInstanceError } from '../../../lib/cypress-instances'
+import { CypressInstanceError } from '../../../lib/cypress-sessions'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 

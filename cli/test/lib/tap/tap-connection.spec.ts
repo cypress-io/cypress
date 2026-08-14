@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CRI from 'chrome-remote-interface'
 
-import type { ReadyInstanceState } from '../../../lib/cypress-instances'
+import type { ReadyInstanceState } from '../../../lib/cypress-sessions'
 import { CdpErrorMessage, withTapConnection } from '../../../lib/tap/tap-connection'
 import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { errors } from '../../../lib/errors'

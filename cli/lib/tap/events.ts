@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 
 import util, { DEVELOPMENT_VERSION } from '../util'
-import { resolvedInstanceIdentity } from '../cypress-instances'
+import { resolvedInstanceIdentity } from '../cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
 

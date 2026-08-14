@@ -1,4 +1,4 @@
-import type { PinnedView, TapNativeCommandSchema } from '@packages/cypress-instances'
+import type { PinnedView, TapNativeCommandSchema } from '@packages/cypress-sessions'
 
 /** Options `cypress tap` accepts from the top-level CLI. */
 export interface TapCliOptions {

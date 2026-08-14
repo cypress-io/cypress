@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CypressInstanceError, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
+import { CypressInstanceError, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
-import { buildTapSchema } from '@packages/cypress-instances'
+import { buildTapSchema } from '@packages/cypress-sessions'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
 import { fetchMock, mockConnection, reportedEvent, resetTapMocks, schema, tapError } from './tap-fixtures'
@@ -17,9 +17,9 @@ vi.mock('../../../lib/tap/instance-gql', () => {
   return { queryInstanceGraphql: vi.fn() }
 })
 
-vi.mock('../../../lib/cypress-instances', async (importActual) => {
+vi.mock('../../../lib/cypress-sessions', async (importActual) => {
   return {
-    ...await importActual<typeof import('../../../lib/cypress-instances')>(),
+    ...await importActual<typeof import('../../../lib/cypress-sessions')>(),
     listLiveInstances: vi.fn(),
     resolveLiveInstance: vi.fn(),
     resolveInstance: vi.fn(),

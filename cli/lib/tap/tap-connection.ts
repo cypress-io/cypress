@@ -3,9 +3,9 @@ import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
 import { DEFAULT_CDP_TIMEOUT_MS, FIND_INSTANCE_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
-import type { ReadyInstanceState } from '../cypress-instances'
-import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-instances'
-import type { TapExecResult } from '@packages/cypress-instances'
+import type { ReadyInstanceState } from '../cypress-sessions'
+import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-sessions'
+import type { TapExecResult } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 

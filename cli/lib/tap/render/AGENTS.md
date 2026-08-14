@@ -110,5 +110,5 @@ result whose depth the CLI does not control.
    the raw JSON instead — a per-option escape hatch for a result no view can
    honestly render.
 3. The `result` shape is the command's typed interface from the shared
-   `@packages/cypress-instances` contract — render from that, and let anything
+   `@packages/cypress-sessions` contract — render from that, and let anything
    machine-facing stay reachable through `--json`.

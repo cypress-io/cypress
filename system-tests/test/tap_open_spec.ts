@@ -788,7 +788,7 @@ describe('tap CLI across the run lifecycle', function () {
   it('exits 1 with NO_INSTANCE once the instance is gone', async () => {
     // SIGKILL skips the record cleanup an orderly exit would run, so the record outlives
     // its writer. Discovery reaps it on the next read (`reapIfDead` in
-    // cypress-instances/store.ts), so an unclean exit reports NO_INSTANCE rather than
+    // cypress-sessions/store.ts), so an unclean exit reports NO_INSTANCE rather than
     // STALE_INSTANCE — the latter needs a pid that is alive but no longer answering.
     await instance.terminate()
 

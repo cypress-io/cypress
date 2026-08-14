@@ -1,8 +1,8 @@
-import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
-import type { ReadyInstanceState } from '../../cypress-instances'
+import { CypressInstanceError, resolveLiveInstance } from '../../cypress-sessions'
+import type { ReadyInstanceState } from '../../cypress-sessions'
 import { withTapConnection, validateExecResult } from '../tap-connection'
 import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
-import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD } from '@packages/cypress-sessions'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions, TapRunState, TapStatus } from '../types'
 

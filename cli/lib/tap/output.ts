@@ -3,8 +3,8 @@ import commander from 'commander'
 import logger from '../logger'
 import { renderingFor } from './render'
 import { noteTapFailure } from './events'
-import type { InstanceSelection } from '../cypress-instances'
-import type { TapSchema } from '@packages/cypress-instances'
+import type { InstanceSelection } from '../cypress-sessions'
+import type { TapSchema } from '@packages/cypress-sessions'
 
 // Codes whose message already reads as a complete explanation with its own
 // guidance; printing the code in front of one adds noise rather than context.

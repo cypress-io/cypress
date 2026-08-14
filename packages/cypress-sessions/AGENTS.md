@@ -10,9 +10,9 @@ CLI stay in agreement by construction instead of hand-mirrored copies.
 
 **Producer / Consumer**
 
-- **Producer** — `@packages/server` (`lib/cypress-instances.ts`) writes `<pid>.json`
+- **Producer** — `@packages/server` (`lib/cypress-sessions.ts`) writes `<pid>.json`
   records into the `instances/` dir and serves the probe route in open mode.
-- **Consumer** — the CLI (`cli/lib/cypress-instances/*`) reads those records,
+- **Consumer** — the CLI (`cli/lib/cypress-sessions/*`) reads those records,
   checks pid liveness, and probes the route to confirm the instance and read the
   live CDP endpoint.
 
@@ -20,10 +20,10 @@ CLI stay in agreement by construction instead of hand-mirrored copies.
 
 ```bash
 # Build TypeScript to dist/
-yarn workspace @packages/cypress-instances build
+yarn workspace @packages/cypress-sessions build
 
 # Run tests
-yarn workspace @packages/cypress-instances test
+yarn workspace @packages/cypress-sessions test
 ```
 
 **Architecture**

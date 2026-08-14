@@ -3,13 +3,13 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { Browser, TestingType } from '@packages/types'
-import { SCHEMA_VERSION, cypressInstancesDir, recordPath } from '@packages/cypress-instances'
-import type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
+import { SCHEMA_VERSION, cypressInstancesDir, recordPath } from '@packages/cypress-sessions'
+import type { CypressInstance, LiveInstanceState } from '@packages/cypress-sessions'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
-export type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
+export type { CypressInstance, LiveInstanceState } from '@packages/cypress-sessions'
 
-const debug = Debug('cypress:server:cypress-instances')
+const debug = Debug('cypress:server:cypress-sessions')
 
 export const getInstancesDir = (): string => {
   return cypressInstancesDir(resolveCypressCacheRoot())

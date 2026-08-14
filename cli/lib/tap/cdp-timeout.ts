@@ -1,6 +1,6 @@
 import type CRI from 'chrome-remote-interface'
 
-import { CypressInstanceError } from '../cypress-instances'
+import { CypressInstanceError } from '../cypress-sessions'
 
 /** Bound for a protocol call, including one awaiting app-side work. */
 export const DEFAULT_CDP_TIMEOUT_MS = 30_000

@@ -4,7 +4,7 @@ import stripAnsi from 'strip-ansi'
 import { renderConsolePropsHuman } from '../../../lib/tap/render/console-props'
 import type { ConsolePropsOptions } from '../../../lib/tap/render/console-props'
 import { color } from '../../../lib/tap/render/format'
-import type { TapConsoleProps } from '@packages/cypress-instances'
+import type { TapConsoleProps } from '@packages/cypress-sessions'
 
 // chalk's color level depends on where the suite runs, so strip any escape
 // codes before snapshotting — the assertions target the layout, not the colors.

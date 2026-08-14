@@ -7,7 +7,7 @@ import { isCompatibleRecord, parseRecordPid, cypressInstancesDir } from './recor
 import type { CypressInstance } from './record'
 import { isPidAlive, verifyInstanceRecord } from './liveness'
 
-const debug = Debug('cypress:cli:cypress-instances')
+const debug = Debug('cypress:cli:cypress-sessions')
 
 export const getInstancesDir = (): string => {
   return cypressInstancesDir(state.getCacheDir())
