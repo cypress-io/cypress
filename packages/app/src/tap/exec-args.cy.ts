@@ -84,6 +84,24 @@ describe('tap/exec-args', () => {
       })
     })
 
+    it('applies an absent option’s declared default, already the declared type', () => {
+      const withDefaults: TapCommandOptionSchema[] = [
+        ...OPTIONS,
+        { name: 'selector', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
+        { name: 'max-chars', type: 'number', required: false, defaultValue: 30_000, description: 'a cap' },
+      ]
+
+      expect(coerceCommandOptions('run', PARAMS, withDefaults, { config: 'a.json' })).to.deep.eq({
+        ok: true,
+        options: { 'headed': false, 'config': 'a.json', 'selector': 'body', 'max-chars': 30_000 },
+      })
+
+      expect(coerceCommandOptions('run', PARAMS, withDefaults, { config: 'a.json', selector: '.btn', 'max-chars': '50' })).to.deep.eq({
+        ok: true,
+        options: { 'headed': false, 'config': 'a.json', 'selector': '.btn', 'max-chars': 50 },
+      })
+    })
+
     it('rejects a missing required option with a usage hint', () => {
       const outcome = coerceCommandOptions('run', PARAMS, OPTIONS, {})
 

@@ -132,7 +132,9 @@ export const coerceCommandOptions = (name: string, params: readonly TapCommandPa
         return invalid(`"${name}" is missing the required --${option.name} option.`)
       }
 
-      if (option.type === 'boolean') {
+      if (option.defaultValue !== undefined) {
+        coerced[option.name] = option.defaultValue
+      } else if (option.type === 'boolean') {
         coerced[option.name] = false
       }
 

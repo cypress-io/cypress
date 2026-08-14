@@ -45,6 +45,24 @@ const schema: TapSchema = {
   ],
 }
 
+// A command whose options carry defaults, kept apart from `schema` so the tests
+// asserting that an unsupplied option is simply absent keep meaning something.
+const defaulting: TapSchema = {
+  schemaVersion: 1,
+  cypressVersion: '15.0.0',
+  commands: [
+    {
+      name: 'probe',
+      description: 'read something out of a running Cypress instance',
+      params: [],
+      options: [
+        { name: 'selector', alias: 's', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
+        { name: 'max-chars', alias: 'm', type: 'number', required: false, defaultValue: 30_000, description: 'cap on returned characters' },
+      ],
+    },
+  ],
+}
+
 const subcommand = (program: commander.Command, name: string): commander.Command => {
   return program.commands.find((command) => command.name() === name)!
 }
@@ -295,6 +313,37 @@ describe('lib/tap/build-program', () => {
     program.parse(['launch', 'a.cy.js'], { from: 'user' })
 
     expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, {})
+  })
+
+  it('forwards a schema option’s default when the flag is absent, and the supplied value when it is not', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(defaulting, dispatch)
+
+    program.parse(['probe'], { from: 'user' })
+    program.parse(['probe', '--selector', '.btn', '--max-chars', '50'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenNthCalledWith(1, 'probe', {}, { 'selector': 'body', 'max-chars': '30000' })
+    expect(dispatch).toHaveBeenNthCalledWith(2, 'probe', {}, { 'selector': '.btn', 'max-chars': '50' })
+  })
+
+  it('renders each declared default in the per-command help, quoting a string and not a number', () => {
+    const program = buildTapProgram(defaulting, vi.fn())
+    const help = subcommand(program, 'probe').helpInformation().replace(/\s+/g, ' ')
+
+    expect(help).toContain('-s, --selector <selector> a CSS selector (default: "body")')
+    expect(help).toContain('-m, --max-chars <max-chars> cap on returned characters (default: 30000)')
+  })
+
+  it('renders the dom and aria selector defaults from the shared contract, leaving inspect’s required selector without one', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+    const helpOf = (name: string): string => subcommand(program, name).helpInformation().replace(/\s+/g, ' ')
+
+    expect(helpOf('dom')).toContain('-s, --selector <selector> a CSS selector matching exactly one element (default: "body")')
+    expect(helpOf('aria')).toContain('-s, --selector <selector> a CSS selector matching exactly one element to root the tree at (default: "body")')
+
+    // inspect takes the same selector but requires it, so the only default it
+    // renders is the --timeout every command shares.
+    expect(helpOf('inspect').match(/\(default:/g)).toHaveLength(1)
   })
 
   it('throws a catchable unknownOption error for a flag not in the schema', () => {

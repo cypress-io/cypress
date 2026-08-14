@@ -26,18 +26,17 @@ describe('lib/tap/utils parseIndex', () => {
 })
 
 describe('lib/tap/utils parsePositiveInt', () => {
-  it('falls back when the value is absent', () => {
-    expect(parsePositiveInt(undefined, 200, 'max-nodes')).to.eq(200)
-  })
-
   it('parses a positive integer, up to the largest one that survives the round trip', () => {
-    expect(parsePositiveInt('50', 200, 'max-nodes')).to.eq(50)
-    expect(parsePositiveInt('9007199254740991', 200, 'max-nodes')).to.eq(Number.MAX_SAFE_INTEGER)
+    expect(parsePositiveInt('50', 'max-nodes')).to.eq(50)
+    expect(parsePositiveInt('9007199254740991', 'max-nodes')).to.eq(Number.MAX_SAFE_INTEGER)
   })
 
-  it('rejects zero and every malformed value with INVALID_LIMIT', () => {
-    for (const bad of ['0', ...MALFORMED]) {
-      expect(() => parsePositiveInt(bad as any, 200, 'max-nodes'), JSON.stringify(bad)).to.throw(FrameCommandError).that.includes({ code: 'INVALID_LIMIT' })
+  // The caps these parse are declared with a default, so commander supplies one
+  // however the command was invoked — an absent value is malformed, not a cue to
+  // fall back to a second default the help never promised.
+  it('rejects zero, an absent value, and every malformed value with INVALID_LIMIT', () => {
+    for (const bad of ['0', undefined, ...MALFORMED]) {
+      expect(() => parsePositiveInt(bad as any, 'max-nodes'), JSON.stringify(bad)).to.throw(FrameCommandError).that.includes({ code: 'INVALID_LIMIT' })
     }
   })
 })
