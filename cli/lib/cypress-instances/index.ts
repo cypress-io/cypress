@@ -151,7 +151,7 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   if (supported.length === 0) {
     throw new CypressInstanceError(
       'UNSUPPORTED_BROWSER',
-      'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium based browser to use cypress tap.',
+      'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.',
     )
   }
 

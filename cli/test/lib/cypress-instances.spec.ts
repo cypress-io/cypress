@@ -399,7 +399,7 @@ describe('lib/cypress-instances', () => {
       // Not NO_BROWSER_ATTACHED: a Firefox instance never attaches one, so the
       // "open a browser" guidance would send the user in a circle.
       expect(err.code).toBe('UNSUPPORTED_BROWSER')
-      expect(err.message).toBe('The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium based browser to use cypress tap.')
+      expect(err.message).toBe('The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.')
     })
 
     it('resolves a Chromium instance over a live one at the cwd running an unsupported browser', async () => {

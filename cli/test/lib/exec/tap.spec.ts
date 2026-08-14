@@ -565,14 +565,14 @@ describe('lib/exec/tap', () => {
     // Every other resolution failure is transient — an instance running a browser
     // tap cannot drive is not, so a poller must hear it rather than wait it out.
     it('fails instead of reporting "not connected" when the browser is unsupported', async () => {
-      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('UNSUPPORTED_BROWSER', 'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium based browser to use cypress tap.'))
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('UNSUPPORTED_BROWSER', 'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.'))
 
       expect(await tap.start(['status'], {})).toBe(1)
 
       const output = logger.print()
 
       expect(output).toContain('running on an unsupported browser')
-      expect(output).toContain('Run Cypress open on a Chromium based browser')
+      expect(output).toContain('Run Cypress open on a Chromium-based browser')
       // The message stands on its own, so it is not prefixed with its code.
       expect(output).not.toContain('UNSUPPORTED_BROWSER')
     })
