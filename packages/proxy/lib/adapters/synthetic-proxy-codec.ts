@@ -55,7 +55,7 @@ const CONTENT_DECODERS: Record<string, (body: Buffer) => Buffer> = {
  * way, so we keep the response self-describing instead of stripping the header
  * and claiming plaintext bytes that are not.
  */
-function toIdentityResponse (response: HttpResponse): HttpResponse {
+export function toIdentityResponse (response: HttpResponse): HttpResponse {
   const headers = response.headers ?? {}
   const contentEncoding = Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-encoding')?.[1]
   const encodings = String(contentEncoding ?? '')
