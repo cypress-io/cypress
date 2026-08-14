@@ -218,11 +218,12 @@ describe('tap CLI argument handling', function () {
     expect(result.exitCode).to.eq(1)
   })
 
-  it('exits 1 and says so for more arguments than a command takes', async () => {
+  it('exits 1 and counts the arguments a command takes against what it was given', async () => {
     const result = await tapWithoutSession(['run', 'a.cy.js', 'b.cy.js'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('too many arguments')
+    expect(failureOutput(result)).to.include(copyFor('INVALID_ARGUMENTS'))
+    expect(failureOutput(result)).to.include('2 arguments were passed to "run", but it takes at most 1.')
   })
 
   it('renders a command’s help without needing a session', async () => {
@@ -951,12 +952,12 @@ describe('tap CLI against a session that stopped answering', function () {
     await session?.kill()
   })
 
-  it('exits 1 with STALE_SESSION, saying Cypress was running and is not now', async () => {
+  it('exits 1 with STALE_SESSION, saying Cypress could not be reached rather than not found', async () => {
     const result = await session.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include(copyFor('STALE_SESSION'))
-    expect(failureOutput(result)).to.include('no longer responding')
+    expect(failureOutput(result), 'the record is still on disk, so this is not NO_SESSION').to.not.include(copyFor('NO_SESSION'))
   })
 
   it('reports "not connected" from status rather than failing', async () => {
@@ -1810,7 +1811,8 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include(copyFor('AMBIGUOUS_COMMAND'))
-    expect(failureOutput(result), 'the qualified id to retry with').to.match(/qualify the id with its section, e.g. "h\d+:1"/)
+    expect(failureOutput(result)).to.include('"1" matches:')
+    expect(failureOutput(result), 'the qualified ids to retry with').to.match(/h\d+:1/)
   })
 
   it('resolves the same number once qualified with its section', async () => {
@@ -2301,7 +2303,7 @@ describe('tap CLI against a retried test', function () {
     const result = await session.tap(['reporter', '--attempt', '1'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include(copyFor('ATTEMPT_NOT_FOUND'))
+    expect(failureOutput(result)).to.include('You passed the --attempt flag without also passing the --test-id flag.')
   })
 
   it('exits 1 with TEST_NOT_FOUND for an unknown test id', async () => {
