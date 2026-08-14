@@ -168,6 +168,10 @@ export default {
   chai: {
     length_invalid_argument: 'You must provide a valid number to a `length` assertion. You passed: `{{length}}`',
     match_invalid_argument: '`match` requires its argument be a `RegExp`. You passed: `{{regExp}}`',
+    invalid_jquery_accessor_arg: stripIndent`\
+      The \`{{assertion}}\` assertion requires the {{description}} name to be a string. You passed: \`{{arg}}\`
+
+      Assert on one {{description}} at a time by passing its name and, optionally, its expected value.`,
     invalid_jquery_obj (obj) {
       return stripIndent`\
         You attempted to make a chai-jQuery assertion on an object that is neither a DOM object or a jQuery object.
@@ -285,6 +289,13 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
+    env_removed: stripIndent`\
+      Overriding the \`env\` configuration was removed in Cypress version 16.0.0.
+
+      Please update to use \`expose: { KEY: value }\` to make a value readable in the browser for a suite or test.
+
+      https://on.cypress.io/cypress-env-migration
+    `,
   },
 
   contains: {
@@ -461,6 +472,13 @@ export default {
     },
   },
 
+  end: {
+    removed: {
+      message: `${cmd('end')} was removed in Cypress version 16.0.0. A Cypress chain is already terminated when the next \`cy.<command>()\` starts a new chain, so \`.end()\` calls can be removed.`,
+      docsUrl: 'https://on.cypress.io/migration-guide',
+    },
+  },
+
   env: {
     docsUrl: 'https://on.cypress.io/api/env',
     invalid_argument: {
@@ -481,6 +499,22 @@ export default {
         ${cmd('env', '\'{{envVars}}\'')} failed with the following error:
 
         > "{{error}}"`,
+    },
+    removed ({ keys }: { keys: string[] }) {
+      const message = ['`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.']
+
+      if (keys.length === 1) {
+        message.push(`The key being accessed was: \`${keys[0]}\``)
+      } else if (keys.length > 1) {
+        message.push(`The keys being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
+      }
+
+      message.push('This call may come from a plugin. Update the plugin to a version that supports Cypress 16.')
+
+      return {
+        message: message.join('\n\n'),
+        docsUrl: 'https://on.cypress.io/cypress-env-migration',
+      }
     },
   },
 

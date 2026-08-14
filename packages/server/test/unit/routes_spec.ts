@@ -8,6 +8,7 @@ import proxyquire from 'proxyquire'
 import { Cfg } from '../../lib/project-base'
 import '../spec_helper'
 import { getCtx } from '@packages/data-context'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -361,6 +362,148 @@ describe('lib/routes', () => {
       }, res)
 
       expect(appHtml).to.have.been.calledWith(false)
+    })
+  })
+
+  describe('direct-origin catch-all (proxy disabled)', () => {
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    function setupCatchAll ({ remoteState }) {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const router = {
+        get: sinon.stub(),
+        post: sinon.stub(),
+        all: sinon.stub(),
+        use: sinon.spy(),
+      }
+      const Router = sinon.stub().returns(router)
+      const { createCommonRoutes } = proxyquire('../../lib/routes', {
+        'express': { Router },
+      })
+      const handleHttpRequest = sinon.stub().resolves()
+
+      createCommonRoutes({
+        config: {
+          clientRoute: '/__/',
+          namespace: '__cypress',
+          port: 2020,
+        } as Cfg,
+        getSpec: sinon.stub().returns({}),
+        // @ts-expect-error
+        networkProxy: {
+          handleHttpRequest,
+        } as NetworkProxy,
+        nodeProxy: {} as HttpProxy,
+        onError: () => {},
+        // @ts-expect-error
+        remoteStates: {
+          hasPrimary: sinon.stub().returns(false),
+          current: sinon.stub().returns(remoteState),
+        } as RemoteStates,
+        testingType: 'e2e',
+      })
+
+      const catchAllCall = router.all.args.find((args) => args[0] === '*')
+
+      return { handler: catchAllCall?.[1], handleHttpRequest }
+    }
+
+    const fileRemoteState = {
+      strategy: 'file',
+      origin: 'http://localhost:2020',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    }
+
+    it('serves strategy:file requests through the interception pipeline', async () => {
+      const { handler, handleHttpRequest } = setupCatchAll({ remoteState: fileRemoteState })
+      const req = { url: '/cypress/fixtures/dom.html', method: 'GET', headers: {} }
+      const res = {}
+      const next = sinon.stub().throws('next() should not be called')
+
+      await handler(req, res, next)
+
+      expect(handleHttpRequest).to.have.been.calledWith(req, res)
+      // the pipeline routes by proxiedUrl — it must be absolute at our origin
+      expect((req as any).proxiedUrl).to.eq('http://localhost:2020/cypress/fixtures/dom.html')
+    })
+
+    it('serves strategy:file requests addressed under an aliased host name', async () => {
+      const { handler, handleHttpRequest } = setupCatchAll({
+        remoteState: {
+          strategy: 'file',
+          origin: 'http://127.0.0.1:2020',
+          fileServer: 'http://localhost:2021',
+          domainName: 'localhost',
+          props: null,
+        },
+      })
+      // The Host header names us differently than the configured base —
+      // the toFileServerUrl origin comparison is the authorization gate.
+      const req = { url: '/cypress/fixtures/dom.html', method: 'GET', protocol: 'http', headers: { host: '127.0.0.1:2020' } }
+      const res = {}
+      const next = sinon.stub().throws('next() should not be called')
+
+      await handler(req, res, next)
+
+      expect(handleHttpRequest).to.have.been.calledWith(req, res)
+      expect((req as any).proxiedUrl).to.eq('http://127.0.0.1:2020/cypress/fixtures/dom.html')
+    })
+
+    it('serves loopback-token requests without rewriting the URL', async () => {
+      const { handler, handleHttpRequest } = setupCatchAll({ remoteState: fileRemoteState })
+      // the pre-flight and the CDP origin redirect both arrive with proxiedUrl
+      // already restored to the URL that was actually asked for
+      const req = {
+        url: '/test.html',
+        method: 'GET',
+        proxiedUrl: 'http://www.foobar.com:9500/test.html',
+        headers: { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken },
+      }
+      const res = {}
+      const next = sinon.stub().throws('next() should not be called')
+
+      await handler(req, res, next)
+
+      expect(handleHttpRequest).to.have.been.calledWith(req, res)
+      // net-stubbing and the file-server rewrite must see the real target,
+      // not this server's origin
+      expect(req.proxiedUrl).to.eq('http://www.foobar.com:9500/test.html')
+    })
+
+    it('ignores a forged loopback header without the token', async () => {
+      const { handler, handleHttpRequest } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+      })
+      const req = {
+        url: '/test.html',
+        method: 'GET',
+        proxiedUrl: 'http://www.foobar.com:9500/test.html',
+        headers: { 'x-cypress-internal-loopback': 'http://www.foobar.com:9500/test.html' },
+      }
+      const next = sinon.stub()
+
+      await handler(req, {}, next)
+
+      expect(next).to.have.been.called
+      expect(handleHttpRequest).to.not.have.been.called
+    })
+
+    it('falls through for URLs the file server cannot resolve', async () => {
+      const { handler, handleHttpRequest } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+      })
+      const req = { url: '/anything', method: 'GET', headers: {} }
+      const next = sinon.stub()
+
+      await handler(req, {}, next)
+
+      expect(next).to.have.been.called
+      expect(handleHttpRequest).to.not.have.been.called
     })
   })
 })

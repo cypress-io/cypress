@@ -14,6 +14,7 @@ import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
 import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import { CDPDisconnectedError } from './cri-errors'
 import { normalizeResourceType } from './normalize-resource-type'
 import { cdpKeyPress } from '../../automation/commands/key_press'
 import { AUT_FRAME_HEADER } from '../constants'
@@ -99,8 +100,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       try {
         await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
       } catch (e) {
-        // swallow this error if the CRI connection was reset
-        if (!e.message.includes('browser CRI connection was reset')) {
+        // swallow this error if the CRI connection was reset - the ack racing a
+        // disconnect is expected and not actionable
+        if (!CDPDisconnectedError.isCDPDisconnectedError(e)) {
           throw e
         }
       }

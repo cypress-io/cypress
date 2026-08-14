@@ -9,7 +9,7 @@ interface TagGrep {
 }
 
 export const parseTitleGrep = (s: string): TitleGrep | null => {
-  if (!s || typeof s !== 'string') {
+  if (!s) {
     return null
   }
 
@@ -32,7 +32,7 @@ export const parseTitleGrep = (s: string): TitleGrep | null => {
 }
 
 export const parseFullTitleGrep = (s: string): TitleGrep[] => {
-  if (!s || typeof s !== 'string') {
+  if (!s) {
     return []
   }
 
@@ -114,16 +114,6 @@ export const shouldTestRunTags = (parsedGrepTags: TagGrep[][], tags: string[] = 
 export const shouldTestRunTitle = (parsedGrep: TitleGrep[], testName: string): boolean => {
   if (!testName) {
     return true
-  }
-
-  if (!parsedGrep) {
-    return true
-  }
-
-  if (!Array.isArray(parsedGrep)) {
-    console.error('Invalid parsed title grep')
-    console.error(parsedGrep)
-    throw new Error('Expected title grep to be an array')
   }
 
   if (!parsedGrep.length) {

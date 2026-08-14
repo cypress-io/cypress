@@ -2,8 +2,10 @@ const { expect, sinon } = require('../../spec_helper')
 
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
+import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
+import { shouldSkipResponseBody } from '../../../lib/browsers/cdp-protocol/should-skip-response-body'
 
 function createPausedRequest (options: {
   requestId: string
@@ -99,6 +101,72 @@ async function readStream (stream: NodeJS.ReadableStream): Promise<string> {
 }
 
 describe('CdpFetchTransport', () => {
+  describe('shouldSkipResponseBody', () => {
+    it('skips an EventSource resourceType with no content-type header', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'EventSource',
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
+    })
+
+    it('skips a plain text/event-stream content-type', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
+    })
+
+    it('skips text/event-stream with a charset parameter', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream;charset=utf-8' }],
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
+    })
+
+    it('matches the content-type header name and value case-insensitively', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+        responseHeaders: [{ name: 'Content-Type', value: 'Text/Event-Stream' }],
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
+    })
+
+    it('skips multipart/x-mixed-replace', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+        responseHeaders: [{ name: 'content-type', value: 'multipart/x-mixed-replace' }],
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
+    })
+
+    it('does not skip text/html', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Document',
+        responseHeaders: [{ name: 'content-type', value: 'text/html' }],
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
+    })
+
+    // deliberately NOT skipped — documented residual gap. ndjson responses can
+    // also never finish, but they carry no reliable, provable content-type or
+    // resourceType signal the way SSE and multipart streams do.
+    it('does not skip application/x-ndjson', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+        responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
+    })
+
+    it('does not skip when the content-type is missing and resourceType is not EventSource', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
+    })
+
+    it('does not skip when responseHeaders is absent entirely', () => {
+      expect(shouldSkipResponseBody({
+        resourceType: 'Fetch',
+        responseHeaders: undefined,
+      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
+    })
+  })
+
   describe('createCdpFetchCodec', () => {
     it('decodes CDP request pauses to the neutral request shape', () => {
       const codec = createCdpFetchCodec()
@@ -233,6 +301,96 @@ describe('CdpFetchTransport', () => {
       expect(encoded.url).to.equal('https://example.test/response')
     })
 
+    it('copies bodySkipped from the transport response onto the neutral response', () => {
+      const codec = createCdpFetchCodec()
+
+      codec.decodeRequest({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      const response = codec.decodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+        bodySkipped: true,
+      })
+
+      expect(response.bodySkipped).to.be.true
+    })
+
+    // SSE relies on this: an unchanged empty body must digest-match the empty
+    // origin body a skipped fetch produced, or every stream response would be
+    // (wrongly) fulfilled instead of released to the browser untouched.
+    it('continues (does not fulfill) a skipped response whose body was left untouched', () => {
+      const codec = createCdpFetchCodec()
+
+      codec.decodeRequest({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      const response = codec.decodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+        bodySkipped: true,
+        originalBodyDigest: digestBody(Buffer.alloc(0)),
+      })
+
+      const encoded = codec.encodeResponse(response)
+
+      expect(encoded.fulfilled).to.be.false
+      expect(encoded.body).to.be.undefined
+      // Unchanged headers are omitted so CDP keeps the browser's original set
+      // rather than a reconstruction of it (same rule continueRequestHeaders
+      // applies at the request stage).
+      expect(encoded.responseHeaders).to.be.undefined
+    })
+
+    it('fulfills a skipped response when middleware sets a body', () => {
+      const codec = createCdpFetchCodec()
+
+      codec.decodeRequest({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      const response = codec.decodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+        bodySkipped: true,
+        originalBodyDigest: digestBody(Buffer.alloc(0)),
+      })
+
+      const encoded = codec.encodeResponse({
+        ...response,
+        body: 'stubbed',
+      })
+
+      expect(encoded.fulfilled).to.be.true
+      expect(encoded.body).to.equal(Buffer.from('stubbed').toString('base64'))
+    })
+
     // A body we cannot prove came from the origin has to be fulfilled, or a
     // rewrite would be silently dropped in favor of the origin bytes.
     it('fulfills a response pause with no origin body digest to compare against', () => {
@@ -333,6 +491,104 @@ describe('CdpFetchTransport', () => {
           url: 'https://example.test/mutated',
         })
       }).to.throw()
+    })
+  })
+
+  // Fetch.enable is scoped to the session it is sent on, so every session
+  // whose traffic must run the middleware onion needs its own enable — with
+  // one shared pattern list, since a session pausing a different set of stages
+  // than its siblings would silently skip middleware for that traffic.
+  describe('session-scoped Fetch interception', () => {
+    const FETCH_PATTERNS = {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    }
+
+    it('enables Fetch on its own session at start', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+
+      expect(client.send).to.have.been.calledWith('Fetch.enable', FETCH_PATTERNS, undefined)
+    })
+
+    it('enables a service worker session with the same patterns as its own session', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+      await transport.attachServiceWorkerSession('sw-session')
+
+      const enableCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.enable')
+
+      expect(enableCalls).to.have.length(2)
+      expect(enableCalls.map((call) => call.args[2])).to.deep.equal([undefined, 'sw-session'])
+      // one pattern list for every session — not two that can drift apart
+      expect(enableCalls[1].args[1]).to.equal(enableCalls[0].args[1])
+      expect(enableCalls[1].args[1]).to.deep.equal(FETCH_PATTERNS)
+    })
+
+    it('does not enable a service worker session before the transport has started', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.attachServiceWorkerSession('sw-session')
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.enable')
+    })
+
+    it('rejects when a service worker session cannot be enabled so the caller can report it', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+
+      client.send.withArgs('Fetch.enable', sinon.match.any, 'sw-session')
+      .rejects(new Error('ProtocolError: Inspected target closed'))
+
+      await expect(transport.attachServiceWorkerSession('sw-session'))
+      .to.be.rejectedWith('Inspected target closed')
+    })
+
+    // The whole point of enabling per session rather than per transport: pauses
+    // from every session land on the shared connection handlers, and each reply
+    // has to go back to the session the pause came from.
+    it('intercepts a service worker session pause and replies on that session', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+      const onRequestPaused = await startTransport(transport, client)
+
+      await transport.attachServiceWorkerSession('sw-session')
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'sw-fetch-request',
+        networkId: 'sw-network-1',
+        url: 'https://example.test/fixtures/service-worker.js',
+      }), 'sw-session')
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'sw-fetch-request',
+      }, 'sw-session')
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'sw-fetch-request',
+        networkId: 'sw-network-1',
+        url: 'https://example.test/fixtures/service-worker.js',
+        responseStatusCode: 200,
+      }), 'sw-session')
+
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'sw-fetch-request',
+        responseCode: 200,
+      }, 'sw-session')
     })
   })
 
@@ -760,6 +1016,107 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
+    // Network.responseReceived derives mimeType/charset from the wire
+    // content-type; a continueResponse header override does not update them,
+    // so a changed content-type must take the fulfill path to be recorded
+    // truthfully (e.g. Test Replay keys stylesheet handling off mimeType).
+    it('fulfills when middleware changes only the content-type of an untouched body', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            'content-type': 'text/css',
+          },
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = [{ name: 'Content-Type', value: 'application/octet-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [{
+          name: 'content-type',
+          value: 'text/css',
+        }],
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+    })
+
+    // Overrides other than content-type are recorded truthfully by CDP on
+    // continueResponse, so they keep the cheaper wire release.
+    it('continues when middleware changes headers other than content-type', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('.x { color: red; }').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            'x-custom': 'yes',
+          },
+        }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = [{ name: 'Content-Type', value: 'application/octet-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responseHeaders: [
+          { name: 'content-type', value: 'application/octet-stream' },
+          { name: 'x-custom', value: 'yes' },
+        ],
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
@@ -1570,6 +1927,59 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    // Fetch.getResponseBody never resolves for a never-ending body (SSE), so
+    // a deny-listed response pause must skip the eager fetch entirely instead
+    // of wedging the pause (#34470).
+    it('skips the eager body fetch and continues untouched for a deny-listed (SSE) response pause', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const middlewareSawResponse = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        middlewareSawResponse({
+          body: await readStream(response.bodyStream!),
+          bodySkipped: response.bodySkipped,
+        })
+
+        return response
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [{ name: 'content-type', value: 'text/event-stream' }]
+
+      await onRequestPaused(response)
+
+      await handled
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+      })
+
+      expect(middlewareSawResponse).to.have.been.calledWith({
+        body: '',
+        bodySkipped: true,
+      })
+    })
+
     it('does not charge the response body transfer against the response pause timeout', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
@@ -1688,8 +2098,10 @@ describe('CdpFetchTransport', () => {
         return {
           ...response,
           body: await readStream(response.bodyStream!),
+          // a content-type change would force the fulfill path (mimeType
+          // derivation) — use a neutral header to stay on continueResponse
           headers: {
-            'content-type': 'text/plain',
+            'x-verbatim': 'empty',
           },
           statusCode: 204,
         }
@@ -1718,8 +2130,8 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 204,
         responseHeaders: [{
-          name: 'content-type',
-          value: 'text/plain',
+          name: 'x-verbatim',
+          value: 'empty',
         }],
       })
 

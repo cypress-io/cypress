@@ -148,7 +148,9 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     validateOverridableAtRunTime(config, overrideContext, (validationResult) => {
       let errKey = 'config.cypress_config_api.read_only'
 
-      if (validationResult.supportedOverrideLevel === 'global_only') {
+      if (validationResult.invalidConfigKey === 'env') {
+        errKey = 'config.env_removed'
+      } else if (validationResult.supportedOverrideLevel === 'global_only') {
         errKey = 'config.invalid_mocha_config_override.global_only'
       } else if (validationResult.supportedOverrideLevel === 'suite') {
         errKey = 'config.invalid_mocha_config_override.suite_only'

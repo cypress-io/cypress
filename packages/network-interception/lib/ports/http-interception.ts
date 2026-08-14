@@ -18,6 +18,7 @@ export type HttpResponse = {
   id: string
   url: string
   body?: HttpBody
+  bodySkipped?: boolean
   bodyStream?: Readable
   headers?: HttpHeaders
   statusCode?: number

@@ -25,6 +25,8 @@ describe('block hosts', () => {
         // cross origin requests which return 503
         // result in a zero status code
         xhr.onerror = () => resolve(xhr)
+        // an unblocked request resolves here instead, failing the assertion below
+        xhr.onload = () => resolve(xhr)
       })
     }).its('status').should('eq', 0)
   })

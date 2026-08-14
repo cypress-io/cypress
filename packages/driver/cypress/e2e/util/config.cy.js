@@ -147,7 +147,7 @@ describe('driver/src/cypress/validate_config', () => {
             expect(overrideLevel).to.eq(mocha_runnable)
 
             expect(() => {
-              validateConfig(state, { viewportWidth: 200, viewportHeight: 100 })
+              validateConfig(state, { viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' })
             }).not.to.throw()
           })
         })
@@ -165,6 +165,10 @@ describe('driver/src/cypress/validate_config', () => {
           expect(() => {
             validateConfig(state, { viewportWidth: 200 })
           }).to.throw(`\`Cypress.config()\` cannot override \`viewportWidth\` during test execution`)
+
+          expect(() => {
+            validateConfig(state, { blockHosts: 'example.com' })
+          }).to.throw(`\`Cypress.config()\` cannot override \`blockHosts\` during test execution`)
         })
 
         it('does not throw when set outside test execution (e.g. support/spec file load)', () => {
@@ -178,8 +182,38 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.be.undefined
 
           expect(() => {
-            validateConfig(state, { viewportWidth: 200, viewportHeight: 100 })
+            validateConfig(state, { viewportWidth: 200, viewportHeight: 100, blockHosts: 'example.com' })
           }).not.to.throw()
+        })
+      })
+
+      describe('when the config option is env', () => {
+        it('throws when mutated at run-time with Cypress.config()', () => {
+          const state = $SetterGetter.create({
+            duringUserTestExecution: true,
+            specWindow: { Error },
+            runnable: { type: 'test' },
+          })
+
+          expect(() => {
+            validateConfig(state, { env: { FOO: 'bar' } })
+          }).to.throw('Overriding the `env` configuration was removed in Cypress version 16.0.0.')
+        })
+
+        ;['test', 'suite'].forEach((mocha_runnable) => {
+          it(`throws when config override level is ${mocha_runnable}`, () => {
+            const state = $SetterGetter.create({
+              duringUserTestExecution: false,
+              test: {
+                _testConfig: { applied: mocha_runnable },
+              },
+              specWindow: { Error },
+            })
+
+            expect(() => {
+              validateConfig(state, { env: { FOO: 'bar' } })
+            }).to.throw('Please update to use `expose: { KEY: value }` to make a value readable in the browser for a suite or test.')
+          })
         })
       })
 
