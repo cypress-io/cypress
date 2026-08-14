@@ -5,7 +5,7 @@ import Debug from 'debug'
 import state from '../tasks/state'
 import { isCompatibleRecord, parseRecordPid, cypressSessionsDir } from './record'
 import type { CypressSession } from './record'
-import { isPidAlive, verifySessionRecord } from './liveness'
+import { isPidAlive } from './liveness'
 
 const debug = Debug('cypress:cli:cypress-sessions')
 
@@ -117,28 +117,10 @@ export const readLiveSessions = async (): Promise<CypressSession[]> => {
   return records.filter((record): record is CypressSession => record !== null)
 }
 
-export const pruneDeadSessionRecords = async (probeTimeoutMs?: number): Promise<number> => {
+export const pruneDeadSessionRecords = async (): Promise<number> => {
   const files = await listRecordFiles(getSessionsDir())
 
-  const pruned = await Promise.all(files.map(async (file): Promise<boolean> => {
-    if (await reapIfDead(file)) {
-      return true
-    }
-
-    const record = await readCompatibleRecord(file.path)
-
-    if (!record) {
-      return false
-    }
-
-    if (!(await verifySessionRecord(record, probeTimeoutMs))) {
-      await fs.remove(file.path)
-
-      return true
-    }
-
-    return false
-  }))
+  const pruned = await Promise.all(files.map((file) => reapIfDead(file)))
 
   const removed = pruned.filter(Boolean).length
 

@@ -686,26 +686,36 @@ describe('lib/cypress-sessions', () => {
   })
 
   describe('.pruneDeadSessionRecords', () => {
-    it('removes dead-pid and unverified live-pid records, keeps verified ones and non-record files', async () => {
-      const livePort = await startFakeSession()
-      const closedPort = await getClosedPort()
-
+    it('removes dead-pid records, keeps live ones and non-record files', async () => {
       mockfs({
         [SESSIONS_DIR]: {
-          '111.json': makeRecord({ pid: 111, serverPort: livePort }),
+          '111.json': makeRecord({ pid: 111 }),
           '222.json': makeRecord({ pid: 222 }),
-          '333.json': makeRecord({ pid: 333, serverPort: closedPort }),
           'keep.txt': 'not a record',
         },
       })
 
-      stubKill({ alive: [111, 333] })
+      stubKill({ alive: [111] })
 
-      expect(await pruneDeadSessionRecords()).toBe(2)
+      expect(await pruneDeadSessionRecords()).toBe(1)
       expect(await fs.pathExists(`${SESSIONS_DIR}/111.json`)).toBe(true)
       expect(await fs.pathExists(`${SESSIONS_DIR}/222.json`)).toBe(false)
-      expect(await fs.pathExists(`${SESSIONS_DIR}/333.json`)).toBe(false)
       expect(await fs.pathExists(`${SESSIONS_DIR}/keep.txt`)).toBe(true)
+    })
+
+    it('keeps a live-pid record whose server does not answer the probe', async () => {
+      const closedPort = await getClosedPort()
+
+      mockfs({
+        [SESSIONS_DIR]: {
+          '333.json': makeRecord({ pid: 333, serverPort: closedPort }),
+        },
+      })
+
+      stubKill({ alive: [333] })
+
+      expect(await pruneDeadSessionRecords()).toBe(0)
+      expect(await fs.pathExists(`${SESSIONS_DIR}/333.json`)).toBe(true)
     })
 
     it('keeps unreadable or incompatible records while their pid is taken', async () => {
