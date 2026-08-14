@@ -5,6 +5,7 @@ import { HttpIntercept } from '@packages/network-interception'
 import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
+import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
 import { shouldSkipResponseBody } from '../../../lib/browsers/cdp-protocol/should-skip-response-body'
 
 function createPausedRequest (options: {
@@ -62,15 +63,32 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
   isAUTFrame?: (frameId: string) => Promise<boolean>
   isFromExtraTarget?: boolean
   addPendingUrlWithoutPreRequest?: (url: string) => void
+  onRequestCanceled?: (requestId: string) => void
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
   const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
     isAUTFrame: options.isAUTFrame,
     isFromExtraTarget: options.isFromExtraTarget,
     addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
+    onRequestCanceled: options.onRequestCanceled,
   }, networkExtraInfo as any)
 
   return { transport, networkExtraInfo }
+}
+
+function onLoadingFailed (client: ReturnType<typeof createClient>, event: {
+  requestId: string
+  canceled?: boolean
+  errorText?: string
+}, sessionId?: string) {
+  client.on.withArgs('Network.loadingFailed').getCalls().forEach((call) => {
+    call.args[1]({
+      canceled: false,
+      errorText: 'net::ERR_ABORTED',
+      type: 'Fetch',
+      ...event,
+    } as Protocol.Network.LoadingFailedEvent, sessionId)
+  })
 }
 
 async function startTransport (transport: CdpFetchTransport, client: ReturnType<typeof createClient>) {
@@ -167,6 +185,64 @@ describe('CdpFetchTransport', () => {
     })
   })
 
+  describe('toNetworkError', () => {
+    it('reports a refused connection the way Node does', () => {
+      const err = toNetworkError('http://127.0.0.1:3333/should-err?_=1', 'ConnectionRefused') as Error & { code: string }
+
+      expect(err.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(err.code).to.equal('ECONNREFUSED')
+    })
+
+    it('infers the default port from the scheme when the URL omits it', () => {
+      expect(toNetworkError('https://example.test/thing', 'ConnectionRefused').message)
+      .to.equal('connect ECONNREFUSED example.test:443')
+
+      expect(toNetworkError('http://example.test/thing', 'ConnectionRefused').message)
+      .to.equal('connect ECONNREFUSED example.test:80')
+    })
+
+    it('unbrackets an IPv6 literal, matching Node', () => {
+      expect(toNetworkError('http://[::1]:3333/x', 'ConnectionRefused').message)
+      .to.equal('connect ECONNREFUSED ::1:3333')
+    })
+
+    it('carries a timeout code the driver classifies as a responseTimeout failure', () => {
+      const err = toNetworkError('http://example.test:8080/x', 'TimedOut') as Error & { code: string }
+
+      expect(err.message).to.equal('connect ETIMEDOUT example.test:8080')
+      expect(err.code).to.equal('ETIMEDOUT')
+    })
+
+    it('reports a DNS failure against the host alone', () => {
+      const err = toNetworkError('http://nope.invalid/x', 'NameNotResolved') as Error & { code: string }
+
+      expect(err.message).to.equal('getaddrinfo ENOTFOUND nope.invalid')
+      expect(err.code).to.equal('ENOTFOUND')
+    })
+
+    it('omits the address for reasons Node reports without one', () => {
+      const err = toNetworkError('http://example.test/x', 'ConnectionReset') as Error & { code: string }
+
+      expect(err.message).to.equal('read ECONNRESET')
+      expect(err.code).to.equal('ECONNRESET')
+    })
+
+    // Inventing a Node code for these would misreport what the browser saw.
+    it('falls back to naming the CDP reason when there is no Node equivalent', () => {
+      const err = toNetworkError('http://example.test/x', 'BlockedByClient') as Error & { code?: string }
+
+      expect(err.message).to.equal('CDP Fetch response failed for http://example.test/x: BlockedByClient')
+      expect(err.code).to.be.undefined
+    })
+
+    it('still produces a coded error when the URL cannot be parsed', () => {
+      const err = toNetworkError('not a url', 'ConnectionRefused') as Error & { code: string }
+
+      expect(err.message).to.equal('connect ECONNREFUSED')
+      expect(err.code).to.equal('ECONNREFUSED')
+    })
+  })
+
   describe('createCdpFetchCodec', () => {
     it('decodes CDP request pauses to the neutral request shape', () => {
       const codec = createCdpFetchCodec()
@@ -258,6 +334,68 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    // The net-stubbing pipeline hands every request back with a string body, so
+    // a bodyless GET returns as ''. Forwarding that as postData would make
+    // Chrome attach `Content-Length: 0` to a request that never had a body.
+    it('does not encode an empty body onto a request the browser paused without one', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        headers: { foo: 'bar' },
+        body: '',
+      })
+
+      expect(transportRequest).not.to.have.property('postData')
+    })
+
+    it('encodes an emptied body when the pause carried one, so the change reaches the origin', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'POST',
+        headers: {},
+        postData: 'original',
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        body: '',
+      })
+
+      expect(transportRequest.postData).to.equal('')
+    })
+
+    it('encodes a non-empty body onto a request the browser paused without one', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        body: 'added',
+      })
+
+      expect(transportRequest).to.have.property('postData', 'added')
+    })
+
     it('round trips CDP response pauses through the neutral response shape', () => {
       const codec = createCdpFetchCodec()
       const transportRequest = {
@@ -273,6 +411,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -318,6 +457,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
       })
@@ -345,6 +485,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -377,6 +518,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -411,6 +553,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -426,6 +569,7 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('origin').toString('base64'),
         fulfilled: true,
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -939,6 +1083,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -984,6 +1129,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -1063,6 +1209,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/css',
@@ -1355,6 +1502,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 0,
+        responsePhrase: 'unknown',
       })
     })
 
@@ -1451,6 +1599,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -1560,6 +1709,48 @@ describe('CdpFetchTransport', () => {
       expect(networkExtraInfo.clear).not.to.have.been.called
     })
 
+    // The MITM path performs the upstream request itself, so cy.intercept sees
+    // Node's own connection error. The middleware must see the same thing here.
+    it('rejects a response error pause with the Node-shaped network error', async () => {
+      const client = createClient()
+      let capturedError: (Error & { code?: string }) | undefined
+
+      const httpIntercept = {
+        handle: async (request: any, next: (outbound: any) => Promise<any>) => {
+          try {
+            return await next(request)
+          } catch (err) {
+            capturedError = err as Error & { code?: string }
+
+            throw err
+          }
+        },
+      }
+
+      const { transport } = createTransport(client, { httpIntercept: httpIntercept as any })
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'http://127.0.0.1:3333/should-err',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'http://127.0.0.1:3333/should-err',
+        responseErrorReason: 'ConnectionRefused',
+      }))
+
+      await handled
+
+      expect(capturedError?.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(capturedError?.code).to.equal('ECONNREFUSED')
+    })
+
     it('clears extraInfo tracking when the flow ends in a response error pause', async () => {
       const client = createClient()
       const { transport, networkExtraInfo } = createTransport(client)
@@ -1660,7 +1851,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'fetch-request',
         method: 'POST',
-        postData: 'payload',
+        postData: 'cGF5bG9hZA==',
         headers: [{
           name: 'accept-encoding',
           value: 'gzip, deflate',
@@ -1739,6 +1930,65 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    it('continues the request with byte-accurate base64 when middleware sets a Buffer body', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      // bytes that a utf8 string round-trip would corrupt
+      const binaryBody = Buffer.from([0x23, 0x02, 0xff, 0x00, 0x9c])
+
+      httpIntercept.use(async (req, next) => {
+        req.body = binaryBody
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+      await onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 }))
+      await handled
+
+      const continueArgs = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')?.args[1]
+
+      expect(continueArgs.postData).to.equal(binaryBody.toString('base64'))
+    })
+
+    it('fails the request pause when middleware requests a network error', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async () => {
+        // cy.intercept forceNetworkError tags its error so the transport maps
+        // it to Fetch.failRequest instead of releasing the pause untouched
+        const err: Error & { isForceNetworkError?: boolean } = new Error('forceNetworkError called')
+
+        err.isForceNetworkError = true
+        throw err
+      })
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+        requestId: 'fetch-request',
+        errorReason: 'Failed',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+    })
+
     it('continues the request pause when middleware fails before the terminal path', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
@@ -1786,6 +2036,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 201,
+        responsePhrase: 'Created',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2073,6 +2324,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 202,
+        responsePhrase: 'Accepted',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2328,6 +2580,7 @@ describe('CdpFetchTransport', () => {
       expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
+        'Network.loadingFailed',
       ])
 
       expect(networkExtraInfo.start).to.have.been.calledOnce
@@ -2363,6 +2616,7 @@ describe('CdpFetchTransport', () => {
       expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
+        'Network.loadingFailed',
       ])
 
       expect(networkExtraInfo.start).to.have.been.calledTwice
@@ -2454,6 +2708,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2503,6 +2758,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2791,9 +3047,198 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [],
         body: Buffer.from('mutated').toString('base64'),
       })
+    })
+  })
+
+  describe('browser request cancellation', () => {
+    // Parks a flow in the middleware onion the way pre-request correlation
+    // does, so the cancellation arrives while the request pause is still held.
+    function parkedIntercept () {
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const parked = Promise.withResolvers<any>()
+
+      httpIntercept.use(async () => parked.promise)
+
+      return { httpIntercept, parked }
+    }
+
+    it('aborts a flow still paused in the middleware onion', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub().callsFake(() => {
+        parked.reject(new Error('request destroyed before browser pre-request was received'))
+      })
+
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest')
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      await handled
+
+      expect(onRequestCanceled).to.have.been.calledOnceWith('network-1')
+      // the pause is released rather than left held; the request is already
+      // gone, so CDP rejecting this is expected and swallowed
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+    })
+
+    it('does not strand a continueResponse when the cancellation lands after the request was continued', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      await handled
+
+      // no response pause ever arrived for this flow, so there is no pause left
+      // to release — sending one would target a request id CDP no longer knows
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
+    it('leaves a genuine network failure to the response error pause', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: false, errorText: 'net::ERR_CONNECTION_REFUSED' })
+
+      expect(onRequestCanceled).not.to.have.been.called
+
+      parked.reject(new Error('unparked'))
+      await tick()
+    })
+
+    it('ignores a cancellation for a request it never paused', async () => {
+      const client = createClient()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { onRequestCanceled })
+
+      await startTransport(transport, client)
+
+      onLoadingFailed(client, { requestId: 'never-paused', canceled: true })
+
+      expect(onRequestCanceled).not.to.have.been.called
+    })
+
+    it('scopes cancellation to the session the request paused on', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }), 'service-worker-session')
+
+      await tick()
+
+      // CDP request ids are only unique per session
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      expect(onRequestCanceled).not.to.have.been.called
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true }, 'service-worker-session')
+
+      expect(onRequestCanceled).to.have.been.calledOnceWith('network-1')
+
+      parked.reject(new Error('unparked'))
+      await tick()
+    })
+
+    it('namespaces the canceled request id for an extra-target transport', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled, isFromExtraTarget: true })
+      const onRequestPaused = await startTransport(transport, client)
+
+      onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      // must match the id the shared HttpIntercept was handed
+      expect(onRequestCanceled.firstCall.args[0]).to.match(/^extra-\d+:network-1$/)
+
+      parked.reject(new Error('unparked'))
+      await tick()
+    })
+
+    it('stops cancelling once the flow has completed', async () => {
+      const client = createClient()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      expect(onRequestCanceled).not.to.have.been.called
+    })
+
+    it('unsubscribes from Network.loadingFailed on stop', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+      await transport.stop()
+
+      expect(client.off).to.have.been.calledWith('Network.loadingFailed')
     })
   })
 })

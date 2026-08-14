@@ -3,11 +3,12 @@ import type { HttpRequest, HttpResponse, TransportCodecPort } from '@packages/ne
 import type { HttpMiddlewareCtx } from '../http'
 import { createProxyHttpCodec } from './http-codec'
 import {
+  abortSyntheticExpressContext,
   createRequestBodyStream,
   createSyntheticExpressContext,
   createSyntheticIncomingResponse,
 } from './synthetic-express-context'
-import type { SyntheticCypressResponse } from './synthetic-express-context'
+import type { SyntheticCypressResponse, SyntheticExpressContext } from './synthetic-express-context'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
 const WIRE_ENCODING_HEADERS = new Set(['content-encoding', 'content-length', 'transfer-encoding'])
@@ -55,7 +56,7 @@ const CONTENT_DECODERS: Record<string, (body: Buffer) => Buffer> = {
  * way, so we keep the response self-describing instead of stripping the header
  * and claiming plaintext bytes that are not.
  */
-function toIdentityResponse (response: HttpResponse): HttpResponse {
+export function toIdentityResponse (response: HttpResponse): HttpResponse {
   const headers = response.headers ?? {}
   const contentEncoding = Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-encoding')?.[1]
   const encodings = String(contentEncoding ?? '')
@@ -98,6 +99,16 @@ type SyntheticProxyCodecOptions = {
   ) => HttpMiddlewareCtx<any>
 }
 
+export type SyntheticProxyCodec = TransportCodecPort<HttpMiddlewareCtx<any>, HttpMiddlewareCtx<any>> & {
+  /**
+   * Tears down the synthetic exchange for an in-flight request the browser
+   * canceled. A transport whose cancellation signal is out of band (CDP
+   * Network.loadingFailed) has no other way to reach the exchange, and without
+   * it the flow sits in pre-request correlation until that timer expires.
+   */
+  abortRequest (id: string): void
+}
+
 /**
  * Proxy codec variant for transports that start from a neutral HttpRequest
  * (e.g. CDP Fetch) instead of a real Express req/res. Synthesizes the middleware
@@ -106,18 +117,28 @@ type SyntheticProxyCodecOptions = {
  */
 export function createSyntheticProxyCodec (
   options: SyntheticProxyCodecOptions,
-): TransportCodecPort<HttpMiddlewareCtx<any>, HttpMiddlewareCtx<any>> {
+): SyntheticProxyCodec {
   const coreCodec = createProxyHttpCodec()
+  const inFlightExchanges = new Map<string, SyntheticExpressContext>()
 
   return {
     encodeRequest (request: HttpRequest): HttpMiddlewareCtx<any> {
-      const { req, res } = createSyntheticExpressContext(request)
-      const ctx = options.createMiddlewareContext(req, res)
+      const exchange = createSyntheticExpressContext(request)
+      const ctx = options.createMiddlewareContext(exchange.req, exchange.res)
 
       ctx.id = request.id
       coreCodec.decodeRequest(ctx)
+      inFlightExchanges.set(request.id, exchange)
 
       return ctx
+    },
+
+    abortRequest (id: string): void {
+      const exchange = inFlightExchanges.get(id)
+
+      if (exchange) {
+        abortSyntheticExpressContext(exchange)
+      }
     },
 
     decodeRequest (ctx: HttpMiddlewareCtx<any>): HttpRequest {
@@ -169,6 +190,7 @@ export function createSyntheticProxyCodec (
     },
 
     releaseRequest (id: string): void {
+      inFlightExchanges.delete(id)
       coreCodec.releaseRequest?.(id)
     },
   }
