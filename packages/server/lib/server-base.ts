@@ -31,8 +31,8 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import { INSTANCES_ROUTE_PREFIX, INSTANCE_ID_HEADER } from '@packages/cypress-sessions'
-import { cypressInstances } from './cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
@@ -87,9 +87,9 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _hasValidInstanceIdHeader = (req): boolean => {
-  const provided = req.headers[INSTANCE_ID_HEADER]
-  const current = cypressInstances.getCurrent()?.instanceId
+const _hasValidSessionIdHeader = (req): boolean => {
+  const provided = req.headers[SESSION_ID_HEADER]
+  const current = cypressSessions.getCurrent()?.sessionId
 
   return Boolean(current) && typeof provided === 'string' && provided === current
 }
@@ -103,12 +103,12 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
   ]
 
   const isCliTapRequest = (trimmedUrl: string, req) => {
-    return trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidInstanceIdHeader(req)
+    return trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req)
   }
 
   const isAllowedProxyBypass = (trimmedUrl: string, req) => {
     return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) ||
-      trimmedUrl.startsWith(INSTANCES_ROUTE_PREFIX) ||
+      trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
       isCliTapRequest(trimmedUrl, req)
   }
 

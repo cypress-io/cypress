@@ -26,16 +26,16 @@ export interface FrameAmbiguousResult {
   /**
    * One entry per match, in document order, each carrying the index of the match
    * it names and a selector unique to it — `null` where none could be derived.
-   * May be shorter than `count`: the instance only derives so many.
+   * May be shorter than `count`: the session only derives so many.
    */
   selectors: ResolveSelectorMatch[]
 }
 
 /**
  * A unique selector for each match, to offer in place of the ambiguous one.
- * Best effort: these come from the instance itself, which derives them the way
+ * Best effort: these come from the session itself, which derives them the way
  * its Selector Playground does — so they honor any selectorPriority the project
- * configured, and are selectors the user's own tests would use. An instance that
+ * configured, and are selectors the user's own tests would use. A session that
  * can't reach its app under test (a secondary origin inside `cy.origin`) just
  * leaves the match count to speak for itself.
  */

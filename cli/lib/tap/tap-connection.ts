@@ -2,8 +2,8 @@ import Debug from 'debug'
 import CRI from 'chrome-remote-interface'
 
 import { errors } from '../errors'
-import { DEFAULT_CDP_TIMEOUT_MS, FIND_INSTANCE_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
-import type { ReadyInstanceState } from '../cypress-sessions'
+import { DEFAULT_CDP_TIMEOUT_MS, FIND_SESSION_TIMEOUT_MS, boundCdpCalls, isRendererUnresponsive, withCdpDeadline } from './cdp-timeout'
+import type { ReadySessionState } from '../cypress-sessions'
 import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD } from '@packages/cypress-sessions'
 import type { TapExecResult } from '@packages/cypress-sessions'
 
@@ -114,17 +114,17 @@ const evaluateBinding = (client: CRI.Client, sessionId: string) => {
   return client.Runtime.evaluate({ expression: `window.${TAP_BINDING_GLOBAL}` }, sessionId)
 }
 
-const probeForBinding = async (client: CRI.Client, sessionId: string, findInstanceMs: number): Promise<boolean> => {
+const probeForBinding = async (client: CRI.Client, sessionId: string, findSessionMs: number): Promise<boolean> => {
   const { result, exceptionDetails } = await withCdpDeadline(
     evaluateBinding(client, sessionId),
     'the runner-page probe',
-    findInstanceMs,
+    findSessionMs,
   )
 
   return !exceptionDetails && result.type !== 'undefined' && !!result.objectId
 }
 
-const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], findInstanceMs: number): Promise<string> => {
+const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTargetInfo[], findSessionMs: number): Promise<string> => {
   let unresponsive: unknown
 
   for (const target of targetInfos) {
@@ -137,7 +137,7 @@ const findRunnerPageSession = async (client: CRI.Client, targetInfos: PageTarget
     try {
       sessionId = await attachToPage(client, target.targetId)
 
-      if (await probeForBinding(client, sessionId, findInstanceMs)) {
+      if (await probeForBinding(client, sessionId, findSessionMs)) {
         debug('matched runner page target %o', { targetId: target.targetId, url: target.url })
 
         return sessionId
@@ -180,11 +180,11 @@ const resolveBindingObjectId = async (client: CRI.Client, sessionId: string): Pr
   const { result, exceptionDetails } = evaluated
 
   if (exceptionDetails) {
-    return throwTapError(errors.tapCdpUnreachable, `Failed to connect to the instance.`)
+    return throwTapError(errors.tapCdpUnreachable, `Failed to connect to the session.`)
   }
 
   if (result.type === 'undefined' || !result.objectId) {
-    return throwTapError(errors.tapBindingNotFound, `Connected to an unsupported instance.`)
+    return throwTapError(errors.tapBindingNotFound, `Connected to an unsupported session.`)
   }
 
   return result.objectId
@@ -241,16 +241,16 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
 }
 
 export const withTapConnection = async <T> (
-  instance: ReadyInstanceState,
+  session: ReadySessionState,
   fn: (connection: TapConnection) => Promise<T>,
   timeoutMs?: number,
 ): Promise<T> => {
   const callMs = timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS
-  const findInstanceMs = timeoutMs ?? FIND_INSTANCE_TIMEOUT_MS
+  const findSessionMs = timeoutMs ?? FIND_SESSION_TIMEOUT_MS
 
-  debug('opening tap connection for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, callMs, findInstanceMs })
+  debug('opening tap connection for session %o', { pid: session.pid, cdpBrowserWsUrl: session.cdpBrowserWsUrl, callMs, findSessionMs })
 
-  const client = await connectToBrowser(instance.cdpBrowserWsUrl)
+  const client = await connectToBrowser(session.cdpBrowserWsUrl)
 
   boundCdpCalls(client, callMs)
 
@@ -258,7 +258,7 @@ export const withTapConnection = async <T> (
     const attach = async (): Promise<string> => {
       const { targetInfos } = await listTargets(client)
 
-      return findRunnerPageSession(client, targetInfos, findInstanceMs)
+      return findRunnerPageSession(client, targetInfos, findSessionMs)
     }
 
     let sessionId = await attach()

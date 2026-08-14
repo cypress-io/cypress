@@ -156,7 +156,7 @@ export interface TapInstance {
   /**
    * Freezes the server (and its process tree where supported): the record stays
    * and the pid stays alive while nothing answers, which is what reports
-   * STALE_INSTANCE rather than NO_INSTANCE. `kill` needs no resume first.
+   * STALE_SESSION rather than NO_SESSION. `kill` needs no resume first.
    */
   suspend (): Promise<void>
   resume (): Promise<void>
@@ -360,7 +360,7 @@ export const openTapInstance = async (project: ProjectFixtureDir, options: OpenT
 }
 
 const recordedPid = async (projectRoot: string): Promise<number | undefined> => {
-  const dir = path.join(CACHE_FOLDER, 'instances')
+  const dir = path.join(CACHE_FOLDER, 'sessions')
   const entries: string[] = await fs.readdir(dir).catch(() => [])
 
   for (const entry of entries) {

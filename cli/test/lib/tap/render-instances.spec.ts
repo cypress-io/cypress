@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import { renderInstancesHuman } from '../../../lib/tap/render/instances'
-import type { TapInstanceSummary } from '../../../lib/tap/commands/instances'
+import type { TapSessionSummary } from '../../../lib/tap/commands/instances'
 
-const render = (instances: TapInstanceSummary[]): string => stripAnsi(renderInstancesHuman(instances))
+const render = (instances: TapSessionSummary[]): string => stripAnsi(renderInstancesHuman(instances))
 
 describe('lib/tap/render/instances', () => {
   it('renders a padded table; missing testing type and detached browser show a dash', () => {

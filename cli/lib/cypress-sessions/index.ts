@@ -1,155 +1,155 @@
 import path from 'path'
 
-import { CypressInstanceError, isTapSupportedBrowser } from './record'
-import type { LiveInstanceState, ReadyInstanceState, CypressInstance } from './record'
-import { isPidAlive, verifyInstanceRecord } from './liveness'
-import { readLiveInstances } from './store'
+import { CypressSessionError, isTapSupportedBrowser } from './record'
+import type { LiveSessionState, ReadySessionState, CypressSession } from './record'
+import { isPidAlive, verifySessionRecord } from './liveness'
+import { readLiveSessions } from './store'
 
-export { CypressInstanceError, INSTANCES_DIRNAME, isTapSupportedBrowser } from './record'
+export { CypressSessionError, SESSIONS_DIRNAME, isTapSupportedBrowser } from './record'
 
-export type { LiveInstanceState, ReadyInstanceState, CypressInstanceErrorCode, CypressInstance } from './record'
+export type { LiveSessionState, ReadySessionState, CypressSessionErrorCode, CypressSession } from './record'
 
-export { isPidAlive, verifyInstanceRecord } from './liveness'
+export { isPidAlive, verifySessionRecord } from './liveness'
 
-export { getInstancesDir, pruneDeadInstanceRecords, readInstanceRecords } from './store'
+export { getSessionsDir, pruneDeadSessionRecords, readSessionRecords } from './store'
 
-export interface ListInstanceOptions {
-  /** Optional pid filter; omitted lists every matching instance. */
-  instance?: number
+export interface ListSessionOptions {
+  /** Optional pid filter; omitted lists every matching session. */
+  session?: number
   probeTimeoutMs?: number
 }
 
-const matchesProject = (record: CypressInstance, projectRoot: string): boolean => {
+const matchesProject = (record: CypressSession, projectRoot: string): boolean => {
   return path.resolve(record.projectRoot) === path.resolve(projectRoot)
 }
 
-// An undefined instance does not constrain, so an absent `--instance` lists
+// An undefined pid does not constrain, so an absent filter lists
 // every pid.
-const matchesInstance = (record: CypressInstance, instance: number | undefined): boolean => {
-  return instance === undefined || record.pid === instance
+const matchesSession = (record: CypressSession, session: number | undefined): boolean => {
+  return session === undefined || record.pid === session
 }
 
 // A dead pid is skipped without a probe (it proves the writer is gone); the
 // survivors carry the live browser CDP state from their probe response.
-const probeMatches = async (matches: CypressInstance[], probeTimeoutMs?: number): Promise<LiveInstanceState[]> => {
+const probeMatches = async (matches: CypressSession[], probeTimeoutMs?: number): Promise<LiveSessionState[]> => {
   const probed = await Promise.all(matches.map(async (record) => {
-    return isPidAlive(record.pid) ? verifyInstanceRecord(record, probeTimeoutMs) : null
+    return isPidAlive(record.pid) ? verifySessionRecord(record, probeTimeoutMs) : null
   }))
 
-  return probed.filter((instance): instance is LiveInstanceState => instance !== null)
+  return probed.filter((session): session is LiveSessionState => session !== null)
 }
 
-export const listLiveInstances = async (options: ListInstanceOptions = {}): Promise<LiveInstanceState[]> => {
-  const records = await readLiveInstances()
+export const listLiveSessions = async (options: ListSessionOptions = {}): Promise<LiveSessionState[]> => {
+  const records = await readLiveSessions()
 
-  const matches = records.filter((record) => matchesInstance(record, options.instance))
+  const matches = records.filter((record) => matchesSession(record, options.session))
 
   return probeMatches(matches, options.probeTimeoutMs)
 }
 
-export type InstanceSelectionReason = 'explicit' | 'only' | 'cwd-match' | 'arbitrary'
+export type SessionSelectionReason = 'explicit' | 'only' | 'cwd-match' | 'arbitrary'
 
-export interface InstanceSelection {
-  instance: ReadyInstanceState
-  reason: InstanceSelectionReason
+export interface SessionSelection {
+  session: ReadySessionState
+  reason: SessionSelectionReason
   candidateCount: number
 }
 
-// Like InstanceSelection, but the chosen instance may have no browser attached yet.
-export interface LiveInstanceSelection {
-  instance: LiveInstanceState
-  reason: InstanceSelectionReason
+// Like SessionSelection, but the chosen session may have no browser attached yet.
+export interface LiveSessionSelection {
+  session: LiveSessionState
+  reason: SessionSelectionReason
   candidateCount: number
 }
 
-export interface ResolveInstanceOptions {
-  instance?: number
+export interface ResolveSessionOptions {
+  session?: number
   cwd: string
   probeTimeoutMs?: number
 }
 
-export interface ResolvedInstanceIdentity {
-  instanceId: string
+export interface ResolvedSessionIdentity {
+  sessionId: string
   machineId: string | null
   userId: string | null
 }
 
-let lastResolvedIdentity: ResolvedInstanceIdentity | null = null
+let lastResolvedIdentity: ResolvedSessionIdentity | null = null
 
 // Read rather than threaded through every caller: each tap command resolves its
-// own instance, several of them below this module.
-export const resolvedInstanceIdentity = (): ResolvedInstanceIdentity | null => lastResolvedIdentity
+// own session, several of them below this module.
+export const resolvedSessionIdentity = (): ResolvedSessionIdentity | null => lastResolvedIdentity
 
-export const resolvedInstanceId = (): string | null => lastResolvedIdentity?.instanceId ?? null
+export const resolvedSessionId = (): string | null => lastResolvedIdentity?.sessionId ?? null
 
-const describeFilter = (instance: number | undefined): string => {
-  if (instance !== undefined) {
-    return ` with pid ${instance}`
+const describeFilter = (session: number | undefined): string => {
+  if (session !== undefined) {
+    return ` with pid ${session}`
   }
 
   return ''
 }
 
-const lowestPid = <T extends LiveInstanceState>(instances: T[]): T => {
-  return [...instances].sort((a, b) => a.pid - b.pid)[0]
+const lowestPid = <T extends LiveSessionState>(sessions: T[]): T => {
+  return [...sessions].sort((a, b) => a.pid - b.pid)[0]
 }
 
-const selectInstance = <T extends LiveInstanceState>(candidates: T[], options: ResolveInstanceOptions): { instance: T, reason: InstanceSelectionReason } => {
+const selectSession = <T extends LiveSessionState>(candidates: T[], options: ResolveSessionOptions): { session: T, reason: SessionSelectionReason } => {
   if (candidates.length === 1) {
-    const filtered = options.instance !== undefined
+    const filtered = options.session !== undefined
 
-    return { instance: candidates[0], reason: filtered ? 'explicit' : 'only' }
+    return { session: candidates[0], reason: filtered ? 'explicit' : 'only' }
   }
 
   const cwdMatches = candidates.filter((record) => matchesProject(record, options.cwd))
 
   if (cwdMatches.length > 0) {
-    return { instance: lowestPid(cwdMatches), reason: 'cwd-match' }
+    return { session: lowestPid(cwdMatches), reason: 'cwd-match' }
   }
 
-  return { instance: lowestPid(candidates), reason: 'arbitrary' }
+  return { session: lowestPid(candidates), reason: 'arbitrary' }
 }
 
-const describeInstance = (instances: LiveInstanceState[], instance: number | undefined): string => {
-  if (instances.length === 1) {
-    return ` (pid ${instances[0].pid}, ${instances[0].projectRoot})`
+const describeSession = (sessions: LiveSessionState[], session: number | undefined): string => {
+  if (sessions.length === 1) {
+    return ` (pid ${sessions[0].pid}, ${sessions[0].projectRoot})`
   }
 
-  return describeFilter(instance)
+  return describeFilter(session)
 }
 
-// Reads, filters by pid, and probes for liveness. Throws NO_INSTANCE when
-// nothing matches, STALE_INSTANCE when matches exist but none responds, and
+// Reads, filters by pid, and probes for liveness. Throws NO_SESSION when
+// nothing matches, STALE_SESSION when matches exist but none responds, and
 // UNSUPPORTED_BROWSER when every one that does has a browser tap cannot drive.
-const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanceState[]> => {
-  const { instance, probeTimeoutMs } = options
-  const records = await readLiveInstances()
+const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionState[]> => {
+  const { session, probeTimeoutMs } = options
+  const records = await readLiveSessions()
 
-  const matches = records.filter((record) => matchesInstance(record, instance))
+  const matches = records.filter((record) => matchesSession(record, session))
 
   if (matches.length === 0) {
-    throw new CypressInstanceError(
-      'NO_INSTANCE',
-      `No Cypress instance found${describeFilter(instance)}. This command requires Cypress running in open mode. Start Cypress in open mode and try again.`,
+    throw new CypressSessionError(
+      'NO_SESSION',
+      `No Cypress session found${describeFilter(session)}. This command requires Cypress running in open mode. Start Cypress in open mode and try again.`,
     )
   }
 
   const live = await probeMatches(matches, probeTimeoutMs)
 
   if (live.length === 0) {
-    throw new CypressInstanceError(
-      'STALE_INSTANCE',
-      `Cypress was previously running${describeFilter(instance)}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode and try again.`,
+    throw new CypressSessionError(
+      'STALE_SESSION',
+      `Cypress was previously running${describeFilter(session)}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode and try again.`,
     )
   }
 
-  // Dropped before selection so an instance running an unsupported browser never
+  // Dropped before selection so a session running an unsupported browser never
   // shadows one that can serve the command; when it is the only candidate the
   // caller hears why rather than "no browser attached".
   const supported = live.filter((record) => isTapSupportedBrowser(record.browserFamily))
 
   if (supported.length === 0) {
-    throw new CypressInstanceError(
+    throw new CypressSessionError(
       'UNSUPPORTED_BROWSER',
       'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.',
     )
@@ -158,37 +158,37 @@ const liveMatches = async (options: ResolveInstanceOptions): Promise<LiveInstanc
   return supported
 }
 
-// Resolves a live instance without requiring a browser; `status` reports
-// instances that have no browser attached yet.
-export const resolveLiveInstance = async (options: ResolveInstanceOptions): Promise<LiveInstanceSelection> => {
+// Resolves a live session without requiring a browser; `status` reports
+// sessions that have no browser attached yet.
+export const resolveLiveSession = async (options: ResolveSessionOptions): Promise<LiveSessionSelection> => {
   const live = await liveMatches(options)
 
-  const { instance, reason } = selectInstance(live, options)
+  const { session, reason } = selectSession(live, options)
 
-  lastResolvedIdentity = { instanceId: instance.instanceId, machineId: instance.machineId, userId: instance.userId }
+  lastResolvedIdentity = { sessionId: session.sessionId, machineId: session.machineId, userId: session.userId }
 
-  return { instance, reason, candidateCount: live.length }
+  return { session, reason, candidateCount: live.length }
 }
 
-// Adds the browser-readiness requirement to resolveLiveInstance: the instance
+// Adds the browser-readiness requirement to resolveLiveSession: the session
 // it returns is guaranteed to have a browser attached. Gate on the browser
-// before selecting so a browserless instance never shadows a ready one that
+// before selecting so a browserless session never shadows a ready one that
 // could serve the command.
-export const resolveInstance = async (options: ResolveInstanceOptions): Promise<InstanceSelection> => {
+export const resolveSession = async (options: ResolveSessionOptions): Promise<SessionSelection> => {
   const live = await liveMatches(options)
 
-  const ready = live.filter((record): record is ReadyInstanceState => record.cdpBrowserWsUrl !== null)
+  const ready = live.filter((record): record is ReadySessionState => record.cdpBrowserWsUrl !== null)
 
   if (ready.length === 0) {
-    throw new CypressInstanceError(
+    throw new CypressSessionError(
       'NO_BROWSER_ATTACHED',
-      `Cypress is running${describeInstance(live, options.instance)}, but no test browser is open. Open a browser in Cypress and try again.`,
+      `Cypress is running${describeSession(live, options.session)}, but no test browser is open. Open a browser in Cypress and try again.`,
     )
   }
 
-  const { instance: selected, reason } = selectInstance(ready, options)
+  const { session: selected, reason } = selectSession(ready, options)
 
-  lastResolvedIdentity = { instanceId: selected.instanceId, machineId: selected.machineId, userId: selected.userId }
+  lastResolvedIdentity = { sessionId: selected.sessionId, machineId: selected.machineId, userId: selected.userId }
 
-  return { instance: selected, reason, candidateCount: ready.length }
+  return { session: selected, reason, candidateCount: ready.length }
 }

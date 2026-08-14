@@ -1,6 +1,6 @@
-import { CypressInstanceError, resolveLiveInstance } from '../../cypress-sessions'
+import { CypressSessionError, resolveLiveSession } from '../../cypress-sessions'
 import { TapSpecsOperation } from '@packages/cypress-sessions'
-import { queryInstanceGraphql } from '../instance-gql'
+import { querySessionGraphql } from '../session-gql'
 import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { defineNativeCommand } from './definition'
 import type { TapSpecsQuery } from '@packages/cypress-sessions'
@@ -51,14 +51,14 @@ const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
 
 const listSpecs = async (options: TapCliOptions): Promise<number> => {
   try {
-    const { instance } = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
-    const data = await queryInstanceGraphql(instance, TapSpecsOperation)
+    const { session } = await resolveLiveSession({ session: options.instance, cwd: process.cwd() })
+    const data = await querySessionGraphql(session, TapSpecsOperation)
 
     renderOutcome('specs', toSpecList(data), options.json)
 
     return 0
   } catch (err: any) {
-    if (err instanceof CypressInstanceError) {
+    if (err instanceof CypressSessionError) {
       renderFailure(err)
 
       return 1

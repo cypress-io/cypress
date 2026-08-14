@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
-import { resolvedInstanceIdentity } from '../../../lib/cypress-sessions'
+import { resolvedSessionIdentity } from '../../../lib/cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import util, { DEVELOPMENT_VERSION } from '../../../lib/util'
 
@@ -21,7 +21,7 @@ vi.mock('../../../lib/cypress-sessions', async (importActual) => {
 
   return {
     ...actual,
-    resolvedInstanceIdentity: vi.fn().mockReturnValue(null),
+    resolvedSessionIdentity: vi.fn().mockReturnValue(null),
   }
 })
 
@@ -52,7 +52,7 @@ describe('lib/tap/events', () => {
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     delete process.env.CYPRESS_INTERNAL_ENV
     delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
-    vi.mocked(resolvedInstanceIdentity).mockReturnValue(null)
+    vi.mocked(resolvedSessionIdentity).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
     vi.mocked(util.pkgVersion).mockReturnValue('15.0.0')
     dateNow.mockReturnValue(1_000)
@@ -91,21 +91,21 @@ describe('lib/tap/events', () => {
   })
 
   it('carries the id of the instance the command resolved', async () => {
-    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'a1b2c3d4-0000-4000-8000-000000000000', machineId: null, userId: null })
+    vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'a1b2c3d4-0000-4000-8000-000000000000', machineId: null, userId: null })
 
     await reportTapTrace(0)
 
-    expect(posted(fetchMock).payload).toMatchObject({ instanceId: 'a1b2c3d4-0000-4000-8000-000000000000' })
+    expect(posted(fetchMock).payload).toMatchObject({ sessionId: 'a1b2c3d4-0000-4000-8000-000000000000' })
   })
 
   it('omits the instance id when the command never resolved one', async () => {
     await reportTapTrace(1)
 
-    expect(posted(fetchMock).payload).not.toHaveProperty('instanceId')
+    expect(posted(fetchMock).payload).not.toHaveProperty('sessionId')
   })
 
   it('reports to the machine collector with the machine id the instance carried', async () => {
-    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: 'machine-hash', userId: null })
+    vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: null })
 
     await reportTapTrace(0)
 
@@ -115,7 +115,7 @@ describe('lib/tap/events', () => {
   })
 
   it('stays anonymous when the instance reports no machine id', async () => {
-    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: null, userId: null })
+    vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: null, userId: null })
 
     await reportTapTrace(0)
 
@@ -124,7 +124,7 @@ describe('lib/tap/events', () => {
   })
 
   it('carries the cloud user id of the instance the command resolved', async () => {
-    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: 'machine-hash', userId: 'cloud-user-1' })
+    vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: 'cloud-user-1' })
 
     await reportTapTrace(0)
 
@@ -132,7 +132,7 @@ describe('lib/tap/events', () => {
   })
 
   it('omits the user id when the instance has no logged-in user', async () => {
-    vi.mocked(resolvedInstanceIdentity).mockReturnValue({ instanceId: 'inst-1', machineId: 'machine-hash', userId: null })
+    vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: null })
 
     await reportTapTrace(0)
 
@@ -154,11 +154,11 @@ describe('lib/tap/events', () => {
   })
 
   it('carries the noted failure code', async () => {
-    noteTapFailure('NO_INSTANCE')
+    noteTapFailure('NO_SESSION')
 
     await reportTapTrace(1)
 
-    expect(posted(fetchMock).payload).toMatchObject({ exitCode: 1, errorCode: 'NO_INSTANCE' })
+    expect(posted(fetchMock).payload).toMatchObject({ exitCode: 1, errorCode: 'NO_SESSION' })
   })
 
   it('reuses one message id across the events of an invocation', async () => {
@@ -171,7 +171,7 @@ describe('lib/tap/events', () => {
   })
 
   it('starts a trace with no failure carried over from the previous command', async () => {
-    noteTapFailure('NO_INSTANCE')
+    noteTapFailure('NO_SESSION')
     beginTapTrace({ command: 'specs', flags: [] })
 
     await reportTapTrace(0)

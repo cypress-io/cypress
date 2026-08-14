@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
-import { CypressInstanceError, resolveInstance } from '../../cypress-sessions'
+import { CypressSessionError, resolveSession } from '../../cypress-sessions'
 import { withTapConnection, validateExecResult } from '../tap-connection'
 import type { TapConnection } from '../tap-connection'
 import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
@@ -105,7 +105,7 @@ export const assertFrameReadable = async (connection: TapConnection): Promise<vo
 }
 
 /**
- * Shared flow for the AUT-frame commands: resolve a running instance, open a
+ * Shared flow for the AUT-frame commands: resolve a running session, open a
  * tap connection, gate on the run lifecycle, locate the AUT frame, run `read`, and
  * render the result. Maps the CLI-native `FrameCommandError` and the
  * discovery/transport failures to the same rendered output the schema commands
@@ -117,9 +117,9 @@ export const withResolvedAutFrame = async (
   command: string,
 ): Promise<number> => {
   try {
-    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+    const selection = await resolveSession({ session: options.instance, cwd: process.cwd() })
 
-    return await withTapConnection(selection.instance, async (connection) => {
+    return await withTapConnection(selection.session, async (connection) => {
       try {
         await assertFrameReadable(connection)
 
@@ -144,7 +144,7 @@ export const withResolvedAutFrame = async (
       }
     }, options.timeout)
   } catch (err: any) {
-    if (err instanceof CypressInstanceError) {
+    if (err instanceof CypressSessionError) {
       renderFailure(err)
 
       return 1

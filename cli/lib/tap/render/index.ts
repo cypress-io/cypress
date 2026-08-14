@@ -1,6 +1,6 @@
 import type { ClearResult, PinResult, TapCommandName, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-sessions'
 import type { TapRunResult } from '../commands/run'
-import type { TapInstanceSummary } from '../commands/instances'
+import type { TapSessionSummary } from '../commands/instances'
 import type { TapSpecEntry } from '../commands/specs'
 import type { TapStatus } from '../types'
 import type { FrameDomResult } from '../commands/dom'
@@ -60,7 +60,7 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
     },
   },
   run: { renderHuman: (result) => renderRunHuman(result as TapRunResult) },
-  instances: { renderHuman: (result) => renderInstancesHuman(result as TapInstanceSummary[]) },
+  instances: { renderHuman: (result) => renderInstancesHuman(result as TapSessionSummary[]) },
   specs: { renderHuman: (result) => renderSpecsHuman(result as TapSpecEntry[]) },
   status: { renderHuman: (result) => renderStatusHuman(result as TapStatus) },
   dom: { renderHuman: orAmbiguous<FrameDomResult>(renderDomHuman) },

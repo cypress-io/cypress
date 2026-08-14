@@ -1,32 +1,32 @@
 export {
-  INSTANCES_DIRNAME,
+  SESSIONS_DIRNAME,
   isCompatibleRecord,
   isTapSupportedBrowser,
   parseRecordPid,
-  cypressInstancesDir,
-  instancesProbePath,
+  cypressSessionsDir,
+  sessionProbePath,
 } from '@packages/cypress-sessions'
 
 export type {
-  CypressInstance,
-  LiveInstanceState,
-  ReadyInstanceState,
-  InstanceTestingType,
+  CypressSession,
+  LiveSessionState,
+  ReadySessionState,
+  SessionTestingType,
 } from '@packages/cypress-sessions'
 
-export type CypressInstanceErrorCode =
-  | 'NO_INSTANCE'
-  | 'STALE_INSTANCE'
+export type CypressSessionErrorCode =
+  | 'NO_SESSION'
+  | 'STALE_SESSION'
   | 'NO_BROWSER_ATTACHED'
   | 'UNSUPPORTED_BROWSER'
   | 'RENDERER_UNRESPONSIVE'
 
-export class CypressInstanceError extends Error {
-  code: CypressInstanceErrorCode
+export class CypressSessionError extends Error {
+  code: CypressSessionErrorCode
 
-  constructor (code: CypressInstanceErrorCode, message: string) {
+  constructor (code: CypressSessionErrorCode, message: string) {
     super(message)
-    this.name = 'CypressInstanceError'
+    this.name = 'CypressSessionError'
     this.code = code
   }
 }
