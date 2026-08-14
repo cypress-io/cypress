@@ -521,7 +521,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client)
 
       await transport.start()
-      await transport.attachServiceWorkerSession('sw-session')
+      await transport.attachChildSession('sw-session')
 
       const enableCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.enable')
 
@@ -536,7 +536,7 @@ describe('CdpFetchTransport', () => {
       const client = createClient()
       const { transport } = createTransport(client)
 
-      await transport.attachServiceWorkerSession('sw-session')
+      await transport.attachChildSession('sw-session')
 
       expect(client.send).not.to.have.been.calledWith('Fetch.enable')
     })
@@ -550,7 +550,7 @@ describe('CdpFetchTransport', () => {
       client.send.withArgs('Fetch.enable', sinon.match.any, 'sw-session')
       .rejects(new Error('ProtocolError: Inspected target closed'))
 
-      await expect(transport.attachServiceWorkerSession('sw-session'))
+      await expect(transport.attachChildSession('sw-session'))
       .to.be.rejectedWith('Inspected target closed')
     })
 
@@ -562,7 +562,7 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client)
       const onRequestPaused = await startTransport(transport, client)
 
-      await transport.attachServiceWorkerSession('sw-session')
+      await transport.attachChildSession('sw-session')
 
       const handled = onRequestPaused(createPausedRequest({
         requestId: 'sw-fetch-request',
