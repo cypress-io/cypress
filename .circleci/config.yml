@@ -114,10 +114,6 @@ commands:
               or:
                 - equal: [<<pipeline.trigger_source>>, 'api']
                 - equal: [<<pipeline.git.branch>>, 'develop']
-                # tap's integration branch reviews as a draft, and a draft PR
-                # otherwise halts CI, which would leave it with no pre-release
-                # binaries. Remove when the branch merges into develop.
-                - equal: [<<pipeline.git.branch>>, 'feat/tap-cli-integration']
                 - matches:
                     pattern: /^release\/.*/
                     value: <<pipeline.git.branch>>
