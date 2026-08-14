@@ -1,5 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
+import { STATUS_CODES } from 'http'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
@@ -9,6 +10,7 @@ import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
+import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
 import { shouldSkipResponseBody } from './should-skip-response-body'
@@ -100,10 +102,19 @@ type CdpFetchTransportOptions = {
    * once) while the page keeps its impersonated URL.
    */
   resolveOriginRedirect?: (url: string) => { url: string, headers: Record<string, string> } | undefined
+  /**
+   * Called with the HttpIntercept request id when the browser cancels a
+   * request that is still paused in the middleware onion, so the pipeline can
+   * tear the flow down the way a closed proxy socket does on the MITM path.
+   */
+  onRequestCanceled?: (requestId: string) => void
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
+  // Byte-accurate body for Fetch.continueRequest when middleware set a Buffer;
+  // postData is its lossy utf8 string view, kept for pause comparison.
+  postDataBuffer?: Buffer
   requestId?: string
   resourceType?: ResourceType
   sessionId?: string
@@ -128,10 +139,18 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
  */
 type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   headersReady: PromiseWithResolvers<void>
+  // key into inFlightByNetworkId; absent when the pause carried no networkId
+  networkKey?: string
 }
 
 export class CdpFetchTransport {
   private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
+  /**
+   * The same flows as `inFlightRequests`, keyed by session-scoped Network
+   * request id. Cancellation only ever arrives on the Network domain
+   * (`Network.loadingFailed`), which knows nothing about Fetch request ids.
+   */
+  private readonly inFlightByNetworkId = new Map<string, ResponsePauseDeferred>()
   /**
    * Prefix for HttpIntercept / synthetic-codec request ids when this transport
    * owns an extra-target session. CDP network/request ids are only unique per
@@ -203,8 +222,8 @@ export class CdpFetchTransport {
 
   /**
    * Attaches the Fetch handlers and enables interception on this transport's
-   * own session. Sessions that attach later come through
-   * `attachServiceWorkerSession`.
+   * own session. Child sessions that attach later (service workers,
+   * origin-isolated iframes) come through `attachChildSession`.
    */
   async start (): Promise<void> {
     if (this.isStarted) {
@@ -216,6 +235,9 @@ export class CdpFetchTransport {
     debug('starting CDP Fetch transport')
     this.client.on('Fetch.requestPaused', this.interceptRequest)
     this.client.on('Fetch.requestPaused', this.resolveResponse)
+    // The Fetch domain reports nothing when a paused request is canceled, so
+    // the Network domain is the only signal that a flow is never coming back.
+    this.client.on('Network.loadingFailed', this.onLoadingFailed)
     // Set-Cookie never appears on Fetch response pauses — the raw cookie
     // headers only arrive on the Network extraInfo events tracked here.
     this.networkExtraInfo.start()
@@ -228,6 +250,7 @@ export class CdpFetchTransport {
     } catch (err) {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.networkExtraInfo.stop()
       this.isStarted = false
 
@@ -236,19 +259,20 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Enables interception on a service worker session attached to this
-   * transport's connection. A service worker's script fetch and its
-   * fetch-handler requests run on that session rather than the page's, so
-   * without this they bypass the middleware onion — and `cy.intercept` —
-   * entirely.
+   * Enables interception on a child session attached to this transport's
+   * connection. Those targets run their network on their own session rather
+   * than the page's — a service worker's script fetch and fetch handlers, an
+   * out-of-process iframe's (OOPIF) subresources — so without this their
+   * requests bypass the middleware onion (and `cy.intercept`) entirely and
+   * escape to the real origin.
    *
    * Must run while the target is still waiting for the debugger; the caller
    * (CriClient._onAttachedToTarget) sequences this before
    * Runtime.runIfWaitingForDebugger.
    */
-  async attachServiceWorkerSession (sessionId: string): Promise<void> {
+  async attachChildSession (sessionId: string): Promise<void> {
     if (!this.isStarted) {
-      debug('attachServiceWorkerSession skipped (transport not started)')
+      debug('attachChildSession skipped (transport not started)')
 
       return
     }
@@ -283,11 +307,51 @@ export class CdpFetchTransport {
     } finally {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
       this.isStarted = false
       debug('CDP Fetch transport stopped')
     }
+  }
+
+  /**
+   * The browser canceling a paused request — test isolation navigating to
+   * about:blank is the common case — leaves its flow with nothing to wait for:
+   * CDP emits no Fetch event for an abandoned pause, and the request never
+   * reaches the network, so no pre-request or response pause is ever coming.
+   *
+   * Propagating the cancellation lets the pipeline's existing teardown run,
+   * which on the MITM path is driven by the dying proxy socket. Both halves
+   * are needed and neither is a no-op for the other's case: the abort covers a
+   * flow still in request middleware (typically parked in pre-request
+   * correlation, whose 2s timer would otherwise expire and log a warning), the
+   * rejection covers one already continued and waiting on a response pause.
+   */
+  private onLoadingFailed = (event: Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
+    // A request that failed on the wire still gets a Fetch response pause
+    // carrying its error reason — resolveResponse owns those, and treating
+    // them as cancellations here would silence a real failure.
+    if (!event.canceled) {
+      return
+    }
+
+    const networkKey = this.getNetworkKey(event.requestId, sessionId)
+    const deferred = this.inFlightByNetworkId.get(networkKey)
+
+    if (!deferred) {
+      return
+    }
+
+    debug('browser canceled in-flight request %s', networkKey)
+
+    this.inFlightByNetworkId.delete(networkKey)
+    this.options.onRequestCanceled?.(`${this.requestIdPrefix}${event.requestId}`)
+    deferred.reject(new Error(`CDP Fetch request canceled by the browser: ${networkKey}`))
+  }
+
+  private getNetworkKey (networkRequestId: string, sessionId?: string): string {
+    return `${sessionId ?? 'root'}:${networkRequestId}`
   }
 
   private interceptRequest = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
@@ -408,6 +472,7 @@ export class CdpFetchTransport {
       const responseDeferred: ResponsePauseDeferred = {
         ...Promise.withResolvers<CdpFetchTransportResponse>(),
         headersReady: Promise.withResolvers<void>(),
+        ...(event.networkId ? { networkKey: this.getNetworkKey(event.networkId, sessionId) } : {}),
       }
 
       // reset()/stop() may reject this before the continue callback races on
@@ -422,6 +487,10 @@ export class CdpFetchTransport {
       deferred = responseDeferred
 
       this.inFlightRequests.set(fetchRequestId, deferred)
+
+      if (deferred.networkKey) {
+        this.inFlightByNetworkId.set(deferred.networkKey, deferred)
+      }
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
         const headers = await this.continueRequestHeaders(event, outbound)
@@ -440,7 +509,14 @@ export class CdpFetchTransport {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
           ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
-          ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
+          // Fetch.continueRequest's postData is a CDP binary param (base64
+          // over JSON); the pause's event.request.postData is plaintext, so
+          // only the outgoing value is encoded. Sending plaintext makes CDP
+          // reject the continue ("invalid base64 string") — or worse, accept
+          // base64-shaped plaintext and hand the origin corrupted bytes.
+          ...(outbound.postDataBuffer || outbound.postData !== event.request.postData
+            ? { postData: (outbound.postDataBuffer ?? Buffer.from(outbound.postData ?? '', 'utf8')).toString('base64') }
+            : {}),
           ...(headers ? { headers } : {}),
         }, outbound.sessionId)
 
@@ -479,6 +555,11 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // CDP rejects a status code it has no built-in reason phrase for
+          // ("Invalid http status code or phrase"), which turns req.reply(777)
+          // into a silently released pause. Node's MITM path serves unknown
+          // codes with the phrase "unknown"; mirror that.
+          responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
@@ -488,6 +569,10 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // Chrome rejects a code it has no built-in phrase for; for every
+          // known code, omit the phrase so the origin's own phrase survives
+          // the pass-through untouched.
+          ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
         }, response.sessionId)
       }
@@ -507,9 +592,28 @@ export class CdpFetchTransport {
       }
 
       if (!requestContinued) {
-        await this.safeSend('Fetch.continueRequest', {
-          requestId: event.requestId,
-        }, sessionId)
+        // A requested network error (cy.intercept forceNetworkError) must
+        // reach the page as one — MITM resets the connection; here the pause
+        // is failed. Everything else releases untouched as before.
+        if ((err as Error & { isForceNetworkError?: boolean })?.isForceNetworkError) {
+          await this.safeSend('Fetch.failRequest', {
+            requestId: event.requestId,
+            errorReason: 'Failed',
+          }, sessionId)
+        } else {
+          await this.safeSend('Fetch.continueRequest', {
+            requestId: event.requestId,
+          }, sessionId)
+        }
+      } else if ((err as Error & { isForceNetworkError?: boolean })?.isForceNetworkError) {
+        // A network error requested from a response handler
+        // (res.send({ forceNetworkError: true })) must reach the page as one
+        // too. The request stage already continued, so the pause in hand is the
+        // response — fail it rather than releasing the origin's response.
+        await this.safeSend('Fetch.failRequest', {
+          requestId: response?.requestId ?? responseRequestId ?? event.requestId,
+          errorReason: 'Failed',
+        }, response?.sessionId ?? responseSessionId ?? sessionId)
       } else {
         const continueRequestId = response?.requestId ?? responseRequestId
 
@@ -581,7 +685,7 @@ export class CdpFetchTransport {
 
     if (event.responseErrorReason) {
       debug('response error pause for matched request %s: %s', event.request.url, event.responseErrorReason)
-      deferred.reject(new Error(`CDP Fetch response failed for ${event.request.url}: ${event.responseErrorReason}`))
+      deferred.reject(toNetworkError(event.request.url, event.responseErrorReason))
 
       await this.safeSend('Fetch.failRequest', {
         requestId: event.requestId,
@@ -764,6 +868,10 @@ export class CdpFetchTransport {
     }
 
     this.inFlightRequests.delete(fetchRequestId)
+
+    if (deferred?.networkKey && this.inFlightByNetworkId.get(deferred.networkKey) === deferred) {
+      this.inFlightByNetworkId.delete(deferred.networkKey)
+    }
   }
 
   private rejectAll (err: Error): void {

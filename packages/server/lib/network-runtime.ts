@@ -43,9 +43,10 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 }
 
 export type CreateCdpFetchRuntimeDeps = {
-  // onServiceWorkerTargetAttached is a settable hook: the runtime assigns it
-  // so service worker sessions get Fetch enabled before they start running.
-  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onServiceWorkerTargetAttached'>
+  // onChildTargetAttached is a settable hook: the runtime assigns it so
+  // child sessions (service workers, origin-isolated iframes) get Fetch
+  // enabled before they start running.
+  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onChildTargetAttached'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
   // Protocol-neutral subscription to AUT document navigation commits,
   // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
@@ -204,12 +205,18 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
   networkProxy.withIntercept(expressInterception)
 
+  const syntheticCodec = createSyntheticProxyCodec({
+    createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
+  })
+
   const networkInterception = attachStages(
     new HttpIntercept(createCdpFetchCodec()),
-    createSyntheticProxyCodec({
-      createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
-    }),
+    syntheticCodec,
   )
+
+  // Every transport shares one synthetic codec, so a canceled request is torn
+  // down through the same exchange map no matter which target it paused on.
+  const onRequestCanceled = (requestId: string) => syntheticCodec.abortRequest(requestId)
 
   // Send strategy:file requests to the origin server over the wire, and let
   // Express serve them from the file server, rather than answering the pause
@@ -251,6 +258,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
+    onRequestCanceled,
   })
 
   // Extra-target transports share networkInterception so they cannot drift from
@@ -288,6 +296,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       const extraTransport = new CdpFetchTransport(client, networkInterception, {
         isFromExtraTarget: true,
         resolveOriginRedirect,
+        onRequestCanceled,
       })
 
       await extraTransport.start()
@@ -329,17 +338,19 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
-      // A service worker's network runs on its own CDP session — without
-      // enabling Fetch there, its script fetch and fetch-handler requests
-      // bypass the middleware onion (and cy.intercept) entirely.
-      deps.client.onServiceWorkerTargetAttached = (sessionId) => {
-        return fetchTransport.attachServiceWorkerSession(sessionId)
+      // Service workers and out-of-process iframes have their own CDP
+      // session — without enabling Fetch there, a worker's script fetch and an
+      // out-of-process iframe's (OOPIF) subresources (e.g. a cross-origin spec
+      // bridge's runner bundle) bypass the middleware onion entirely and
+      // escape to the real origin.
+      deps.client.onChildTargetAttached = (sessionId) => {
+        return fetchTransport.attachChildSession(sessionId)
       }
 
       try {
         await fetchTransport.start()
       } catch (err) {
-        deps.client.onServiceWorkerTargetAttached = undefined
+        deps.client.onChildTargetAttached = undefined
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
 
@@ -357,7 +368,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     },
     async stop () {
       stopped = true
-      deps.client.onServiceWorkerTargetAttached = undefined
+      deps.client.onChildTargetAttached = undefined
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 
