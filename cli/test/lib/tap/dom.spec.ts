@@ -42,31 +42,21 @@ describe('lib/tap/commands/dom extractDom', () => {
     return result
   }
 
-  it('returns the whole-document HTML when no selector is given', async () => {
-    const { session, createIsolatedWorld, callFunctionOn } = makeSession([{ value: { html: '<html>hi</html>' } }])
-
-    const result = await extractDom(session, frame, undefined, 30000)
-
-    expect(result).to.deep.eq({ html: '<html>hi</html>' })
-    // Isolated world is created for the resolved AUT frame, on its session.
-    expect(createIsolatedWorld).toHaveBeenCalledWith({ frameId: 'aut-frame-id', worldName: 'cypress-tap' }, SESSION_ID)
-    // selector (null when absent) and maxChars are forwarded as call arguments.
-    expect(callFunctionOn.mock.calls[0][0]).toMatchObject({
-      executionContextId: 42,
-      arguments: [{ value: null }, { value: 30000 }, { value: 0 }],
-      returnByValue: true,
-    })
-
-    expect(callFunctionOn.mock.calls[0][1]).to.eq(SESSION_ID)
-  })
-
-  it('returns the matched element (and forwards the selector) in selector mode', async () => {
-    const { session, callFunctionOn } = makeSession([MATCHED_ONE, { value: { found: true, html: '<a></a>' } }])
+  it('returns the matched element, forwarding the selector and maxChars', async () => {
+    const { session, createIsolatedWorld, callFunctionOn } = makeSession([MATCHED_ONE, { value: { found: true, html: '<a></a>' } }])
 
     const result = await extractDom(session, frame, '.x', 100)
 
     expect(result).to.deep.eq({ found: true, html: '<a></a>' })
-    expect(callFunctionOn.mock.calls[1][0].arguments).to.deep.eq([{ value: '.x' }, { value: 100 }, { value: 0 }])
+    // Isolated world is created for the resolved AUT frame, on its session.
+    expect(createIsolatedWorld).toHaveBeenCalledWith({ frameId: 'aut-frame-id', worldName: 'cypress-tap' }, SESSION_ID)
+    expect(callFunctionOn.mock.calls[1][0]).toMatchObject({
+      executionContextId: 42,
+      arguments: [{ value: '.x' }, { value: 100 }, { value: 0 }],
+      returnByValue: true,
+    })
+
+    expect(callFunctionOn.mock.calls[1][1]).to.eq(SESSION_ID)
   })
 
   it('returns found:false when the selector matches nothing', async () => {
@@ -95,9 +85,9 @@ describe('lib/tap/commands/dom extractDom', () => {
   })
 
   it('reports truncation from the browser-side cap', async () => {
-    const { session } = makeSession([{ value: { html: '<htm', truncated: true } }])
+    const { session } = makeSession([MATCHED_ONE, { value: { found: true, html: '<htm', truncated: true } }])
 
-    const result = await readDom(session, frame, undefined, 4)
+    const result = await readDom(session, frame, '.x', 4)
 
     expect(result.truncated).to.eq(true)
     expect(result.html).to.eq('<htm')
@@ -114,9 +104,9 @@ describe('lib/tap/commands/dom extractDom', () => {
   })
 
   it('maps a CDP evaluation exception to FRAME_READ_FAILED', async () => {
-    const failing = () => makeSession([{ exceptionDetails: { text: 'boom', exception: { description: 'boom' } } }]).session
+    const failing = () => makeSession([MATCHED_ONE, { exceptionDetails: { text: 'boom', exception: { description: 'boom' } } }]).session
 
-    await expect(extractDom(failing(), frame, undefined, 100)).rejects.toBeInstanceOf(TapError)
-    await expect(extractDom(failing(), frame, undefined, 100)).rejects.toMatchObject({ code: 'FRAME_READ_FAILED' })
+    await expect(extractDom(failing(), frame, '.x', 100)).rejects.toBeInstanceOf(TapError)
+    await expect(extractDom(failing(), frame, '.x', 100)).rejects.toMatchObject({ code: 'FRAME_READ_FAILED' })
   })
 })

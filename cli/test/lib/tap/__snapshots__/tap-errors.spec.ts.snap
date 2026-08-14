@@ -169,10 +169,10 @@ Instead the value was: "5""
 `;
 
 exports[`lib/tap error rendering catalogue > MISSING_COMPANION_OPTION 1`] = `
-"> cypress tap dom --at 1
-You passed the --at flag without also passing the --selector flag.
+"> cypress tap reporter --attempt 2
+You passed the --attempt flag without also passing the --test-id flag.
 
-Pass --selector to choose the elements to index into, or omit --at to read the whole document."
+Pass --test-id to specify the test, or omit --attempt to review the latest attempt for every test in the spec."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_AUT 1`] = `

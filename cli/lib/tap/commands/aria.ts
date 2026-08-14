@@ -17,7 +17,6 @@ const REPORTED_STATES = new Set(['focused', 'disabled', 'required', 'invalid', '
 
 interface AXNode {
   nodeId: string
-  parentId?: string
   role?: AXValue
   name?: AXValue
   value?: AXValue
@@ -141,7 +140,7 @@ const resolveSelectorBackendNodeId = async (
 export const extractAria = (
   session: TapSession,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   maxNodes: number,
   at?: number,
 ): Promise<FrameAriaResult | FrameAmbiguousResult> => {
@@ -162,25 +161,14 @@ export const extractAria = (
 
     const base: FrameAriaResult = { nodes: [], nodeCount: 0 }
 
-    let rootId: string | undefined
+    const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector, at ?? 0)
 
-    if (selector !== undefined) {
-      const backendNodeId = await resolveSelectorBackendNodeId(session, frame, selector, at ?? 0)
-
-      if (backendNodeId === undefined) {
-        // Selector matched nothing, or the match is absent from the a11y tree.
-        return base
-      }
-
-      rootId = (axNodes as AXNode[]).find((node) => node.backendDOMNodeId === backendNodeId)?.nodeId
-
-      if (rootId === undefined) {
-        return base
-      }
-    } else {
-      // The frame root is the sole node with no parent (the RootWebArea).
-      rootId = (axNodes as AXNode[]).find((node) => node.parentId === undefined)?.nodeId ?? (axNodes as AXNode[])[0]?.nodeId
+    if (backendNodeId === undefined) {
+      // Selector matched nothing, or the match is absent from the a11y tree.
+      return base
     }
+
+    const rootId = (axNodes as AXNode[]).find((node) => node.backendDOMNodeId === backendNodeId)?.nodeId
 
     if (rootId === undefined) {
       return base

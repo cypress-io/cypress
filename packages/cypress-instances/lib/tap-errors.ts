@@ -445,7 +445,7 @@ export class SnapshotNotFoundTapError extends NotFoundTapError {
 /**
  * A flag that only means something alongside another one. Both are named here;
  * `remedy` is the throw site's, because what dropping either one leaves you with
- * is particular to the pair — a spec-wide view, the whole document.
+ * is particular to the pair — a spec-wide view rather than one test's attempt.
  */
 export class MissingCompanionOptionTapError extends DetailedTapError {
   constructor (given: string, required: string, remedy: string) {

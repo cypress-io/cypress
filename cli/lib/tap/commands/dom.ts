@@ -12,7 +12,7 @@ import { defineNativeCommand } from './definition'
 
 /** What `cypress tap dom` returns: the element the selector matched. */
 export interface FrameDomResult {
-  /** Whether the selector matched — present only in selector mode. */
+  /** Whether the selector matched. */
   found?: boolean
   /** The matched element's outerHTML. */
   html?: string
@@ -23,7 +23,7 @@ export interface FrameDomResult {
 export const extractDom = (
   session: TapSession,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   maxChars: number,
   at?: number,
 ): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameDomResult> => {
@@ -33,7 +33,7 @@ export const extractDom = (
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: readDom.toString(),
     executionContextId,
-    arguments: [{ value: selector ?? null }, { value: maxChars }, { value: at ?? 0 }],
+    arguments: [{ value: selector }, { value: maxChars }, { value: at ?? 0 }],
     returnByValue: true,
   }, sessionId)
 

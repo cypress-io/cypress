@@ -1,4 +1,4 @@
-import { TAP_EXEC_METHOD, TapError, InvalidValueTapError, MissingCompanionOptionTapError } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError, InvalidValueTapError } from '@packages/cypress-instances'
 import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-instances'
 
 import { validateExecResult } from '../tap-session'
@@ -52,17 +52,9 @@ const disambiguatingSelectors = async (session: TapSession, selector: string): P
 export const resolveAmbiguity = async (
   session: TapSession,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   at?: number,
 ): Promise<FrameAmbiguousResult | undefined> => {
-  if (selector === undefined) {
-    if (at !== undefined) {
-      throw new MissingCompanionOptionTapError('--at', '--selector', 'Pass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.')
-    }
-
-    return undefined
-  }
-
   const { client, sessionId } = session
   const executionContextId = await createFrameIsolatedWorld(session, frame)
 
@@ -112,7 +104,7 @@ export const resolveAmbiguity = async (
 export const withAmbiguous = async <T>(
   session: TapSession,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   at: number | undefined,
   read: () => Promise<T>,
 ): Promise<T | FrameAmbiguousResult> => {

@@ -104,20 +104,6 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     })
   })
 
-  // Not a bad value but a missing companion: `--at` has nothing to index without
-  // a `--selector`, whatever number it was given.
-  it('rejects an --at when nothing is there to index', async () => {
-    const { session, callFunctionOn } = makeSession({ count: 1 })
-
-    await expect(resolveAmbiguity(session, frame, undefined, 0)).rejects.toMatchObject({
-      code: 'MISSING_COMPANION_OPTION',
-      detail: 'You passed the `--at` flag without also passing the `--selector` flag.\n\nPass `--selector` to choose the elements to index into, or omit `--at` to read the whole document.',
-    })
-
-    // No selector means no reason to reach into the frame at all.
-    expect(callFunctionOn).not.toHaveBeenCalled()
-  })
-
   it('lets an --at through when the selector matched nothing, leaving the read to report it', async () => {
     const { session } = makeSession({ count: 0 })
 
