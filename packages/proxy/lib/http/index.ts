@@ -206,7 +206,17 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(createBrowserConnectionClosedError())
+          const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
+
+          // forceNetworkError destroys the res itself, so this close is our own
+          // teardown rather than a browser cancel. Carry the tag forward or it
+          // is lost here — this handler runs after the requested error already
+          // set ctx.error, and replaces it.
+          if ((ctx.error as Error & { isForceNetworkError?: boolean } | undefined)?.isForceNetworkError) {
+            error.isForceNetworkError = true
+          }
+
+          _onError(error)
         }
       }
 
