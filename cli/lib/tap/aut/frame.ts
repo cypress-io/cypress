@@ -2,8 +2,8 @@ import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
 import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
-import { withTapSession, validateExecResult } from '../tap-session'
-import type { TapSession } from '../tap-session'
+import { withTapConnection, validateExecResult } from '../tap-connection'
+import type { TapConnection } from '../tap-connection'
 import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
 import type { FrameAmbiguousResult } from './single-match'
@@ -56,7 +56,7 @@ const findAutFrame = (node: FrameNode): { id: string, url: string } | undefined 
 /**
  * Locates the app-under-test frame within the runner page. Verified empirically:
  * the AUT is a same-process child frame of the runner-page target, so one
- * attached session reaches it — no separate target attach. A pinned snapshot is
+ * attached CDP session reaches it — no separate target attach. A pinned snapshot is
  * always same-super-domain, so it is reliably this child frame too.
  */
 export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Promise<AutFrame> => {
@@ -86,8 +86,8 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
  * errors a poller can branch on, mirroring the `status` lifecycle contract
  * (wait until `passed`/`failed`).
  */
-export const assertFrameReadable = async (session: TapSession): Promise<void> => {
-  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
+export const assertFrameReadable = async (connection: TapConnection): Promise<void> => {
+  const outcome = validateExecResult(await connection.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
 
   if ('error' in outcome) {
     throw new FrameCommandError(outcome.error.code, outcome.error.message)
@@ -106,26 +106,26 @@ export const assertFrameReadable = async (session: TapSession): Promise<void> =>
 
 /**
  * Shared flow for the AUT-frame commands: resolve a running instance, open a
- * tap session, gate on the run lifecycle, locate the AUT frame, run `read`, and
+ * tap connection, gate on the run lifecycle, locate the AUT frame, run `read`, and
  * render the result. Maps the CLI-native `FrameCommandError` and the
  * discovery/transport failures to the same rendered output the schema commands
  * use.
  */
 export const withResolvedAutFrame = async (
   options: TapCliOptions,
-  read: (session: TapSession, frame: AutFrame) => Promise<unknown>,
+  read: (connection: TapConnection, frame: AutFrame) => Promise<unknown>,
   command: string,
 ): Promise<number> => {
   try {
     const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
 
-    return await withTapSession(selection.instance, async (session) => {
+    return await withTapConnection(selection.instance, async (connection) => {
       try {
-        await assertFrameReadable(session)
+        await assertFrameReadable(connection)
 
-        const frame = await resolveAutFrame(session.client, session.sessionId)
+        const frame = await resolveAutFrame(connection.client, connection.sessionId)
 
-        const result = await read(session, frame)
+        const result = await read(connection, frame)
 
         renderOutcome(command, result, options.json)
 

@@ -3,23 +3,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import logger from '../../../lib/logger'
 import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
-import { withTapSession } from '../../../lib/tap/tap-session'
+import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import { tapCliCommands } from '../../../lib/tap/commands'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
 import { buildTapSchema } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
-import { mockResolved, mockSession, readyInstance, resetTapMocks, schema, tapError } from './tap-fixtures'
+import { mockResolved, mockConnection, readyInstance, resetTapMocks, schema, tapError } from './tap-fixtures'
 
 // vi.mock is hoisted above these imports, so the factories cannot come from
 // ./tap-fixtures — everything they don't cover does.
-vi.mock('../../../lib/tap/tap-session', async (importActual) => {
-  return { ...await importActual<typeof import('../../../lib/tap/tap-session')>(), withTapSession: vi.fn() }
+vi.mock('../../../lib/tap/tap-connection', async (importActual) => {
+  return { ...await importActual<typeof import('../../../lib/tap/tap-connection')>(), withTapConnection: vi.fn() }
 })
 
 vi.mock('../../../lib/tap/instance-gql', () => {
@@ -50,7 +50,7 @@ describe('lib/exec/tap', () => {
 
   describe('dispatching a command', () => {
     it('fetches the schema, hands the command to exec, prints the unwrapped result, and exits 0', async () => {
-      const call = mockSession()
+      const call = mockConnection()
 
       expect(await tap.start(['health'], {})).toBe(0)
       expect(logger.print()).toBe('ok')
@@ -62,7 +62,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('forwards positional args to exec as raw strings keyed by param name, without interpreting them', async () => {
-      const call = mockSession(schema, { result: { status: 'started' } })
+      const call = mockConnection(schema, { result: { status: 'started' } })
 
       expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], {})).toBe(0)
 
@@ -70,7 +70,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('forwards parsed options to exec as raw strings, without interpreting them', async () => {
-      const call = mockSession(schema, { result: { status: 'started' } })
+      const call = mockConnection(schema, { result: { status: 'started' } })
 
       expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js', '--browser', 'chrome', '--headed'], {})).toBe(0)
 
@@ -78,7 +78,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('rejects an option the command does not advertise, without reaching exec', async () => {
-      const call = mockSession()
+      const call = mockConnection()
 
       expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js', '--nope'], {})).toBe(1)
       expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`unknown option '--nope'`)
@@ -86,7 +86,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints non-string results as readable JSON', async () => {
-      mockSession(schema, { result: { status: 'ok', browsers: 2 } })
+      mockConnection(schema, { result: { status: 'ok', browsers: 2 } })
 
       expect(await tap.start(['health'], {})).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'ok', browsers: 2 })
@@ -115,7 +115,7 @@ describe('lib/exec/tap', () => {
     }
 
     it('prints a command’s human-readable rendering by default when it defines one', async () => {
-      const call = mockSession(reporterSchema, { result: reporterView })
+      const call = mockConnection(reporterSchema, { result: reporterView })
 
       expect(await tap.start(['reporter', '--test', 'r2'], {})).toBe(0)
       expect(call).toHaveBeenCalledWith('exec', ['reporter', {}, { test: 'r2' }])
@@ -129,7 +129,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints the raw JSON result when --json is passed', async () => {
-      mockSession(reporterSchema, { result: reporterView })
+      mockConnection(reporterSchema, { result: reporterView })
 
       expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual(reporterView)
@@ -140,7 +140,7 @@ describe('lib/exec/tap', () => {
     // the flag is handed over to it. Every other command keeps it to itself.
     it('forwards --json to the instance for a command whose schema declares it', async () => {
       const consoleProps = { name: 'request', type: 'command', props: { body: 'x'.repeat(2_000) } }
-      const call = mockSession(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
+      const call = mockConnection(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
 
       expect(await tap.start(['command', '--test-id', 'r2', '--command-id', '1'], { json: true })).toBe(0)
       expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1', 'json': 'true' }])
@@ -148,7 +148,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('does not forward --json for a command whose schema does not declare it', async () => {
-      const call = mockSession(reporterSchema, { result: reporterView })
+      const call = mockConnection(reporterSchema, { result: reporterView })
 
       expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
       expect(call).toHaveBeenCalledWith('exec', ['reporter', {}, { test: 'r2' }])
@@ -156,24 +156,24 @@ describe('lib/exec/tap', () => {
 
     it('leaves the options alone without --json', async () => {
       const commandView = { id: '1', name: 'visit', hook: { hookId: 'r2', hookName: 'test body' }, snapshots: [] }
-      const call = mockSession(buildTapSchema('15.0.0'), { result: commandView })
+      const call = mockConnection(buildTapSchema('15.0.0'), { result: commandView })
 
       expect(await tap.start(['command', '--test-id', 'r2', '--command-id', '1'], {})).toBe(0)
       expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1' }])
     })
 
     it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
-      mockSession()
+      mockConnection()
       const { instance } = mockResolved()
 
       await tap.start(['health'], { instance: 1234 })
 
       expect(resolveInstance).toHaveBeenCalledWith({ instance: 1234, cwd: process.cwd() })
-      expect(vi.mocked(withTapSession).mock.calls[0][0]).toBe(instance)
+      expect(vi.mocked(withTapConnection).mock.calls[0][0]).toBe(instance)
     })
 
     it('resolves with just the cwd tiebreak when --instance is absent', async () => {
-      mockSession()
+      mockConnection()
 
       await tap.start(['health'], {})
 
@@ -181,7 +181,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders an app-side domain failure ({ error }) with its code and exits 1', async () => {
-      const call = mockSession(schema, {
+      const call = mockConnection(schema, {
         error: {
           code: 'INVALID_ARGUMENTS',
           message: '<spec> must be a string, but number was given.',
@@ -194,7 +194,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('treats an unrecognizable exec result as a transport failure', async () => {
-      mockSession(schema, 'not an envelope')
+      mockConnection(schema, 'not an envelope')
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapInvalidExecResult.description)
@@ -203,7 +203,7 @@ describe('lib/exec/tap', () => {
     it('treats a malformed error envelope as a transport failure, without crashing on renderFailure', async () => {
       for (const malformed of [{ error: null }, { error: 'boom' }, { error: {} }, { error: { code: 'X' } }]) {
         logger.reset()
-        mockSession(schema, malformed)
+        mockConnection(schema, malformed)
 
         expect(await tap.start(['health'], {})).toBe(1)
         expect(logger.print()).toContain(errors.tapInvalidExecResult.description)
@@ -215,7 +215,7 @@ describe('lib/exec/tap', () => {
     const stderr = (): string => vi.mocked(console.error).mock.calls.flat().join(' ')
 
     it('prints an app-side domain failure on stderr, leaving stdout clean under --json', async () => {
-      mockSession(schema, {
+      mockConnection(schema, {
         error: {
           code: 'INVALID_ARGUMENTS',
           message: '<spec> must be a string, but number was given.',
@@ -228,7 +228,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints a known tap error on stderr, leaving stdout clean under --json', async () => {
-      vi.mocked(withTapSession).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+      vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
 
       expect(await tap.start(['health'], { json: true })).toBe(1)
       expect(stderr()).toContain(errors.tapBindingNotFound.description)
@@ -238,7 +238,7 @@ describe('lib/exec/tap', () => {
 
   describe('commander validates the command against the live schema', () => {
     it('rejects a command the instance does not advertise, without reaching exec', async () => {
-      const call = mockSession()
+      const call = mockConnection()
 
       expect(await tap.start(['bogus'], {})).toBe(1)
       expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`unknown command 'bogus'`)
@@ -246,7 +246,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('rejects a missing required positional, without reaching exec', async () => {
-      const call = mockSession()
+      const call = mockConnection()
 
       expect(await tap.start(['fake-command-for-testing'], {})).toBe(1)
       expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`missing required argument 'spec'`)
@@ -256,7 +256,7 @@ describe('lib/exec/tap', () => {
 
   describe('help', () => {
     it('prints the schema-derived overview for a bare invocation and exits 0', async () => {
-      mockSession()
+      mockConnection()
 
       expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
@@ -266,26 +266,26 @@ describe('lib/exec/tap', () => {
 
     // A bare invocation and --help print the same help, so they answer the same.
     it('answers a bare invocation exactly as it answers --help', async () => {
-      mockSession()
+      mockConnection()
       const bareCode = await tap.start([], {})
       const bareOutput = logger.print()
 
       logger.reset()
-      mockSession()
+      mockConnection()
 
       expect(await tap.start(['--help'], {})).toBe(bareCode)
       expect(logger.print()).toBe(bareOutput)
     })
 
     it('prints the overview and exits 0 for an explicit --help', async () => {
-      mockSession()
+      mockConnection()
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
     it('leads the help with a banner naming the resolved instance', async () => {
-      mockSession()
+      mockConnection()
       mockResolved({ instance: readyInstance({ pid: 7777, projectRoot: '/projects/app' }) })
 
       expect(await tap.start(['--help'], {})).toBe(0)
@@ -293,7 +293,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('lists the CLI-native instances command at the top of the overview commands', async () => {
-      mockSession()
+      mockConnection()
 
       expect(await tap.start(['--help'], {})).toBe(0)
       const help = logger.print()
@@ -303,7 +303,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('notes which instance was auto-selected when several were live', async () => {
-      mockSession()
+      mockConnection()
       mockResolved({ instance: readyInstance({ pid: 7777 }), reason: 'arbitrary', candidateCount: 3 })
 
       expect(await tap.start(['--help'], {})).toBe(0)
@@ -312,7 +312,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('omits the multi-instance note when only one instance was live', async () => {
-      mockSession()
+      mockConnection()
       mockResolved({ reason: 'only', candidateCount: 1 })
 
       expect(await tap.start(['--help'], {})).toBe(0)
@@ -320,7 +320,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints a rich per-command help for `<command> --help`, without reaching exec', async () => {
-      const call = mockSession()
+      const call = mockConnection()
 
       expect(await tap.start(['fake-command-for-testing', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap fake-command-for-testing')
@@ -332,7 +332,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders a schema command’s details prose in place of its one-liner for `<command> --help`', async () => {
-      mockSession({
+      mockConnection({
         ...schema,
         commands: [
           ...schema.commands,
@@ -352,7 +352,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('fails when help is requested for a command the instance does not advertise', async () => {
-      mockSession()
+      mockConnection()
 
       expect(await tap.start(['bogus', '--help'], {})).toBe(1)
       expect(logger.print()).toContain('UNKNOWN_COMMAND')
@@ -360,7 +360,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('treats a hidden command as unknown for `<command> --help` and omits it from the listing', async () => {
-      mockSession({
+      mockConnection({
         ...schema,
         commands: [
           ...schema.commands,
@@ -409,7 +409,7 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('Chrome')
       expect(() => JSON.parse(output)).toThrow()
 
-      expect(withTapSession).toHaveBeenCalledTimes(1)
+      expect(withTapConnection).toHaveBeenCalledTimes(1)
     })
 
     it('bounds the renderer probe with --timeout', async () => {
@@ -417,7 +417,7 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['instances'], { timeout: 5000 })).toBe(0)
 
-      expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), 5000)
+      expect(withTapConnection).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), 5000)
     })
 
     it('bounds the renderer probe with the find-instance default when --timeout is absent', async () => {
@@ -425,7 +425,7 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['instances'], {})).toBe(0)
 
-      expect(withTapSession).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), FIND_INSTANCE_TIMEOUT_MS)
+      expect(withTapConnection).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), FIND_INSTANCE_TIMEOUT_MS)
     })
 
     it('prints the raw instance summaries with --json', async () => {
@@ -501,13 +501,13 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['instances', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap instances')
       expect(listLiveInstances).not.toHaveBeenCalled()
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('exits 1 on an excess positional and never enumerates', async () => {
       expect(await tap.start(['instances', 'extra'], {})).toBe(1)
       expect(listLiveInstances).not.toHaveBeenCalled()
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
   })
 
@@ -545,7 +545,7 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('not connected')
       expect(() => JSON.parse(output)).toThrow()
       // Nothing live means nothing to connect to.
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('prints the raw status object with --json', async () => {
@@ -591,12 +591,12 @@ describe('lib/exec/tap', () => {
       })
 
       // The early lifecycle is reported from discovery alone.
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('reports "spec not selected" with totalSpecs when a browser is attached and on the spec list', async () => {
       mockLiveResolved(liveInstance())
-      mockSession(schema, { result: { spec: null, totalSpecs: 3 } } satisfies TapExecResult)
+      mockConnection(schema, { result: { spec: null, totalSpecs: 3 } } satisfies TapExecResult)
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({
@@ -612,7 +612,7 @@ describe('lib/exec/tap', () => {
 
     it('merges the run state, active spec, and results when on a spec', async () => {
       mockLiveResolved(liveInstance())
-      mockSession(schema, {
+      mockConnection(schema, {
         result: {
           spec: 'cypress/e2e/login.cy.ts',
           totalSpecs: 3,
@@ -641,7 +641,7 @@ describe('lib/exec/tap', () => {
 
     it('reports "loading" with no verdict and no run to name while the selected spec is still building', async () => {
       mockLiveResolved(liveInstance())
-      mockSession(schema, {
+      mockConnection(schema, {
         result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'loading', startedAt: null },
       } satisfies TapExecResult)
 
@@ -661,7 +661,7 @@ describe('lib/exec/tap', () => {
 
     it('reports a spec that failed to build as failed, carrying the reason', async () => {
       mockLiveResolved(liveInstance())
-      mockSession(schema, {
+      mockConnection(schema, {
         result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'failed', startedAt: '2026-07-29T10:15:00.000Z', error: 'Error: Webpack Compilation Error' },
       } satisfies TapExecResult)
 
@@ -682,7 +682,7 @@ describe('lib/exec/tap', () => {
 
     it('reports a null startedAt for an instance whose binding does not name the run', async () => {
       mockLiveResolved(liveInstance())
-      mockSession(schema, {
+      mockConnection(schema, {
         result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'passed', totalTests: 1, results: { passed: 1, failed: 0, pending: 0, skipped: 0 } },
       } satisfies TapExecResult)
 
@@ -694,7 +694,7 @@ describe('lib/exec/tap', () => {
 
     it('asks the binding for run-state over the session', async () => {
       mockLiveResolved(liveInstance())
-      const call = mockSession(schema, { result: { spec: null, totalSpecs: 0 } } satisfies TapExecResult)
+      const call = mockConnection(schema, { result: { spec: null, totalSpecs: 0 } } satisfies TapExecResult)
 
       await tap.start(['status'], {})
 
@@ -711,7 +711,7 @@ describe('lib/exec/tap', () => {
 
     it('exits 1 and renders the failure when the instance is unreachable despite a browser', async () => {
       mockLiveResolved(liveInstance())
-      vi.mocked(withTapSession).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+      vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
 
       expect(await tap.start(['status'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)
@@ -719,7 +719,7 @@ describe('lib/exec/tap', () => {
 
     it('exits 1 and surfaces the binding error when the running Cypress lacks the run-state command', async () => {
       mockLiveResolved(liveInstance())
-      mockSession(schema, { error: { code: 'UNKNOWN_COMMAND', message: 'no such command' } } satisfies TapExecResult)
+      mockConnection(schema, { error: { code: 'UNKNOWN_COMMAND', message: 'no such command' } } satisfies TapExecResult)
 
       expect(await tap.start(['status'], {})).toBe(1)
       expect(logger.print()).toContain('UNKNOWN_COMMAND: no such command')
@@ -730,13 +730,13 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['status', '--help'], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap status')
       expect(resolveLiveInstance).not.toHaveBeenCalled()
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('exits 1 on an excess positional and never resolves an instance', async () => {
       expect(await tap.start(['status', 'extra'], {})).toBe(1)
       expect(resolveLiveInstance).not.toHaveBeenCalled()
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
   })
 
@@ -783,7 +783,7 @@ describe('lib/exec/tap', () => {
       expect(() => JSON.parse(output)).toThrow()
 
       // The spec list comes from the instance's data layer, not the browser.
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('prints the raw spec entries (with git timestamps) via --json', async () => {
@@ -991,7 +991,7 @@ describe('lib/exec/tap', () => {
       expect(() => JSON.parse(output)).toThrow()
 
       // The run is driven from the instance's data layer, not over a CDP session.
-      expect(withTapSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('prints the raw launch outcome with --json', async () => {
@@ -1109,7 +1109,7 @@ describe('lib/exec/tap', () => {
             DOM: { enable: vi.fn() },
             Accessibility: { enable: vi.fn(), getFullAXTree: vi.fn().mockResolvedValue({ nodes: [] }) },
           },
-        } as unknown as TapSession
+        } as unknown as TapConnection
 
         await read(session, { frameId: 'f' } as AutFrame)
         forwarded = callFunctionOn.mock.calls.map(([params]) => params.arguments)
@@ -1174,14 +1174,14 @@ describe('lib/exec/tap', () => {
 
   describe('the schema handshake', () => {
     it('rejects an unrecognizable schema', async () => {
-      mockSession('not a schema')
+      mockConnection('not a schema')
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapInvalidSchema.description)
     })
 
     it('rejects a future protocol version, telling the user to update the CLI', async () => {
-      mockSession({ ...schema, schemaVersion: 2 })
+      mockConnection({ ...schema, schemaVersion: 2 })
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain('newer than this CLI')
@@ -1189,7 +1189,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('rejects an older protocol version, telling the user to update the running Cypress', async () => {
-      mockSession({ ...schema, schemaVersion: 0 })
+      mockConnection({ ...schema, schemaVersion: 0 })
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain('older than this CLI')
@@ -1199,7 +1199,7 @@ describe('lib/exec/tap', () => {
 
   describe('failure rendering', () => {
     const failResolve = (err: unknown) => vi.mocked(resolveInstance).mockRejectedValue(err)
-    const failSession = (err: unknown) => vi.mocked(withTapSession).mockRejectedValue(err)
+    const failConnection = (err: unknown) => vi.mocked(withTapConnection).mockRejectedValue(err)
 
     it('renders discovery errors with their code and exits 1', async () => {
       failResolve(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
@@ -1209,8 +1209,8 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders a known transport failure as its mapped description and solution, and exits 1', async () => {
-      mockSession()
-      failSession(tapError(errors.tapCdpUnreachable, 'Could not open a debugging connection to the browser: socket hang up'))
+      mockConnection()
+      failConnection(tapError(errors.tapCdpUnreachable, 'Could not open a debugging connection to the browser: socket hang up'))
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapCdpUnreachable.description)
@@ -1218,8 +1218,8 @@ describe('lib/exec/tap', () => {
     })
 
     it('renders the binding-not-found failure as its mapped guidance', async () => {
-      mockSession()
-      failSession(tapError(errors.tapBindingNotFound, 'Failed to connect to the runner page.'))
+      mockConnection()
+      failConnection(tapError(errors.tapBindingNotFound, 'Failed to connect to the runner page.'))
 
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)

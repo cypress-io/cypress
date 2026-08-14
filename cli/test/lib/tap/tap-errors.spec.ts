@@ -6,7 +6,7 @@ import { errors } from '../../../lib/errors'
 // an error's description + solution only — no platform footer and no `----`
 // dividers (the runtime diagnostic stays on the Error for logs/--debug). Adding
 // or rewording a tap error should land here as a snapshot diff. Which failure
-// maps to which entry is covered by tap-session.spec.ts.
+// maps to which entry is covered by tap-connection.spec.ts.
 
 // eslint-disable-next-line no-control-regex
 const ANSI = /\[[0-9;]*m/g

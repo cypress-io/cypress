@@ -2,8 +2,8 @@ import Debug from 'debug'
 import commander from 'commander'
 
 import { CypressInstanceError, resolveInstance } from '../cypress-instances'
-import { withTapSession, throwTapError, validateExecResult } from '../tap/tap-session'
-import type { TapSession } from '../tap/tap-session'
+import { withTapConnection, throwTapError, validateExecResult } from '../tap/tap-connection'
+import type { TapConnection } from '../tap/tap-connection'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
 import { renderFailure, renderKnownFailure, renderOutcome, renderSchemaHelp, renderStaticHelp, renderNativeHelp } from '../tap/output'
 import { tapCliCommands } from '../tap/commands'
@@ -92,8 +92,8 @@ const runNativeCommand = async (native: TapCliCommand, positionals: string[], op
   return dispatchCode ?? 1
 }
 
-const execCommand = async (session: TapSession, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined): Promise<number> => {
-  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
+const execCommand = async (connection: TapConnection, command: string, commandArgs: Record<string, string>, commandOptions: Record<string, string>, json: boolean | undefined): Promise<number> => {
+  const outcome = validateExecResult(await connection.call(TAP_EXEC_METHOD, [command, commandArgs, commandOptions]))
 
   if ('error' in outcome) {
     renderFailure(outcome.error)
@@ -126,13 +126,13 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
   try {
     const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
 
-    return await withTapSession(selection.instance, async (session) => {
-      const schema = validateSchema(await session.call(TAP_SCHEMA_METHOD))
+    return await withTapConnection(selection.instance, async (connection) => {
+      const schema = validateSchema(await connection.call(TAP_SCHEMA_METHOD))
 
       let dispatchCode = 0
       const program = buildTapProgram(schema, async (name, args, commandOptions) => {
         noteTapCommand(name, args, commandOptions)
-        dispatchCode = await execCommand(session, name, args, withJson(schema, name, commandOptions, options.json), options.json)
+        dispatchCode = await execCommand(connection, name, args, withJson(schema, name, commandOptions, options.json), options.json)
       })
 
       if (wantsHelp || !command) {

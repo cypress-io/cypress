@@ -1,4 +1,4 @@
-import type { TapSession } from '../tap-session'
+import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from '../aut/frame'
 import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
 import { parseIndex } from '../utils'
@@ -71,8 +71,8 @@ const projectAria = (node: AXNode | undefined): FrameInspectResult['aria'] => {
   return Object.keys(aria).length ? aria : undefined
 }
 
-const readAriaNode = async (session: TapSession, objectId: string): Promise<FrameInspectResult['aria']> => {
-  const { client, sessionId } = session
+const readAriaNode = async (connection: TapConnection, objectId: string): Promise<FrameInspectResult['aria']> => {
+  const { client, sessionId } = connection
 
   try {
     const { node } = await client.DOM.describeNode({ objectId }, sessionId)
@@ -90,18 +90,18 @@ const readAriaNode = async (session: TapSession, objectId: string): Promise<Fram
 }
 
 export const extractInspect = (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string,
   at?: number,
-): Promise<FrameInspectResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameInspectResult> => {
-  const { client, sessionId } = session
+): Promise<FrameInspectResult | FrameAmbiguousResult> => withAmbiguous(connection, frame, selector, at, async (): Promise<FrameInspectResult> => {
+  const { client, sessionId } = connection
 
   await client.DOM.enable({}, sessionId)
   await client.Accessibility.enable(sessionId)
 
   const base: FrameInspectResult = { selector, found: false }
-  const objectId = await querySelectorObjectId(session, frame, selector, at ?? 0)
+  const objectId = await querySelectorObjectId(connection, frame, selector, at ?? 0)
 
   if (!objectId) {
     return base
@@ -119,7 +119,7 @@ export const extractInspect = (
   }
 
   const { tag, attributes, styles, box } = info.result.value as ElementInfo
-  const aria = await readAriaNode(session, objectId)
+  const aria = await readAriaNode(connection, objectId)
 
   return {
     ...base,
@@ -132,6 +132,6 @@ export const extractInspect = (
   }
 })
 
-export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractInspect(session, frame, commandOptions.selector, parseIndex(commandOptions.at))
+export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => withResolvedAutFrame(options, (connection, frame) => {
+  return extractInspect(connection, frame, commandOptions.selector, parseIndex(commandOptions.at))
 }, 'inspect'))

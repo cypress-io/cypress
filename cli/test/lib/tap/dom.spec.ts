@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { extractDom } from '../../../lib/tap/commands/dom'
 import { FrameCommandError } from '../../../lib/tap/aut/frame'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
@@ -23,7 +23,7 @@ describe('lib/tap/commands/dom extractDom', () => {
       call: vi.fn(),
       client: { Page: { createIsolatedWorld }, Runtime: { callFunctionOn } },
       sessionId: SESSION_ID,
-    } as unknown as TapSession
+    } as unknown as TapConnection
 
     return { session, createIsolatedWorld, callFunctionOn }
   }

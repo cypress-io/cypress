@@ -27,7 +27,7 @@ export const isRendererUnresponsive = (err: unknown): boolean => {
  * A pending CDP reply has no timer of its own, and the only thing that settles
  * one other than a matching reply is the browser-level socket closing — so a
  * target that stops answering leaves the promise orphaned forever. Stop waiting
- * on our side; the orphan settles when the session closes its client.
+ * on our side; the orphan settles when the connection closes its client.
  */
 export const withCdpDeadline = async <T> (work: Promise<T>, what: string, ms: number): Promise<T> => {
   let timer: NodeJS.Timeout | undefined
@@ -47,7 +47,7 @@ export const withCdpDeadline = async <T> (work: Promise<T>, what: string, ms: nu
 /**
  * Every domain shorthand (`client.Runtime.evaluate(...)`) is generated as a call
  * to `client.send`, so replacing that one method bounds every protocol call the
- * session makes, including the raw-client ones the frame extractors issue. Event
+ * connection makes, including the raw-client ones the frame extractors issue. Event
  * subscriptions and `close` don't go through it and stay unbounded.
  */
 export const boundCdpCalls = (client: CRI.Client, ms: number): void => {

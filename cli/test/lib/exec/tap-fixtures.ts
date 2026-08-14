@@ -3,8 +3,8 @@ import { vi } from 'vitest'
 import logger from '../../../lib/logger'
 import { listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
 import type { ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
-import { withTapSession } from '../../../lib/tap/tap-session'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import { withTapConnection } from '../../../lib/tap/tap-connection'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
@@ -37,15 +37,15 @@ export const schema: TapSchema = {
   ],
 }
 
-export const mockSession = (sessionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
+export const mockConnection = (connectionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
   const call = vi.fn(async (method: string) => {
-    return method === 'getSchema' ? sessionSchema : execOutcome
+    return method === 'getSchema' ? connectionSchema : execOutcome
   })
 
   // These tests drive the binding exec/status paths, which use only `call`;
   // the frame extractors (dom/aria/inspect, which use client/sessionId) are
   // covered separately, so the session's CDP members are stubbed away here.
-  vi.mocked(withTapSession).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapSession))
+  vi.mocked(withTapConnection).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapConnection))
 
   return call
 }
@@ -83,7 +83,7 @@ export const resetTapMocks = (): void => {
   fetchMock.mockReset()
   fetchMock.mockResolvedValue({ status: 200 })
   vi.stubGlobal('fetch', fetchMock)
-  vi.mocked(withTapSession).mockReset()
+  vi.mocked(withTapConnection).mockReset()
   vi.mocked(queryInstanceGraphql).mockReset()
   vi.mocked(listLiveInstances).mockReset()
   vi.mocked(resolveLiveInstance).mockReset()

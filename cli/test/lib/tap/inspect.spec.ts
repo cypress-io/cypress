@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { CypressInstanceError } from '../../../lib/cypress-instances'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
@@ -54,7 +54,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
       Runtime: { callFunctionOn },
     }
 
-    return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapSession }
+    return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapConnection }
   }
 
   // A read returns the element; an ambiguous selector returns the candidates
