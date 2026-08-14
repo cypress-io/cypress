@@ -17,7 +17,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
-import { cypressInstances } from './cypress-instances'
+import { cypressInstances } from './cypress-sessions'
 import type {
   BannersState,
   FoundBrowser,

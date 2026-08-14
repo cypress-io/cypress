@@ -3,15 +3,15 @@ import path from 'path'
 import os from 'os'
 import fs from 'fs-extra'
 import mockedEnv from 'mocked-env'
-import { cypressInstances, getInstancesDir, _resetForTesting } from '../../lib/cypress-instances'
+import { cypressInstances, getInstancesDir, _resetForTesting } from '../../lib/cypress-sessions'
 
-describe('lib/cypress-instances', () => {
+describe('lib/cypress-sessions', () => {
   let restoreEnv: () => void
   let cacheDir: string
   let recordPath: string
 
   beforeEach(() => {
-    cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-cypress-instances-'))
+    cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-cypress-sessions-'))
     recordPath = path.join(cacheDir, 'instances', `${process.pid}.json`)
 
     // resolveCypressCacheRoot also reads the npm_config_/npm_package_config_ variants,

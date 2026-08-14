@@ -1,6 +1,6 @@
 import type { TapCliOptions } from './types'
-import type { TapCommandName, TapNativeCommandName } from '@packages/cypress-instances'
-import { KNOWN_COMMANDS } from '@packages/cypress-instances'
+import type { TapCommandName, TapNativeCommandName } from '@packages/cypress-sessions'
+import { KNOWN_COMMANDS } from '@packages/cypress-sessions'
 
 type ReportedCommand = TapNativeCommandName | TapCommandName | 'unknown'
 

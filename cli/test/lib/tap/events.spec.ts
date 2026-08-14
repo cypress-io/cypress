@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../../../lib/tap/events'
-import { resolvedInstanceIdentity } from '../../../lib/cypress-instances'
+import { resolvedInstanceIdentity } from '../../../lib/cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import util, { DEVELOPMENT_VERSION } from '../../../lib/util'
 
@@ -16,8 +16,8 @@ vi.mock('../../../lib/util', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/cypress-instances', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
+vi.mock('../../../lib/cypress-sessions', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/cypress-sessions')>()
 
   return {
     ...actual,

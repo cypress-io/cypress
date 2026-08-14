@@ -7,7 +7,7 @@ import net from 'net'
 import { ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { cypressInstances } from '../../../lib/cypress-instances'
+import { cypressInstances } from '../../../lib/cypress-sessions'
 
 const HOST = '127.0.0.1'
 const PORT = 50505

@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { ClearResult, PinResult } from '@packages/cypress-instances'
+import type { ClearResult, PinResult } from '@packages/cypress-sessions'
 import { color, layout } from './format'
 import { PIN_ICON, pinnedBlock } from './pinned'
 

@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-instances'
-import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-instances'
+import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-sessions'
+import type { LiveInstanceSelection, LiveInstanceState, ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
@@ -10,8 +10,8 @@ import { tapCliCommands } from '../../../lib/tap/commands'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { AutFrame } from '../../../lib/tap/aut/frame'
-import { buildTapSchema } from '@packages/cypress-instances'
-import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
+import { buildTapSchema } from '@packages/cypress-sessions'
+import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
 import { errors } from '../../../lib/errors'
 import tap from '../../../lib/exec/tap'
 import { mockResolved, mockConnection, readyInstance, resetTapMocks, schema, tapError } from './tap-fixtures'
@@ -26,9 +26,9 @@ vi.mock('../../../lib/tap/instance-gql', () => {
   return { queryInstanceGraphql: vi.fn() }
 })
 
-vi.mock('../../../lib/cypress-instances', async (importActual) => {
+vi.mock('../../../lib/cypress-sessions', async (importActual) => {
   return {
-    ...await importActual<typeof import('../../../lib/cypress-instances')>(),
+    ...await importActual<typeof import('../../../lib/cypress-sessions')>(),
     listLiveInstances: vi.fn(),
     resolveLiveInstance: vi.fn(),
     resolveInstance: vi.fn(),

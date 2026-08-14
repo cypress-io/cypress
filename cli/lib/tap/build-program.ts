@@ -3,7 +3,7 @@ import commander from 'commander'
 import { tapCliCommands } from './commands'
 import { DEFAULT_CDP_TIMEOUT_MS } from './cdp-timeout'
 import type { TapCliCommand } from './types'
-import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
+import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-sessions'
 
 type TapDispatch = (command: string, args: Record<string, string>, options: Record<string, string>) => Promise<void> | void
 

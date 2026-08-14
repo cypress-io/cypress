@@ -1,5 +1,5 @@
-import { isTapSupportedBrowser, listLiveInstances } from '../../cypress-instances'
-import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-instances'
+import { isTapSupportedBrowser, listLiveInstances } from '../../cypress-sessions'
+import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-sessions'
 import { renderOutcome, renderResult } from '../output'
 import { withTapConnection } from '../tap-connection'
 import { FIND_INSTANCE_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'

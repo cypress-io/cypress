@@ -5,14 +5,14 @@ export {
   parseRecordPid,
   cypressInstancesDir,
   instancesProbePath,
-} from '@packages/cypress-instances'
+} from '@packages/cypress-sessions'
 
 export type {
   CypressInstance,
   LiveInstanceState,
   ReadyInstanceState,
   InstanceTestingType,
-} from '@packages/cypress-instances'
+} from '@packages/cypress-sessions'
 
 export type CypressInstanceErrorCode =
   | 'NO_INSTANCE'

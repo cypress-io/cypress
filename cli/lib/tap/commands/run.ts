@@ -1,5 +1,5 @@
-import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
-import { LiveInstanceState, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-instances'
+import { CypressInstanceError, resolveLiveInstance } from '../../cypress-sessions'
+import { LiveInstanceState, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-sessions'
 import { queryInstanceGraphql } from '../instance-gql'
 import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { defineNativeCommand } from './definition'

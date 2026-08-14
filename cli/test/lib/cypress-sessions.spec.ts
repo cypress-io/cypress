@@ -17,7 +17,7 @@ import {
   resolvedInstanceId,
   resolvedInstanceIdentity,
   CypressInstanceError,
-} from '../../lib/cypress-instances'
+} from '../../lib/cypress-sessions'
 
 vi.mock('../../lib/tasks/state', async (importActual) => {
   const actual = await importActual()
@@ -67,7 +67,7 @@ const stubKill = ({ alive = [], eperm = [] }: { alive?: number[], eperm?: number
   }) as any)
 }
 
-describe('lib/cypress-instances', () => {
+describe('lib/cypress-sessions', () => {
   const servers: http.Server[] = []
 
   const startFakeInstance = async ({ instanceId = INSTANCE_ID, respondWith = null as Record<string, any> | null, hang = false } = {}): Promise<number> => {

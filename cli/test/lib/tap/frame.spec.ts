@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import logger from '../../../lib/logger'
-import { resolveInstance } from '../../../lib/cypress-instances'
+import { resolveInstance } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { resolveAutFrame, assertFrameReadable, withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 import type { TapCliOptions } from '../../../lib/tap/types'
 
-vi.mock('../../../lib/cypress-instances', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
+vi.mock('../../../lib/cypress-sessions', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/cypress-sessions')>()
 
   return { ...actual, resolveInstance: vi.fn() }
 })

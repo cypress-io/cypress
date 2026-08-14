@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { instancesProbePath } from './record'
 import type { LiveInstanceState, CypressInstance } from './record'
 
-const debug = Debug('cypress:cli:cypress-instances')
+const debug = Debug('cypress:cli:cypress-sessions')
 
 const PROBE_HOST = '127.0.0.1'
 const DEFAULT_PROBE_TIMEOUT_MS = 2000

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
-import type { LiveInstanceState } from '../../../lib/cypress-instances'
+import type { LiveInstanceState } from '../../../lib/cypress-sessions'
 import { errors } from '../../../lib/errors'
 
 const instance: LiveInstanceState = {

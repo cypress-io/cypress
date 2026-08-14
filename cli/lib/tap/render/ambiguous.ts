@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { MAX_DERIVED_SELECTORS } from '@packages/cypress-instances'
+import { MAX_DERIVED_SELECTORS } from '@packages/cypress-sessions'
 
 import type { FrameAmbiguousResult } from '../aut/single-match'
 import { color, columns, layout, quoted } from './format'

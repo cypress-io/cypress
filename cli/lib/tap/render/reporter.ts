@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-instances'
+import type { TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-sessions'
 import { color, countsLine, emptyState, heading, layout, startedAtLabel, stateBadge, table, titleLine } from './format'
 import { aliasSuffix, cleanedSuffix, commandLabel, formatMessage, networkDot, networkSuffix, sectionHeading } from './command-row'
 

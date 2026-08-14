@@ -1,9 +1,9 @@
-import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
-import { TapSpecsOperation } from '@packages/cypress-instances'
+import { CypressInstanceError, resolveLiveInstance } from '../../cypress-sessions'
+import { TapSpecsOperation } from '@packages/cypress-sessions'
 import { queryInstanceGraphql } from '../instance-gql'
 import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { defineNativeCommand } from './definition'
-import type { TapSpecsQuery } from '@packages/cypress-instances'
+import type { TapSpecsQuery } from '@packages/cypress-sessions'
 import type { TapCliOptions } from '../types'
 
 /** One row of `cypress tap specs`: a runnable spec of the active project. */

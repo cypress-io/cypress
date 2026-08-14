@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapNetworkInfo } from '@packages/cypress-instances'
+import type { TapNetworkInfo } from '@packages/cypress-sessions'
 import { color, heading } from './format'
 
 // The command-log row grammar, shared by the two renderers that show command log

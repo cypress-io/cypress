@@ -1,4 +1,4 @@
-import type { ClearResult, PinResult, TapCommandName, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import type { ClearResult, PinResult, TapCommandName, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-sessions'
 import type { TapRunResult } from '../commands/run'
 import type { TapInstanceSummary } from '../commands/instances'
 import type { TapSpecEntry } from '../commands/specs'
@@ -24,7 +24,7 @@ import { renderCommandHuman } from './command'
  * declares `renderHuman` prints that rendering by default; `--json` bypasses it
  * for the raw result. Commands without one keep printing JSON. The result shape
  * a renderer receives is the command's typed interface from the shared
- * `@packages/cypress-instances` contract; `options` are the command's invoked
+ * `@packages/cypress-sessions` contract; `options` are the command's invoked
  * options, for a command whose result shape depends on them. Returning
  * undefined declines the rendering for the invoked options, printing the raw
  * JSON as if `--json` had been passed.
