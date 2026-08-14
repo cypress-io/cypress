@@ -159,7 +159,12 @@ export async function sendStaticResponse (backendRequest: Pick<InterceptedReques
 
   if (staticResponse.forceNetworkError) {
     debug('forcing network error')
-    const err = new Error('forceNetworkError called')
+    const err: Error & { isForceNetworkError?: boolean } = new Error('forceNetworkError called')
+
+    // The CDP Fetch transport has no connection to reset, so it needs to tell
+    // a requested network error apart from a real pipeline failure to map it
+    // to Fetch.failRequest instead of releasing the pause untouched.
+    err.isForceNetworkError = true
 
     return onError(err)
   }
