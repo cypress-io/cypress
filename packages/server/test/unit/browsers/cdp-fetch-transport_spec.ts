@@ -1848,10 +1848,11 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
+      // postData is a CDP binary param: base64 of the utf8 body, not the body
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'fetch-request',
         method: 'POST',
-        postData: 'cGF5bG9hZA==',
+        postData: Buffer.from('payload', 'utf8').toString('base64'),
         headers: [{
           name: 'accept-encoding',
           value: 'gzip, deflate',
@@ -1985,6 +1986,40 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+    })
+
+    it('fails the response pause when a response handler requests a network error', async () => {
+      // res.send({ forceNetworkError: true }) raises after the request has
+      // continued, so the pause in hand is the response one — it must still
+      // reach the page as a network error, not as the origin's response
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        await next(req)
+
+        const err: Error & { isForceNetworkError?: boolean } = new Error('forceNetworkError called')
+
+        err.isForceNetworkError = true
+        throw err
+      })
+
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+      await onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 }))
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+        requestId: 'fetch-request',
+        errorReason: 'Failed',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'fetch-request',
       })
     })
