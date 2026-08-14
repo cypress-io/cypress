@@ -1,7 +1,7 @@
 import { toIdentityResponse } from '@packages/proxy'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 type ServeInternalRoutesConfig = InternalRouteConfig
@@ -99,6 +99,46 @@ export function createServeInternalRoutesMiddleware ({
         headers: { 'content-type': 'text/plain' },
         body: 'Not Found',
       }
+    }
+
+    // In cypress-in-cypress the inner Cypress shares the browser page with the
+    // parent, and exactly one of the inner's documents belongs to both
+    // pipelines: the runner document (clientRoute) IS the parent's AUT
+    // document. Fulfilling it here answers the pause before the parent's
+    // interception ever sees it, so the parent cannot inject and
+    // window:before:load dies silently. It reaches our Express over the wire
+    // without the loopback, so release it and leave the pause chain to the
+    // parent.
+    //
+    // Only that document. Releasing other own-origin internals (e.g. the CT
+    // fixture iframe under /__cypress/iframes) invites the parent's partial
+    // injection into frames it does not own, which reroutes the inner AUT's
+    // deliberate test errors to the parent as cross-origin uncaught
+    // exceptions. Foreign-origin internal routes (the CT dev server origin)
+    // keep the loopback for the same reason as before: they never reach our
+    // Express over the wire.
+    // Two release classes, both matching the (passing) e2e-mode topology
+    // where the inner has no interception at all:
+    //   - clientRoute paths: the runner document (the parent's AUT page,
+    //     which the parent must inject) and its static assets
+    //   - concrete subresource types (xhr/fetch/script/...): e.g. the app's
+    //     /__cypress/graphql calls, which the parent's cy.intercept must see.
+    //     Injection never touches non-documents, so these cannot re-trigger
+    //     the parent-injection problem.
+    // Documents normalize to 'other' at this layer, so a non-clientRoute
+    // 'other' is conservatively kept on the loopback — that keeps the CT
+    // fixture iframe (/__cypress/iframes) out of the parent's partial
+    // injection, which reroutes the inner AUT's deliberate test errors to
+    // the parent as cross-origin uncaught exceptions.
+    if (
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+      && isCypressServerOrigin(request.url, config)
+      && (
+        (config.clientRoute && matchesPathPrefix(url.pathname, config.clientRoute))
+        || (request.resourceType && request.resourceType !== 'other')
+      )
+    ) {
+      return next(request)
     }
 
     // Fulfill via Express for both same-origin and cross-origin internals.
