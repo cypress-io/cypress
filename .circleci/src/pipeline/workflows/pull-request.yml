@@ -336,7 +336,11 @@ jobs:
       # #34561 cypress-in-cypress specs: exercise the spec-transition teardown that
       # wedged on a zombie (disconnected-but-not-terminated) CDP connection when the
       # proxy is disabled.
-      spec: cypress/e2e/cypress-in-cypress.cy.ts,cypress/e2e/cypress-in-cypress-e2e.cy.ts,cypress/e2e/cypress-in-cypress-run-mode.cy.ts,cypress/e2e/cypress-in-cypress-component.cy.ts
+      # #34603 debug + banner: window:before:load flag delivery and cy.intercept
+      # visibility of inner-app graphql through the cy-in-cy internal-route release;
+      # the uncaught-errors specs pin the release's injection boundary (the parent
+      # must never partial-inject inner-owned frames).
+      spec: cypress/e2e/cypress-in-cypress.cy.ts,cypress/e2e/cypress-in-cypress-e2e.cy.ts,cypress/e2e/cypress-in-cypress-run-mode.cy.ts,cypress/e2e/cypress-in-cypress-component.cy.ts,cypress/e2e/debug.cy.ts,cypress/e2e/cloud_message_banner.cy.ts,cypress/e2e/runner/reporter-ct-webpack.uncaught-errors.cy.ts,cypress/e2e/runner/reporter-ct-vite.uncaught-errors.cy.ts
       requires:
         - ready-to-test
   - driver-integration-tests-chrome:
