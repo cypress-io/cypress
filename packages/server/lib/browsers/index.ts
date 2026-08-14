@@ -136,9 +136,8 @@ const browsers = {
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    cypressInstances.setBrowser(browser)
-
     await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
+    cypressInstances.setBrowser(browser)
 
     return this.getBrowserInstance()
   },
@@ -200,8 +199,6 @@ const browsers = {
 
     debug('opening browser %o', browser)
 
-    cypressInstances.setBrowser(browser)
-
     const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
 
     debug(`browser opened for launch ${thisLaunchAttempt}`)
@@ -239,6 +236,7 @@ const browsers = {
 
     instance = _instance
     instance.browser = browser
+    cypressInstances.setBrowser(browser)
 
     // TODO: normalizing opening and closing / exiting
     // so that there is a default for each browser but

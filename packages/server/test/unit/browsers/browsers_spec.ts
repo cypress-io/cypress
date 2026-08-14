@@ -525,6 +525,31 @@ describe('lib/browsers/index', () => {
   // Recorded for every family, not just the ones that speak CDP, so an external
   // tool can tell a browser it cannot drive from no browser at all.
   context('cypress instances browser', () => {
+    it('does not record the browser when launch fails', async () => {
+      const setBrowser = sinon.spy(cypressInstances, 'setBrowser')
+      const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
+      const launchError = new Error('failed to launch')
+
+      browsers._setInstance(null)
+      sinon.stub(firefox, 'open').rejects(launchError)
+
+      await expect(browsers.open(browser as any, { url: 'http://localhost:3000' } as any, null, ctx)).to.be.rejectedWith(launchError)
+
+      expect(setBrowser).not.to.be.calledWith(browser)
+    })
+
+    it('does not record the browser when connecting fails', async () => {
+      const setBrowser = sinon.spy(cypressInstances, 'setBrowser')
+      const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
+      const connectError = new Error('failed to connect')
+
+      sinon.stub(firefox, 'connectToExisting').rejects(connectError)
+
+      await expect(browsers.connectToExisting(browser as any, { browsers: [] } as any, null)).to.be.rejectedWith(connectError)
+
+      expect(setBrowser).not.to.be.calledWith(browser)
+    })
+
     it('records the browser on launch and clears it when the browser exits', async () => {
       const setBrowser = sinon.spy(cypressInstances, 'setBrowser')
       const url: TestUrl = 'http://localhost:3000'
