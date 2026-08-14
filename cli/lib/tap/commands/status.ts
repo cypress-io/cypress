@@ -30,7 +30,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   let selection
 
   try {
-    selection = await resolveLiveSession({ session: options.instance, cwd: process.cwd() })
+    selection = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
   } catch (err) {
     if (err instanceof CypressSessionError) {
       // Polling cannot outlast an session tap will never be able to drive, so

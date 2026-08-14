@@ -40,7 +40,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
       returnByValue: true,
     })
 
-    // Nothing to disambiguate, so the instance is never asked for selectors.
+    // Nothing to disambiguate, so the session is never asked for selectors.
     expect(call).not.toHaveBeenCalled()
   })
 
@@ -64,7 +64,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     expect(call).toHaveBeenCalledWith('exec', ['resolve-selector', { selector: '.item' }, {}])
   })
 
-  it('still answers with the count when the instance could derive no selectors', async () => {
+  it('still answers with the count when the session could derive no selectors', async () => {
     const { session } = makeSession({ count: 2 }, { result: { selectors: [] } })
 
     expect(await resolveAmbiguity(session, frame, '.item')).to.deep.eq({
@@ -75,13 +75,13 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     })
   })
 
-  it('still answers when the instance reports a failure for the selectors', async () => {
+  it('still answers when the session reports a failure for the selectors', async () => {
     const { session } = makeSession({ count: 2 }, { error: { code: 'NO_AUT', message: 'no app under test is loaded' } })
 
     expect(await resolveAmbiguity(session, frame, '.item')).to.deep.include({ ambiguous: true, count: 2 })
   })
 
-  it('still answers when asking the instance for selectors throws', async () => {
+  it('still answers when asking the session for selectors throws', async () => {
     const { session } = makeSession({ count: 2 }, new Error('binding gone'))
 
     expect(await resolveAmbiguity(session, frame, '.item')).to.deep.include({ ambiguous: true, count: 2, selectors: [] })

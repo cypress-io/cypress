@@ -94,8 +94,8 @@ SPECS (15)
   cypress/e2e/unbuildable.cy.js  <modified>
 `
 
-exports['instances listing'] = `
-INSTANCES (1)
+exports['sessions listing'] = `
+SESSIONS (1)
   PID  PROJECT  TYPE  BROWSER
   <pid>  <project>  e2e  Chrome
 `
@@ -614,12 +614,12 @@ TEST BODY · r3
 `
 
 exports['complete failed run debugging journey'] = `
-$ cypress tap instances
-INSTANCES (1)
+$ cypress tap sessions
+SESSIONS (1)
   PID  PROJECT  TYPE  BROWSER
   <pid>  <project>  e2e  Chrome
 
-$ cypress tap --instance <pid> specs
+$ cypress tap --session <pid> specs
 SPECS (15)
   cypress/e2e/agents.cy.js  <modified>
   cypress/e2e/aut-content.cy.js  <modified>
@@ -637,27 +637,27 @@ SPECS (15)
   cypress/e2e/slow.cy.js  <modified>
   cypress/e2e/unbuildable.cy.js  <modified>
 
-$ cypress tap --instance <pid> run cypress/e2e/failing.cy.js
+$ cypress tap --session <pid> run cypress/e2e/failing.cy.js
 ▶ cypress/e2e/failing.cy.js
 
   testing type  e2e
   browser  Chrome
 
-$ cypress tap --instance <pid> status
+$ cypress tap --session <pid> status
 PID  PROJECT  TYPE  BROWSER
 <pid>  <project>  e2e  Chrome
 
 ✖ cypress/e2e/failing.cy.js  (started at <time>)
 ✓ --  ✖ 1  ○ --
 
-$ cypress tap --instance <pid> reporter
+$ cypress tap --session <pid> reporter
 cypress/e2e/failing.cy.js  (started at <time>)
 ✓ --  ✖ 1  ○ --  <duration>
 
 Failing
   r3  ✖ fails after loading the fixture page  <duration>
 
-$ cypress tap --instance <pid> reporter --test-id r3
+$ cypress tap --session <pid> reporter --test-id r3
 ✖ Failing > fails after loading the fixture page  failed
 
 TEST BODY · r3
@@ -677,7 +677,7 @@ TEST BODY · r3
   12 | })
   13 |
 
-$ cypress tap --instance <pid> command --test-id r3 --command-id 3
+$ cypress tap --session <pid> command --test-id r3 --command-id 3
 TEST BODY · r3
 ✖  3  -assert  expected <div#status> to have text this is not what the page says, but the text was ready  failed
 
@@ -693,10 +693,10 @@ ERROR
   AssertionError: Timed out retrying after <duration>: expected '<div#status>' to have text 'this is not what the page says…
   at Context.eval (webpack:///./cypress/e2e/failing.cy.js:10:22)
 
-$ cypress tap --instance <pid> dom --selector #status
+$ cypress tap --session <pid> dom --selector #status
 <div id="status" data-cy="status" data-cypress-el="true">ready</div>
 
-$ cypress tap --instance <pid> inspect --selector #status
+$ cypress tap --session <pid> inspect --selector #status
 ATTRIBUTES (3)
   id  status
   data-cy  status

@@ -51,7 +51,7 @@ const toSpecList = (data: TapSpecsQuery): TapSpecEntry[] => {
 
 const listSpecs = async (options: TapCliOptions): Promise<number> => {
   try {
-    const { session } = await resolveLiveSession({ session: options.instance, cwd: process.cwd() })
+    const { session } = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
     const data = await querySessionGraphql(session, TapSpecsOperation)
 
     renderOutcome('specs', toSpecList(data), options.json)

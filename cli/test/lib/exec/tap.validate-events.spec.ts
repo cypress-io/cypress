@@ -45,7 +45,7 @@ describe('lib/exec/tap reporting the invocation', () => {
   beforeEach(resetTapMocks)
 
   // `health` is advertised by this test's schema but is not a command this CLI
-  // ships, standing in for a newer instance.
+  // ships, standing in for a newer session.
   it('reports a dispatched command that succeeded', async () => {
     mockConnection()
 
@@ -70,7 +70,7 @@ describe('lib/exec/tap reporting the invocation', () => {
     expect(reportedEvent().flags).toEqual([])
   })
 
-  // A CLI-native command is dispatched before it looks for an instance, so it
+  // A CLI-native command is dispatched before it looks for a session, so it
   // reports what was typed as well as the code it failed with.
   it('reports a discovery failure a CLI-native command handled itself', async () => {
     vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
@@ -80,7 +80,7 @@ describe('lib/exec/tap reporting the invocation', () => {
     expect(JSON.stringify(reportedEvent())).not.toContain('a.cy.js')
   })
 
-  it('reports an instance-side failure by the code the instance gave', async () => {
+  it('reports a session-side failure by the code the session gave', async () => {
     mockConnection(schema, { error: { code: 'INVALID_ARGUMENTS', message: '<spec> must be a string.' } })
 
     expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], {})).toBe(1)
@@ -125,14 +125,14 @@ describe('lib/exec/tap reporting the invocation', () => {
   describe('flags', () => {
     // The names say which options agents reach for; the values are selectors,
     // spec paths and test titles, so they never leave the machine.
-    // The outer `cypress tap` command parses --instance/--json/--timeout off
+    // The outer `cypress tap` command parses --session/--json/--timeout off
     // before start() sees the operands, so they arrive as options instead.
     it('reports the flag names an invocation used, never their values', async () => {
       mockConnection(buildTapSchema('15.0.0'))
 
-      expect(await tap.start(['reporter', '--test-id', 'r2'], { json: true, instance: 4242 })).toBe(0)
+      expect(await tap.start(['reporter', '--test-id', 'r2'], { json: true, session: 4242 })).toBe(0)
 
-      expect(reportedEvent().flags).toEqual(['json', 'instance', 'test-id'])
+      expect(reportedEvent().flags).toEqual(['json', 'session', 'test-id'])
       expect(JSON.stringify(reportedEvent())).not.toContain('r2')
       expect(JSON.stringify(reportedEvent())).not.toContain('4242')
     })

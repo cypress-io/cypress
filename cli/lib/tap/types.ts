@@ -2,7 +2,7 @@ import type { PinnedView, TapNativeCommandSchema } from '@packages/cypress-sessi
 
 /** Options `cypress tap` accepts from the top-level CLI. */
 export interface TapCliOptions {
-  instance?: number
+  session?: number
   /** Print the raw JSON result even when the command has a human-readable rendering. */
   json?: boolean
   /** How long to wait on any single CDP call, in milliseconds. */
@@ -11,7 +11,7 @@ export interface TapCliOptions {
 
 /**
  * A tap subcommand implemented entirely in the CLI, as opposed to the commands
- * discovered from the running Cypress instance's schema. Its declarative shape
+ * discovered from the running Cypress session's schema. Its declarative shape
  * (description, params, options, help prose) comes from `TAP_NATIVE_COMMANDS`;
  * its positionals and options are parsed CLI-side with the same commander
  * grammar the schema commands use, then handed to `handler` as raw strings
@@ -23,14 +23,14 @@ export interface TapCliCommand extends TapNativeCommandSchema {
 }
 
 /**
- * The `run-state` payload reported by the running Cypress instance's tap
+ * The `run-state` payload reported by the running Cypress session's tap
  * binding. Mirrors the app-side result shape, which travels over CDP as
  * untyped JSON.
  */
 export interface TapRunState {
   /** Relative path of the selected spec, or `null` before one is selected. */
   spec: string | null
-  /** Number of specs the instance can run. */
+  /** Number of specs the session can run. */
   totalSpecs: number
   /** Where the selected spec is in its run; absent until a spec is selected. */
   state?: 'loading' | 'running' | 'passed' | 'failed'
@@ -47,7 +47,7 @@ export interface TapRunState {
 }
 
 /**
- * What `cypress tap status` renders: how far the instance has progressed
+ * What `cypress tap status` renders: how far the session has progressed
  * through its lifecycle, plus run progress once a spec is selected.
  */
 export interface TapStatus {
@@ -57,17 +57,17 @@ export interface TapStatus {
    * `failed`). Only `passed` and `failed` are verdicts.
    */
   status: string
-  /** Process id of the running Cypress instance. */
+  /** Process id of the running Cypress session. */
   pid?: number
-  /** Absolute path of the project the instance has open. */
+  /** Absolute path of the project the session has open. */
   projectRoot?: string
-  /** Testing type the instance has open, or `null` before one is chosen. */
+  /** Testing type the session has open, or `null` before one is chosen. */
   testingType?: 'e2e' | 'component' | null
-  /** Whether the instance has a browser attached over CDP. */
+  /** Whether the session has a browser attached over CDP. */
   browserAttached?: boolean
   /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
   browserName?: string | null
-  /** Number of specs the instance can run. */
+  /** Number of specs the session can run. */
   totalSpecs?: number
   /** Relative path of the selected spec. */
   spec?: string

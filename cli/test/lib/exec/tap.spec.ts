@@ -135,10 +135,10 @@ describe('lib/exec/tap', () => {
       expect(JSON.parse(logger.print())).toEqual(reporterView)
     })
 
-    // For `command`, --json also changes what the instance returns — nothing is
+    // For `command`, --json also changes what the session returns — nothing is
     // withheld from a payload that is not being rendered for reading room — so
     // the flag is handed over to it. Every other command keeps it to itself.
-    it('forwards --json to the instance for a command whose schema declares it', async () => {
+    it('forwards --json to the session for a command whose schema declares it', async () => {
       const consoleProps = { name: 'request', type: 'command', props: { body: 'x'.repeat(2_000) } }
       const call = mockConnection(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
 
@@ -162,17 +162,17 @@ describe('lib/exec/tap', () => {
       expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1' }])
     })
 
-    it('resolves the target from --instance and the cwd, then opens a session against it', async () => {
+    it('resolves the target from --session and the cwd, then opens a session against it', async () => {
       mockConnection()
       const { session } = mockResolved()
 
-      await tap.start(['health'], { instance: 1234 })
+      await tap.start(['health'], { session: 1234 })
 
       expect(resolveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
       expect(vi.mocked(withTapConnection).mock.calls[0][0]).toBe(session)
     })
 
-    it('resolves with just the cwd tiebreak when --instance is absent', async () => {
+    it('resolves with just the cwd tiebreak when --session is absent', async () => {
       mockConnection()
 
       await tap.start(['health'], {})
@@ -228,7 +228,7 @@ describe('lib/exec/tap', () => {
     })
 
     it('prints a known tap error on stderr, leaving stdout clean under --json', async () => {
-      vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+      vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the session may still be loading'))
 
       expect(await tap.start(['health'], { json: true })).toBe(1)
       expect(stderr()).toContain(errors.tapBindingNotFound.description)
@@ -237,7 +237,7 @@ describe('lib/exec/tap', () => {
   })
 
   describe('commander validates the command against the live schema', () => {
-    it('rejects a command the instance does not advertise, without reaching exec', async () => {
+    it('rejects a command the session does not advertise, without reaching exec', async () => {
       const call = mockConnection()
 
       expect(await tap.start(['bogus'], {})).toBe(1)
@@ -284,7 +284,7 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
-    it('leads the help with a banner naming the resolved instance', async () => {
+    it('leads the help with a banner naming the resolved session', async () => {
       mockConnection()
       mockResolved({ session: readySession({ pid: 7777, projectRoot: '/projects/app' }) })
 
@@ -292,31 +292,31 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('Target:\n  /projects/app\n  v15.0.0\n  pid:7777')
     })
 
-    it('lists the CLI-native instances command at the top of the overview commands', async () => {
+    it('lists the CLI-native sessions command at the top of the overview commands', async () => {
       mockConnection()
 
       expect(await tap.start(['--help'], {})).toBe(0)
       const help = logger.print()
 
-      expect(help).toContain('instances')
-      expect(help.indexOf('instances')).toBeLessThan(help.indexOf('health'))
+      expect(help).toContain('sessions')
+      expect(help.indexOf('sessions')).toBeLessThan(help.indexOf('health'))
     })
 
-    it('notes which instance was auto-selected when several were live', async () => {
+    it('notes which session was auto-selected when several were live', async () => {
       mockConnection()
       mockResolved({ session: readySession({ pid: 7777 }), reason: 'arbitrary', candidateCount: 3 })
 
       expect(await tap.start(['--help'], {})).toBe(0)
-      expect(logger.print()).toContain('3 running instances matched; targeting pid 7777.')
-      expect(logger.print()).toContain('Pass --instance <pid> to target another.')
+      expect(logger.print()).toContain('3 running sessions matched; targeting pid 7777.')
+      expect(logger.print()).toContain('Pass --session <pid> to target another.')
     })
 
-    it('omits the multi-instance note when only one instance was live', async () => {
+    it('omits the multi-session note when only one session was live', async () => {
       mockConnection()
       mockResolved({ reason: 'only', candidateCount: 1 })
 
       expect(await tap.start(['--help'], {})).toBe(0)
-      expect(logger.print()).not.toContain('running instances matched')
+      expect(logger.print()).not.toContain('running sessions matched')
     })
 
     it('prints a rich per-command help for `<command> --help`, without reaching exec', async () => {
@@ -351,7 +351,7 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).not.toContain('a one-line summary for the listing')
     })
 
-    it('fails when help is requested for a command the instance does not advertise', async () => {
+    it('fails when help is requested for a command the session does not advertise', async () => {
       mockConnection()
 
       expect(await tap.start(['bogus', '--help'], {})).toBe(1)
@@ -375,7 +375,7 @@ describe('lib/exec/tap', () => {
     })
   })
 
-  describe('the CLI-native instances command', () => {
+  describe('the CLI-native sessions command', () => {
     const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
       schemaVersion: 1,
       pid: 54321,
@@ -393,17 +393,17 @@ describe('lib/exec/tap', () => {
 
     // Reporting whether the runner page answers takes a session, so this command
     // opens one — bounded, and only where there is a browser to ask.
-    it('renders the live instances as a table and exits 0, probing only an instance with a browser attached', async () => {
+    it('renders the live sessions as a table and exits 0, probing only a session with a browser attached', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([
         liveSession({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
         liveSession({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
       ])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['sessions'], {})).toBe(0)
 
       const output = logger.print()
 
-      expect(output).toContain('INSTANCES (2)')
+      expect(output).toContain('SESSIONS (2)')
       expect(output).toContain('111')
       expect(output).toContain('/projects/app')
       expect(output).toContain('Chrome')
@@ -415,97 +415,97 @@ describe('lib/exec/tap', () => {
     it('bounds the renderer probe with --timeout', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
 
-      expect(await tap.start(['instances'], { timeout: 5000 })).toBe(0)
+      expect(await tap.start(['sessions'], { timeout: 5000 })).toBe(0)
 
       expect(withTapConnection).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), 5000)
     })
 
-    it('bounds the renderer probe with the find-instance default when --timeout is absent', async () => {
+    it('bounds the renderer probe with the find-session default when --timeout is absent', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['sessions'], {})).toBe(0)
 
       expect(withTapConnection).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), FIND_SESSION_TIMEOUT_MS)
     })
 
-    it('prints the raw instance summaries with --json', async () => {
+    it('prints the raw session summaries with --json', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([
         liveSession({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
         liveSession({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
       ])
 
-      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([
         { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true },
         { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null, browserSupported: true },
       ])
     })
 
-    it('lists an instance running a browser tap cannot drive, marked unsupported', async () => {
+    it('lists a session running a browser tap cannot drive, marked unsupported', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([
         liveSession({ pid: 111, cdpBrowserWsUrl: null, browserName: 'Firefox', browserFamily: 'firefox' }),
       ])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['sessions'], {})).toBe(0)
       expect(logger.print()).toContain('Firefox (unsupported)')
 
       logger.reset()
 
-      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0]).toMatchObject({ browserName: 'Firefox', browserSupported: false })
     })
 
-    it('reports the testing type as null for an instance that has not chosen one', async () => {
+    it('reports the testing type as null for a session that has not chosen one', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111, testingType: null })])
 
-      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0].testingType).toBeNull()
     })
 
     it('never exposes the internal serverPort', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111, serverPort: 49200 })])
 
-      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())[0]).not.toHaveProperty('serverPort')
     })
 
-    it('prints guidance instead of an empty array when no instance is live', async () => {
+    it('prints guidance instead of an empty array when no session is live', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([])
 
-      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(await tap.start(['sessions'], {})).toBe(0)
 
       const output = logger.print()
 
       expect(() => JSON.parse(output)).toThrow()
-      expect(output).toContain('No running Cypress instance found')
+      expect(output).toContain('No running Cypress session found')
       expect(output).toContain('select a testing type')
     })
 
-    it('forwards --instance as the discovery filter', async () => {
+    it('forwards --session as the discovery filter', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([])
 
-      await tap.start(['instances'], { instance: 1234 })
+      await tap.start(['sessions'], { session: 1234 })
 
       expect(listLiveSessions).toHaveBeenCalledWith({ session: 1234 })
     })
 
-    it('lists every live instance when --instance is absent', async () => {
+    it('lists every live session when --session is absent', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([])
 
-      await tap.start(['instances'], {})
+      await tap.start(['sessions'], {})
 
       expect(listLiveSessions).toHaveBeenCalledWith({ session: undefined })
     })
 
-    it('prints instances usage for `instances --help` and exits 0, without enumerating', async () => {
-      expect(await tap.start(['instances', '--help'], {})).toBe(0)
-      expect(logger.print()).toContain('Usage: cypress tap instances')
+    it('prints sessions usage for `sessions --help` and exits 0, without enumerating', async () => {
+      expect(await tap.start(['sessions', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap sessions')
       expect(listLiveSessions).not.toHaveBeenCalled()
       expect(withTapConnection).not.toHaveBeenCalled()
     })
 
     it('exits 1 on an excess positional and never enumerates', async () => {
-      expect(await tap.start(['instances', 'extra'], {})).toBe(1)
+      expect(await tap.start(['sessions', 'extra'], {})).toBe(1)
       expect(listLiveSessions).not.toHaveBeenCalled()
       expect(withTapConnection).not.toHaveBeenCalled()
     })
@@ -535,7 +535,7 @@ describe('lib/exec/tap', () => {
       return selection
     }
 
-    it('reports "not connected" and exits 0 when no instance is live', async () => {
+    it('reports "not connected" and exits 0 when no session is live', async () => {
       vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'none'))
 
       expect(await tap.start(['status'], {})).toBe(0)
@@ -562,7 +562,7 @@ describe('lib/exec/tap', () => {
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
     })
 
-    // Every other resolution failure is transient — an instance running a browser
+    // Every other resolution failure is transient — a session running a browser
     // tap cannot drive is not, so a poller must hear it rather than wait it out.
     it('fails instead of reporting "not connected" when the browser is unsupported', async () => {
       vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('UNSUPPORTED_BROWSER', 'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.'))
@@ -680,7 +680,7 @@ describe('lib/exec/tap', () => {
       })
     })
 
-    it('reports a null startedAt for an instance whose binding does not name the run', async () => {
+    it('reports a null startedAt for a session whose binding does not name the run', async () => {
       mockLiveResolved(liveSession())
       mockConnection(schema, {
         result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'passed', totalTests: 1, results: { passed: 1, failed: 0, pending: 0, skipped: 0 } },
@@ -701,17 +701,17 @@ describe('lib/exec/tap', () => {
       expect(call).toHaveBeenCalledWith('exec', ['run-state', {}, {}])
     })
 
-    it('forwards --instance plus the cwd to discovery', async () => {
+    it('forwards --session plus the cwd to discovery', async () => {
       mockLiveResolved(liveSession({ cdpBrowserWsUrl: null }))
 
-      await tap.start(['status'], { instance: 1234 })
+      await tap.start(['status'], { session: 1234 })
 
       expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
     })
 
-    it('exits 1 and renders the failure when the instance is unreachable despite a browser', async () => {
+    it('exits 1 and renders the failure when the session is unreachable despite a browser', async () => {
       mockLiveResolved(liveSession())
-      vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the instance may still be loading'))
+      vi.mocked(withTapConnection).mockRejectedValue(tapError(errors.tapBindingNotFound, 'the session may still be loading'))
 
       expect(await tap.start(['status'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)
@@ -733,7 +733,7 @@ describe('lib/exec/tap', () => {
       expect(withTapConnection).not.toHaveBeenCalled()
     })
 
-    it('exits 1 on an excess positional and never resolves an instance', async () => {
+    it('exits 1 on an excess positional and never resolves a session', async () => {
       expect(await tap.start(['status', 'extra'], {})).toBe(1)
       expect(resolveLiveSession).not.toHaveBeenCalled()
       expect(withTapConnection).not.toHaveBeenCalled()
@@ -782,7 +782,7 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('2 hours ago')
       expect(() => JSON.parse(output)).toThrow()
 
-      // The spec list comes from the instance's data layer, not the browser.
+      // The spec list comes from the session's data layer, not the browser.
       expect(withTapConnection).not.toHaveBeenCalled()
     })
 
@@ -833,7 +833,7 @@ describe('lib/exec/tap', () => {
       ])
     })
 
-    it('lists specs even when the instance has no browser attached', async () => {
+    it('lists specs even when the session has no browser attached', async () => {
       mockLiveResolved(liveSession({ cdpBrowserWsUrl: null }))
       vi.mocked(querySessionGraphql).mockResolvedValue({
         currentProject: { specs: [{ relative: 'cypress/e2e/a.cy.ts' }] },
@@ -853,7 +853,7 @@ describe('lib/exec/tap', () => {
       expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/win.cy.ts' }])
     })
 
-    it('queries the resolved instance with the TapSpecs operation', async () => {
+    it('queries the resolved session with the TapSpecs operation', async () => {
       const { session } = mockLiveResolved(liveSession())
 
       vi.mocked(querySessionGraphql).mockResolvedValue({ currentProject: { specs: [] } })
@@ -863,16 +863,16 @@ describe('lib/exec/tap', () => {
       expect(querySessionGraphql).toHaveBeenCalledWith(session, expect.objectContaining({ operationName: 'TapSpecs' }))
     })
 
-    it('forwards --instance plus the cwd to discovery', async () => {
+    it('forwards --session plus the cwd to discovery', async () => {
       mockLiveResolved(liveSession())
       vi.mocked(querySessionGraphql).mockResolvedValue({ currentProject: { specs: [] } })
 
-      await tap.start(['specs'], { instance: 1234 })
+      await tap.start(['specs'], { session: 1234 })
 
       expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
     })
 
-    it('renders an empty list when the instance has no project open', async () => {
+    it('renders an empty list when the session has no project open', async () => {
       mockLiveResolved(liveSession())
       vi.mocked(querySessionGraphql).mockResolvedValue({ currentProject: null })
 
@@ -901,7 +901,7 @@ describe('lib/exec/tap', () => {
       ])
     })
 
-    it('renders the discovery failure and exits 1 when no instance is live', async () => {
+    it('renders the discovery failure and exits 1 when no session is live', async () => {
       vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
       expect(await tap.start(['specs'], {})).toBe(1)
@@ -911,7 +911,7 @@ describe('lib/exec/tap', () => {
 
     it('renders a known data-layer failure and exits 1', async () => {
       mockLiveResolved(liveSession())
-      vi.mocked(querySessionGraphql).mockRejectedValue(tapError(errors.tapGraphqlUnreachable, 'Could not reach the instance to run TapSpecs: socket hang up'))
+      vi.mocked(querySessionGraphql).mockRejectedValue(tapError(errors.tapGraphqlUnreachable, 'Could not reach the session to run TapSpecs: socket hang up'))
 
       expect(await tap.start(['specs'], {})).toBe(1)
       expect(logger.print()).toContain(errors.tapGraphqlUnreachable.description)
@@ -925,7 +925,7 @@ describe('lib/exec/tap', () => {
       expect(querySessionGraphql).not.toHaveBeenCalled()
     })
 
-    it('exits 1 on an excess positional and never resolves an instance', async () => {
+    it('exits 1 on an excess positional and never resolves a session', async () => {
       expect(await tap.start(['specs', 'extra'], {})).toBe(1)
       expect(resolveLiveSession).not.toHaveBeenCalled()
       expect(querySessionGraphql).not.toHaveBeenCalled()
@@ -966,7 +966,7 @@ describe('lib/exec/tap', () => {
     }
 
     // The absolute path deliberately disagrees with projectRoot + relative, proving
-    // the CLI sends the instance's own absolute path rather than resolving one.
+    // the CLI sends the session's own absolute path rather than resolving one.
     const loginSpec = { relative: 'cypress/e2e/login.cy.ts', absolute: '/disk/real-project/cypress/e2e/login.cy.ts' }
 
     const launched = { __typename: 'RunSpecResponse', testingType: 'e2e', browser: { displayName: 'Chrome' }, spec: { relative: 'cypress/e2e/login.cy.ts' } }
@@ -990,7 +990,7 @@ describe('lib/exec/tap', () => {
       expect(output).toContain('Chrome')
       expect(() => JSON.parse(output)).toThrow()
 
-      // The run is driven from the instance's data layer, not over a CDP session.
+      // The run is driven from the session's data layer, not over a CDP session.
       expect(withTapConnection).not.toHaveBeenCalled()
     })
 
@@ -1006,7 +1006,7 @@ describe('lib/exec/tap', () => {
       })
     })
 
-    it('sends the matched spec\'s instance-reported absolute path to the TapRunSpec operation', async () => {
+    it('sends the matched spec\'s session-reported absolute path to the TapRunSpec operation', async () => {
       const { session } = mockLiveResolved(liveSession())
 
       mockSessionGraphql()
@@ -1021,7 +1021,7 @@ describe('lib/exec/tap', () => {
       }), 60_000)
     })
 
-    it('matches an OS-native (Windows) relative path from the instance against the POSIX input', async () => {
+    it('matches an OS-native (Windows) relative path from the session against the POSIX input', async () => {
       const { session } = mockLiveResolved(liveSession())
 
       mockSessionGraphql({ specs: [{ relative: 'cypress\\e2e\\login.cy.ts', absolute: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' }] })
@@ -1033,7 +1033,7 @@ describe('lib/exec/tap', () => {
       }), 60_000)
     })
 
-    it('fails with SPEC_NOT_FOUND when the spec is not in the instance\'s list, without triggering a run', async () => {
+    it('fails with SPEC_NOT_FOUND when the spec is not in the session\'s list, without triggering a run', async () => {
       mockLiveResolved(liveSession())
       mockSessionGraphql({ specs: [{ relative: 'cypress/e2e/other.cy.ts', absolute: '/disk/real-project/cypress/e2e/other.cy.ts' }] })
 
@@ -1042,7 +1042,7 @@ describe('lib/exec/tap', () => {
       expect(querySessionGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }))
     })
 
-    it('surfaces a RunSpecError with the instance\'s own code and message, exiting 1', async () => {
+    it('surfaces a RunSpecError with the session\'s own code and message, exiting 1', async () => {
       mockLiveResolved(liveSession())
       mockSessionGraphql({
         runSpec: { __typename: 'RunSpecError', code: 'NO_SPEC_PATTERN_MATCH', detailMessage: 'Unable to determine testing type, spec does not match any configured specPattern' },
@@ -1052,7 +1052,7 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toBe('NO_SPEC_PATTERN_MATCH: Unable to determine testing type, spec does not match any configured specPattern')
     })
 
-    it('exits 1 when the instance returns no run result', async () => {
+    it('exits 1 when the session returns no run result', async () => {
       mockLiveResolved(liveSession())
       mockSessionGraphql({ runSpec: null })
 
@@ -1060,16 +1060,16 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain('RUN_FAILED')
     })
 
-    it('forwards --instance plus the cwd to discovery', async () => {
+    it('forwards --session plus the cwd to discovery', async () => {
       mockLiveResolved(liveSession())
       mockSessionGraphql()
 
-      await tap.start(['run', 'cypress/e2e/login.cy.ts'], { instance: 1234 })
+      await tap.start(['run', 'cypress/e2e/login.cy.ts'], { session: 1234 })
 
       expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
     })
 
-    it('renders the discovery failure and exits 1 when no instance is live', async () => {
+    it('renders the discovery failure and exits 1 when no session is live', async () => {
       vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
       expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
@@ -1082,11 +1082,11 @@ describe('lib/exec/tap', () => {
     it('routes dom to the AUT-frame reader with the top-level options and returns its exit code', async () => {
       vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
 
-      expect(await tap.start(['dom', '--selector', '.foo'], { instance: 7 })).toBe(0)
+      expect(await tap.start(['dom', '--selector', '.foo'], { session: 7 })).toBe(0)
 
       expect(withResolvedAutFrame).toHaveBeenCalledTimes(1)
-      expect(vi.mocked(withResolvedAutFrame).mock.calls[0][0]).toEqual({ instance: 7 })
-      // A native command never consults the running instance's schema.
+      expect(vi.mocked(withResolvedAutFrame).mock.calls[0][0]).toEqual({ session: 7 })
+      // A native command never consults the running session's schema.
       expect(resolveSession).not.toHaveBeenCalled()
     })
 
@@ -1146,7 +1146,7 @@ describe('lib/exec/tap', () => {
 
     it('rejects `inspect` with no selector, without reading the frame', async () => {
       expect(await tap.start(['inspect'], {})).toBe(1)
-      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`required option '-s, --selector <selector>' not specified`)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(`required option '-e, --selector <selector>' not specified`)
       expect(withResolvedAutFrame).not.toHaveBeenCalled()
     })
 
@@ -1225,18 +1225,18 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toContain(errors.tapBindingNotFound.description)
     })
 
-    it('falls back to the baked-in CLI command help when no instance is found and help was wanted', async () => {
+    it('falls back to the baked-in CLI command help when no session is found and help was wanted', async () => {
       failResolve(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
       expect(logger.print()).toMatchInlineSnapshot(`
         "Usage: cypress tap [command] [args...] [options]
 
-        Interacts with a running Cypress instance
+        Interacts with a running Cypress session
 
         Options:
-          -i, --instance <pid>  target a specific running Cypress instance by its
-                                server process id (pid)
+          -s, --session <pid>   target a specific running Cypress session by its server
+                                process id (pid)
           --json                print the raw JSON result instead of the human-readable
                                 rendering
           --timeout <ms>        how long to wait on any single call into the running
@@ -1244,10 +1244,10 @@ describe('lib/exec/tap', () => {
           -h, --help            display help for command
 
         Commands:
-          instances [options]   list the running Cypress instances this CLI can reach
-          status [options]      report where a running Cypress instance is in its
+          sessions [options]    list the running Cypress sessions this CLI can reach
+          status [options]      report where a running Cypress session is in its
                                 lifecycle
-          specs [options]       list the specs the running Cypress instance can run,
+          specs [options]       list the specs the running Cypress session can run,
                                 most recently modified first
           run [options] <spec>  run (or rerun) a spec by its project-relative path
           dom [options]         read the app-under-test DOM as HTML: the page body,
@@ -1280,11 +1280,11 @@ describe('lib/exec/tap', () => {
 
       expect(help).toContain('UNKNOWN_COMMAND')
       expect(help).toContain('"instancs" is not a command')
-      expect(help).toContain('instances')
+      expect(help).toContain('sessions')
       expect(help).toContain('specs')
     })
 
-    it('renders the baked-in per-command help when no instance is found', async () => {
+    it('renders the baked-in per-command help when no session is found', async () => {
       failResolve(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
       expect(await tap.start(['command', '--help'], {})).toBe(0)
@@ -1306,7 +1306,7 @@ describe('lib/exec/tap', () => {
                                          keys}" / "[n items]": a number or "all"
                                          (default 3, and a section over 8 rows folds at
                                          any depth unless this is passed)
-          -i, --instance <pid>           target a specific running Cypress instance by
+          -s, --session <pid>            target a specific running Cypress session by
                                          its server process id (pid)
           --json                         print the raw JSON result instead of the
                                          human-readable rendering — every console
@@ -1320,14 +1320,14 @@ describe('lib/exec/tap', () => {
       `)
     })
 
-    it('falls back to generic help (exit 0) for a bare invocation with no instance found', async () => {
+    it('falls back to generic help (exit 0) for a bare invocation with no session found', async () => {
       failResolve(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
       expect(await tap.start([], {})).toBe(0)
       expect(logger.print()).toContain('Usage: cypress tap')
     })
 
-    it('falls back to generic help for --help when an instance is up but has no browser', async () => {
+    it('falls back to generic help for --help when a session is up but has no browser', async () => {
       failResolve(new CypressSessionError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
@@ -1335,7 +1335,7 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
     })
 
-    it('falls back to generic help for `<command> --help` when an instance is up but has no browser', async () => {
+    it('falls back to generic help for `<command> --help` when a session is up but has no browser', async () => {
       failResolve(new CypressSessionError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start(['run', '--help'], {})).toBe(0)
@@ -1343,7 +1343,7 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).not.toContain('NO_BROWSER_ATTACHED')
     })
 
-    it('falls back to generic help for --help when the matched instance is stale', async () => {
+    it('falls back to generic help for --help when the matched session is stale', async () => {
       failResolve(new CypressSessionError('STALE_SESSION', 'Cypress was previously running, but is no longer responding.'))
 
       expect(await tap.start(['--help'], {})).toBe(0)
@@ -1351,7 +1351,7 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).not.toContain('STALE_SESSION')
     })
 
-    it('falls back to generic help (exit 0) for a bare invocation when an instance is up but has no browser', async () => {
+    it('falls back to generic help (exit 0) for a bare invocation when a session is up but has no browser', async () => {
       failResolve(new CypressSessionError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
 
       expect(await tap.start([], {})).toBe(0)

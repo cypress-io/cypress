@@ -89,15 +89,15 @@ result whose depth the CLI does not control.
 - **A count in the heading, not prose.** `heading('X', n)` over "There are n X".
 - **Muted for secondary, `—` for absent.** Missing testing type, no attached
   browser, no timestamp — a muted em dash, never blank or "null".
-- **Guard/lifecycle messages are their own thing.** A "no instance / no browser"
-  guard is the find-instance layer speaking, not the command's empty rendering;
+- **Guard/lifecycle messages are their own thing.** A "no session / no browser"
+  guard is the find-session layer speaking, not the command's empty rendering;
   don't dress it up as data.
 - **One thing, one rendering.** When two commands report the same thing, they
   share the block that renders it — the pinned command reads identically from
   `pin` and from `status` (`pinned.ts`), as its own reporter row.
-- **One instance, one row.** A command that names the instance it targeted opens
-  with the same PID/PROJECT/TYPE/BROWSER row `instances` prints
-  (`instanceColumns`), so the two surfaces stay recognizable as the same thing.
+- **One session, one row.** A command that names the session it targeted opens
+  with the same PID/PROJECT/TYPE/BROWSER row `sessions` prints
+  (`sessionColumns`), so the two surfaces stay recognizable as the same thing.
 
 ## Adding a command renderer
 

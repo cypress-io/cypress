@@ -90,7 +90,7 @@ describe('lib/tap/events', () => {
     })
   })
 
-  it('carries the id of the instance the command resolved', async () => {
+  it('carries the id of the session the command resolved', async () => {
     vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'a1b2c3d4-0000-4000-8000-000000000000', machineId: null, userId: null })
 
     await reportTapTrace(0)
@@ -98,13 +98,13 @@ describe('lib/tap/events', () => {
     expect(posted(fetchMock).payload).toMatchObject({ sessionId: 'a1b2c3d4-0000-4000-8000-000000000000' })
   })
 
-  it('omits the instance id when the command never resolved one', async () => {
+  it('omits the session id when the command never resolved one', async () => {
     await reportTapTrace(1)
 
     expect(posted(fetchMock).payload).not.toHaveProperty('sessionId')
   })
 
-  it('reports to the machine collector with the machine id the instance carried', async () => {
+  it('reports to the machine collector with the machine id the session carried', async () => {
     vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: null })
 
     await reportTapTrace(0)
@@ -114,7 +114,7 @@ describe('lib/tap/events', () => {
     expect(posted(fetchMock).payload).not.toHaveProperty('machineId')
   })
 
-  it('stays anonymous when the instance reports no machine id', async () => {
+  it('stays anonymous when the session reports no machine id', async () => {
     vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: null, userId: null })
 
     await reportTapTrace(0)
@@ -123,7 +123,7 @@ describe('lib/tap/events', () => {
     expect(posted(fetchMock)).not.toHaveProperty('machineId')
   })
 
-  it('carries the cloud user id of the instance the command resolved', async () => {
+  it('carries the cloud user id of the session the command resolved', async () => {
     vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: 'cloud-user-1' })
 
     await reportTapTrace(0)
@@ -131,7 +131,7 @@ describe('lib/tap/events', () => {
     expect(posted(fetchMock).payload).toMatchObject({ userId: 'cloud-user-1' })
   })
 
-  it('omits the user id when the instance has no logged-in user', async () => {
+  it('omits the user id when the session has no logged-in user', async () => {
     vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: null })
 
     await reportTapTrace(0)

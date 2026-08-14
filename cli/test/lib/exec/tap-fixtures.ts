@@ -19,7 +19,7 @@ export const schema: TapSchema = {
   commands: [
     {
       name: 'health',
-      description: 'check that a running Cypress instance is reachable and its tap binding responds',
+      description: 'check that a running Cypress session is reachable and its tap binding responds',
       params: [],
       options: [],
     },

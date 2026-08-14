@@ -409,21 +409,21 @@ const tapCdpUnreachable = {
 }
 
 const tapBindingNotFound = {
-  description: 'Could not connect to the Cypress instance.',
+  description: 'Could not connect to the Cypress session.',
   solution: stripIndent`
-    The instance may still be loading — try again in a moment.
+    The session may still be loading — try again in a moment.
 
     If the problem persists, the browser tab running Cypress may have been closed. Open a browser in Cypress and try again.
   `,
 }
 
 const tapBindingThrew = {
-  description: 'The Cypress instance failed while running the tap command.',
+  description: 'The Cypress session failed while running the tap command.',
   solution: genericErrorSolution,
 }
 
 const tapStaleHandle = {
-  description: 'The Cypress instance navigated while running the command.',
+  description: 'The Cypress session navigated while running the command.',
   solution: 'Try running the command again.',
 }
 
@@ -448,12 +448,12 @@ const tapInvalidExecResult = {
 }
 
 const tapGraphqlUnreachable = {
-  description: 'Could not reach the Cypress instance to read its data.',
-  solution: 'The instance may have just closed. Make sure Cypress is running in open mode, then try again.',
+  description: 'Could not reach the Cypress session to read its data.',
+  solution: 'The session may have just closed. Make sure Cypress is running in open mode, then try again.',
 }
 
 const tapGraphqlFailed = {
-  description: 'The Cypress instance failed while answering a data query.',
+  description: 'The Cypress session failed while answering a data query.',
   solution: genericErrorSolution,
 }
 

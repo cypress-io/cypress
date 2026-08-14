@@ -16,7 +16,7 @@ dayjs.extend(relativeTime)
 
 // Subdirs under the cache root that are not binary version dirs. SESSIONS_DIRNAME
 // is sourced from cypress-sessions so a rename there can't silently make prune
-// treat the instances dir as a stale binary cache and delete live records.
+// treat the sessions dir as a stale binary cache and delete live records.
 const EXTERNAL_CACHE_ENTRIES = new Set(['bundles', SESSIONS_DIRNAME])
 
 // output colors for the table

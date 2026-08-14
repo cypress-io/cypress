@@ -11,7 +11,7 @@ process.env.TZ = 'UTC'
 const render = (status: TapStatus): string => stripAnsi(renderStatusHuman(status))
 
 describe('lib/tap/render/status', () => {
-  it('renders a mid-run status: the instance row, the spec led by its phase icon and trailed by the run start, counts, and the pin', () => {
+  it('renders a mid-run status: the session row, the spec led by its phase icon and trailed by the run start, counts, and the pin', () => {
     const output = render({
       status: 'running',
       pid: 4242,
@@ -91,7 +91,7 @@ describe('lib/tap/render/status', () => {
     ].join('\n'))
   })
 
-  it('renders a pre-spec phase as the instance row plus the phase on its own', () => {
+  it('renders a pre-spec phase as the session row plus the phase on its own', () => {
     const output = render({
       status: 'browser not selected',
       pid: 111,

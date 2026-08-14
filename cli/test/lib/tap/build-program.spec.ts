@@ -10,7 +10,7 @@ const schema: TapSchema = {
   commands: [
     {
       name: 'health',
-      description: 'check that a running Cypress instance is reachable',
+      description: 'check that a running Cypress session is reachable',
       params: [],
       options: [],
     },
@@ -37,7 +37,7 @@ const schema: TapSchema = {
     },
     {
       name: 'run-state',
-      description: 'report where the running Cypress instance is in its run lifecycle',
+      description: 'report where the running Cypress session is in its run lifecycle',
       params: [],
       options: [],
       hidden: true,
@@ -53,10 +53,10 @@ const defaulting: TapSchema = {
   commands: [
     {
       name: 'probe',
-      description: 'read something out of a running Cypress instance',
+      description: 'read something out of a running Cypress session',
       params: [],
       options: [
-        { name: 'selector', alias: 's', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
+        { name: 'selector', alias: 'e', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
         { name: 'max-chars', alias: 'm', type: 'number', required: false, defaultValue: 30_000, description: 'cap on returned characters' },
       ],
     },
@@ -75,7 +75,7 @@ describe('lib/tap/build-program', () => {
   it('registers the CLI-native commands first, then one subcommand per advertised command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'health', 'launch', 'open'])
+    expect(program.commands.map((command) => command.name())).toEqual(['sessions', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'health', 'launch', 'open'])
   })
 
   it('omits commands flagged hidden from the program (still exec-able, just not advertised)', () => {
@@ -85,7 +85,7 @@ describe('lib/tap/build-program', () => {
   })
 
   it('shadows a schema-advertised command that collides with a CLI-native one', () => {
-    // An older instance still advertises `run` over the binding; the CLI-native
+    // An older session still advertises `run` over the binding; the CLI-native
     // command wins, so only one `run` registers and it carries the native grammar.
     const program = buildTapProgram({
       schemaVersion: 1,
@@ -238,7 +238,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': 'log-3', 'attempt': '1' })
   })
 
-  // `command` declares --json in its schema so the instance can be told, but the
+  // `command` declares --json in its schema so the session can be told, but the
   // flag every command shares is still declared once, and it is that one the
   // help lists — with the command's own wording.
   it('declares a schema’s own --json once, keeping its description', () => {
@@ -289,8 +289,8 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
 
     expect(subcommand(program, 'command').helpInformation()).toContain('-t, --test-id <test-id>')
-    expect(subcommand(program, 'aria').helpInformation()).toContain('-s, --selector <selector>')
-    expect(subcommand(program, 'status').helpInformation()).toContain('-i, --instance <pid>')
+    expect(subcommand(program, 'aria').helpInformation()).toContain('-e, --selector <selector>')
+    expect(subcommand(program, 'status').helpInformation()).toContain('-s, --session <pid>')
   })
 
   // Commander accepts a short flag claimed twice within one command and silently
@@ -330,7 +330,7 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(defaulting, vi.fn())
     const help = subcommand(program, 'probe').helpInformation().replace(/\s+/g, ' ')
 
-    expect(help).toContain('-s, --selector <selector> a CSS selector (default: "body")')
+    expect(help).toContain('-e, --selector <selector> a CSS selector (default: "body")')
     expect(help).toContain('-m, --max-chars <max-chars> cap on returned characters (default: 30000)')
   })
 
@@ -338,8 +338,8 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
     const helpOf = (name: string): string => subcommand(program, name).helpInformation().replace(/\s+/g, ' ')
 
-    expect(helpOf('dom')).toContain('-s, --selector <selector> a CSS selector matching exactly one element (default: "body")')
-    expect(helpOf('aria')).toContain('-s, --selector <selector> a CSS selector matching exactly one element to root the tree at (default: "body")')
+    expect(helpOf('dom')).toContain('-e, --selector <selector> a CSS selector matching exactly one element (default: "body")')
+    expect(helpOf('aria')).toContain('-e, --selector <selector> a CSS selector matching exactly one element to root the tree at (default: "body")')
 
     // inspect takes the same selector but requires it, so the only default it
     // renders is the --timeout every command shares.
@@ -361,7 +361,7 @@ describe('lib/tap/build-program', () => {
       cypressVersion: '15.0.0',
       commands: [{
         name: 'health',
-        description: 'check that a running Cypress instance is reachable',
+        description: 'check that a running Cypress session is reachable',
       }],
     } as TapSchema, dispatch)
 
