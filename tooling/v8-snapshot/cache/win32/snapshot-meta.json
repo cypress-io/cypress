@@ -854,6 +854,7 @@
     "./packages/server/lib/automation/cookie/jar.ts",
     "./packages/server/lib/browsers/chrome.ts",
     "./packages/server/lib/browsers/firefox.ts",
+    "./packages/server/lib/browsers/webkit-cdp-bridge.ts",
     "./packages/server/lib/cache.ts",
     "./packages/server/lib/cloud/api/cloud_request.ts",
     "./packages/server/lib/cloud/api/index.ts",
@@ -3612,6 +3613,7 @@
     "./packages/server/lib/browsers/cdp-protocol/cri-errors.ts",
     "./packages/server/lib/browsers/cdp-protocol/debug-cdp-connection.ts",
     "./packages/server/lib/browsers/cdp-protocol/normalize-resource-type.ts",
+    "./packages/server/lib/browsers/cdp-protocol/should-skip-response-body.ts",
     "./packages/server/lib/browsers/constants.ts",
     "./packages/server/lib/browsers/electron.ts",
     "./packages/server/lib/browsers/firefox-util.ts",
@@ -3922,5 +3924,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "028aa9e67aa6e12cf3bc35138decab3722b09cfd309755d09e1b8a9f650170f2"
+  "deferredHash": "24c9ee0190717ef18e4e3f89d73890cbfe40e5a31dd7359648c24941afcd2a33"
 }
