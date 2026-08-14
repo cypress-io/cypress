@@ -57,7 +57,7 @@ export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: n
       return null
     }
 
-    const live = await response.json() as { instanceId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, machineId?: unknown, userId?: unknown }
+    const live = await response.json() as { instanceId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown }
 
     if (live.instanceId !== record.instanceId) {
       return null
@@ -66,10 +66,13 @@ export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: n
     const cdpBrowserWsUrl = typeof live.cdpBrowserWsUrl === 'string' ? live.cdpBrowserWsUrl : null
     const attached = cdpBrowserWsUrl !== null && await cdpEndpointReachable(cdpBrowserWsUrl, timeoutMs)
 
+    // The browser identity describes what the instance has open, not what is
+    // reachable over CDP — a browser tap cannot drive still has to be nameable.
     return {
       ...record,
       cdpBrowserWsUrl: attached ? cdpBrowserWsUrl : null,
-      browserName: attached && typeof live.browserName === 'string' ? live.browserName : null,
+      browserName: typeof live.browserName === 'string' ? live.browserName : null,
+      browserFamily: typeof live.browserFamily === 'string' ? live.browserFamily : null,
       machineId: typeof live.machineId === 'string' ? live.machineId : null,
       userId: typeof live.userId === 'string' ? live.userId : null,
     }

@@ -31,8 +31,10 @@ export interface CypressInstance {
 
 export interface LiveInstanceState extends CypressInstance {
   cdpBrowserWsUrl: string | null
-  /** Display name of the attached browser (e.g. `Chrome`), or `null` when none is attached. */
+  /** Display name of the browser the instance has open (e.g. `Chrome`), or `null` when none is open. */
   browserName: string | null
+  /** Family of the browser the instance has open (e.g. `chromium`), or `null` when none is open. */
+  browserFamily: string | null
   /** sha256 hash of the OS machine GUID (node-machine-id), or `null` when unresolvable. */
   machineId: string | null
   /** Cloud user id of the logged-in user, or `null` when logged out or not yet resolved. */
@@ -41,6 +43,14 @@ export interface LiveInstanceState extends CypressInstance {
 
 export interface ReadyInstanceState extends LiveInstanceState {
   cdpBrowserWsUrl: string
+}
+
+export const TAP_SUPPORTED_BROWSER_FAMILY = 'chromium'
+
+// tap drives the browser over CDP, which only Chromium-based browsers speak. A
+// null family means no browser is open yet — nothing to call unsupported.
+export const isTapSupportedBrowser = (browserFamily: string | null): boolean => {
+  return browserFamily === null || browserFamily === TAP_SUPPORTED_BROWSER_FAMILY
 }
 
 export const recordFileName = (pid: number): string => {

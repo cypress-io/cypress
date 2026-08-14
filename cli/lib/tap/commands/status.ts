@@ -32,8 +32,16 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   try {
     selection = await resolveLiveInstance({ instance: options.instance, cwd: process.cwd() })
   } catch (err) {
-    // No live instance is a status a poller waits on, not a failure.
     if (err instanceof CypressInstanceError) {
+      // Polling cannot outlast an instance tap will never be able to drive, so
+      // that one is a failure where every other resolution error is a status a
+      // poller waits on.
+      if (err.code === 'UNSUPPORTED_BROWSER') {
+        renderFailure(err)
+
+        return 1
+      }
+
       renderOutcome('status', { status: 'not connected' } satisfies TapStatus, options.json)
 
       return 0

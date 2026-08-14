@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
-import type { TestingType } from '@packages/types'
+import type { Browser, TestingType } from '@packages/types'
 import { SCHEMA_VERSION, cypressInstancesDir, recordPath } from '@packages/cypress-instances'
 import type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
@@ -55,7 +55,7 @@ export const cypressInstances = {
 
     // machineId/userId are read fresh from the data context when the probe route
     // answers; the in-memory state only carries the browser attachment.
-    currentState = { ...record, cdpBrowserWsUrl: null, browserName: null, machineId: null, userId: null }
+    currentState = { ...record, cdpBrowserWsUrl: null, browserName: null, browserFamily: null, machineId: null, userId: null }
 
     try {
       await persist(record)
@@ -65,15 +65,25 @@ export const cypressInstances = {
     }
   },
 
-  setCdpBrowserWsUrl (cdpBrowserWsUrl: string | null, browserName: string | null = null): void {
+  // The browser Cypress has open, whether or not it speaks CDP: a consumer that
+  // cannot drive a non-Chromium browser still needs to know which one is open to
+  // say why. Recorded at launch rather than at CDP attach for that reason.
+  setBrowser (browser: Pick<Browser, 'displayName' | 'family'> | null): void {
     if (!currentState) {
       return
     }
 
-    // browserName is only meaningful while a browser is attached; clearing the
-    // url clears the name so the two never disagree.
-    currentState = { ...currentState, cdpBrowserWsUrl, browserName: cdpBrowserWsUrl ? browserName : null }
-    debug('cypress instances cdpBrowserWsUrl is now %o (browser %o)', cdpBrowserWsUrl, currentState.browserName)
+    currentState = { ...currentState, browserName: browser?.displayName ?? null, browserFamily: browser?.family ?? null }
+    debug('cypress instances browser is now %o', browser ? { name: currentState.browserName, family: currentState.browserFamily } : null)
+  },
+
+  setCdpBrowserWsUrl (cdpBrowserWsUrl: string | null): void {
+    if (!currentState) {
+      return
+    }
+
+    currentState = { ...currentState, cdpBrowserWsUrl }
+    debug('cypress instances cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
   },
 
   getCurrent (): LiveInstanceState | null {
