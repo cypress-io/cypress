@@ -5,6 +5,7 @@ import { HttpIntercept } from '@packages/network-interception'
 import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
+import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
 import { shouldSkipResponseBody } from '../../../lib/browsers/cdp-protocol/should-skip-response-body'
 
 function createPausedRequest (options: {
@@ -167,6 +168,64 @@ describe('CdpFetchTransport', () => {
     })
   })
 
+  describe('toNetworkError', () => {
+    it('reports a refused connection the way Node does', () => {
+      const err = toNetworkError('http://127.0.0.1:3333/should-err?_=1', 'ConnectionRefused') as Error & { code: string }
+
+      expect(err.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(err.code).to.equal('ECONNREFUSED')
+    })
+
+    it('infers the default port from the scheme when the URL omits it', () => {
+      expect(toNetworkError('https://example.test/thing', 'ConnectionRefused').message)
+      .to.equal('connect ECONNREFUSED example.test:443')
+
+      expect(toNetworkError('http://example.test/thing', 'ConnectionRefused').message)
+      .to.equal('connect ECONNREFUSED example.test:80')
+    })
+
+    it('unbrackets an IPv6 literal, matching Node', () => {
+      expect(toNetworkError('http://[::1]:3333/x', 'ConnectionRefused').message)
+      .to.equal('connect ECONNREFUSED ::1:3333')
+    })
+
+    it('carries a timeout code the driver classifies as a responseTimeout failure', () => {
+      const err = toNetworkError('http://example.test:8080/x', 'TimedOut') as Error & { code: string }
+
+      expect(err.message).to.equal('connect ETIMEDOUT example.test:8080')
+      expect(err.code).to.equal('ETIMEDOUT')
+    })
+
+    it('reports a DNS failure against the host alone', () => {
+      const err = toNetworkError('http://nope.invalid/x', 'NameNotResolved') as Error & { code: string }
+
+      expect(err.message).to.equal('getaddrinfo ENOTFOUND nope.invalid')
+      expect(err.code).to.equal('ENOTFOUND')
+    })
+
+    it('omits the address for reasons Node reports without one', () => {
+      const err = toNetworkError('http://example.test/x', 'ConnectionReset') as Error & { code: string }
+
+      expect(err.message).to.equal('read ECONNRESET')
+      expect(err.code).to.equal('ECONNRESET')
+    })
+
+    // Inventing a Node code for these would misreport what the browser saw.
+    it('falls back to naming the CDP reason when there is no Node equivalent', () => {
+      const err = toNetworkError('http://example.test/x', 'BlockedByClient') as Error & { code?: string }
+
+      expect(err.message).to.equal('CDP Fetch response failed for http://example.test/x: BlockedByClient')
+      expect(err.code).to.be.undefined
+    })
+
+    it('still produces a coded error when the URL cannot be parsed', () => {
+      const err = toNetworkError('not a url', 'ConnectionRefused') as Error & { code: string }
+
+      expect(err.message).to.equal('connect ECONNREFUSED')
+      expect(err.code).to.equal('ECONNREFUSED')
+    })
+  })
+
   describe('createCdpFetchCodec', () => {
     it('decodes CDP request pauses to the neutral request shape', () => {
       const codec = createCdpFetchCodec()
@@ -256,6 +315,68 @@ describe('CdpFetchTransport', () => {
           cookie: 'a=1; b=2',
         },
       })
+    })
+
+    // The net-stubbing pipeline hands every request back with a string body, so
+    // a bodyless GET returns as ''. Forwarding that as postData would make
+    // Chrome attach `Content-Length: 0` to a request that never had a body.
+    it('does not encode an empty body onto a request the browser paused without one', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        headers: { foo: 'bar' },
+        body: '',
+      })
+
+      expect(transportRequest).not.to.have.property('postData')
+    })
+
+    it('encodes an emptied body when the pause carried one, so the change reaches the origin', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'POST',
+        headers: {},
+        postData: 'original',
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        body: '',
+      })
+
+      expect(transportRequest.postData).to.equal('')
+    })
+
+    it('encodes a non-empty body onto a request the browser paused without one', () => {
+      const codec = createCdpFetchCodec()
+      const transportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({
+        ...request,
+        body: 'added',
+      })
+
+      expect(transportRequest).to.have.property('postData', 'added')
     })
 
     it('round trips CDP response pauses through the neutral response shape', () => {
@@ -1558,6 +1679,48 @@ describe('CdpFetchTransport', () => {
       // redirect hops reuse the network id — the next hop's Network events may
       // already be tracked, and wiping here would drop that hop's Set-Cookie
       expect(networkExtraInfo.clear).not.to.have.been.called
+    })
+
+    // The MITM path performs the upstream request itself, so cy.intercept sees
+    // Node's own connection error. The middleware must see the same thing here.
+    it('rejects a response error pause with the Node-shaped network error', async () => {
+      const client = createClient()
+      let capturedError: (Error & { code?: string }) | undefined
+
+      const httpIntercept = {
+        handle: async (request: any, next: (outbound: any) => Promise<any>) => {
+          try {
+            return await next(request)
+          } catch (err) {
+            capturedError = err as Error & { code?: string }
+
+            throw err
+          }
+        },
+      }
+
+      const { transport } = createTransport(client, { httpIntercept: httpIntercept as any })
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'http://127.0.0.1:3333/should-err',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'http://127.0.0.1:3333/should-err',
+        responseErrorReason: 'ConnectionRefused',
+      }))
+
+      await handled
+
+      expect(capturedError?.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(capturedError?.code).to.equal('ECONNREFUSED')
     })
 
     it('clears extraInfo tracking when the flow ends in a response error pause', async () => {

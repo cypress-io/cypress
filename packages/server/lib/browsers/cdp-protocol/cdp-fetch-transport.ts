@@ -9,6 +9,7 @@ import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
+import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
 import { shouldSkipResponseBody } from './should-skip-response-body'
@@ -581,7 +582,7 @@ export class CdpFetchTransport {
 
     if (event.responseErrorReason) {
       debug('response error pause for matched request %s: %s', event.request.url, event.responseErrorReason)
-      deferred.reject(new Error(`CDP Fetch response failed for ${event.request.url}: ${event.responseErrorReason}`))
+      deferred.reject(toNetworkError(event.request.url, event.responseErrorReason))
 
       await this.safeSend('Fetch.failRequest', {
         requestId: event.requestId,
