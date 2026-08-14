@@ -1,3 +1,0 @@
-# Cypress Instances
-
-@AGENTS.md

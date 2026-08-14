@@ -50,8 +50,8 @@ describe('lib/tap/render/ambiguous', () => {
     ].join('\n'))
   })
 
-  it('numbers every match when the instance named none of them, without blaming the selector config', () => {
-    // An empty list means the lookup never answered — the instance could not be
+  it('numbers every match when the session named none of them, without blaming the selector config', () => {
+    // An empty list means the lookup never answered — the session could not be
     // reached, or could not reach its app under test. It says nothing about why
     // any one match has no selector, so the dashes go unexplained.
     expect(render({ ambiguous: true, selector: '.item', count: 2, selectors: [] })).toBe([
@@ -63,7 +63,7 @@ describe('lib/tap/render/ambiguous', () => {
     ].join('\n'))
   })
 
-  it('stops numbering at the cap the instance derives to, saying how much of the match list is shown', () => {
+  it('stops numbering at the cap the session derives to, saying how much of the match list is shown', () => {
     const derived = [...numbered('.a', '.b'), ...Array.from({ length: 8 }, (_, offset) => ({ index: offset + 2, selector: null }))]
 
     expect(render({ ambiguous: true, selector: '*', count: 5000, selectors: derived })).toBe([
@@ -86,8 +86,8 @@ describe('lib/tap/render/ambiguous', () => {
     ].join('\n'))
   })
 
-  it('leaves a list the instance answered short of the cap unexplained', () => {
-    // Two entries for ten rows is not the instance reporting eight underivable
+  it('leaves a list the session answered short of the cap unexplained', () => {
+    // Two entries for ten rows is not the session reporting eight underivable
     // matches, so the rows it never spoke for get no explanation either.
     expect(render({ ambiguous: true, selector: '*', count: 5000, selectors: numbered('.a', '.b') })).not.toContain(underivable)
   })

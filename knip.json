@@ -291,7 +291,7 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/cypress-instances": {
+    "packages/cypress-sessions": {
       "entry": [
         "lib/generated/**/*.ts"
       ],
@@ -809,27 +809,27 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
-    "cli/lib/cypress-instances/index.ts": [
+    "cli/lib/cypress-sessions/index.ts": [
       "types"
     ],
-    "cli/lib/cypress-instances/record.ts": [
+    "cli/lib/cypress-sessions/record.ts": [
       "types"
     ],
     "cli/lib/tap/contract.ts": [
       "exports",
       "types"
     ],
-    "cli/lib/tap/tap-session.ts": [
+    "cli/lib/tap/tap-connection.ts": [
       "exports",
       "types"
     ],
     "cli/lib/tap/types.ts": [
       "types"
     ],
-    "packages/cypress-instances/lib/contracts/command.ts": [
+    "packages/cypress-sessions/lib/contracts/command.ts": [
       "types"
     ],
-    "packages/server/lib/cypress-instances.ts": [
+    "packages/server/lib/cypress-sessions.ts": [
       "types"
     ],
     "cli/types/cy-blob-util.d.ts": [

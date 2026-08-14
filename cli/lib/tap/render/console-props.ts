@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-import type { TapConsoleProps, TapJsonValue } from '@packages/cypress-instances'
+import type { TapConsoleProps, TapJsonValue } from '@packages/cypress-sessions'
 import { clamp, color, emptyState, heading, layout, tableRows, terminalWidth } from './format'
 
 // A command's console properties are the deepest payload the tap returns — a

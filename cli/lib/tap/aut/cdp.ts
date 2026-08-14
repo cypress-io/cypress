@@ -1,13 +1,13 @@
-import type { TapSession } from '../tap-session'
+import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from './frame'
-import { FrameCommandError } from './frame'
+import { invalidSelectorError } from './frame'
 
 // A separate JS context that shares the frame's DOM but not its globals, so
 // nothing the tap reads pollutes the page.
 const TAP_WORLD_NAME = 'cypress-tap'
 
-export const createFrameIsolatedWorld = async (session: TapSession, frame: AutFrame): Promise<number> => {
-  const { client, sessionId } = session
+export const createFrameIsolatedWorld = async (connection: TapConnection, frame: AutFrame): Promise<number> => {
+  const { client, sessionId } = connection
 
   const { executionContextId } = await client.Page.createIsolatedWorld({
     frameId: frame.frameId,
@@ -21,17 +21,17 @@ export const createFrameIsolatedWorld = async (session: TapSession, frame: AutFr
  * Resolves a CSS selector to the matched element's CDP objectId, querying in an
  * isolated world on the AUT frame. `index` picks one of several matches
  * (`--at`), already checked against the match count by the caller. Throws
- * `INVALID_SELECTOR` when the selector is malformed; returns undefined when the
+ * `INVALID_VALUE` when the selector is malformed; returns undefined when the
  * selector is valid but nothing matched.
  */
 export const querySelectorObjectId = async (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string,
   index: number,
 ): Promise<string | undefined> => {
-  const { client, sessionId } = session
-  const executionContextId = await createFrameIsolatedWorld(session, frame)
+  const { client, sessionId } = connection
+  const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: 'function (selector, index) { return document.querySelectorAll(selector)[index] }',
@@ -40,7 +40,7 @@ export const querySelectorObjectId = async (
   }, sessionId)
 
   if (exceptionDetails) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw invalidSelectorError(selector)
   }
 
   // querySelector returned null — a real "nothing matched" answer, not an error.

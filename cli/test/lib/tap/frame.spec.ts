@@ -2,22 +2,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import logger from '../../../lib/logger'
-import { resolveInstance } from '../../../lib/cypress-instances'
-import { withTapSession } from '../../../lib/tap/tap-session'
+import { resolveSession } from '../../../lib/cypress-sessions'
+import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { resolveAutFrame, assertFrameReadable, withResolvedAutFrame } from '../../../lib/tap/aut/frame'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 import type { TapCliOptions } from '../../../lib/tap/types'
 
-vi.mock('../../../lib/cypress-instances', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/cypress-instances')>()
+vi.mock('../../../lib/cypress-sessions', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/cypress-sessions')>()
 
-  return { ...actual, resolveInstance: vi.fn() }
+  return { ...actual, resolveSession: vi.fn() }
 })
 
-vi.mock('../../../lib/tap/tap-session', async (importActual) => {
-  const actual = await importActual<typeof import('../../../lib/tap/tap-session')>()
+vi.mock('../../../lib/tap/tap-connection', async (importActual) => {
+  const actual = await importActual<typeof import('../../../lib/tap/tap-connection')>()
 
-  return { ...actual, withTapSession: vi.fn() }
+  return { ...actual, withTapConnection: vi.fn() }
 })
 
 const SESSION_ID = 'S1'
@@ -62,15 +62,15 @@ describe('lib/tap/aut/frame resolveAutFrame', () => {
     })
 
     await expect(resolveAutFrame(client as any, SESSION_ID)).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'NO_AUT_FRAME',
+      name: 'TapError',
+      code: 'NO_AUT',
     })
   })
 })
 
 describe('lib/tap/aut/frame assertFrameReadable', () => {
   const sessionForRunState = (envelope: unknown) => {
-    return { call: vi.fn().mockResolvedValue(envelope) } as unknown as TapSession
+    return { call: vi.fn().mockResolvedValue(envelope) } as unknown as TapConnection
   }
 
   it('resolves once the run has settled to passed', async () => {
@@ -87,41 +87,42 @@ describe('lib/tap/aut/frame assertFrameReadable', () => {
     await expect(assertFrameReadable(session)).resolves.toBeUndefined()
   })
 
-  it('rejects mid-run with RUN_IN_PROGRESS so a poller waits for the app to settle', async () => {
+  // Naming the spec is what makes the wait actionable — it says what to poll on.
+  it('rejects mid-run with SPEC_IN_PROGRESS so a poller waits for the app to settle', async () => {
     const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'running' } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'RUN_IN_PROGRESS',
-      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
+      name: 'TapError',
+      code: 'SPEC_IN_PROGRESS',
+      detail: 'The spec login.cy.js is currently running.',
     })
   })
 
-  it('rejects with NO_RUN — distinct from mid-run — when no spec has run', async () => {
+  it('rejects with SPEC_NOT_STARTED — distinct from mid-run — when no spec has run', async () => {
     const session = sessionForRunState({ result: { spec: null, totalSpecs: 3 } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'NO_RUN',
+      name: 'TapError',
+      code: 'SPEC_NOT_STARTED',
     })
   })
 
-  it('rejects a spec still building with NO_RUN — loading is not a verdict, so there is no run to read', async () => {
+  it('rejects a spec still building with SPEC_NOT_STARTED — loading is not a verdict, so there is no run to read', async () => {
     const session = sessionForRunState({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'loading', startedAt: null } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'NO_RUN',
+      name: 'TapError',
+      code: 'SPEC_NOT_STARTED',
     })
   })
 
-  it('surfaces an app-side run-state error envelope as a FrameCommandError', async () => {
-    const session = sessionForRunState({ error: { code: 'BOOM', message: 'run-state blew up' } })
+  it('surfaces an app-side run-state error envelope as a TapError', async () => {
+    const session = sessionForRunState({ error: { code: 'BOOM', detail: 'run-state blew up' } })
 
     await expect(assertFrameReadable(session)).rejects.toMatchObject({
-      name: 'FrameCommandError',
+      name: 'TapError',
       code: 'BOOM',
-      message: 'run-state blew up',
+      detail: 'run-state blew up',
     })
   })
 })
@@ -135,10 +136,10 @@ describe('lib/tap/aut/frame withResolvedAutFrame', () => {
       call: vi.fn().mockResolvedValue({ result: { spec: 'login.cy.js', totalSpecs: 1, state: 'passed' } }),
       client: makePageClient(frameTree()),
       sessionId: SESSION_ID,
-    } as unknown as TapSession
+    } as unknown as TapConnection
 
-    vi.mocked(resolveInstance).mockResolvedValue({ instance: {}, reason: 'only', candidateCount: 1 } as any)
-    vi.mocked(withTapSession).mockImplementation((_instance: any, use: any) => use(session))
+    vi.mocked(resolveSession).mockResolvedValue({ session: {}, reason: 'only', candidateCount: 1 } as any)
+    vi.mocked(withTapConnection).mockImplementation((_session: any, use: any) => use(session))
 
     logger.reset()
     vi.spyOn(console, 'log').mockImplementation(() => {})

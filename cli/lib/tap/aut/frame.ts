@@ -1,13 +1,13 @@
 import Debug from 'debug'
 import type CRI from 'chrome-remote-interface'
 
-import { CypressInstanceError, resolveInstance } from '../../cypress-instances'
-import { withTapSession, validateExecResult } from '../tap-session'
-import type { TapSession } from '../tap-session'
-import { renderOutcome, renderFailure, renderKnownFailure } from '../output'
+import { resolveSession } from '../../cypress-sessions'
+import { withTapConnection, validateExecResult } from '../tap-connection'
+import type { TapConnection } from '../tap-connection'
+import { renderOutcome, renderTapFailure } from '../output'
 import type { TapCliOptions, TapRunState } from '../types'
 import type { FrameAmbiguousResult } from './single-match'
-import { TAP_EXEC_METHOD, TAP_RUN_IN_PROGRESS_MESSAGE } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError, InvalidValueTapError, SpecInProgressTapError } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 
@@ -17,14 +17,11 @@ const debug = Debug('cypress:cli:tap')
 // double-buffer frames (`AUT Snapshot - N`) and the spec bridge (`Your Spec`).
 const AUT_FRAME_NAME_PREFIX = 'Your project:'
 
-export class FrameCommandError extends Error {
-  code: string
-
-  constructor (code: string, message: string) {
-    super(message)
-    this.name = 'FrameCommandError'
-    this.code = code
-  }
+// Three readers reject a malformed selector (the match counter, the DOM reader, and
+// the single-node lookup), and the app-side `resolve-selector` reports the same
+// condition over the wire — they must all say it the same way.
+export const invalidSelectorError = (selector: string): TapError => {
+  return new InvalidValueTapError('--selector', 'a valid CSS selector', selector)
 }
 
 export interface AutFrame {
@@ -56,7 +53,7 @@ const findAutFrame = (node: FrameNode): { id: string, url: string } | undefined 
 /**
  * Locates the app-under-test frame within the runner page. Verified empirically:
  * the AUT is a same-process child frame of the runner-page target, so one
- * attached session reaches it — no separate target attach. A pinned snapshot is
+ * attached connection reaches it — no separate target attach. A pinned snapshot is
  * always same-super-domain, so it is reliably this child frame too.
  */
 export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Promise<AutFrame> => {
@@ -68,7 +65,7 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
   const found = findAutFrame(frameTree as FrameNode)
 
   if (!found) {
-    throw new FrameCommandError('NO_AUT_FRAME', 'no app under test is loaded — run a spec first (and, to read a past command, pin it with the pin command)')
+    throw new TapError('NO_AUT')
   }
 
   debug('resolved AUT frame %o', found)
@@ -86,76 +83,56 @@ export const resolveAutFrame = async (client: CRI.Client, sessionId: string): Pr
  * errors a poller can branch on, mirroring the `status` lifecycle contract
  * (wait until `passed`/`failed`).
  */
-export const assertFrameReadable = async (session: TapSession): Promise<void> => {
-  const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
+export const assertFrameReadable = async (connection: TapConnection): Promise<void> => {
+  const outcome = validateExecResult(await connection.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
 
   if ('error' in outcome) {
-    throw new FrameCommandError(outcome.error.code, outcome.error.message)
+    // The session already named the condition; re-raise it as ours so it renders
+    // through the one path rather than being reported as a frame read failure.
+    throw TapError.fromPayload(outcome.error)
   }
 
-  const { state } = outcome.result as TapRunState
+  const { state, spec } = outcome.result as TapRunState
 
   if (state === 'running') {
-    throw new FrameCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
+    throw new SpecInProgressTapError(spec)
   }
 
   if (state !== 'passed' && state !== 'failed') {
-    throw new FrameCommandError('NO_RUN', 'no run has settled — run a spec first, then read the app under test once the run has completed (status passed or failed)')
+    throw new TapError('SPEC_NOT_STARTED')
   }
 }
 
 /**
- * Shared flow for the AUT-frame commands: resolve a running instance, open a
- * tap session, gate on the run lifecycle, locate the AUT frame, run `read`, and
- * render the result. Maps the CLI-native `FrameCommandError` and the
- * discovery/transport failures to the same rendered output the schema commands
- * use.
+ * Shared flow for the AUT-frame commands: resolve a running session, open a
+ * tap connection, gate on the run lifecycle, locate the AUT frame, run `read`, and
+ * render the result. Every failure along the way — the read's own, the run-state
+ * gate's, discovery's, transport's — is a `TapError`, so one catch renders them
+ * all the way the schema commands render theirs.
  */
 export const withResolvedAutFrame = async (
   options: TapCliOptions,
-  read: (session: TapSession, frame: AutFrame) => Promise<unknown>,
+  read: (connection: TapConnection, frame: AutFrame) => Promise<unknown>,
   command: string,
 ): Promise<number> => {
   try {
-    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+    const selection = await resolveSession({ session: options.session, cwd: process.cwd() })
 
-    return await withTapSession(selection.instance, async (session) => {
-      try {
-        await assertFrameReadable(session)
+    return await withTapConnection(selection.session, async (connection) => {
+      await assertFrameReadable(connection)
 
-        const frame = await resolveAutFrame(session.client, session.sessionId)
+      const frame = await resolveAutFrame(connection.client, connection.sessionId)
 
-        const result = await read(session, frame)
+      const result = await read(connection, frame)
 
-        renderOutcome(command, result, options.json)
+      renderOutcome(command, result, options.json)
 
-        // The ambiguity answer is still a result — it names the matches to
-        // choose between, so it prints on stdout like any other. But it is not
-        // the read that was asked for, and the exit code has to say so.
-        return (result as FrameAmbiguousResult).ambiguous ? 1 : 0
-      } catch (err: any) {
-        if (err instanceof FrameCommandError) {
-          renderFailure({ code: err.code, message: err.message })
-
-          return 1
-        }
-
-        throw err
-      }
+      // The ambiguity answer is still a result — it names the matches to
+      // choose between, so it prints on stdout like any other. But it is not
+      // the read that was asked for, and the exit code has to say so.
+      return (result as FrameAmbiguousResult).ambiguous ? 1 : 0
     }, options.timeout)
   } catch (err: any) {
-    if (err instanceof CypressInstanceError) {
-      renderFailure(err)
-
-      return 1
-    }
-
-    if (err.known && err.details) {
-      renderKnownFailure(err)
-
-      return 1
-    }
-
-    throw err
+    return await renderTapFailure(err)
   }
 }

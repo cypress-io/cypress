@@ -4,10 +4,10 @@ import {
   isTapSupportedBrowser,
   recordFileName,
   parseRecordPid,
-  instancesProbePath,
+  sessionProbePath,
   buildTapSchema,
-  INSTANCES_ROUTE_PREFIX,
-  INSTANCES_DIRNAME,
+  SESSIONS_ROUTE_PREFIX,
+  SESSIONS_DIRNAME,
   SCHEMA_VERSION,
   TAP_COMMANDS,
 } from '../index'
@@ -17,11 +17,11 @@ const validRecord = {
   pid: 1234,
   projectRoot: '/projects/app',
   serverPort: 5000,
-  instanceId: 'a1b2c3d4-0000-4000-8000-000000000000',
+  sessionId: 'a1b2c3d4-0000-4000-8000-000000000000',
   testingType: 'e2e',
 }
 
-describe('cypress-instances contract', () => {
+describe('cypress-sessions contract', () => {
   describe('isCompatibleRecord', () => {
     it('accepts a well-formed record', () => {
       expect(isCompatibleRecord(validRecord)).toBe(true)
@@ -36,7 +36,7 @@ describe('cypress-instances contract', () => {
       expect(isCompatibleRecord(null)).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, schemaVersion: 0 })).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, serverPort: 1.5 })).toBe(false)
-      expect(isCompatibleRecord({ ...validRecord, instanceId: '' })).toBe(false)
+      expect(isCompatibleRecord({ ...validRecord, sessionId: '' })).toBe(false)
       expect(isCompatibleRecord({ ...validRecord, testingType: 'nope' })).toBe(false)
     })
   })
@@ -56,13 +56,13 @@ describe('cypress-instances contract', () => {
 
   describe('probe route', () => {
     it('builds the probe path from the shared prefix', () => {
-      expect(instancesProbePath('abc')).toBe(`${INSTANCES_ROUTE_PREFIX}abc`)
-      expect(instancesProbePath('abc')).toBe('/__cypress/instances/abc')
+      expect(sessionProbePath('abc')).toBe(`${SESSIONS_ROUTE_PREFIX}abc`)
+      expect(sessionProbePath('abc')).toBe('/__cypress/sessions/abc')
     })
   })
 
-  it('exposes the instances dir name', () => {
-    expect(INSTANCES_DIRNAME).toBe('instances')
+  it('exposes the sessions dir name', () => {
+    expect(SESSIONS_DIRNAME).toBe('sessions')
   })
 
   describe('isTapSupportedBrowser', () => {

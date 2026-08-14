@@ -229,7 +229,7 @@ describe('cli', () => {
 
       const result = await execa('bin/cypress', ['tap', 'status', '--fake'], options)
 
-      expect(result).toContain('unknown option: --fake')
+      expect(result).toContain('Unknown option "--fake"')
       expect(result).toContain('code: 1')
       // Only printed from the reporting that the exit would have skipped.
       expect(result).toContain('skipped tap event')
@@ -900,12 +900,12 @@ describe('cli', () => {
       expect(tap.start).toBeCalledWith(['--frobnicate'], {})
     })
 
-    it('forwards --instance', async () => {
-      await exec('tap health --instance 123')
+    it('forwards --session', async () => {
+      await exec('tap health --session 123')
 
       await flushPromises()
 
-      expect(tap.start).toBeCalledWith(['health'], { instance: 123 })
+      expect(tap.start).toBeCalledWith(['health'], { session: 123 })
     })
 
     // The invocation reports the keys of what commander parsed, so an option left

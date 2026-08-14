@@ -1,5 +1,5 @@
-import { TAP_NATIVE_COMMANDS } from '@packages/cypress-instances'
-import type { TapCommandOptionSchema, TapCommandParamSchema, TapNativeCommandName, TapRawOptions, TapRawParams } from '@packages/cypress-instances'
+import { TAP_NATIVE_COMMANDS } from '@packages/cypress-sessions'
+import type { TapCommandOptionSchema, TapCommandParamSchema, TapNativeCommandName, TapRawOptions, TapRawParams } from '@packages/cypress-sessions'
 import type { TapCliCommand, TapCliOptions } from '../types'
 
 type NativeByName<N extends TapNativeCommandName> = Extract<typeof TAP_NATIVE_COMMANDS[number], { name: N }>

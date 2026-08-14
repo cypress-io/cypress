@@ -11,14 +11,15 @@ describe('tap/tap-manager', () => {
   // exercised once the first real command lands (see the `run` command spec).
   // Until then these cover the command-lookup failure and the wire envelope.
   describe('exec', () => {
-    it('returns UNKNOWN_COMMAND listing the available commands', async () => {
+    // The listing is the CLI's generated help, appended as it renders, so the
+    // binding names only what it was given.
+    it('returns UNKNOWN_COMMAND naming the name given', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
 
       const outcome = await manager.exec('bogus')
 
-      expect((outcome as { error: { code: string, message: string } }).error.code).to.eq('UNKNOWN_COMMAND')
-      expect((outcome as { error: { message: string } }).error.message).to.contain(`Available commands: ${Object.keys(tapCommands).join(', ')}.`)
-      expect((outcome as { error: { message: string } }).error.message).to.contain('v15.0.0')
+      expect((outcome as { error: { code: string } }).error.code).to.eq('UNKNOWN_COMMAND')
+      expect((outcome as { error: { detail: string } }).error.detail).to.eq('Unknown command "bogus"')
     })
 
     it('does not resolve inherited property names as commands', async () => {

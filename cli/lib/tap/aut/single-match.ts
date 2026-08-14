@@ -1,10 +1,10 @@
-import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
-import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TapError, InvalidValueTapError } from '@packages/cypress-sessions'
+import type { ResolveSelectorMatch, ResolveSelectorResult } from '@packages/cypress-sessions'
 
-import { validateExecResult } from '../tap-session'
-import type { TapSession } from '../tap-session'
+import { validateExecResult } from '../tap-connection'
+import type { TapConnection } from '../tap-connection'
 import { createFrameIsolatedWorld } from './cdp'
-import { FrameCommandError } from './frame'
+import { invalidSelectorError } from './frame'
 import type { AutFrame } from './frame'
 import { countMatches } from './scripts'
 import type { MatchCountResult } from './scripts'
@@ -26,22 +26,22 @@ export interface FrameAmbiguousResult {
   /**
    * One entry per match, in document order, each carrying the index of the match
    * it names and a selector unique to it — `null` where none could be derived.
-   * May be shorter than `count`: the instance only derives so many.
+   * May be shorter than `count`: the session only derives so many.
    */
   selectors: ResolveSelectorMatch[]
 }
 
 /**
  * A unique selector for each match, to offer in place of the ambiguous one.
- * Best effort: these come from the instance itself, which derives them the way
+ * Best effort: these come from the session itself, which derives them the way
  * its Selector Playground does — so they honor any selectorPriority the project
- * configured, and are selectors the user's own tests would use. An instance that
+ * configured, and are selectors the user's own tests would use. A session that
  * can't reach its app under test (a secondary origin inside `cy.origin`) just
  * leaves the match count to speak for itself.
  */
-const disambiguatingSelectors = async (session: TapSession, selector: string): Promise<ResolveSelectorMatch[]> => {
+const disambiguatingSelectors = async (connection: TapConnection, selector: string): Promise<ResolveSelectorMatch[]> => {
   try {
-    const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['resolve-selector', { selector }, {}]))
+    const outcome = validateExecResult(await connection.call(TAP_EXEC_METHOD, ['resolve-selector', { selector }, {}]))
 
     return 'error' in outcome ? [] : (outcome.result as ResolveSelectorResult).selectors
   } catch {
@@ -50,21 +50,13 @@ const disambiguatingSelectors = async (session: TapSession, selector: string): P
 }
 
 export const resolveAmbiguity = async (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   at?: number,
 ): Promise<FrameAmbiguousResult | undefined> => {
-  if (selector === undefined) {
-    if (at !== undefined) {
-      throw new FrameCommandError('INVALID_INDEX', '--at needs a selector to index into')
-    }
-
-    return undefined
-  }
-
-  const { client, sessionId } = session
-  const executionContextId = await createFrameIsolatedWorld(session, frame)
+  const { client, sessionId } = connection
+  const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: countMatches.toString(),
@@ -74,13 +66,13 @@ export const resolveAmbiguity = async (
   }, sessionId)
 
   if (exceptionDetails) {
-    throw new FrameCommandError('FRAME_READ_FAILED', `resolving "${selector}" in the app under test failed: ${exceptionDetails.exception?.description || exceptionDetails.text}`)
+    throw new TapError('FRAME_READ_FAILED', { message: `resolving "${selector}" in the app under test failed: ${exceptionDetails.exception?.description || exceptionDetails.text}` })
   }
 
   const { count, invalidSelector } = result.value as MatchCountResult
 
   if (invalidSelector) {
-    throw new FrameCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw invalidSelectorError(selector)
   }
 
   // Nothing matched: each command reports that in its own shape, and an `--at`
@@ -91,7 +83,7 @@ export const resolveAmbiguity = async (
 
   if (at !== undefined) {
     if (at >= count) {
-      throw new FrameCommandError('INVALID_INDEX', `"${selector}" matched ${count} element${count === 1 ? '' : 's'}; pass --at 0-${count - 1}`)
+      throw new InvalidValueTapError('--at', `0 to ${count - 1}, since "${selector}" matched ${count} element${count === 1 ? '' : 's'}`, at)
     }
 
     return undefined
@@ -105,18 +97,18 @@ export const resolveAmbiguity = async (
     ambiguous: true,
     selector,
     count,
-    selectors: await disambiguatingSelectors(session, selector),
+    selectors: await disambiguatingSelectors(connection, selector),
   }
 }
 
 export const withAmbiguous = async <T>(
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
-  selector: string | undefined,
+  selector: string,
   at: number | undefined,
   read: () => Promise<T>,
 ): Promise<T | FrameAmbiguousResult> => {
-  const ambiguous = await resolveAmbiguity(session, frame, selector, at)
+  const ambiguous = await resolveAmbiguity(connection, frame, selector, at)
 
   return ambiguous ?? read()
 }

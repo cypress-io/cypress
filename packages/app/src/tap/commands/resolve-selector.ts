@@ -1,6 +1,6 @@
 import { tapManagerDataSource } from '../tap-manager-data-source'
-import { defineCommand, TapCommandError } from './definition'
-import { MAX_DERIVED_SELECTORS } from '../contract'
+import { defineCommand } from './definition'
+import { MAX_DERIVED_SELECTORS, TapError, InvalidValueTapError } from '../contract'
 import type { ResolveSelectorMatch, ResolveSelectorResult } from '../contract'
 
 // A shadow-scoped selector is unique only within its own shadow root, so it can't
@@ -13,7 +13,7 @@ export const resolveSelectorCommand = defineCommand('resolve-selector', async ({
   const source = tapManagerDataSource.getElementSelectorSource()
 
   if (!source) {
-    throw new TapCommandError('NO_AUT', 'no app under test is loaded — run a spec first')
+    throw new TapError('NO_AUT')
   }
 
   let matched: ReturnType<typeof source.find>
@@ -21,7 +21,7 @@ export const resolveSelectorCommand = defineCommand('resolve-selector', async ({
   try {
     matched = source.find(selector)
   } catch {
-    throw new TapCommandError('INVALID_SELECTOR', `"${selector}" is not a valid CSS selector`)
+    throw new InvalidValueTapError('--selector', 'a valid CSS selector', selector)
   }
 
   const selectors: ResolveSelectorMatch[] = []

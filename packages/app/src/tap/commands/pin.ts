@@ -1,8 +1,8 @@
-import { defineCommand, noRunError, TapCommandError } from './definition'
+import { defineCommand } from './definition'
 import { attemptOfLog, attemptSelectionError, liveSnapshots, resolveCommandLogId, selectTestAttempt, serializeReporterRow } from '../test-state'
 import { tapManagerDataSource } from '../tap-manager-data-source'
 import type { PinSnapshotEntry, TapTestsRunner } from '../types'
-import { TAP_RUN_IN_PROGRESS_MESSAGE } from '../contract'
+import { CommandNotFoundTapError, SnapshotNotFoundTapError, SpecInProgressTapError, TapError } from '../contract'
 import type { ClearResult, PinnedView, PinResult, SnapshotRef } from '../contract'
 
 // A pin as the commands read it, whoever made it: tap's own, or one made by hand
@@ -92,9 +92,12 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
     return named
   }
 
-  const available = snapshots.map((entry, index) => (entry.name !== undefined ? `"${entry.name}" (${index + 1})` : `${index + 1}`)).join(', ')
+  // Names are quoted, since one can carry spaces and an unquoted list of them reads
+  // as more snapshots than there are. An unnamed snapshot is reachable only by its
+  // index, so that is what it is listed as.
+  const available = snapshots.map((entry, index) => (entry.name === undefined ? `${index + 1}` : `"${entry.name}"`)).join(', ')
 
-  throw new TapCommandError('SNAPSHOT_NOT_FOUND', `no snapshot of this command matches "${at}" — available snapshots: ${available}`)
+  throw new SnapshotNotFoundTapError(at, `This command has these snapshots: [${available}]`)
 }
 
 export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test, 'command-id': command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
@@ -112,16 +115,18 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
     return { cleared: true }
   }
 
+  // Either the pair that names a command or `--clear`, which no one option can be
+  // marked required to express.
   if (test === undefined || command === undefined) {
-    throw new TapCommandError('PIN_TARGET_REQUIRED', 'provide a test id and command id to pin (as listed by the reporter command), or pass --clear to release the current pin')
+    throw new TapError('INVALID_OPTIONS', { detail: 'Pass `--test-id` and `--command-id`, as listed by `cypress tap reporter`, or `--clear` to release the current pin.' })
   }
 
   if (!runner) {
-    throw noRunError()
+    throw new TapError('SPEC_NOT_STARTED')
   }
 
   if (tapManagerDataSource.isRunning()) {
-    throw new TapCommandError('RUN_IN_PROGRESS', TAP_RUN_IN_PROGRESS_MESSAGE)
+    throw new SpecInProgressTapError(tapManagerDataSource.getActiveSpecRelative() ?? null)
   }
 
   const selection = selectTestAttempt(runner, test, attempt)
@@ -133,14 +138,14 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
   const logId = resolveCommandLogId(selection.attempt, command, test)
 
   if (logId === undefined) {
-    throw new TapCommandError('COMMAND_NOT_FOUND', `no command of this test matches the id "${command}" — use the reporter command (with --test-id) to list this test’s commands`)
+    throw new CommandNotFoundTapError(command, test)
   }
 
   const props = runner.getSnapshotPropsForLog(test, logId)
   const snapshots = liveSnapshots(props)
 
   if (snapshots.length === 0) {
-    throw new TapCommandError('SNAPSHOT_UNAVAILABLE', 'this command has no DOM snapshot to pin — snapshots are captured in open mode and kept only for the most recent tests (numTestsKeptInMemory)')
+    throw new TapError('SNAPSHOT_UNAVAILABLE')
   }
 
   const index = resolveAt(snapshots, at)
@@ -160,7 +165,7 @@ export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test
 
   // The app is the record of the pin, so a pin it did not take is not a result.
   if (!pinned) {
-    throw new TapCommandError('SNAPSHOT_UNAVAILABLE', 'the app under test did not take the pin — this command’s snapshots may have just fallen out of memory (numTestsKeptInMemory)')
+    throw new TapError('SNAPSHOT_UNAVAILABLE')
   }
 
   return { pinned, ...(props?.url !== undefined ? { url: props.url } : {}) }

@@ -81,20 +81,23 @@ describe('tap/commands/resolve-selector', () => {
     stubSource(undefined)
 
     expect(await exec()).to.deep.eq({
-      error: { code: 'NO_AUT', message: 'no app under test is loaded — run a spec first' },
+      error: { code: 'NO_AUT' },
     })
   })
 
   // The stub queries for real: the rejection under test is the browser parser's,
   // and a stub that simply throws would prove nothing about it.
-  it('fails with INVALID_SELECTOR when the browser rejects the selector', async () => {
+  it('reports a selector the browser rejects as the value it was given', async () => {
     stubSource({
       find: (selector) => document.querySelectorAll(selector),
       getSelector: () => null,
     })
 
     expect(await exec('>>bad')).to.deep.eq({
-      error: { code: 'INVALID_SELECTOR', message: '">>bad" is not a valid CSS selector' },
+      error: {
+        code: 'INVALID_VALUE',
+        detail: 'Expected `--selector` to be a valid CSS selector.\n\nInstead the value was: ">>bad"',
+      },
     })
   })
 

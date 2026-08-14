@@ -111,14 +111,14 @@ generates:
 
   ###
   # Operation result types for the tap CLI's direct GraphQL transport. The queries
-  # live as plain strings in @packages/cypress-instances (plucked via the /* GraphQL */
+  # live as plain strings in @packages/cypress-sessions (plucked via the /* GraphQL */
   # magic comment) so the CLI can send them without a graphql runtime; codegen
   # validates them against the schema and emits their result/variable types.
   ###
-  '../cypress-instances/lib/generated/graphql.ts':
+  '../cypress-sessions/lib/generated/graphql.ts':
     schema: './schemas/schema.graphql'
     documents:
-      - '../cypress-instances/lib/**/*.ts'
+      - '../cypress-sessions/lib/**/*.ts'
     config:
       <<: *documentFilters
       # Emit the scalar map, and only the enums/inputs the tap operations use,

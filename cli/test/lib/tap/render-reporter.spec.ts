@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import { renderReporterHuman, renderReporterSpecHuman } from '../../../lib/tap/render/reporter'
-import type { TapReporterSpecView, TapReporterView } from '@packages/cypress-instances'
+import type { TapReporterSpecView, TapReporterView } from '@packages/cypress-sessions'
 
 // The run start time renders against the terminal's own clock, so pin the zone
 // the snapshots are written in.

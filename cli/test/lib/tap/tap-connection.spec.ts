@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CRI from 'chrome-remote-interface'
 
-import type { ReadyInstanceState } from '../../../lib/cypress-instances'
-import { CdpErrorMessage, withTapSession } from '../../../lib/tap/tap-session'
-import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
-import { errors } from '../../../lib/errors'
+import type { ReadySessionState } from '../../../lib/cypress-sessions'
+import { CdpErrorMessage, withTapConnection } from '../../../lib/tap/tap-connection'
+import { FIND_SESSION_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 
 vi.mock('chrome-remote-interface', () => ({ default: vi.fn() }))
 
@@ -36,7 +35,7 @@ const makeClient = (overrides: FakeClientOverrides = {}) => {
   }
 
   // Mirrors chrome-remote-interface, where every domain shorthand is generated as
-  // a `client.send` call — the seam the session installs its bound on.
+  // a `client.send` call — the seam the connection installs its bound on.
   const client: any = {
     send: (command: string, ...args: unknown[]) => behaviors[command](...args),
     close: vi.fn().mockResolvedValue(undefined),
@@ -52,13 +51,13 @@ const makeClient = (overrides: FakeClientOverrides = {}) => {
   return client
 }
 
-const makeRecord = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => {
+const makeRecord = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => {
   return {
     schemaVersion: 1,
     pid: 1234,
     projectRoot: PROJECT,
     serverPort: 5555,
-    instanceId: 'instance-abc',
+    sessionId: 'session-abc',
     testingType: 'e2e',
     cdpBrowserWsUrl: BROWSER_WS_URL,
     browserName: 'Chrome',
@@ -69,17 +68,17 @@ const makeRecord = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceS
   }
 }
 
-let instance: ReadyInstanceState
+let session: ReadySessionState
 
-const setup = (client = makeClient(), overrides: Partial<ReadyInstanceState> = {}) => {
-  instance = makeRecord(overrides)
+const setup = (client = makeClient(), overrides: Partial<ReadySessionState> = {}) => {
+  session = makeRecord(overrides)
   mockConnect.mockResolvedValue(client)
 
-  return { instance, client }
+  return { session, client }
 }
 
 const callOnce = (method = 'health', args: unknown[] = []) => {
-  return withTapSession(instance, (session) => session.call(method, args))
+  return withTapConnection(session, (connection) => connection.call(method, args))
 }
 
 const staleError = () => new Error(CdpErrorMessage.objectNotFound)
@@ -89,28 +88,27 @@ const UNRESPONSIVE_MS = 25
 const never = () => vi.fn().mockReturnValue(new Promise(() => {}))
 
 const callWithBound = () => {
-  return withTapSession(instance, (session) => session.call('health'), UNRESPONSIVE_MS)
+  return withTapConnection(session, (connection) => connection.call('health'), UNRESPONSIVE_MS)
 }
 
 const expectUnresponsive = async (promise: Promise<any>) => {
   const err = await promise.catch((e) => e)
 
   expect(err.code).toBe('RENDERER_UNRESPONSIVE')
-  expect(err.details).toBeUndefined()
 
   return err
 }
 
-const expectError = async (promise: Promise<any>, details: unknown) => {
+const expectError = async (promise: Promise<any>, code: string) => {
   const err = await promise.catch((e) => e)
 
-  expect(err.known).toBe(true)
-  expect(err.details).toBe(details)
+  expect(err.name).toBe('TapError')
+  expect(err.code).toBe(code)
 
   return err
 }
 
-describe('lib/tap/tap-session', () => {
+describe('lib/tap/tap-connection', () => {
   beforeEach(() => {
     mockConnect.mockReset()
   })
@@ -118,8 +116,8 @@ describe('lib/tap/tap-session', () => {
   it('connects to the browser ws, attaches a session, invokes the binding, and returns the decoded result', async () => {
     const { client } = setup()
 
-    const result = await withTapSession(instance, async (session) => {
-      return session.call('health')
+    const result = await withTapConnection(session, async (connection) => {
+      return connection.call('health')
     })
 
     expect(result).toBe('ok')
@@ -153,8 +151,8 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ callFunctionOn }))
 
-    const results = await withTapSession(instance, async (session) => {
-      return [await session.call('getSchema'), await session.call('health')]
+    const results = await withTapConnection(session, async (connection) => {
+      return [await connection.call('getSchema'), await connection.call('health')]
     })
 
     expect(results).toEqual([{ protocolVersion: 1, commands: [] }, 'ok'])
@@ -172,7 +170,7 @@ describe('lib/tap/tap-session', () => {
     const { client } = setup()
     const boom = new Error('boom')
 
-    const err = await withTapSession(instance, async () => {
+    const err = await withTapConnection(session, async () => {
       throw boom
     }).catch((e) => e)
 
@@ -221,7 +219,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
-    await expectError(callOnce(), errors.tapStaleHandle)
+    await expectError(callOnce(), 'STALE_HANDLE')
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledTimes(2)
   })
 
@@ -231,7 +229,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
-    await expectError(callOnce(), errors.tapStaleHandle)
+    await expectError(callOnce(), 'STALE_HANDLE')
 
     expect(client.Runtime.evaluate).toHaveBeenCalledTimes(3)
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledTimes(2)
@@ -258,7 +256,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ evaluate }))
 
-    await expectError(callOnce(), errors.tapStaleHandle)
+    await expectError(callOnce(), 'STALE_HANDLE')
     expect(client.Runtime.evaluate).toHaveBeenCalledTimes(3)
     expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
   })
@@ -270,7 +268,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ evaluate }))
 
-    await expectError(callOnce(), errors.tapCdpUnreachable)
+    await expectError(callOnce(), 'CDP_UNREACHABLE')
     expect(client.Runtime.evaluate).toHaveBeenCalledTimes(2)
     expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
   })
@@ -303,7 +301,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
-    await expectError(callOnce(), errors.tapBindingNotFound)
+    await expectError(callOnce(), 'BINDING_NOT_FOUND')
     expect(client.Target.getTargets).toHaveBeenCalledTimes(2)
   })
 
@@ -318,7 +316,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
-    await expectError(callOnce(), errors.tapStaleHandle)
+    await expectError(callOnce(), 'STALE_HANDLE')
     expect(client.Target.getTargets).toHaveBeenCalledTimes(2)
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledOnce()
   })
@@ -327,7 +325,7 @@ describe('lib/tap/tap-session', () => {
     const evaluate = vi.fn().mockResolvedValue({ result: { type: 'undefined' } })
     const { client } = setup(makeClient({ evaluate }))
 
-    await expectError(callOnce(), errors.tapBindingNotFound)
+    await expectError(callOnce(), 'BINDING_NOT_FOUND')
     expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
     expect(client.Target.detachFromTarget).toHaveBeenCalledWith({ sessionId: 'SID1' })
   })
@@ -340,7 +338,7 @@ describe('lib/tap/tap-session', () => {
 
     setup(makeClient({ callFunctionOn }))
 
-    const err = await expectError(callOnce(), errors.tapBindingThrew)
+    const err = await expectError(callOnce(), 'BINDING_THREW')
 
     expect(err.message).toContain('Error: boom')
   })
@@ -366,7 +364,7 @@ describe('lib/tap/tap-session', () => {
 
     setup(client)
 
-    await expectError(callOnce(), errors.tapBindingNotFound)
+    await expectError(callOnce(), 'BINDING_NOT_FOUND')
     expect(client.Target.attachToTarget).not.toHaveBeenCalled()
   })
 
@@ -436,10 +434,10 @@ describe('lib/tap/tap-session', () => {
   })
 
   it('throws CDP_UNREACHABLE when the browser connection cannot be opened', async () => {
-    instance = makeRecord()
+    session = makeRecord()
     mockConnect.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
-    await expectError(callOnce(), errors.tapCdpUnreachable)
+    await expectError(callOnce(), 'CDP_UNREACHABLE')
   })
 
   it('throws CDP_UNREACHABLE when listing targets fails', async () => {
@@ -447,7 +445,7 @@ describe('lib/tap/tap-session', () => {
 
     setup(makeClient({ getTargets }))
 
-    await expectError(callOnce(), errors.tapCdpUnreachable)
+    await expectError(callOnce(), 'CDP_UNREACHABLE')
   })
 
   it('throws BINDING_NOT_FOUND when every candidate page fails to attach', async () => {
@@ -455,14 +453,14 @@ describe('lib/tap/tap-session', () => {
 
     setup(makeClient({ attachToTarget }))
 
-    await expectError(callOnce(), errors.tapBindingNotFound)
+    await expectError(callOnce(), 'BINDING_NOT_FOUND')
   })
 
   it('throws CDP_UNREACHABLE when the binding call fails with a non-stale error', async () => {
     const callFunctionOn = vi.fn().mockRejectedValue(new Error('socket hung up'))
     const { client } = setup(makeClient({ callFunctionOn }))
 
-    await expectError(callOnce(), errors.tapCdpUnreachable)
+    await expectError(callOnce(), 'CDP_UNREACHABLE')
 
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledOnce()
   })
@@ -505,7 +503,7 @@ describe('lib/tap/tap-session', () => {
     try {
       const settled = callOnce().catch((e) => e)
 
-      await vi.advanceTimersByTimeAsync(FIND_INSTANCE_TIMEOUT_MS)
+      await vi.advanceTimersByTimeAsync(FIND_SESSION_TIMEOUT_MS)
 
       expect((await settled as Error & { code: string }).code).toBe('RENDERER_UNRESPONSIVE')
     } finally {

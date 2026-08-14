@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { resolveAmbiguity } from '../../../lib/tap/aut/single-match'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
@@ -23,7 +23,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
       call,
       client: { Page: { createIsolatedWorld }, Runtime: { callFunctionOn } },
       sessionId: SESSION_ID,
-    } as unknown as TapSession
+    } as unknown as TapConnection
 
     return { session, call, callFunctionOn, createIsolatedWorld }
   }
@@ -40,7 +40,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
       returnByValue: true,
     })
 
-    // Nothing to disambiguate, so the instance is never asked for selectors.
+    // Nothing to disambiguate, so the session is never asked for selectors.
     expect(call).not.toHaveBeenCalled()
   })
 
@@ -64,7 +64,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     expect(call).toHaveBeenCalledWith('exec', ['resolve-selector', { selector: '.item' }, {}])
   })
 
-  it('still answers with the count when the instance could derive no selectors', async () => {
+  it('still answers with the count when the session could derive no selectors', async () => {
     const { session } = makeSession({ count: 2 }, { result: { selectors: [] } })
 
     expect(await resolveAmbiguity(session, frame, '.item')).to.deep.eq({
@@ -75,13 +75,13 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     })
   })
 
-  it('still answers when the instance reports a failure for the selectors', async () => {
+  it('still answers when the session reports a failure for the selectors', async () => {
     const { session } = makeSession({ count: 2 }, { error: { code: 'NO_AUT', message: 'no app under test is loaded' } })
 
     expect(await resolveAmbiguity(session, frame, '.item')).to.deep.include({ ambiguous: true, count: 2 })
   })
 
-  it('still answers when asking the instance for selectors throws', async () => {
+  it('still answers when asking the session for selectors throws', async () => {
     const { session } = makeSession({ count: 2 }, new Error('binding gone'))
 
     expect(await resolveAmbiguity(session, frame, '.item')).to.deep.include({ ambiguous: true, count: 2, selectors: [] })
@@ -99,17 +99,9 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     const { session } = makeSession({ count: 3 })
 
     await expect(resolveAmbiguity(session, frame, '.item', 3)).rejects.toMatchObject({
-      code: 'INVALID_INDEX',
-      message: '".item" matched 3 elements; pass --at 0-2',
+      code: 'INVALID_VALUE',
+      detail: 'Expected `--at` to be 0 to 2, since ".item" matched 3 elements.\n\nInstead the value was: 3',
     })
-  })
-
-  it('rejects an --at when nothing is there to index', async () => {
-    const { session, callFunctionOn } = makeSession({ count: 1 })
-
-    await expect(resolveAmbiguity(session, frame, undefined, 0)).rejects.toMatchObject({ code: 'INVALID_INDEX' })
-    // No selector means no reason to reach into the frame at all.
-    expect(callFunctionOn).not.toHaveBeenCalled()
   })
 
   it('lets an --at through when the selector matched nothing, leaving the read to report it', async () => {
@@ -118,12 +110,13 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
     expect(await resolveAmbiguity(session, frame, '.missing', 4)).to.be.undefined
   })
 
-  it('maps a bad selector to INVALID_SELECTOR', async () => {
+  it('maps a bad selector to the selector it was given', async () => {
     const { session } = makeSession({ invalidSelector: true })
 
     await expect(resolveAmbiguity(session, frame, '>>bad')).rejects.toMatchObject({
-      name: 'FrameCommandError',
-      code: 'INVALID_SELECTOR',
+      name: 'TapError',
+      code: 'INVALID_VALUE',
+      detail: 'Expected `--selector` to be a valid CSS selector.\n\nInstead the value was: ">>bad"',
     })
   })
 

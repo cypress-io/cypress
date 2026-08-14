@@ -1,3 +1,5 @@
+import type { TapErrorPayload } from './tap-errors'
+
 export const TAP_SCHEMA_VERSION = 1
 
 export const TAP_BINDING_GLOBAL = '__CYPRESS_TAP_BINDING__'
@@ -5,8 +7,6 @@ export const TAP_BINDING_GLOBAL = '__CYPRESS_TAP_BINDING__'
 export const TAP_SCHEMA_METHOD = 'getSchema'
 
 export const TAP_EXEC_METHOD = 'exec'
-
-export const TAP_RUN_IN_PROGRESS_MESSAGE = 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again'
 
 export interface TapCommandParamSchema {
   name: string
@@ -20,7 +20,7 @@ interface TapCommandOptionBase {
   // A single letter, rendered by the CLI as `-t, --test-id <test-id>`. Commander
   // accepts a letter claimed twice within one command and silently lets the last
   // declaration win, so an alias must be unique across the command's own options
-  // and the `--instance` every command shares.
+  // and the `--session` every command shares.
   alias?: string
   required: boolean
   description: string
@@ -60,7 +60,7 @@ export interface TapSchema {
 
 export type TapExecResult =
   | { result: unknown }
-  | { error: { code: string, message: string } }
+  | { error: TapErrorPayload }
 
 // How a command's declared params/options surface to its handler, derived once
 // here so the app's defineCommand and the CLI's defineNativeCommand type handlers
@@ -108,7 +108,7 @@ export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
 const testIdField = { name: 'test-id', alias: 't', type: 'string', description: 'test id, as listed by the reporter command' } as const
 const commandIdField = { name: 'command-id', alias: 'c', type: 'string', description: 'command id, as listed by the reporter command — a row number (test body first when duplicated), an e-prefixed event id, or hook-qualified like "h1:3"' } as const
 const attemptField = { name: 'attempt', alias: 'a', type: 'number', required: false, description: '1-based attempt (attempt 1 = first run); defaults to the latest' } as const
-const selectorField = { name: 'selector', alias: 's', type: 'string', required: false, description: 'a CSS selector' } as const
+const selectorField = { name: 'selector', alias: 'e', type: 'string', required: false, description: 'a CSS selector' } as const
 
 const commandMeta = {
   name: 'command',
@@ -128,7 +128,7 @@ const commandMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: run stats and every suite’s tests',
+  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: the spec’s stats and every suite’s tests',
   details: `Shows test results the way the Cypress app's reporter panel does, right in
 your terminal. Pass --test-id <id> (test ids come from the spec overview this
 same command prints with no --test-id) to see one
@@ -136,7 +136,7 @@ test's full story: its network routes, the hooks that ran, the complete
 command log, and the failure output when something went wrong. Add --attempt
 to view an earlier retry.
 
-Leave --test-id off to get the spec-level overview instead: the run's pass/fail
+Leave --test-id off to get the spec-level overview instead: the spec's pass/fail
 stats and every suite's tests at a glance.`,
   params: [],
   options: [
@@ -160,7 +160,7 @@ const pinMeta = {
 
 const runStateMeta = {
   name: 'run-state',
-  description: 'report where the running Cypress instance is in its run lifecycle',
+  description: 'report where the running Cypress session is in its run lifecycle',
   params: [],
   options: [],
   hidden: true,
@@ -177,9 +177,9 @@ const resolveSelectorMeta = {
 } as const satisfies TapCommandSchema
 
 // The canonical command metadata, the single source both sides build a schema
-// from: the running instance advertises it over the binding (see the app's
+// from: the running session advertises it over the binding (see the app's
 // TapManager), and the CLI stamps it with its own version to render help with no
-// instance attached. Order here is the order commands list in help.
+// session attached. Order here is the order commands list in help.
 export const TAP_COMMANDS = [
   commandMeta,
   reporterMeta,
@@ -222,32 +222,32 @@ const runMeta = {
   description: 'run (or rerun) a spec by its project-relative path',
   details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
 command. If no browser is open it launches one, switching to the spec's testing
-type when needed, then requests the run and returns immediately — returning does
-not mean the run has started, let alone finished.
+type when needed, then requests the spec and returns immediately — returning does
+not mean the spec has started, let alone finished.
 
-Poll the status command for run progress. Read status first and keep its
-startedAt: a verdict still carrying that same startedAt describes the run before
-this one, so wait for a verdict whose startedAt differs.`,
+Poll the status command for progress. Read status first and keep its startedAt:
+a verdict still carrying that same startedAt describes the spec before this one,
+so wait for a verdict whose startedAt differs.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
 } as const satisfies TapNativeCommandSchema
 
-const instancesMeta = {
-  name: 'instances',
-  description: 'list the running Cypress instances this CLI can reach',
-  details: `Lists the running Cypress instances this CLI can reach, as a JSON array. Pass
-an instance's pid to \`--instance\` to target it with another tap command.
+const sessionsMeta = {
+  name: 'sessions',
+  description: 'list the running Cypress sessions this CLI can reach',
+  details: `Lists the running Cypress sessions this CLI can reach, as a JSON array. Pass
+a session's pid to \`--session\` to target it with another tap command.
 
 tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
-An instance running any other browser is listed as unsupported, and every other
+A session running any other browser is listed as unsupported, and every other
 tap command refuses it.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {
   name: 'status',
-  description: 'report where a running Cypress instance is in its lifecycle',
-  details: `Reports where a running Cypress instance is in its lifecycle, as JSON — for
+  description: 'report where a running Cypress session is in its lifecycle',
+  details: `Reports where a running Cypress session is in its lifecycle, as JSON — for
 polling and "where am I?" checks. Always exits 0 for a determinable stage
 (including "not connected"); a poller branches on the \`status\` field.
 
@@ -259,17 +259,17 @@ and stays loading for as long as the build takes, so a poller needs its own
 timeout. A spec whose build fails reports failed and carries the reason as
 error — it ran no tests, so it reports no counts either.
 
-From loading onwards the output carries startedAt, the run every other field
-describes (null while loading). A rerun leaves the previous run's verdict
-readable until the incoming run starts, identical on every other field, so
+From loading onwards the output carries startedAt, the spec every other field
+describes (null while loading). A rerun leaves the previous spec's verdict
+readable until the incoming one starts, identical on every other field, so
 compare startedAt before believing a verdict.`,
 } as const satisfies TapNativeCommandSchema
 
 const specsMeta = {
   name: 'specs',
-  description: 'list the specs the running Cypress instance can run, most recently modified first',
-  details: `Lists the specs the connected Cypress instance can run, in descending order by last modified. To find other testing types you must open a new
-cypress instance with that testing type specified.`,
+  description: 'list the specs the running Cypress session can run, most recently modified first',
+  details: `Lists the specs the connected Cypress session can run, in descending order by last modified. To find other testing types you must open a new
+cypress session with that testing type specified.`,
 } as const satisfies TapNativeCommandSchema
 
 // Every selector these three take must resolve to exactly one element, so a
@@ -344,12 +344,12 @@ ${AMBIGUOUS_SELECTOR_HELP}`,
   ],
 } as const satisfies TapNativeCommandSchema
 
-// CLI-native tap commands: implemented entirely in the CLI (instance discovery
+// CLI-native tap commands: implemented entirely in the CLI (session discovery
 // over the filesystem, DOM/ARIA reads over CDP), so — unlike TAP_COMMANDS — they
-// are never advertised by getSchema or exec'd on the instance. Listed here in the
+// are never advertised by getSchema or exec'd on the session. Listed here in the
 // order they appear in help, ahead of the schema-driven commands.
 export const TAP_NATIVE_COMMANDS = [
-  instancesMeta,
+  sessionsMeta,
   statusMeta,
   specsMeta,
   runMeta,
@@ -362,8 +362,13 @@ export type TapNativeCommandName = typeof TAP_NATIVE_COMMANDS[number]['name']
 
 const allTapCommands: readonly (TapCommandSchema | TapNativeCommandSchema)[] = [...TAP_NATIVE_COMMANDS, ...TAP_COMMANDS]
 
-/** Every command name this CLI ships, whether it dispatches to the instance or handles it itself. */
+/** Every command name this CLI ships, whether it dispatches to the session or handles it itself. */
 export const KNOWN_COMMANDS: ReadonlySet<string> = new Set(allTapCommands.map(({ name }) => name))
+
+// The failure catalogue and the error both sides raise. Re-exported here for the
+// same reason the result contracts are: this module is dependency-free, so the
+// browser-side app can import it where it cannot import the package barrel.
+export * from './tap-errors'
 
 // Per-command result contracts live in `./contracts/`; re-exported here so the
 // app's deep import of this module and the package barrel both reach them.

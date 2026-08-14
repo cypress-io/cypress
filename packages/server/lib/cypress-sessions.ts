@@ -3,32 +3,32 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { Browser, TestingType } from '@packages/types'
-import { SCHEMA_VERSION, cypressInstancesDir, recordPath } from '@packages/cypress-instances'
-import type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
+import { SCHEMA_VERSION, cypressSessionsDir, recordPath } from '@packages/cypress-sessions'
+import type { CypressSession, LiveSessionState } from '@packages/cypress-sessions'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
-export type { CypressInstance, LiveInstanceState } from '@packages/cypress-instances'
+export type { CypressSession, LiveSessionState } from '@packages/cypress-sessions'
 
-const debug = Debug('cypress:server:cypress-instances')
+const debug = Debug('cypress:server:cypress-sessions')
 
-export const getInstancesDir = (): string => {
-  return cypressInstancesDir(resolveCypressCacheRoot())
+export const getSessionsDir = (): string => {
+  return cypressSessionsDir(resolveCypressCacheRoot())
 }
 
 const getRecordPath = (pid: number): string => {
   return recordPath(resolveCypressCacheRoot(), pid)
 }
 
-let currentState: LiveInstanceState | null = null
+let currentState: LiveSessionState | null = null
 
 let persistChain: Promise<void> = Promise.resolve()
-const persist = (record: CypressInstance): Promise<void> => {
+const persist = (record: CypressSession): Promise<void> => {
   const run = async () => {
     const finalPath = getRecordPath(record.pid)
     const tmpPath = `${finalPath}.tmp`
 
     // Write to a temp file then rename: rename is atomic, so a concurrent reader
-    // (e.g. the CLI discovering live instances) always sees either the old record or
+    // (e.g. the CLI discovering live sessions) always sees either the old record or
     // the fully-written new one, never a partially-written/corrupt JSON file.
     await fs.ensureDir(path.dirname(finalPath))
     await fs.writeJson(tmpPath, record)
@@ -42,14 +42,14 @@ const persist = (record: CypressInstance): Promise<void> => {
   return next
 }
 
-export const cypressInstances = {
-  async addInstance ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
-    const record: CypressInstance = {
+export const cypressSessions = {
+  async addSession ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
+    const record: CypressSession = {
       schemaVersion: SCHEMA_VERSION,
       pid: process.pid,
       projectRoot: path.resolve(projectRoot),
       serverPort,
-      instanceId: crypto.randomUUID(),
+      sessionId: crypto.randomUUID(),
       testingType,
     }
 
@@ -59,9 +59,9 @@ export const cypressInstances = {
 
     try {
       await persist(record)
-      debug('wrote cypress instances record %o', record)
+      debug('wrote cypress sessions record %o', record)
     } catch (err) {
-      debug('failed to write cypress instances record: %o', err)
+      debug('failed to write cypress sessions record: %o', err)
     }
   },
 
@@ -74,7 +74,7 @@ export const cypressInstances = {
     }
 
     currentState = { ...currentState, browserName: browser?.displayName ?? null, browserFamily: browser?.family ?? null }
-    debug('cypress instances browser is now %o', browser ? { name: currentState.browserName, family: currentState.browserFamily } : null)
+    debug('cypress sessions browser is now %o', browser ? { name: currentState.browserName, family: currentState.browserFamily } : null)
   },
 
   setCdpBrowserWsUrl (cdpBrowserWsUrl: string | null): void {
@@ -83,10 +83,10 @@ export const cypressInstances = {
     }
 
     currentState = { ...currentState, cdpBrowserWsUrl }
-    debug('cypress instances cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
+    debug('cypress sessions cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
   },
 
-  getCurrent (): LiveInstanceState | null {
+  getCurrent (): LiveSessionState | null {
     return currentState
   },
 
@@ -103,15 +103,15 @@ export const cypressInstances = {
       await persistChain
 
       if (currentState) {
-        debug('skipping cypress instances removal; a newer record is live')
+        debug('skipping cypress sessions removal; a newer record is live')
 
         return
       }
 
       await fs.remove(getRecordPath(state.pid))
-      debug('removed cypress instances record for pid %d', state.pid)
+      debug('removed cypress sessions record for pid %d', state.pid)
     } catch (err) {
-      debug('failed to remove cypress instances record: %o', err)
+      debug('failed to remove cypress sessions record: %o', err)
     }
   },
 }

@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
-import { cypressInstances } from '../cypress-instances'
+import { cypressSessions } from '../cypress-sessions'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
@@ -137,7 +137,7 @@ const browsers = {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     await browserLauncher.connectToExisting(browser, options, automation, cdpSocketServer)
-    cypressInstances.setBrowser(browser)
+    cypressSessions.setBrowser(browser)
 
     return this.getBrowserInstance()
   },
@@ -236,7 +236,7 @@ const browsers = {
 
     instance = _instance
     instance.browser = browser
-    cypressInstances.setBrowser(browser)
+    cypressSessions.setBrowser(browser)
 
     // TODO: normalizing opening and closing / exiting
     // so that there is a default for each browser but
@@ -272,7 +272,7 @@ const browsers = {
 
       options.onBrowserClose()
       browserLauncher.clearInstanceState()
-      cypressInstances.setBrowser(null)
+      cypressSessions.setBrowser(null)
       instance = null
 
       if (browserDidCrash) {

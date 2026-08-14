@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import { renderCommandHuman } from '../../../lib/tap/render/command'
-import type { TapCommandResult } from '@packages/cypress-instances'
+import type { TapCommandResult } from '@packages/cypress-sessions'
 
 // chalk's color level depends on where the suite runs, so strip any escape
 // codes before snapshotting — the assertions target the layout, not the colors.

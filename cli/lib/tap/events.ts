@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 
 import util, { DEVELOPMENT_VERSION } from '../util'
-import { resolvedInstanceIdentity } from '../cypress-instances'
+import { resolvedSessionIdentity } from '../cypress-sessions'
 import { detectAgent } from '@packages/agent-info'
 import type { ReportedInvocation } from './reported-invocation'
 
@@ -97,21 +97,21 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
       return
     }
 
-    const identity = resolvedInstanceIdentity()
+    const identity = resolvedSessionIdentity()
 
     const payload = {
       command: trace.command,
       flags: trace.flags.slice(0, MAX_REPORTED_FLAGS),
       agent: detectAgent(),
-      instanceId: identity?.instanceId ?? undefined,
+      sessionId: identity?.sessionId ?? undefined,
       userId: identity?.userId ?? undefined,
       exitCode,
       errorCode: trace.errorCode,
       durationMs: Date.now() - trace.startedAt,
     }
 
-    // The identity travels in the instance probe response, so an invocation that
-    // never resolved an instance has no machineId and stays on the anonymous
+    // The identity travels in the session probe response, so an invocation that
+    // never resolved a session has no machineId and stays on the anonymous
     // collector, mirroring EventCollectorActions.recordEvent app-side.
     const machineId = identity?.machineId ?? undefined
     const url = eventCollectorUrl(machineId !== undefined)

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import commander from 'commander'
 
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, type TapSchema } from '@packages/cypress-instances'
+import { buildTapSchema, type TapSchema } from '@packages/cypress-sessions'
 
 const schema: TapSchema = {
   schemaVersion: 1,
@@ -10,7 +10,7 @@ const schema: TapSchema = {
   commands: [
     {
       name: 'health',
-      description: 'check that a running Cypress instance is reachable',
+      description: 'check that a running Cypress session is reachable',
       params: [],
       options: [],
     },
@@ -37,7 +37,7 @@ const schema: TapSchema = {
     },
     {
       name: 'run-state',
-      description: 'report where the running Cypress instance is in its run lifecycle',
+      description: 'report where the running Cypress session is in its run lifecycle',
       params: [],
       options: [],
       hidden: true,
@@ -53,10 +53,10 @@ const defaulting: TapSchema = {
   commands: [
     {
       name: 'probe',
-      description: 'read something out of a running Cypress instance',
+      description: 'read something out of a running Cypress session',
       params: [],
       options: [
-        { name: 'selector', alias: 's', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
+        { name: 'selector', alias: 'e', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
         { name: 'max-chars', alias: 'm', type: 'number', required: false, defaultValue: 30_000, description: 'cap on returned characters' },
       ],
     },
@@ -75,7 +75,7 @@ describe('lib/tap/build-program', () => {
   it('registers the CLI-native commands first, then one subcommand per advertised command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
-    expect(program.commands.map((command) => command.name())).toEqual(['instances', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'health', 'launch', 'open'])
+    expect(program.commands.map((command) => command.name())).toEqual(['sessions', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'health', 'launch', 'open'])
   })
 
   it('omits commands flagged hidden from the program (still exec-able, just not advertised)', () => {
@@ -85,7 +85,7 @@ describe('lib/tap/build-program', () => {
   })
 
   it('shadows a schema-advertised command that collides with a CLI-native one', () => {
-    // An older instance still advertises `run` over the binding; the CLI-native
+    // An older session still advertises `run` over the binding; the CLI-native
     // command wins, so only one `run` registers and it carries the native grammar.
     const program = buildTapProgram({
       schemaVersion: 1,
@@ -160,35 +160,65 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('health', {}, {})
   })
 
-  it('throws a catchable missingArgument error when a required positional is absent', () => {
+  // An invocation short of what the command declares is a tap failure like any
+  // other — not commander's own message on stderr and its own exit code — and it
+  // reads as the instance would report the same omission.
+  it('raises a tap failure naming every required positional left out', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.missingArgument' }),
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '"launch" is missing the required <spec> argument.',
+      }),
     )
+
+    expect(console.error).not.toHaveBeenCalled()
   })
 
-  it('throws a catchable excessArguments error for operands beyond the declared params', () => {
+  it('raises a tap failure counting operands beyond the declared params', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch', 'a.cy.js', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '2 arguments were passed to "launch", but it takes at most 1.',
+      }),
     )
   })
 
-  it('throws a catchable excessArguments error for operands passed to a no-param command', () => {
+  it('raises a tap failure for operands passed to a no-param command', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '1 argument was passed to "health", but it takes none.',
+      }),
     )
   })
 
-  it('throws a catchable unknownCommand error for a command not in the schema', () => {
+  it('raises a tap failure for an option given without its value', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['launch', 'a.cy.js', '--browser'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_OPTIONS',
+        detail: '"launch" was given the --browser option without a value.',
+      }),
+    )
+  })
+
+  // A name the schema has no command for is a tap failure like any other, raised
+  // with the listing that answers it rather than reported in commander's voice.
+  it('raises a tap failure naming a command not in the schema, and the help that lists them', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['bogus'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.unknownCommand' }),
+      expect.objectContaining({
+        code: 'UNKNOWN_COMMAND',
+        detail: expect.stringContaining('Unknown command "bogus"'),
+      }),
     )
   })
 
@@ -238,7 +268,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': 'log-3', 'attempt': '1' })
   })
 
-  // `command` declares --json in its schema so the instance can be told, but the
+  // `command` declares --json in its schema so the session can be told, but the
   // flag every command shares is still declared once, and it is that one the
   // help lists — with the command's own wording.
   it('declares a schema’s own --json once, keeping its description', () => {
@@ -289,8 +319,8 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
 
     expect(subcommand(program, 'command').helpInformation()).toContain('-t, --test-id <test-id>')
-    expect(subcommand(program, 'aria').helpInformation()).toContain('-s, --selector <selector>')
-    expect(subcommand(program, 'status').helpInformation()).toContain('-i, --instance <pid>')
+    expect(subcommand(program, 'aria').helpInformation()).toContain('-e, --selector <selector>')
+    expect(subcommand(program, 'status').helpInformation()).toContain('-s, --session <pid>')
   })
 
   // Commander accepts a short flag claimed twice within one command and silently
@@ -330,7 +360,7 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(defaulting, vi.fn())
     const help = subcommand(program, 'probe').helpInformation().replace(/\s+/g, ' ')
 
-    expect(help).toContain('-s, --selector <selector> a CSS selector (default: "body")')
+    expect(help).toContain('-e, --selector <selector> a CSS selector (default: "body")')
     expect(help).toContain('-m, --max-chars <max-chars> cap on returned characters (default: 30000)')
   })
 
@@ -338,19 +368,22 @@ describe('lib/tap/build-program', () => {
     const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
     const helpOf = (name: string): string => subcommand(program, name).helpInformation().replace(/\s+/g, ' ')
 
-    expect(helpOf('dom')).toContain('-s, --selector <selector> a CSS selector matching exactly one element (default: "body")')
-    expect(helpOf('aria')).toContain('-s, --selector <selector> a CSS selector matching exactly one element to root the tree at (default: "body")')
+    expect(helpOf('dom')).toContain('-e, --selector <selector> a CSS selector matching exactly one element (default: "body")')
+    expect(helpOf('aria')).toContain('-e, --selector <selector> a CSS selector matching exactly one element to root the tree at (default: "body")')
 
     // inspect takes the same selector but requires it, so the only default it
     // renders is the --timeout every command shares.
     expect(helpOf('inspect').match(/\(default:/g)).toHaveLength(1)
   })
 
-  it('throws a catchable unknownOption error for a flag not in the schema', () => {
+  it('raises a tap failure naming a flag not in the schema, and the help that lists them', () => {
     const program = buildTapProgram(schema, vi.fn())
 
     expect(() => program.parse(['launch', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.unknownOption' }),
+      expect.objectContaining({
+        code: 'UNKNOWN_OPTION',
+        detail: expect.stringContaining('Unknown option "--nope"'),
+      }),
     )
   })
 
@@ -361,7 +394,7 @@ describe('lib/tap/build-program', () => {
       cypressVersion: '15.0.0',
       commands: [{
         name: 'health',
-        description: 'check that a running Cypress instance is reachable',
+        description: 'check that a running Cypress session is reachable',
       }],
     } as TapSchema, dispatch)
 
@@ -370,7 +403,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('health', {}, {})
 
     expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.excessArguments' }),
+      expect.objectContaining({ code: 'INVALID_ARGUMENTS' }),
     )
   })
 
@@ -433,7 +466,7 @@ describe('lib/tap/build-program', () => {
     expect(dispatch).toHaveBeenCalledWith('show', { 'spec-path': 'a.cy.js' }, {})
   })
 
-  it('declares a required value option with requiredOption so commander enforces it', () => {
+  it('declares a required value option with requiredOption, and names it when left out', () => {
     const program = buildTapProgram({
       schemaVersion: 1,
       cypressVersion: '15.0.0',
@@ -446,7 +479,10 @@ describe('lib/tap/build-program', () => {
     }, vi.fn())
 
     expect(() => program.parse(['login'], { from: 'user' })).toThrowError(
-      expect.objectContaining({ code: 'commander.missingMandatoryOptionValue' }),
+      expect.objectContaining({
+        code: 'INVALID_OPTIONS',
+        detail: '"login" is missing the required --token option.',
+      }),
     )
   })
 })

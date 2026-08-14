@@ -10,30 +10,30 @@ export const SCHEMA_VERSION = 1
 
 export const MIN_SCHEMA_VERSION = 1
 
-export const INSTANCES_DIRNAME = 'instances'
+export const SESSIONS_DIRNAME = 'sessions'
 
 const RECORD_EXTENSION = '.json'
 
-export const INSTANCES_ROUTE_PREFIX = '/__cypress/instances/'
+export const SESSIONS_ROUTE_PREFIX = '/__cypress/sessions/'
 
-export const INSTANCE_ID_HEADER = 'x-cypress-instance-id'
+export const SESSION_ID_HEADER = 'x-cypress-session-id'
 
-export type InstanceTestingType = 'e2e' | 'component' | null
+export type SessionTestingType = 'e2e' | 'component' | null
 
-export interface CypressInstance {
+export interface CypressSession {
   schemaVersion: number
   pid: number
   projectRoot: string
   serverPort: number
-  instanceId: string
-  testingType: InstanceTestingType
+  sessionId: string
+  testingType: SessionTestingType
 }
 
-export interface LiveInstanceState extends CypressInstance {
+export interface LiveSessionState extends CypressSession {
   cdpBrowserWsUrl: string | null
-  /** Display name of the browser the instance has open (e.g. `Chrome`), or `null` when none is open. */
+  /** Display name of the browser the session has open (e.g. `Chrome`), or `null` when none is open. */
   browserName: string | null
-  /** Family of the browser the instance has open (e.g. `chromium`), or `null` when none is open. */
+  /** Family of the browser the session has open (e.g. `chromium`), or `null` when none is open. */
   browserFamily: string | null
   /** sha256 hash of the OS machine GUID (node-machine-id), or `null` when unresolvable. */
   machineId: string | null
@@ -41,7 +41,7 @@ export interface LiveInstanceState extends CypressInstance {
   userId: string | null
 }
 
-export interface ReadyInstanceState extends LiveInstanceState {
+export interface ReadySessionState extends LiveSessionState {
   cdpBrowserWsUrl: string
 }
 
@@ -67,30 +67,30 @@ export const parseRecordPid = (entry: string): number | null => {
   return Number.isInteger(pid) ? pid : null
 }
 
-export const cypressInstancesDir = (cacheRoot: string): string => {
-  return path.join(cacheRoot, INSTANCES_DIRNAME)
+export const cypressSessionsDir = (cacheRoot: string): string => {
+  return path.join(cacheRoot, SESSIONS_DIRNAME)
 }
 
 export const recordPath = (cacheRoot: string, pid: number): string => {
-  return path.join(cypressInstancesDir(cacheRoot), recordFileName(pid))
+  return path.join(cypressSessionsDir(cacheRoot), recordFileName(pid))
 }
 
-export const instancesProbePath = (instanceId: string): string => {
-  return `${INSTANCES_ROUTE_PREFIX}${instanceId}`
+export const sessionProbePath = (sessionId: string): string => {
+  return `${SESSIONS_ROUTE_PREFIX}${sessionId}`
 }
 
-const isValidTestingType = (value: any): value is InstanceTestingType => {
+const isValidTestingType = (value: any): value is SessionTestingType => {
   return value === 'e2e' || value === 'component' || value === null
 }
 
-export const isCompatibleRecord = (record: any): record is CypressInstance => {
+export const isCompatibleRecord = (record: any): record is CypressSession => {
   return Boolean(record)
     && typeof record.schemaVersion === 'number'
     && record.schemaVersion >= MIN_SCHEMA_VERSION
     && typeof record.pid === 'number'
     && typeof record.projectRoot === 'string'
     && Number.isInteger(record.serverPort)
-    && typeof record.instanceId === 'string'
-    && record.instanceId.length > 0
+    && typeof record.sessionId === 'string'
+    && record.sessionId.length > 0
     && isValidTestingType(record.testingType)
 }

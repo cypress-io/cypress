@@ -90,10 +90,30 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect(outcome).to.deep.eq({
-      error: { code: 'SNAPSHOT_NOT_FOUND', message: 'no snapshot of this command matches "during" — available snapshots: "before" (1), "after" (2)' },
+      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for `--at` "during". This command has these snapshots: ["before", "after"]' },
     })
 
     expect(pinSnapshot).not.to.have.been.called
+  })
+
+  it('lists an unnamed snapshot by the index --at would take', async () => {
+    stubSource({
+      runner: {
+        getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
+        getSnapshotPropsForLog: () => ({ ...SNAPSHOT_PROPS, snapshots: [{}, { name: 'after' }] }),
+      },
+    })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+    const missing = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
+
+    expect((missing as { error: { detail: string } }).error.detail).to.contain('these snapshots: [1, "after"]')
+
+    // The listing is only worth printing if what it names resolves, and `--at` is
+    // 1-based, so the index it shows is the one to pass back.
+    const pinned = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: '1' })
+
+    expect((pinned as { result: any }).result.pinned.at).to.deep.eq({ index: 1, total: 2 })
   })
 
   it('switches to a different command by re-pinning it', async () => {
@@ -479,27 +499,28 @@ describe('tap/commands/pin', () => {
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2' })
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('PIN_TARGET_REQUIRED')
+    expect((outcome as { error: { code: string } }).error.code).to.eq('INVALID_OPTIONS')
     // A malformed pin never drives the app pin.
     expect(pinSnapshot).not.to.have.been.called
   })
 
-  it('fails with NO_RUN when no runner has mounted', async () => {
+  it('fails with SPEC_NOT_STARTED when no runner has mounted', async () => {
     stubSource({ runner: undefined })
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
-    expect((outcome as { error: { code: string } }).error.code).to.eq('NO_RUN')
+    expect((outcome as { error: { code: string } }).error.code).to.eq('SPEC_NOT_STARTED')
   })
 
-  it('refuses to pin while a spec is running', async () => {
+  it('refuses to pin while a spec is running, naming the spec to wait on', async () => {
     stubSource({ running: true })
+    cy.stub(tapManagerDataSource, 'getActiveSpecRelative').returns('cypress/e2e/slow.cy.js')
 
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1' })
 
-    expect((outcome as { error: { code: string, message: string } }).error).to.deep.eq({
-      code: 'RUN_IN_PROGRESS',
-      message: 'a spec is currently running — call `cypress tap status` to check its current status; wait for it to finish before trying again',
+    expect((outcome as { error: { code: string, detail: string } }).error).to.deep.eq({
+      code: 'SPEC_IN_PROGRESS',
+      detail: 'The spec cypress/e2e/slow.cy.js is currently running.',
     })
   })
 
@@ -563,7 +584,7 @@ describe('tap/commands/pin', () => {
     expect(outcome).to.deep.eq({
       error: {
         code: 'AMBIGUOUS_COMMAND',
-        message: '"2" matches h1:2 (before each) and h2:2 (before each) — qualify the id with its section, e.g. "h1:2"',
+        detail: '"2" matches:\n\n  h1:2 (before each)\n  h2:2 (before each)',
       },
     })
 
