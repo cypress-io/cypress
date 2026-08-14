@@ -1,6 +1,17 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 import { getAllHtmlOrigins } from './origins'
 import { clearStorage, getStorage, setStorage } from './storage'
+
+// Cookie automation round trips are unbounded at every layer beneath the driver,
+// so a browser command that is accepted but never answered would hang the
+// between-test lifecycle indefinitely. Matches INTERNAL_COMMAND_TIMEOUT in ./index.
+const AUTOMATION_TIMEOUT = 20_000
+
+const timeBoxAutomation = <T>(automation: Promise<T>, command: string): Bluebird<T> => {
+  return Bluebird.resolve(automation)
+  .timeout(AUTOMATION_TIMEOUT, `Timed out after ${AUTOMATION_TIMEOUT}ms waiting for the browser to respond to the '${command}' automation command.`)
+}
 
 const LOGS = {
   clearCurrentSessionData: {
@@ -124,15 +135,15 @@ export default class SessionsManager {
     },
 
     getCookies: async () => {
-      return this.Cypress.automation('get:cookies', {})
+      return timeBoxAutomation(this.Cypress.automation('get:cookies', {}), 'get:cookies')
     },
 
     setCookies: async (cookies) => {
-      return this.Cypress.automation('set:cookies', cookies)
+      return timeBoxAutomation(this.Cypress.automation('set:cookies', cookies), 'set:cookies')
     },
 
     clearCookies: async () => {
-      return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
+      return timeBoxAutomation(this.Cypress.automation('clear:cookies', await this.sessions.getCookies()), 'clear:cookies')
     },
 
     getCurrentSessionData: async () => {

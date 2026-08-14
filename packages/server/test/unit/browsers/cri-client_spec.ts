@@ -41,6 +41,9 @@ describe('lib/browsers/cri-client', function () {
   // wraps the shared helper over the current criStub
   const fireDisconnect = () => fireDisconnectListeners(criStub.on, criStub.off)
 
+  // drains async event handlers, which fireCDPEvent invokes without awaiting
+  const drain = () => new Promise((resolve) => setImmediate(resolve))
+
   beforeEach(function () {
     send = sinon.stub()
     onError = sinon.stub()
@@ -160,13 +163,35 @@ describe('lib/browsers/cri-client', function () {
         it('sends Runtime.runIfWaitingForDebugger even if Network.enable throws', async () => {
           criStub.send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target closed'))
 
-          await fireCDPEvent('Target.attachedToTarget', {
+          fireCDPEvent('Target.attachedToTarget', {
             waitingForDebugger: true,
             sessionId,
             targetInfo: { type: 'iframe' } as Protocol.Target.TargetInfo,
           })
 
+          await drain()
+
           expect(criStub.send).to.have.been.calledWith('Network.enable').and.to.have.thrown()
+          expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        })
+
+        it('sends Runtime.runIfWaitingForDebugger when Network.enable is never answered', async () => {
+          criStub.send.withArgs('Network.enable').returns(new Promise(() => {}))
+
+          const clock = sinon.useFakeTimers({ shouldAdvanceTime: false })
+
+          try {
+            fireCDPEvent('Target.attachedToTarget', {
+              waitingForDebugger: true,
+              sessionId,
+              targetInfo: { type: 'iframe' } as Protocol.Target.TargetInfo,
+            })
+
+            await clock.tickAsync(2000)
+          } finally {
+            clock.restore()
+          }
+
           expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
         })
 
@@ -187,10 +212,6 @@ describe('lib/browsers/cri-client', function () {
     describe('when a service worker target attaches', () => {
       const sessionId = 'sw-session'
       let client: CriClient
-
-      // drains the async attach handler, which fireCDPEvent invokes without
-      // awaiting
-      const drain = () => new Promise((resolve) => setImmediate(resolve))
 
       beforeEach(async () => {
         client = await getClient({ host: HOST, fullyManageTabs: true })

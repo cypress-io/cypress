@@ -46,6 +46,12 @@ export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
 // potentially hung (debug logging only - the command is not aborted)
 const SEND_HANG_DETECTION_MS = 10000
 
+// An auto-attached target is held at the debugger until we release it, so an
+// unanswered Network.enable on that session must not be what decides whether it
+// ever runs. The send is left outstanding rather than aborted: if it settles
+// late, its effect still applies to the session.
+const ATTACHED_TARGET_NETWORK_ENABLE_TIMEOUT_MS = 2000
+
 export interface ICriClient {
   /**
    * The target id attached to by this client
@@ -455,7 +461,21 @@ export class CriClient implements ICriClient {
       // Service workers get attached at the page and browser level. We only want to handle them at the browser level
       // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
       if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
-        await this.cdpConnection.send('Network.enable', this.protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
+        let timeout: NodeJS.Timeout | undefined
+
+        try {
+          await Promise.race([
+            this.cdpConnection.send('Network.enable', this.protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId),
+            new Promise<void>((resolve) => {
+              timeout = setTimeout(() => {
+                debug('Network.enable went unanswered for %dms on session %s; releasing the debugger anyway', ATTACHED_TARGET_NETWORK_ENABLE_TIMEOUT_MS, event.sessionId)
+                resolve()
+              }, ATTACHED_TARGET_NETWORK_ENABLE_TIMEOUT_MS)
+            }),
+          ])
+        } finally {
+          clearTimeout(timeout)
+        }
       }
     } catch (error) {
       // it's possible that the target was closed before we could enable network, in that case, just ignore

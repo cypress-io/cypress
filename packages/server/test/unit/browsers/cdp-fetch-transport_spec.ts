@@ -2007,9 +2007,9 @@ describe('CdpFetchTransport', () => {
           responseStatusCode: 200,
         }))
 
-        // the pause already arrived, so a body slower than the 30s pause
-        // timeout must not fail the flow
-        await clock.tickAsync(31000)
+        // the pause already arrived, so the wait for it is not what a slow
+        // body is charged against - resolution gets its own budget
+        await clock.tickAsync(29000)
 
         slowBody.resolve({ body: '', base64Encoded: false })
 
@@ -2023,6 +2023,49 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 200,
       })
+    })
+
+    it('releases the response pause when its resolution never settles', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      const stalledBody = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.getResponseBody').returns(stalledBody.promise)
+
+      httpIntercept.use(async (req, next) => next(req))
+
+      const clock = sinon.useFakeTimers({ shouldAdvanceTime: false })
+      let responded: Promise<unknown> | undefined
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await clock.tickAsync(0)
+
+        responded = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await clock.tickAsync(30001)
+        await handled
+
+        // the request-stage id addresses the arrived pause, so the flow can
+        // still be released rather than leaving the browser paused
+        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+          requestId: 'fetch-request',
+        })
+      } finally {
+        clock.restore()
+        stalledBody.resolve({ body: '', base64Encoded: false })
+        await responded
+      }
     })
 
     it('exposes response pause bodies as a stream for middleware rewrites', async () => {

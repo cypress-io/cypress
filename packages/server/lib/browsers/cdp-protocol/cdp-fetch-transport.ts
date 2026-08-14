@@ -122,9 +122,9 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
 
 /**
  * `headersReady` settles once the response pause has arrived and its headers
- * are resolved. RESPONSE_PAUSE_TIMEOUT_MS is bounded on that rather than on the
- * whole response so the body transfer, which can legitimately outlast the time
- * the browser took to respond, is not charged against a pause that arrived.
+ * are resolved. It splits the wait for the browser to respond from the wait for
+ * that response to resolve, so each gets its own RESPONSE_PAUSE_TIMEOUT_MS
+ * budget and the body transfer is not charged against a pause that arrived.
  */
 type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   headersReady: PromiseWithResolvers<void>
@@ -458,7 +458,23 @@ export class CdpFetchTransport {
             }),
           ])
 
-          const pausedResponse = await responseDeferred.promise
+          clearTimeout(timeout)
+
+          const pausedResponse = await Promise.race([
+            responseDeferred.promise,
+            new Promise<never>((_resolve, reject) => {
+              timeout = setTimeout(() => {
+                // Every path that rejects this deferred releases the pause
+                // itself. Timing out is the one case where the pause arrived
+                // and nothing owns it, so claim the request-stage id — it
+                // still addresses that pause — for the catch below to release.
+                responseRequestId = event.requestId
+                responseSessionId = sessionId
+
+                reject(new Error(`Timed out resolving the CDP Fetch response pause for ${event.request.url}`))
+              }, RESPONSE_PAUSE_TIMEOUT_MS)
+            }),
+          ])
 
           responseRequestId = pausedResponse.requestId
           responseSessionId = pausedResponse.sessionId

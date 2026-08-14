@@ -81,12 +81,32 @@ const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
   return !!(runnable._fired && runnable._fired[event])
 }
 
+// These listeners are fully awaited between tests and none of them is otherwise
+// timed out, so a browser round trip that is accepted but never answered stalls
+// the run with no output at all until CI kills the job.
+const LIFECYCLE_EVENT_TIMEOUT = 60000
+
+const lifecycleTimeoutMessage = (event: string) => {
+  return `Timed out after ${LIFECYCLE_EVENT_TIMEOUT}ms waiting for '${event}' to complete. This usually means a command sent to the browser between tests was never answered. Rerun with DEBUG=cypress-verbose:server:browsers:cdp-connection:* to identify the unanswered browser command.`
+}
+
+// The test these fire for has already been reported, so surface the stall
+// instead of attributing it to whatever test runs next.
+const reportLifecycleTimeout = (err: Error) => {
+  if (!(err instanceof Promise.TimeoutError)) {
+    throw err
+  }
+
+  // eslint-disable-next-line no-console
+  console.error(err.message)
+}
+
 const testBeforeRunAsync = (test, Cypress) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_RUN_ASYNC_EVENT, test)) {
       return fire(TEST_BEFORE_RUN_ASYNC_EVENT, test, Cypress)
     }
-  })
+  }).timeout(LIFECYCLE_EVENT_TIMEOUT, lifecycleTimeoutMessage(TEST_BEFORE_RUN_ASYNC_EVENT))
 }
 
 const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
@@ -94,7 +114,7 @@ const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
     if (!fired(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test)) {
       return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, ...args)
     }
-  })
+  }).timeout(LIFECYCLE_EVENT_TIMEOUT, lifecycleTimeoutMessage(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT))
 }
 
 const testAfterRunAsync = (test, Cypress) => {
@@ -102,7 +122,7 @@ const testAfterRunAsync = (test, Cypress) => {
     if (!fired(TEST_AFTER_RUN_ASYNC_EVENT, test)) {
       return fire(TEST_AFTER_RUN_ASYNC_EVENT, test, Cypress)
     }
-  })
+  }).timeout(LIFECYCLE_EVENT_TIMEOUT, lifecycleTimeoutMessage(TEST_AFTER_RUN_ASYNC_EVENT))
 }
 
 const runnableAfterRunAsync = (runnable, Cypress) => {
@@ -551,14 +571,14 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           cy.removeAllListeners('window:load')
 
           // This will navigate to about:blank if test isolation is on
-          await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
+          await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn }).catch(reportLifecycleTimeout)
           // Clear cached spec-bridge targets after isolation; the runner must serve
           // a current app build so `notifyCrossOriginBridgeReady` re-binds the iframe.
           Cypress.primaryOriginCommunicator.clearCrossOriginDriverWindows()
         }
 
         testAfterRun(test, Cypress)
-        await testAfterRunAsync(test, Cypress)
+        await testAfterRunAsync(test, Cypress).catch(reportLifecycleTimeout)
 
         // if the user has stopped the run and we are in run mode, we need to abort,
         // this needs to happen after the test:after:run events have fired
