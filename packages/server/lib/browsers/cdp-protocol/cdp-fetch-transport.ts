@@ -222,8 +222,8 @@ export class CdpFetchTransport {
 
   /**
    * Attaches the Fetch handlers and enables interception on this transport's
-   * own session. Sessions that attach later come through
-   * `attachServiceWorkerSession`.
+   * own session. Child sessions that attach later (service workers,
+   * origin-isolated iframes) come through `attachChildSession`.
    */
   async start (): Promise<void> {
     if (this.isStarted) {
@@ -259,19 +259,20 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Enables interception on a service worker session attached to this
-   * transport's connection. A service worker's script fetch and its
-   * fetch-handler requests run on that session rather than the page's, so
-   * without this they bypass the middleware onion — and `cy.intercept` —
-   * entirely.
+   * Enables interception on a child session attached to this transport's
+   * connection. Those targets run their network on their own session rather
+   * than the page's — a service worker's script fetch and fetch handlers, an
+   * out-of-process iframe's (OOPIF) subresources — so without this their
+   * requests bypass the middleware onion (and `cy.intercept`) entirely and
+   * escape to the real origin.
    *
    * Must run while the target is still waiting for the debugger; the caller
    * (CriClient._onAttachedToTarget) sequences this before
    * Runtime.runIfWaitingForDebugger.
    */
-  async attachServiceWorkerSession (sessionId: string): Promise<void> {
+  async attachChildSession (sessionId: string): Promise<void> {
     if (!this.isStarted) {
-      debug('attachServiceWorkerSession skipped (transport not started)')
+      debug('attachChildSession skipped (transport not started)')
 
       return
     }

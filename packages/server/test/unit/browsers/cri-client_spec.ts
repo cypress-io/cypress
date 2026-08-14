@@ -184,7 +184,7 @@ describe('lib/browsers/cri-client', function () {
       })
     })
 
-    describe('when a service worker target attaches', () => {
+    describe('when a child target (service worker / out-of-process iframe) attaches', () => {
       const sessionId = 'sw-session'
       let client: CriClient
 
@@ -200,7 +200,7 @@ describe('lib/browsers/cri-client', function () {
       it('enables interception on the session before releasing the debugger', async () => {
         const enabled = Promise.withResolvers<void>()
 
-        client.onServiceWorkerTargetAttached = sinon.stub().returns(enabled.promise)
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
@@ -210,7 +210,7 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(client.onServiceWorkerTargetAttached).to.have.been.calledOnceWith(sessionId)
+        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
 
         // a worker released before its session is intercepted fetches its own
         // script straight off the network, bypassing the middleware onion
@@ -222,10 +222,36 @@ describe('lib/browsers/cri-client', function () {
         expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
-      it('does not enable interception for other target types', async () => {
-        client.onServiceWorkerTargetAttached = sinon.stub().resolves()
+      it('enables interception on origin-isolated iframe sessions before releasing the debugger', async () => {
+        // an out-of-process iframe's (OOPIF) subresources are fetched on its
+        // own session (e.g. an https spec-bridge iframe on an origin-keyed
+        // google origin); released uninstrumented, its runner bundle request
+        // escapes to the real origin
+        const enabled = Promise.withResolvers<void>()
 
-        await Promise.all(['page', 'other', 'iframe'].map((type) => {
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'iframe' } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
+        expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+        enabled.resolve()
+        await drain()
+
+        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('does not enable interception for other target types', async () => {
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        await Promise.all(['page', 'other'].map((type) => {
           return fireCDPEvent('Target.attachedToTarget', {
             waitingForDebugger: true,
             sessionId,
@@ -235,11 +261,11 @@ describe('lib/browsers/cri-client', function () {
 
         await drain()
 
-        expect(client.onServiceWorkerTargetAttached).not.to.have.been.called
+        expect(client.onChildTargetAttached).not.to.have.been.called
       })
 
       it('releases the debugger even when enabling interception fails', async () => {
-        client.onServiceWorkerTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+        client.onChildTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
 
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: true,
