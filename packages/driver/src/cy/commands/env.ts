@@ -48,7 +48,9 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
         message,
         timeout: options.timeout,
         consoleProps () {
-          return envVars
+          // only the names, never the values - `cy.env()` exists to keep sensitive
+          // values out of the browser's console and the command log snapshots
+          return { 'Env Vars': envVars }
         },
       })
 
