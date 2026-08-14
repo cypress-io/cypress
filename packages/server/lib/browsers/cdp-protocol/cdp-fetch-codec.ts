@@ -298,7 +298,13 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.headers = toNetworkHeaders(httpRequest.headers)
       }
 
-      if (httpRequest.body !== undefined) {
+      // The net-stubbing pipeline normalizes every intercepted request to a
+      // string body, so a request the browser paused without one arrives back
+      // here as `''` — indistinguishable from a body a handler emptied. Sending
+      // that as postData makes Chrome attach `Content-Length: 0` to requests
+      // that never had a body (#24407). Only an empty body the pause itself
+      // carried is a real change worth forwarding.
+      if (httpRequest.body !== undefined && (httpRequest.body.length > 0 || transportRequest.postData !== undefined)) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
       }
 
