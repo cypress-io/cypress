@@ -204,12 +204,18 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
   networkProxy.withIntercept(expressInterception)
 
+  const syntheticCodec = createSyntheticProxyCodec({
+    createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
+  })
+
   const networkInterception = attachStages(
     new HttpIntercept(createCdpFetchCodec()),
-    createSyntheticProxyCodec({
-      createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
-    }),
+    syntheticCodec,
   )
+
+  // Every transport shares one synthetic codec, so a canceled request is torn
+  // down through the same exchange map no matter which target it paused on.
+  const onRequestCanceled = (requestId: string) => syntheticCodec.abortRequest(requestId)
 
   // Send strategy:file requests to the origin server over the wire, and let
   // Express serve them from the file server, rather than answering the pause
@@ -251,6 +257,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
+    onRequestCanceled,
   })
 
   // Extra-target transports share networkInterception so they cannot drift from
@@ -288,6 +295,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       const extraTransport = new CdpFetchTransport(client, networkInterception, {
         isFromExtraTarget: true,
         resolveOriginRedirect,
+        onRequestCanceled,
       })
 
       await extraTransport.start()
