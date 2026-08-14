@@ -693,6 +693,7 @@
     "./packages/config/cjs/project/utils.js",
     "./packages/config/cjs/utils.js",
     "./packages/config/cjs/validation.js",
+    "./packages/cypress-sessions/dist/index.js",
     "./packages/data-context/graphql/makeGraphQLServer.ts",
     "./packages/data-context/graphql/plugins/index.ts",
     "./packages/data-context/graphql/plugins/nexusDebugFieldPlugin.ts",
@@ -3361,6 +3362,14 @@
     "./node_modules/zod/v3/helpers/util.cjs",
     "./node_modules/zod/v3/locales/en.cjs",
     "./node_modules/zod/v3/types.cjs",
+    "./packages/cypress-sessions/dist/contracts/command.js",
+    "./packages/cypress-sessions/dist/contracts/pin.js",
+    "./packages/cypress-sessions/dist/contracts/pinned.js",
+    "./packages/cypress-sessions/dist/contracts/reporter.js",
+    "./packages/cypress-sessions/dist/contracts/resolve-selector.js",
+    "./packages/cypress-sessions/dist/tap-contract.js",
+    "./packages/cypress-sessions/dist/tap-errors.js",
+    "./packages/cypress-sessions/dist/tap-operations.js",
     "./packages/data-context/graphql/corsOriginDelegate.ts",
     "./packages/data-context/graphql/index.ts",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
@@ -3666,6 +3675,7 @@
     "./packages/server/lib/cloud/network/parse_error.ts",
     "./packages/server/lib/cloud/network/system_error.ts",
     "./packages/server/lib/cloud/protocol.ts",
+    "./packages/server/lib/cloud/reporting_disabled.ts",
     "./packages/server/lib/cloud/require_script.ts",
     "./packages/server/lib/cloud/strip_path.ts",
     "./packages/server/lib/cloud/studio/StudioElectron.ts",
@@ -3686,6 +3696,7 @@
     "./packages/server/lib/controllers/spec.ts",
     "./packages/server/lib/controllers/xhrs.ts",
     "./packages/server/lib/cwd.ts",
+    "./packages/server/lib/cypress-sessions.ts",
     "./packages/server/lib/cypress.ts",
     "./packages/server/lib/environment.ts",
     "./packages/server/lib/exec.ts",
@@ -3729,6 +3740,7 @@
     "./packages/server/lib/util/ci_provider.ts",
     "./packages/server/lib/util/class-helpers.ts",
     "./packages/server/lib/util/commit-info.ts",
+    "./packages/server/lib/util/cypress-cache.ts",
     "./packages/server/lib/util/duration.ts",
     "./packages/server/lib/util/editors.ts",
     "./packages/server/lib/util/egress-policy.ts",
@@ -3926,5 +3938,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ff3cad7686562419f86dacfd5e072354396df923119719e934bb76985c94bc7f"
+  "deferredHash": "393594b8188996582ef0773e3aea0087c318934a824df6d13fae8f980e9c7520"
 }
