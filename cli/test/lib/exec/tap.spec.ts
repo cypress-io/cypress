@@ -1207,7 +1207,7 @@ describe('lib/exec/tap', () => {
           --json                print the raw JSON result instead of the human-readable
                                 rendering
           --timeout <ms>        how long to wait on any single call into the running
-                                Cypress, in milliseconds (default 30000)
+                                Cypress, in milliseconds (default: 30000)
           -h, --help            display help for command
 
         Commands:
@@ -1280,7 +1280,7 @@ describe('lib/exec/tap', () => {
                                          property in full, however long, rather than
                                          the long ones named by their length
           --timeout <ms>                 how long to wait on any single call into the
-                                         running Cypress, in milliseconds (default
+                                         running Cypress, in milliseconds (default:
                                          30000)
           -h, --help                     display help for command
         "

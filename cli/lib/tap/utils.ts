@@ -26,11 +26,7 @@ export const parseIndex = (raw: string | undefined): number | undefined => {
   return value
 }
 
-export const parsePositiveInt = (raw: string | undefined, fallback: number, label: string): number => {
-  if (raw === undefined) {
-    return fallback
-  }
-
+export const parsePositiveInt = (raw: string, label: string): number => {
   const value = parseWholeNumber(raw)
 
   if (value === undefined || value <= 0) {

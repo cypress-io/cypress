@@ -15,17 +15,29 @@ export interface TapCommandParamSchema {
   description: string
 }
 
-export interface TapCommandOptionSchema {
+interface TapCommandOptionBase {
   name: string
   // A single letter, rendered by the CLI as `-t, --test-id <test-id>`. Commander
   // accepts a letter claimed twice within one command and silently lets the last
   // declaration win, so an alias must be unique across the command's own options
   // and the `--instance` every command shares.
   alias?: string
-  type: 'string' | 'number' | 'boolean'
   required: boolean
   description: string
 }
+
+// `defaultValue` is the value a command sees when the flag is absent, so a
+// handler never restates a default its own help already promises. The CLI hands
+// it to commander, which both applies it and renders `(default: …)` — so a
+// description must not spell the default out a second time. Pairing it with
+// `type` keeps the two from disagreeing: a boolean flag is already
+// absent-means-false, so it takes none, and a required option can't need one.
+type TapCommandOptionDefault =
+  | { type: 'string', defaultValue?: string }
+  | { type: 'number', defaultValue?: number }
+  | { type: 'boolean', defaultValue?: never }
+
+export type TapCommandOptionSchema = TapCommandOptionBase & TapCommandOptionDefault
 
 export interface TapCommandSchema {
   name: string
@@ -62,6 +74,10 @@ type SchemaObject<
   { [E in Entry as E extends Present ? E['name'] : never]: Scalars[E['type']] } &
   { [E in Entry as E extends Present ? never : E['name']]?: Scalars[E['type']] }
 
+// An option carrying a default is present however it was invoked, so both sides
+// see it alongside the ones their caller is made to supply.
+type Defaulted = { defaultValue: string | number }
+
 // App-side handlers see coerced values (the binding's exec coerces each wire
 // string to its declared scalar before dispatch): required params are present,
 // and boolean options default to false when the flag is absent.
@@ -71,7 +87,7 @@ export type TapCoercedParams<P extends readonly TapCommandParamSchema[]> =
   SchemaObject<P[number], { required: true }, CoercedScalars>
 
 export type TapCoercedOptions<O extends readonly TapCommandOptionSchema[]> =
-  SchemaObject<O[number], { required: true } | { type: 'boolean' }, CoercedScalars>
+  SchemaObject<O[number], { required: true } | { type: 'boolean' } | Defaulted, CoercedScalars>
 
 // CLI-side handlers see commander's values forwarded as raw strings (a set
 // boolean flag arrives as the string 'true'). Only required value options are
@@ -82,7 +98,7 @@ export type TapRawParams<P extends readonly TapCommandParamSchema[]> =
   SchemaObject<P[number], { required: true }, RawScalars>
 
 export type TapRawOptions<O extends readonly TapCommandOptionSchema[]> =
-  SchemaObject<O[number], { required: true, type: 'string' | 'number' }, RawScalars>
+  SchemaObject<O[number], { required: true, type: 'string' | 'number' } | Defaulted, RawScalars>
 
 // Options that recur across commands, defined once so their name, type, and help
 // text can't drift between the commands that expose them. `test-id` and
@@ -264,13 +280,13 @@ selector you meant.`
 
 // Where `dom` and `aria` read from with no selector: the document element only
 // adds a <head> of script and style text; `--selector html` still reads it.
-export const TAP_DEFAULT_SELECTOR = 'body'
+const TAP_DEFAULT_SELECTOR = 'body'
 
 // Shared by the three selector-taking reads, so the way you pick one match out
 // of several is identical across them.
 const atField = {
   name: 'at',
-  type: 'string',
+  type: 'number',
   required: false,
   description: '0-based index of the match to read, as listed by the index column when a selector matches several',
 } as const satisfies TapCommandOptionSchema
@@ -286,8 +302,8 @@ browser-side so a heavy page never ships megabytes at once.
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR}; defaults to ${TAP_DEFAULT_SELECTOR}` },
-    { name: 'max-chars', alias: 'm', type: 'string', required: false, description: 'cap on returned HTML characters (default 30000)' },
+    { ...selectorField, defaultValue: TAP_DEFAULT_SELECTOR, description: SINGLE_ELEMENT_SELECTOR },
+    { name: 'max-chars', alias: 'm', type: 'number', required: false, defaultValue: 30_000, description: 'cap on returned HTML characters' },
     atField,
   ],
 } as const satisfies TapNativeCommandSchema
@@ -302,8 +318,10 @@ are dropped, leaving the compact role/name/state tree DevTools shows.
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    { ...selectorField, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at; defaults to ${TAP_DEFAULT_SELECTOR}` },
-    { name: 'max-nodes', alias: 'm', type: 'string', required: false, description: 'cap on the number of accessibility nodes returned (default 200)' },
+    { ...selectorField, defaultValue: TAP_DEFAULT_SELECTOR, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at` },
+    // The accessibility tree of a real app is deep; the cap keeps the projection
+    // affordable for an LLM. A selector roots it at a subtree for finer reads.
+    { name: 'max-nodes', alias: 'm', type: 'number', required: false, defaultValue: 200, description: 'cap on the number of accessibility nodes returned' },
     atField,
   ],
 } as const satisfies TapNativeCommandSchema

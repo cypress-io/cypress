@@ -1,5 +1,3 @@
-import { TAP_DEFAULT_SELECTOR } from '@packages/cypress-instances'
-
 import type { TapSession } from '../tap-session'
 import type { AutFrame } from '../aut/frame'
 import { withResolvedAutFrame } from '../aut/frame'
@@ -9,10 +7,6 @@ import type { AXProperty, AXValue } from '../aut/cdp'
 import { withAmbiguous } from '../aut/single-match'
 import type { FrameAmbiguousResult } from '../aut/single-match'
 import { defineNativeCommand } from './definition'
-
-// The accessibility tree of a real app is deep; cap the projection so it stays
-// affordable for an LLM. A selector roots it at a subtree for finer reads.
-const DEFAULT_MAX_NODES = 200
 
 // Structural/text roles carry no semantic signal on their own — dropping them
 // yields the compact role/name tree DevTools shows, not the raw render tree.
@@ -204,5 +198,5 @@ export const extractAria = (
 }
 
 export const ariaCommand = defineNativeCommand('aria', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractAria(session, frame, commandOptions.selector ?? TAP_DEFAULT_SELECTOR, parsePositiveInt(commandOptions['max-nodes'], DEFAULT_MAX_NODES, 'max-nodes'), parseIndex(commandOptions.at))
+  return extractAria(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-nodes'], 'max-nodes'), parseIndex(commandOptions.at))
 }, 'aria'))
