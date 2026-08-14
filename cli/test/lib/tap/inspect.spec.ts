@@ -120,7 +120,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   it('fails instead of reporting a partial element when the renderer stops answering', async () => {
     const { session } = makeInspectSession({
       selectorObjectId: 'obj-1',
-      axError: new TapError('RENDERER_UNRESPONSIVE', 'The targeted Cypress instance did not answer Accessibility.getPartialAXTree within 30000ms.'),
+      axError: new TapError('RENDERER_UNRESPONSIVE', { detail: 'The targeted Cypress instance did not answer Accessibility.getPartialAXTree within 30000ms.' }),
     })
 
     await expect(extractInspect(session, frame, '.wedged')).rejects.toMatchObject({ code: 'RENDERER_UNRESPONSIVE' })
