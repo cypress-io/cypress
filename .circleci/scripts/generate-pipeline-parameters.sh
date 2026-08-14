@@ -207,7 +207,14 @@ while IFS= read -r file; do
       unit_tests=true
       ;;
     packages/agent-info/*)
-      # No monorepo consumers yet — only its own vitest suite runs in unit-tests.
+      cli_tests=true
+      unit_tests=true
+      ;;
+    packages/cypress-sessions/*)
+      app_ui_tests=true
+      cli_tests=true
+      server_tests=true
+      system_tests=true
       unit_tests=true
       ;;
     packages/runner/*)
