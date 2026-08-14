@@ -23,8 +23,8 @@ const CLI_BIN = path.join(__dirname, '..', '..', 'cli', 'bin', 'cypress')
 // that entry at module load, so only development | test | staging | production work.
 const CONFIG_ENV = 'test'
 
-// The instances dir lives under the cache root, so a pid-unique folder means discovery
-// can only ever find this suite's own instance — `reason: 'only'`, no --instance needed.
+// The sessions dir lives under the cache root, so a pid-unique folder means discovery
+// can only ever find this suite's own session — `reason: 'only'`, no --session needed.
 const CACHE_FOLDER = path.join(os.tmpdir(), `cy-tap-open-${process.pid}`)
 
 const READY_TIMEOUT_MS = 120000
@@ -49,7 +49,7 @@ export interface TapResult {
 export interface TapStatus {
   status: string
   startedAt?: string | null
-  /** Set once the instance is reachable. */
+  /** Set once the session is reachable. */
   pid?: number
   [key: string]: unknown
 }
@@ -132,11 +132,11 @@ const runTap = (args: string[], cwd: string, cacheFolder = CACHE_FOLDER): Promis
 }
 
 /**
- * Runs the CLI against an instances dir guaranteed to be empty, for the discovery
- * failure paths. Uses its own cache folder so it cannot see an instance another suite
+ * Runs the CLI against a sessions dir guaranteed to be empty, for the discovery
+ * failure paths. Uses its own cache folder so it cannot see a session another suite
  * in this same mocha process has booted, whatever the declaration order.
  */
-export const tapWithoutInstance = async (args: string[]): Promise<TapResult> => {
+export const tapWithoutSession = async (args: string[]): Promise<TapResult> => {
   const emptyCache = path.join(os.tmpdir(), `cy-tap-open-empty-${process.pid}`)
 
   await fs.remove(emptyCache)
@@ -144,7 +144,7 @@ export const tapWithoutInstance = async (args: string[]): Promise<TapResult> => 
   return runTap(args, os.tmpdir(), emptyCache)
 }
 
-export interface TapInstance {
+export interface TapSession {
   projectRoot: string
   tap (args: string[]): Promise<TapResult>
   status (): Promise<TapStatus>
@@ -160,21 +160,21 @@ export interface TapInstance {
    */
   suspend (): Promise<void>
   resume (): Promise<void>
-  /** Kills the process tree but leaves the instance record for stale-record tests. */
+  /** Kills the process tree but leaves the session record for stale-record tests. */
   terminate (): Promise<void>
   kill (): Promise<void>
 }
 
-export interface OpenTapInstanceOptions {
+export interface OpenTapSessionOptions {
   /**
-   * Boot alongside the instances already running rather than from an empty
-   * instances dir, and leave that shared dir in place when killed — so the
-   * instances it was booted beside stay discoverable.
+   * Boot alongside the sessions already running rather than from an empty
+   * sessions dir, and leave that shared dir in place when killed — so the
+   * sessions it was booted beside stay discoverable.
    */
   additional?: boolean
 }
 
-interface BootedInstance {
+interface BootedSession {
   projectRoot: string
   terminate (): Promise<void>
   suspend (): Promise<void>
@@ -185,7 +185,7 @@ interface BootedInstance {
   exitReason (): string | null
 }
 
-const buildInstance = async (booted: BootedInstance, options: OpenTapInstanceOptions = {}): Promise<TapInstance> => {
+const buildSession = async (booted: BootedSession, options: OpenTapSessionOptions = {}): Promise<TapSession> => {
   const { projectRoot, terminate } = booted
 
   const kill = async (): Promise<void> => {
@@ -227,13 +227,13 @@ const buildInstance = async (booted: BootedInstance, options: OpenTapInstanceOpt
         // exists but carries no CDP url, so the browser is still launching and every
         // read would fail NO_BROWSER_ATTACHED. Ready is the first stage past both.
         //
-        // And it must be this instance: with another already running, discovery
+        // And it must be this session: with another already running, discovery
         // falls back to that one until this one's own record lands.
-        const isThisInstance = typeof current.projectRoot === 'string'
+        const isThisSession = typeof current.projectRoot === 'string'
           && path.resolve(current.projectRoot) === path.resolve(projectRoot)
 
-        if (isThisInstance && current.status !== 'not connected' && current.status !== 'browser not selected') {
-          debug('instance ready at stage %s', current.status)
+        if (isThisSession && current.status !== 'not connected' && current.status !== 'browser not selected') {
+          debug('session ready at stage %s', current.status)
 
           return
         }
@@ -244,7 +244,7 @@ const buildInstance = async (booted: BootedInstance, options: OpenTapInstanceOpt
       await delay(POLL_INTERVAL_MS)
     }
 
-    return failWithContext(`the instance never became reachable within ${READY_TIMEOUT_MS}ms; last status was "${last}" (waiting on ${projectRoot})`)
+    return failWithContext(`the session never became reachable within ${READY_TIMEOUT_MS}ms; last status was "${last}" (waiting on ${projectRoot})`)
   }
 
   const waitForStatus = async (match: (status: TapStatus) => boolean, label: string): Promise<TapStatus> => {
@@ -305,7 +305,7 @@ const buildInstance = async (booted: BootedInstance, options: OpenTapInstanceOpt
   }
 }
 
-const prepareProject = async (project: ProjectFixtureDir, options: OpenTapInstanceOptions): Promise<string> => {
+const prepareProject = async (project: ProjectFixtureDir, options: OpenTapSessionOptions): Promise<string> => {
   const projectRoot = await Fixtures.scaffoldProject(project)
 
   if (!options.additional) {
@@ -318,10 +318,10 @@ const prepareProject = async (project: ProjectFixtureDir, options: OpenTapInstan
 }
 
 /**
- * Spawning the CLI gives the harness a per-instance env, captured boot output, and a
- * child handle to kill. See `openTapInstanceViaModuleApi` for the Module API contrast.
+ * Spawning the CLI gives the harness a per-session env, captured boot output, and a
+ * child handle to kill. See `openTapSessionViaModuleApi` for the Module API contrast.
  */
-export const openTapInstance = async (project: ProjectFixtureDir, options: OpenTapInstanceOptions = {}): Promise<TapInstance> => {
+export const openTapSession = async (project: ProjectFixtureDir, options: OpenTapSessionOptions = {}): Promise<TapSession> => {
   const projectRoot = await prepareProject(project, options)
 
   // Electron and the browser outlive the CLI alone, so detach and signal the whole tree.
@@ -349,7 +349,7 @@ export const openTapInstance = async (project: ProjectFixtureDir, options: OpenT
     }
   }
 
-  return buildInstance({
+  return buildSession({
     projectRoot,
     terminate: () => signalTree('SIGKILL'),
     suspend: () => process.platform === 'win32' ? signalRecorded(projectRoot, 'SIGSTOP') : signalTree('SIGSTOP'),
@@ -380,7 +380,7 @@ const recordedPid = async (projectRoot: string): Promise<number | undefined> => 
 
 // Windows has no SIGSTOP/SIGCONT, and tree-kill maps every signal to forced
 // termination. Suspending the recorded server process keeps its pid live while
-// making the instance probe unresponsive.
+// making the session probe unresponsive.
 const setWindowsProcessSuspended = async (pid: number, suspended: boolean): Promise<void> => {
   const method = suspended ? 'NtSuspendProcess' : 'NtResumeProcess'
   const script = `
@@ -426,7 +426,7 @@ const signalRecorded = async (projectRoot: string, signal: 'SIGKILL' | 'SIGSTOP'
   const pid = await recordedPid(projectRoot)
 
   if (!pid) {
-    throw new Error(`No instance pid recorded for ${projectRoot}`)
+    throw new Error(`No session pid recorded for ${projectRoot}`)
   }
 
   if (process.platform === 'win32' && signal !== 'SIGKILL') {
@@ -441,9 +441,9 @@ const signalRecorded = async (projectRoot: string, signal: 'SIGKILL' | 'SIGSTOP'
 /**
  * Covers the documented `cypress.open()` entry and its option normalization. The Module
  * API inherits this process's env and stdio and exposes no child handle, so this path
- * must mutate env and terminate through the pid in the instance record.
+ * must mutate env and terminate through the pid in the session record.
  */
-export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): Promise<TapInstance> => {
+export const openTapSessionViaModuleApi = async (project: ProjectFixtureDir): Promise<TapSession> => {
   const projectRoot = await prepareProject(project, {})
 
   const overrides: Record<string, string | undefined> = {
@@ -485,7 +485,7 @@ export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): P
   })
 
   try {
-    return await buildInstance({
+    return await buildSession({
       projectRoot,
       terminate: async () => {
         await signalRecorded(projectRoot, 'SIGKILL')
@@ -493,7 +493,7 @@ export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): P
       },
       suspend: () => signalRecorded(projectRoot, 'SIGSTOP'),
       resume: () => signalRecorded(projectRoot, 'SIGCONT'),
-      context: () => 'stdio is inherited through the Module API, so the instance\'s own output is above, interleaved with the test output',
+      context: () => 'stdio is inherited through the Module API, so the session\'s own output is above, interleaved with the test output',
       exitReason: () => settled,
     })
   } catch (err) {

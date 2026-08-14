@@ -1,6 +1,6 @@
 import type { TapStatus } from '../types'
 import { color, countsLine, layout, startedAtLabel, stateBadge, titleLine } from './format'
-import { instanceColumns } from './instances'
+import { sessionColumns } from './sessions'
 import { pinnedBlock } from './pinned'
 
 // The lifecycle phase's dot and tint: a filled green/red check for a finished
@@ -13,7 +13,7 @@ const PHASE = {
 
 const phaseOf = (status: string) => PHASE[status as keyof typeof PHASE] ?? { icon: color.muted('●'), tint: color.muted }
 
-// Where the instance is: the selected spec led by its phase icon and trailed by
+// Where the session is: the selected spec led by its phase icon and trailed by
 // the run's start time, or — before a spec is selected — the phase on its own.
 // The icon carries the phase over a spec, so the line doesn't also spell it out.
 const phaseLine = (status: TapStatus): string => {
@@ -34,7 +34,7 @@ export const renderStatusHuman = (status: TapStatus): string => {
     return phaseLine(status)
   }
 
-  const instance = {
+  const session = {
     pid,
     projectRoot,
     testingType: status.testingType ?? null,
@@ -48,7 +48,7 @@ export const renderStatusHuman = (status: TapStatus): string => {
     progress.push(countsLine(status.results))
   }
 
-  const blocks = [instanceColumns([instance]), progress]
+  const blocks = [sessionColumns([session]), progress]
 
   // A spec that failed to build has no results to show, so the failure is the
   // only thing the run has to say.

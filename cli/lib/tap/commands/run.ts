@@ -27,7 +27,7 @@ const findTargetSpec = async (session: LiveSessionState, relative: string) => {
 
 const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<number> => {
   try {
-    const { session } = await resolveLiveSession({ session: options.instance, cwd: process.cwd() })
+    const { session } = await resolveLiveSession({ session: options.session, cwd: process.cwd() })
 
     const match = await findTargetSpec(session, args.spec)
 

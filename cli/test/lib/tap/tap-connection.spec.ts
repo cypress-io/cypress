@@ -36,7 +36,7 @@ const makeClient = (overrides: FakeClientOverrides = {}) => {
   }
 
   // Mirrors chrome-remote-interface, where every domain shorthand is generated as
-  // a `client.send` call — the seam the session installs its bound on.
+  // a `client.send` call — the seam the connection installs its bound on.
   const client: any = {
     send: (command: string, ...args: unknown[]) => behaviors[command](...args),
     close: vi.fn().mockResolvedValue(undefined),
@@ -58,7 +58,7 @@ const makeRecord = (overrides: Partial<ReadySessionState> = {}): ReadySessionSta
     pid: 1234,
     projectRoot: PROJECT,
     serverPort: 5555,
-    sessionId: 'instance-abc',
+    sessionId: 'session-abc',
     testingType: 'e2e',
     cdpBrowserWsUrl: BROWSER_WS_URL,
     browserName: 'Chrome',
@@ -69,17 +69,17 @@ const makeRecord = (overrides: Partial<ReadySessionState> = {}): ReadySessionSta
   }
 }
 
-let instance: ReadySessionState
+let session: ReadySessionState
 
 const setup = (client = makeClient(), overrides: Partial<ReadySessionState> = {}) => {
-  instance = makeRecord(overrides)
+  session = makeRecord(overrides)
   mockConnect.mockResolvedValue(client)
 
-  return { instance, client }
+  return { session, client }
 }
 
 const callOnce = (method = 'health', args: unknown[] = []) => {
-  return withTapConnection(instance, (session) => session.call(method, args))
+  return withTapConnection(session, (connection) => connection.call(method, args))
 }
 
 const staleError = () => new Error(CdpErrorMessage.objectNotFound)
@@ -89,7 +89,7 @@ const UNRESPONSIVE_MS = 25
 const never = () => vi.fn().mockReturnValue(new Promise(() => {}))
 
 const callWithBound = () => {
-  return withTapConnection(instance, (session) => session.call('health'), UNRESPONSIVE_MS)
+  return withTapConnection(session, (connection) => connection.call('health'), UNRESPONSIVE_MS)
 }
 
 const expectUnresponsive = async (promise: Promise<any>) => {
@@ -118,8 +118,8 @@ describe('lib/tap/tap-connection', () => {
   it('connects to the browser ws, attaches a session, invokes the binding, and returns the decoded result', async () => {
     const { client } = setup()
 
-    const result = await withTapConnection(instance, async (session) => {
-      return session.call('health')
+    const result = await withTapConnection(session, async (connection) => {
+      return connection.call('health')
     })
 
     expect(result).toBe('ok')
@@ -153,8 +153,8 @@ describe('lib/tap/tap-connection', () => {
 
     const { client } = setup(makeClient({ callFunctionOn }))
 
-    const results = await withTapConnection(instance, async (session) => {
-      return [await session.call('getSchema'), await session.call('health')]
+    const results = await withTapConnection(session, async (connection) => {
+      return [await connection.call('getSchema'), await connection.call('health')]
     })
 
     expect(results).toEqual([{ protocolVersion: 1, commands: [] }, 'ok'])
@@ -172,7 +172,7 @@ describe('lib/tap/tap-connection', () => {
     const { client } = setup()
     const boom = new Error('boom')
 
-    const err = await withTapConnection(instance, async () => {
+    const err = await withTapConnection(session, async () => {
       throw boom
     }).catch((e) => e)
 
@@ -436,7 +436,7 @@ describe('lib/tap/tap-connection', () => {
   })
 
   it('throws CDP_UNREACHABLE when the browser connection cannot be opened', async () => {
-    instance = makeRecord()
+    session = makeRecord()
     mockConnect.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
     await expectError(callOnce(), errors.tapCdpUnreachable)

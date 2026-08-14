@@ -137,8 +137,8 @@ describe('lib/tap/aut/frame withResolvedAutFrame', () => {
       sessionId: SESSION_ID,
     } as unknown as TapConnection
 
-    vi.mocked(resolveSession).mockResolvedValue({ instance: {}, reason: 'only', candidateCount: 1 } as any)
-    vi.mocked(withTapConnection).mockImplementation((_instance: any, use: any) => use(session))
+    vi.mocked(resolveSession).mockResolvedValue({ session: {}, reason: 'only', candidateCount: 1 } as any)
+    vi.mocked(withTapConnection).mockImplementation((_session: any, use: any) => use(session))
 
     logger.reset()
     vi.spyOn(console, 'log').mockImplementation(() => {})

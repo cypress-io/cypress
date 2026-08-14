@@ -62,7 +62,7 @@ const sessionBanner = (schema: TapSchema, selection: SessionSelection): string =
   pid:${session.pid}`
 
   if (candidateCount > 1) {
-    return `${target}\n${candidateCount} running instances matched; targeting pid ${session.pid}. Pass --instance <pid> to target another.`
+    return `${target}\n${candidateCount} running sessions matched; targeting pid ${session.pid}. Pass --session <pid> to target another.`
   }
 
   return target

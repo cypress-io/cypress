@@ -124,7 +124,7 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
   }
 
   try {
-    const selection = await resolveSession({ session: options.instance, cwd: process.cwd() })
+    const selection = await resolveSession({ session: options.session, cwd: process.cwd() })
 
     return await withTapConnection(selection.session, async (connection) => {
       const schema = validateSchema(await connection.call(TAP_SCHEMA_METHOD))

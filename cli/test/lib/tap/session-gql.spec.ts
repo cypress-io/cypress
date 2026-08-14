@@ -4,7 +4,7 @@ import { querySessionGraphql } from '../../../lib/tap/session-gql'
 import type { LiveSessionState } from '../../../lib/cypress-sessions'
 import { errors } from '../../../lib/errors'
 
-const instance: LiveSessionState = {
+const session: LiveSessionState = {
   schemaVersion: 1,
   pid: 4242,
   projectRoot: '/projects/app',
@@ -37,10 +37,10 @@ describe('lib/tap/session-gql', () => {
     vi.unstubAllGlobals()
   })
 
-  it('posts the operation to the instance server port and returns the data', async () => {
+  it('posts the operation to the session server port and returns the data', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ data: { currentProject: null } }))
 
-    const data = await querySessionGraphql(instance, request)
+    const data = await querySessionGraphql(session, request)
 
     expect(data).toEqual({ currentProject: null })
 
@@ -55,7 +55,7 @@ describe('lib/tap/session-gql', () => {
   it('maps a network failure to the unreachable error', async () => {
     fetchMock.mockRejectedValue(new Error('connect ECONNREFUSED'))
 
-    await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
       known: true,
       details: errors.tapGraphqlUnreachable,
       message: expect.stringContaining('ECONNREFUSED'),
@@ -65,17 +65,17 @@ describe('lib/tap/session-gql', () => {
   it('maps a non-200 answer to the unreachable error', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500))
 
-    await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
       known: true,
       details: errors.tapGraphqlUnreachable,
       message: expect.stringContaining('500'),
     })
   })
 
-  it('reports an unsupported instance when the request is redirected away from GraphQL', async () => {
+  it('reports an unsupported session when the request is redirected away from GraphQL', async () => {
     fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
 
-    await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
       known: true,
       details: errors.tapOutdatedProtocol,
       message: expect.stringContaining('redirected'),
@@ -85,7 +85,7 @@ describe('lib/tap/session-gql', () => {
   it('surfaces a GraphQL error payload with its message', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ errors: [{ message: 'resolver exploded' }] }))
 
-    await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
       known: true,
       details: errors.tapGraphqlFailed,
       message: expect.stringContaining('resolver exploded'),
@@ -96,7 +96,7 @@ describe('lib/tap/session-gql', () => {
     for (const malformedErrors of [[null], ['boom'], [{}]]) {
       fetchMock.mockResolvedValue(jsonResponse({ errors: malformedErrors }))
 
-      await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+      await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
         known: true,
         details: errors.tapGraphqlFailed,
       })
@@ -108,7 +108,7 @@ describe('lib/tap/session-gql', () => {
       throw new Error('unexpected token')
     } })
 
-    await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
       known: true,
       details: errors.tapGraphqlFailed,
     })
@@ -118,7 +118,7 @@ describe('lib/tap/session-gql', () => {
     for (const payload of [null, 'junk', {}, { data: null }, { data: 'nope' }, { errors: [] }]) {
       fetchMock.mockResolvedValue(jsonResponse(payload))
 
-      await expect(querySessionGraphql(instance, request)).rejects.toMatchObject({
+      await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
         known: true,
         details: errors.tapGraphqlFailed,
       })

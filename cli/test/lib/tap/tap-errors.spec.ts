@@ -43,19 +43,19 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapBindingNotFound — the instance page could not be reached', () => {
+  it('tapBindingNotFound — the session page could not be reached', () => {
     expect(render(errors.tapBindingNotFound)).toMatchInlineSnapshot(`
-      "Could not connect to the Cypress instance.
+      "Could not connect to the Cypress session.
 
-      The instance may still be loading — try again in a moment.
+      The session may still be loading — try again in a moment.
 
       If the problem persists, the browser tab running Cypress may have been closed. Open a browser in Cypress and try again."
     `)
   })
 
-  it('tapBindingThrew — the binding method threw inside the instance', () => {
+  it('tapBindingThrew — the binding method threw inside the session', () => {
     expect(render(errors.tapBindingThrew)).toMatchInlineSnapshot(`
-      "The Cypress instance failed while running the tap command.
+      "The Cypress session failed while running the tap command.
 
       Search for an existing issue or open a GitHub issue at
 
@@ -63,15 +63,15 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapStaleHandle — the instance navigated mid-command', () => {
+  it('tapStaleHandle — the session navigated mid-command', () => {
     expect(render(errors.tapStaleHandle)).toMatchInlineSnapshot(`
-      "The Cypress instance navigated while running the command.
+      "The Cypress session navigated while running the command.
 
       Try running the command again."
     `)
   })
 
-  it('tapInvalidSchema — the instance returned an unrecognizable schema', () => {
+  it('tapInvalidSchema — the session returned an unrecognizable schema', () => {
     expect(render(errors.tapInvalidSchema)).toMatchInlineSnapshot(`
       "The running Cypress returned a tap schema this CLI does not recognize.
 
@@ -79,7 +79,7 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapUnsupportedProtocol — the instance is newer than this CLI', () => {
+  it('tapUnsupportedProtocol — the session is newer than this CLI', () => {
     expect(render(errors.tapUnsupportedProtocol)).toMatchInlineSnapshot(`
       "The running Cypress is newer than this CLI and uses a tap protocol it does not understand.
 
@@ -87,7 +87,7 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapOutdatedProtocol — the instance is older than this CLI', () => {
+  it('tapOutdatedProtocol — the session is older than this CLI', () => {
     expect(render(errors.tapOutdatedProtocol)).toMatchInlineSnapshot(`
       "The running Cypress is older than this CLI and speaks an earlier tap protocol.
 
@@ -95,17 +95,17 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapGraphqlUnreachable — the instance data layer could not be reached', () => {
+  it('tapGraphqlUnreachable — the session data layer could not be reached', () => {
     expect(render(errors.tapGraphqlUnreachable)).toMatchInlineSnapshot(`
-      "Could not reach the Cypress instance to read its data.
+      "Could not reach the Cypress session to read its data.
 
-      The instance may have just closed. Make sure Cypress is running in open mode, then try again."
+      The session may have just closed. Make sure Cypress is running in open mode, then try again."
     `)
   })
 
-  it('tapGraphqlFailed — the instance failed while answering a data query', () => {
+  it('tapGraphqlFailed — the session failed while answering a data query', () => {
     expect(render(errors.tapGraphqlFailed)).toMatchInlineSnapshot(`
-      "The Cypress instance failed while answering a data query.
+      "The Cypress session failed while answering a data query.
 
       Search for an existing issue or open a GitHub issue at
 
@@ -113,7 +113,7 @@ describe('lib/tap public error catalog', () => {
     `)
   })
 
-  it('tapInvalidExecResult — the instance returned an unrecognizable exec result', () => {
+  it('tapInvalidExecResult — the session returned an unrecognizable exec result', () => {
     expect(render(errors.tapInvalidExecResult)).toMatchInlineSnapshot(`
       "The running Cypress returned a result this CLI does not recognize.
 

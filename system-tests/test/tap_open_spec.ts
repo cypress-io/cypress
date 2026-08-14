@@ -3,8 +3,8 @@
 import { expect } from 'chai'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import { openTapInstance, openTapInstanceViaModuleApi, tapWithoutInstance } from '../lib/tap-open'
-import type { TapInstance } from '../lib/tap-open'
+import { openTapSession, openTapSessionViaModuleApi, tapWithoutSession } from '../lib/tap-open'
+import type { TapSession } from '../lib/tap-open'
 
 const SPEC = 'cypress/e2e/aut-content.cy.js'
 const SLOW_SPEC = 'cypress/e2e/slow.cy.js'
@@ -114,15 +114,15 @@ interface ReporterCommand {
 }
 
 /** The spec overview groups tests under their suite, so flatten it to run order. */
-const specTests = async (instance: TapInstance): Promise<ReporterTest[]> => {
-  const overview = (await instance.tap(['--json', 'reporter'])).json()
+const specTests = async (session: TapSession): Promise<ReporterTest[]> => {
+  const overview = (await session.tap(['--json', 'reporter'])).json()
 
   return [...overview.tests, ...overview.suites.flatMap((suite: { tests: ReporterTest[] }) => suite.tests)]
 }
 
 /** Every fixture here holds a single test, so the run's first test is the one under read. */
-const firstTest = async (instance: TapInstance): Promise<ReporterTest> => {
-  const [test] = await specTests(instance)
+const firstTest = async (session: TapSession): Promise<ReporterTest> => {
+  const [test] = await specTests(session)
 
   expect(test, 'a test in the settled run').to.exist
 
@@ -130,8 +130,8 @@ const firstTest = async (instance: TapInstance): Promise<ReporterTest> => {
 }
 
 /** Command ids come from the reporter view of one test — its command log. */
-const commandLog = async (instance: TapInstance, testId: string, extra: string[] = []): Promise<ReporterCommand[]> => {
-  const result = await instance.tap(['--json', 'reporter', '--test-id', testId, ...extra])
+const commandLog = async (session: TapSession, testId: string, extra: string[] = []): Promise<ReporterCommand[]> => {
+  const result = await session.tap(['--json', 'reporter', '--test-id', testId, ...extra])
 
   expect(result.exitCode, 'the command log read').to.eq(0)
 
@@ -147,28 +147,28 @@ const rowNamed = (commands: ReporterCommand[], name: string): ReporterCommand =>
 }
 
 /**
- * Drives the real `cypress tap` CLI against a real open-mode instance. JSON assertions
+ * Drives the real `cypress tap` CLI against a real open-mode session. JSON assertions
  * cover the stable result contract; snapshots cover selected human renderings.
  */
-describe('tap CLI with no running instance', function () {
+describe('tap CLI with no running session', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
   it('reports "not connected" from status, and exits 0', async () => {
-    const result = await tapWithoutInstance(['--json', 'status'])
+    const result = await tapWithoutSession(['--json', 'status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.eq({ status: 'not connected' })
   })
 
   it('exits 1 with NO_SESSION for a read', async () => {
-    const result = await tapWithoutInstance(['dom', '--selector', '#status'])
+    const result = await tapWithoutSession(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('NO_SESSION')
   })
 
-  it('names the pid that was asked for when --instance matches nothing', async () => {
-    const result = await tapWithoutInstance(['--instance', '999999', 'inspect', '--selector', '#status'])
+  it('names the pid that was asked for when --session matches nothing', async () => {
+    const result = await tapWithoutSession(['--session', '999999', 'inspect', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('NO_SESSION')
@@ -177,14 +177,14 @@ describe('tap CLI with no running instance', function () {
 })
 
 /**
- * What the CLI rejects before it looks for an instance. A CLI-native command
+ * What the CLI rejects before it looks for a session. A CLI-native command
  * parses its positionals and options first, so none of this needs one.
  */
 describe('tap CLI argument handling', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
   it('prints help and exits 0 when asked for no command', async () => {
-    const result = await tapWithoutInstance([])
+    const result = await tapWithoutSession([])
 
     expect(result.exitCode, 'no command is not a failure').to.eq(0)
     expect(result.stdout).to.include('Commands:')
@@ -192,33 +192,33 @@ describe('tap CLI argument handling', function () {
   })
 
   it('exits 1 for an option no command declares', async () => {
-    const result = await tapWithoutInstance(['dom', '--not-an-option'])
+    const result = await tapWithoutSession(['dom', '--not-an-option'])
 
     expect(result.exitCode).to.eq(1)
   })
 
   it('exits 1 and names the option a command requires', async () => {
-    const result = await tapWithoutInstance(['inspect'])
+    const result = await tapWithoutSession(['inspect'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('--selector')
   })
 
   it('exits 1 for a missing required argument', async () => {
-    const result = await tapWithoutInstance(['run'])
+    const result = await tapWithoutSession(['run'])
 
     expect(result.exitCode).to.eq(1)
   })
 
   it('exits 1 and says so for more arguments than a command takes', async () => {
-    const result = await tapWithoutInstance(['run', 'a.cy.js', 'b.cy.js'])
+    const result = await tapWithoutSession(['run', 'a.cy.js', 'b.cy.js'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('too many arguments')
   })
 
-  it('renders a command’s help without needing an instance', async () => {
-    const result = await tapWithoutInstance(['reporter', '--help'])
+  it('renders a command’s help without needing a session', async () => {
+    const result = await tapWithoutSession(['reporter', '--help'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.stdout).to.include('--test-id')
@@ -229,31 +229,31 @@ describe('tap CLI argument handling', function () {
 describe('tap CLI before any spec has run', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
+    session = await openTapSession('tap-retries')
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
-  it('reports a connected instance with no spec selected', async () => {
-    const status = await instance.status()
+  it('reports a connected session with no spec selected', async () => {
+    const status = await session.status()
 
     expect(status.status).to.eq('spec not selected')
   })
 
   it('lists the project’s specs', async () => {
-    const result = await instance.tap(['--json', 'specs'])
+    const result = await session.tap(['--json', 'specs'])
 
     expect(result.exitCode).to.eq(0)
     expect(JSON.stringify(result.json())).to.include('aut-content.cy.js')
   })
 
   it('exits 1 with SPEC_NOT_FOUND when asked to run a spec that does not exist', async () => {
-    const result = await instance.tap(['run', 'cypress/e2e/not-a-real-spec.cy.js'])
+    const result = await session.tap(['run', 'cypress/e2e/not-a-real-spec.cy.js'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('SPEC_NOT_FOUND')
@@ -262,19 +262,19 @@ describe('tap CLI before any spec has run', function () {
   it('exits 1 with NO_RUN for an AUT read', async () => {
     // Short of a verdict there is no run to read: the resolved frame would be the
     // runner shell, so the read is refused rather than returning a misleading page.
-    const result = await instance.tap(['dom'])
+    const result = await session.tap(['dom'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('NO_RUN')
   })
 
   it('reports the spec-not-selected phase for humans', async () => {
-    const result = await instance.tap(['status'])
+    const result = await session.tap(['status'])
 
     expect(result.exitCode).to.eq(0)
 
     snapshotRendering('status before a spec is selected', result.stdout, [
-      [new RegExp(String((await instance.status()).pid), 'g'), '<pid>'],
+      [new RegExp(String((await session.status()).pid), 'g'), '<pid>'],
       [/ {2,}/g, '  '],
     ])
   })
@@ -282,7 +282,7 @@ describe('tap CLI before any spec has run', function () {
   // Declared last: it selects a spec, which every test above depends on not having happened.
   it('confirms for humans what a run launched', async () => {
     // `run` returns as soon as the spec is requested, so it reports what was launched.
-    const result = await instance.tap(['run', SPEC])
+    const result = await session.tap(['run', SPEC])
 
     expect(result.exitCode).to.eq(0)
 
@@ -293,52 +293,52 @@ describe('tap CLI before any spec has run', function () {
 describe('tap CLI against a settled run', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(SPEC)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('reports a settled run through the status lifecycle', async () => {
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.status).to.eq('passed')
     expect(status.startedAt, 'the run every other field describes').to.be.a('string')
   })
 
-  it('lists the instance it is attached to', async () => {
-    const result = await instance.tap(['--json', 'instances'])
+  it('lists the session it is attached to', async () => {
+    const result = await session.tap(['--json', 'sessions'])
 
     expect(result.exitCode).to.eq(0)
     expect(JSON.stringify(result.json())).to.include('tap-retries')
   })
 
-  it('reads through the pid --instance names', async () => {
-    // Discovery finds this suite's instance anyway, so the pid path needs asking for.
-    const { pid } = await instance.status()
+  it('reads through the pid --session names', async () => {
+    // Discovery finds this suite's session anyway, so the pid path needs asking for.
+    const { pid } = await session.status()
 
     expect(pid, 'the pid status reports').to.be.a('number')
 
-    const result = await instance.tap(['--json', '--instance', String(pid), 'dom', '--selector', '#status'])
+    const result = await session.tap(['--json', '--session', String(pid), 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
   it('reads the app-under-test DOM by selector', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', '#status'])
+    const result = await session.tap(['--json', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
   it('reads the app-under-test body when no selector is given', async () => {
-    const result = await instance.tap(['--json', 'dom'])
+    const result = await session.tap(['--json', 'dom'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().found).to.eq(true)
@@ -348,14 +348,14 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('reads the whole document with --selector html', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', 'html'])
+    const result = await session.tap(['--json', 'dom', '--selector', 'html'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().html).to.include('<title>Tap AUT content</title>')
   })
 
   it('renders a DOM read for humans', async () => {
-    const result = await instance.tap(['dom', '--selector', '#status'])
+    const result = await session.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.stdout).to.include(STATUS_DIV)
@@ -364,7 +364,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('tells a human when a read was clipped', async () => {
-    const result = await instance.tap(['dom', '--max-chars', '120'])
+    const result = await session.tap(['dom', '--max-chars', '120'])
 
     expect(result.exitCode).to.eq(0)
     // Deliberately not snapshotted: a cap this low cuts the markup mid-tag, so a
@@ -374,7 +374,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('renders the ambiguity answer for humans', async () => {
-    const result = await instance.tap(['dom', '--selector', '.item'])
+    const result = await session.tap(['dom', '--selector', '.item'])
 
     expect(result.exitCode, 'the read never happened').to.eq(1)
     snapshotRendering('dom ambiguous selector', result.stdout)
@@ -383,14 +383,14 @@ describe('tap CLI against a settled run', function () {
   it('renders the accessibility subtree for humans', async () => {
     // Rooted at the panel: the whole-frame tree carries browser-version-dependent
     // nodes, while this subtree is entirely the fixture's own markup.
-    const result = await instance.tap(['aria', '--selector', '#panel'])
+    const result = await session.tap(['aria', '--selector', '#panel'])
 
     expect(result.exitCode).to.eq(0)
     snapshotRendering('aria subtree', result.stdout)
   })
 
   it('renders a failure for humans', async () => {
-    const result = await instance.tap(['dom', '--selector', '#status['])
+    const result = await session.tap(['dom', '--selector', '#status['])
 
     expect(result.exitCode).to.eq(1)
     expect(result.stdout, 'failures go to stderr').to.eq('')
@@ -400,8 +400,8 @@ describe('tap CLI against a settled run', function () {
 
   it('renders status for humans', async () => {
     // Once a spec is selected, an icon carries the phase, so snapshot the full rendering.
-    const payload = await instance.status()
-    const result = await instance.tap(['status'])
+    const payload = await session.status()
+    const result = await session.tap(['status'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -409,7 +409,7 @@ describe('tap CLI against a settled run', function () {
     // that could also match the run counts.
     snapshotRendering('status', result.stdout, [
       [new RegExp(String(payload.pid), 'g'), '<pid>'],
-      // The instance table pads PROJECT to the width of the longest value, so the
+      // The session table pads PROJECT to the width of the longest value, so the
       // column width tracks the scaffolded tmp path — which differs between a local
       // run and CI. Collapse space runs: column order and content stay asserted,
       // alignment (the part that legitimately varies) does not.
@@ -418,7 +418,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('clips a read at --max-chars', async () => {
-    const result = await instance.tap(['--json', 'dom', '--max-chars', '20'])
+    const result = await session.tap(['--json', 'dom', '--max-chars', '20'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().truncated, 'the browser-side cap clipped the output').to.eq(true)
@@ -426,22 +426,22 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('accepts the short option aliases', async () => {
-    const short = await instance.tap(['--json', 'dom', '-s', '#status', '-m', '30000'])
-    const long = await instance.tap(['--json', 'dom', '--selector', '#status', '--max-chars', '30000'])
+    const short = await session.tap(['--json', 'dom', '-e', '#status', '-m', '30000'])
+    const long = await session.tap(['--json', 'dom', '--selector', '#status', '--max-chars', '30000'])
 
     expect(short.exitCode).to.eq(0)
     expect(short.json()).to.deep.eq(long.json())
   })
 
   it('reports a selector that matches nothing as an answer, not a failure', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', '.not-in-the-fixture'])
+    const result = await session.tap(['--json', 'dom', '--selector', '.not-in-the-fixture'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.eq({ found: false })
   })
 
   it('exits 1 and names the matches for an ambiguous selector', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', '.item'])
+    const result = await session.tap(['--json', 'dom', '--selector', '.item'])
 
     // Ambiguity is a stdout result, but not a successful read.
     expect(result.exitCode).to.eq(1)
@@ -455,21 +455,21 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('indexes into an ambiguous selector with --at', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', '.item', '--at', '1'])
+    const result = await session.tap(['--json', 'dom', '--selector', '.item', '--at', '1'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: '<li class="item">Item 2</li>' })
   })
 
   it('exits 1 with the valid range for an out-of-range --at', async () => {
-    const result = await instance.tap(['dom', '--selector', '.item', '--at', '3'])
+    const result = await session.tap(['dom', '--selector', '.item', '--at', '3'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('pass --at 0-2')
   })
 
   it('exits 1 for an --at beyond the default selector’s single match', async () => {
-    const result = await instance.tap(['dom', '--at', '1'])
+    const result = await session.tap(['dom', '--at', '1'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('INVALID_INDEX')
@@ -477,14 +477,14 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('exits 1 for an invalid selector', async () => {
-    const result = await instance.tap(['dom', '--selector', '#status['])
+    const result = await session.tap(['dom', '--selector', '#status['])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('is not a valid CSS selector')
   })
 
   it('projects the accessibility tree of the body', async () => {
-    const result = await instance.tap(['--json', 'aria'])
+    const result = await session.tap(['--json', 'aria'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -508,7 +508,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('roots the accessibility tree at a selector', async () => {
-    const result = await instance.tap(['--json', 'aria', '--selector', '#panel'])
+    const result = await session.tap(['--json', 'aria', '--selector', '#panel'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -522,7 +522,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('clips the accessibility tree at --max-nodes', async () => {
-    const result = await instance.tap(['--json', 'aria', '--max-nodes', '2'])
+    const result = await session.tap(['--json', 'aria', '--max-nodes', '2'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().nodes).to.have.length(2)
@@ -530,7 +530,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('inspects an element', async () => {
-    const result = await instance.tap(['--json', 'inspect', '--selector', '#status'])
+    const result = await session.tap(['--json', 'inspect', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -543,7 +543,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('reports a disabled control’s accessibility state', async () => {
-    const result = await instance.tap(['--json', 'inspect', '--selector', '#locked'])
+    const result = await session.tap(['--json', 'inspect', '--selector', '#locked'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().aria).to.deep.include({ role: 'button', name: 'Locked' })
@@ -551,14 +551,14 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('reports an element that matched nothing', async () => {
-    const result = await instance.tap(['--json', 'inspect', '--selector', '#missing'])
+    const result = await session.tap(['--json', 'inspect', '--selector', '#missing'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.eq({ selector: '#missing', found: false })
   })
 
   it('renders an inspected element for humans', async () => {
-    const result = await instance.tap(['inspect', '--selector', '#status'])
+    const result = await session.tap(['inspect', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -569,7 +569,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('renders an element that matched nothing for humans', async () => {
-    const result = await instance.tap(['inspect', '--selector', '#missing'])
+    const result = await session.tap(['inspect', '--selector', '#missing'])
 
     expect(result.exitCode, 'no match is an answer, not a failure').to.eq(0)
 
@@ -577,7 +577,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('renders every spec under a counted heading for humans', async () => {
-    const result = await instance.tap(['specs'])
+    const result = await session.tap(['specs'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.stdout).to.include(`SPECS (${ALL_SPECS.length})`)
@@ -594,24 +594,24 @@ describe('tap CLI against a settled run', function () {
     ])
   })
 
-  it('lists the reachable instances for humans', async () => {
-    const result = await instance.tap(['instances'])
+  it('lists the reachable sessions for humans', async () => {
+    const result = await session.tap(['sessions'])
 
     expect(result.exitCode).to.eq(0)
 
-    snapshotRendering('instances listing', result.stdout, [
-      [new RegExp(String((await instance.status()).pid), 'g'), '<pid>'],
+    snapshotRendering('sessions listing', result.stdout, [
+      [new RegExp(String((await session.status()).pid), 'g'), '<pid>'],
       [/ {2,}/g, '  '],
     ])
   })
 
   it('reports the accessibility subtree of a selector matching nothing as empty', async () => {
-    const result = await instance.tap(['--json', 'aria', '--selector', '#missing'])
+    const result = await session.tap(['--json', 'aria', '--selector', '#missing'])
 
     expect(result.exitCode, 'no match is an answer, not a failure').to.eq(0)
     expect(result.json().nodes).to.deep.eq([])
 
-    const rendered = await instance.tap(['aria', '--selector', '#missing'])
+    const rendered = await session.tap(['aria', '--selector', '#missing'])
 
     expect(rendered.stdout).to.include('No accessibility nodes found.')
   })
@@ -619,7 +619,7 @@ describe('tap CLI against a settled run', function () {
   it('answers an ambiguous selector the same way for aria and inspect', async () => {
     // One answer, three commands: never a read of one arbitrary match.
     for (const command of ['aria', 'inspect']) {
-      const result = await instance.tap(['--json', command, '--selector', '.item'])
+      const result = await session.tap(['--json', command, '--selector', '.item'])
 
       expect(result.exitCode, `${command} refused the ambiguous read`).to.eq(1)
       expect(result.json()).to.deep.include({ ambiguous: true, selector: '.item', count: 3 })
@@ -627,12 +627,12 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('indexes into an ambiguous selector with --at for aria and inspect', async () => {
-    const aria = await instance.tap(['--json', 'aria', '--selector', '.item', '--at', '1'])
+    const aria = await session.tap(['--json', 'aria', '--selector', '.item', '--at', '1'])
 
     expect(aria.exitCode).to.eq(0)
     expect(aria.json().nodes[0]).to.include({ depth: 0, role: 'listitem' })
 
-    const inspected = await instance.tap(['--json', 'inspect', '--selector', '.item', '--at', '2'])
+    const inspected = await session.tap(['--json', 'inspect', '--selector', '.item', '--at', '2'])
 
     expect(inspected.exitCode).to.eq(0)
     expect(inspected.json()).to.deep.include({ found: true, tag: 'li' })
@@ -641,7 +641,7 @@ describe('tap CLI against a settled run', function () {
   it('numbers no further than the matches it can name, and says so', async () => {
     // Not snapshotted: `*` also matches whatever the proxy injected, so the total is
     // the browser's business. The cap and the note are the point.
-    const result = await instance.tap(['aria', '--selector', '*'])
+    const result = await session.tap(['aria', '--selector', '*'])
 
     expect(result.exitCode).to.eq(1)
     expect(result.stdout).to.match(/showing the first 10 of \d+ matches/)
@@ -650,7 +650,7 @@ describe('tap CLI against a settled run', function () {
 
   it('exits 1 with INVALID_LIMIT for a cap that is not a positive integer', async () => {
     for (const args of [['dom', '--max-chars', '0'], ['dom', '--max-chars', 'lots'], ['aria', '--max-nodes', '0']]) {
-      const result = await instance.tap(args)
+      const result = await session.tap(args)
 
       expect(result.exitCode, args.join(' ')).to.eq(1)
       expect(failureOutput(result), args.join(' ')).to.include('INVALID_LIMIT')
@@ -658,7 +658,7 @@ describe('tap CLI against a settled run', function () {
   })
 
   it('exits 1 with INVALID_INDEX for an --at that is not a whole number', async () => {
-    const result = await instance.tap(['dom', '--selector', '.item', '--at', '1.5'])
+    const result = await session.tap(['dom', '--selector', '.item', '--at', '1.5'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('INVALID_INDEX')
@@ -666,15 +666,15 @@ describe('tap CLI against a settled run', function () {
 
   it('reads within an explicit --timeout', async () => {
     // Only the accepting half: a deadline short enough to be sure to fire races the
-    // work rather than bounding it, so the expiry is covered against a frozen instance.
-    const result = await instance.tap(['--json', '--timeout', '30000', 'dom', '--selector', '#status'])
+    // work rather than bounding it, so the expiry is covered against a frozen session.
+    const result = await session.tap(['--json', '--timeout', '30000', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
   it('lists every spec of the project and nothing else', async () => {
-    const specs = (await instance.tap(['--json', 'specs'])).json<Array<{ relativePath: string }>>()
+    const specs = (await session.tap(['--json', 'specs'])).json<Array<{ relativePath: string }>>()
 
     // The whole set, not a subset: a listing that quietly drops a spec is a spec
     // an agent can never run. Adding a fixture spec means adding it here.
@@ -687,10 +687,10 @@ describe('tap CLI against a settled run', function () {
     // An agent that fans out its reads gets one session per command, so this is
     // the only thing that exercises them overlapping.
     const results = await Promise.all([
-      instance.tap(['--json', 'dom', '--selector', '#status']),
-      instance.tap(['--json', 'aria', '--selector', '#panel']),
-      instance.tap(['--json', 'inspect', '--selector', '#toggle']),
-      instance.tap(['--json', 'status']),
+      session.tap(['--json', 'dom', '--selector', '#status']),
+      session.tap(['--json', 'aria', '--selector', '#panel']),
+      session.tap(['--json', 'inspect', '--selector', '#toggle']),
+      session.tap(['--json', 'status']),
     ])
 
     expect(results.map((result) => result.exitCode)).to.deep.eq([0, 0, 0, 0])
@@ -700,48 +700,48 @@ describe('tap CLI against a settled run', function () {
     expect(results[3].json()).to.include({ status: 'passed' })
   })
 
-  it('does not expose the commands the instance keeps to itself', async () => {
+  it('does not expose the commands the session keeps to itself', async () => {
     // `run-state` and `resolve-selector` back the status and ambiguity answers;
     // they are advertised as hidden, so the CLI never registers them.
     for (const hidden of ['run-state', 'resolve-selector']) {
-      const result = await instance.tap([hidden])
+      const result = await session.tap([hidden])
 
       expect(result.exitCode, hidden).to.not.eq(0)
     }
   })
 })
 
-// These run in declaration order against one instance: the run gate has to be observed
+// These run in declaration order against one session: the run gate has to be observed
 // mid-run, before anything settles.
 describe('tap CLI across the run lifecycle', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let firstStartedAt: string | null | undefined
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
+    session = await openTapSession('tap-retries')
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('exits 1 with RUN_IN_PROGRESS while a spec is still running', async () => {
-    await instance.requestRun(SLOW_SPEC)
+    await session.requestRun(SLOW_SPEC)
 
     // `running` is the only stage the reads reject as in-progress; `loading` is still
     // short of a run of its own and reports NO_RUN.
-    await instance.waitForStatus((status) => status.status === 'running', 'the running stage')
+    await session.waitForStatus((status) => status.status === 'running', 'the running stage')
 
-    const result = await instance.tap(['dom'])
+    const result = await session.tap(['dom'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('RUN_IN_PROGRESS')
   })
 
   it('becomes readable once that run settles', async () => {
-    const settled = await instance.waitForStatus(
+    const settled = await session.waitForStatus(
       (status) => status.status === 'passed' || status.status === 'failed',
       'a verdict',
     )
@@ -749,14 +749,14 @@ describe('tap CLI across the run lifecycle', function () {
     expect(settled.status).to.eq('passed')
     firstStartedAt = settled.startedAt
 
-    const result = await instance.tap(['--json', 'dom', '--selector', '#status'])
+    const result = await session.tap(['--json', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
   it('starts a new run on rerun, with its own startedAt', async () => {
-    const settled = await instance.runSpec(SLOW_SPEC)
+    const settled = await session.runSpec(SLOW_SPEC)
 
     expect(settled.status).to.eq('passed')
     expect(settled.startedAt).to.be.a('string')
@@ -764,11 +764,11 @@ describe('tap CLI across the run lifecycle', function () {
   })
 
   it('keeps the app under test readable after a failing run', async () => {
-    const settled = await instance.runSpec(FAILING_SPEC)
+    const settled = await session.runSpec(FAILING_SPEC)
 
     expect(settled.status).to.eq('failed')
 
-    const result = await instance.tap(['--json', 'dom', '--selector', '#status'])
+    const result = await session.tap(['--json', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
@@ -776,23 +776,23 @@ describe('tap CLI across the run lifecycle', function () {
 
   it('renders the failure in the command log', async () => {
     // Reuse the prior failed run because only it renders the error panel.
-    const test = await firstTest(instance)
+    const test = await firstTest(session)
 
-    const result = await instance.tap(['reporter', '--test-id', test.id])
+    const result = await session.tap(['reporter', '--test-id', test.id])
 
     expect(result.exitCode).to.eq(0)
 
     snapshotRendering('reporter failed command log', result.stdout)
   })
 
-  it('exits 1 with NO_SESSION once the instance is gone', async () => {
+  it('exits 1 with NO_SESSION once the session is gone', async () => {
     // SIGKILL skips the record cleanup an orderly exit would run, so the record outlives
     // its writer. Discovery reaps it on the next read (`reapIfDead` in
     // cypress-sessions/store.ts), so an unclean exit reports NO_SESSION rather than
     // STALE_SESSION — the latter needs a pid that is alive but no longer answering.
-    await instance.terminate()
+    await session.terminate()
 
-    const result = await instance.tap(['dom', '--selector', '#status'])
+    const result = await session.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('NO_SESSION')
@@ -806,84 +806,84 @@ describe('tap CLI across the run lifecycle', function () {
 describe('tap CLI while a spec is running', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.requestRun(LONG_RUN_SPEC)
-    await instance.waitForStatus((status) => status.status === 'running', 'the running stage')
+    session = await openTapSession('tap-retries')
+    await session.requestRun(LONG_RUN_SPEC)
+    await session.waitForStatus((status) => status.status === 'running', 'the running stage')
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('reports progress but refuses the reads a settled run owns', async () => {
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.status).to.eq('running')
     expect(status.spec).to.eq(LONG_RUN_SPEC)
     expect(status.startedAt, 'the run under way').to.be.a('string')
 
     // The reporter reads the live attempt, so a run can be watched, not just its outcome.
-    const overview = (await instance.tap(['--json', 'reporter'])).json()
+    const overview = (await session.tap(['--json', 'reporter'])).json()
     const tests = [...overview.tests, ...overview.suites.flatMap((suite: { tests: ReporterTest[] }) => suite.tests)]
 
     expect(tests, 'the running test is already listed').to.have.length(1)
 
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', tests[0].id])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', tests[0].id])).json()
     const pending = (view.commands as ReporterCommand[]).find((command) => command.state === 'pending')
 
     expect(pending, 'the command still running').to.exist
 
     // The page is mid-flight, so these are refused rather than read off a moving target.
     for (const args of [['dom'], ['aria'], ['inspect', '--selector', '#status']]) {
-      const refused = await instance.tap(args)
+      const refused = await session.tap(args)
 
       expect(refused.exitCode, args.join(' ')).to.eq(1)
       expect(failureOutput(refused), args.join(' ')).to.include('RUN_IN_PROGRESS')
     }
 
     // pin has its own guard: pinning would swap the frame under the run.
-    const pinned = await instance.tap(['pin', '--test-id', tests[0].id, '--command-id', '1'])
+    const pinned = await session.tap(['pin', '--test-id', tests[0].id, '--command-id', '1'])
 
     expect(pinned.exitCode).to.eq(1)
     expect(failureOutput(pinned)).to.include('RUN_IN_PROGRESS')
 
-    const cleared = await instance.tap(['--json', 'pin', '--clear'])
+    const cleared = await session.tap(['--json', 'pin', '--clear'])
 
     expect(cleared.exitCode).to.eq(0)
     expect(cleared.json()).to.deep.eq({ cleared: false })
   })
 
   it('renders the running phase for humans', async () => {
-    const result = await instance.tap(['status'])
+    const result = await session.tap(['status'])
 
     expect(result.exitCode).to.eq(0)
 
     snapshotRendering('status while running', result.stdout, [
-      [new RegExp(String((await instance.status()).pid), 'g'), '<pid>'],
+      [new RegExp(String((await session.status()).pid), 'g'), '<pid>'],
       [/ {2,}/g, '  '],
     ])
   })
 })
 
 /**
- * Discovery with more than one candidate: which instance a command targets, and
+ * Discovery with more than one candidate: which session a command targets, and
  * how to say which. Two projects, so the cwd tiebreak has something to go on.
  */
-describe('tap CLI with more than one instance running', function () {
+describe('tap CLI with more than one session running', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let retries: TapInstance
-  let eviction: TapInstance
+  let retries: TapSession
+  let eviction: TapSession
   let retriesPid: number
   let evictionPid: number
 
   before(async () => {
-    retries = await openTapInstance('tap-retries')
-    // `additional` keeps the shared dir, so the first instance stays discoverable.
-    eviction = await openTapInstance('tap-eviction', { additional: true })
+    retries = await openTapSession('tap-retries')
+    // `additional` keeps the shared dir, so the first session stays discoverable.
+    eviction = await openTapSession('tap-eviction', { additional: true })
 
     retriesPid = (await retries.status()).pid!
     evictionPid = (await eviction.status()).pid!
@@ -894,21 +894,21 @@ describe('tap CLI with more than one instance running', function () {
     await retries?.kill()
   })
 
-  it('lists both instances, each with its own project', async () => {
-    const listed = (await retries.tap(['--json', 'instances'])).json<Array<{ pid: number, projectRoot: string }>>()
+  it('lists both sessions, each with its own project', async () => {
+    const listed = (await retries.tap(['--json', 'sessions'])).json<Array<{ pid: number, projectRoot: string }>>()
 
     expect(listed).to.have.length(2)
     expect(listed.map((entry) => entry.pid)).to.have.members([retriesPid, evictionPid])
     expect(listed.find((entry) => entry.pid === evictionPid)!.projectRoot).to.include('tap-eviction')
   })
 
-  it('targets the instance whose project the command was run from', async () => {
+  it('targets the session whose project the command was run from', async () => {
     expect((await retries.status()).pid).to.eq(retriesPid)
     expect((await eviction.status()).pid).to.eq(evictionPid)
   })
 
-  it('targets the other one when --instance names it', async () => {
-    const crossed = await retries.tap(['--json', '--instance', String(evictionPid), 'status'])
+  it('targets the other one when --session names it', async () => {
+    const crossed = await retries.tap(['--json', '--session', String(evictionPid), 'status'])
 
     expect(crossed.exitCode).to.eq(0)
     expect(crossed.json().pid, 'the pid asked for, not the one nearby').to.eq(evictionPid)
@@ -919,8 +919,8 @@ describe('tap CLI with more than one instance running', function () {
     const result = await retries.tap(['--help'])
 
     expect(result.exitCode).to.eq(0)
-    expect(result.stdout).to.include('2 running instances matched')
-    expect(result.stdout).to.include('Pass --instance <pid> to target another')
+    expect(result.stdout).to.include('2 running sessions matched')
+    expect(result.stdout).to.include('Pass --session <pid> to target another')
   })
 })
 
@@ -928,24 +928,24 @@ describe('tap CLI with more than one instance running', function () {
  * A pid alive but no longer answering: the only state that reports
  * STALE_SESSION rather than NO_SESSION.
  */
-describe('tap CLI against an instance that stopped answering', function () {
+describe('tap CLI against a session that stopped answering', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(SPEC)
-    await instance.suspend()
+    session = await openTapSession('tap-retries')
+    await session.runSpec(SPEC)
+    await session.suspend()
   })
 
   after(async () => {
     // SIGKILL reaps a stopped tree, so this needs no resume first.
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('exits 1 with STALE_SESSION, saying Cypress was running and is not now', async () => {
-    const result = await instance.tap(['dom', '--selector', '#status'])
+    const result = await session.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('STALE_SESSION')
@@ -954,19 +954,19 @@ describe('tap CLI against an instance that stopped answering', function () {
 
   it('reports "not connected" from status rather than failing', async () => {
     // status answers whatever it finds, and this is one of the things it can find.
-    const result = await instance.tap(['--json', 'status'])
+    const result = await session.tap(['--json', 'status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.eq({ status: 'not connected' })
   })
 
-  it('reads again once the instance answers', async () => {
-    await instance.resume()
+  it('reads again once the session answers', async () => {
+    await session.resume()
 
     // A resumed tree answers again, but not instantly.
-    await instance.waitForStatus((status) => status.status === 'passed', 'the instance to answer again')
+    await session.waitForStatus((status) => status.status === 'passed', 'the session to answer again')
 
-    const result = await instance.tap(['--json', 'dom', '--selector', '#status'])
+    const result = await session.tap(['--json', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
@@ -974,46 +974,46 @@ describe('tap CLI against an instance that stopped answering', function () {
 })
 
 /**
- * Proves a `cypress.open()` instance is discoverable and readable through tap. The full
- * read surface is already covered above against the CLI-spawned instance.
+ * Proves a `cypress.open()` session is discoverable and readable through tap. The full
+ * read surface is already covered above against the CLI-spawned session.
  */
-describe('tap CLI against a Module-API-booted instance', function () {
+describe('tap CLI against a Module-API-booted session', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstanceViaModuleApi('tap-retries')
-    await instance.runSpec(SPEC)
+    session = await openTapSessionViaModuleApi('tap-retries')
+    await session.runSpec(SPEC)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('is discoverable, with a settled run', async () => {
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.status).to.eq('passed')
     expect(status.startedAt).to.be.a('string')
   })
 
   it('reads the app-under-test DOM by selector', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', '#status'])
+    const result = await session.tap(['--json', 'dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
   it('projects the accessibility tree', async () => {
-    const result = await instance.tap(['--json', 'aria'])
+    const result = await session.tap(['--json', 'aria'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().nodes[0]).to.include({ depth: 0, role: 'heading', name: 'Tap fixture' })
   })
 
   it('still exits 1 for an ambiguous selector', async () => {
-    const result = await instance.tap(['--json', 'dom', '--selector', '.item'])
+    const result = await session.tap(['--json', 'dom', '--selector', '.item'])
 
     expect(result.exitCode).to.eq(1)
     expect(result.json()).to.deep.include({ ambiguous: true, count: 3 })
@@ -1040,7 +1040,7 @@ describe('tap CLI help text', function () {
   ]
 
   const helpFor = async (command: string[]) => {
-    const result = await tapWithoutInstance([...command, '--help'])
+    const result = await tapWithoutSession([...command, '--help'])
 
     expect(result.exitCode, `tap ${command.join(' ')} --help should succeed`).to.eq(0)
 
@@ -1057,7 +1057,7 @@ describe('tap CLI help text', function () {
     .filter((name): name is string => Boolean(name))
 
     expect(names, 'commands parsed out of the root help').to.include.members([
-      'instances', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'command', 'reporter', 'pin',
+      'sessions', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'command', 'reporter', 'pin',
     ])
 
     for (const text of [root, ...await Promise.all(names.map((name) => helpFor([name])))]) {
@@ -1068,7 +1068,7 @@ describe('tap CLI help text', function () {
   })
 
   it('exits non-zero for an unknown command', async () => {
-    const result = await tapWithoutInstance(['not-a-command'])
+    const result = await tapWithoutSession(['not-a-command'])
 
     expect(result.exitCode).to.not.eq(0)
   })
@@ -1081,35 +1081,35 @@ describe('tap CLI help text', function () {
 describe('tap CLI reading a pinned snapshot', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let testId: string
   let clickCommandId: string
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(PIN_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(PIN_SPEC)
 
-    testId = (await firstTest(instance)).id
-    clickCommandId = rowNamed(await commandLog(instance, testId), 'click').id
+    testId = (await firstTest(session)).id
+    clickCommandId = rowNamed(await commandLog(session, testId), 'click').id
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('reports the spec overview and a test’s command log', async () => {
-    const overview = (await instance.tap(['--json', 'reporter'])).json()
+    const overview = (await session.tap(['--json', 'reporter'])).json()
 
     expect(overview.spec).to.include('pin-target.cy.js')
     expect(overview.stats).to.include({ passed: 1, failed: 0 })
 
-    const log = (await instance.tap(['--json', 'reporter', '--test-id', testId])).json()
+    const log = (await session.tap(['--json', 'reporter', '--test-id', testId])).json()
 
     expect(log.commands.map((entry: { name: string }) => entry.name)).to.include.members(['visit', 'get', 'click', 'assert'])
   })
 
   it('renders the spec overview for humans', async () => {
-    const result = await instance.tap(['reporter'])
+    const result = await session.tap(['reporter'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1117,7 +1117,7 @@ describe('tap CLI reading a pinned snapshot', function () {
   })
 
   it('renders a test’s command log for humans', async () => {
-    const result = await instance.tap(['reporter', '--test-id', testId])
+    const result = await session.tap(['reporter', '--test-id', testId])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1125,7 +1125,7 @@ describe('tap CLI reading a pinned snapshot', function () {
   })
 
   it('details one command, including the snapshots pinnable on it', async () => {
-    const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', clickCommandId])
+    const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', clickCommandId])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1137,14 +1137,14 @@ describe('tap CLI reading a pinned snapshot', function () {
   })
 
   it('exits 1 when --command-id is given without the test it belongs to', async () => {
-    const result = await instance.tap(['command', '--command-id', clickCommandId])
+    const result = await session.tap(['command', '--command-id', clickCommandId])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('--test-id')
   })
 
   it('renders one command, top to bottom, for humans', async () => {
-    const result = await instance.tap(['command', '--test-id', testId, '--command-id', clickCommandId])
+    const result = await session.tap(['command', '--test-id', testId, '--command-id', clickCommandId])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1157,14 +1157,14 @@ describe('tap CLI reading a pinned snapshot', function () {
   })
 
   it('exits 1 with PIN_TARGET_REQUIRED when given nothing to pin or clear', async () => {
-    const result = await instance.tap(['pin'])
+    const result = await session.tap(['pin'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('PIN_TARGET_REQUIRED')
   })
 
   it('exits 1 with SNAPSHOT_NOT_FOUND and names the snapshots there are', async () => {
-    const result = await instance.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'midway'])
+    const result = await session.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'midway'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('SNAPSHOT_NOT_FOUND')
@@ -1172,97 +1172,97 @@ describe('tap CLI reading a pinned snapshot', function () {
   })
 
   it('reads the pinned snapshot rather than the live page', async () => {
-    const live = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
+    const live = (await session.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(live.html).to.eq('<div id="status">clicked</div>')
 
-    const pin = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
+    const pin = await session.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
 
     expect(pin.exitCode).to.eq(0)
     expect(pin.json().pinned).to.deep.include({ test: testId })
     expect(pin.json().pinned.at).to.deep.include({ name: 'before', index: 1, total: 2 })
 
-    const pinned = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
+    const pinned = (await session.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(pinned.html, 'the pre-click snapshot').to.eq('<div id="status">ready</div>')
 
     // status carries the pin, so a poller can tell it is not looking at the live app.
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.pinned).to.deep.include({ test: testId })
   })
 
   it('addresses a snapshot by position, and switches without releasing', async () => {
-    const first = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', '1'])
+    const first = await session.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', '1'])
 
     expect(first.exitCode).to.eq(0)
     expect(first.json().pinned.at).to.deep.include({ name: 'before', index: 1, total: 2 })
 
     // Re-running on the pinned command moves which snapshot shows.
-    const second = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', '2'])
+    const second = await session.tap(['--json', 'pin', '--test-id', testId, '--command-id', clickCommandId, '--at', '2'])
 
     expect(second.exitCode).to.eq(0)
     expect(second.json().pinned.at).to.deep.include({ name: 'after', index: 2, total: 2 })
 
-    const after = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
+    const after = (await session.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(after.html, 'the post-click snapshot').to.eq('<div id="status">clicked</div>')
   })
 
   it('answers aria and inspect out of the pinned frame too', async () => {
     // The pin swaps the frame all three reads resolve against, not just dom's.
-    const pinned = await instance.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
+    const pinned = await session.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
 
     expect(pinned.exitCode).to.eq(0)
 
-    const aria = (await instance.tap(['--json', 'aria', '--selector', '#toggle'])).json()
+    const aria = (await session.tap(['--json', 'aria', '--selector', '#toggle'])).json()
 
     expect(aria.nodes[0]).to.include({ depth: 0, role: 'button', name: 'toggle' })
 
-    const inspected = (await instance.tap(['--json', 'inspect', '--selector', '#status'])).json()
+    const inspected = (await session.tap(['--json', 'inspect', '--selector', '#status'])).json()
 
     expect(inspected).to.deep.include({ found: true, tag: 'div' })
   })
 
   it('renders the pin the same way from pin and from status', async () => {
-    const pinned = await instance.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
+    const pinned = await session.tap(['pin', '--test-id', testId, '--command-id', clickCommandId, '--at', 'before'])
 
     expect(pinned.exitCode).to.eq(0)
 
     snapshotRendering('pin a snapshot', pinned.stdout)
 
     // One thing, one rendering: status reports the pin with the same block.
-    const status = await instance.tap(['status'])
+    const status = await session.tap(['status'])
 
     expect(status.stdout).to.include(pinned.stdout.trim())
 
     snapshotRendering('status while pinned', status.stdout, [
-      [new RegExp(String((await instance.status()).pid), 'g'), '<pid>'],
+      [new RegExp(String((await session.status()).pid), 'g'), '<pid>'],
       [/ {2,}/g, '  '],
     ])
   })
 
   it('restores the live app on --clear', async () => {
-    const cleared = await instance.tap(['pin', '--clear'])
+    const cleared = await session.tap(['pin', '--clear'])
 
     expect(cleared.exitCode).to.eq(0)
 
-    const live = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
+    const live = (await session.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(live.html, 'the live post-click page').to.eq('<div id="status">clicked</div>')
 
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.pinned, 'no pin is reported once cleared').to.be.undefined
   })
 
   it('reports a --clear with no pin to release as having cleared nothing', async () => {
-    const result = await instance.tap(['--json', 'pin', '--clear'])
+    const result = await session.tap(['--json', 'pin', '--clear'])
 
     expect(result.exitCode, 'nothing to release is not a failure').to.eq(0)
     expect(result.json()).to.deep.eq({ cleared: false })
 
-    const rendered = await instance.tap(['pin', '--clear'])
+    const rendered = await session.tap(['pin', '--clear'])
 
     snapshotRendering('pin clear with nothing pinned', rendered.stdout)
   })
@@ -1275,21 +1275,21 @@ describe('tap CLI reading a pinned snapshot', function () {
 describe('tap CLI debugging a failed run end to end', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
+    session = await openTapSession('tap-retries')
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
-  it('walks from instance discovery to the DOM that explains a failed run', async () => {
+  it('walks from session discovery to the DOM that explains a failed run', async () => {
     const journeyOutput: string[] = []
 
-    const instancesResult = await instance.tap(['--json', 'instances'])
-    const instances = instancesResult.json<Array<{
+    const sessionsResult = await session.tap(['--json', 'sessions'])
+    const sessions = sessionsResult.json<Array<{
       pid: number
       projectRoot: string
       testingType: string
@@ -1297,45 +1297,45 @@ describe('tap CLI debugging a failed run end to end', function () {
       rendererResponsive?: boolean
     }>>()
 
-    expect(instancesResult.exitCode).to.eq(0)
-    expect(instances).to.have.length(1)
-    expect(instances[0]).to.deep.include({
-      projectRoot: instance.projectRoot,
+    expect(sessionsResult.exitCode).to.eq(0)
+    expect(sessions).to.have.length(1)
+    expect(sessions[0]).to.deep.include({
+      projectRoot: session.projectRoot,
       testingType: 'e2e',
       browserAttached: true,
       rendererResponsive: true,
     })
 
-    const renderedInstances = await instance.tap(['instances'])
+    const renderedSessions = await session.tap(['sessions'])
 
-    journeyOutput.push(`$ cypress tap instances\n${renderedInstances.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap sessions\n${renderedSessions.stdout.trimEnd()}`)
 
-    const pid = String(instances[0].pid)
-    const specsResult = await instance.tap(['--json', '--instance', pid, 'specs'])
+    const pid = String(sessions[0].pid)
+    const specsResult = await session.tap(['--json', '--session', pid, 'specs'])
     const specs = specsResult.json<Array<{ relativePath: string }>>()
     const failingSpec = specs.find((spec) => spec.relativePath === FAILING_SPEC)
 
     expect(specsResult.exitCode).to.eq(0)
-    expect(failingSpec, 'the failing spec listed for the discovered instance').to.exist
+    expect(failingSpec, 'the failing spec listed for the discovered session').to.exist
 
-    const renderedSpecs = await instance.tap(['--instance', pid, 'specs'])
+    const renderedSpecs = await session.tap(['--session', pid, 'specs'])
     const [specsHeading, ...specRows] = renderedSpecs.stdout.trimEnd().split('\n')
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} specs\n${[specsHeading, ...specRows.sort()].join('\n')}`)
+    journeyOutput.push(`$ cypress tap --session ${pid} specs\n${[specsHeading, ...specRows.sort()].join('\n')}`)
 
-    const before = await instance.status()
-    const runResult = await instance.tap(['--instance', pid, 'run', failingSpec!.relativePath])
+    const before = await session.status()
+    const runResult = await session.tap(['--session', pid, 'run', failingSpec!.relativePath])
 
     expect(runResult.exitCode).to.eq(0)
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} run ${failingSpec!.relativePath}\n${runResult.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap --session ${pid} run ${failingSpec!.relativePath}\n${runResult.stdout.trimEnd()}`)
 
-    await instance.waitForStatus(
+    await session.waitForStatus(
       (current) => current.status === 'failed' && current.startedAt !== before.startedAt,
       `a failed verdict for ${failingSpec!.relativePath}`,
     )
 
-    const statusResult = await instance.tap(['--json', '--instance', pid, 'status'])
+    const statusResult = await session.tap(['--json', '--session', pid, 'status'])
     const status = statusResult.json()
 
     expect(statusResult.exitCode).to.eq(0)
@@ -1343,11 +1343,11 @@ describe('tap CLI debugging a failed run end to end', function () {
     expect(status.results).to.deep.include({ passed: 0, failed: 1 })
     expect(status.spec).to.eq(FAILING_SPEC)
 
-    const renderedStatus = await instance.tap(['--instance', pid, 'status'])
+    const renderedStatus = await session.tap(['--session', pid, 'status'])
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} status\n${renderedStatus.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap --session ${pid} status\n${renderedStatus.stdout.trimEnd()}`)
 
-    const overviewResult = await instance.tap(['--json', '--instance', pid, 'reporter'])
+    const overviewResult = await session.tap(['--json', '--session', pid, 'reporter'])
     const overview = overviewResult.json()
     const tests: ReporterTest[] = [
       ...overview.tests,
@@ -1359,11 +1359,11 @@ describe('tap CLI debugging a failed run end to end', function () {
     expect(test, 'the failed test listed in the reporter').to.exist
     expect(test.state).to.eq('failed')
 
-    const renderedOverview = await instance.tap(['--instance', pid, 'reporter'])
+    const renderedOverview = await session.tap(['--session', pid, 'reporter'])
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} reporter\n${renderedOverview.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap --session ${pid} reporter\n${renderedOverview.stdout.trimEnd()}`)
 
-    const view = (await instance.tap(['--json', '--instance', pid, 'reporter', '--test-id', test.id])).json()
+    const view = (await session.tap(['--json', '--session', pid, 'reporter', '--test-id', test.id])).json()
 
     expect(view.error.name).to.eq('AssertionError')
     expect(view.error.codeFrame.file).to.include('failing.cy.js')
@@ -1373,46 +1373,46 @@ describe('tap CLI debugging a failed run end to end', function () {
     expect(failed, 'the failed row').to.exist
     expect(failed!.name).to.eq('assert')
 
-    const renderedReporter = await instance.tap(['--instance', pid, 'reporter', '--test-id', test.id])
+    const renderedReporter = await session.tap(['--session', pid, 'reporter', '--test-id', test.id])
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} reporter --test-id ${test.id}\n${renderedReporter.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap --session ${pid} reporter --test-id ${test.id}\n${renderedReporter.stdout.trimEnd()}`)
 
-    const detail = (await instance.tap(['--json', '--instance', pid, 'command', '--test-id', test.id, '--command-id', failed!.id])).json()
+    const detail = (await session.tap(['--json', '--session', pid, 'command', '--test-id', test.id, '--command-id', failed!.id])).json()
 
     expect(detail.state).to.eq('failed')
     expect(detail.consoleProps.name).to.eq('assert')
     expect(detail.snapshots, 'a snapshot to pin the failure at').to.have.length.greaterThan(0)
 
-    const renderedCommand = await instance.tap(['--instance', pid, 'command', '--test-id', test.id, '--command-id', failed!.id])
+    const renderedCommand = await session.tap(['--session', pid, 'command', '--test-id', test.id, '--command-id', failed!.id])
 
-    journeyOutput.push(`$ cypress tap --instance ${pid} command --test-id ${test.id} --command-id ${failed!.id}\n${renderedCommand.stdout.trimEnd()}`)
+    journeyOutput.push(`$ cypress tap --session ${pid} command --test-id ${test.id} --command-id ${failed!.id}\n${renderedCommand.stdout.trimEnd()}`)
 
     // Pin the failed row, and the frame answers as of the failure rather than now.
-    const pinned = await instance.tap(['--json', '--instance', pid, 'pin', '--test-id', test.id, '--command-id', failed!.id])
+    const pinned = await session.tap(['--json', '--session', pid, 'pin', '--test-id', test.id, '--command-id', failed!.id])
 
     expect(pinned.exitCode).to.eq(0)
     expect(pinned.json().pinned).to.deep.include({ test: test.id })
     expect(pinned.json().pinned.command.id).to.eq(failed!.id)
 
-    expect((await instance.status()).pinned).to.deep.include({ test: test.id })
+    expect((await session.status()).pinned).to.deep.include({ test: test.id })
 
     // The snapshot marks the element the assertion was about, so a pinned read is
     // distinguishable from the live page by more than its text.
-    const dom = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
+    const dom = (await session.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(dom).to.deep.include({ found: true, html: '<div id="status" data-cy="status" data-cypress-el="true">ready</div>' })
 
-    const inspected = (await instance.tap(['--json', 'inspect', '--selector', '#status'])).json()
+    const inspected = (await session.tap(['--json', 'inspect', '--selector', '#status'])).json()
 
     expect(inspected).to.deep.include({ found: true, tag: 'div' })
     expect(inspected.attributes).to.deep.eq({ 'id': 'status', 'data-cy': 'status', 'data-cypress-el': 'true' })
 
-    const renderedDom = await instance.tap(['--instance', pid, 'dom', '--selector', '#status'])
-    const renderedInspect = await instance.tap(['--instance', pid, 'inspect', '--selector', '#status'])
+    const renderedDom = await session.tap(['--session', pid, 'dom', '--selector', '#status'])
+    const renderedInspect = await session.tap(['--session', pid, 'inspect', '--selector', '#status'])
 
     journeyOutput.push(
-      `$ cypress tap --instance ${pid} dom --selector #status\n${renderedDom.stdout.trimEnd()}`,
-      `$ cypress tap --instance ${pid} inspect --selector #status\n${renderedInspect.stdout.trimEnd()}`,
+      `$ cypress tap --session ${pid} dom --selector #status\n${renderedDom.stdout.trimEnd()}`,
+      `$ cypress tap --session ${pid} inspect --selector #status\n${renderedInspect.stdout.trimEnd()}`,
     )
 
     snapshotRendering('complete failed run debugging journey', journeyOutput.join('\n\n'), [
@@ -1423,23 +1423,23 @@ describe('tap CLI debugging a failed run end to end', function () {
     ])
 
     // Released, the same read answers with the live element, highlight and all gone.
-    expect((await instance.tap(['pin', '--clear'])).exitCode).to.eq(0)
-    expect((await instance.status()).pinned, 'no pin survives the release').to.be.undefined
+    expect((await session.tap(['pin', '--clear'])).exitCode).to.eq(0)
+    expect((await session.status()).pinned, 'no pin survives the release').to.be.undefined
 
-    const live = (await instance.tap(['--json', 'dom', '--selector', '#status'])).json()
+    const live = (await session.tap(['--json', 'dom', '--selector', '#status'])).json()
 
     expect(live).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
   it('renders the failed row the way a reader would meet it', async () => {
-    const settled = await instance.runSpec(FAILING_SPEC)
+    const settled = await session.runSpec(FAILING_SPEC)
 
     expect(settled.status).to.eq('failed')
 
-    const test = await firstTest(instance)
-    const failed = rowNamed(await commandLog(instance, test.id), 'assert')
+    const test = await firstTest(session)
+    const failed = rowNamed(await commandLog(session, test.id), 'assert')
 
-    const result = await instance.tap(['command', '--test-id', test.id, '--command-id', failed.id])
+    const result = await session.tap(['command', '--test-id', test.id, '--command-id', failed.id])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1447,8 +1447,8 @@ describe('tap CLI debugging a failed run end to end', function () {
   })
 
   it('reruns the spec and reaches the same verdict, under a new startedAt', async () => {
-    const before = await instance.status()
-    const settled = await instance.runSpec(FAILING_SPEC)
+    const before = await session.status()
+    const settled = await session.runSpec(FAILING_SPEC)
 
     expect(settled.status).to.eq('failed')
     expect(settled.startedAt).to.not.eq(before.startedAt)
@@ -1462,20 +1462,20 @@ describe('tap CLI debugging a failed run end to end', function () {
 describe('tap CLI against a run with network activity', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let testId: string
   let commands: ReporterCommand[]
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(NETWORK_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(NETWORK_SPEC)
 
-    testId = (await firstTest(instance)).id
-    commands = await commandLog(instance, testId)
+    testId = (await firstTest(session)).id
+    commands = await commandLog(session, testId)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   /** Every network row logs under the same name; the network object tells them apart. */
@@ -1490,7 +1490,7 @@ describe('tap CLI against a run with network activity', function () {
   }
 
   it('reports the intercept as a route rather than a command', async () => {
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', testId])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', testId])).json()
 
     expect(view.routes).to.have.length(1)
     expect(view.routes[0]).to.deep.include({ method: 'GET', stubbed: true, alias: 'getUsers' })
@@ -1502,7 +1502,7 @@ describe('tap CLI against a run with network activity', function () {
   })
 
   it('details the stubbed request’s network fields', async () => {
-    const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', stubbedRow().id])
+    const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', stubbedRow().id])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1529,7 +1529,7 @@ describe('tap CLI against a run with network activity', function () {
   })
 
   it('renders a network row’s own detail panel for humans', async () => {
-    const result = await instance.tap(['command', '--test-id', testId, '--command-id', stubbedRow().id])
+    const result = await session.tap(['command', '--test-id', testId, '--command-id', stubbedRow().id])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1549,7 +1549,7 @@ describe('tap CLI against a run with network activity', function () {
 
     expect(events, 'event rows in the log').to.have.length.greaterThan(0)
 
-    const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', events[0].id])
+    const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', events[0].id])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json()).to.deep.include({ id: events[0].id, name: events[0].name })
@@ -1563,7 +1563,7 @@ describe('tap CLI against a run with network activity', function () {
   })
 
   it('renders the reporter view for humans, routes table and all', async () => {
-    const result = await instance.tap(['reporter', '--test-id', testId])
+    const result = await session.tap(['reporter', '--test-id', testId])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1578,15 +1578,15 @@ describe('tap CLI against a run with network activity', function () {
 describe('tap CLI reading a command’s console properties', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
-  // One instance across both fixtures: each inner block runs the spec it reads.
+  // One session across both fixtures: each inner block runs the spec it reads.
   before(async () => {
-    instance = await openTapInstance('tap-retries')
+    session = await openTapSession('tap-retries')
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   describe('a payload the driver bounded before it shipped', () => {
@@ -1600,18 +1600,18 @@ describe('tap CLI reading a command’s console properties', function () {
     const withheldFor = (length: number) => `[${length.toLocaleString('en-US')} characters withheld — pass --json to include it]`
 
     before(async () => {
-      await instance.runSpec(CONSOLE_PROPS_SPEC)
+      await session.runSpec(CONSOLE_PROPS_SPEC)
 
-      testId = (await firstTest(instance)).id
+      testId = (await firstTest(session)).id
 
-      const commands = await commandLog(instance, testId)
+      const commands = await commandLog(session, testId)
 
       deepId = rowNamed(commands, 'deep-console-props').id
       emptyId = rowNamed(commands, 'empty-console-props').id
     })
 
     it('names a value too long to read by its length, keeping the rest legible', async () => {
-      const result = await instance.tap(['command', '--test-id', testId, '--command-id', deepId])
+      const result = await session.tap(['command', '--test-id', testId, '--command-id', deepId])
 
       expect(result.exitCode).to.eq(0)
       expect(result.stdout, 'the long string').to.include(withheldFor(note.length))
@@ -1621,7 +1621,7 @@ describe('tap CLI reading a command’s console properties', function () {
     })
 
     it('returns every console property in full with --json', async () => {
-      const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', deepId])
+      const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', deepId])
 
       expect(result.exitCode).to.eq(0)
 
@@ -1635,7 +1635,7 @@ describe('tap CLI reading a command’s console properties', function () {
     })
 
     it('leaves a bounded value bounded at --depth all', async () => {
-      const result = await instance.tap(['command', '--test-id', testId, '--command-id', deepId, '--depth', 'all'])
+      const result = await session.tap(['command', '--test-id', testId, '--command-id', deepId, '--depth', 'all'])
 
       expect(result.exitCode).to.eq(0)
       // Depth opens the rendering; this was bounded before the CLI saw it.
@@ -1643,14 +1643,14 @@ describe('tap CLI reading a command’s console properties', function () {
     })
 
     it('falls back to the default depth for an unusable --depth', async () => {
-      const result = await instance.tap(['command', '--test-id', testId, '--command-id', deepId, '--depth', 'wide'])
+      const result = await session.tap(['command', '--test-id', testId, '--command-id', deepId, '--depth', 'wide'])
 
       expect(result.exitCode, 'an unreadable dial is not a failed read').to.eq(0)
       expect(result.stdout).to.include('--depth takes a whole number or "all"')
     })
 
     it('keeps both panels for a command that logged neither', async () => {
-      const result = await instance.tap(['command', '--test-id', testId, '--command-id', emptyId])
+      const result = await session.tap(['command', '--test-id', testId, '--command-id', emptyId])
 
       expect(result.exitCode).to.eq(0)
 
@@ -1664,17 +1664,17 @@ describe('tap CLI reading a command’s console properties', function () {
     let envelopeId: string
 
     before(async () => {
-      await instance.runSpec(CONSOLE_PROPS_SHAPES_SPEC)
+      await session.runSpec(CONSOLE_PROPS_SHAPES_SPEC)
 
-      testId = (await firstTest(instance)).id
+      testId = (await firstTest(session)).id
 
-      const commands = await commandLog(instance, testId)
+      const commands = await commandLog(session, testId)
 
       shapesId = rowNamed(commands, 'props-shapes').id
       envelopeId = rowNamed(commands, 'props-envelope').id
     })
 
-    const shapes = (extra: string[] = []) => instance.tap(['command', '--test-id', testId, '--command-id', shapesId, ...extra])
+    const shapes = (extra: string[] = []) => session.tap(['command', '--test-id', testId, '--command-id', shapesId, ...extra])
 
     it('summarizes what is too deep or too wide to take in at a glance', async () => {
       const result = await shapes()
@@ -1718,14 +1718,14 @@ describe('tap CLI reading a command’s console properties', function () {
 
     it('exits 1 with SNAPSHOT_UNAVAILABLE for a row that captured none', async () => {
       // These rows are `Cypress.log` calls, so they captured no DOM snapshot.
-      const result = await instance.tap(['pin', '--test-id', testId, '--command-id', shapesId])
+      const result = await session.tap(['pin', '--test-id', testId, '--command-id', shapesId])
 
       expect(result.exitCode).to.eq(1)
       expect(failureOutput(result)).to.include('SNAPSHOT_UNAVAILABLE')
     })
 
     it('renders the envelope sections that sit beside props', async () => {
-      const result = await instance.tap(['command', '--test-id', testId, '--command-id', envelopeId])
+      const result = await session.tap(['command', '--test-id', testId, '--command-id', envelopeId])
 
       expect(result.exitCode).to.eq(0)
       expect(result.stdout).to.include('MOUSE EVENTS (2)')
@@ -1746,18 +1746,18 @@ describe('tap CLI reading a command’s console properties', function () {
 describe('tap CLI against a spec with hooks and a pending test', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let tests: ReporterTest[]
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(HOOKS_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(HOOKS_SPEC)
 
-    tests = await specTests(instance)
+    tests = await specTests(session)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   const titled = (title: string): ReporterTest => {
@@ -1773,7 +1773,7 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
   })
 
   it('renders the overview with its suite breadcrumbs and state badges', async () => {
-    const result = await instance.tap(['reporter'])
+    const result = await session.tap(['reporter'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1781,14 +1781,14 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
   })
 
   it('names the hook section every row of the log ran in', async () => {
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', titled('logs a command of its own').id])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', titled('logs a command of its own').id])).json()
 
     // The synthesized test body plus the hooks that ran around it, in order.
     expect(view.hooks.map((hook: { hookName: string }) => hook.hookName)).to.deep.eq(['before each', 'test body', 'after each'])
   })
 
   it('renders the log split into its hook sections', async () => {
-    const result = await instance.tap(['reporter', '--test-id', titled('logs nothing of its own').id])
+    const result = await session.tap(['reporter', '--test-id', titled('logs nothing of its own').id])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1799,7 +1799,7 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
     const testId = titled('logs nothing of its own').id
 
     // This test body logs nothing, so nothing wins the tie and the CLI will not guess.
-    const result = await instance.tap(['command', '--test-id', testId, '--command-id', '1'])
+    const result = await session.tap(['command', '--test-id', testId, '--command-id', '1'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('AMBIGUOUS_COMMAND')
@@ -1808,13 +1808,13 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
 
   it('resolves the same number once qualified with its section', async () => {
     const testId = titled('logs nothing of its own').id
-    const log = await commandLog(instance, testId)
+    const log = await commandLog(session, testId)
     const hookIds = [...new Set(log.map((row) => row.hookId))].filter(Boolean) as string[]
 
     expect(hookIds, 'rows from more than one section').to.have.length.greaterThan(1)
 
     for (const hookId of hookIds) {
-      const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', `${hookId}:1`])
+      const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', `${hookId}:1`])
 
       expect(result.exitCode, `${hookId}:1`).to.eq(0)
       expect(result.json().hook).to.deep.include({ hookId })
@@ -1823,7 +1823,7 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
 
   it('gives the test body a bare number, over the hooks that share it', async () => {
     const testId = titled('logs a command of its own').id
-    const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', '1'])
+    const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', '1'])
 
     expect(result.exitCode).to.eq(0)
     expect(result.json().hook).to.deep.include({ hookId: testId, hookName: 'test body' })
@@ -1831,7 +1831,7 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
   })
 
   it('renders a pending test as a log with nothing in it', async () => {
-    const result = await instance.tap(['reporter', '--test-id', titled('never runs').id])
+    const result = await session.tap(['reporter', '--test-id', titled('never runs').id])
 
     expect(result.exitCode, 'a test that never ran is still a test').to.eq(0)
 
@@ -1843,22 +1843,22 @@ describe('tap CLI against a spec with hooks and a pending test', function () {
 describe('tap CLI against a spec with spies, stubs and a session', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let tests: ReporterTest[]
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(AGENTS_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(AGENTS_SPEC)
 
-    tests = await specTests(instance)
+    tests = await specTests(session)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('tabulates the spy and the stub with their call counts', async () => {
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', tests[0].id])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', tests[0].id])).json()
 
     expect(view.agents.map((agent: { functionName: string }) => agent.functionName)).to.deep.eq(['greet', 'shout'])
     // The driver numbers each agent, and the event rows are labeled with that type.
@@ -1871,7 +1871,7 @@ describe('tap CLI against a spec with spies, stubs and a session', function () {
   })
 
   it('renders the spies and stubs panel for humans', async () => {
-    const result = await instance.tap(['reporter', '--test-id', tests[0].id])
+    const result = await session.tap(['reporter', '--test-id', tests[0].id])
 
     expect(result.exitCode).to.eq(0)
     expect(result.stdout).to.include('SPIES / STUBS (2)')
@@ -1880,12 +1880,12 @@ describe('tap CLI against a spec with spies, stubs and a session', function () {
   })
 
   it('lists the session the test created', async () => {
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', tests[1].id])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', tests[1].id])).json()
 
     expect(view.sessions).to.have.length(1)
     expect(view.sessions[0]).to.deep.include({ name: 'tap session' })
 
-    const result = await instance.tap(['reporter', '--test-id', tests[1].id])
+    const result = await session.tap(['reporter', '--test-id', tests[1].id])
 
     expect(result.stdout).to.include('SESSIONS (1)')
     expect(result.stdout).to.include('tap session')
@@ -1899,19 +1899,19 @@ describe('tap CLI against a spec with spies, stubs and a session', function () {
 describe('tap CLI against a spec that cannot be built', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(UNBUILDABLE_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(UNBUILDABLE_SPEC)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('reports a failed verdict carrying the build failure, and no counts', async () => {
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.status).to.eq('failed')
     expect(status.spec).to.eq(UNBUILDABLE_SPEC)
@@ -1921,12 +1921,12 @@ describe('tap CLI against a spec that cannot be built', function () {
   })
 
   it('renders the build failure under the phase for humans', async () => {
-    const result = await instance.tap(['status'])
+    const result = await session.tap(['status'])
 
     expect(result.exitCode).to.eq(0)
 
     snapshotRendering('status with a build failure', result.stdout, [
-      [new RegExp(String((await instance.status()).pid), 'g'), '<pid>'],
+      [new RegExp(String((await session.status()).pid), 'g'), '<pid>'],
       // The compiler's own stack names paths and loaders, so keep only the first line.
       [/(Error: Webpack Compilation Error)[\s\S]*/, '$1 <compiler detail>'],
       [/ {2,}/g, '  '],
@@ -1936,21 +1936,21 @@ describe('tap CLI against a spec that cannot be built', function () {
   it('reports an empty run: no tests to list, and none to address', async () => {
     // The bundle delivered no test, so mocha finished with nothing — an all-zero sweep
     // that only `status`'s error tells apart from a wholly passing run.
-    const overview = (await instance.tap(['--json', 'reporter'])).json()
+    const overview = (await session.tap(['--json', 'reporter'])).json()
 
     expect(overview.spec).to.eq(UNBUILDABLE_SPEC)
     expect(overview.stats).to.deep.eq({ passed: 0, failed: 0, pending: 0, skipped: 0 })
     expect(overview.tests).to.deep.eq([])
     expect(overview.suites).to.deep.eq([])
 
-    const missing = await instance.tap(['reporter', '--test-id', 'r3'])
+    const missing = await session.tap(['reporter', '--test-id', 'r3'])
 
     expect(missing.exitCode).to.eq(1)
     expect(failureOutput(missing)).to.include('TEST_NOT_FOUND')
   })
 
   it('renders the empty run for humans', async () => {
-    const result = await instance.tap(['reporter'])
+    const result = await session.tap(['reporter'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -1962,12 +1962,12 @@ describe('tap CLI against a spec that cannot be built', function () {
     // document. The reason is only in `status`. Both reads default to `body`, and
     // that page's body carries nothing accessible, so the tree comes back empty
     // rather than rooted at the frame.
-    const aria = await instance.tap(['--json', 'aria'])
+    const aria = await session.tap(['--json', 'aria'])
 
     expect(aria.exitCode).to.eq(0)
     expect(aria.json()).to.deep.eq({ nodes: [], nodeCount: 0 })
 
-    const dom = await instance.tap(['--json', 'dom'])
+    const dom = await session.tap(['--json', 'dom'])
 
     expect(dom.exitCode).to.eq(0)
     expect(dom.json().html, 'nothing of the spec ever rendered').to.not.include('Unbuildable')
@@ -1981,22 +1981,22 @@ describe('tap CLI against a spec that cannot be built', function () {
 describe('tap CLI against a suite a hook took down', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let tests: ReporterTest[]
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(HOOK_FAILURE_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(HOOK_FAILURE_SPEC)
 
-    tests = await specTests(instance)
+    tests = await specTests(session)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('reports one failure and the rest skipped, never run', async () => {
-    const status = await instance.status()
+    const status = await session.status()
 
     expect(status.status).to.eq('failed')
     expect(status.results).to.deep.include({ passed: 0, failed: 1 })
@@ -2007,7 +2007,7 @@ describe('tap CLI against a suite a hook took down', function () {
   })
 
   it('renders the overview with a skipped count for humans', async () => {
-    const result = await instance.tap(['reporter'])
+    const result = await session.tap(['reporter'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -2015,7 +2015,7 @@ describe('tap CLI against a suite a hook took down', function () {
   })
 
   it('attributes the failure to the hook that raised it', async () => {
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', tests[0].id])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', tests[0].id])).json()
 
     expect(view.error.message).to.include('the before hook could not set up')
     expect(view.error.message).to.include('before all')
@@ -2028,7 +2028,7 @@ describe('tap CLI against a suite a hook took down', function () {
   })
 
   it('renders the hook failure for humans', async () => {
-    const result = await instance.tap(['reporter', '--test-id', tests[0].id])
+    const result = await session.tap(['reporter', '--test-id', tests[0].id])
 
     expect(result.exitCode).to.eq(0)
 
@@ -2044,18 +2044,18 @@ describe('tap CLI against a suite a hook took down', function () {
 describe('tap CLI against a test the driver evicted from memory', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let tests: ReporterTest[]
 
   before(async () => {
-    instance = await openTapInstance('tap-eviction')
-    await instance.runSpec(EVICTION_SPEC)
+    session = await openTapSession('tap-eviction')
+    await session.runSpec(EVICTION_SPEC)
 
-    tests = await specTests(instance)
+    tests = await specTests(session)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('runs every test, whatever it keeps of them', async () => {
@@ -2063,8 +2063,8 @@ describe('tap CLI against a test the driver evicted from memory', function () {
   })
 
   it('marks the evicted rows, and leaves the latest test whole', async () => {
-    const evicted = await commandLog(instance, tests[0].id)
-    const kept = await commandLog(instance, tests[2].id)
+    const evicted = await commandLog(session, tests[0].id)
+    const kept = await commandLog(session, tests[2].id)
 
     expect(evicted, 'the rows themselves survive the eviction').to.have.length.greaterThan(0)
     expect(evicted.every((row) => row.cleanedUp === true), 'every row of the oldest test').to.eq(true)
@@ -2075,8 +2075,8 @@ describe('tap CLI against a test the driver evicted from memory', function () {
   })
 
   it('says so on an evicted row rather than reporting it as empty', async () => {
-    const evicted = await commandLog(instance, tests[0].id)
-    const detail = (await instance.tap(['--json', 'command', '--test-id', tests[0].id, '--command-id', evicted[0].id])).json()
+    const evicted = await commandLog(session, tests[0].id)
+    const detail = (await session.tap(['--json', 'command', '--test-id', tests[0].id, '--command-id', evicted[0].id])).json()
 
     expect(detail.cleanedUp).to.eq(true)
     expect(detail.snapshots, 'nothing left to pin').to.deep.eq([])
@@ -2085,16 +2085,16 @@ describe('tap CLI against a test the driver evicted from memory', function () {
     expect(Object.keys(detail.consoleProps)).to.deep.eq(['Message'])
     expect(String(detail.consoleProps.Message)).to.match(/memory/i)
 
-    const kept = await commandLog(instance, tests[2].id)
-    const whole = (await instance.tap(['--json', 'command', '--test-id', tests[2].id, '--command-id', rowNamed(kept, 'click').id])).json()
+    const kept = await commandLog(session, tests[2].id)
+    const whole = (await session.tap(['--json', 'command', '--test-id', tests[2].id, '--command-id', rowNamed(kept, 'click').id])).json()
 
     expect(whole.snapshots).to.have.length.greaterThan(0)
     expect(whole.consoleProps).to.exist
   })
 
   it('exits 1 with SNAPSHOT_UNAVAILABLE when asked to pin an evicted row', async () => {
-    const evicted = await commandLog(instance, tests[0].id)
-    const result = await instance.tap(['pin', '--test-id', tests[0].id, '--command-id', evicted[0].id])
+    const evicted = await commandLog(session, tests[0].id)
+    const result = await session.tap(['pin', '--test-id', tests[0].id, '--command-id', evicted[0].id])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('SNAPSHOT_UNAVAILABLE')
@@ -2102,7 +2102,7 @@ describe('tap CLI against a test the driver evicted from memory', function () {
   })
 
   it('renders an evicted log for humans, marked as cleaned up', async () => {
-    const result = await instance.tap(['reporter', '--test-id', tests[0].id])
+    const result = await session.tap(['reporter', '--test-id', tests[0].id])
 
     expect(result.exitCode).to.eq(0)
     expect(result.stdout).to.include('(cleaned up)')
@@ -2111,8 +2111,8 @@ describe('tap CLI against a test the driver evicted from memory', function () {
   })
 
   it('renders an evicted row’s detail, empty panels and all', async () => {
-    const evicted = await commandLog(instance, tests[0].id)
-    const result = await instance.tap(['command', '--test-id', tests[0].id, '--command-id', evicted[0].id])
+    const evicted = await commandLog(session, tests[0].id)
+    const result = await session.tap(['command', '--test-id', tests[0].id, '--command-id', evicted[0].id])
 
     expect(result.exitCode).to.eq(0)
 
@@ -2127,24 +2127,24 @@ describe('tap CLI against a test the driver evicted from memory', function () {
 describe('tap CLI walking a spec with every kind of row', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let testId: string
   let commands: ReporterCommand[]
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(JOURNEY_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(JOURNEY_SPEC)
 
-    testId = (await firstTest(instance)).id
-    commands = await commandLog(instance, testId)
+    testId = (await firstTest(session)).id
+    commands = await commandLog(session, testId)
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('renders the whole log for humans: hook, route, event, log and alias rows', async () => {
-    const result = await instance.tap(['reporter', '--test-id', testId])
+    const result = await session.tap(['reporter', '--test-id', testId])
 
     expect(result.exitCode).to.eq(0)
 
@@ -2163,7 +2163,7 @@ describe('tap CLI walking a spec with every kind of row', function () {
 
     expect(logged.message).to.eq('the stub answered')
 
-    const detail = (await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', logged.id])).json()
+    const detail = (await session.tap(['--json', 'command', '--test-id', testId, '--command-id', logged.id])).json()
 
     expect(detail.hook).to.deep.include({ hookId: testId, hookName: 'test body' })
     // A row with a single snapshot carries no name for it, so only the index addresses it.
@@ -2171,24 +2171,24 @@ describe('tap CLI walking a spec with every kind of row', function () {
     expect(detail.snapshots[0]).to.include({ index: 1 })
     expect(detail.snapshots[0].name, 'one unnamed snapshot').to.be.undefined
 
-    const pinned = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', logged.id])
+    const pinned = await session.tap(['--json', 'pin', '--test-id', testId, '--command-id', logged.id])
 
     expect(pinned.exitCode, 'addressable by index alone').to.eq(0)
     expect(pinned.json().pinned.at).to.deep.eq({ index: 1, total: 1 })
 
-    await instance.tap(['pin', '--clear'])
+    await session.tap(['pin', '--clear'])
   })
 
   it('details the typed field’s row, with the event table the driver logged', async () => {
     const typed = rowNamed(commands, 'type')
 
-    const detail = (await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', typed.id])).json()
+    const detail = (await session.tap(['--json', 'command', '--test-id', testId, '--command-id', typed.id])).json()
 
     // Not asserted value by value: these are the browser's own key events.
     expect(detail.consoleProps.table, 'the keyboard events').to.exist
     expect(detail.snapshots).to.have.length.greaterThan(0)
 
-    const rendered = await instance.tap(['command', '--test-id', testId, '--command-id', typed.id])
+    const rendered = await session.tap(['command', '--test-id', testId, '--command-id', typed.id])
 
     expect(rendered.exitCode).to.eq(0)
     expect(rendered.stdout).to.match(/EVENTS \(\d+\)/)
@@ -2197,22 +2197,22 @@ describe('tap CLI walking a spec with every kind of row', function () {
   it('walks the click either side of its snapshots, then puts the page back', async () => {
     const click = rowNamed(commands, 'click')
 
-    const before = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', click.id, '--at', 'before'])
+    const before = await session.tap(['--json', 'pin', '--test-id', testId, '--command-id', click.id, '--at', 'before'])
 
     expect(before.exitCode).to.eq(0)
-    expect((await instance.tap(['--json', 'dom', '--selector', '#status'])).json().html).to.include('ready')
+    expect((await session.tap(['--json', 'dom', '--selector', '#status'])).json().html).to.include('ready')
 
-    const after = await instance.tap(['--json', 'pin', '--test-id', testId, '--command-id', click.id, '--at', 'after'])
+    const after = await session.tap(['--json', 'pin', '--test-id', testId, '--command-id', click.id, '--at', 'after'])
 
     expect(after.exitCode).to.eq(0)
-    expect((await instance.tap(['--json', 'dom', '--selector', '#status'])).json().html).to.include('clicked')
+    expect((await session.tap(['--json', 'dom', '--selector', '#status'])).json().html).to.include('clicked')
 
-    expect((await instance.tap(['pin', '--clear'])).exitCode).to.eq(0)
-    expect((await instance.tap(['--json', 'dom', '--selector', '#status'])).json().html).to.eq('<div id="status">clicked</div>')
+    expect((await session.tap(['pin', '--clear'])).exitCode).to.eq(0)
+    expect((await session.tap(['--json', 'dom', '--selector', '#status'])).json().html).to.eq('<div id="status">clicked</div>')
   })
 
   it('reports the route the hook registered, kept out of the log', async () => {
-    const view = (await instance.tap(['--json', 'reporter', '--test-id', testId])).json()
+    const view = (await session.tap(['--json', 'reporter', '--test-id', testId])).json()
 
     expect(view.routes).to.have.length(1)
     expect(view.routes[0]).to.deep.include({ method: 'GET', stubbed: true, alias: 'getUsers' })
@@ -2227,29 +2227,29 @@ describe('tap CLI walking a spec with every kind of row', function () {
 describe('tap CLI against a retried test', function () {
   this.timeout(SUITE_TIMEOUT_MS)
 
-  let instance: TapInstance
+  let session: TapSession
   let testId: string
 
   before(async () => {
-    instance = await openTapInstance('tap-retries')
-    await instance.runSpec(RETRIES_SPEC)
+    session = await openTapSession('tap-retries')
+    await session.runSpec(RETRIES_SPEC)
 
-    testId = (await firstTest(instance)).id
+    testId = (await firstTest(session)).id
   })
 
   after(async () => {
-    await instance?.kill()
+    await session?.kill()
   })
 
   it('reports the failed first attempt beside the passing verdict', async () => {
-    const test = await firstTest(instance)
+    const test = await firstTest(session)
 
     expect(test.state, 'the fixture passes on its retry').to.eq('passed')
     expect(test.attempts?.map((attempt) => attempt.state)).to.deep.eq(['failed', 'passed'])
   })
 
   it('renders the retried test in the spec overview for humans', async () => {
-    const result = await instance.tap(['reporter'])
+    const result = await session.tap(['reporter'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -2257,8 +2257,8 @@ describe('tap CLI against a retried test', function () {
   })
 
   it('renders an earlier attempt’s failure for humans', async () => {
-    const latest = await instance.tap(['reporter', '--test-id', testId])
-    const first = await instance.tap(['reporter', '--test-id', testId, '--attempt', '1'])
+    const latest = await session.tap(['reporter', '--test-id', testId])
+    const first = await session.tap(['reporter', '--test-id', testId, '--attempt', '1'])
 
     expect(latest.exitCode).to.eq(0)
     expect(first.exitCode).to.eq(0)
@@ -2268,11 +2268,11 @@ describe('tap CLI against a retried test', function () {
   })
 
   it('reads a command out of an earlier attempt', async () => {
-    const failed = (await commandLog(instance, testId, ['--attempt', '1'])).find((command) => command.state === 'failed')
+    const failed = (await commandLog(session, testId, ['--attempt', '1'])).find((command) => command.state === 'failed')
 
     expect(failed, 'a failed row in the first attempt').to.exist
 
-    const result = await instance.tap(['--json', 'command', '--test-id', testId, '--command-id', failed!.id, '--attempt', '1'])
+    const result = await session.tap(['--json', 'command', '--test-id', testId, '--command-id', failed!.id, '--attempt', '1'])
 
     expect(result.exitCode).to.eq(0)
 
@@ -2284,28 +2284,28 @@ describe('tap CLI against a retried test', function () {
   })
 
   it('exits 1 with ATTEMPT_NOT_FOUND past the last attempt', async () => {
-    const result = await instance.tap(['reporter', '--test-id', testId, '--attempt', '3'])
+    const result = await session.tap(['reporter', '--test-id', testId, '--attempt', '3'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('ATTEMPT_NOT_FOUND')
   })
 
   it('exits 1 when --attempt is given without the test it selects within', async () => {
-    const result = await instance.tap(['reporter', '--attempt', '1'])
+    const result = await session.tap(['reporter', '--attempt', '1'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('ATTEMPT_NOT_FOUND')
   })
 
   it('exits 1 with TEST_NOT_FOUND for an unknown test id', async () => {
-    const result = await instance.tap(['reporter', '--test-id', 'not-a-test'])
+    const result = await session.tap(['reporter', '--test-id', 'not-a-test'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('TEST_NOT_FOUND')
   })
 
   it('exits 1 with COMMAND_NOT_FOUND for an unknown command id', async () => {
-    const result = await instance.tap(['command', '--test-id', testId, '--command-id', '9999'])
+    const result = await session.tap(['command', '--test-id', testId, '--command-id', '9999'])
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include('COMMAND_NOT_FOUND')

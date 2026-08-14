@@ -15,7 +15,7 @@ export const FIND_SESSION_TIMEOUT_MS = 2_000
 const unresponsive = (what: string, ms: number): CypressSessionError => {
   return new CypressSessionError(
     'RENDERER_UNRESPONSIVE',
-    `The targeted Cypress instance did not answer ${what} within ${ms}ms. The browser is reachable, but the page running Cypress is not responding — it may be paused in devtools, stuck in a loop, or starved of memory. Pass --timeout <ms> to wait longer.`,
+    `The targeted Cypress session did not answer ${what} within ${ms}ms. The browser is reachable, but the page running Cypress is not responding — it may be paused in devtools, stuck in a loop, or starved of memory. Pass --timeout <ms> to wait longer.`,
   )
 }
 

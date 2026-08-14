@@ -1,6 +1,6 @@
 import type { ClearResult, PinResult, TapCommandName, TapCommandResult, TapNativeCommandName, TapReporterSpecView, TapReporterView } from '@packages/cypress-sessions'
 import type { TapRunResult } from '../commands/run'
-import type { TapSessionSummary } from '../commands/instances'
+import type { TapSessionSummary } from '../commands/sessions'
 import type { TapSpecEntry } from '../commands/specs'
 import type { TapStatus } from '../types'
 import type { FrameDomResult } from '../commands/dom'
@@ -10,7 +10,7 @@ import type { FrameAmbiguousResult } from '../aut/single-match'
 import { renderAmbiguousHuman } from './ambiguous'
 import { renderReporterHuman, renderReporterSpecHuman } from './reporter'
 import { renderRunHuman } from './run'
-import { renderInstancesHuman } from './instances'
+import { renderSessionsHuman } from './sessions'
 import { renderSpecsHuman } from './specs'
 import { renderStatusHuman } from './status'
 import { renderDomHuman } from './dom'
@@ -60,7 +60,7 @@ const renderings: Partial<Record<TapCommandName | TapNativeCommandName, TapComma
     },
   },
   run: { renderHuman: (result) => renderRunHuman(result as TapRunResult) },
-  instances: { renderHuman: (result) => renderInstancesHuman(result as TapSessionSummary[]) },
+  sessions: { renderHuman: (result) => renderSessionsHuman(result as TapSessionSummary[]) },
   specs: { renderHuman: (result) => renderSpecsHuman(result as TapSpecEntry[]) },
   status: { renderHuman: (result) => renderStatusHuman(result as TapStatus) },
   dom: { renderHuman: orAmbiguous<FrameDomResult>(renderDomHuman) },
