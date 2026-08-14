@@ -1,6 +1,11 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.20.2
 
+**Features:**
+
+- Added the `cypress tap` command, which drives a Cypress session that is already open. It lists the Cypress instances running on the machine, starts and reruns a spec, reports a run's status and results, prints a failing test's error and Command Log, and inspects the DOM and accessibility tree of the application under test. Every subcommand prints readable output by default and machine-readable JSON with `--json`. Run `cypress tap --help` for the full list of subcommands. Addressed in [#34540](https://github.com/cypress-io/cypress/pull/34540).
+- Added the `CYPRESS_DISABLE_GUEST_TELEMETRY` environment variable, which turns off every report Cypress sends without an account behind it when set to any value: the anonymous usage events recorded while Cypress is open, the event each `cypress tap` invocation reports, and crash and error reports. Crash reports can still be turned off on their own with `CYPRESS_CRASH_REPORTS=0`. Addressed in [#34540](https://github.com/cypress-io/cypress/pull/34540).
+
 **Bugfixes:**
 
 - Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
