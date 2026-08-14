@@ -27,6 +27,14 @@ function unknownOption (this: any, flag: string, type: string = 'option'): void 
   logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
+
+  // A command that took exitOverride() means to handle its own failure — exiting
+  // here would skip the rest of its run, including anything it does on the way
+  // out. `cypress tap` relies on this to report the invocation before leaving.
+  if (this._exitCallback) {
+    this._exitCallback(new commander.CommanderError(1, 'commander.unknownOption', `unknown ${type}: ${flag}`))
+  }
+
   process.exit(1)
 }
 commander.Command.prototype.unknownOption = unknownOption
@@ -126,6 +134,9 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
+  session: 'target a specific running Cypress session by its server process id (pid)',
+  json: 'print the raw JSON result instead of the human-readable rendering',
+  tapTimeout: 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
@@ -151,6 +162,7 @@ const knownCommands = [
   'install',
   'open',
   'run',
+  'tap',
   'verify',
   '-v',
   '--version',
@@ -578,6 +590,26 @@ const cliModule = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('tap')
+    .usage('[command] [args...]')
+    .description('Interacts with a running Cypress session')
+    .helpOption(false)
+    .allowUnknownOption(true)
+    .option('-s, --session <pid>', text('session'), coerceAnyStringToInt)
+    .option('--json', text('json'))
+    .option('--timeout <ms>', text('tapTimeout'), coerceAnyStringToInt)
+    .action(async function (this: any, opts: any, args: string[]) {
+      try {
+        const { default: tapModule } = await import('./exec/tap')
+        const code = await tapModule.start(args || [], _.pick(opts, ['session', 'json', 'timeout']))
+
+        process.exit(code)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     maybeAddDevFlag(program

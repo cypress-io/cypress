@@ -1,0 +1,98 @@
+import { vi } from 'vitest'
+
+import logger from '../../../lib/logger'
+import { listLiveSessions, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
+import type { ReadySessionState, SessionSelection } from '../../../lib/cypress-sessions'
+import { withTapConnection } from '../../../lib/tap/tap-connection'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
+import { querySessionGraphql } from '../../../lib/tap/session-gql'
+import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
+import { TapError } from '@packages/cypress-sessions'
+import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
+
+export const tapError = (code: string, message?: string): Error => {
+  return new TapError(code as never, { message })
+}
+
+export const schema: TapSchema = {
+  schemaVersion: 1,
+  cypressVersion: '15.0.0',
+  commands: [
+    {
+      name: 'health',
+      description: 'check that a running Cypress session is reachable and its tap binding responds',
+      params: [],
+      options: [],
+    },
+    {
+      name: 'fake-command-for-testing',
+      description: 'a fake command, advertised only by this test\'s schema, exercising schema-forwarded dispatch',
+      params: [
+        { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the spec command' },
+      ],
+      options: [
+        { name: 'browser', alias: 'b', type: 'string', required: false, description: 'which browser to run in' },
+        { name: 'headed', type: 'boolean', required: false, description: 'show the browser' },
+      ],
+    },
+  ],
+}
+
+export const mockConnection = (connectionSchema: unknown = schema, execOutcome: unknown = { result: 'ok' } satisfies TapExecResult) => {
+  const call = vi.fn(async (method: string) => {
+    return method === 'getSchema' ? connectionSchema : execOutcome
+  })
+
+  // These tests drive the binding exec/status paths, which use only `call`;
+  // the frame extractors (dom/aria/inspect, which use client/sessionId) are
+  // covered separately, so the session's CDP members are stubbed away here.
+  vi.mocked(withTapConnection).mockImplementation(async (_runner, fn) => fn({ call } as unknown as TapConnection))
+
+  return call
+}
+
+export const readySession = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => ({
+  schemaVersion: 1,
+  pid: 4242,
+  projectRoot: '/projects/app',
+  serverPort: 49200,
+  sessionId: 'inst-1',
+  testingType: 'e2e',
+  cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+  browserName: 'Chrome',
+  browserFamily: 'chromium',
+  machineId: null,
+  userId: null,
+  ...overrides,
+})
+
+export const mockResolved = (overrides: Partial<SessionSelection> = {}): SessionSelection => {
+  const selection: SessionSelection = { session: readySession(), reason: 'only', candidateCount: 1, ...overrides }
+
+  vi.mocked(resolveSession).mockResolvedValue(selection)
+
+  return selection
+}
+
+// Every invocation reports itself to the Cloud event collector, so nothing in
+// these specs is allowed to reach the network.
+export const fetchMock = vi.fn()
+
+export const reportedEvent = () => JSON.parse(fetchMock.mock.calls.at(-1)![1].body).payload
+
+export const resetTapMocks = (): void => {
+  fetchMock.mockReset()
+  fetchMock.mockResolvedValue({ status: 200 })
+  vi.stubGlobal('fetch', fetchMock)
+  vi.mocked(withTapConnection).mockReset()
+  vi.mocked(querySessionGraphql).mockReset()
+  vi.mocked(listLiveSessions).mockReset()
+  vi.mocked(resolveLiveSession).mockReset()
+  vi.mocked(resolveSession).mockReset()
+  vi.mocked(withResolvedAutFrame).mockReset()
+  vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
+  mockResolved()
+  logger.reset()
+  vi.spyOn(console, 'log').mockImplementation(() => {})
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+}

@@ -22,6 +22,8 @@ import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { cypressSessions } from './cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -247,6 +249,29 @@ export const createCommonRoutes = ({
 
     res.sendStatus(204)
   })
+
+  // Cypress sessions only apply to an interactive (`cypress open`) session that an
+  // external tool can attach to; the record is only written in open mode, so don't
+  // expose the probe route for headless `cypress run`.
+  if (!config.isTextTerminal) {
+    router.get(`${SESSIONS_ROUTE_PREFIX}:sessionId`, async (req, res) => {
+      const state = cypressSessions.getCurrent()
+
+      if (!state || req.params.sessionId !== state.sessionId) {
+        return res.sendStatus(404)
+      }
+
+      // Identity is read at probe time rather than stored on the state: the
+      // logged-in user can change over the session's lifetime.
+      const ctx = getCtx()
+
+      return res.json({
+        ...state,
+        machineId: await ctx.coreData.machineId.catch(() => null),
+        userId: ctx.coreData.user?.id ?? null,
+      })
+    })
+  }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
