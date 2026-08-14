@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals
 import os from 'os'
 import fs from 'fs-extra'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern, matchesAnySpecPattern } from '../../../src/sources'
 import path from 'path'
 import chokidar from 'chokidar'
 import _ from 'lodash'
@@ -446,6 +446,32 @@ describe('getPathFromSpecPattern', () => {
   })
 })
 
+describe('matchesAnySpecPattern', () => {
+  const e2ePattern = [defaultSpecPattern.e2e]
+  const componentPattern = [defaultSpecPattern.component]
+
+  it('matches a posix path against a pattern with directory segments', () => {
+    expect(matchesAnySpecPattern('cypress/e2e/foo.cy.ts', e2ePattern, '/')).toBe(true)
+    expect(matchesAnySpecPattern('cypress/support/e2e.ts', e2ePattern, '/')).toBe(false)
+  })
+
+  it('matches a windows path against a pattern with directory segments', () => {
+    expect(matchesAnySpecPattern('cypress\\e2e\\foo.cy.ts', e2ePattern, '\\')).toBe(true)
+    expect(matchesAnySpecPattern('cypress\\e2e\\nested\\foo.cy.ts', e2ePattern, '\\')).toBe(true)
+    expect(matchesAnySpecPattern('cypress\\support\\e2e.ts', e2ePattern, '\\')).toBe(false)
+  })
+
+  it('matches a windows path against a pattern without directory segments', () => {
+    expect(matchesAnySpecPattern('src\\components\\Foo.cy.tsx', componentPattern, '\\')).toBe(true)
+    expect(matchesAnySpecPattern('src\\components\\Foo.tsx', componentPattern, '\\')).toBe(false)
+  })
+
+  it('matches against any of the provided patterns', () => {
+    expect(matchesAnySpecPattern('tests\\e2e\\foo.cy.js', [...e2ePattern, 'tests/e2e/**/*.cy.js'], '\\')).toBe(true)
+    expect(matchesAnySpecPattern('tests/e2e/foo.cy.js', [], '/')).toBe(false)
+  })
+})
+
 describe('_makeSpecWatcher', () => {
   let ctx: DataContext
   let specWatcher: chokidar.FSWatcher
@@ -469,6 +495,7 @@ describe('_makeSpecWatcher', () => {
   const SPEC_FILE2 = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'foo.cy.js')
   const SPEC_FILE3 = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'foo.spec.ts')
   const SPEC_FILE_ABC = path.join('cypress', 'e2e', 'some', 'new', 'folder', 'abc.ts')
+  const RENAMED_SPEC_FILE1 = path.join('cypress', 'e2e', 'bar.cy.js')
 
   const writeFiles = () => {
     return Promise.all([
@@ -543,6 +570,34 @@ describe('_makeSpecWatcher', () => {
     ])
 
     expect(Array.from(allFiles)).not.toContain(SUPPORT_FILE)
+  })
+
+  it('watch for renames on files based on a specPattern containing a directory', async function () {
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: specWatcherPath,
+      specPattern: ['cypress/e2e/**/*.cy.js'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    await new Promise((resolve) => specWatcher.on('ready', resolve))
+
+    const allFiles = new Set()
+
+    specWatcher.on('add', (filePath) => allFiles.add(filePath))
+    specWatcher.on('change', (filePath) => allFiles.add(filePath))
+    specWatcher.on('unlink', (filePath) => allFiles.delete(filePath))
+
+    await writeFiles()
+    await ctx.actions.file.moveFileInProject(SPEC_FILE1, RENAMED_SPEC_FILE1)
+    await delay(1000)
+
+    expect(Array.from(allFiles).sort()).toEqual([
+      RENAMED_SPEC_FILE1,
+      SPEC_FILE2,
+    ])
+
+    expect(Array.from(allFiles)).not.toContain(SPEC_FILE1)
   })
 
   it('do not throw if file/folder is deleted while ignoring files', async function () {

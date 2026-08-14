@@ -79,6 +79,14 @@ export const reportTapTrace = async (exitCode: number): Promise<void> => {
   // This runs from the `finally` the CLI exits on, so nothing here may throw: a
   // failure while assembling the event would replace the command's own outcome.
   try {
+    // Read through getEnv so the opt-out can also come from npm config, the way
+    // the CLI's other public variables are set.
+    if (util.getEnv('CYPRESS_DISABLE_GUEST_TELEMETRY')) {
+      debug('skipped tap event: telemetry disabled')
+
+      return
+    }
+
     const cypressVersion = util.pkgVersion()
 
     // Local development reports nothing unless it names the collector to use, so

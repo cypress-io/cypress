@@ -142,9 +142,12 @@ export namespace CyHttpMessages {
      */
     query: Record<string, string | number>
     /**
-     * The HTTP version used in the request. Read only.
+     * The HTTP version used in the request. Read only. Not reported in Chromium-based
+     * browsers when the proxy is disabled — the browser negotiates the protocol with
+     * the origin directly, and it is not knowable at the point the request is
+     * intercepted. Firefox and WebKit keep the proxy and still report it.
      */
-    httpVersion: string
+    httpVersion?: string
     /**
      * The resource type that is being requested, according to the browser.
      * @deprecated the resource types may change or be completely removed in a future version of Cypress
