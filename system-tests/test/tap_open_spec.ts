@@ -174,13 +174,21 @@ describe('tap CLI against a settled run', function () {
     expect(result.json()).to.deep.include({ found: true, html: STATUS_DIV })
   })
 
-  it('reads the whole app-under-test DOM', async () => {
+  it('reads the app-under-test body when no selector is given', async () => {
     const result = await instance.tap(['--json', 'dom'])
 
     expect(result.exitCode).to.eq(0)
+    expect(result.json().found).to.eq(true)
     // `include`, not an equality: the proxy injects into the AUT document.
     expect(result.json().html).to.include('<h1>Tap fixture</h1>')
-    expect(result.json()).to.not.have.property('found')
+    expect(result.json().html, 'the default read is rooted at the body').to.match(/^<body[\s>]/)
+  })
+
+  it('reads the whole document with --selector html', async () => {
+    const result = await instance.tap(['--json', 'dom', '--selector', 'html'])
+
+    expect(result.exitCode).to.eq(0)
+    expect(result.json().html).to.include('<title>Tap AUT content</title>')
   })
 
   it('renders a DOM read for humans', async () => {
@@ -196,9 +204,9 @@ describe('tap CLI against a settled run', function () {
     const result = await instance.tap(['dom', '--max-chars', '120'])
 
     expect(result.exitCode).to.eq(0)
-    // Deliberately not snapshotted: at any cap the whole-page read starts with the
-    // proxy's injected script, so a snapshot would track that injection rather than
-    // this rendering. The truncation notice is the part worth asserting.
+    // Deliberately not snapshotted: a cap this low cuts the markup mid-tag, so a
+    // snapshot would pin whichever attribute the browser happened to serialize
+    // first. The truncation notice is the part worth asserting.
     expect(result.stdout).to.include('truncated')
   })
 
@@ -297,11 +305,11 @@ describe('tap CLI against a settled run', function () {
     expect(failureOutput(result)).to.include('0 to 2, since ".item" matched 3 elements')
   })
 
-  it('exits 1 when --at is given without a selector to index into', async () => {
+  it('exits 1 for an --at beyond the default selector’s single match', async () => {
     const result = await instance.tap(['dom', '--at', '1'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('You passed the --at flag without also passing the --selector flag')
+    expect(failureOutput(result)).to.include('0 to 0, since "body" matched 1 element')
   })
 
   it('exits 1 for an invalid selector', async () => {
@@ -311,7 +319,7 @@ describe('tap CLI against a settled run', function () {
     expect(failureOutput(result)).to.include('Expected --selector to be a valid CSS selector')
   })
 
-  it('projects the accessibility tree', async () => {
+  it('projects the accessibility tree of the body', async () => {
     const result = await instance.tap(['--json', 'aria'])
 
     expect(result.exitCode).to.eq(0)
@@ -319,7 +327,10 @@ describe('tap CLI against a settled run', function () {
     const outcome = result.json()
     const roles = outcome.nodes.map((node: { role: string }) => node.role)
 
-    expect(outcome.nodes[0]).to.include({ depth: 0, role: 'RootWebArea' })
+    // The body itself projects to nothing — it is a structural role — so the
+    // fixture's own content sits at the top of the tree.
+    expect(outcome.nodes[0]).to.include({ depth: 0, role: 'heading', name: 'Tap fixture' })
+    expect(roles, 'the document root is above the body').to.not.include('RootWebArea')
     expect(outcome.nodeCount).to.eq(outcome.nodes.length)
     expect(roles).to.include.members(['heading', 'region', 'button', 'textbox', 'checkbox'])
 
@@ -508,7 +519,7 @@ describe('tap CLI against a Module-API-booted instance', function () {
     const result = await instance.tap(['--json', 'aria'])
 
     expect(result.exitCode).to.eq(0)
-    expect(result.json().nodes[0]).to.include({ depth: 0, role: 'RootWebArea' })
+    expect(result.json().nodes[0]).to.include({ depth: 0, role: 'heading', name: 'Tap fixture' })
   })
 
   it('still exits 1 for an ambiguous selector', async () => {

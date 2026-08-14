@@ -10,13 +10,11 @@ import { readDom } from '../aut/scripts'
 import type { DomReadResult } from '../aut/scripts'
 import { defineNativeCommand } from './definition'
 
-const DEFAULT_MAX_CHARS = 30000
-
-/** What `cypress tap dom` returns: the whole document, or the matched element. */
+/** What `cypress tap dom` returns: the element the selector matched. */
 export interface FrameDomResult {
   /** Whether the selector matched — present only in selector mode. */
   found?: boolean
-  /** The matched element's outerHTML, or the whole document in whole-page mode. */
+  /** The matched element's outerHTML. */
   html?: string
   /** Present (always `true`) when the browser-side cap clipped the output. */
   truncated?: true
@@ -61,7 +59,7 @@ export const extractDom = (
 // cannot use is reported as itself rather than as whatever the search for a
 // Cypress to run it against happened to find.
 export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => {
-  const maxChars = parsePositiveInt(commandOptions['max-chars'], DEFAULT_MAX_CHARS, 'max-chars')
+  const maxChars = parsePositiveInt(commandOptions['max-chars'], 'max-chars')
   const at = parseIndex(commandOptions.at)
 
   return withResolvedAutFrame(options, (session, frame) => {

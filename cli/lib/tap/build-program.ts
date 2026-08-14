@@ -1,6 +1,7 @@
 import commander from 'commander'
 
 import { tapCliCommands } from './commands'
+import { DEFAULT_CDP_TIMEOUT_MS } from './cdp-timeout'
 import type { TapCliCommand } from './types'
 import { MissingArgumentsTapError, MissingOptionTapError, TapError, UnknownCommandTapError, UnknownOptionTapError } from '@packages/cypress-instances'
 import type { TapCommandOptionSchema, TapCommandParamSchema, TapSchema } from '@packages/cypress-instances'
@@ -27,6 +28,14 @@ const argumentDescriptions = (params: readonly TapCommandParamSchema[]): Record<
 
 const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readable rendering'
 
+// commander both applies a declared default and appends `(default: …)` to the
+// help it generates, which is the whole reason a schema carries one. Its types
+// cap the value at a string, but it stores and renders whatever it is handed,
+// and a number has to arrive as one to render as 30000 rather than "30000".
+const declareOption = (command: commander.Command, flags: string, description: string, defaultValue?: string | number): void => {
+  command.option(flags, description, defaultValue as string | undefined)
+}
+
 // Every tap command accepts `--instance`, `--json` and `--timeout`; all are
 // consumed by the top-level `cypress tap` command before a subprogram parses, so
 // declaring them on a command is purely so they render in its generated help.
@@ -35,7 +44,7 @@ const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readabl
 const declareSharedOptions = (command: commander.Command, jsonDescription: string): void => {
   command.option('-i, --instance <pid>', 'target a specific running Cypress instance by its server process id (pid)')
   command.option('--json', jsonDescription)
-  command.option('--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)')
+  declareOption(command, '--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds', DEFAULT_CDP_TIMEOUT_MS)
 }
 
 const declareOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): void => {
@@ -44,14 +53,15 @@ const declareOptions = (command: commander.Command, options: readonly TapCommand
   // so the schema contributes only its description.
   const json = options.find(({ name }) => name === 'json')
 
-  for (const { name, alias, type, required, description } of options.filter((option) => option !== json)) {
+  for (const option of options.filter((candidate) => candidate !== json)) {
+    const { name, alias, type, required, description } = option
     const lead = alias ? `-${alias}, ` : ''
     const flags = type === 'boolean' ? `${lead}--${name}` : `${lead}--${name} <${name}>`
 
     if (required && type !== 'boolean') {
       command.requiredOption(flags, description)
     } else {
-      command.option(flags, description)
+      declareOption(command, flags, description, option.defaultValue)
     }
   }
 

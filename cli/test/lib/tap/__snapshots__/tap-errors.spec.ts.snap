@@ -132,7 +132,7 @@ Options:
   --json                print the raw JSON result instead of the human-readable
                         rendering
   --timeout <ms>        how long to wait on any single call into the running
-                        Cypress, in milliseconds (default 30000)
+                        Cypress, in milliseconds (default: 30000)
   -h, --help            display help for command"
 `;
 
@@ -155,7 +155,7 @@ Options:
   --json                   print the raw JSON result instead of the
                            human-readable rendering
   --timeout <ms>           how long to wait on any single call into the running
-                           Cypress, in milliseconds (default 30000)
+                           Cypress, in milliseconds (default: 30000)
   -h, --help               display help for command"
 `;
 
@@ -315,7 +315,7 @@ Options:
   --json                print the raw JSON result instead of the human-readable
                         rendering
   --timeout <ms>        how long to wait on any single call into the running
-                        Cypress, in milliseconds (default 30000)
+                        Cypress, in milliseconds (default: 30000)
   -h, --help            display help for command
 
 Commands:
@@ -325,11 +325,11 @@ Commands:
   specs [options]       list the specs the running Cypress instance can run,
                         most recently modified first
   run [options] <spec>  run (or rerun) a spec by its project-relative path
-  dom [options]         read the app-under-test DOM as HTML: the whole page,
+  dom [options]         read the app-under-test DOM as HTML: the page body,
                         or the one element a selector matches (with its
                         subtree)
   aria [options]        read the accessibility (ARIA) tree of the
-                        app-under-test frame, or the subtree at a selector
+                        app-under-test page body, or the subtree at a selector
   inspect [options]     inspect the element a selector matches: its tag,
                         attributes, computed styles, box model, and
                         accessibility node
@@ -362,12 +362,12 @@ Unknown option "--bogus"
 
 Usage: cypress tap dom [options]
 
-read the app-under-test DOM as HTML: the whole page, or the one element a selector matches (with its subtree)
+read the app-under-test DOM as HTML: the page body, or the one element a selector matches (with its subtree)
 
 Options:
-  -s, --selector <selector>    a CSS selector matching exactly one element;
-                               omit to read the whole document
-  -m, --max-chars <max-chars>  cap on returned HTML characters (default 30000)
+  -s, --selector <selector>    a CSS selector matching exactly one element
+                               (default: "body")
+  -m, --max-chars <max-chars>  cap on returned HTML characters (default: 30000)
   --at <at>                    0-based index of the match to read, as listed by
                                the index column when a selector matches several
   -i, --instance <pid>         target a specific running Cypress instance by
@@ -375,6 +375,7 @@ Options:
   --json                       print the raw JSON result instead of the
                                human-readable rendering
   --timeout <ms>               how long to wait on any single call into the
-                               running Cypress, in milliseconds (default 30000)
+                               running Cypress, in milliseconds (default:
+                               30000)
   -h, --help                   display help for command"
 `;
