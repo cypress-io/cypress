@@ -25,6 +25,25 @@ const UPDATE_COMMAND = '`npm install --save-dev cypress@latest`'
  */
 export const TAP_TARGET = 'Cypress session'
 
+/**
+ * Several codes stand for one thing a reader has to do about them, and saying it
+ * four slightly different ways only reads as four different problems. Each keeps
+ * its own code — `status` and the help fallback branch on some of them, and
+ * telemetry counts them apart — so what is shared is the copy, never the identity.
+ * The jsdoc on each entry is where the condition it really stands for is written.
+ */
+const UNREACHABLE = {
+  description: `Could not reach the ${TAP_TARGET}.`,
+  solution: 'Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading.',
+} satisfies TapErrorCopy
+
+// No "if it keeps failing" clause here: the entries that ask for a report already
+// open theirs with one, and saying it twice reads as two separate escalations.
+const COMMAND_FAILED = {
+  description: `The ${TAP_TARGET} failed while running the command.`,
+  solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
+} satisfies TapErrorCopy
+
 export const TAP_ERROR_COPY = {
   // Finding an instance to drive
   /** Raised when discovery found no instance record at all, and none was named. */
@@ -42,14 +61,11 @@ export const TAP_ERROR_COPY = {
     solution: `Run \`cypress tap instances\` to list the ${TAP_TARGET}s you can tap into.`,
   },
   /** Raised when records matched, but none answered its liveness probe. */
-  STALE_INSTANCE: {
-    description: `The ${TAP_TARGET} was running, but is no longer responding.`,
-    solution: 'It likely exited uncleanly. Start Cypress again with `cypress open`, then try again.',
-  },
+  STALE_INSTANCE: { ...UNREACHABLE },
   /** Raised when the instance is live, but has no browser open to drive. */
   NO_BROWSER_ATTACHED: {
     description: `The ${TAP_TARGET} is running, but no test browser is open.`,
-    solution: 'Open a Chromium based browser in Cypress, then try again.',
+    solution: 'Open a Chromium-based browser in Cypress, then try again.',
   },
   /** Raised when a CDP call went unanswered until the timeout elapsed. */
   RENDERER_UNRESPONSIVE: {
@@ -59,26 +75,19 @@ export const TAP_ERROR_COPY = {
 
   // Connecting to it
   /** Raised when the CDP connection could not be opened, or dropped mid-command. */
-  CDP_UNREACHABLE: {
-    description: `Lost the connection to the ${TAP_TARGET}'s browser.`,
-    solution: 'The browser may have just closed. Make sure Cypress is running with a browser open, then try again.',
-  },
+  CDP_UNREACHABLE: { ...UNREACHABLE },
   /** Raised when no open page carries the tap binding. */
-  BINDING_NOT_FOUND: {
-    description: `Could not make a connection to the ${TAP_TARGET}.`,
-    solution: `The ${TAP_TARGET} may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again.`,
-  },
+  BINDING_NOT_FOUND: { ...UNREACHABLE },
   /** Raised when a binding method threw while running the command. */
   BINDING_THREW: {
-    description: `The ${TAP_TARGET} failed while running the command.`,
-    solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
+    ...COMMAND_FAILED,
     recommendGhIssue: true,
   },
-  /** Raised when the page navigated mid-call, and the retry hit it again. */
-  STALE_HANDLE: {
-    description: `The ${TAP_TARGET} navigated while running the command.`,
-    solution: 'Run the command again.',
-  },
+  /**
+   * Raised when the page navigated mid-call, and the retry hit it again. An
+   * expected race rather than a defect, so it asks for no report.
+   */
+  STALE_HANDLE: { ...COMMAND_FAILED },
 
   // Agreeing on a protocol with it
   /** Raised when the instance replied in a shape this CLI has no handling for. */
@@ -99,22 +108,17 @@ export const TAP_ERROR_COPY = {
 
   // Reading its data
   /** Raised when a GraphQL request never got an answer over HTTP. */
-  GRAPHQL_UNREACHABLE: {
-    description: `Could not connect to the ${TAP_TARGET} to read its data.`,
-    solution: `The ${TAP_TARGET} may have just closed. Make sure Cypress is running in open mode, then try again.`,
-    recommendGhIssue: true,
-  },
+  GRAPHQL_UNREACHABLE: { ...UNREACHABLE },
   /** Raised when GraphQL answered, but with errors, no data, or not JSON. */
   GRAPHQL_FAILED: {
-    description: `The ${TAP_TARGET} failed while answering a data query.`,
-    solution: 'Try the command again.',
+    ...COMMAND_FAILED,
     recommendGhIssue: true,
   },
 
   // The spec lifecycle
   /** Raised when a spec was read before any has run. */
   SPEC_NOT_STARTED: {
-    description: 'No spec is available to read.',
+    description: 'No spec has run yet.',
     solution: 'Start a spec with the `run` command, then read it once it has finished.',
   },
   /**
@@ -133,7 +137,7 @@ export const TAP_ERROR_COPY = {
   /** Raised when the given path matches no spec the instance can run. */
   SPEC_NOT_FOUND: {
     description: `The ${TAP_TARGET} has no spec matching that path.`,
-    solution: `\`cypress tap specs\` lists the specs the ${TAP_TARGET} can run. If the spec exists but is not listed, widen \`specPattern\` in the Cypress config.`,
+    solution: `\`cypress tap specs\` lists the specs the ${TAP_TARGET} can run. If the spec exists but is not listed, widen \`specPattern\` in the Cypress configuration.`,
   },
   /** Raised when the instance is running with no project open. */
   NO_PROJECT: {
@@ -151,12 +155,11 @@ export const TAP_ERROR_COPY = {
   /** Raised when the runner page holds no app-under-test frame to read. */
   NO_AUT: {
     description: `Failed to determine the app under test in the ${TAP_TARGET}.`,
-    solution: 'Run a spec first with `cypress tap run <spec>`. To read the app as it was at an earlier command, pin that command with `cypress tap pin`.',
+    solution: 'Run the spec again with `cypress tap run <spec>`. To read the app as it was at an earlier command, pin that command with `cypress tap pin`.',
   },
   /** Raised when an injected script threw inside the AUT frame. */
   FRAME_READ_FAILED: {
-    description: 'Reading the app under test failed.',
-    solution: 'The page may have navigated mid-read. Try again once it has settled.',
+    ...COMMAND_FAILED,
     recommendGhIssue: true,
   },
 
@@ -177,7 +180,7 @@ export const TAP_ERROR_COPY = {
    */
   ATTEMPT_NOT_FOUND: {
     description: 'No attempt of this test matched that number.',
-    solution: '`--attempt` takes a 1-based attempt number and selects an earlier attempt of a retried test; omit it for the latest.',
+    solution: '`--attempt` selects an earlier attempt of a retried test; attempt 1 is the first run. Omit it for the latest.',
   },
   /**
    * Raised when `--command-id` named a reporter row this test does not have.
@@ -200,7 +203,7 @@ export const TAP_ERROR_COPY = {
    */
   SNAPSHOT_NOT_FOUND: {
     description: 'No snapshot of this command matched that name or index.',
-    solution: 'Run `cypress tap command --test-id <id> --command-id <id>` to list the snapshots a command has. `--at` takes a snapshot name or a 1-based index; omit it to pin the command’s final state.',
+    solution: '`--at` takes a snapshot name or a 1-based index; omit it to pin the command’s final state.',
   },
   /** Raised when the command captured no snapshot, or it has since been evicted. */
   SNAPSHOT_UNAVAILABLE: {
@@ -483,14 +486,46 @@ export class UnknownOptionTapError extends DetailedTapError {
 export class MissingArgumentsTapError extends TapError {
   constructor (command: string, params: readonly string[]) {
     const named = params.map((param) => `<${param}>`).join(' ')
+    const noun = params.length === 1 ? 'argument' : 'arguments'
 
-    super('INVALID_ARGUMENTS', { detail: `"${command}" is missing the required ${named} argument(s).` })
+    super('INVALID_ARGUMENTS', { detail: `"${command}" is missing the required ${named} ${noun}.` })
   }
 }
 
 export class MissingOptionTapError extends TapError {
   constructor (command: string, option: string) {
     super('INVALID_OPTIONS', { detail: `"${command}" is missing the required --${option} option.` })
+  }
+}
+
+/** What the handshake compared, and what each side is actually running. */
+export interface VersionSkew {
+  /** The tap schema version the instance answered the handshake with. */
+  instanceSchema: number
+  /** The schema version this CLI speaks. Passed rather than read, so this module
+   * stays free of the contract that declares it. */
+  cliSchema: number
+  instanceCypress: string
+  cliCypress: string
+}
+
+/**
+ * A CLI and an instance that do not speak the same tap schema. Which of the two is
+ * behind is decided here rather than at the throw site, so the code and the copy
+ * cannot disagree about who has to update — the schema versions settle it, and the
+ * table describes both outcomes, so this writes only the specifics.
+ *
+ * Those specifics name the Cypress versions, not the schema versions: the schema is
+ * what disagreed, but it is not what anyone can act on. The schema numbers stay on
+ * the diagnostic. Construct this only for a genuine mismatch; equal versions are
+ * not a failure, and would read here as the instance being behind.
+ */
+export class VersionSkewTapError extends TapError {
+  constructor ({ instanceSchema, cliSchema, instanceCypress, cliCypress }: VersionSkew) {
+    super(instanceSchema > cliSchema ? 'CLI_OUTDATED' : 'INSTANCE_OUTDATED', {
+      detail: `The ${TAP_TARGET} is running Cypress v${instanceCypress}; this CLI is v${cliCypress}.`,
+      message: `the ${TAP_TARGET} speaks tap schema v${instanceSchema}; this CLI speaks v${cliSchema}.`,
+    })
   }
 }
 

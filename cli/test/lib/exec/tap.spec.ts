@@ -14,6 +14,7 @@ import { buildTapSchema } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { TAP_ERROR_COPY, InstanceNotFoundTapError } from '@packages/cypress-instances'
 import tap from '../../../lib/exec/tap'
+import util from '../../../lib/util'
 import { mockResolved, mockSession, readyInstance, resetTapMocks, schema, tapError } from './tap-fixtures'
 
 // vi.mock is hoisted above these imports, so the factories cannot come from
@@ -262,7 +263,7 @@ describe('lib/exec/tap', () => {
 
       const stderr = vi.mocked(console.error).mock.calls.flat().join(' ')
 
-      expect(stderr).toContain('"fake-command-for-testing" is missing the required <spec> argument(s).')
+      expect(stderr).toContain('"fake-command-for-testing" is missing the required <spec> argument.')
       // The remedy is the called command's own help, which lists what it takes.
       expect(stderr).toContain('Usage: cypress tap fake-command-for-testing')
       expect(call.mock.calls).toEqual([['getSchema']])
@@ -1188,6 +1189,18 @@ describe('lib/exec/tap', () => {
       expect(await tap.start(['health'], {})).toBe(1)
       expect(logger.print()).toContain('older than this CLI')
       expect(logger.print()).toContain('Update Cypress')
+    })
+
+    // The schema versions the handshake compares say nothing to whoever has to
+    // update one of the two, so the failure names the Cypress versions instead.
+    it('names both Cypress versions, whichever side is behind', async () => {
+      for (const schemaVersion of [2, 0]) {
+        logger.reset()
+        mockSession({ ...schema, cypressVersion: '15.0.0', schemaVersion })
+
+        expect(await tap.start(['health'], {})).toBe(1)
+        expect(logger.print(), `schemaVersion ${schemaVersion}`).toContain(`running Cypress v15.0.0; this CLI is v${util.pkgVersion()}`)
+      }
     })
   })
 

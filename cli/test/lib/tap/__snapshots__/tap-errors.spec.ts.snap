@@ -10,113 +10,113 @@ That command id matches more than one row of the test.
   h3:1 (before each)
   h5:1 (after each)
 
-Qualify the id with the section it belongs to, as cypress tap reporter lists it."
+Qualify the id with the section it belongs to, as {color:cyan}cypress tap reporter{/color} lists it."
 `;
 
 exports[`lib/tap error rendering catalogue > ATTEMPT_NOT_FOUND 1`] = `
 "> cypress tap reporter --test-id r7 --attempt 5
 No attempt of this test matched that number.
 
-Looked for --attempt 5. Test "r7" has 3 attempts.
+Looked for {color:cyan}--attempt{/color} 5. Test "r7" has 3 attempts.
 
---attempt takes a 1-based attempt number and selects an earlier attempt of a retried test; omit it for the latest."
+{color:cyan}--attempt{/color} selects an earlier attempt of a retried test; attempt 1 is the first run. Omit it for the latest."
 `;
 
 exports[`lib/tap error rendering catalogue > BINDING_NOT_FOUND 1`] = `
 "> cypress tap status
-Could not make a connection to the Cypress session.
+Could not reach the Cypress session.
 
-The Cypress session may still be loading, so try again in a moment. If the problem persists, the tab running Cypress may have been closed; open a browser in Cypress and try again."
+Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
 `;
 
 exports[`lib/tap error rendering catalogue > BINDING_THREW 1`] = `
 "> cypress tap reporter
 The Cypress session failed while running the command.
 
-Check the Cypress session with cypress tap status, then try again.
+Check the Cypress session with {color:cyan}cypress tap status{/color}, then try again.
 
 If the problem persists, search for an existing issue or open a GitHub issue at
 
-  https://github.com/cypress-io/cypress/issues"
+  {color:blue}https://github.com/cypress-io/cypress/issues{/color}"
 `;
 
 exports[`lib/tap error rendering catalogue > CDP_UNREACHABLE 1`] = `
 "> cypress tap status
-Lost the connection to the Cypress session's browser.
+Could not reach the Cypress session.
 
-The browser may have just closed. Make sure Cypress is running with a browser open, then try again."
+Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
 `;
 
 exports[`lib/tap error rendering catalogue > CLI_OUTDATED 1`] = `
 "> cypress tap status
 The targeted Cypress session is newer than this CLI.
 
-Update the CLI with npm install --save-dev cypress@latest, then try again."
+The Cypress session is running Cypress v16.2.0; this CLI is v15.20.1.
+
+Update the CLI with {color:cyan}npm install --save-dev cypress@latest{/color}, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > COMMAND_NOT_FOUND 1`] = `
 "> cypress tap command --test-id r7 --command-id 9
 No command in this test matched that id.
 
-Looked for --command-id "9".
+Looked for {color:cyan}--command-id{/color} "9".
 
-Run cypress tap reporter --test-id <id> to list the commands in the test."
+Run {color:cyan}cypress tap reporter --test-id <id>{/color} to list the commands in the test."
 `;
 
 exports[`lib/tap error rendering catalogue > FRAME_READ_FAILED 1`] = `
 "> cypress tap dom --selector ".item"
-Reading the app under test failed.
+The Cypress session failed while running the command.
 
-The page may have navigated mid-read. Try again once it has settled.
+Check the Cypress session with {color:cyan}cypress tap status{/color}, then try again.
 
 If the problem persists, search for an existing issue or open a GitHub issue at
 
-  https://github.com/cypress-io/cypress/issues"
+  {color:blue}https://github.com/cypress-io/cypress/issues{/color}"
 `;
 
 exports[`lib/tap error rendering catalogue > GRAPHQL_FAILED 1`] = `
 "> cypress tap specs
-The Cypress session failed while answering a data query.
+The Cypress session failed while running the command.
 
-Try the command again.
+Check the Cypress session with {color:cyan}cypress tap status{/color}, then try again.
 
 If the problem persists, search for an existing issue or open a GitHub issue at
 
-  https://github.com/cypress-io/cypress/issues"
+  {color:blue}https://github.com/cypress-io/cypress/issues{/color}"
 `;
 
 exports[`lib/tap error rendering catalogue > GRAPHQL_UNREACHABLE 1`] = `
 "> cypress tap specs
-Could not connect to the Cypress session to read its data.
+Could not reach the Cypress session.
 
-The Cypress session may have just closed. Make sure Cypress is running in open mode, then try again.
-
-If the problem persists, search for an existing issue or open a GitHub issue at
-
-  https://github.com/cypress-io/cypress/issues"
+Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
 `;
 
 exports[`lib/tap error rendering catalogue > INSTANCE_NOT_FOUND 1`] = `
 "> cypress tap --instance 4321 dom --selector "#status"
 No Cypress session matched that process id.
 
-Looked for --instance 4321.
+Looked for {color:cyan}--instance{/color} 4321.
 
-Run cypress tap instances to list the Cypress sessions you can tap into."
+Run {color:cyan}cypress tap instances{/color} to list the Cypress sessions you can tap into."
 `;
 
 exports[`lib/tap error rendering catalogue > INSTANCE_OUTDATED 1`] = `
 "> cypress tap status
 The targeted Cypress session is older than this CLI.
 
-Update Cypress in the running project with npm install --save-dev cypress@latest, restart it, then try again."
+The Cypress session is running Cypress v15.20.1; this CLI is v16.2.0.
+
+Update Cypress in the running project with {color:cyan}npm install --save-dev cypress@latest{/color}, restart it, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > INVALID_ARGUMENTS 1`] = `
 "> cypress tap run
 The command was called with invalid arguments.
 
-"run" is missing the required <spec> argument(s).
+"run" is missing the required <spec> argument.
 
 Usage: cypress tap run [options] <spec>
 
@@ -163,37 +163,37 @@ exports[`lib/tap error rendering catalogue > INVALID_VALUE 1`] = `
 "> cypress tap dom --selector ".item" --at 5
 An invalid value was given.
 
-Expected --at to be 0 to 2, since ".item" matched 3 elements.
+Expected {color:cyan}--at{/color} to be 0 to 2, since ".item" matched 3 elements.
 
 Instead the value was: "5""
 `;
 
 exports[`lib/tap error rendering catalogue > MISSING_COMPANION_OPTION 1`] = `
 "> cypress tap reporter --attempt 2
-You passed the --attempt flag without also passing the --test-id flag.
+You passed the {color:cyan}--attempt{/color} flag without also passing the {color:cyan}--test-id{/color} flag.
 
-Pass --test-id to specify the test, or omit --attempt to review the latest attempt for every test in the spec."
+Pass {color:cyan}--test-id{/color} to specify the test, or omit {color:cyan}--attempt{/color} to review the latest attempt for every test in the spec."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_AUT 1`] = `
 "> cypress tap dom --selector "#status"
 Failed to determine the app under test in the Cypress session.
 
-Run a spec first with cypress tap run <spec>. To read the app as it was at an earlier command, pin that command with cypress tap pin."
+Run the spec again with {color:cyan}cypress tap run <spec>{/color}. To read the app as it was at an earlier command, pin that command with {color:cyan}cypress tap pin{/color}."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_BROWSER_ATTACHED 1`] = `
 "> cypress tap dom --selector "#status"
 The Cypress session is running, but no test browser is open.
 
-Open a Chromium based browser in Cypress, then try again."
+Open a Chromium-based browser in Cypress, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_INSTANCE 1`] = `
 "> cypress tap dom --selector "#status"
 Could not find a Cypress session to tap into.
 
-Start Cypress with cypress open, select a testing type and launch a browser, then try again."
+Start Cypress with {color:cyan}cypress open{/color}, select a testing type and launch a browser, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > NO_PROJECT 1`] = `
@@ -207,7 +207,7 @@ exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `
 "> cypress tap status
 The Cypress session answered in a way this CLI does not recognize.
 
-The Cypress session and this CLI are likely different versions. Update the older of the two with npm install --save-dev cypress@latest, then try again."
+The Cypress session and this CLI are likely different versions. Update the older of the two with {color:cyan}npm install --save-dev cypress@latest{/color}, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > RENDERER_UNRESPONSIVE 1`] = `
@@ -216,30 +216,30 @@ The Cypress session is reachable, but the page running it is not responding.
 
 No response within the specified timeout (30000ms).
 
-It may be paused in DevTools, stuck in a loop, or starved of memory. Pass --timeout <ms> to wait longer."
+It may be paused in DevTools, stuck in a loop, or starved of memory. Pass {color:cyan}--timeout <ms>{/color} to wait longer."
 `;
 
 exports[`lib/tap error rendering catalogue > SNAPSHOT_NOT_FOUND 1`] = `
 "> cypress tap pin --test-id r7 --command-id 3 --at middle
 No snapshot of this command matched that name or index.
 
-Looked for --at "middle". This command has: before, after.
+Looked for {color:cyan}--at{/color} "middle". This command has these snapshots: 1 before, 2 after.
 
-Run cypress tap command --test-id <id> --command-id <id> to list the snapshots a command has. --at takes a snapshot name or a 1-based index; omit it to pin the command’s final state."
+{color:cyan}--at{/color} takes a snapshot name or a 1-based index; omit it to pin the command’s final state."
 `;
 
 exports[`lib/tap error rendering catalogue > SNAPSHOT_UNAVAILABLE 1`] = `
 "> cypress tap pin --test-id r7 --command-id 3
 That command has no DOM snapshot to pin.
 
-Snapshots are captured in open mode and kept only for the most recent tests, as numTestsKeptInMemory sets. Run the spec again to capture fresh snapshots, or raise numTestsKeptInMemory to keep more."
+Snapshots are captured in open mode and kept only for the most recent tests, as {color:cyan}numTestsKeptInMemory{/color} sets. Run the spec again to capture fresh snapshots, or raise {color:cyan}numTestsKeptInMemory{/color} to keep more."
 `;
 
 exports[`lib/tap error rendering catalogue > SPEC_IN_PROGRESS 1`] = `
 "> cypress tap dom --selector "#status"
 The spec cypress/e2e/checkout.cy.ts is currently running.
 
-Use cypress tap status to verify when the spec has finished."
+Use {color:cyan}cypress tap status{/color} to verify when the spec has finished."
 `;
 
 exports[`lib/tap error rendering catalogue > SPEC_NOT_FOUND 1`] = `
@@ -248,14 +248,14 @@ The Cypress session has no spec matching that path.
 
 Looked for "cypress/e2e/checkout.cy.ts".
 
-cypress tap specs lists the specs the Cypress session can run. If the spec exists but is not listed, widen specPattern in the Cypress config."
+{color:cyan}cypress tap specs{/color} lists the specs the Cypress session can run. If the spec exists but is not listed, widen {color:cyan}specPattern{/color} in the Cypress configuration."
 `;
 
 exports[`lib/tap error rendering catalogue > SPEC_NOT_STARTED 1`] = `
 "> cypress tap dom --selector "#status"
-No spec is available to read.
+No spec has run yet.
 
-Start a spec with the run command, then read it once it has finished."
+Start a spec with the {color:cyan}run{/color} command, then read it once it has finished."
 `;
 
 exports[`lib/tap error rendering catalogue > SPEC_START_FAILED 1`] = `
@@ -264,30 +264,30 @@ The Cypress session could not start the spec.
 
 The Cypress session returned no result for "cypress/e2e/checkout.cy.ts".
 
-Check the Cypress session with cypress tap status, then try again."
+Check the Cypress session with {color:cyan}cypress tap status{/color}, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > STALE_HANDLE 1`] = `
 "> cypress tap dom --selector "#status"
-The Cypress session navigated while running the command.
+The Cypress session failed while running the command.
 
-Run the command again."
+Check the Cypress session with {color:cyan}cypress tap status{/color}, then try again."
 `;
 
 exports[`lib/tap error rendering catalogue > STALE_INSTANCE 1`] = `
 "> cypress tap --instance 4321 dom --selector "#status"
-The Cypress session was running, but is no longer responding.
+Could not reach the Cypress session.
 
-It likely exited uncleanly. Start Cypress again with cypress open, then try again."
+Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
 `;
 
 exports[`lib/tap error rendering catalogue > TEST_NOT_FOUND 1`] = `
 "> cypress tap reporter --test-id r7
 No test in this spec matched that id.
 
-Looked for --test-id "r7".
+Looked for {color:cyan}--test-id{/color} "r7".
 
-Run cypress tap reporter to list the tests in the spec."
+Run {color:cyan}cypress tap reporter{/color} to list the tests in the spec."
 `;
 
 exports[`lib/tap error rendering catalogue > TESTING_TYPE_NOT_CONFIGURED 1`] = `
@@ -298,7 +298,7 @@ Configure it in the Cypress config, or start Cypress in a testing type the proje
 
 Learn more:
 
-  https://on.cypress.io/configuration"
+  {color:blue}https://on.cypress.io/configuration{/color}"
 `;
 
 exports[`lib/tap error rendering catalogue > UNKNOWN_COMMAND 1`] = `
@@ -353,7 +353,7 @@ Try running the command again.
 
 If the problem persists, search for an existing issue or open a GitHub issue at
 
-  https://github.com/cypress-io/cypress/issues"
+  {color:blue}https://github.com/cypress-io/cypress/issues{/color}"
 `;
 
 exports[`lib/tap error rendering catalogue > UNKNOWN_OPTION 1`] = `

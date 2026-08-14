@@ -169,7 +169,7 @@ describe('lib/tap/build-program', () => {
     expect(() => program.parse(['launch'], { from: 'user' })).toThrowError(
       expect.objectContaining({
         code: 'INVALID_ARGUMENTS',
-        detail: '"launch" is missing the required <spec> argument(s).',
+        detail: '"launch" is missing the required <spec> argument.',
       }),
     )
 

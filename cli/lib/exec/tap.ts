@@ -10,7 +10,7 @@ import { tapCliCommands } from '../tap/commands'
 import { beginTapTrace, noteTapCommand, noteTapFailure, reportTapTrace } from '../tap/events'
 import { reportedInvocation } from '../tap/reported-invocation'
 import type { TapCliCommand, TapCliOptions } from '../tap/types'
-import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, buildTapSchema } from '@packages/cypress-instances'
+import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD, VersionSkewTapError, buildTapSchema } from '@packages/cypress-instances'
 import type { TapSchema } from '@packages/cypress-instances'
 import util from '../util'
 
@@ -35,12 +35,13 @@ const validateSchema = (value: unknown): TapSchema => {
     return throwTapError('PROTOCOL_MISMATCH', `${TAP_SCHEMA_METHOD} returned an unrecognizable schema.`)
   }
 
-  if (schema.schemaVersion > TAP_SCHEMA_VERSION) {
-    return throwTapError('CLI_OUTDATED')
-  }
-
-  if (schema.schemaVersion < TAP_SCHEMA_VERSION) {
-    return throwTapError('INSTANCE_OUTDATED', `schema version v${schema.schemaVersion} is older than the CLI's v${TAP_SCHEMA_VERSION}.`)
+  if (schema.schemaVersion !== TAP_SCHEMA_VERSION) {
+    throw new VersionSkewTapError({
+      instanceSchema: schema.schemaVersion,
+      cliSchema: TAP_SCHEMA_VERSION,
+      instanceCypress: schema.cypressVersion,
+      cliCypress: util.pkgVersion(),
+    })
   }
 
   return schema

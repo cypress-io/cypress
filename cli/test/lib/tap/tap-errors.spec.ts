@@ -1,11 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
+import chalk from 'chalk'
 import Debug from 'debug'
 
 import logger from '../../../lib/logger'
 import { renderTapFailure, helpFor } from '../../../lib/tap/output'
 import { buildTapProgram } from '../../../lib/tap/build-program'
-import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, InstanceNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError, UnknownTapError } from '@packages/cypress-instances'
+import { buildTapSchema, TAP_ERROR_COPY, TapError, type TapErrorCode, type TapErrorCopy, AttemptNotFoundTapError, CommandNotFoundTapError, InstanceNotFoundTapError, InvalidValueTapError, MissingArgumentsTapError, MissingCompanionOptionTapError, MissingOptionTapError, SnapshotNotFoundTapError, SpecInProgressTapError, tapErrorCopy, TestNotFoundTapError, UnknownCommandTapError, UnknownOptionTapError, UnknownTapError, VersionSkewTapError } from '@packages/cypress-instances'
 
 // The catalogue of every user-facing `cypress tap` failure. Adding or rewording one
 // should land here as a snapshot diff: the rendering catalogue at the foot of this
@@ -107,6 +108,29 @@ describe('lib/tap error registry', () => {
 
     expect(offenders).to.deep.eq([])
   })
+
+  // Codes that mean one thing to a reader say it in one wording, so a caller who
+  // meets two of them is not told they met two different problems. Pinning the
+  // groups here is what keeps a later edit to one member from quietly splitting a
+  // group, or from folding a code into one whose remedy is not really its own.
+  it('shares one message across the codes that read the same to a caller', () => {
+    const byMessage = new Map<string, string[]>()
+
+    for (const [code, copy] of entries.filter(([, copy]) => copy.description)) {
+      const key = `${copy.description}\n${copy.solution}`
+
+      byMessage.set(key, [...(byMessage.get(key) ?? []), code])
+    }
+
+    const shared = [...byMessage.values()]
+    .filter((codes) => codes.length > 1)
+    .map((codes) => codes.sort())
+
+    expect(shared.sort()).to.deep.eq([
+      ['BINDING_NOT_FOUND', 'CDP_UNREACHABLE', 'GRAPHQL_UNREACHABLE', 'STALE_INSTANCE'],
+      ['BINDING_THREW', 'FRAME_READ_FAILED', 'GRAPHQL_FAILED', 'STALE_HANDLE'],
+    ])
+  })
 })
 
 describe('lib/tap error registry lookup', () => {
@@ -134,6 +158,34 @@ describe('lib/tap error registry lookup', () => {
     for (const value of [undefined, null, 42, {}, [], true]) {
       expect(tapErrorCopy(value), String(value)).to.eq(tapErrorCopy('NOT_A_CODE'))
     }
+  })
+})
+
+// One raiser for both directions of a version disagreement, so the code it picks
+// and the remedy that code carries always name the same side.
+describe('lib/tap version skew', () => {
+  it('names the CLI as behind when the instance speaks a newer schema', () => {
+    const err = new VersionSkewTapError({ instanceSchema: 2, cliSchema: 1, instanceCypress: '16.2.0', cliCypress: '15.20.1' })
+
+    expect(err.code).to.eq('CLI_OUTDATED')
+    expect(err.detail).to.eq('The Cypress session is running Cypress v16.2.0; this CLI is v15.20.1.')
+  })
+
+  it('names the instance as behind when it speaks an older schema', () => {
+    const err = new VersionSkewTapError({ instanceSchema: 1, cliSchema: 2, instanceCypress: '15.20.1', cliCypress: '16.2.0' })
+
+    expect(err.code).to.eq('INSTANCE_OUTDATED')
+    expect(err.detail).to.eq('The Cypress session is running Cypress v15.20.1; this CLI is v16.2.0.')
+  })
+
+  // Whoever has to update acts on a Cypress version, so the schema versions that
+  // decided it belong to the debug log rather than the output.
+  it('keeps the schema versions on the diagnostic, out of what a caller reads', () => {
+    const err = new VersionSkewTapError({ instanceSchema: 7, cliSchema: 3, instanceCypress: '16.2.0', cliCypress: '15.20.1' })
+
+    expect(err.detail).not.to.contain('schema')
+    expect(err.message).to.contain('v7')
+    expect(err.message).to.contain('v3')
   })
 })
 
@@ -378,10 +430,46 @@ describe('lib/tap error rendering', () => {
 // reads as a transcript of what each failure looks like at the terminal — and a
 // change to any failure's assembled output lands as a reviewable diff under it.
 describe('lib/tap error rendering catalogue', () => {
+  // Vitest runs without a TTY, so chalk would otherwise emit no colour at all and
+  // the catalogue would read as plain text no caller ever sees.
+  const colourless = chalk.level
+
   beforeEach(() => {
+    chalk.level = 1
     logger.reset()
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
+
+  afterEach(() => {
+    chalk.level = colourless
+  })
+
+  const COLOUR_NAMES: Record<string, string> = {
+    30: 'black',
+    31: 'red',
+    32: 'green',
+    33: 'yellow',
+    34: 'blue',
+    35: 'magenta',
+    36: 'cyan',
+    37: 'white',
+  }
+
+  // eslint-disable-next-line no-control-regex
+  const SGR = /\u001b\[(\d+)m/g
+
+  /**
+   * The escapes chalk emits, spelled out as `{color:cyan}…{/color}`. This file is
+   * read far more than it is run — in a terminal, in a diff, in review — and raw
+   * escapes are legible in none of those. A code with no name here spells itself
+   * out as its number, so a newly styled failure is still readable and still
+   * obviously wants naming.
+   */
+  const spellOutColours = (text: string): string => {
+    return text.replace(SGR, (_match, code: string) => {
+      return code === '39' ? '{/color}' : `{color:${COLOUR_NAMES[code] ?? code}}`
+    })
+  }
 
   // The generated help of the program a caller really parses against, so an entry
   // that takes help in place of its remedy snapshots the help it would actually
@@ -455,14 +543,17 @@ describe('lib/tap error rendering catalogue', () => {
       failure: new TapError('PROTOCOL_MISMATCH'),
     },
     // cli/lib/exec/tap.ts (schema handshake)
+    // Both directions come from one raiser, which picks the code from the schema
+    // versions — so these two entries differ only in which side is ahead.
     CLI_OUTDATED: {
       invocation: 'cypress tap status',
-      failure: new TapError('CLI_OUTDATED'),
+      failure: new VersionSkewTapError({ instanceSchema: 2, cliSchema: 1, instanceCypress: '16.2.0', cliCypress: '15.20.1' }),
     },
-    // cli/lib/exec/tap.ts (schema handshake); also cli/lib/tap/instance-gql.ts
+    // cli/lib/exec/tap.ts (schema handshake); also cli/lib/tap/instance-gql.ts, which
+    // has no schema to hand and so names no versions
     INSTANCE_OUTDATED: {
       invocation: 'cypress tap status',
-      failure: new TapError('INSTANCE_OUTDATED'),
+      failure: new VersionSkewTapError({ instanceSchema: 1, cliSchema: 2, instanceCypress: '15.20.1', cliCypress: '16.2.0' }),
     },
     // cli/lib/tap/instance-gql.ts
     GRAPHQL_UNREACHABLE: {
@@ -537,7 +628,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_NOT_FOUND: {
       invocation: 'cypress tap pin --test-id r7 --command-id 3 --at middle',
-      failure: new SnapshotNotFoundTapError('middle', 'This command has: before, after.'),
+      failure: new SnapshotNotFoundTapError('middle', 'This command has these snapshots: 1 before, 2 after.'),
     },
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_UNAVAILABLE: {
@@ -598,7 +689,10 @@ describe('lib/tap error rendering catalogue', () => {
 
       await renderTapFailure(failure, helpOf === undefined ? undefined : helpFor(program, helpOf))
 
-      const printed = stripAnsi(vi.mocked(console.error).mock.calls.flat().join(' '))
+      // What the failure itself styled, taken before `errorToStderr` paints the
+      // whole thing red: the blanket colour says nothing a reader of this file
+      // needs, whereas the commands and links each entry highlights do.
+      const printed = spellOutColours(logger.print())
 
       expect(`> ${invocation}\n${printed}`).toMatchSnapshot()
     })

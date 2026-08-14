@@ -92,9 +92,9 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
     return named
   }
 
-  const available = snapshots.map((entry, index) => (entry.name !== undefined ? `"${entry.name}" (${index + 1})` : `${index + 1}`)).join(', ')
+  const available = snapshots.map((entry, index) => (entry.name !== undefined ? `${index + 1} ${entry.name}` : `${index + 1}`)).join(', ')
 
-  throw new SnapshotNotFoundTapError(at, `This command has: ${available}.`)
+  throw new SnapshotNotFoundTapError(at, `This command has these snapshots: ${available}.`)
 }
 
 export const pinCommand = defineCommand('pin', async (_params, { 'test-id': test, 'command-id': command, at, clear, attempt }): Promise<PinResult | ClearResult> => {
