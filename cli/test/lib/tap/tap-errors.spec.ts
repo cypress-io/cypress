@@ -129,6 +129,7 @@ describe('lib/tap error registry', () => {
     expect(shared.sort()).to.deep.eq([
       ['BINDING_NOT_FOUND', 'CDP_UNREACHABLE', 'GRAPHQL_UNREACHABLE', 'STALE_INSTANCE'],
       ['BINDING_THREW', 'FRAME_READ_FAILED', 'GRAPHQL_FAILED', 'STALE_HANDLE'],
+      ['PROTOCOL_MISMATCH', 'UNKNOWN_ERROR'],
     ])
   })
 })
@@ -279,7 +280,7 @@ describe('lib/tap error rendering', () => {
 
     // A pid is a number, so it reads without quotes where an id reads with them.
     expect(await render('INSTANCE_NOT_FOUND', new InstanceNotFoundTapError(4321).detail)).to.eq([
-      'No Cypress session matched that process id.',
+      'No Cypress session matched the provided instance id.',
       'Looked for --instance 4321.',
       'Run cypress tap instances to list the Cypress sessions you can tap into.',
     ].join('\n\n'))
@@ -372,20 +373,38 @@ describe('lib/tap error rendering', () => {
 
   // Every Node system error carries a code, and none of them are ours: read for one,
   // an ENOTDIR from a read that should have worked would report itself to the reader
-  // as whichever registry entry the unknown-code fallback lands on.
+  // as whichever registry entry that errno happened to land on.
   it('renders a system error as unknown rather than reading its errno as a code', async () => {
     const printed = await renderTapFailure(Object.assign(new Error('ENOTDIR: not a directory'), { code: 'ENOTDIR' })).then(stderr)
 
     expect(printed).to.contain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
-    expect(printed).not.to.contain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+    expect(printed).not.to.contain('ENOTDIR')
   })
 
-  // A wire payload is a bare object, and its code is the instance's — including one
-  // this CLI has no entry for, which is the protocol mismatch the fallback reports.
-  it('still reads the code off a payload the instance sent', async () => {
+  // The same bug in the shape that would actually mislead: an Error whose `code`
+  // collides with a registry key would render as that entry, describing a condition
+  // nothing had established. What the code is read off, not what it says, is what
+  // decides — so the contrast is against the same code arriving as a wire payload.
+  it('reads a code off a payload the instance sent, and never off an Error', async () => {
+    const asPayload = await renderTapFailure({ code: 'NO_INSTANCE' }).then(stderr)
+
+    expect(asPayload).to.contain(TAP_ERROR_COPY.NO_INSTANCE.description)
+
+    vi.mocked(console.error).mockClear()
+
+    const asThrow = await renderTapFailure(Object.assign(new Error('read of undefined'), { code: 'NO_INSTANCE' })).then(stderr)
+
+    expect(asThrow).to.contain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
+    expect(asThrow).not.to.contain(TAP_ERROR_COPY.NO_INSTANCE.description)
+  })
+
+  // A code only a newer Cypress raises has no copy here, so it falls back — and the
+  // code itself stays out of the output, as every other code does.
+  it('falls back for a wire code it has no entry for, without printing it', async () => {
     const printed = await renderTapFailure({ code: 'SOMETHING_ONLY_A_NEWER_CYPRESS_RAISES' }).then(stderr)
 
     expect(printed).to.contain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+    expect(printed).not.to.contain('SOMETHING_ONLY_A_NEWER_CYPRESS_RAISES')
   })
 
   // The diagnostic is for whoever is asked for a debug log, not for the reader: the

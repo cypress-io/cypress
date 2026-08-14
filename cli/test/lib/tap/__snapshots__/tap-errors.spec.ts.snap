@@ -96,7 +96,7 @@ Make sure Cypress is still open with a browser, then run the command again. If i
 
 exports[`lib/tap error rendering catalogue > INSTANCE_NOT_FOUND 1`] = `
 "> cypress tap --instance 4321 dom --selector "#status"
-No Cypress session matched that process id.
+No Cypress session matched the provided instance id.
 
 Looked for {color:cyan}--instance{/color} 4321.
 
@@ -205,9 +205,13 @@ Open a project in Cypress, then try again."
 
 exports[`lib/tap error rendering catalogue > PROTOCOL_MISMATCH 1`] = `
 "> cypress tap status
-The Cypress session answered in a way this CLI does not recognize.
+An error occurred.
 
-The Cypress session and this CLI are likely different versions. Update the older of the two with {color:cyan}npm install --save-dev cypress@latest{/color}, then try again."
+Try running the command again.
+
+If the problem persists, search for an existing issue or open a GitHub issue at
+
+  {color:blue}https://github.com/cypress-io/cypress/issues{/color}"
 `;
 
 exports[`lib/tap error rendering catalogue > RENDERER_UNRESPONSIVE 1`] = `
@@ -347,7 +351,7 @@ Commands:
 
 exports[`lib/tap error rendering catalogue > UNKNOWN_ERROR 1`] = `
 "> cypress tap status
-An unknown error occurred.
+An error occurred.
 
 Try running the command again.
 

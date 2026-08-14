@@ -44,6 +44,17 @@ const COMMAND_FAILED = {
   solution: `Check the ${TAP_TARGET} with \`cypress tap status\`, then try again.`,
 } satisfies TapErrorCopy
 
+/**
+ * Nothing worth saying, for the conditions that should not arise: a failure with no
+ * code of its own, and an answer this CLI cannot read. Retrying is the only remedy
+ * that fits either, and the report is how they stop standing in for something a
+ * reader could have acted on.
+ */
+const NOTHING_KNOWN = {
+  description: 'An error occurred.',
+  solution: 'Try running the command again.',
+} satisfies TapErrorCopy
+
 export const TAP_ERROR_COPY = {
   // Finding an instance to drive
   /** Raised when discovery found no instance record at all, and none was named. */
@@ -57,7 +68,7 @@ export const TAP_ERROR_COPY = {
    * @deprecated - raise it with new InstanceNotFoundTapError(), which writes its detail
    */
   INSTANCE_NOT_FOUND: {
-    description: `No ${TAP_TARGET} matched that process id.`,
+    description: `No ${TAP_TARGET} matched the provided instance id.`,
     solution: `Run \`cypress tap instances\` to list the ${TAP_TARGET}s you can tap into.`,
   },
   /** Raised when records matched, but none answered its liveness probe. */
@@ -90,10 +101,16 @@ export const TAP_ERROR_COPY = {
   STALE_HANDLE: { ...COMMAND_FAILED },
 
   // Agreeing on a protocol with it
-  /** Raised when the instance replied in a shape this CLI has no handling for. */
+  /**
+   * Raised when the instance replied in a shape this CLI has no handling for: an
+   * unreadable schema, an exec result that is neither outcome, a call whose args
+   * arrived as something other than a map. A version disagreement is not among
+   * them — the handshake compares versions and answers for that itself, naming
+   * both — so this is left with nothing it could tell a reader to do, and says so.
+   */
   PROTOCOL_MISMATCH: {
-    description: `The ${TAP_TARGET} answered in a way this CLI does not recognize.`,
-    solution: `The ${TAP_TARGET} and this CLI are likely different versions. Update the older of the two with ${UPDATE_COMMAND}, then try again.`,
+    ...NOTHING_KNOWN,
+    recommendGhIssue: true,
   },
   /** Raised when the handshake reported a schema version newer than this CLI's. */
   CLI_OUTDATED: {
@@ -263,8 +280,7 @@ export const TAP_ERROR_COPY = {
    * for one of them.
    */
   UNKNOWN_ERROR: {
-    description: 'An unknown error occurred.',
-    solution: 'Try running the command again.',
+    ...NOTHING_KNOWN,
     recommendGhIssue: true,
   },
 } satisfies Record<string, TapErrorCopy>
@@ -272,13 +288,10 @@ export const TAP_ERROR_COPY = {
 /** Every failure `cypress tap` can report: the keys of the table above. */
 export type TapErrorCode = keyof typeof TAP_ERROR_COPY
 
-// An unknown code is a protocol mismatch by definition — the instance speaks of a
-// failure this CLI has no copy for — but worth a report, since a same-version pair
-// should never disagree.
-const FALLBACK: TapErrorCopy = {
-  ...TAP_ERROR_COPY.PROTOCOL_MISMATCH,
-  recommendGhIssue: true,
-}
+// An unknown code is a protocol mismatch by definition: the instance speaks of a
+// failure this CLI has no copy for, which is one more thing about its answer that
+// cannot be read.
+const FALLBACK: TapErrorCopy = TAP_ERROR_COPY.PROTOCOL_MISMATCH
 
 /**
  * Copy for a code, which arrives from the instance over the wire — so anything that
