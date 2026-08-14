@@ -8,6 +8,6 @@ export { ProxyCookieStateAdapter } from './proxy-cookie-state'
 
 export { ProxyCommandLogAdapter } from './proxy-command-log'
 
-export { createSyntheticProxyCodec } from './synthetic-proxy-codec'
+export { createSyntheticProxyCodec, toIdentityResponse } from './synthetic-proxy-codec'
 
 export { createSyntheticExpressContext } from './synthetic-express-context'
