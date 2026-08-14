@@ -355,7 +355,10 @@ jobs:
       # #34557 encoding drifts pinned per-pipeline (#34554, #34384, #34386);
       # #34555 service worker session interception; #34562 synthetic request query +
       # httpVersion drift; #34559 cloud-bundle loopback routes.
-      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/cypress/downloads_basic_auth.cy.ts,cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/service-worker.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/commands/prompt/prompt.cy.ts
+      # #34616 net_stubbing: the cy.intercept contract on this transport, including
+      # the drifts pinned by #34611 — the three contract violations it now guards
+      # went unnoticed because this spec had never run in a gating job.
+      spec: cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/issues/3890.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/cypress/downloads_basic_auth.cy.ts,cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/service-worker.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/commands/prompt/prompt.cy.ts,cypress/e2e/commands/net_stubbing.cy.ts
       requires:
         - ready-to-test
   - unit-tests-proxy-disabled:
