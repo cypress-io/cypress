@@ -1,7 +1,7 @@
 import Debug from 'debug'
 
 import { errors } from '../errors'
-import { throwTapError } from './tap-session'
+import { throwTapError } from './tap-connection'
 import type { LiveInstanceState } from '../cypress-instances'
 import { INSTANCE_ID_HEADER } from '@packages/cypress-instances'
 import type { TapGraphqlOperation } from '@packages/cypress-instances'

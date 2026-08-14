@@ -1,6 +1,6 @@
 import { CypressInstanceError, resolveLiveInstance } from '../../cypress-instances'
 import type { ReadyInstanceState } from '../../cypress-instances'
-import { withTapSession, validateExecResult } from '../tap-session'
+import { withTapConnection, validateExecResult } from '../tap-connection'
 import { renderFailure, renderKnownFailure, renderOutcome } from '../output'
 import { TAP_EXEC_METHOD } from '@packages/cypress-instances'
 import { defineNativeCommand } from './definition'
@@ -69,8 +69,8 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
   }
 
   try {
-    const outcome = await withTapSession(instance as ReadyInstanceState, async (session) => {
-      return validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
+    const outcome = await withTapConnection(instance as ReadyInstanceState, async (connection) => {
+      return validateExecResult(await connection.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
     }, options.timeout)
 
     if ('error' in outcome) {

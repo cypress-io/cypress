@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { resolveAmbiguity } from '../../../lib/tap/aut/single-match'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
@@ -23,7 +23,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
       call,
       client: { Page: { createIsolatedWorld }, Runtime: { callFunctionOn } },
       sessionId: SESSION_ID,
-    } as unknown as TapSession
+    } as unknown as TapConnection
 
     return { session, call, callFunctionOn, createIsolatedWorld }
   }

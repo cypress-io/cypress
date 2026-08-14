@@ -1959,11 +1959,13 @@ describe('tap CLI against a spec that cannot be built', function () {
 
   it('still answers the frame reads, with no app under test in them', async () => {
     // The app puts its own page in the frame, so these succeed and report an empty
-    // document. The reason is only in `status`.
+    // document. The reason is only in `status`. Both reads default to `body`, and
+    // that page's body carries nothing accessible, so the tree comes back empty
+    // rather than rooted at the frame.
     const aria = await instance.tap(['--json', 'aria'])
 
     expect(aria.exitCode).to.eq(0)
-    expect(aria.json()).to.deep.eq({ nodes: [{ depth: 0, role: 'RootWebArea' }], nodeCount: 1 })
+    expect(aria.json()).to.deep.eq({ nodes: [], nodeCount: 0 })
 
     const dom = await instance.tap(['--json', 'dom'])
 

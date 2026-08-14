@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CRI from 'chrome-remote-interface'
 
 import type { ReadyInstanceState } from '../../../lib/cypress-instances'
-import { CdpErrorMessage, withTapSession } from '../../../lib/tap/tap-session'
+import { CdpErrorMessage, withTapConnection } from '../../../lib/tap/tap-connection'
 import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { errors } from '../../../lib/errors'
 
@@ -79,7 +79,7 @@ const setup = (client = makeClient(), overrides: Partial<ReadyInstanceState> = {
 }
 
 const callOnce = (method = 'health', args: unknown[] = []) => {
-  return withTapSession(instance, (session) => session.call(method, args))
+  return withTapConnection(instance, (session) => session.call(method, args))
 }
 
 const staleError = () => new Error(CdpErrorMessage.objectNotFound)
@@ -89,7 +89,7 @@ const UNRESPONSIVE_MS = 25
 const never = () => vi.fn().mockReturnValue(new Promise(() => {}))
 
 const callWithBound = () => {
-  return withTapSession(instance, (session) => session.call('health'), UNRESPONSIVE_MS)
+  return withTapConnection(instance, (session) => session.call('health'), UNRESPONSIVE_MS)
 }
 
 const expectUnresponsive = async (promise: Promise<any>) => {
@@ -110,7 +110,7 @@ const expectError = async (promise: Promise<any>, details: unknown) => {
   return err
 }
 
-describe('lib/tap/tap-session', () => {
+describe('lib/tap/tap-connection', () => {
   beforeEach(() => {
     mockConnect.mockReset()
   })
@@ -118,7 +118,7 @@ describe('lib/tap/tap-session', () => {
   it('connects to the browser ws, attaches a session, invokes the binding, and returns the decoded result', async () => {
     const { client } = setup()
 
-    const result = await withTapSession(instance, async (session) => {
+    const result = await withTapConnection(instance, async (session) => {
       return session.call('health')
     })
 
@@ -153,7 +153,7 @@ describe('lib/tap/tap-session', () => {
 
     const { client } = setup(makeClient({ callFunctionOn }))
 
-    const results = await withTapSession(instance, async (session) => {
+    const results = await withTapConnection(instance, async (session) => {
       return [await session.call('getSchema'), await session.call('health')]
     })
 
@@ -172,7 +172,7 @@ describe('lib/tap/tap-session', () => {
     const { client } = setup()
     const boom = new Error('boom')
 
-    const err = await withTapSession(instance, async () => {
+    const err = await withTapConnection(instance, async () => {
       throw boom
     }).catch((e) => e)
 

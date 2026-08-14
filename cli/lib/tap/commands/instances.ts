@@ -1,7 +1,7 @@
 import { isTapSupportedBrowser, listLiveInstances } from '../../cypress-instances'
 import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-instances'
 import { renderOutcome, renderResult } from '../output'
-import { withTapSession } from '../tap-session'
+import { withTapConnection } from '../tap-connection'
 import { FIND_INSTANCE_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
@@ -40,7 +40,7 @@ const probeRenderer = async (instance: LiveInstanceState, timeoutMs: number): Pr
   }
 
   try {
-    return await withTapSession(instance as ReadyInstanceState, async () => true, timeoutMs)
+    return await withTapConnection(instance as ReadyInstanceState, async () => true, timeoutMs)
   } catch (err) {
     return isRendererUnresponsive(err) ? false : undefined
   }

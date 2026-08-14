@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { extractAria } from '../../../lib/tap/commands/aria'
-import type { TapSession } from '../../../lib/tap/tap-session'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
 
 const SESSION_ID = 'S1'
 
@@ -52,7 +52,7 @@ describe('lib/tap/commands/aria extractAria', () => {
       Runtime: { callFunctionOn },
     }
 
-    return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapSession, client }
+    return { session: { call: vi.fn(), client, sessionId: SESSION_ID } as unknown as TapConnection, client }
   }
 
   const frame = { frameId: 'aut-frame-id' }

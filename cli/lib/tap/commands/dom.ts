@@ -1,4 +1,4 @@
-import type { TapSession } from '../tap-session'
+import type { TapConnection } from '../tap-connection'
 import type { AutFrame } from '../aut/frame'
 import { FrameCommandError, withResolvedAutFrame } from '../aut/frame'
 import { parseIndex, parsePositiveInt } from '../utils'
@@ -20,14 +20,14 @@ export interface FrameDomResult {
 }
 
 export const extractDom = (
-  session: TapSession,
+  connection: TapConnection,
   frame: AutFrame,
   selector: string | undefined,
   maxChars: number,
   at?: number,
-): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(session, frame, selector, at, async (): Promise<FrameDomResult> => {
-  const { client, sessionId } = session
-  const executionContextId = await createFrameIsolatedWorld(session, frame)
+): Promise<FrameDomResult | FrameAmbiguousResult> => withAmbiguous(connection, frame, selector, at, async (): Promise<FrameDomResult> => {
+  const { client, sessionId } = connection
+  const executionContextId = await createFrameIsolatedWorld(connection, frame)
 
   const { result, exceptionDetails } = await client.Runtime.callFunctionOn({
     functionDeclaration: readDom.toString(),
@@ -53,6 +53,6 @@ export const extractDom = (
   }
 })
 
-export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (session, frame) => {
-  return extractDom(session, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], 'max-chars'), parseIndex(commandOptions.at))
+export const domCommand = defineNativeCommand('dom', (options, _args, commandOptions) => withResolvedAutFrame(options, (connection, frame) => {
+  return extractDom(connection, frame, commandOptions.selector, parsePositiveInt(commandOptions['max-chars'], 'max-chars'), parseIndex(commandOptions.at))
 }, 'dom'))

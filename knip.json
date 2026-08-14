@@ -819,7 +819,7 @@
       "exports",
       "types"
     ],
-    "cli/lib/tap/tap-session.ts": [
+    "cli/lib/tap/tap-connection.ts": [
       "exports",
       "types"
     ],

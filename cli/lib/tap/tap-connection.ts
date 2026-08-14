@@ -38,7 +38,7 @@ export const throwTapError = (details: { description: string, solution: string }
   throw err
 }
 
-export interface TapSession {
+export interface TapConnection {
   call (method: string, args?: unknown[]): Promise<unknown>
   // Raw CDP access for the frame extractors (dom/aria/inspect), which run
   // protocol domains
@@ -240,15 +240,15 @@ const callBindingWithRetry = async (client: CRI.Client, sessionId: string, metho
   }
 }
 
-export const withTapSession = async <T> (
+export const withTapConnection = async <T> (
   instance: ReadyInstanceState,
-  fn: (session: TapSession) => Promise<T>,
+  fn: (connection: TapConnection) => Promise<T>,
   timeoutMs?: number,
 ): Promise<T> => {
   const callMs = timeoutMs ?? DEFAULT_CDP_TIMEOUT_MS
   const findInstanceMs = timeoutMs ?? FIND_INSTANCE_TIMEOUT_MS
 
-  debug('opening tap session for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, callMs, findInstanceMs })
+  debug('opening tap connection for instance %o', { pid: instance.pid, cdpBrowserWsUrl: instance.cdpBrowserWsUrl, callMs, findInstanceMs })
 
   const client = await connectToBrowser(instance.cdpBrowserWsUrl)
 
@@ -295,7 +295,7 @@ export const withTapSession = async <T> (
       return response.result.value
     }
 
-    const session: TapSession = {
+    const connection: TapConnection = {
       call,
       client,
       get sessionId () {
@@ -303,7 +303,7 @@ export const withTapSession = async <T> (
       },
     }
 
-    return await fn(session)
+    return await fn(connection)
   } finally {
     await client.close().catch(() => {})
   }
