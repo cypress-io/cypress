@@ -3,7 +3,7 @@ import path from 'path'
 import os from 'os'
 import fs from 'fs-extra'
 import mockedEnv from 'mocked-env'
-import { cypressInstances, getInstancesDir, _resetForTesting } from '../../lib/cypress-sessions'
+import { cypressSessions, getSessionsDir, _resetForTesting } from '../../lib/cypress-sessions'
 
 describe('lib/cypress-sessions', () => {
   let restoreEnv: () => void
@@ -12,7 +12,7 @@ describe('lib/cypress-sessions', () => {
 
   beforeEach(() => {
     cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-cypress-sessions-'))
-    recordPath = path.join(cacheDir, 'instances', `${process.pid}.json`)
+    recordPath = path.join(cacheDir, 'sessions', `${process.pid}.json`)
 
     // resolveCypressCacheRoot also reads the npm_config_/npm_package_config_ variants,
     // so clear them to keep the dev environment from shadowing CYPRESS_CACHE_FOLDER.
@@ -32,19 +32,19 @@ describe('lib/cypress-sessions', () => {
     restoreEnv()
   })
 
-  describe('.getInstancesDir', () => {
-    it('resolves to an instances/ dir under the cache root', () => {
-      expect(getInstancesDir()).to.eq(path.join(cacheDir, 'instances'))
+  describe('.getSessionsDir', () => {
+    it('resolves to a sessions/ dir under the cache root', () => {
+      expect(getSessionsDir()).to.eq(path.join(cacheDir, 'sessions'))
     })
 
-    // ProjectBase.open() calls process.chdir(projectRoot) before the instance record is
+    // ProjectBase.open() calls process.chdir(projectRoot) before the session record is
     // written. A relative CYPRESS_CACHE_FOLDER must stay anchored to the launch cwd
     // (which the CLI reader resolves against), not drift to the project root — otherwise
     // the server writes the record to a tree the CLI never reads from.
     it('keeps a relative CYPRESS_CACHE_FOLDER anchored to the launch cwd across a chdir', () => {
       process.env.CYPRESS_CACHE_FOLDER = './.cypress-cache-relative'
 
-      const beforeChdir = getInstancesDir()
+      const beforeChdir = getSessionsDir()
 
       // Simulate ProjectBase.open() doing process.chdir(projectRoot) by stubbing the
       // reported cwd rather than mutating the real process state. The resolution must
@@ -54,14 +54,14 @@ describe('lib/cypress-sessions', () => {
 
       sinon.stub(process, 'cwd').returns(projectRoot)
 
-      expect(getInstancesDir()).to.eq(beforeChdir)
-      expect(getInstancesDir()).to.not.contain(projectRoot)
+      expect(getSessionsDir()).to.eq(beforeChdir)
+      expect(getSessionsDir()).to.not.contain(projectRoot)
     })
   })
 
-  describe('.addInstance', () => {
+  describe('.addSession', () => {
     it('writes a record named by pid with only immutable identity fields', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
+      await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'e2e' })
 
       const record = await fs.readJson(recordPath)
 
@@ -73,27 +73,27 @@ describe('lib/cypress-sessions', () => {
         testingType: 'e2e',
       })
 
-      expect(record.instanceId).to.be.a('string').and.match(/^[0-9a-f-]{36}$/)
+      expect(record.sessionId).to.be.a('string').and.match(/^[0-9a-f-]{36}$/)
 
       expect(record).to.not.have.property('cdpBrowserWsUrl')
     })
 
     it('records the selected testing type', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455, testingType: 'component' })
+      await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455, testingType: 'component' })
 
       expect(await fs.readJson(recordPath)).to.have.property('testingType', 'component')
     })
 
     it('defaults the testing type to null when none is selected', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/some/project', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/some/project', serverPort: 4455 })
 
       expect(await fs.readJson(recordPath)).to.have.property('testingType', null)
     })
 
     it('leaves no temp files behind (atomic write)', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
-      const entries = await fs.readdir(getInstancesDir())
+      const entries = await fs.readdir(getSessionsDir())
 
       expect(entries).to.eql([`${process.pid}.json`])
     })
@@ -104,21 +104,21 @@ describe('lib/cypress-sessions', () => {
       await fs.writeFile(filePath, 'x')
       process.env.CYPRESS_CACHE_FOLDER = filePath
 
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
-      expect(await fs.pathExists(path.join(filePath, 'instances'))).to.be.false
+      expect(await fs.pathExists(path.join(filePath, 'sessions'))).to.be.false
     })
   })
 
   describe('.setBrowser', () => {
     it('records the open browser without touching the disk record', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
       const onDiskBefore = await fs.readJson(recordPath)
 
-      cypressInstances.setBrowser({ displayName: 'Firefox', family: 'firefox' })
+      cypressSessions.setBrowser({ displayName: 'Firefox', family: 'firefox' })
 
-      expect(cypressInstances.getCurrent()).to.deep.include({
+      expect(cypressSessions.getCurrent()).to.deep.include({
         serverPort: 4455,
         browserName: 'Firefox',
         browserFamily: 'firefox',
@@ -128,31 +128,31 @@ describe('lib/cypress-sessions', () => {
     })
 
     it('clears the browser when it goes away', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
-      cypressInstances.setBrowser({ displayName: 'Chrome', family: 'chromium' })
-      cypressInstances.setBrowser(null)
+      cypressSessions.setBrowser({ displayName: 'Chrome', family: 'chromium' })
+      cypressSessions.setBrowser(null)
 
-      expect(cypressInstances.getCurrent()!.browserName).to.be.null
-      expect(cypressInstances.getCurrent()!.browserFamily).to.be.null
+      expect(cypressSessions.getCurrent()!.browserName).to.be.null
+      expect(cypressSessions.getCurrent()!.browserFamily).to.be.null
     })
 
     it('is a no-op when no record has been written yet', () => {
-      cypressInstances.setBrowser({ displayName: 'Chrome', family: 'chromium' })
+      cypressSessions.setBrowser({ displayName: 'Chrome', family: 'chromium' })
 
-      expect(cypressInstances.getCurrent()).to.be.null
+      expect(cypressSessions.getCurrent()).to.be.null
     })
   })
 
   describe('.setCdpBrowserWsUrl', () => {
     it('updates the live state without touching the disk record', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
       const onDiskBefore = await fs.readJson(recordPath)
 
-      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressSessions.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
 
-      expect(cypressInstances.getCurrent()).to.deep.include({
+      expect(cypressSessions.getCurrent()).to.deep.include({
         serverPort: 4455,
         cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       })
@@ -161,37 +161,37 @@ describe('lib/cypress-sessions', () => {
     })
 
     it('leaves the open browser in place when the endpoint goes away', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
-      cypressInstances.setBrowser({ displayName: 'Chrome', family: 'chromium' })
-      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
-      cypressInstances.setCdpBrowserWsUrl(null)
+      cypressSessions.setBrowser({ displayName: 'Chrome', family: 'chromium' })
+      cypressSessions.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressSessions.setCdpBrowserWsUrl(null)
 
-      expect(cypressInstances.getCurrent()!.cdpBrowserWsUrl).to.be.null
-      expect(cypressInstances.getCurrent()!.browserName).to.eq('Chrome')
+      expect(cypressSessions.getCurrent()!.cdpBrowserWsUrl).to.be.null
+      expect(cypressSessions.getCurrent()!.browserName).to.eq('Chrome')
     })
 
     it('is a no-op when no record has been written yet', () => {
-      cypressInstances.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      cypressSessions.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
 
-      expect(cypressInstances.getCurrent()).to.be.null
+      expect(cypressSessions.getCurrent()).to.be.null
     })
   })
 
   describe('.getCurrent', () => {
     it('is null before write and after remove', async () => {
-      expect(cypressInstances.getCurrent()).to.be.null
+      expect(cypressSessions.getCurrent()).to.be.null
 
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
-      await cypressInstances.remove()
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.remove()
 
-      expect(cypressInstances.getCurrent()).to.be.null
+      expect(cypressSessions.getCurrent()).to.be.null
     })
 
     it('is the disk record plus the memory-only browser CDP state', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
-      expect(cypressInstances.getCurrent()).to.deep.eq({
+      expect(cypressSessions.getCurrent()).to.deep.eq({
         ...await fs.readJson(recordPath),
         cdpBrowserWsUrl: null,
         browserName: null,
@@ -204,24 +204,24 @@ describe('lib/cypress-sessions', () => {
 
   describe('.remove', () => {
     it('deletes the record file', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
-      await cypressInstances.remove()
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.remove()
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
 
     it('is idempotent and never throws', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
-      await cypressInstances.remove()
-      await cypressInstances.remove()
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
+      await cypressSessions.remove()
+      await cypressSessions.remove()
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
 
     it('waits out an in-flight persist so the file cannot be resurrected', async () => {
-      const writing = cypressInstances.addInstance({ projectRoot: '/p', serverPort: 4455 })
+      const writing = cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })
 
-      await cypressInstances.remove()
+      await cypressSessions.remove()
       await writing
 
       expect(await fs.pathExists(recordPath)).to.be.false
@@ -231,12 +231,12 @@ describe('lib/cypress-sessions', () => {
     // write() takes over the live state while the previous close()'s remove() is still
     // in flight. The stale remove() must not delete the freshly written record.
     it('does not delete a record a newer write took over on switch', async () => {
-      await cypressInstances.addInstance({ projectRoot: '/a', serverPort: 4455 })
+      await cypressSessions.addSession({ projectRoot: '/a', serverPort: 4455 })
 
       // begin removing the first record, then write the second before it completes
-      const removing = cypressInstances.remove()
+      const removing = cypressSessions.remove()
 
-      await cypressInstances.addInstance({ projectRoot: '/b', serverPort: 5566 })
+      await cypressSessions.addSession({ projectRoot: '/b', serverPort: 5566 })
       await removing
 
       expect(await fs.pathExists(recordPath)).to.be.true
@@ -246,7 +246,7 @@ describe('lib/cypress-sessions', () => {
         serverPort: 5566,
       })
 
-      expect(cypressInstances.getCurrent()).to.include({ serverPort: 5566 })
+      expect(cypressSessions.getCurrent()).to.include({ serverPort: 5566 })
     })
   })
 })

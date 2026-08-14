@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
 import logger from '../../../lib/logger'
-import { resolveInstance } from '../../../lib/cypress-sessions'
+import { resolveSession } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { resolveAutFrame, assertFrameReadable, withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
@@ -11,7 +11,7 @@ import type { TapCliOptions } from '../../../lib/tap/types'
 vi.mock('../../../lib/cypress-sessions', async (importActual) => {
   const actual = await importActual<typeof import('../../../lib/cypress-sessions')>()
 
-  return { ...actual, resolveInstance: vi.fn() }
+  return { ...actual, resolveSession: vi.fn() }
 })
 
 vi.mock('../../../lib/tap/tap-connection', async (importActual) => {
@@ -137,7 +137,7 @@ describe('lib/tap/aut/frame withResolvedAutFrame', () => {
       sessionId: SESSION_ID,
     } as unknown as TapConnection
 
-    vi.mocked(resolveInstance).mockResolvedValue({ instance: {}, reason: 'only', candidateCount: 1 } as any)
+    vi.mocked(resolveSession).mockResolvedValue({ instance: {}, reason: 'only', candidateCount: 1 } as any)
     vi.mocked(withTapConnection).mockImplementation((_instance: any, use: any) => use(session))
 
     logger.reset()

@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { CypressInstanceError, resolveInstance } from '../cypress-sessions'
+import { CypressSessionError, resolveSession } from '../cypress-sessions'
 import { withTapConnection, throwTapError, validateExecResult } from '../tap/tap-connection'
 import type { TapConnection } from '../tap/tap-connection'
 import { buildTapProgram, buildNativeProgram } from '../tap/build-program'
@@ -57,7 +57,7 @@ const buildCommandInfo = (operands: string[]): CommandInfo => {
 // `--json` is parsed by the outer `cypress tap` command, so commander never
 // routes it to the command being run. A command that declares it in its own
 // schema needs it anyway — for that command the flag also changes what the
-// instance returns, not just how the CLI prints it — so it is handed over here.
+// session returns, not just how the CLI prints it — so it is handed over here.
 const withJson = (schema: TapSchema, name: string, options: Record<string, string>, json: boolean | undefined): Record<string, string> => {
   const declared = schema.commands.find((command) => command.name === name)?.options.some((option) => option.name === 'json')
 
@@ -106,9 +106,9 @@ const execCommand = async (connection: TapConnection, command: string, commandAr
   return 0
 }
 
-// With no instance to query, fall back to the schema this CLI ships with so the
+// With no session to query, fall back to the schema this CLI ships with so the
 // help listing still reflects every command the CLI knows — the query path stays
-// authoritative when an instance is attached (it may run a different version).
+// authoritative when a session is attached (it may run a different version).
 const renderKnownSchema = (command: string | undefined): number => {
   const schema = buildTapSchema(util.pkgVersion())
   const program = buildTapProgram(schema, () => {})
@@ -124,9 +124,9 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
   }
 
   try {
-    const selection = await resolveInstance({ instance: options.instance, cwd: process.cwd() })
+    const selection = await resolveSession({ session: options.instance, cwd: process.cwd() })
 
-    return await withTapConnection(selection.instance, async (connection) => {
+    return await withTapConnection(selection.session, async (connection) => {
       const schema = validateSchema(await connection.call(TAP_SCHEMA_METHOD))
 
       let dispatchCode = 0
@@ -154,7 +154,7 @@ const runTap = async ({ wantsHelp, positionals, command }: CommandInfo, options:
       return dispatchCode
     }, options.timeout)
   } catch (err: any) {
-    if (err instanceof CypressInstanceError) {
+    if (err instanceof CypressSessionError) {
       if (wantsHelp || !command) {
         return renderKnownSchema(command)
       }

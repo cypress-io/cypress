@@ -1,6 +1,6 @@
 import type CRI from 'chrome-remote-interface'
 
-import { CypressInstanceError } from '../cypress-sessions'
+import { CypressSessionError } from '../cypress-sessions'
 
 /** Bound for a protocol call, including one awaiting app-side work. */
 export const DEFAULT_CDP_TIMEOUT_MS = 30_000
@@ -10,17 +10,17 @@ export const DEFAULT_CDP_TIMEOUT_MS = 30_000
  * these in milliseconds, so keeping them short is what lets the scan skip an
  * unresponsive target rather than stop on it.
  */
-export const FIND_INSTANCE_TIMEOUT_MS = 2_000
+export const FIND_SESSION_TIMEOUT_MS = 2_000
 
-const unresponsive = (what: string, ms: number): CypressInstanceError => {
-  return new CypressInstanceError(
+const unresponsive = (what: string, ms: number): CypressSessionError => {
+  return new CypressSessionError(
     'RENDERER_UNRESPONSIVE',
     `The targeted Cypress instance did not answer ${what} within ${ms}ms. The browser is reachable, but the page running Cypress is not responding — it may be paused in devtools, stuck in a loop, or starved of memory. Pass --timeout <ms> to wait longer.`,
   )
 }
 
 export const isRendererUnresponsive = (err: unknown): boolean => {
-  return err instanceof CypressInstanceError && err.code === 'RENDERER_UNRESPONSIVE'
+  return err instanceof CypressSessionError && err.code === 'RENDERER_UNRESPONSIVE'
 }
 
 /**

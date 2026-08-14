@@ -13,7 +13,7 @@ import electron from '../../../lib/browsers/electron'
 import chrome from '../../../lib/browsers/chrome'
 import * as firefox from '../../../lib/browsers/firefox'
 import Promise from 'bluebird'
-import { cypressInstances } from '../../../lib/cypress-sessions'
+import { cypressSessions } from '../../../lib/cypress-sessions'
 import { deferred } from '../../support/helpers/deferred'
 import type { DataContext } from '@packages/data-context/src/DataContext'
 import type { BrowserInstance } from '../../../lib/browsers/types'
@@ -524,9 +524,9 @@ describe('lib/browsers/index', () => {
 
   // Recorded for every family, not just the ones that speak CDP, so an external
   // tool can tell a browser it cannot drive from no browser at all.
-  context('cypress instances browser', () => {
+  context('cypress sessions browser', () => {
     it('does not record the browser when launch fails', async () => {
-      const setBrowser = sinon.spy(cypressInstances, 'setBrowser')
+      const setBrowser = sinon.spy(cypressSessions, 'setBrowser')
       const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
       const launchError = new Error('failed to launch')
 
@@ -539,7 +539,7 @@ describe('lib/browsers/index', () => {
     })
 
     it('does not record the browser when connecting fails', async () => {
-      const setBrowser = sinon.spy(cypressInstances, 'setBrowser')
+      const setBrowser = sinon.spy(cypressSessions, 'setBrowser')
       const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
       const connectError = new Error('failed to connect')
 
@@ -551,7 +551,7 @@ describe('lib/browsers/index', () => {
     })
 
     it('records the browser on launch and clears it when the browser exits', async () => {
-      const setBrowser = sinon.spy(cypressInstances, 'setBrowser')
+      const setBrowser = sinon.spy(cypressSessions, 'setBrowser')
       const url: TestUrl = 'http://localhost:3000'
       const browserInstance = new EventEmitter() as BrowserInstance
 

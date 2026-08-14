@@ -3,7 +3,7 @@ import commander from 'commander'
 import logger from '../logger'
 import { renderingFor } from './render'
 import { noteTapFailure } from './events'
-import type { InstanceSelection } from '../cypress-sessions'
+import type { SessionSelection } from '../cypress-sessions'
 import type { TapSchema } from '@packages/cypress-sessions'
 
 // Codes whose message already reads as a complete explanation with its own
@@ -53,16 +53,16 @@ const unknownCommandMessage = (program: commander.Command, schema: TapSchema, co
   return `"${command}" is not a command of this Cypress (v${schema.cypressVersion}). Available commands: ${available}.`
 }
 
-const instanceBanner = (schema: TapSchema, selection: InstanceSelection): string => {
-  const { instance, candidateCount } = selection
+const sessionBanner = (schema: TapSchema, selection: SessionSelection): string => {
+  const { session, candidateCount } = selection
 
   const target = `Target:
-  ${instance.projectRoot}
+  ${session.projectRoot}
   v${schema.cypressVersion}
-  pid:${instance.pid}`
+  pid:${session.pid}`
 
   if (candidateCount > 1) {
-    return `${target}\n${candidateCount} running instances matched; targeting pid ${instance.pid}. Pass --instance <pid> to target another.`
+    return `${target}\n${candidateCount} running instances matched; targeting pid ${session.pid}. Pass --instance <pid> to target another.`
   }
 
   return target
@@ -99,8 +99,8 @@ const renderHelp = (program: commander.Command, schema: TapSchema, command: stri
   return 0
 }
 
-export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: InstanceSelection, command: string | undefined): number => {
-  return renderHelp(program, schema, command, instanceBanner(schema, selection))
+export const renderSchemaHelp = (program: commander.Command, schema: TapSchema, selection: SessionSelection, command: string | undefined): number => {
+  return renderHelp(program, schema, command, sessionBanner(schema, selection))
 }
 
 export const renderStaticHelp = (program: commander.Command, schema: TapSchema, command: string | undefined): number => {

@@ -17,7 +17,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
-import { cypressInstances } from './cypress-sessions'
+import { cypressSessions } from './cypress-sessions'
 import type {
   BannersState,
   FoundBrowser,
@@ -255,10 +255,10 @@ export class ProjectBase extends EE {
       projectRoot: this.projectRoot,
     })
 
-    // Cypress instances only apply to an interactive (`cypress open`) session that an
+    // Cypress sessions only apply to an interactive (`cypress open`) session that an
     // external tool can attach to; skip it for headless `cypress run`.
     if (!cfg.isTextTerminal) {
-      await cypressInstances.addInstance({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
+      await cypressSessions.addSession({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
     }
 
     await this.saveState(stateToSave)
@@ -330,7 +330,7 @@ export class ProjectBase extends EE {
 
     await Promise.all([
       this.server?.close(),
-      cypressInstances.remove(),
+      cypressSessions.remove(),
     ])
 
     this._isServerOpen = false

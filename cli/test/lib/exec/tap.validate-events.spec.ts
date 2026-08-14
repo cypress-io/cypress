@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { CypressInstanceError, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-sessions'
+import { CypressSessionError, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import { buildTapSchema } from '@packages/cypress-sessions'
 import { errors } from '../../../lib/errors'
@@ -13,16 +13,16 @@ vi.mock('../../../lib/tap/tap-connection', async (importActual) => {
   return { ...await importActual<typeof import('../../../lib/tap/tap-connection')>(), withTapConnection: vi.fn() }
 })
 
-vi.mock('../../../lib/tap/instance-gql', () => {
-  return { queryInstanceGraphql: vi.fn() }
+vi.mock('../../../lib/tap/session-gql', () => {
+  return { querySessionGraphql: vi.fn() }
 })
 
 vi.mock('../../../lib/cypress-sessions', async (importActual) => {
   return {
     ...await importActual<typeof import('../../../lib/cypress-sessions')>(),
-    listLiveInstances: vi.fn(),
-    resolveLiveInstance: vi.fn(),
-    resolveInstance: vi.fn(),
+    listLiveSessions: vi.fn(),
+    resolveLiveSession: vi.fn(),
+    resolveSession: vi.fn(),
   }
 })
 
@@ -63,20 +63,20 @@ describe('lib/exec/tap reporting the invocation', () => {
   // A schema command's flags are named by the schema, which a discovery failure
   // never fetched, so the code is all such an invocation has to report.
   it('reports a discovery failure by its code', async () => {
-    vi.mocked(resolveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+    vi.mocked(resolveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
     expect(await tap.start(['reporter', '--test-id', 'r2'], {})).toBe(1)
-    expect(reportedEvent()).toMatchObject({ command: 'reporter', exitCode: 1, errorCode: 'NO_INSTANCE' })
+    expect(reportedEvent()).toMatchObject({ command: 'reporter', exitCode: 1, errorCode: 'NO_SESSION' })
     expect(reportedEvent().flags).toEqual([])
   })
 
   // A CLI-native command is dispatched before it looks for an instance, so it
   // reports what was typed as well as the code it failed with.
   it('reports a discovery failure a CLI-native command handled itself', async () => {
-    vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('NO_INSTANCE', 'No running Cypress was found.'))
+    vi.mocked(resolveLiveSession).mockRejectedValue(new CypressSessionError('NO_SESSION', 'No running Cypress was found.'))
 
     expect(await tap.start(['run', 'cypress/e2e/a.cy.js'], {})).toBe(1)
-    expect(reportedEvent()).toMatchObject({ command: 'run', exitCode: 1, errorCode: 'NO_INSTANCE', flags: ['spec'] })
+    expect(reportedEvent()).toMatchObject({ command: 'run', exitCode: 1, errorCode: 'NO_SESSION', flags: ['spec'] })
     expect(JSON.stringify(reportedEvent())).not.toContain('a.cy.js')
   })
 
@@ -164,7 +164,7 @@ describe('lib/exec/tap reporting the invocation', () => {
   })
 
   it('reports an unexpected error before rethrowing it', async () => {
-    vi.mocked(resolveInstance).mockRejectedValue(new Error('boom'))
+    vi.mocked(resolveSession).mockRejectedValue(new Error('boom'))
 
     await expect(tap.start(['health'], {})).rejects.toThrow('boom')
     expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'UNHANDLED' })

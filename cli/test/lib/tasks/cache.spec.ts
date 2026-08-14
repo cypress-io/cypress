@@ -293,12 +293,12 @@ describe('lib/tasks/cache', () => {
       expect(await fs.pathExists('/.cache/Cypress/bundles/cy-prompt/abc123/manifest.json')).toEqual(true)
     })
 
-    it('sweeps stale (dead-pid) runner instances records while keeping live ones', async function () {
+    it('sweeps stale (dead-pid) session records while keeping live ones', async function () {
       mockfs.restore()
       mockfs({
         '/.cache/Cypress': {
           '1.2.3': { 'Cypress': { 'file1': 'current' } },
-          'instances': {
+          'sessions': {
             [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }),
             '999999.json': JSON.stringify({ pid: 999999 }),
             'notes.txt': 'not a record',
@@ -319,19 +319,19 @@ describe('lib/tasks/cache', () => {
 
       await cache.prune()
 
-      expect(await fs.pathExists(`/.cache/Cypress/instances/${process.pid}.json`)).toEqual(true)
-      expect(await fs.pathExists('/.cache/Cypress/instances/999999.json')).toEqual(false)
-      expect(await fs.pathExists('/.cache/Cypress/instances/notes.txt')).toEqual(true)
+      expect(await fs.pathExists(`/.cache/Cypress/sessions/${process.pid}.json`)).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/sessions/999999.json')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/sessions/notes.txt')).toEqual(true)
       expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
     })
 
-    it('preserves the instances/ subdir while pruning old binary versions', async function () {
+    it('preserves the sessions/ subdir while pruning old binary versions', async function () {
       mockfs.restore()
       mockfs({
         '/.cache/Cypress': {
           '1.2.3': { 'Cypress': { 'file1': 'current' } },
           '2.3.4': { 'Cypress.app': {} },
-          'instances': { [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }) },
+          'sessions': { [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }) },
         },
       })
 
@@ -344,7 +344,7 @@ describe('lib/tasks/cache', () => {
 
       expect(await fs.pathExists('/.cache/Cypress/2.3.4')).toEqual(false)
       expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
-      expect(await fs.pathExists('/.cache/Cypress/instances')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/sessions')).toEqual(true)
     })
   })
 

@@ -2,8 +2,8 @@ import Debug from 'debug'
 
 import { errors } from '../errors'
 import { throwTapError } from './tap-connection'
-import type { LiveInstanceState } from '../cypress-sessions'
-import { INSTANCE_ID_HEADER } from '@packages/cypress-sessions'
+import type { LiveSessionState } from '../cypress-sessions'
+import { SESSION_ID_HEADER } from '@packages/cypress-sessions'
 import type { TapGraphqlOperation } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
@@ -45,7 +45,7 @@ const validateEnvelope = <T>(operationName: string, envelope: GraphqlEnvelope | 
   return envelope.data as T
 }
 
-export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState, operation: TapGraphqlOperation<TResult>, timeoutMs: number = DEFAULT_QUERY_TIMEOUT_MS): Promise<TResult> => {
+export const querySessionGraphql = async <TResult>(instance: LiveSessionState, operation: TapGraphqlOperation<TResult>, timeoutMs: number = DEFAULT_QUERY_TIMEOUT_MS): Promise<TResult> => {
   const { operationName, query, variables } = operation
   const url = `http://${GRAPHQL_HOST}:${instance.serverPort}${GRAPHQL_PATH}/${operationName}`
 
@@ -54,7 +54,7 @@ export const queryInstanceGraphql = async <TResult>(instance: LiveInstanceState,
   try {
     response = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', [INSTANCE_ID_HEADER]: instance.instanceId },
+      headers: { 'content-type': 'application/json', [SESSION_ID_HEADER]: instance.sessionId },
       body: JSON.stringify({ operationName, query, variables: variables ?? {} }),
       signal: AbortSignal.timeout(timeoutMs),
     })

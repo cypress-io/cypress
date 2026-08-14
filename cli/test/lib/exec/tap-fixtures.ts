@@ -1,11 +1,11 @@
 import { vi } from 'vitest'
 
 import logger from '../../../lib/logger'
-import { listLiveInstances, resolveLiveInstance, resolveInstance } from '../../../lib/cypress-sessions'
-import type { ReadyInstanceState, InstanceSelection } from '../../../lib/cypress-sessions'
+import { listLiveSessions, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
+import type { ReadySessionState, SessionSelection } from '../../../lib/cypress-sessions'
 import { withTapConnection } from '../../../lib/tap/tap-connection'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
-import { queryInstanceGraphql } from '../../../lib/tap/instance-gql'
+import { querySessionGraphql } from '../../../lib/tap/session-gql'
 import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
 import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
 
@@ -50,12 +50,12 @@ export const mockConnection = (connectionSchema: unknown = schema, execOutcome: 
   return call
 }
 
-export const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => ({
+export const readySession = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => ({
   schemaVersion: 1,
   pid: 4242,
   projectRoot: '/projects/app',
   serverPort: 49200,
-  instanceId: 'inst-1',
+  sessionId: 'inst-1',
   testingType: 'e2e',
   cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
   browserName: 'Chrome',
@@ -65,10 +65,10 @@ export const readyInstance = (overrides: Partial<ReadyInstanceState> = {}): Read
   ...overrides,
 })
 
-export const mockResolved = (overrides: Partial<InstanceSelection> = {}): InstanceSelection => {
-  const selection: InstanceSelection = { instance: readyInstance(), reason: 'only', candidateCount: 1, ...overrides }
+export const mockResolved = (overrides: Partial<SessionSelection> = {}): SessionSelection => {
+  const selection: SessionSelection = { session: readySession(), reason: 'only', candidateCount: 1, ...overrides }
 
-  vi.mocked(resolveInstance).mockResolvedValue(selection)
+  vi.mocked(resolveSession).mockResolvedValue(selection)
 
   return selection
 }
@@ -84,10 +84,10 @@ export const resetTapMocks = (): void => {
   fetchMock.mockResolvedValue({ status: 200 })
   vi.stubGlobal('fetch', fetchMock)
   vi.mocked(withTapConnection).mockReset()
-  vi.mocked(queryInstanceGraphql).mockReset()
-  vi.mocked(listLiveInstances).mockReset()
-  vi.mocked(resolveLiveInstance).mockReset()
-  vi.mocked(resolveInstance).mockReset()
+  vi.mocked(querySessionGraphql).mockReset()
+  vi.mocked(listLiveSessions).mockReset()
+  vi.mocked(resolveLiveSession).mockReset()
+  vi.mocked(resolveSession).mockReset()
   vi.mocked(withResolvedAutFrame).mockReset()
   vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
   mockResolved()

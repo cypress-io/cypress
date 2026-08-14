@@ -1,15 +1,15 @@
-import { isTapSupportedBrowser, listLiveInstances } from '../../cypress-sessions'
-import type { LiveInstanceState, ReadyInstanceState } from '../../cypress-sessions'
+import { isTapSupportedBrowser, listLiveSessions } from '../../cypress-sessions'
+import type { LiveSessionState, ReadySessionState } from '../../cypress-sessions'
 import { renderOutcome, renderResult } from '../output'
 import { withTapConnection } from '../tap-connection'
-import { FIND_INSTANCE_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
+import { FIND_SESSION_TIMEOUT_MS, isRendererUnresponsive } from '../cdp-timeout'
 import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
 const NO_INSTANCES_GUIDANCE = 'No running Cypress instance found. Start Cypress in open mode (e.g. `cypress open`) and select a testing type to get started.'
 
 /** One row of `cypress tap instances`: a reachable open-mode Cypress instance. */
-export interface TapInstanceSummary {
+export interface TapSessionSummary {
   /** Process id — the handle other tap commands accept via `--instance`. */
   pid: number
   /** Absolute path of the project the instance has open. */
@@ -34,20 +34,20 @@ export interface TapInstanceSummary {
 // Bounded, and never throws: `instances` is what a caller reaches for when
 // everything else is failing, so an unanswered probe is a reported fact rather
 // than an error. Absent means there was nothing to ask, not that it went unasked.
-const probeRenderer = async (instance: LiveInstanceState, timeoutMs: number): Promise<boolean | undefined> => {
+const probeRenderer = async (instance: LiveSessionState, timeoutMs: number): Promise<boolean | undefined> => {
   if (instance.cdpBrowserWsUrl === null) {
     return undefined
   }
 
   try {
-    return await withTapConnection(instance as ReadyInstanceState, async () => true, timeoutMs)
+    return await withTapConnection(instance as ReadySessionState, async () => true, timeoutMs)
   } catch (err) {
     return isRendererUnresponsive(err) ? false : undefined
   }
 }
 
 const listInstances = async (options: TapCliOptions): Promise<number> => {
-  const instances = await listLiveInstances({ instance: options.instance })
+  const instances = await listLiveSessions({ session: options.instance })
 
   if (instances.length === 0) {
     renderResult(NO_INSTANCES_GUIDANCE)
@@ -55,10 +55,10 @@ const listInstances = async (options: TapCliOptions): Promise<number> => {
     return 0
   }
 
-  const timeoutMs = options.timeout ?? FIND_INSTANCE_TIMEOUT_MS
+  const timeoutMs = options.timeout ?? FIND_SESSION_TIMEOUT_MS
   const responsive = await Promise.all(instances.map((instance) => probeRenderer(instance, timeoutMs)))
 
-  const summaries: TapInstanceSummary[] = instances.map((instance, index) => ({
+  const summaries: TapSessionSummary[] = instances.map((instance, index) => ({
     pid: instance.pid,
     projectRoot: instance.projectRoot,
     testingType: instance.testingType,

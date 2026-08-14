@@ -1,7 +1,7 @@
 import Debug from 'debug'
 
-import { instancesProbePath } from './record'
-import type { LiveInstanceState, CypressInstance } from './record'
+import { sessionProbePath } from './record'
+import type { LiveSessionState, CypressSession } from './record'
 
 const debug = Debug('cypress:cli:cypress-sessions')
 
@@ -47,8 +47,8 @@ const cdpEndpointReachable = async (cdpBrowserWsUrl: string, timeoutMs: number):
   }
 }
 
-export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveInstanceState | null> => {
-  const url = `http://${PROBE_HOST}:${record.serverPort}${instancesProbePath(record.instanceId)}`
+export const verifySessionRecord = async (record: CypressSession, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveSessionState | null> => {
+  const url = `http://${PROBE_HOST}:${record.serverPort}${sessionProbePath(record.sessionId)}`
 
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
@@ -57,16 +57,16 @@ export const verifyInstanceRecord = async (record: CypressInstance, timeoutMs: n
       return null
     }
 
-    const live = await response.json() as { instanceId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown }
+    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown }
 
-    if (live.instanceId !== record.instanceId) {
+    if (live.sessionId !== record.sessionId) {
       return null
     }
 
     const cdpBrowserWsUrl = typeof live.cdpBrowserWsUrl === 'string' ? live.cdpBrowserWsUrl : null
     const attached = cdpBrowserWsUrl !== null && await cdpEndpointReachable(cdpBrowserWsUrl, timeoutMs)
 
-    // The browser identity describes what the instance has open, not what is
+    // The browser identity describes what the session has open, not what is
     // reachable over CDP — a browser tap cannot drive still has to be nameable.
     return {
       ...record,

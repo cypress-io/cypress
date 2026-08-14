@@ -160,18 +160,18 @@ describe('tap CLI with no running instance', function () {
     expect(result.json()).to.deep.eq({ status: 'not connected' })
   })
 
-  it('exits 1 with NO_INSTANCE for a read', async () => {
+  it('exits 1 with NO_SESSION for a read', async () => {
     const result = await tapWithoutInstance(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_INSTANCE')
+    expect(failureOutput(result)).to.include('NO_SESSION')
   })
 
   it('names the pid that was asked for when --instance matches nothing', async () => {
     const result = await tapWithoutInstance(['--instance', '999999', 'inspect', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_INSTANCE')
+    expect(failureOutput(result)).to.include('NO_SESSION')
     expect(failureOutput(result)).to.include('999999')
   })
 })
@@ -785,17 +785,17 @@ describe('tap CLI across the run lifecycle', function () {
     snapshotRendering('reporter failed command log', result.stdout)
   })
 
-  it('exits 1 with NO_INSTANCE once the instance is gone', async () => {
+  it('exits 1 with NO_SESSION once the instance is gone', async () => {
     // SIGKILL skips the record cleanup an orderly exit would run, so the record outlives
     // its writer. Discovery reaps it on the next read (`reapIfDead` in
-    // cypress-sessions/store.ts), so an unclean exit reports NO_INSTANCE rather than
-    // STALE_INSTANCE — the latter needs a pid that is alive but no longer answering.
+    // cypress-sessions/store.ts), so an unclean exit reports NO_SESSION rather than
+    // STALE_SESSION — the latter needs a pid that is alive but no longer answering.
     await instance.terminate()
 
     const result = await instance.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('NO_INSTANCE')
+    expect(failureOutput(result)).to.include('NO_SESSION')
   })
 })
 
@@ -926,7 +926,7 @@ describe('tap CLI with more than one instance running', function () {
 
 /**
  * A pid alive but no longer answering: the only state that reports
- * STALE_INSTANCE rather than NO_INSTANCE.
+ * STALE_SESSION rather than NO_SESSION.
  */
 describe('tap CLI against an instance that stopped answering', function () {
   this.timeout(SUITE_TIMEOUT_MS)
@@ -944,11 +944,11 @@ describe('tap CLI against an instance that stopped answering', function () {
     await instance?.kill()
   })
 
-  it('exits 1 with STALE_INSTANCE, saying Cypress was running and is not now', async () => {
+  it('exits 1 with STALE_SESSION, saying Cypress was running and is not now', async () => {
     const result = await instance.tap(['dom', '--selector', '#status'])
 
     expect(result.exitCode).to.eq(1)
-    expect(failureOutput(result)).to.include('STALE_INSTANCE')
+    expect(failureOutput(result)).to.include('STALE_SESSION')
     expect(failureOutput(result)).to.include('no longer responding')
   })
 

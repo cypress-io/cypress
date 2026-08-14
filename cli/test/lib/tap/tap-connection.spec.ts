@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CRI from 'chrome-remote-interface'
 
-import type { ReadyInstanceState } from '../../../lib/cypress-sessions'
+import type { ReadySessionState } from '../../../lib/cypress-sessions'
 import { CdpErrorMessage, withTapConnection } from '../../../lib/tap/tap-connection'
-import { FIND_INSTANCE_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
+import { FIND_SESSION_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
 import { errors } from '../../../lib/errors'
 
 vi.mock('chrome-remote-interface', () => ({ default: vi.fn() }))
@@ -52,13 +52,13 @@ const makeClient = (overrides: FakeClientOverrides = {}) => {
   return client
 }
 
-const makeRecord = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceState => {
+const makeRecord = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => {
   return {
     schemaVersion: 1,
     pid: 1234,
     projectRoot: PROJECT,
     serverPort: 5555,
-    instanceId: 'instance-abc',
+    sessionId: 'instance-abc',
     testingType: 'e2e',
     cdpBrowserWsUrl: BROWSER_WS_URL,
     browserName: 'Chrome',
@@ -69,9 +69,9 @@ const makeRecord = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceS
   }
 }
 
-let instance: ReadyInstanceState
+let instance: ReadySessionState
 
-const setup = (client = makeClient(), overrides: Partial<ReadyInstanceState> = {}) => {
+const setup = (client = makeClient(), overrides: Partial<ReadySessionState> = {}) => {
   instance = makeRecord(overrides)
   mockConnect.mockResolvedValue(client)
 
@@ -505,7 +505,7 @@ describe('lib/tap/tap-connection', () => {
     try {
       const settled = callOnce().catch((e) => e)
 
-      await vi.advanceTimersByTimeAsync(FIND_INSTANCE_TIMEOUT_MS)
+      await vi.advanceTimersByTimeAsync(FIND_SESSION_TIMEOUT_MS)
 
       expect((await settled as Error & { code: string }).code).toBe('RENDERER_UNRESPONSIVE')
     } finally {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { CypressInstanceError } from '../../../lib/cypress-sessions'
+import { CypressSessionError } from '../../../lib/cypress-sessions'
 import { extractInspect } from '../../../lib/tap/commands/inspect'
 import type { TapConnection } from '../../../lib/tap/tap-connection'
 
@@ -120,7 +120,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
   it('fails instead of reporting a partial element when the renderer stops answering', async () => {
     const { session } = makeInspectSession({
       selectorObjectId: 'obj-1',
-      axError: new CypressInstanceError('RENDERER_UNRESPONSIVE', 'The targeted Cypress instance did not answer Accessibility.getPartialAXTree within 30000ms.'),
+      axError: new CypressSessionError('RENDERER_UNRESPONSIVE', 'The targeted Cypress instance did not answer Accessibility.getPartialAXTree within 30000ms.'),
     })
 
     await expect(extractInspect(session, frame, '.wedged')).rejects.toMatchObject({ code: 'RENDERER_UNRESPONSIVE' })

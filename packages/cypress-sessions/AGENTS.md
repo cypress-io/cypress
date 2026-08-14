@@ -1,6 +1,6 @@
-This package is the **cross-process contract** for Cypress instances: the shared
+This package is the **cross-process contract** for Cypress sessions: the shared
 schema, on-disk layout, and liveness-probe route that let an external process
-(the `cypress` CLI) find a running `cypress open` instance and attach to its
+(the `cypress` CLI) find a running `cypress open` session and attach to its
 browser over CDP.
 
 It is intentionally **pure, dependency-free TypeScript** — types, constants, and
@@ -11,9 +11,9 @@ CLI stay in agreement by construction instead of hand-mirrored copies.
 **Producer / Consumer**
 
 - **Producer** — `@packages/server` (`lib/cypress-sessions.ts`) writes `<pid>.json`
-  records into the `instances/` dir and serves the probe route in open mode.
+  records into the `sessions/` dir and serves the probe route in open mode.
 - **Consumer** — the CLI (`cli/lib/cypress-sessions/*`) reads those records,
-  checks pid liveness, and probes the route to confirm the instance and read the
+  checks pid liveness, and probes the route to confirm the session and read the
   live CDP endpoint.
 
 **Key Commands**
@@ -28,10 +28,10 @@ yarn workspace @packages/cypress-sessions test
 
 **Architecture**
 
-- `lib/index.ts` — the entire contract: `CypressInstance` / `LiveInstanceState`
-  / `ReadyInstanceState` interfaces, `isCompatibleRecord` validator, schema version
-  constants, `INSTANCES_DIRNAME`, `<pid>.json` filename helpers, and the
-  `INSTANCES_ROUTE_PREFIX` / `instancesProbePath` route helpers.
+- `lib/index.ts` — the entire contract: `CypressSession` / `LiveSessionState`
+  / `ReadySessionState` interfaces, `isCompatibleRecord` validator, schema version
+  constants, `SESSIONS_DIRNAME`, `<pid>.json` filename helpers, and the
+  `SESSIONS_ROUTE_PREFIX` / `sessionProbePath` route helpers.
 
 **Gotchas / Notes**
 
