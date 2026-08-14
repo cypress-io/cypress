@@ -51,6 +51,23 @@ export class CDPCommandQueue {
     this.queue = []
   }
 
+  /**
+   * Rejects every enqueued command's deferred and empties the queue. Used when
+   * the connection reaches a terminal state, since enqueued commands are
+   * waiting on a reconnect that will never come and would otherwise hang forever.
+   */
+  public reject (error: Error) {
+    debug('rejecting %d enqueued command(s)', this.queue.length)
+
+    const entries = this.queue
+
+    this.queue = []
+
+    for (const entry of entries) {
+      entry.deferred.reject(error)
+    }
+  }
+
   public extract<T extends CdpCommand> (search: Partial<Command<T>>): Command<T> | undefined {
     // this should find, remove, and return if found a given command
 

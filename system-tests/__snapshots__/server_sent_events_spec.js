@@ -19,17 +19,18 @@ exports['e2e server sent events / passes'] = `
 
   server sent events
     ✓ does not crash
+    ✓ reads SSE framing from a fetch ReadableStream before cancelling
     ✓ aborts proxied connections to prevent client connection buildup
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -47,9 +48,9 @@ exports['e2e server sent events / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  server_sent_events.cy.js                 XX:XX        2        2        -        -        - │
+  │ ✔  server_sent_events.cy.js                 XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
