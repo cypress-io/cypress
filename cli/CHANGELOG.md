@@ -33,7 +33,6 @@
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
-## 15.19.1
 ## 15.20.2
 
 **Bugfixes:**
@@ -83,6 +82,7 @@
 - Fixed an issue where a Cypress error message that interpolated a value containing a `$` sequence (such as `$&`, `` $` ``, `$'`, or `$$`) could render with corrupted or duplicated text. Such values are now shown verbatim. Fixed in [#34220](https://github.com/cypress-io/cypress/pull/34220).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) matching on the `auth` option compared only the portion of a Basic authentication password before the first colon, so a request whose password contained a colon (permitted by RFC 7617) failed to match. The full password is now compared. Fixed in [#34206](https://github.com/cypress-io/cypress/pull/34206).
 - Fixed an issue where [`cy.intercept()`](https://on.cypress.io/intercept) routes specifying a numeric `port` (for example `port: 8080` or `port: [8080]`) did not match requests on non-default ports. Such routes now match as documented. Fixes [#17653](https://github.com/cypress-io/cypress/issues/17653). Fixed in [#34205](https://github.com/cypress-io/cypress/pull/34205).
+- Fixed an issue where inline source maps embedded without a `charset` (for example those emitted by esbuild) were not decoded and were silently dropped. These inline source maps are now decoded. Fixed in [#34204](https://github.com/cypress-io/cypress/pull/34204).
 - Fixed an issue where the TypeScript 7 support added in [15.18.0](#15-18-0) did not work: TypeScript spec and support files failed to compile with `Error: Cannot find module '@babel/preset-typescript'`. Fixes [#34359](https://github.com/cypress-io/cypress/issues/34359).
 - Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) block could intermittently fail with `TypeError: Cannot read properties of undefined (reading 'applied')`, incorrectly reported as originating from your test code. Addressed in [#34376](https://github.com/cypress-io/cypress/pull/34376).
 - Fixed an issue where, during a [`cy.origin()`](https://on.cypress.io/origin) block, session cookies set on the primary origin by the first page visited in a test were not included in the identity provider's callback request back to the primary origin (for example, `POST /auth/callback` in an OAuth Authorization Code flow). Fixes [#29719](https://github.com/cypress-io/cypress/issues/29719). Fixed in [#34287](https://github.com/cypress-io/cypress/pull/34287).
