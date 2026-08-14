@@ -27,7 +27,6 @@ const DISCOVERY_CODES: ReadonlySet<string> = new Set([
 ])
 
 const INVALID_USAGE = 'INVALID_USAGE'
-const UNHANDLED = 'UNHANDLED'
 
 const validateSchema = (value: unknown): TapSchema => {
   const schema = value as TapSchema | null | undefined
@@ -197,10 +196,6 @@ const tapModule = {
       exitCode = await runTap(info, options)
 
       return exitCode
-    } catch (err: any) {
-      noteTapFailure(UNHANDLED)
-
-      throw err
     } finally {
       await reportTapTrace(exitCode)
     }

@@ -228,7 +228,7 @@ describe('cli', () => {
 
       const result = await execa('bin/cypress', ['tap', 'status', '--fake'], options)
 
-      expect(result).toContain('unknown option: --fake')
+      expect(result).toContain('Unknown option "--fake"')
       expect(result).toContain('code: 1')
       // Only printed from the reporting that the exit would have skipped.
       expect(result).toContain('skipped tap event')

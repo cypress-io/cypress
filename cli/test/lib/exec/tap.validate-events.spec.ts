@@ -160,11 +160,11 @@ describe('lib/exec/tap reporting the invocation', () => {
     })
   })
 
-  it('reports an unexpected error before rethrowing it', async () => {
+  it('reports an error raised as no failure of ours as an unknown one', async () => {
     vi.mocked(resolveInstance).mockRejectedValue(new Error('boom'))
 
-    await expect(tap.start(['health'], {})).rejects.toThrow('boom')
-    expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'UNHANDLED' })
+    expect(await tap.start(['health'], {})).toBe(1)
+    expect(reportedEvent()).toMatchObject({ exitCode: 1, errorCode: 'UNKNOWN_ERROR' })
   })
 
   it('leaves the exit code alone when the collector cannot be reached', async () => {
