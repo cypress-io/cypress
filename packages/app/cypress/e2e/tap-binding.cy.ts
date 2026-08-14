@@ -375,7 +375,7 @@ describe('tap binding with a retrying spec', () => {
       // spec-level overview.
       const overviewWithAttempt = await binding.exec('reporter', {}, { attempt: '1' })
 
-      expect((overviewWithAttempt as { error: { code: string } }).error.code).to.eq('ATTEMPT_NOT_FOUND')
+      expect((overviewWithAttempt as { error: { code: string } }).error.code).to.eq('MISSING_COMPANION_OPTION')
 
       // The failing first attempt has a failed command; the passing latest has none.
       expect(first.commands.some((command: Record<string, unknown>) => command.state === 'failed')).to.eq(true)
