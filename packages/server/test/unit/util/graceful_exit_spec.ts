@@ -79,16 +79,32 @@ describe('lib/util/graceful-exit', () => {
     expect(exitStub).to.have.been.calledWith(0)
   })
 
-  it('exits with code 1 when a step throws', async () => {
+  it('keeps the requested exit code when a step throws', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+    const laterStep = sinon.stub().resolves()
+
+    GracefulExit.addStep(async () => {
+      throw new Error('step failed')
+    }, 'failing-step')
+
+    GracefulExit.addStep(laterStep as any, 'healthy-step')
+
+    await GracefulExit.exitGracefully(0)
+
+    expect(laterStep).to.have.been.calledOnce
+    expect(exitStub).to.have.been.calledWith(0)
+  })
+
+  it('keeps a non-zero exit code when a step throws', async () => {
     const exitStub = sinon.stub(process, 'exit')
 
     GracefulExit.addStep(async () => {
       throw new Error('step failed')
     }, 'failing-step')
 
-    await GracefulExit.exitGracefully(0)
+    await GracefulExit.exitGracefully(4)
 
-    expect(exitStub).to.have.been.calledWith(1)
+    expect(exitStub).to.have.been.calledWith(4)
   })
 
   it('returns the same in-flight promise when exitGracefully is called twice', async () => {
@@ -166,7 +182,7 @@ describe('lib/util/graceful-exit', () => {
     exitStub.restore()
   })
 
-  it('force exits after teardown timeout when a step never completes', async function () {
+  it('force exits with the requested code after teardown timeout when a step never completes', async function () {
     this.timeout(5000)
 
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '50'
@@ -179,7 +195,7 @@ describe('lib/util/graceful-exit', () => {
 
     await new Promise((r) => setTimeout(r, 200))
 
-    expect(exitStub).to.have.been.calledWith(1)
+    expect(exitStub).to.have.been.calledWith(0)
 
     exitStub.restore()
   })

@@ -1,0 +1,3 @@
+[31mWe detected that the Cypress process was killed by signal [33mSIGKILL[39m[31m instead of exiting on its own.[39m
+[31m[39m
+[31mAny results printed above were reported before this happened, but the run did not finish cleanly.[39m

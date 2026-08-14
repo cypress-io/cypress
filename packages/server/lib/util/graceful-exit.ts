@@ -131,9 +131,7 @@ export class GracefulExit {
     return GracefulExit.singleton.processTeardown != null
   }
 
-  private async flushSteps (code: number): Promise<number> {
-    let hadErrors = false
-
+  private async flushSteps (code: number): Promise<void> {
     await Promise.all(Array.from(this.steps.entries()).map(async ([key, { name, fn }]) => {
       try {
         this.debug(`<${key}> executing teardown step: %s`, name)
@@ -142,19 +140,11 @@ export class GracefulExit {
 
         this.debug(`<${key}> teardown step completed: %s`, name)
       } catch (error) {
-        console.error(error)
         this.debug(`<${key}> Error executing teardown step: ${name}`, error)
-        hadErrors = true
+        console.log(`An error occurred during the "${name}" teardown step. This does not affect the exit code (${code}).`)
+        console.log(error)
       }
     }))
-
-    if (hadErrors) {
-      console.error('Additional errors occurred during teardown. Exiting with code 1.')
-
-      return 1
-    }
-
-    return code
   }
 
   private clearForceExitTimeout (): void {
@@ -165,20 +155,17 @@ export class GracefulExit {
   }
 
   private async flushAndExit (code: number): Promise<number | void> {
-    let finalExitCode = code ?? 0
-
     try {
-      finalExitCode = await this.flushSteps(code)
-      this.debug('steps flushed successfully', code, finalExitCode)
+      await this.flushSteps(code)
+      this.debug('steps flushed successfully', code)
     } catch (error) {
       this.debug('Error flushing steps: ', error)
-      finalExitCode = 1
     } finally {
       this.clearForceExitTimeout()
       this.processTeardown = null
       this.teardownStartedAt = null
       this.steps.clear()
-      process.exit(finalExitCode)
+      process.exit(code ?? 0)
     }
   }
 
@@ -197,13 +184,13 @@ export class GracefulExit {
           try {
             const ms = getTeardownTimeoutMs()
 
-            console.error(`Failed to gracefully exit after ${ms}ms. Exiting with code 1. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
+            console.log(`Failed to gracefully exit after ${ms}ms. Exiting with code ${code}. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
           } catch (e) {
-            console.error('Error forcing exit: ', e)
+            console.log('Error forcing exit: ', e)
           } finally {
             exit.clearForceExitTimeout()
             resolve()
-            process.exit(1)
+            process.exit(code)
           }
         }, getTeardownTimeoutMs())
       }),

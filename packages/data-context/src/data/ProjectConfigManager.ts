@@ -30,6 +30,9 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 
+// must stay comfortably under the process teardown budget - see mainProcessWillDisconnect
+const MAIN_PROCESS_WILL_DISCONNECT_TIMEOUT_MS = 2000
+
 export type OnFinalConfigLoadedOptions = {
   shouldRestartBrowser: boolean
 }
@@ -655,7 +658,7 @@ export class ProjectConfigManager {
     return new Promise((resolve, reject) => {
       if (!this._eventsIpc) {
         debug(`mainProcessWillDisconnect message not set, no IPC available`)
-        reject()
+        reject(new Error('mainProcessWillDisconnect has no IPC available'))
 
         return
       }
@@ -663,11 +666,13 @@ export class ProjectConfigManager {
       debug('sending main:process:will:disconnect message')
       this._eventsIpc.send('main:process:will:disconnect')
 
-      // If for whatever reason we don't get an ack in 5s, bail.
+      // If for whatever reason we don't get an ack, bail. This runs inside the process teardown
+      // budget (CYPRESS_INTERNAL_TEARDOWN_TIMEOUT, 5s), so it has to give up well before that or
+      // the force-exit cuts off the rest of teardown instead.
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
         reject(new Error('mainProcessWillDisconnect message timed out'))
-      }, 5000)
+      }, MAIN_PROCESS_WILL_DISCONNECT_TIMEOUT_MS)
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
         debug('Received main:process:will:disconnect:ack')
