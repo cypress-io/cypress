@@ -90,10 +90,30 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect(outcome).to.deep.eq({
-      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for `--at` "during". This command has these snapshots: [before, after]' },
+      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for `--at` "during". This command has these snapshots: ["before", "after"]' },
     })
 
     expect(pinSnapshot).not.to.have.been.called
+  })
+
+  it('lists an unnamed snapshot by the index --at would take', async () => {
+    stubSource({
+      runner: {
+        getTestState: (id: string) => TESTS_STATE[id as keyof typeof TESTS_STATE],
+        getSnapshotPropsForLog: () => ({ ...SNAPSHOT_PROPS, snapshots: [{}, { name: 'after' }] }),
+      },
+    })
+
+    const manager = new TapManager(CYPRESS_VERSION)
+    const missing = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
+
+    expect((missing as { error: { detail: string } }).error.detail).to.contain('these snapshots: [1, "after"]')
+
+    // The listing is only worth printing if what it names resolves, and `--at` is
+    // 1-based, so the index it shows is the one to pass back.
+    const pinned = await manager.exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: '1' })
+
+    expect((pinned as { result: any }).result.pinned.at).to.deep.eq({ index: 1, total: 2 })
   })
 
   it('switches to a different command by re-pinning it', async () => {

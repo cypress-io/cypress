@@ -667,7 +667,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_NOT_FOUND: {
       invocation: 'cypress tap pin --test-id r7 --command-id 3 --at middle',
-      failure: new SnapshotNotFoundTapError('middle', 'This command has these snapshots: [before, after]'),
+      failure: new SnapshotNotFoundTapError('middle', 'This command has these snapshots: ["before", "after"]'),
     },
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_UNAVAILABLE: {

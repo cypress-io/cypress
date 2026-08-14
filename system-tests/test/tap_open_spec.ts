@@ -1175,7 +1175,7 @@ describe('tap CLI reading a pinned snapshot', function () {
 
     expect(result.exitCode).to.eq(1)
     expect(failureOutput(result)).to.include(copyFor('SNAPSHOT_NOT_FOUND'))
-    expect(failureOutput(result), 'the names it would have taken').to.include('"before" (1)')
+    expect(failureOutput(result), 'the names it would have taken').to.include('["before", "after"]')
   })
 
   it('reads the pinned snapshot rather than the live page', async () => {

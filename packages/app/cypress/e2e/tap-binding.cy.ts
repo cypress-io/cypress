@@ -604,7 +604,7 @@ describe('tap binding pin lifecycle', () => {
       const missingSnapshot = await binding.exec('pin', {}, { 'test-id': testId, 'command-id': commandId, at: 'during' })
 
       expect((missingSnapshot as { error: { code: string } }).error.code).to.eq('SNAPSHOT_NOT_FOUND')
-      expect((missingSnapshot as { error: { detail: string } }).error.detail).to.contain('"before" (1)')
+      expect((missingSnapshot as { error: { detail: string } }).error.detail).to.contain('["before", "after"]')
 
       // The default pin lands on the click's final snapshot.
       const pinOutcome = (await binding.exec('pin', {}, { 'test-id': testId, 'command-id': commandId })) as { result: Record<string, any> }

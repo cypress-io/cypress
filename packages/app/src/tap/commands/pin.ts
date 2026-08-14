@@ -92,7 +92,10 @@ const resolveAt = (snapshots: PinSnapshotEntry[], at: string | undefined): numbe
     return named
   }
 
-  const available = snapshots.map((entry) => entry.name ?? '-').join(', ')
+  // Names are quoted, since one can carry spaces and an unquoted list of them reads
+  // as more snapshots than there are. An unnamed snapshot is reachable only by its
+  // index, so that is what it is listed as.
+  const available = snapshots.map((entry, index) => (entry.name === undefined ? `${index + 1}` : `"${entry.name}"`)).join(', ')
 
   throw new SnapshotNotFoundTapError(at, `This command has these snapshots: [${available}]`)
 }
