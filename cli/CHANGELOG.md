@@ -4,7 +4,7 @@
 **Features:**
 
 - Added the `cypress tap` command, which gives your AI agent direct access to your open-mode Cypress session. It lists the open-mode Cypress sessions running on the machine, starts and reruns a spec, reports a run's status and results, prints a failing test's error and Command Log, and inspects the DOM and accessibility tree of the application under test. Every subcommand prints readable output by default and machine-readable JSON with `--json`. Run `cypress tap --help` for the full list of subcommands. Addressed in [#34540](https://github.com/cypress-io/cypress/pull/34540).
-- Added the `CYPRESS_DISABLE_GUEST_TELEMETRY` environment variable, which turns off every report Cypress sends without an account behind it when set to any value: the anonymous usage events recorded while Cypress is open, the event each `cypress tap` invocation reports, and crash and error reports. Crash reports can still be turned off on their own with `CYPRESS_CRASH_REPORTS=0`. Addressed in [#34540](https://github.com/cypress-io/cypress/pull/34540).
+- Added a `CYPRESS_DISABLE_GUEST_TELEMETRY` environment variable, which disables any reporting Cypress sends for non-logged sessions. This includes anonymous usage events within Cypress open-mode and the Cypress CLI. Addressed in [#34540](https://github.com/cypress-io/cypress/pull/34540).
 
 **Bugfixes:**
 
