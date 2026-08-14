@@ -1,5 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
+import { STATUS_CODES } from 'http'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
@@ -104,6 +105,9 @@ type CdpFetchTransportOptions = {
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
+  // Byte-accurate body for Fetch.continueRequest when middleware set a Buffer;
+  // postData is its lossy utf8 string view, kept for pause comparison.
+  postDataBuffer?: Buffer
   requestId?: string
   resourceType?: ResourceType
   sessionId?: string
@@ -440,7 +444,14 @@ export class CdpFetchTransport {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
           ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
-          ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
+          // Fetch.continueRequest's postData is a CDP binary param (base64
+          // over JSON); the pause's event.request.postData is plaintext, so
+          // only the outgoing value is encoded. Sending plaintext makes CDP
+          // reject the continue ("invalid base64 string") — or worse, accept
+          // base64-shaped plaintext and hand the origin corrupted bytes.
+          ...(outbound.postDataBuffer || outbound.postData !== event.request.postData
+            ? { postData: (outbound.postDataBuffer ?? Buffer.from(outbound.postData ?? '', 'utf8')).toString('base64') }
+            : {}),
           ...(headers ? { headers } : {}),
         }, outbound.sessionId)
 
@@ -479,6 +490,11 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // CDP rejects a status code it has no built-in reason phrase for
+          // ("Invalid http status code or phrase"), which turns req.reply(777)
+          // into a silently released pause. Node's MITM path serves unknown
+          // codes with the phrase "unknown"; mirror that.
+          responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
@@ -488,6 +504,10 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // Chrome rejects a code it has no built-in phrase for; for every
+          // known code, omit the phrase so the origin's own phrase survives
+          // the pass-through untouched.
+          ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
         }, response.sessionId)
       }
@@ -507,9 +527,19 @@ export class CdpFetchTransport {
       }
 
       if (!requestContinued) {
-        await this.safeSend('Fetch.continueRequest', {
-          requestId: event.requestId,
-        }, sessionId)
+        // A requested network error (cy.intercept forceNetworkError) must
+        // reach the page as one — MITM resets the connection; here the pause
+        // is failed. Everything else releases untouched as before.
+        if ((err as Error & { isForceNetworkError?: boolean })?.isForceNetworkError) {
+          await this.safeSend('Fetch.failRequest', {
+            requestId: event.requestId,
+            errorReason: 'Failed',
+          }, sessionId)
+        } else {
+          await this.safeSend('Fetch.continueRequest', {
+            requestId: event.requestId,
+          }, sessionId)
+        }
       } else {
         const continueRequestId = response?.requestId ?? responseRequestId
 

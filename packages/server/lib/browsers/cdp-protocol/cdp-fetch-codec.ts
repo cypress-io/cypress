@@ -183,8 +183,8 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
 
 function contentTypeOf (entries?: Protocol.Fetch.HeaderEntry[]): string | undefined {
   const values = entries
-    ?.filter(({ name }) => name.toLowerCase() === 'content-type')
-    .map(({ value }) => value)
+  ?.filter(({ name }) => name.toLowerCase() === 'content-type')
+  .map(({ value }) => value)
 
   return values?.length ? values.join(', ') : undefined
 }
@@ -300,6 +300,13 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
 
       if (httpRequest.body !== undefined) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
+
+        // A Buffer body must reach the transport as bytes: the utf8 string
+        // view above is lossy for binary payloads, and Fetch.continueRequest
+        // transmits base64-encoded bytes.
+        if (Buffer.isBuffer(httpRequest.body)) {
+          transportRequest.postDataBuffer = httpRequest.body
+        }
       }
 
       return transportRequest

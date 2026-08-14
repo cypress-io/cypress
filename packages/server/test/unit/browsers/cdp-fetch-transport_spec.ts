@@ -273,6 +273,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -318,6 +319,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
       })
@@ -345,6 +347,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -377,6 +380,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -411,6 +415,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -426,6 +431,7 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('origin').toString('base64'),
         fulfilled: true,
         responseCode: 200,
+        responsePhrase: 'OK',
       })
     })
 
@@ -939,6 +945,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -984,6 +991,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -1063,6 +1071,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/css',
@@ -1355,6 +1364,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 0,
+        responsePhrase: 'unknown',
       })
     })
 
@@ -1451,6 +1461,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -1660,7 +1671,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
         requestId: 'fetch-request',
         method: 'POST',
-        postData: 'payload',
+        postData: 'cGF5bG9hZA==',
         headers: [{
           name: 'accept-encoding',
           value: 'gzip, deflate',
@@ -1739,6 +1750,65 @@ describe('CdpFetchTransport', () => {
       })
     })
 
+    it('continues the request with byte-accurate base64 when middleware sets a Buffer body', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      // bytes that a utf8 string round-trip would corrupt
+      const binaryBody = Buffer.from([0x23, 0x02, 0xff, 0x00, 0x9c])
+
+      httpIntercept.use(async (req, next) => {
+        req.body = binaryBody
+
+        return next(req)
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+      await onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 }))
+      await handled
+
+      const continueArgs = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')?.args[1]
+
+      expect(continueArgs.postData).to.equal(binaryBody.toString('base64'))
+    })
+
+    it('fails the request pause when middleware requests a network error', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async () => {
+        // cy.intercept forceNetworkError tags its error so the transport maps
+        // it to Fetch.failRequest instead of releasing the pause untouched
+        const err: Error & { isForceNetworkError?: boolean } = new Error('forceNetworkError called')
+
+        err.isForceNetworkError = true
+        throw err
+      })
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(client.send).to.have.been.calledWith('Fetch.failRequest', {
+        requestId: 'fetch-request',
+        errorReason: 'Failed',
+      })
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+    })
+
     it('continues the request pause when middleware fails before the terminal path', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
@@ -1786,6 +1856,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 201,
+        responsePhrase: 'Created',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2073,6 +2144,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 202,
+        responsePhrase: 'Accepted',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2454,6 +2526,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2503,6 +2576,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -2791,6 +2865,7 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [],
         body: Buffer.from('mutated').toString('base64'),
       })
