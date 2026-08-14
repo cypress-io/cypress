@@ -660,4 +660,76 @@ describe('createSyntheticProxyCodec', () => {
     expect(maybeSetBasicAuthHeadersRan).to.equal(true)
     expect(skippedMiddlewareRan).to.equal(false)
   })
+
+  describe('abortRequest', () => {
+    function createCodec () {
+      return createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => {
+          return {
+            req,
+            res,
+          } as any
+        },
+      })
+    }
+
+    it('destroys the exchange of an in-flight request', async () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-abort',
+        url: 'https://example.test/1mb',
+        method: 'GET',
+        headers: {},
+      })
+
+      const closed = new Promise<void>((resolve) => ctx.res.once('close', () => resolve()))
+
+      codec.abortRequest('network-abort')
+
+      await closed
+
+      expect(ctx.req.destroyed, 'req destroyed').to.equal(true)
+      expect(ctx.res.destroyed, 'res destroyed').to.equal(true)
+    })
+
+    it('is a no-op for an unknown request id', () => {
+      expect(() => createCodec().abortRequest('never-seen')).not.to.throw()
+    })
+
+    it('is a no-op once the request has been released', () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-released',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      codec.releaseRequest?.('network-released')
+      codec.abortRequest('network-released')
+
+      expect(ctx.res.destroyed).to.equal(false)
+    })
+
+    it('does not re-destroy an exchange that is already aborted', () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-twice',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      let closeCount = 0
+
+      ctx.res.on('close', () => closeCount++)
+
+      codec.abortRequest('network-twice')
+      codec.abortRequest('network-twice')
+
+      return new Promise<void>((resolve) => setTimeout(resolve, 10)).then(() => {
+        expect(closeCount).to.equal(1)
+      })
+    })
+  })
 })
