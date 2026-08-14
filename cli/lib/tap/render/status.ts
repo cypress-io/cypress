@@ -39,6 +39,7 @@ export const renderStatusHuman = (status: TapStatus): string => {
     projectRoot,
     testingType: status.testingType ?? null,
     browserName: status.browserName ?? null,
+    browserAttached: status.browserAttached,
   }
 
   const progress = [phaseLine(status)]

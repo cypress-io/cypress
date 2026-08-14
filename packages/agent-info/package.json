@@ -3,7 +3,6 @@
   "version": "0.0.0-development",
   "private": true,
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "build": "yarn clean && tsc",
     "clean": "rimraf -rf ./{dist,coverage}",
@@ -23,6 +22,7 @@
   "files": [
     "dist"
   ],
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"

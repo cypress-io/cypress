@@ -31,6 +31,8 @@ const READY_TIMEOUT_MS = 120000
 const SETTLE_TIMEOUT_MS = 120000
 const POLL_INTERVAL_MS = 500
 
+const STATUS_TIMEOUT_MS = 30000
+
 // Mirrors app_data.path(): join(ospath.data(), PRODUCT_NAME, 'cy', folder, ...) where
 // folder is CYPRESS_CONFIG_ENV. Computed rather than read from app_data, because
 // app_data reads process.env at call time and mutating it here would move the app-data
@@ -151,31 +153,52 @@ export interface TapInstance {
   /** Polls until `match` holds, with the last status and open output on timeout. */
   waitForStatus (match: (status: TapStatus) => boolean, label: string): Promise<TapStatus>
   runSpec (spec: string): Promise<TapStatus>
+  /**
+   * Freezes the server (and its process tree where supported): the record stays
+   * and the pid stays alive while nothing answers, which is what reports
+   * STALE_INSTANCE rather than NO_INSTANCE. `kill` needs no resume first.
+   */
+  suspend (): Promise<void>
+  resume (): Promise<void>
   /** Kills the process tree but leaves the instance record for stale-record tests. */
   terminate (): Promise<void>
   kill (): Promise<void>
 }
 
+export interface OpenTapInstanceOptions {
+  /**
+   * Boot alongside the instances already running rather than from an empty
+   * instances dir, and leave that shared dir in place when killed — so the
+   * instances it was booted beside stay discoverable.
+   */
+  additional?: boolean
+}
+
 interface BootedInstance {
   projectRoot: string
   terminate (): Promise<void>
+  suspend (): Promise<void>
+  resume (): Promise<void>
   /** Boot output appended to timeout errors when available. */
   context (): string
   /** Non-null once the booting process is gone, so polling can fail fast. */
   exitReason (): string | null
 }
 
-const buildInstance = async (booted: BootedInstance): Promise<TapInstance> => {
+const buildInstance = async (booted: BootedInstance, options: OpenTapInstanceOptions = {}): Promise<TapInstance> => {
   const { projectRoot, terminate } = booted
 
   const kill = async (): Promise<void> => {
     await terminate()
-    await fs.remove(CACHE_FOLDER)
+
+    if (!options.additional) {
+      await fs.remove(CACHE_FOLDER)
+    }
   }
 
   const status = async (): Promise<TapStatus> => {
     // status exits 0 for any determinable stage, so the JSON field is the signal.
-    return (await runTap(['--json', 'status'], projectRoot)).json<TapStatus>()
+    return (await runTap(['--json', '--timeout', String(STATUS_TIMEOUT_MS), 'status'], projectRoot)).json<TapStatus>()
   }
 
   const failWithContext = async (message: string): Promise<never> => {
@@ -203,7 +226,13 @@ const buildInstance = async (booted: BootedInstance): Promise<TapInstance> => {
         // "not connected" means no record yet; "browser not selected" means the record
         // exists but carries no CDP url, so the browser is still launching and every
         // read would fail NO_BROWSER_ATTACHED. Ready is the first stage past both.
-        if (current.status !== 'not connected' && current.status !== 'browser not selected') {
+        //
+        // And it must be this instance: with another already running, discovery
+        // falls back to that one until this one's own record lands.
+        const isThisInstance = typeof current.projectRoot === 'string'
+          && path.resolve(current.projectRoot) === path.resolve(projectRoot)
+
+        if (isThisInstance && current.status !== 'not connected' && current.status !== 'browser not selected') {
           debug('instance ready at stage %s', current.status)
 
           return
@@ -215,7 +244,7 @@ const buildInstance = async (booted: BootedInstance): Promise<TapInstance> => {
       await delay(POLL_INTERVAL_MS)
     }
 
-    return failWithContext(`the instance never became reachable within ${READY_TIMEOUT_MS}ms; last status was "${last}"`)
+    return failWithContext(`the instance never became reachable within ${READY_TIMEOUT_MS}ms; last status was "${last}" (waiting on ${projectRoot})`)
   }
 
   const waitForStatus = async (match: (status: TapStatus) => boolean, label: string): Promise<TapStatus> => {
@@ -269,15 +298,20 @@ const buildInstance = async (booted: BootedInstance): Promise<TapInstance> => {
     requestRun,
     waitForStatus,
     runSpec,
+    suspend: booted.suspend,
+    resume: booted.resume,
     terminate,
     kill,
   }
 }
 
-const prepareProject = async (project: ProjectFixtureDir): Promise<string> => {
+const prepareProject = async (project: ProjectFixtureDir, options: OpenTapInstanceOptions): Promise<string> => {
   const projectRoot = await Fixtures.scaffoldProject(project)
 
-  await fs.remove(CACHE_FOLDER)
+  if (!options.additional) {
+    await fs.remove(CACHE_FOLDER)
+  }
+
   await seedWelcomeDismissed(projectRoot)
 
   return projectRoot
@@ -287,8 +321,8 @@ const prepareProject = async (project: ProjectFixtureDir): Promise<string> => {
  * Spawning the CLI gives the harness a per-instance env, captured boot output, and a
  * child handle to kill. See `openTapInstanceViaModuleApi` for the Module API contrast.
  */
-export const openTapInstance = async (project: ProjectFixtureDir): Promise<TapInstance> => {
-  const projectRoot = await prepareProject(project)
+export const openTapInstance = async (project: ProjectFixtureDir, options: OpenTapInstanceOptions = {}): Promise<TapInstance> => {
+  const projectRoot = await prepareProject(project, options)
 
   // Electron and the browser outlive the CLI alone, so detach and signal the whole tree.
   const child = cp.spawn(process.execPath, [
@@ -309,16 +343,20 @@ export const openTapInstance = async (project: ProjectFixtureDir): Promise<TapIn
     output += buf.toString()
   })
 
+  const signalTree = async (signal: string): Promise<void> => {
+    if (child.exitCode === null && child.pid) {
+      await new Promise<void>((resolve) => treeKill(child.pid!, signal, () => resolve()))
+    }
+  }
+
   return buildInstance({
     projectRoot,
-    terminate: async () => {
-      if (child.exitCode === null && child.pid) {
-        await new Promise<void>((resolve) => treeKill(child.pid!, 'SIGKILL', () => resolve()))
-      }
-    },
+    terminate: () => signalTree('SIGKILL'),
+    suspend: () => process.platform === 'win32' ? signalRecorded(projectRoot, 'SIGSTOP') : signalTree('SIGSTOP'),
+    resume: () => process.platform === 'win32' ? signalRecorded(projectRoot, 'SIGCONT') : signalTree('SIGCONT'),
     context: () => output || '(no output captured)',
     exitReason: () => (child.exitCode === null ? null : `exited with ${child.exitCode}`),
-  })
+  }, options)
 }
 
 const recordedPid = async (projectRoot: string): Promise<number | undefined> => {
@@ -340,13 +378,73 @@ const recordedPid = async (projectRoot: string): Promise<number | undefined> => 
   return undefined
 }
 
+// Windows has no SIGSTOP/SIGCONT, and tree-kill maps every signal to forced
+// termination. Suspending the recorded server process keeps its pid live while
+// making the instance probe unresponsive.
+const setWindowsProcessSuspended = async (pid: number, suspended: boolean): Promise<void> => {
+  const method = suspended ? 'NtSuspendProcess' : 'NtResumeProcess'
+  const script = `
+Add-Type -TypeDefinition @'
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+public static class ProcessControl {
+  [DllImport("ntdll.dll")]
+  public static extern int NtSuspendProcess(IntPtr processHandle);
+
+  [DllImport("ntdll.dll")]
+  public static extern int NtResumeProcess(IntPtr processHandle);
+}
+'@
+
+$process = [System.Diagnostics.Process]::GetProcessById(${pid})
+try {
+  $status = [ProcessControl]::${method}($process.Handle)
+  if ($status -ne 0) {
+    throw "${method} failed with NTSTATUS $status"
+  }
+} finally {
+  $process.Dispose()
+}
+`
+
+  await new Promise<void>((resolve, reject) => {
+    cp.execFile('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', script], (err) => {
+      if (err) {
+        reject(err)
+
+        return
+      }
+
+      resolve()
+    })
+  })
+}
+
+const signalRecorded = async (projectRoot: string, signal: 'SIGKILL' | 'SIGSTOP' | 'SIGCONT'): Promise<void> => {
+  const pid = await recordedPid(projectRoot)
+
+  if (!pid) {
+    throw new Error(`No instance pid recorded for ${projectRoot}`)
+  }
+
+  if (process.platform === 'win32' && signal !== 'SIGKILL') {
+    await setWindowsProcessSuspended(pid, signal === 'SIGSTOP')
+
+    return
+  }
+
+  await new Promise<void>((resolve) => treeKill(pid, signal, () => resolve()))
+}
+
 /**
  * Covers the documented `cypress.open()` entry and its option normalization. The Module
  * API inherits this process's env and stdio and exposes no child handle, so this path
  * must mutate env and terminate through the pid in the instance record.
  */
 export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): Promise<TapInstance> => {
-  const projectRoot = await prepareProject(project)
+  const projectRoot = await prepareProject(project, {})
 
   const overrides: Record<string, string | undefined> = {
     CYPRESS_CONFIG_ENV: CONFIG_ENV,
@@ -390,14 +488,11 @@ export const openTapInstanceViaModuleApi = async (project: ProjectFixtureDir): P
     return await buildInstance({
       projectRoot,
       terminate: async () => {
-        const pid = await recordedPid(projectRoot)
-
-        if (pid) {
-          await new Promise<void>((resolve) => treeKill(pid, 'SIGKILL', () => resolve()))
-        }
-
+        await signalRecorded(projectRoot, 'SIGKILL')
         applyEnv(previous)
       },
+      suspend: () => signalRecorded(projectRoot, 'SIGSTOP'),
+      resume: () => signalRecorded(projectRoot, 'SIGCONT'),
       context: () => 'stdio is inherited through the Module API, so the instance\'s own output is above, interleaved with the test output',
       exitReason: () => settled,
     })

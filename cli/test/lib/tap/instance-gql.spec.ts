@@ -13,6 +13,7 @@ const instance: LiveInstanceState = {
   testingType: 'e2e',
   cdpBrowserWsUrl: null,
   browserName: null,
+  browserFamily: null,
   machineId: null,
   userId: null,
 }

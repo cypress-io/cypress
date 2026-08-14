@@ -385,6 +385,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -435,9 +436,23 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['instances'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual([
-        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome' },
-        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null },
+        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true },
+        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null, browserSupported: true },
       ])
+    })
+
+    it('lists an instance running a browser tap cannot drive, marked unsupported', async () => {
+      vi.mocked(listLiveInstances).mockResolvedValue([
+        liveInstance({ pid: 111, cdpBrowserWsUrl: null, browserName: 'Firefox', browserFamily: 'firefox' }),
+      ])
+
+      expect(await tap.start(['instances'], {})).toBe(0)
+      expect(logger.print()).toContain('Firefox (unsupported)')
+
+      logger.reset()
+
+      expect(await tap.start(['instances'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())[0]).toMatchObject({ browserName: 'Firefox', browserSupported: false })
     })
 
     it('reports the testing type as null for an instance that has not chosen one', async () => {
@@ -506,6 +521,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -544,6 +560,21 @@ describe('lib/exec/tap', () => {
 
       expect(await tap.start(['status'], { json: true })).toBe(0)
       expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    // Every other resolution failure is transient — an instance running a browser
+    // tap cannot drive is not, so a poller must hear it rather than wait it out.
+    it('fails instead of reporting "not connected" when the browser is unsupported', async () => {
+      vi.mocked(resolveLiveInstance).mockRejectedValue(new CypressInstanceError('UNSUPPORTED_BROWSER', 'The Cypress session is running on an unsupported browser.\n\nRun Cypress open on a Chromium-based browser to use `cypress tap`.'))
+
+      expect(await tap.start(['status'], {})).toBe(1)
+
+      const output = logger.print()
+
+      expect(output).toContain('running on an unsupported browser')
+      expect(output).toContain('Run Cypress open on a Chromium-based browser')
+      // The message stands on its own, so it is not prefixed with its code.
+      expect(output).not.toContain('UNSUPPORTED_BROWSER')
     })
 
     it('reports "browser not selected" without opening a session when no browser is attached', async () => {
@@ -719,6 +750,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -919,6 +951,7 @@ describe('lib/exec/tap', () => {
       testingType: 'e2e',
       cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
       browserName: 'Chrome',
+      browserFamily: 'chromium',
       machineId: null,
       userId: null,
       ...overrides,
@@ -1057,11 +1090,13 @@ describe('lib/exec/tap', () => {
       expect(resolveInstance).not.toHaveBeenCalled()
     })
 
-    it('forwards the parsed selector and --max-chars to the DOM reader', async () => {
-      let forwarded: unknown
+    // Runs a native frame command against a stubbed browser, returning the
+    // arguments of every in-page call it made: the single-element guard counts
+    // matches first, then the read itself follows.
+    const frameCallArguments = async (argv: string[]): Promise<unknown[]> => {
+      let forwarded: unknown[] = []
 
       vi.mocked(withResolvedAutFrame).mockImplementation(async (_options, read) => {
-        // The single-element guard counts matches first; the read follows.
         const callFunctionOn = vi.fn()
         .mockResolvedValueOnce({ result: { value: { count: 1 } } })
         .mockResolvedValue({ result: { value: { html: '<html/>' } } })
@@ -1071,19 +1106,42 @@ describe('lib/exec/tap', () => {
           client: {
             Page: { createIsolatedWorld: vi.fn().mockResolvedValue({ executionContextId: 1 }) },
             Runtime: { callFunctionOn },
+            DOM: { enable: vi.fn() },
+            Accessibility: { enable: vi.fn(), getFullAXTree: vi.fn().mockResolvedValue({ nodes: [] }) },
           },
         } as unknown as TapSession
 
         await read(session, { frameId: 'f' } as AutFrame)
-        forwarded = callFunctionOn.mock.calls[1][0].arguments
+        forwarded = callFunctionOn.mock.calls.map(([params]) => params.arguments)
 
         return 0
       })
 
-      await tap.start(['dom', '--selector', '.btn', '--max-chars', '50'], {})
+      await tap.start(argv, {})
+
+      return forwarded
+    }
+
+    it('forwards the parsed selector and --max-chars to the DOM reader', async () => {
+      const [, read] = await frameCallArguments(['dom', '--selector', '.btn', '--max-chars', '50'])
 
       // selector and the coerced --max-chars reach the extractor as call arguments.
-      expect(forwarded).toEqual([{ value: '.btn' }, { value: 50 }, { value: 0 }])
+      expect(read).toEqual([{ value: '.btn' }, { value: 50 }, { value: 0 }])
+    })
+
+    it('reads the body when dom is given no selector', async () => {
+      const [guard, read] = await frameCallArguments(['dom'])
+
+      expect(guard).toEqual([{ value: 'body' }])
+      expect(read).toEqual([{ value: 'body' }, { value: 30000 }, { value: 0 }])
+    })
+
+    it('roots the tree at the body when aria is given no selector', async () => {
+      const [guard, read] = await frameCallArguments(['aria'])
+
+      expect(guard).toEqual([{ value: 'body' }])
+      // The body is then resolved as the element the projected tree is rooted at.
+      expect(read).toEqual([{ value: 'body' }, { value: 0 }])
     })
 
     it('rejects `inspect` with no selector, without reading the frame', async () => {
@@ -1182,7 +1240,7 @@ describe('lib/exec/tap', () => {
           --json                print the raw JSON result instead of the human-readable
                                 rendering
           --timeout <ms>        how long to wait on any single call into the running
-                                Cypress, in milliseconds (default 30000)
+                                Cypress, in milliseconds (default: 30000)
           -h, --help            display help for command
 
         Commands:
@@ -1192,11 +1250,11 @@ describe('lib/exec/tap', () => {
           specs [options]       list the specs the running Cypress instance can run,
                                 most recently modified first
           run [options] <spec>  run (or rerun) a spec by its project-relative path
-          dom [options]         read the app-under-test DOM as HTML: the whole page,
+          dom [options]         read the app-under-test DOM as HTML: the page body,
                                 or the one element a selector matches (with its
                                 subtree)
           aria [options]        read the accessibility (ARIA) tree of the
-                                app-under-test frame, or the subtree at a selector
+                                app-under-test page body, or the subtree at a selector
           inspect [options]     inspect the element a selector matches: its tag,
                                 attributes, computed styles, box model, and
                                 accessibility node
@@ -1255,7 +1313,7 @@ describe('lib/exec/tap', () => {
                                          property in full, however long, rather than
                                          the long ones named by their length
           --timeout <ms>                 how long to wait on any single call into the
-                                         running Cypress, in milliseconds (default
+                                         running Cypress, in milliseconds (default:
                                          30000)
           -h, --help                     display help for command
         "

@@ -62,6 +62,7 @@ const makeRecord = (overrides: Partial<ReadyInstanceState> = {}): ReadyInstanceS
     testingType: 'e2e',
     cdpBrowserWsUrl: BROWSER_WS_URL,
     browserName: 'Chrome',
+    browserFamily: 'chromium',
     machineId: null,
     userId: null,
     ...overrides,

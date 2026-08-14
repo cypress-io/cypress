@@ -9,7 +9,25 @@ export interface InstanceRow {
   projectRoot: string
   testingType: 'e2e' | 'component' | null
   browserName: string | null
+  browserAttached?: boolean
+  browserSupported?: boolean
   rendererResponsive?: boolean
+}
+
+// An open browser reads by its name alone only when tap can actually drive it;
+// each way that can fail — a browser tap does not support, one it has lost its
+// connection to, one whose page will not answer — is the state every other
+// command fails in, so each says which.
+const browserState = (instance: InstanceRow): string | null => {
+  if (instance.browserSupported === false) {
+    return 'unsupported'
+  }
+
+  if (instance.browserAttached === false) {
+    return 'not attached'
+  }
+
+  return instance.rendererResponsive === false ? 'not responding' : null
 }
 
 const browserCell = (instance: InstanceRow): string => {
@@ -17,9 +35,9 @@ const browserCell = (instance: InstanceRow): string => {
     return '—'
   }
 
-  // A browser that is attached but whose page will not answer is the state every
-  // other command fails in, so it reads differently from a healthy one.
-  return instance.rendererResponsive === false ? `${instance.browserName} (not responding)` : instance.browserName
+  const state = browserState(instance)
+
+  return state === null ? instance.browserName : `${instance.browserName} (${state})`
 }
 
 const browserColor = (instance: InstanceRow) => {
@@ -27,7 +45,13 @@ const browserColor = (instance: InstanceRow) => {
     return color.muted
   }
 
-  return instance.rendererResponsive === false ? color.aborted : color.pass
+  const state = browserState(instance)
+
+  if (state === null) {
+    return color.pass
+  }
+
+  return state === 'unsupported' ? color.warn : color.aborted
 }
 
 // One row per instance. PID is bold — it's the handle the other tap commands
