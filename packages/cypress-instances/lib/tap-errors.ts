@@ -206,7 +206,6 @@ export const TAP_ERROR_COPY = {
    */
   COMMAND_NOT_FOUND: {
     description: 'No command in this test matched that id.',
-    solution: 'Run `cypress tap reporter --test-id <id>` to list the commands in the test.',
   },
   /** Raised when an unqualified row number matches rows in two different hooks. */
   AMBIGUOUS_COMMAND: {
@@ -414,17 +413,29 @@ export class InvalidValueTapError extends DetailedTapError {
 /** The lookups that answer the same way: a well-formed id that named nothing. */
 type NotFoundTapErrorCode = 'INSTANCE_NOT_FOUND' | 'TEST_NOT_FOUND' | 'ATTEMPT_NOT_FOUND' | 'COMMAND_NOT_FOUND' | 'SNAPSHOT_NOT_FOUND'
 
+interface NotFoundDetail {
+  /** What narrows the search, such as how many attempts the test actually has. */
+  context?: string
+  /**
+   * What to do about it, where the throw site can say it more precisely than the
+   * table can. Rendered as its own paragraph, so an entry supplying one carries no
+   * `solution` of its own rather than answering twice.
+   */
+  remedy?: string
+}
+
 /**
  * A value that was read fine but matched nothing there is. Each entry states what
  * was being looked for and where the real ones are listed; this writes the one line
  * only the throw site can — which option was given what — plus whatever narrows the
- * search, such as how many attempts the test actually has. The option is the
- * subclass's rather than the caller's, since each of these lookups is reached by
- * exactly one flag.
+ * search. The option is the subclass's rather than the caller's, since each of these
+ * lookups is reached by exactly one flag.
  */
 abstract class NotFoundTapError extends DetailedTapError {
-  constructor (code: NotFoundTapErrorCode, option: string, value: unknown, context?: string) {
-    super(code, `Looked for \`${option}\` ${JSON.stringify(value)}.${context ? ` ${context}` : ''}`)
+  constructor (code: NotFoundTapErrorCode, option: string, value: unknown, { context, remedy }: NotFoundDetail = {}) {
+    const looked = `Looked for \`${option}\` ${JSON.stringify(value)}.${context ? ` ${context}` : ''}`
+
+    super(code, remedy ? `${looked}\n\n${remedy}` : looked)
   }
 }
 
@@ -440,21 +451,29 @@ export class TestNotFoundTapError extends NotFoundTapError {
   }
 }
 
+/**
+ * The one lookup whose remedy names a value the caller gave: the test whose commands
+ * to list. Which is why the test id is required rather than optional — the table
+ * holds no `solution` for this code to fall back on, since a `--test-id <id>` a
+ * reader has to substitute themselves is the thing being fixed here.
+ */
 export class CommandNotFoundTapError extends NotFoundTapError {
-  constructor (value: unknown) {
-    super('COMMAND_NOT_FOUND', '--command-id', value)
+  constructor (value: unknown, testId: string) {
+    super('COMMAND_NOT_FOUND', '--command-id', value, {
+      remedy: `Run \`cypress tap reporter --test-id ${testId}\` to list the commands in the test.`,
+    })
   }
 }
 
 export class AttemptNotFoundTapError extends NotFoundTapError {
   constructor (value: unknown, context?: string) {
-    super('ATTEMPT_NOT_FOUND', '--attempt', value, context)
+    super('ATTEMPT_NOT_FOUND', '--attempt', value, { context })
   }
 }
 
 export class SnapshotNotFoundTapError extends NotFoundTapError {
   constructor (value: unknown, context?: string) {
-    super('SNAPSHOT_NOT_FOUND', '--at', value, context)
+    super('SNAPSHOT_NOT_FOUND', '--at', value, { context })
   }
 }
 

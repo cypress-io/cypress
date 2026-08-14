@@ -90,7 +90,7 @@ describe('tap/commands/pin', () => {
     const outcome = await new TapManager(CYPRESS_VERSION).exec('pin', {}, { 'test-id': 'r2', 'command-id': '1', at: 'during' })
 
     expect(outcome).to.deep.eq({
-      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for `--at` "during". This command has these snapshots: 1 before, 2 after.' },
+      error: { code: 'SNAPSHOT_NOT_FOUND', detail: 'Looked for `--at` "during". This command has these snapshots: [before, after]' },
     })
 
     expect(pinSnapshot).not.to.have.been.called

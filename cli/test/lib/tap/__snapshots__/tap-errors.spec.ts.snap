@@ -62,7 +62,7 @@ No command in this test matched that id.
 
 Looked for {color:cyan}--command-id{/color} "9".
 
-Run {color:cyan}cypress tap reporter --test-id <id>{/color} to list the commands in the test."
+Run {color:cyan}cypress tap reporter --test-id r7{/color} to list the commands in the test."
 `;
 
 exports[`lib/tap error rendering catalogue > FRAME_READ_FAILED 1`] = `
@@ -227,7 +227,7 @@ exports[`lib/tap error rendering catalogue > SNAPSHOT_NOT_FOUND 1`] = `
 "> cypress tap pin --test-id r7 --command-id 3 --at middle
 No snapshot of this command matched that name or index.
 
-Looked for {color:cyan}--at{/color} "middle". This command has these snapshots: 1 before, 2 after.
+Looked for {color:cyan}--at{/color} "middle". This command has these snapshots: [before, after]
 
 {color:cyan}--at{/color} takes a snapshot name or a 1-based index; omit it to pin the command’s final state."
 `;

@@ -69,6 +69,18 @@ describe('lib/tap error registry', () => {
     expect(copyless.sort()).to.deep.eq(['MISSING_COMPANION_OPTION', 'SPEC_IN_PROGRESS', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
   })
 
+  // The mirror of that rule. An entry ships without a remedy only where one is
+  // already there to read: in its own specifics, as INVALID_VALUE's range and
+  // COMMAND_NOT_FOUND's populated `--test-id` are, or in the generated help the
+  // invocation failures take in its place.
+  it('holds no remedy only for the codes carrying one somewhere a reader will see it', () => {
+    const remedyless = entries
+    .filter(([, copy]) => !copy.solution)
+    .map(([code]) => code)
+
+    expect(remedyless.sort()).to.deep.eq(['COMMAND_NOT_FOUND', 'INVALID_VALUE', 'MISSING_COMPANION_OPTION', 'UNKNOWN_COMMAND', 'UNKNOWN_OPTION'])
+  })
+
   // Every entry is copy a caller reads, so the house rules apply to all of them at
   // once rather than one assertion per entry. A solution is optional — an entry
   // whose specifics carry the remedy, as INVALID_VALUE's do, ships without one.
@@ -270,10 +282,12 @@ describe('lib/tap error rendering', () => {
 
     vi.mocked(console.error).mockClear()
 
-    expect(await render('COMMAND_NOT_FOUND', new CommandNotFoundTapError('9').detail)).to.eq([
+    // The remedy names the test the caller gave rather than a `<id>` they would have
+    // to substitute, so it is the throw site's to write and arrives as detail.
+    expect(await render('COMMAND_NOT_FOUND', new CommandNotFoundTapError('9', 'r7').detail)).to.eq([
       'No command in this test matched that id.',
       'Looked for --command-id "9".',
-      'Run cypress tap reporter --test-id <id> to list the commands in the test.',
+      'Run cypress tap reporter --test-id r7 to list the commands in the test.',
     ].join('\n\n'))
 
     vi.mocked(console.error).mockClear()
@@ -637,7 +651,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/commands/command.ts; also pin.ts
     COMMAND_NOT_FOUND: {
       invocation: 'cypress tap command --test-id r7 --command-id 9',
-      failure: new CommandNotFoundTapError('9'),
+      failure: new CommandNotFoundTapError('9', 'r7'),
     },
     // packages/app/src/tap/test-state.ts
     AMBIGUOUS_COMMAND: {
@@ -647,7 +661,7 @@ describe('lib/tap error rendering catalogue', () => {
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_NOT_FOUND: {
       invocation: 'cypress tap pin --test-id r7 --command-id 3 --at middle',
-      failure: new SnapshotNotFoundTapError('middle', 'This command has these snapshots: 1 before, 2 after.'),
+      failure: new SnapshotNotFoundTapError('middle', 'This command has these snapshots: [before, after]'),
     },
     // packages/app/src/tap/commands/pin.ts
     SNAPSHOT_UNAVAILABLE: {

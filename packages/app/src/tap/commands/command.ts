@@ -42,7 +42,7 @@ export const commandCommand = defineCommand('command', async (_params, options):
   const resolved = resolveCommand(selection.attempt, command, test)
 
   if (!resolved) {
-    throw new CommandNotFoundTapError(command)
+    throw new CommandNotFoundTapError(command, test)
   }
 
   const snapshotProps = tapManagerDataSource.getSnapshotRunner()?.getSnapshotPropsForLog(test, resolved.logId)

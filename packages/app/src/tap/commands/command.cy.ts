@@ -180,7 +180,7 @@ describe('tap/commands/command', () => {
     stubTests(getSerializedConsolePropsForLog)
 
     expect(await new TapManager(CYPRESS_VERSION).exec('command', {}, { 'test-id': 'r2', 'command-id': '9', attempt: '1' })).to.deep.eq({
-      error: { code: 'COMMAND_NOT_FOUND', detail: 'Looked for `--command-id` "9".' },
+      error: { code: 'COMMAND_NOT_FOUND', detail: 'Looked for `--command-id` "9".\n\nRun `cypress tap reporter --test-id r2` to list the commands in the test.' },
     })
 
     expect(getSerializedConsolePropsForLog).not.to.have.been.called
