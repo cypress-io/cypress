@@ -8,6 +8,7 @@ import {
   createSyntheticIncomingResponse,
 } from './synthetic-express-context'
 import type { SyntheticCypressResponse } from './synthetic-express-context'
+import type { ResponseInterceptionMiddlewareCtx } from './types'
 
 const WIRE_ENCODING_HEADERS = new Set(['content-encoding', 'content-length', 'transfer-encoding'])
 
@@ -147,6 +148,10 @@ export function createSyntheticProxyCodec (
 
       ctx.incomingRes = createSyntheticIncomingResponse(response)
       ctx.incomingResStream = response.bodyStream ?? createRequestBodyStream(response.body)
+
+      if (response.bodySkipped) {
+        (ctx as unknown as ResponseInterceptionMiddlewareCtx).resBodySkipped = true
+      }
 
       return ctx
     },

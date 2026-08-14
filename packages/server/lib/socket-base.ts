@@ -133,8 +133,7 @@ export class SocketBase implements SocketBroadcaster {
       cookie: typeof cookie === 'string' ? { name: cookie } : cookie,
       destroyUpgrade: false,
       serveClient: false,
-      // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     })
   }
 
@@ -207,14 +206,6 @@ export class SocketBase implements SocketBroadcaster {
 
     this.getIos().forEach((io) => {
       io?.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
-        if (socket.conn && socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
-          debug('polling WebSocket request received with non-WebKit browser, disconnecting')
-
-          // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,
-          // we d/c polling clients if we're not in WK. remove once WK ws proxying is fixed
-          return socket.disconnect(true)
-        }
-
         debug('socket connected')
 
         socket.on('disconnecting', (reason) => {

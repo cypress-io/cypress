@@ -11,6 +11,7 @@ import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
+import { shouldSkipResponseBody } from './should-skip-response-body'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -110,6 +111,7 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
+  bodySkipped?: boolean
   bodyStream?: Readable
   fulfilled?: boolean
   originalBodyDigest?: BodyDigest
@@ -606,18 +608,30 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
+    const bodySkipped = shouldSkipResponseBody(event)
     let originalBody: Buffer
 
-    try {
-      originalBody = await this.fetchResponseBody(event, sessionId)
-    } catch (err) {
-      deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
+    if (bodySkipped) {
+      debug('skipping eager body fetch for stream-shaped response %s (resourceType=%s)', event.request.url, event.resourceType)
 
-      await this.safeSend('Fetch.continueResponse', {
-        requestId: event.requestId,
-      }, sessionId)
+      // Stand in an empty body: its digest matches the empty body the
+      // middleware materializes, so an untouched response takes
+      // continueResponse and the browser reads the origin stream directly.
+      // Middleware that sets a body still diffs against this digest and
+      // fulfills.
+      originalBody = Buffer.alloc(0)
+    } else {
+      try {
+        originalBody = await this.fetchResponseBody(event, sessionId)
+      } catch (err) {
+        deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
-      return
+        await this.safeSend('Fetch.continueResponse', {
+          requestId: event.requestId,
+        }, sessionId)
+
+        return
+      }
     }
 
     // reset() may have rejected this flow while the merge/fetch awaited CDP.
@@ -646,6 +660,7 @@ export class CdpFetchTransport {
       bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
       originalBodyDigest: digestBody(originalBody),
       sessionId,
+      ...(bodySkipped ? { bodySkipped: true } : {}),
     })
   }
 
