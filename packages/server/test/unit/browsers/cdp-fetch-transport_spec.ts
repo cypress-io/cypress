@@ -62,15 +62,32 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
   isAUTFrame?: (frameId: string) => Promise<boolean>
   isFromExtraTarget?: boolean
   addPendingUrlWithoutPreRequest?: (url: string) => void
+  onRequestCanceled?: (requestId: string) => void
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
   const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
     isAUTFrame: options.isAUTFrame,
     isFromExtraTarget: options.isFromExtraTarget,
     addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
+    onRequestCanceled: options.onRequestCanceled,
   }, networkExtraInfo as any)
 
   return { transport, networkExtraInfo }
+}
+
+function onLoadingFailed (client: ReturnType<typeof createClient>, event: {
+  requestId: string
+  canceled?: boolean
+  errorText?: string
+}, sessionId?: string) {
+  client.on.withArgs('Network.loadingFailed').getCalls().forEach((call) => {
+    call.args[1]({
+      canceled: false,
+      errorText: 'net::ERR_ABORTED',
+      type: 'Fetch',
+      ...event,
+    } as Protocol.Network.LoadingFailedEvent, sessionId)
+  })
 }
 
 async function startTransport (transport: CdpFetchTransport, client: ReturnType<typeof createClient>) {
@@ -2328,6 +2345,7 @@ describe('CdpFetchTransport', () => {
       expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
+        'Network.loadingFailed',
       ])
 
       expect(networkExtraInfo.start).to.have.been.calledOnce
@@ -2363,6 +2381,7 @@ describe('CdpFetchTransport', () => {
       expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
+        'Network.loadingFailed',
       ])
 
       expect(networkExtraInfo.start).to.have.been.calledTwice
@@ -2794,6 +2813,194 @@ describe('CdpFetchTransport', () => {
         responseHeaders: [],
         body: Buffer.from('mutated').toString('base64'),
       })
+    })
+  })
+
+  describe('browser request cancellation', () => {
+    // Parks a flow in the middleware onion the way pre-request correlation
+    // does, so the cancellation arrives while the request pause is still held.
+    function parkedIntercept () {
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const parked = Promise.withResolvers<any>()
+
+      httpIntercept.use(async () => parked.promise)
+
+      return { httpIntercept, parked }
+    }
+
+    it('aborts a flow still paused in the middleware onion', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub().callsFake(() => {
+        parked.reject(new Error('request destroyed before browser pre-request was received'))
+      })
+
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueRequest')
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      await handled
+
+      expect(onRequestCanceled).to.have.been.calledOnceWith('network-1')
+      // the pause is released rather than left held; the request is already
+      // gone, so CDP rejecting this is expected and swallowed
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+    })
+
+    it('does not strand a continueResponse when the cancellation lands after the request was continued', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueRequest', {
+        requestId: 'fetch-request',
+      })
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      await handled
+
+      // no response pause ever arrived for this flow, so there is no pause left
+      // to release — sending one would target a request id CDP no longer knows
+      expect(client.send).not.to.have.been.calledWith('Fetch.continueResponse')
+      expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
+    })
+
+    it('leaves a genuine network failure to the response error pause', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: false, errorText: 'net::ERR_CONNECTION_REFUSED' })
+
+      expect(onRequestCanceled).not.to.have.been.called
+
+      parked.reject(new Error('unparked'))
+      await tick()
+    })
+
+    it('ignores a cancellation for a request it never paused', async () => {
+      const client = createClient()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { onRequestCanceled })
+
+      await startTransport(transport, client)
+
+      onLoadingFailed(client, { requestId: 'never-paused', canceled: true })
+
+      expect(onRequestCanceled).not.to.have.been.called
+    })
+
+    it('scopes cancellation to the session the request paused on', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }), 'service-worker-session')
+
+      await tick()
+
+      // CDP request ids are only unique per session
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      expect(onRequestCanceled).not.to.have.been.called
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true }, 'service-worker-session')
+
+      expect(onRequestCanceled).to.have.been.calledOnceWith('network-1')
+
+      parked.reject(new Error('unparked'))
+      await tick()
+    })
+
+    it('namespaces the canceled request id for an extra-target transport', async () => {
+      const client = createClient()
+      const { httpIntercept, parked } = parkedIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled, isFromExtraTarget: true })
+      const onRequestPaused = await startTransport(transport, client)
+
+      onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      // must match the id the shared HttpIntercept was handed
+      expect(onRequestCanceled.firstCall.args[0]).to.match(/^extra-\d+:network-1$/)
+
+      parked.reject(new Error('unparked'))
+      await tick()
+    })
+
+    it('stops cancelling once the flow has completed', async () => {
+      const client = createClient()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+
+      expect(onRequestCanceled).not.to.have.been.called
+    })
+
+    it('unsubscribes from Network.loadingFailed on stop', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      await transport.start()
+      await transport.stop()
+
+      expect(client.off).to.have.been.calledWith('Network.loadingFailed')
     })
   })
 })

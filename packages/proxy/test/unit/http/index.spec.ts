@@ -4,6 +4,9 @@ import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 import { HttpIntercept } from '@packages/network-interception'
 import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import { correlateBrowserPreRequest } from '../../../lib/adapters/correlate-browser-pre-request'
+import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
+import RequestMiddleware from '../../../lib/http/request-middleware'
 import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
@@ -593,6 +596,77 @@ describe('http', function () {
       http.handleServiceWorkerClientEvent(event)
 
       expect(handleServiceWorkerClientEventStub).toHaveBeenCalledWith(event)
+    })
+  })
+
+  // The synthetic exchange has no socket, so browser cancellation reaches the
+  // pipeline out of band (the CDP Fetch transport calls abortRequest) rather
+  // than through a dying connection the way the MITM path does.
+  describe('createLegacyProxyPipeline over a synthetic exchange', function () {
+    function createSyntheticPipeline () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => true,
+        networkInterceptionCore: { correlateBrowserPreRequest } as any,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            CorrelateBrowserPreRequest: RequestMiddleware.CorrelateBrowserPreRequest,
+          },
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      return { http, codec, pipeline: http.createLegacyProxyPipeline(codec) }
+    }
+
+    const request = {
+      id: 'network-1',
+      url: 'http://localhost:3500/1mb',
+      method: 'GET',
+      headers: {},
+    }
+
+    it('releases the pending pre-request when the request is aborted', async function () {
+      const { http, codec, pipeline } = createSyntheticPipeline()
+      const next = vi.fn()
+      const handled = pipeline(request, next)
+
+      await vi.waitFor(() => {
+        expect(http.preRequests.pendingRequests.length).toEqual(1)
+      })
+
+      codec.abortRequest('network-1')
+
+      await expect(handled).rejects.toThrow('The browser closed the connection before the response completed.')
+
+      // the pre-request timer is cleared with it — an expiry is what logs the
+      // "Never received pre-request" warning and inflates unmatchedRequests
+      expect(http.preRequests.pendingRequests.length).toEqual(0)
+      expect(next, 'origin fetch').not.toHaveBeenCalled()
+    })
+
+    it('keeps waiting on the pre-request while the request is not aborted', async function () {
+      const { http, pipeline } = createSyntheticPipeline()
+
+      pipeline(request, vi.fn())
+
+      await vi.waitFor(() => {
+        expect(http.preRequests.pendingRequests.length).toEqual(1)
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      expect(http.preRequests.pendingRequests.length).toEqual(1)
     })
   })
 })
