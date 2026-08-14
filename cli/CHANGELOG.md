@@ -34,6 +34,12 @@
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
 ## 15.20.2
+## 15.21.0
+
+**Features:**
+
+- Added the `cypress tap` command, which gives your AI agent direct access to your open-mode Cypress session. It lists the open-mode Cypress sessions running on the machine, starts and reruns a spec, reports a run's status and results, prints a failing test's error and Command Log, and inspects the DOM and accessibility tree of the application under test. Every subcommand prints readable output by default and machine-readable JSON with `--json`. Run `cypress tap --help` for the full list of subcommands. Addresses [#34036](https://github.com/cypress-io/cypress/issues/34036).
+- Added a `CYPRESS_DISABLE_GUEST_TELEMETRY` environment variable, which disables any reporting Cypress sends for non-logged sessions. This includes anonymous usage events within Cypress open-mode and the Cypress CLI. Addressed in [#34540](https://github.com/cypress-io/cypress/pull/34540).
 
 **Bugfixes:**
 

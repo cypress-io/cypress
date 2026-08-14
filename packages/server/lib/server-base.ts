@@ -30,6 +30,8 @@ import { SocketAllowed } from './util/socket_allowed'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
+import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
@@ -84,13 +86,30 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+const _hasValidSessionIdHeader = (req): boolean => {
+  const provided = req.headers[SESSION_ID_HEADER]
+  const current = cypressSessions.getCurrent()?.sessionId
+
+  return Boolean(current) && typeof provided === 'string' && provided === current
+}
+
+export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const ALLOWED_PROXY_BYPASS_URLS = [
     '/',
     `/${namespace}/runner/cypress_runner.css`,
     `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
     `/${namespace}/runner/favicon.ico`,
   ]
+
+  const isCliTapRequest = (trimmedUrl: string, req) => {
+    return trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req)
+  }
+
+  const isAllowedProxyBypass = (trimmedUrl: string, req) => {
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) ||
+      trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
+      isCliTapRequest(trimmedUrl, req)
+  }
 
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
@@ -123,7 +142,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
       return next()
     }
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl, req) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }

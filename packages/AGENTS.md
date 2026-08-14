@@ -47,6 +47,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/telemetry** — OpenTelemetry convenience wrapper for capturing performance spans and usage signals inside Cypress processes.
 - **@packages/icons** — Cypress icon assets (SVG, PNG, ICO) and build scripts that produce browser-consumable image files.
 - **@packages/stderr-filtering** — Utility for tagging and filtering noisy third-party stderr output into `debug` streams.
+- **@packages/agent-info** — Detects whether an AI coding agent invoked the current process, and which one, by fingerprinting environment variables.
 
 ### Build & Snapshot Infrastructure
 

@@ -23,6 +23,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
   afterEach(() => {
     sinon.restore()
     delete process.env.CYPRESS_CRASH_REPORTS
+    delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
     delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
     if (oldNodeEnv) {
@@ -101,6 +102,21 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
     it('does not report error when CYPRESS_CRASH_REPORTS is 0', () => {
       process.env.CYPRESS_CRASH_REPORTS = '0'
+      const error = new Error('test error')
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        studioMethod: 'testMethod',
+      })
+
+      expect(cloudRequestStub).to.not.have.been.called
+    })
+
+    it('does not report error when CYPRESS_DISABLE_GUEST_TELEMETRY is set', () => {
+      process.env.CYPRESS_DISABLE_GUEST_TELEMETRY = '1'
       const error = new Error('test error')
 
       reportStudioError({
