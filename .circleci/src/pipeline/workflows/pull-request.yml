@@ -280,6 +280,81 @@ jobs:
       requires:
         - ready-to-test
 
+  # forceHttp1 (HTTP/1 MITM proxy) coverage on Chrome. The browser (CDP Fetch)
+  # network path is the Chrome-family default, so the regular chromium jobs no
+  # longer touch the MITM proxy — forceHttp1: true is the only way onto it.
+  # Firefox, WebKit, and Electron jobs still run the full MITM path on every
+  # PR, so dedicated chromium coverage is two always-on smoke jobs over the
+  # network-heavy specs.
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-force-http1-smoke
+      context: test-runner:cypress-record-key
+      force-http1: true
+      parallelism: 1
+      record-group-suffix: '-smoke'
+      # mirrors run_driver_suite() in scripts/validate-proxy-middleware-transport.sh,
+      # plus the MITM injection/interception-heavy specs (net_stubbing, security,
+      # redirects, service-worker)
+      spec: cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/csp_headers.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/issues/3890.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/commands/net_stubbing.cy.ts,cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/e2e/service-worker.cy.js
+      requires:
+        - ready-to-test
+  - system-tests-chrome:
+      name: system-tests-chrome-force-http1-smoke
+      context: test-runner:performance-tracking
+      force-http1: true
+      parallelism: 1
+      # proxy-pipeline-focused subset: request/response middleware, https-proxy
+      # CONNECT handling, interception, caching, downloads, service workers
+      spec: test/proxying_spec.ts test/network_error_handling_spec.js test/interception_spec.js test/web_security_spec.js test/service_worker_spec.js test/cache_spec.js test/downloads_spec.ts test/visit_spec.js
+      requires:
+        - system-tests-node-modules-install
+
+  # Full forceHttp1 suites, added on top of the always-on smoke jobs by
+  # Trigger Pipeline -> run-force-http1-tests=true. The expression filter means
+  # they are not queued at all on ordinary PRs, and they reuse this workflow's
+  # build rather than living in their own, which would duplicate
+  # node_modules_install and build.
+  # Not in all-jobs-passed: an investigation run against a known-broken path
+  # should not block the PR.
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-force-http1
+      context: test-runner:cypress-record-key
+      force-http1: true
+      filters: pipeline.parameters.run-force-http1-tests == true
+      requires:
+        - ready-to-test
+  - system-tests-chrome:
+      name: system-tests-chrome-force-http1
+      context: test-runner:performance-tracking
+      force-http1: true
+      filters: pipeline.parameters.run-force-http1-tests == true
+      requires:
+        - system-tests-node-modules-install
+  - run-app-integration-tests-chrome:
+      name: run-app-integration-tests-chrome-force-http1
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      force-http1: true
+      filters: pipeline.parameters.run-force-http1-tests == true
+      requires:
+        - ready-to-test
+  - run-launchpad-integration-tests-chrome:
+      name: run-launchpad-integration-tests-chrome-force-http1
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      force-http1: true
+      filters: pipeline.parameters.run-force-http1-tests == true
+      requires:
+        - ready-to-test
+
   - create-and-trigger-packaging-artifacts:
       context:
         - test-runner:upload
@@ -408,6 +483,8 @@ jobs:
         - system-tests-non-root
         - h2-dual-stack-tests
         - proxy-transport-unit-tests
+        - driver-integration-tests-chrome-force-http1-smoke
+        - system-tests-chrome-force-http1-smoke
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta

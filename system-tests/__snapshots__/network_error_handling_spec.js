@@ -18,11 +18,6 @@ Please start this server and then run Cypress again.
 `
 
 exports['e2e network error handling Cypress does not connect to the upstream proxy for the SNI server request 1'] = `
-Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress.
-
-Remove it from your configuration to use the default network path.
-
-Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1
 
 ====================================================================================================
 

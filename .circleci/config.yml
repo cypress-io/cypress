@@ -34,6 +34,11 @@ parameters:
   percy-enabled:
     type: boolean
     default: false
+  # Opt-in full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy)
+  # path on Chrome. Enable via Trigger Pipeline when investigating that path.
+  run-force-http1-tests:
+    type: boolean
+    default: false
 
 commands:
   persist:
