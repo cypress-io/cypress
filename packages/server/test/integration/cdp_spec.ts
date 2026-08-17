@@ -160,6 +160,36 @@ describe('CDP Clients', () => {
   })
 
   context('reconnect after disconnect', () => {
+    it('reconnects page target clients and restores Runtime bindings', async function () {
+      const reconnect = Promise.withResolvers<void>()
+      const onReconnectAttempt = sinon.stub()
+
+      criClient = await CriClient.create({
+        target: `ws://127.0.0.1:${wsServerPort}`,
+        host: '127.0.0.1',
+        onAsynchronousError: reconnect.reject,
+        onReconnect: reconnect.resolve,
+        onReconnectAttempt,
+      })
+
+      await criClient.send('Runtime.addBinding', { name: 'cypressSendToServer-test' })
+      onMessage.resetHistory()
+
+      await Promise.all([
+        clientDisconnected(),
+        closeWsServer(),
+      ])
+
+      wsSrv = await startWsServer()
+      await reconnect.promise
+
+      expect(onReconnectAttempt).to.have.been.called
+      expect(onMessage).to.have.been.calledWithMatch({
+        method: 'Runtime.addBinding',
+        params: { name: 'cypressSendToServer-test' },
+      })
+    })
+
     it('retries to connect', async () => {
       const stub = sinon.stub()
 

@@ -157,8 +157,7 @@ export class CriClient implements ICriClient {
       local: true,
       useHostName: true,
     }, {
-      // Only automatically reconnect if: this is the root browser cri target (no host), or cy in cy
-      automaticallyReconnect: !this.host && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF,
+      automaticallyReconnect: !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF,
     })
 
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', onAsynchronousError)
