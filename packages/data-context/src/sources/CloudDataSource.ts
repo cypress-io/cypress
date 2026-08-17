@@ -31,7 +31,6 @@ import { pathToArray } from 'graphql/jsutils/Path'
 export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
-const cloudEnv = resolveCloudEnv()
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never
@@ -117,7 +116,7 @@ export class CloudDataSource {
 
   reset () {
     return this.#cloudUrqlClient = createClient({
-      url: `${this.getCloudUrl(cloudEnv)}/test-runner-graphql`,
+      url: `${this.getCloudUrl(resolveCloudEnv())}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
         cacheExchange({

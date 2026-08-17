@@ -181,17 +181,46 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
+function contentTypeOf (entries?: Protocol.Fetch.HeaderEntry[]): string | undefined {
+  const values = entries
+  ?.filter(({ name }) => name.toLowerCase() === 'content-type')
+  .map(({ value }) => value)
+
+  return values?.length ? values.join(', ') : undefined
+}
+
 /**
+ * Fulfill only when continueResponse would leave the Network record out of
+ * sync with what the page received; continue everything else, since
+ * continueResponse preserves the wire semantics (extraInfo events, streaming,
+ * HTTP caching).
+ *
+ * continueResponse applies overrides to the renderer and records status and
+ * header overrides truthfully in Network.responseReceived — with one gap:
+ * mimeType and charset are derived from the WIRE content-type and are not
+ * recomputed for an override. Consumers of the record (e.g. Test Replay
+ * stylesheet handling keys off mimeType) would see the stale value. So when
+ * cy.intercept mutates either of these, the response takes
+ * Fetch.fulfillRequest:
+ *   - the body, which no longer matches the origin bytes
+ *   - the content-type, which mimeType and charset are derived from
+ * Spy-only, status, and other header intercepts stay on continueResponse.
+ * If Chrome ever derives another Network.responseReceived field from a header
+ * without recomputing it for overrides, that header joins the fulfill list.
+ *
  * The intercept pipeline always materializes a body on the response path, so
- * the presence of a body cannot decide fulfill vs continue on its own. Only a
- * body that differs from the origin bytes needs Fetch.fulfillRequest; header,
- * status, and spy-only intercepts release the origin body as it is.
+ * the presence of a body cannot decide fulfill vs continue on its own.
  */
 function encodePausedResponse (
   { originalBodyDigest, ...pausedResponse }: CdpFetchTransportResponse,
   response: CdpFetchHttpResponse,
 ): CdpFetchTransportResponse {
-  const fulfilled = response.body !== undefined && !isOriginBody(response.body, originalBodyDigest)
+  const bodyModified = response.body !== undefined && !isOriginBody(response.body, originalBodyDigest)
+  const middlewareContentType = contentTypeOf(toResponseHeaders(response.headers))
+  const contentTypeModified = middlewareContentType !== undefined
+    && middlewareContentType !== contentTypeOf(pausedResponse.responseHeaders)
+
+  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined)
 
   return {
     ...pausedResponse,
@@ -269,8 +298,21 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.headers = toNetworkHeaders(httpRequest.headers)
       }
 
-      if (httpRequest.body !== undefined) {
+      // The net-stubbing pipeline normalizes every intercepted request to a
+      // string body, so a request the browser paused without one arrives back
+      // here as `''` — indistinguishable from a body a handler emptied. Sending
+      // that as postData makes Chrome attach `Content-Length: 0` to requests
+      // that never had a body (#24407). Only an empty body the pause itself
+      // carried is a real change worth forwarding.
+      if (httpRequest.body !== undefined && (httpRequest.body.length > 0 || transportRequest.postData !== undefined)) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
+
+        // A Buffer body must reach the transport as bytes: the utf8 string
+        // view above is lossy for binary payloads, and Fetch.continueRequest
+        // transmits base64-encoded bytes.
+        if (Buffer.isBuffer(httpRequest.body)) {
+          transportRequest.postDataBuffer = httpRequest.body
+        }
       }
 
       return transportRequest
@@ -292,6 +334,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         bodyStream: transportResponse.bodyStream,
         headers: stripWireEncodingHeaders(toHttpHeaders(transportResponse.responseHeaders)),
         statusCode: transportResponse.responseCode,
+        ...(transportResponse.bodySkipped ? { bodySkipped: true } : {}),
       }
     },
 

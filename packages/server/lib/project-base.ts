@@ -17,6 +17,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
+import { cypressSessions } from './cypress-sessions'
 import type {
   BannersState,
   FoundBrowser,
@@ -45,6 +46,7 @@ import type { StudioInitOptions } from './types/studio'
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
   projectRoot: string
+  blockHosts?: Cypress.ResolvedConfigOptions['blockHosts']
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
@@ -253,6 +255,12 @@ export class ProjectBase extends EE {
       projectRoot: this.projectRoot,
     })
 
+    // Cypress sessions only apply to an interactive (`cypress open`) session that an
+    // external tool can attach to; skip it for headless `cypress run`.
+    if (!cfg.isTextTerminal) {
+      await cypressSessions.addSession({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
+    }
+
     await this.saveState(stateToSave)
 
     if (cfg.isTextTerminal) {
@@ -322,6 +330,7 @@ export class ProjectBase extends EE {
 
     await Promise.all([
       this.server?.close(),
+      cypressSessions.remove(),
     ])
 
     this._isServerOpen = false

@@ -12,6 +12,7 @@ export {
   ProxyCommandLogAdapter,
   createSyntheticProxyCodec,
   createSyntheticExpressContext,
+  toIdentityResponse,
 } from './adapters'
 
 export { createProxyNetworkInterception } from './adapters/create-proxy-network-interception'

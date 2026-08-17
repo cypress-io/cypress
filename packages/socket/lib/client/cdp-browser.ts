@@ -70,7 +70,10 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
     }
 
     await encode([event, uuid, args], this._namespace).then((encoded: any) => {
-      window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
+      // Playwright-exposed bindings return a page-side promise that rejects when the
+      // page or context is torn down mid-send; swallow it so it doesn't surface as an
+      // unhandled rejection in the runner. CDP bindings return undefined synchronously.
+      Promise.resolve(window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))).catch(() => {})
     })
 
     return this

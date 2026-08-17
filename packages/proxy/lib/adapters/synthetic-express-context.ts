@@ -65,6 +65,14 @@ function parseCookieHeader (header?: string | string[]): Record<string, string> 
   }, {})
 }
 
+function parseUrlQuery (url: string): Record<string, string> {
+  try {
+    return Object.fromEntries(new URL(url, 'http://127.0.0.1').searchParams)
+  } catch {
+    return {}
+  }
+}
+
 function serializeCookie (name: string, value: string, options: CookieOptions = {}): string {
   const parts = [`${name}=${encodeURIComponent(value)}`]
   const path = options.path == null ? '/' : options.path
@@ -113,6 +121,11 @@ export type SyntheticCypressResponse = CypressOutgoingResponseLike & {
   getCapturedBody (): Buffer
   getCapturedHeaders (): HttpHeaders
   getCapturedStatusCode (): number
+}
+
+export type SyntheticExpressContext = {
+  req: CypressIncomingRequest
+  res: SyntheticCypressResponse
 }
 
 class SyntheticResponse extends Writable {
@@ -265,14 +278,30 @@ export function createSyntheticIncomingResponse (response: HttpResponse): Incomi
   // Match Node IncomingMessage: response middleware looks up content-encoding,
   // content-type, set-cookie, etc. with lowercase keys.
   incomingRes.headers = lowercaseHeaders(response.headers ?? {})
+  // The browser negotiates the protocol with the origin directly, so there is no
+  // httpVersion to report. Node already leaves it null on an unparsed IncomingMessage.
 
   return incomingRes
 }
 
-export function createSyntheticExpressContext (request: HttpRequest): {
-  req: CypressIncomingRequest
-  res: SyntheticCypressResponse
-} {
+/**
+ * Reproduces what a browser-canceled request leaves behind on the MITM path,
+ * where the proxy socket dies: `req` destroyed and `res` closed. The legacy
+ * pipeline keys its cancellation handling on exactly those two signals
+ * (CorrelateBrowserPreRequest's `close` listener, and the `res.destroyed`
+ * check after the request stage), so nothing else has to know this transport
+ * has no socket to close.
+ */
+export function abortSyntheticExpressContext ({ req, res }: SyntheticExpressContext): void {
+  if (res.destroyed) {
+    return
+  }
+
+  req.destroy()
+  res.destroy()
+}
+
+export function createSyntheticExpressContext (request: HttpRequest): SyntheticExpressContext {
   const req = createRequestBodyStream(request.body) as CypressIncomingRequest
   const headers = lowercaseHeaders(request.headers ?? {})
 
@@ -288,6 +317,13 @@ export function createSyntheticExpressContext (request: HttpRequest): {
   req.isAUTFrame = false
   req.isFromExtraTarget = false
   req.isSyncRequest = false
+  // cy.intercept's request message picks `query` off this req (SERIALIZABLE_REQ_PROPS).
+  // Express provides it on the MITM path; without it the driver-side merge re-derives
+  // it and falsely flags the request as modified.
+  req.query = parseUrlQuery(request.url)
+  // httpVersion is deliberately left unset. There is no browser→proxy hop to report
+  // here, and the protocol the browser negotiates with the origin is not knowable
+  // while the request is paused.
 
   return {
     req,

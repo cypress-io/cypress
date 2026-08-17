@@ -3,12 +3,14 @@ import dayjs from 'dayjs'
 import Promise from 'bluebird'
 
 import { LogUtils } from './log'
+import type { SerializeConsolePropsOptions } from './log'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
-import type { Emissions, TestFilter } from '@packages/types'
+import { RUNNABLE_LOGS, RUNNABLE_PROPS } from '@packages/types'
+import type { Emissions, SerializedTest, TestFilter } from '@packages/types'
 import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
@@ -22,11 +24,6 @@ const TEST_BEFORE_AFTER_RUN_ASYNC_EVENT = 'runner:test:before:after:run:async'
 const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:test:after:run:async'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
-
-const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
-const RUNNABLE_PROPS = [
-  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
-] as const
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -1569,15 +1566,15 @@ export default {
           // In this case, we DON'T need to add the new test attempt as it is already queued to rerun.
           const testRetryThatMatches = test.parent.testsQueue.find((t) => t.id === newTest.id && t._currentRetry === newTest._currentRetry)
 
-          if (!testRetryThatMatches) {
-            test.parent.testsQueue.unshift(newTest)
-          }
-
           // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
           test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
           test._retriedFromAfterEachHook = true
 
-          Cypress.action('runner:retry', wrap(test), test.err)
+          if (!testRetryThatMatches) {
+            test.parent.testsQueue.unshift(newTest)
+
+            Cypress.action('runner:retry', wrap(test), test.err)
+          }
 
           return noFail()
         }
@@ -1908,9 +1905,9 @@ export default {
         return _emissions
       },
 
-      getTestsState (testId?: string) {
+      getTestsState (testId?: string): Record<string, SerializedTest> {
         const id = testId ?? (_test != null ? _test.id : undefined)
-        const tests = {}
+        const tests: Record<string, SerializedTest> = {}
 
         // bail if we dont have a current test
         if (!id) {
@@ -1933,6 +1930,66 @@ export default {
         }
 
         return tests
+      },
+
+      getAllTestsState (): Record<string, SerializedTest> {
+        const tests: Record<string, SerializedTest> = {}
+
+        for (let testRunnable of _tests) {
+          const test = serializeTest(testRunnable)
+
+          // `_titlePath` is only stamped on the normalized runnable copy;
+          // `_tests` holds the raw runnables, so read it off the live runnable.
+          test._titlePath = testRunnable.titlePath()
+
+          test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+
+          tests[test.id] = test
+        }
+
+        return tests
+      },
+
+      getAllTestStates (): Record<string, SerializedTest['state']> {
+        const states: Record<string, SerializedTest['state']> = {}
+
+        for (let testRunnable of _tests) {
+          states[testRunnable.id] = testRunnable.state
+        }
+
+        return states
+      },
+
+      getAllTestsSummary (): Record<string, SerializedTest> {
+        const tests: Record<string, SerializedTest> = {}
+
+        for (let testRunnable of _tests) {
+          const test = wrap(testRunnable) as SerializedTest
+
+          test._titlePath = testRunnable.titlePath()
+
+          test.prevAttempts = _.map(testRunnable.prevAttempts, wrap) as SerializedTest[]
+
+          tests[test.id] = test
+        }
+
+        return tests
+      },
+
+      getTestState (testId: string): SerializedTest | undefined {
+        const testRunnable = getTestById(testId)
+
+        if (!testRunnable) {
+          return undefined
+        }
+
+        const test = serializeTest(testRunnable)
+
+        test._titlePath = testRunnable.titlePath()
+
+        test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+
+        return test
       },
 
       stop () {
@@ -1959,7 +2016,7 @@ export default {
 
         if (!test) return
 
-        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+        const logAttrs = findLogAcrossAttempts(test, logId)
 
         if (logAttrs) {
           if (logAttrs._hasBeenCleanedUp) {
@@ -1972,6 +2029,24 @@ export default {
         return
       },
 
+      getSerializedConsolePropsForLog (testId, logId, options?: SerializeConsolePropsOptions) {
+        if (_skipCollectingLogs) return
+
+        const test = getTestById(testId)
+
+        if (!test) return
+
+        const logAttrs = findLogAcrossAttempts(test, logId)
+
+        if (!logAttrs) return
+
+        if (logAttrs._hasBeenCleanedUp) {
+          return { Message: `The command details and snapshot has been cleaned up to reduce the number of tests in memory.` }
+        }
+
+        return LogUtils.toSerializedConsoleProps(LogUtils.getConsoleProps(logAttrs), options)
+      },
+
       getSnapshotPropsForLog (testId, logId) {
         if (_skipCollectingLogs) return
 
@@ -1979,7 +2054,7 @@ export default {
 
         if (!test) return
 
-        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+        const logAttrs = findLogAcrossAttempts(test, logId)
 
         if (logAttrs) {
           return LogUtils.getSnapshotProps(logAttrs)
@@ -2098,10 +2173,21 @@ const mixinLogs = (test) => {
   })
 }
 
-const serializeTest = (test) => {
+// A retried test keeps each attempt's logs on the attempt that produced them, so
+// a per-log lookup has to search every attempt: the reporter shows the rows of
+// earlier attempts too, and a log of one is only ever found here.
+const findLogAcrossAttempts = (test, logId: string) => {
+  const attempts = [test, ...(test.prevAttempts || [])]
+
+  return _.find(_.flatMap(attempts, (attempt) => attempt.commands || []), (log) => log.id === logId)
+}
+
+const serializeTest = (test): SerializedTest => {
   const wrappedTest = wrapAll(test)
 
   mixinLogs(wrappedTest)
 
-  return wrappedTest
+  // wrapAll assembles the object dynamically from the RUNNABLE_PROPS
+  // allowlist, so its type carries no named properties to check against.
+  return wrappedTest as SerializedTest
 }
