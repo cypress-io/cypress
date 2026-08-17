@@ -46,6 +46,18 @@ describe('lib/privileged-commands/privileged-commands-manager', () => {
       expect(channelOptions).to.include(`scripts: "[\\"/__cypress/tests?p=x',extra:(1),y:'\\"]"`)
     })
 
+    it('preserves backslashes in the spec scripts', async () => {
+      const relativeUrl = `/__cypress/tests?p=cypress\\e2e\\nested\\foo.cy.js`
+      const channelOptions = await getChannelOptions({
+        scripts: [{ relativeUrl }],
+      })
+
+      const scriptsLiteral = channelOptions.match(/\n\s*scripts: (.+),\n/)![1]
+      const parsedScripts = JSON.parse(JSON.parse(scriptsLiteral))
+
+      expect(parsedScripts).to.deep.equal([relativeUrl])
+    })
+
     it('escapes characters that would end the inline script element', async () => {
       const channelOptions = await getChannelOptions({
         browserFamily: '</script><script>doThing()</script>',

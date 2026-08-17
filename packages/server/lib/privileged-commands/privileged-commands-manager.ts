@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import os from 'os'
 import path from 'path'
 import { randomUUID } from 'crypto'
 
@@ -50,13 +49,7 @@ class PrivilegedCommandsManager {
     this.channelKeys[options.url] = key
 
     const script = (await fs.readFileAsync(path.join(__dirname, 'privileged-channel.js'))).toString()
-    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => {
-      if (os.platform() === 'win32') {
-        return relativeUrl.replaceAll('\\', '\\\\')
-      }
-
-      return relativeUrl
-    }))
+    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => relativeUrl))
 
     return `${script}({
       browserFamily: ${serializeForInlineScript(options.browserFamily)},
