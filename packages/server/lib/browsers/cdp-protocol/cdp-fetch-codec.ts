@@ -335,6 +335,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         headers: stripWireEncodingHeaders(toHttpHeaders(transportResponse.responseHeaders)),
         statusCode: transportResponse.responseCode,
         ...(transportResponse.bodySkipped ? { bodySkipped: true } : {}),
+        ...(transportResponse.captureStream ? { captureStream: transportResponse.captureStream } : {}),
       }
     },
 

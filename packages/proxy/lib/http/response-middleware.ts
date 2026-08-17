@@ -48,6 +48,13 @@ interface ResponseMiddlewareProps {
    * network capture adapter so it doesn't record a skipped body as an empty one.
    */
   resBodySkipped?: boolean
+  /**
+   * Set by the synthetic proxy codec when the CDP Fetch transport captured a
+   * side-channel stream of the bytes the browser delivered for a
+   * stream-classified response. Consumed by the network capture adapter so
+   * Replay records those bytes instead of skipping the body.
+   */
+  resCaptureStream?: Readable
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>

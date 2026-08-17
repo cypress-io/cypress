@@ -20,6 +20,13 @@ export type HttpResponse = {
   body?: HttpBody
   bodySkipped?: boolean
   bodyStream?: Readable
+  /**
+   * A live stream of the bytes the browser actually delivered for a
+   * stream-classified response (decoded for CDP capture, fulfilled bytes for
+   * stubbed responses). Threaded through to Test Replay capture separately
+   * from `bodyStream`, which the middleware body path must keep untouched.
+   */
+  captureStream?: Readable
   headers?: HttpHeaders
   statusCode?: number
 }

@@ -614,6 +614,63 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.resBodySkipped).to.be.undefined
   })
 
+  it('copies captureStream onto the ctx as resCaptureStream', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-captured',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const captureStream = Readable.from(['origin'])
+
+    codec.encodeResponse({
+      id: 'network-captured',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodyStream: Readable.from(['']),
+      captureStream,
+    })
+
+    expect(ctx.resCaptureStream).to.equal(captureStream)
+  })
+
+  it('leaves resCaptureStream unset when captureStream is absent', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-not-captured',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    codec.encodeResponse({
+      id: 'network-not-captured',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodyStream: Readable.from(['origin']),
+    })
+
+    expect(ctx.resCaptureStream).to.be.undefined
+  })
+
   it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
     const { ExtractCypressMetadataHeaders } = RequestMiddleware
 

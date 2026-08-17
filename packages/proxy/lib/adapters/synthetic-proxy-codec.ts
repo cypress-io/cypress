@@ -174,6 +174,10 @@ export function createSyntheticProxyCodec (
         (ctx as unknown as ResponseInterceptionMiddlewareCtx).resBodySkipped = true
       }
 
+      if (response.captureStream) {
+        (ctx as unknown as ResponseInterceptionMiddlewareCtx).resCaptureStream = response.captureStream
+      }
+
       return ctx
     },
 

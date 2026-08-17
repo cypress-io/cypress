@@ -1,5 +1,6 @@
 const { expect, sinon } = require('../../spec_helper')
 
+import { Readable } from 'stream'
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
 import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
@@ -405,6 +406,60 @@ describe('CdpFetchTransport', () => {
       })
 
       expect(response.bodySkipped).to.be.true
+    })
+
+    it('copies captureStream from the transport response onto the neutral response', () => {
+      const codec = createCdpFetchCodec()
+
+      codec.decodeRequest({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      const captureStream = new Readable({ read () {} })
+
+      const response = codec.decodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+        bodySkipped: true,
+        captureStream,
+      })
+
+      expect(response.captureStream).to.equal(captureStream)
+    })
+
+    it('leaves captureStream unset on the neutral response when the transport response has none', () => {
+      const codec = createCdpFetchCodec()
+
+      codec.decodeRequest({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      const response = codec.decodeResponse({
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'content-type', value: 'text/html' }],
+      })
+
+      // pins the conditional spread — a `captureStream: undefined` key would
+      // pass a bare undefined check
+      expect(response).to.not.have.property('captureStream')
     })
 
     // SSE relies on this: an unchanged empty body must digest-match the empty
