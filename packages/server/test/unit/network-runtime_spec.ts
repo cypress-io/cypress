@@ -44,6 +44,7 @@ describe('lib/network-runtime', () => {
     networkId?: string
     url?: string
     resourceType?: Protocol.Network.ResourceType
+    requestHeaders?: Record<string, string>
     responseStatusCode?: number
     responseHeaders?: Protocol.Fetch.HeaderEntry[]
   }): Protocol.Fetch.RequestPausedEvent {
@@ -55,7 +56,7 @@ describe('lib/network-runtime', () => {
       request: {
         url: options.url ?? 'https://example.test/',
         method: 'GET',
-        headers: {},
+        headers: options.requestHeaders ?? {},
       },
       responseStatusCode: options.responseStatusCode,
       responseHeaders: options.responseHeaders,
@@ -87,6 +88,32 @@ describe('lib/network-runtime', () => {
     }
 
     await new Promise((resolve) => setImmediate(resolve))
+  }
+
+  // Same "replay every registered Fetch.requestPaused handler" shape as
+  // startCdpRuntime's returned function, for a client not started via it
+  // (e.g. an extra-target client whose handlers register through attachExtraTarget).
+  function wirePausedHandler (client: { on: sinon.SinonStub }) {
+    return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
+      return Promise.all(client.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
+        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void)(event, sessionId)
+      }))
+    }
+  }
+
+  // hasInterceptor: false keeps net-stubbing's before:request subscription
+  // fire-and-forget (planSubscriptions awaits it only for a route with a live
+  // driver-side handler) — exercising the driver round trip is out of scope
+  // for these classification tests, and awaiting it here would hang forever
+  // since there is no driver to answer.
+  const minimalMatchingRoute = (id: string) => {
+    return {
+      id,
+      routeMatcher: { url: '*' },
+      hasInterceptor: false,
+      getFixture: sinon.stub(),
+      matches: 0,
+    } as any
   }
 
   it('createProxyRuntime constructs networkProxy and netStubbingState', () => {
@@ -1098,5 +1125,548 @@ describe('lib/network-runtime', () => {
 
     await expect(attach).to.be.rejectedWith('CDP Fetch runtime has been stopped')
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  it('skips the eager body read for a chunked, unrouted response with no injection/JS/SW signal (#34623)', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-request',
+      networkId: 'network-ndjson-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-request',
+      networkId: 'network-ndjson-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      // no content-length: the chunked, no-route, no-injection shape from #34623
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse to release the stream-classified pause').to.exist
+    expect(continueResponseCall!.args[1]).to.include({ requestId: 'ndjson-request' })
+  })
+
+  it('a matching cy.intercept route forces the same response shape to materialize', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    runtime.netStubbingState.routes.push(minimalMatchingRoute('route-1'))
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-routed-request',
+      networkId: 'network-ndjson-2',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-routed-request',
+      networkId: 'network-ndjson-2',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+  })
+
+  // `times` exhaustion disables a route at request-stage counting, but its
+  // already-matched response still reaches InterceptResponse — the spent
+  // route's handler must see real bytes, not the empty stream stand-in.
+  it('a times-exhausted (disabled) route still forces its response to materialize', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const spentRoute = minimalMatchingRoute('route-spent')
+
+    spentRoute.routeMatcher.times = 1
+    spentRoute.matches = 1
+    spentRoute.disabled = true
+    runtime.netStubbingState.routes.push(spentRoute)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'spent-route-request',
+      networkId: 'network-spent-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'spent-route-request',
+      networkId: 'network-spent-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+  })
+
+  // CDP preserves the browser's header casing; the composed matchable must be
+  // lowercased or header/auth route matchers silently stop matching.
+  it('matches a headers route matcher against browser-cased request headers', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const headerRoute = minimalMatchingRoute('route-headers')
+
+    headerRoute.routeMatcher.headers = { 'x-token': 'abc' }
+    runtime.netStubbingState.routes.push(headerRoute)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'cased-header-request',
+      networkId: 'network-cased-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      requestHeaders: { 'X-Token': 'abc' },
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'cased-header-request',
+      networkId: 'network-cased-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      requestHeaders: { 'X-Token': 'abc' },
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+  })
+
+  it('reads stubbingState.routes live — a route registered after the first stream-classified request still forces the next one to materialize', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const firstHandled = onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-first',
+      networkId: 'network-ndjson-first',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-first',
+      networkId: 'network-ndjson-first',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await firstHandled
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+    client.send.resetHistory()
+    runtime.netStubbingState.routes.push(minimalMatchingRoute('route-2'))
+
+    const secondHandled = onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-second',
+      networkId: 'network-ndjson-second',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'ndjson-second',
+      networkId: 'network-ndjson-second',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await secondHandled
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+  })
+
+  it('does not arm capture for a stream-classified response when no protocol manager is set', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'sse-request',
+      networkId: 'network-sse-1',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'sse-request',
+      networkId: 'network-sse-1',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+  })
+
+  it('arms capture for a stream-classified response once a protocol manager with isProtocolEnabled true is applied after createCdpFetchRuntime returns', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    // Mirrors production: server-base applies the protocol manager to
+    // networkProxy (via setProtocolManager) only after createCdpFetchRuntime
+    // has already returned it.
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'sse-request-armed',
+      networkId: 'network-sse-armed',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'sse-request-armed',
+      networkId: 'network-sse-armed',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    }))
+
+    await flush()
+    await handled
+
+    const armCall = client.send.getCalls().find((call) => call.args[0] === 'Network.streamResourceContent')
+
+    expect(armCall, 'expected Network.streamResourceContent to arm capture').to.exist
+    expect(armCall!.args[1]).to.deep.equal({ requestId: 'network-sse-armed' })
+  })
+
+  it('does not arm capture when the protocol manager reports isProtocolEnabled false', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: false } as any)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'sse-request-disabled',
+      networkId: 'network-sse-disabled',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'sse-request-disabled',
+      networkId: 'network-sse-disabled',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+  })
+
+  it('attachExtraTarget transports share the same classifyBody composition as the main transport', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+
+    const onExtraPaused = wirePausedHandler(extraClient)
+
+    const handled = onExtraPaused(createPausedRequest({
+      requestId: 'extra-ndjson-request',
+      networkId: 'extra-network-ndjson-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onExtraPaused(createPausedRequest({
+      requestId: 'extra-ndjson-request',
+      networkId: 'extra-network-ndjson-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+    extraClient.send.resetHistory()
+    runtime.netStubbingState.routes.push(minimalMatchingRoute('extra-route-1'))
+
+    const handledRouted = onExtraPaused(createPausedRequest({
+      requestId: 'extra-ndjson-routed-request',
+      networkId: 'extra-network-ndjson-2',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onExtraPaused(createPausedRequest({
+      requestId: 'extra-ndjson-routed-request',
+      networkId: 'extra-network-ndjson-2',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handledRouted
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.getResponseBody')
+
+    // shouldCaptureBody parity: with recording on, a stream-classified pause
+    // on the extra target arms capture on the extra target's own client
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
+    runtime.netStubbingState.routes.length = 0
+    extraClient.send.resetHistory()
+
+    const handledArmed = onExtraPaused(createPausedRequest({
+      requestId: 'extra-armed-request',
+      networkId: 'extra-network-armed',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+    }))
+
+    await flush()
+
+    await onExtraPaused(createPausedRequest({
+      requestId: 'extra-armed-request',
+      networkId: 'extra-network-armed',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    }))
+
+    await flush()
+    await handledArmed
+
+    expect(extraClient.send).to.have.been.calledWith('Network.streamResourceContent', {
+      requestId: 'extra-network-armed',
+    })
+
+    await runtime.stop()
+  })
+
+  it('stops arming capture when the protocol manager is cleared mid-run', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    // the other half of the late-binding contract: clearing the manager must
+    // take effect on the very next pause, not at the next runtime start
+    runtime.networkProxy.setProtocolManager(undefined as any)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'sse-request-cleared',
+      networkId: 'network-sse-cleared',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'sse-request-cleared',
+      networkId: 'network-sse-cleared',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+  })
+
+  it('a matched route does not override the stream verdict for an SSE response (rule-1 absoluteness)', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    runtime.netStubbingState.routes.push(minimalMatchingRoute('sse-route'))
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'sse-routed-request',
+      networkId: 'network-sse-routed',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'sse-routed-request',
+      networkId: 'network-sse-routed',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    }))
+
+    await flush()
+    await handled
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
   })
 })

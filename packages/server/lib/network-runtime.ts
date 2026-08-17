@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import type EventEmitter from 'events'
+import type { Protocol } from 'devtools-protocol'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
@@ -18,6 +19,9 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-clie
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { classifyResponseBody } from './browsers/cdp-protocol/classify-response-body'
+import type { ResponseBodyDisposition } from './browsers/cdp-protocol/classify-response-body'
+import { normalizeResourceType } from './browsers/cdp-protocol/normalize-resource-type'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -181,6 +185,44 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     getRenderedHTMLOrigins: () => ({}),
   })
 
+  // Shared by the main transport and every extra-target transport so a popup
+  // can never classify or gate capture differently than the page that opened
+  // it — both pause through the same stubbingState and networkInterceptionCore.
+  //
+  // Deliberately looser than SetMatchingRoutes in two safe-direction ways: it
+  // skips the dev-server exclusion, and it re-matches at response time against
+  // the possibly-handler-mutated request URL. Both can only over-materialize.
+  const classifyBody = (event: Protocol.Fetch.RequestPausedEvent): ResponseBodyDisposition => {
+    return classifyResponseBody(event, {
+      modifyObstructiveCode: deps.config.modifyObstructiveCode,
+      experimentalModifyObstructiveThirdPartyCode: deps.config.experimentalModifyObstructiveThirdPartyCode,
+      hasMatchingRoute: (pausedEvent) => {
+        // `times` exhaustion disables a route during request-stage counting, but
+        // its already-matched response still reaches InterceptResponse — a spent
+        // route's body is still needed, so match as if nothing were disabled.
+        // (debug.routes logs from this re-match report spent routes as matched;
+        // the authoritative match is the request-stage one.)
+        const routes = stubbingState.routes.map((route) => route.disabled ? { ...route, disabled: false } : route)
+
+        // CDP preserves the browser's header casing; route matchers (auth,
+        // headers) expect the middleware's lowercased view.
+        const headers = Object.fromEntries(Object.entries(pausedEvent.request.headers).map(([name, value]) => [name.toLowerCase(), value]))
+
+        return networkInterceptionCore.matchRoutes(routes, {
+          headers,
+          method: pausedEvent.request.method,
+          proxiedUrl: pausedEvent.request.url,
+          resourceType: normalizeResourceType(pausedEvent.resourceType),
+        }).length > 0
+      },
+    })
+  }
+
+  // server-base applies the protocol manager to networkProxy.http after this
+  // factory returns (and may clear it later), so this must read the field
+  // fresh on every call rather than capturing today's value.
+  const shouldCaptureBody = (): boolean => networkProxy.http.protocolManager?.isProtocolEnabled ?? false
+
   // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;
   // CDP Fetch needs its own codec. Share middleware stages, keep intercepts distinct.
   const serveInternalRoutes = createServeInternalRoutesMiddleware({
@@ -259,6 +301,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
     onRequestCanceled,
+    classifyBody,
+    shouldCaptureBody,
   })
 
   // Extra-target transports share networkInterception so they cannot drift from
@@ -297,6 +341,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         isFromExtraTarget: true,
         resolveOriginRedirect,
         onRequestCanceled,
+        classifyBody,
+        shouldCaptureBody,
       })
 
       await extraTransport.start()
