@@ -123,6 +123,11 @@ export type SyntheticCypressResponse = CypressOutgoingResponseLike & {
   getCapturedStatusCode (): number
 }
 
+export type SyntheticExpressContext = {
+  req: CypressIncomingRequest
+  res: SyntheticCypressResponse
+}
+
 class SyntheticResponse extends Writable {
   private readonly kOutHeaders = Symbol('kOutHeaders')
   isInitial: null | boolean = null
@@ -279,10 +284,24 @@ export function createSyntheticIncomingResponse (response: HttpResponse): Incomi
   return incomingRes
 }
 
-export function createSyntheticExpressContext (request: HttpRequest): {
-  req: CypressIncomingRequest
-  res: SyntheticCypressResponse
-} {
+/**
+ * Reproduces what a browser-canceled request leaves behind on the MITM path,
+ * where the proxy socket dies: `req` destroyed and `res` closed. The legacy
+ * pipeline keys its cancellation handling on exactly those two signals
+ * (CorrelateBrowserPreRequest's `close` listener, and the `res.destroyed`
+ * check after the request stage), so nothing else has to know this transport
+ * has no socket to close.
+ */
+export function abortSyntheticExpressContext ({ req, res }: SyntheticExpressContext): void {
+  if (res.destroyed) {
+    return
+  }
+
+  req.destroy()
+  res.destroy()
+}
+
+export function createSyntheticExpressContext (request: HttpRequest): SyntheticExpressContext {
   const req = createRequestBodyStream(request.body) as CypressIncomingRequest
   const headers = lowercaseHeaders(request.headers ?? {})
 

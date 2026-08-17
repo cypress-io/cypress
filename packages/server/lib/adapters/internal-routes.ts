@@ -64,7 +64,7 @@ function normalizeRoute (route: string): string {
   return route.endsWith('/') ? route.slice(0, -1) : route
 }
 
-function matchesPathPrefix (pathname: string, route: string): boolean {
+export function matchesPathPrefix (pathname: string, route: string): boolean {
   const normalizedRoute = normalizeRoute(route)
 
   return pathname === normalizedRoute || pathname.startsWith(`${normalizedRoute}/`)

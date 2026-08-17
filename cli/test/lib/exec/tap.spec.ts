@@ -1,0 +1,1436 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import logger from '../../../lib/logger'
+import { listLiveSessions, resolveLiveSession, resolveSession } from '../../../lib/cypress-sessions'
+import type { LiveSessionSelection, LiveSessionState } from '../../../lib/cypress-sessions'
+import { withTapConnection } from '../../../lib/tap/tap-connection'
+import { FIND_SESSION_TIMEOUT_MS } from '../../../lib/tap/cdp-timeout'
+import { querySessionGraphql } from '../../../lib/tap/session-gql'
+import { tapCliCommands } from '../../../lib/tap/commands'
+import type { TapConnection } from '../../../lib/tap/tap-connection'
+import { withResolvedAutFrame } from '../../../lib/tap/aut/frame'
+import type { AutFrame } from '../../../lib/tap/aut/frame'
+import { buildTapSchema } from '@packages/cypress-sessions'
+import type { TapExecResult, TapSchema } from '@packages/cypress-sessions'
+import { TAP_ERROR_COPY, SessionNotFoundTapError } from '@packages/cypress-sessions'
+import tap from '../../../lib/exec/tap'
+import util from '../../../lib/util'
+import { mockResolved, mockConnection, readySession, resetTapMocks, schema, tapError } from './tap-fixtures'
+
+// vi.mock is hoisted above these imports, so the factories cannot come from
+// ./tap-fixtures — everything they don't cover does.
+vi.mock('../../../lib/tap/tap-connection', async (importActual) => {
+  return { ...await importActual<typeof import('../../../lib/tap/tap-connection')>(), withTapConnection: vi.fn() }
+})
+
+vi.mock('../../../lib/tap/session-gql', () => {
+  return { querySessionGraphql: vi.fn() }
+})
+
+vi.mock('../../../lib/cypress-sessions', async (importActual) => {
+  return {
+    ...await importActual<typeof import('../../../lib/cypress-sessions')>(),
+    listLiveSessions: vi.fn(),
+    resolveLiveSession: vi.fn(),
+    resolveSession: vi.fn(),
+  }
+})
+
+// The AUT-frame reader drives CDP, covered in frame.spec.ts; here we assert only
+// that dom/aria/inspect route to it with their parsed args, so stub it out.
+vi.mock('../../../lib/tap/aut/frame', async (importActual) => {
+  return { ...await importActual<typeof import('../../../lib/tap/aut/frame')>(), withResolvedAutFrame: vi.fn() }
+})
+
+describe('lib/exec/tap', () => {
+  beforeEach(resetTapMocks)
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  describe('dispatching a command', () => {
+    it('fetches the schema, hands the command to exec, prints the unwrapped result, and exits 0', async () => {
+      const call = mockConnection()
+
+      expect(await tap.start(['health'], {})).toBe(0)
+      expect(logger.print()).toBe('ok')
+
+      expect(call.mock.calls).toEqual([
+        ['getSchema'],
+        ['exec', ['health', {}, {}]],
+      ])
+    })
+
+    it('forwards positional args to exec as raw strings keyed by param name, without interpreting them', async () => {
+      const call = mockConnection(schema, { result: { status: 'started' } })
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], {})).toBe(0)
+
+      expect(call).toHaveBeenCalledWith('exec', ['fake-command-for-testing', { spec: 'cypress/e2e/a.cy.js' }, {}])
+    })
+
+    it('forwards parsed options to exec as raw strings, without interpreting them', async () => {
+      const call = mockConnection(schema, { result: { status: 'started' } })
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js', '--browser', 'chrome', '--headed'], {})).toBe(0)
+
+      expect(call).toHaveBeenCalledWith('exec', ['fake-command-for-testing', { spec: 'cypress/e2e/a.cy.js' }, { browser: 'chrome', headed: 'true' }])
+    })
+
+    // The flag it does not take, then the help that lists the ones it does.
+    it('rejects an option the command does not advertise, without reaching exec', async () => {
+      const call = mockConnection()
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js', '--nope'], {})).toBe(1)
+
+      const printed = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(printed).toContain('Unknown option "--nope"')
+      expect(printed).toContain('Usage: cypress tap fake-command-for-testing')
+      expect(call.mock.calls).toEqual([['getSchema']])
+    })
+
+    it('prints non-string results as readable JSON', async () => {
+      mockConnection(schema, { result: { status: 'ok', browsers: 2 } })
+
+      expect(await tap.start(['health'], {})).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'ok', browsers: 2 })
+    })
+
+    const reporterSchema: TapSchema = {
+      ...schema,
+      commands: [
+        ...schema.commands,
+        {
+          name: 'reporter',
+          description: 'render a test’s full reporter view',
+          params: [],
+          options: [{ name: 'test', type: 'string', required: true, description: 'test id' }],
+        },
+      ],
+    }
+
+    const reporterView = {
+      test: { id: 'r2', title: 'loads', fullTitle: 'App > loads', state: 'passed' },
+      hooks: [{ hookId: 'r2', hookName: 'test body' }],
+      sessions: [],
+      agents: [],
+      routes: [],
+      commands: [{ id: 'log-1', name: 'visit', message: '/', state: 'passed', type: 'parent', hookId: 'r2' }],
+    }
+
+    it('prints a command’s human-readable rendering by default when it defines one', async () => {
+      const call = mockConnection(reporterSchema, { result: reporterView })
+
+      expect(await tap.start(['reporter', '--test', 'r2'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['reporter', {}, { test: 'r2' }])
+
+      const output = logger.print()
+
+      expect(output).toContain('App > loads')
+      expect(output).toContain('TEST BODY')
+      expect(output).toContain('visit')
+      expect(() => JSON.parse(output)).toThrow()
+    })
+
+    it('prints the raw JSON result when --json is passed', async () => {
+      mockConnection(reporterSchema, { result: reporterView })
+
+      expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual(reporterView)
+    })
+
+    // For `command`, --json also changes what the session returns — nothing is
+    // withheld from a payload that is not being rendered for reading room — so
+    // the flag is handed over to it. Every other command keeps it to itself.
+    it('forwards --json to the session for a command whose schema declares it', async () => {
+      const consoleProps = { name: 'request', type: 'command', props: { body: 'x'.repeat(2_000) } }
+      const call = mockConnection(buildTapSchema('15.0.0'), { result: { id: '1', consoleProps } })
+
+      expect(await tap.start(['command', '--test-id', 'r2', '--command-id', '1'], { json: true })).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1', 'json': 'true' }])
+      expect(JSON.parse(logger.print()).consoleProps).toEqual(consoleProps)
+    })
+
+    it('does not forward --json for a command whose schema does not declare it', async () => {
+      const call = mockConnection(reporterSchema, { result: reporterView })
+
+      expect(await tap.start(['reporter', '--test', 'r2'], { json: true })).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['reporter', {}, { test: 'r2' }])
+    })
+
+    it('leaves the options alone without --json', async () => {
+      const commandView = { id: '1', name: 'visit', hook: { hookId: 'r2', hookName: 'test body' }, snapshots: [] }
+      const call = mockConnection(buildTapSchema('15.0.0'), { result: commandView })
+
+      expect(await tap.start(['command', '--test-id', 'r2', '--command-id', '1'], {})).toBe(0)
+      expect(call).toHaveBeenCalledWith('exec', ['command', {}, { 'test-id': 'r2', 'command-id': '1' }])
+    })
+
+    it('resolves the target from --session and the cwd, then opens a session against it', async () => {
+      mockConnection()
+      const { session } = mockResolved()
+
+      await tap.start(['health'], { session: 1234 })
+
+      expect(resolveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+      expect(vi.mocked(withTapConnection).mock.calls[0][0]).toBe(session)
+    })
+
+    it('resolves with just the cwd tiebreak when --session is absent', async () => {
+      mockConnection()
+
+      await tap.start(['health'], {})
+
+      expect(resolveSession).toHaveBeenCalledWith({ session: undefined, cwd: process.cwd() })
+    })
+
+    it('renders an app-side domain failure ({ error }) with its code and exits 1', async () => {
+      const call = mockConnection(schema, {
+        error: {
+          code: 'INVALID_ARGUMENTS',
+          detail: '<spec> must be a string, but number was given.',
+        },
+      })
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.INVALID_ARGUMENTS.description)
+      expect(call).toHaveBeenCalledWith('exec', ['fake-command-for-testing', { spec: 'cypress/e2e/a.cy.js' }, {}])
+    })
+
+    it('treats an unrecognizable exec result as a transport failure', async () => {
+      mockConnection(schema, 'not an envelope')
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+    })
+
+    it('treats a malformed error envelope as a transport failure, without crashing on the renderer', async () => {
+      for (const malformed of [{ error: null }, { error: 'boom' }, { error: {} }, { error: { code: 'X' } }]) {
+        logger.reset()
+        mockConnection(schema, malformed)
+
+        expect(await tap.start(['health'], {})).toBe(1)
+        expect(logger.print()).toContain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+      }
+    })
+  })
+
+  describe('coded failures go to stderr', () => {
+    const stderr = (): string => vi.mocked(console.error).mock.calls.flat().join(' ')
+
+    it('prints an app-side domain failure on stderr, leaving stdout clean under --json', async () => {
+      mockConnection(schema, {
+        error: {
+          code: 'INVALID_ARGUMENTS',
+          detail: '<spec> must be a string, but number was given.',
+        },
+      })
+
+      expect(await tap.start(['fake-command-for-testing', 'cypress/e2e/a.cy.js'], { json: true })).toBe(1)
+      expect(stderr()).toContain('<spec> must be a string, but number was given.')
+      expect(console.log).not.toHaveBeenCalled()
+    })
+
+    it('prints a known tap error on stderr, leaving stdout clean under --json', async () => {
+      vi.mocked(withTapConnection).mockRejectedValue(tapError('BINDING_NOT_FOUND', 'the session may still be loading'))
+
+      expect(await tap.start(['health'], { json: true })).toBe(1)
+      expect(stderr()).toContain(TAP_ERROR_COPY.BINDING_NOT_FOUND.description)
+      expect(console.log).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('commander validates the command against the live schema', () => {
+    // The name it has no command for, then the help that lists the ones it has.
+    it('rejects a command the session does not advertise, without reaching exec', async () => {
+      const call = mockConnection()
+
+      expect(await tap.start(['bogus'], {})).toBe(1)
+
+      const printed = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(printed).toContain('Unknown command "bogus"')
+      expect(printed).toContain('Usage: cypress tap [command]')
+      expect(call.mock.calls).toEqual([['getSchema']])
+    })
+
+    it('rejects a missing required positional, without reaching exec', async () => {
+      const call = mockConnection()
+
+      expect(await tap.start(['fake-command-for-testing'], {})).toBe(1)
+
+      const stderr = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(stderr).toContain('"fake-command-for-testing" is missing the required <spec> argument.')
+      // The remedy is the called command's own help, which lists what it takes.
+      expect(stderr).toContain('Usage: cypress tap fake-command-for-testing')
+      expect(call.mock.calls).toEqual([['getSchema']])
+    })
+  })
+
+  describe('help', () => {
+    it('prints the schema-derived overview for a bare invocation and exits 0', async () => {
+      mockConnection()
+
+      expect(await tap.start([], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).toContain('health')
+      expect(logger.print()).toContain('fake-command-for-testing [options] <spec>')
+    })
+
+    // A bare invocation and --help print the same help, so they answer the same.
+    it('answers a bare invocation exactly as it answers --help', async () => {
+      mockConnection()
+      const bareCode = await tap.start([], {})
+      const bareOutput = logger.print()
+
+      logger.reset()
+      mockConnection()
+
+      expect(await tap.start(['--help'], {})).toBe(bareCode)
+      expect(logger.print()).toBe(bareOutput)
+    })
+
+    it('prints the overview and exits 0 for an explicit --help', async () => {
+      mockConnection()
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+    })
+
+    it('leads the help with a banner naming the resolved session', async () => {
+      mockConnection()
+      mockResolved({ session: readySession({ pid: 7777, projectRoot: '/projects/app' }) })
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Target:\n  /projects/app\n  v15.0.0\n  pid:7777')
+    })
+
+    it('lists the CLI-native sessions command at the top of the overview commands', async () => {
+      mockConnection()
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      const help = logger.print()
+
+      expect(help).toContain('sessions')
+      expect(help.indexOf('sessions')).toBeLessThan(help.indexOf('health'))
+    })
+
+    it('notes which session was auto-selected when several were live', async () => {
+      mockConnection()
+      mockResolved({ session: readySession({ pid: 7777 }), reason: 'arbitrary', candidateCount: 3 })
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('3 running sessions matched; targeting pid 7777.')
+      expect(logger.print()).toContain('Pass --session <pid> to target another.')
+    })
+
+    it('omits the multi-session note when only one session was live', async () => {
+      mockConnection()
+      mockResolved({ reason: 'only', candidateCount: 1 })
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).not.toContain('running sessions matched')
+    })
+
+    it('prints a rich per-command help for `<command> --help`, without reaching exec', async () => {
+      const call = mockConnection()
+
+      expect(await tap.start(['fake-command-for-testing', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap fake-command-for-testing')
+      expect(logger.print()).toContain('Arguments:')
+      expect(logger.print()).toContain('spec')
+      expect(logger.print()).toContain('project-relative')
+      expect(logger.print()).toContain('Target:\n  /projects/app\n  v15.0.0')
+      expect(call.mock.calls).toEqual([['getSchema']])
+    })
+
+    it('renders a schema command’s details prose in place of its one-liner for `<command> --help`', async () => {
+      mockConnection({
+        ...schema,
+        commands: [
+          ...schema.commands,
+          {
+            name: 'detailed-command',
+            description: 'a one-line summary for the listing',
+            details: 'A longer, friendlier block of prose\nthat only standalone help shows.',
+            params: [],
+            options: [],
+          },
+        ],
+      } satisfies TapSchema)
+
+      expect(await tap.start(['detailed-command', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('A longer, friendlier block of prose\nthat only standalone help shows.')
+      expect(logger.print()).not.toContain('a one-line summary for the listing')
+    })
+
+    it('fails when help is requested for a command the session does not advertise', async () => {
+      mockConnection()
+
+      expect(await tap.start(['bogus', '--help'], {})).toBe(1)
+      expect(logger.print()).toContain('Unknown command "bogus"')
+      expect(logger.print()).toContain('Usage: cypress tap [command]')
+    })
+
+    it('treats a hidden command as unknown for `<command> --help` and omits it from the listing', async () => {
+      mockConnection({
+        ...schema,
+        commands: [
+          ...schema.commands,
+          { name: 'run-state', description: 'internal poll target', params: [], options: [], hidden: true },
+        ],
+      } satisfies TapSchema)
+
+      expect(await tap.start(['run-state', '--help'], {})).toBe(1)
+      expect(logger.print()).toContain('Unknown command "run-state"')
+      // The listing that follows is the remedy, so a hidden command must not
+      // appear in it either.
+      expect(logger.print()).not.toContain('internal poll target')
+    })
+  })
+
+  describe('the CLI-native sessions command', () => {
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
+      schemaVersion: 1,
+      pid: 54321,
+      projectRoot: '/projects/app',
+      serverPort: 49200,
+      sessionId: 'inst-1',
+      testingType: 'e2e',
+      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
+      browserFamily: 'chromium',
+      machineId: null,
+      userId: null,
+      ...overrides,
+    })
+
+    // Reporting whether the runner page answers takes a session, so this command
+    // opens one — bounded, and only where there is a browser to ask.
+    it('renders the live sessions as a table and exits 0, probing only a session with a browser attached', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
+        liveSession({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
+      ])
+
+      expect(await tap.start(['sessions'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('SESSIONS (2)')
+      expect(output).toContain('111')
+      expect(output).toContain('/projects/app')
+      expect(output).toContain('Chrome')
+      expect(() => JSON.parse(output)).toThrow()
+
+      expect(withTapConnection).toHaveBeenCalledTimes(1)
+    })
+
+    it('bounds the renderer probe with --timeout', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
+
+      expect(await tap.start(['sessions'], { timeout: 5000 })).toBe(0)
+
+      expect(withTapConnection).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), 5000)
+    })
+
+    it('bounds the renderer probe with the find-session default when --timeout is absent', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
+
+      expect(await tap.start(['sessions'], {})).toBe(0)
+
+      expect(withTapConnection).toHaveBeenCalledWith(expect.objectContaining({ pid: 111 }), expect.any(Function), FIND_SESSION_TIMEOUT_MS)
+    })
+
+    it('prints the raw session summaries with --json', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, projectRoot: '/projects/app', testingType: 'e2e', cdpBrowserWsUrl: 'ws://x', browserName: 'Chrome' }),
+        liveSession({ pid: 222, projectRoot: '/projects/other', testingType: 'component', cdpBrowserWsUrl: null, browserName: null }),
+      ])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([
+        { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true },
+        { pid: 222, projectRoot: '/projects/other', testingType: 'component', browserAttached: false, browserName: null, browserSupported: true },
+      ])
+    })
+
+    it('lists a session running a browser tap cannot drive, marked unsupported', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, cdpBrowserWsUrl: null, browserName: 'Firefox', browserFamily: 'firefox' }),
+      ])
+
+      expect(await tap.start(['sessions'], {})).toBe(0)
+      expect(logger.print()).toContain('Firefox (unsupported)')
+
+      logger.reset()
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())[0]).toMatchObject({ browserName: 'Firefox', browserSupported: false })
+    })
+
+    it('reports the testing type as null for a session that has not chosen one', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111, testingType: null })])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())[0].testingType).toBeNull()
+    })
+
+    it('never exposes the internal serverPort', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111, serverPort: 49200 })])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())[0]).not.toHaveProperty('serverPort')
+    })
+
+    it('prints guidance instead of an empty array when no session is live', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([])
+
+      expect(await tap.start(['sessions'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(() => JSON.parse(output)).toThrow()
+      expect(output).toContain('No running Cypress session found')
+      expect(output).toContain('select a testing type')
+    })
+
+    it('forwards --session as the discovery filter', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([])
+
+      await tap.start(['sessions'], { session: 1234 })
+
+      expect(listLiveSessions).toHaveBeenCalledWith({ session: 1234 })
+    })
+
+    it('lists every live session when --session is absent', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([])
+
+      await tap.start(['sessions'], {})
+
+      expect(listLiveSessions).toHaveBeenCalledWith({ session: undefined })
+    })
+
+    it('prints sessions usage for `sessions --help` and exits 0, without enumerating', async () => {
+      expect(await tap.start(['sessions', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap sessions')
+      expect(listLiveSessions).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('exits 1 on an excess positional and never enumerates', async () => {
+      expect(await tap.start(['sessions', 'extra'], {})).toBe(1)
+      expect(listLiveSessions).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('the CLI-native status command', () => {
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
+      schemaVersion: 1,
+      pid: 4242,
+      projectRoot: '/projects/app',
+      serverPort: 49200,
+      sessionId: 'inst-1',
+      testingType: 'e2e',
+      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
+      browserFamily: 'chromium',
+      machineId: null,
+      userId: null,
+      ...overrides,
+    })
+
+    const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
+      const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
+
+      vi.mocked(resolveLiveSession).mockResolvedValue(selection)
+
+      return selection
+    }
+
+    it('reports "not connected" and exits 0 when no session is live', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(tapError('NO_SESSION', 'none'))
+
+      expect(await tap.start(['status'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('not connected')
+      expect(() => JSON.parse(output)).toThrow()
+      // Nothing live means nothing to connect to.
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw status object with --json', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(tapError('NO_SESSION', 'none'))
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    it('reports "not connected" for a stale discovery record too', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(tapError('STALE_SESSION', 'stale'))
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    // A poller watching one pid should read "not connected" once it exits, rather
+    // than flipping to a failure the moment its record goes.
+    it('reports "not connected" when the pid it was given has gone', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(new SessionNotFoundTapError(4321))
+
+      expect(await tap.start(['status'], { session: 4321, json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({ status: 'not connected' })
+    })
+
+    // Every other resolution failure is transient — a session running a browser
+    // tap cannot drive is not, so a poller must hear it rather than wait it out.
+    it('fails instead of reporting "not connected" when the browser is unsupported', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(tapError('UNSUPPORTED_BROWSER'))
+
+      expect(await tap.start(['status'], {})).toBe(1)
+
+      const output = logger.print()
+
+      expect(output).toContain(TAP_ERROR_COPY.UNSUPPORTED_BROWSER.description)
+      expect(output).toContain('Chromium-based browsers only')
+      expect(output).not.toContain('not connected')
+    })
+
+    it('reports "browser not selected" without opening a connection when no browser is attached', async () => {
+      mockLiveResolved(liveSession({ pid: 111, cdpBrowserWsUrl: null, browserName: null }))
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'browser not selected',
+        pid: 111,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: false,
+        browserName: null,
+      })
+
+      // The early lifecycle is reported from discovery alone.
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('reports "spec not selected" with totalSpecs when a browser is attached and on the spec list', async () => {
+      mockLiveResolved(liveSession())
+      mockConnection(schema, { result: { spec: null, totalSpecs: 3 } } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'spec not selected',
+        pid: 4242,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: true,
+        browserName: 'Chrome',
+        totalSpecs: 3,
+      })
+    })
+
+    it('merges the run state, active spec, and results when on a spec', async () => {
+      mockLiveResolved(liveSession())
+      mockConnection(schema, {
+        result: {
+          spec: 'cypress/e2e/login.cy.ts',
+          totalSpecs: 3,
+          state: 'running',
+          startedAt: '2026-07-29T10:15:00.000Z',
+          totalTests: 5,
+          results: { passed: 1, failed: 1, pending: 2, skipped: 1 },
+        },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'running',
+        pid: 4242,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: true,
+        browserName: 'Chrome',
+        totalSpecs: 3,
+        spec: 'cypress/e2e/login.cy.ts',
+        startedAt: '2026-07-29T10:15:00.000Z',
+        totalTests: 5,
+        results: { passed: 1, failed: 1, pending: 2, skipped: 1 },
+      })
+    })
+
+    it('reports "loading" with no verdict and no run to name while the selected spec is still building', async () => {
+      mockLiveResolved(liveSession())
+      mockConnection(schema, {
+        result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'loading', startedAt: null },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'loading',
+        pid: 4242,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: true,
+        browserName: 'Chrome',
+        totalSpecs: 3,
+        spec: 'cypress/e2e/login.cy.ts',
+        startedAt: null,
+      })
+    })
+
+    it('reports a spec that failed to build as failed, carrying the reason', async () => {
+      mockLiveResolved(liveSession())
+      mockConnection(schema, {
+        result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'failed', startedAt: '2026-07-29T10:15:00.000Z', error: 'Error: Webpack Compilation Error' },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        status: 'failed',
+        pid: 4242,
+        projectRoot: '/projects/app',
+        testingType: 'e2e',
+        browserAttached: true,
+        browserName: 'Chrome',
+        totalSpecs: 3,
+        spec: 'cypress/e2e/login.cy.ts',
+        startedAt: '2026-07-29T10:15:00.000Z',
+        error: 'Error: Webpack Compilation Error',
+      })
+    })
+
+    it('reports a null startedAt for a session whose binding does not name the run', async () => {
+      mockLiveResolved(liveSession())
+      mockConnection(schema, {
+        result: { spec: 'cypress/e2e/login.cy.ts', totalSpecs: 3, state: 'passed', totalTests: 1, results: { passed: 1, failed: 0, pending: 0, skipped: 0 } },
+      } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], { json: true })).toBe(0)
+      // An unnamed run is reported as unnamed, so a poller gating on startedAt
+      // never mistakes an older Cypress's verdict for one it can attribute.
+      expect(JSON.parse(logger.print()).startedAt).toBe(null)
+    })
+
+    it('asks the binding for run-state over the connection', async () => {
+      mockLiveResolved(liveSession())
+      const call = mockConnection(schema, { result: { spec: null, totalSpecs: 0 } } satisfies TapExecResult)
+
+      await tap.start(['status'], {})
+
+      expect(call).toHaveBeenCalledWith('exec', ['run-state', {}, {}])
+    })
+
+    it('forwards --session plus the cwd to discovery', async () => {
+      mockLiveResolved(liveSession({ cdpBrowserWsUrl: null }))
+
+      await tap.start(['status'], { session: 1234 })
+
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+    })
+
+    it('exits 1 and renders the failure when the session is unreachable despite a browser', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(withTapConnection).mockRejectedValue(tapError('BINDING_NOT_FOUND', 'the session may still be loading'))
+
+      expect(await tap.start(['status'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.BINDING_NOT_FOUND.description)
+    })
+
+    it('exits 1 and surfaces the binding error when the running Cypress lacks the run-state command', async () => {
+      mockLiveResolved(liveSession())
+      mockConnection(schema, { error: { code: 'UNKNOWN_COMMAND', detail: 'no such command' } } satisfies TapExecResult)
+
+      expect(await tap.start(['status'], {})).toBe(1)
+      expect(logger.print()).toContain('no such command')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+    })
+
+    it('prints status usage for `status --help` and exits 0, without resolving', async () => {
+      expect(await tap.start(['status', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap status')
+      expect(resolveLiveSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('exits 1 on an excess positional and never resolves a session', async () => {
+      expect(await tap.start(['status', 'extra'], {})).toBe(1)
+      expect(resolveLiveSession).not.toHaveBeenCalled()
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('answers an unexpected error as an unknown failure', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockRejectedValue(new Error('boom'))
+
+      expect(await tap.start(['specs'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
+    })
+  })
+
+  describe('the CLI-native specs command', () => {
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
+      schemaVersion: 1,
+      pid: 4242,
+      projectRoot: '/projects/app',
+      serverPort: 49200,
+      sessionId: 'inst-1',
+      testingType: 'e2e',
+      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
+      browserFamily: 'chromium',
+      machineId: null,
+      userId: null,
+      ...overrides,
+    })
+
+    const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
+      const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
+
+      vi.mocked(resolveLiveSession).mockResolvedValue(selection)
+
+      return selection
+    }
+
+    it('renders the live spec list as a headed list and exits 0, without opening a connection', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/a.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/b.cy.ts', gitInfo: null },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('SPECS (2)')
+      expect(output).toContain('cypress/e2e/a.cy.ts')
+      expect(output).toContain('2 hours ago')
+      expect(() => JSON.parse(output)).toThrow()
+
+      // The spec list comes from the session's data layer, not the browser.
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw spec entries (with git timestamps) via --json', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/a.cy.ts', gitInfo: { lastModifiedHumanReadable: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/b.cy.ts', gitInfo: null },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+      // git's last-modified (human-readable + raw timestamp) rides along when
+      // present, omitted when the spec has none.
+      expect(JSON.parse(logger.print())).toEqual([
+        { relativePath: 'cypress/e2e/a.cy.ts', lastModified: '2 hours ago', lastModifiedTimestamp: '2026-07-24 09:00:00 -0500' },
+        { relativePath: 'cypress/e2e/b.cy.ts' },
+      ])
+    })
+
+    // The data layer returns specs in path order; an agent wants the one it just
+    // edited first. The two timestamp shapes both appear in practice — git's `%ci`
+    // (`-0500`) and, for a file git has no commit for, a dayjs ctime (`-05:00`) —
+    // and offsets differ, so they are compared as instants rather than as text.
+    it('orders specs most recently modified first, listing specs git knows nothing about last', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          { relative: 'cypress/e2e/older.cy.ts', gitInfo: { lastModifiedTimestamp: '2026-07-20 09:00:00 -0500' } },
+          { relative: 'cypress/e2e/untracked-first.cy.ts', gitInfo: null },
+          // 09:30 -0500 is 14:30Z — later than the 15:00 +0200 (13:00Z) below,
+          // which text ordering would get backwards.
+          { relative: 'cypress/e2e/newest.cy.ts', gitInfo: { lastModifiedTimestamp: '2026-07-24 09:30:00 -05:00' } },
+          { relative: 'cypress/e2e/untracked-second.cy.ts', gitInfo: null },
+          { relative: 'cypress/e2e/middle.cy.ts', gitInfo: { lastModifiedTimestamp: '2026-07-24 15:00:00 +0200' } },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+
+      expect(JSON.parse(logger.print()).map((spec: { relativePath: string }) => spec.relativePath)).toEqual([
+        'cypress/e2e/newest.cy.ts',
+        'cypress/e2e/middle.cy.ts',
+        'cypress/e2e/older.cy.ts',
+        'cypress/e2e/untracked-first.cy.ts',
+        'cypress/e2e/untracked-second.cy.ts',
+      ])
+    })
+
+    it('lists specs even when the session has no browser attached', async () => {
+      mockLiveResolved(liveSession({ cdpBrowserWsUrl: null }))
+      vi.mocked(querySessionGraphql).mockResolvedValue({
+        currentProject: { specs: [{ relative: 'cypress/e2e/a.cy.ts' }] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/a.cy.ts' }])
+    })
+
+    it('normalizes OS-native (Windows) spec paths to POSIX so they match run/status', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({
+        currentProject: { specs: [{ relative: 'cypress\\e2e\\win.cy.ts', gitInfo: null }] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([{ relativePath: 'cypress/e2e/win.cy.ts' }])
+    })
+
+    it('queries the resolved session with the TapSpecs operation', async () => {
+      const { session } = mockLiveResolved(liveSession())
+
+      vi.mocked(querySessionGraphql).mockResolvedValue({ currentProject: { specs: [] } })
+
+      await tap.start(['specs'], {})
+
+      expect(querySessionGraphql).toHaveBeenCalledWith(session, expect.objectContaining({ operationName: 'TapSpecs' }))
+    })
+
+    it('forwards --session plus the cwd to discovery', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({ currentProject: { specs: [] } })
+
+      await tap.start(['specs'], { session: 1234 })
+
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+    })
+
+    it('renders an empty list when the session has no project open', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({ currentProject: null })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual([])
+    })
+
+    it('drops malformed spec entries rather than rendering junk', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockResolvedValue({
+        currentProject: { specs: [
+          null,
+          { relative: 42 },
+          {},
+          { relative: 'cypress/e2e/no-git.cy.ts', gitInfo: { lastModifiedHumanReadable: 42, lastModifiedTimestamp: 42 } },
+          { relative: 'cypress/e2e/ok.cy.ts', gitInfo: { lastModifiedHumanReadable: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' } },
+        ] },
+      })
+
+      expect(await tap.start(['specs'], { json: true })).toBe(0)
+      // Non-string git fields are dropped, not rendered as junk — which leaves the
+      // entry with no usable time, so it orders after the one that has one.
+      expect(JSON.parse(logger.print())).toEqual([
+        { relativePath: 'cypress/e2e/ok.cy.ts', lastModified: 'yesterday', lastModifiedTimestamp: '2026-07-23 10:00:00 -0500' },
+        { relativePath: 'cypress/e2e/no-git.cy.ts' },
+      ])
+    })
+
+    it('renders the discovery failure and exits 1 when no session is live', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['specs'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.NO_SESSION.description)
+      expect(querySessionGraphql).not.toHaveBeenCalled()
+    })
+
+    it('renders a known data-layer failure and exits 1', async () => {
+      mockLiveResolved(liveSession())
+      vi.mocked(querySessionGraphql).mockRejectedValue(tapError('GRAPHQL_UNREACHABLE', 'Could not reach the session to run TapSpecs: socket hang up'))
+
+      expect(await tap.start(['specs'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.GRAPHQL_UNREACHABLE.description)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.GRAPHQL_UNREACHABLE.solution)
+    })
+
+    it('prints specs usage for `specs --help` and exits 0, without resolving', async () => {
+      expect(await tap.start(['specs', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap specs')
+      expect(resolveLiveSession).not.toHaveBeenCalled()
+      expect(querySessionGraphql).not.toHaveBeenCalled()
+    })
+
+    it('exits 1 on an excess positional and never resolves a session', async () => {
+      expect(await tap.start(['specs', 'extra'], {})).toBe(1)
+      expect(resolveLiveSession).not.toHaveBeenCalled()
+      expect(querySessionGraphql).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('the CLI-native run command', () => {
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
+      schemaVersion: 1,
+      pid: 4242,
+      projectRoot: '/projects/app',
+      serverPort: 49200,
+      sessionId: 'inst-1',
+      testingType: 'e2e',
+      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+      browserName: 'Chrome',
+      browserFamily: 'chromium',
+      machineId: null,
+      userId: null,
+      ...overrides,
+    })
+
+    const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
+      const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
+
+      vi.mocked(resolveLiveSession).mockResolvedValue(selection)
+
+      return selection
+    }
+
+    // The absolute path deliberately disagrees with projectRoot + relative, proving
+    // the CLI sends the session's own absolute path rather than resolving one.
+    const loginSpec = { relative: 'cypress/e2e/login.cy.ts', absolute: '/disk/real-project/cypress/e2e/login.cy.ts' }
+
+    const launched = { __typename: 'RunSpecResponse', testingType: 'e2e', browser: { displayName: 'Chrome' }, spec: { relative: 'cypress/e2e/login.cy.ts' } }
+
+    const mockSessionGraphql = ({ specs = [loginSpec], runSpec = launched }: { specs?: unknown[], runSpec?: unknown } = {}) => {
+      vi.mocked(querySessionGraphql).mockImplementation(async (_session, operation) => {
+        return operation.operationName === 'TapSpecs' ? { currentProject: { specs } } : { runSpec }
+      })
+    }
+
+    it('triggers the run and renders the launch outcome, without opening a connection', async () => {
+      mockLiveResolved(liveSession())
+      mockSessionGraphql()
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
+
+      const output = logger.print()
+
+      expect(output).toContain('cypress/e2e/login.cy.ts')
+      expect(output).toContain('e2e')
+      expect(output).toContain('Chrome')
+      expect(() => JSON.parse(output)).toThrow()
+
+      // The run is driven from the session's data layer, not over a CDP connection.
+      expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    it('prints the raw launch outcome with --json', async () => {
+      mockLiveResolved(liveSession())
+      mockSessionGraphql()
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        spec: 'cypress/e2e/login.cy.ts',
+        testingType: 'e2e',
+        browser: 'Chrome',
+      })
+    })
+
+    it('sends the matched spec\'s session-reported absolute path to the TapRunSpec operation', async () => {
+      const { session } = mockLiveResolved(liveSession())
+
+      mockSessionGraphql()
+
+      await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})
+
+      // The mutation gets a launch-sized timeout: it can wait on a browser
+      // launch and a testing-type switch, unlike ordinary data queries.
+      expect(querySessionGraphql).toHaveBeenCalledWith(session, expect.objectContaining({
+        operationName: 'TapRunSpec',
+        variables: { specPath: '/disk/real-project/cypress/e2e/login.cy.ts' },
+      }), 60_000)
+    })
+
+    it('matches an OS-native (Windows) relative path from the session against the POSIX input', async () => {
+      const { session } = mockLiveResolved(liveSession())
+
+      mockSessionGraphql({ specs: [{ relative: 'cypress\\e2e\\login.cy.ts', absolute: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' }] })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(0)
+      expect(querySessionGraphql).toHaveBeenCalledWith(session, expect.objectContaining({
+        operationName: 'TapRunSpec',
+        variables: { specPath: 'C:\\projects\\app\\cypress\\e2e\\login.cy.ts' },
+      }), 60_000)
+    })
+
+    it('fails with SPEC_NOT_FOUND when the spec is not in the session\'s list, without triggering a run', async () => {
+      mockLiveResolved(liveSession())
+      mockSessionGraphql({ specs: [{ relative: 'cypress/e2e/other.cy.ts', absolute: '/disk/real-project/cypress/e2e/other.cy.ts' }] })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.SPEC_NOT_FOUND.description)
+      expect(logger.print()).toContain('Looked for "cypress/e2e/login.cy.ts".')
+      expect(querySessionGraphql).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ operationName: 'TapRunSpec' }))
+    })
+
+    it('surfaces a RunSpecError with the session\'s own code and message, exiting 1', async () => {
+      mockLiveResolved(liveSession())
+      mockSessionGraphql({
+        runSpec: { __typename: 'RunSpecError', code: 'NO_SPEC_PATTERN_MATCH', detailMessage: 'Unable to determine testing type, spec does not match any configured specPattern' },
+      })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.SPEC_NOT_FOUND.description)
+      expect(logger.print()).toContain('Unable to determine testing type, spec does not match any configured specPattern')
+    })
+
+    it('exits 1 when the session returns no run result', async () => {
+      mockLiveResolved(liveSession())
+      mockSessionGraphql({ runSpec: null })
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.SPEC_START_FAILED.description)
+    })
+
+    it('forwards --session plus the cwd to discovery', async () => {
+      mockLiveResolved(liveSession())
+      mockSessionGraphql()
+
+      await tap.start(['run', 'cypress/e2e/login.cy.ts'], { session: 1234 })
+
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+    })
+
+    it('renders the discovery failure and exits 1 when no session is live', async () => {
+      vi.mocked(resolveLiveSession).mockRejectedValue(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.NO_SESSION.description)
+      expect(querySessionGraphql).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('the CLI-native frame commands (dom/aria/inspect)', () => {
+    it('routes dom to the AUT-frame reader with the top-level options and returns its exit code', async () => {
+      vi.mocked(withResolvedAutFrame).mockResolvedValue(0)
+
+      expect(await tap.start(['dom', '--selector', '.foo'], { session: 7 })).toBe(0)
+
+      expect(withResolvedAutFrame).toHaveBeenCalledTimes(1)
+      expect(vi.mocked(withResolvedAutFrame).mock.calls[0][0]).toEqual({ session: 7 })
+      // A native command never consults the running session's schema.
+      expect(resolveSession).not.toHaveBeenCalled()
+    })
+
+    // Runs a native frame command against a stubbed browser, returning the
+    // arguments of every in-page call it made: the single-element guard counts
+    // matches first, then the read itself follows.
+    const frameCallArguments = async (argv: string[]): Promise<unknown[]> => {
+      let forwarded: unknown[] = []
+
+      vi.mocked(withResolvedAutFrame).mockImplementation(async (_options, read) => {
+        const callFunctionOn = vi.fn()
+        .mockResolvedValueOnce({ result: { value: { count: 1 } } })
+        .mockResolvedValue({ result: { value: { html: '<html/>' } } })
+        const connection = {
+          call: vi.fn(),
+          sessionId: 'S1',
+          client: {
+            Page: { createIsolatedWorld: vi.fn().mockResolvedValue({ executionContextId: 1 }) },
+            Runtime: { callFunctionOn },
+            DOM: { enable: vi.fn() },
+            Accessibility: { enable: vi.fn(), getFullAXTree: vi.fn().mockResolvedValue({ nodes: [] }) },
+          },
+        } as unknown as TapConnection
+
+        await read(connection, { frameId: 'f' } as AutFrame)
+        forwarded = callFunctionOn.mock.calls.map(([params]) => params.arguments)
+
+        return 0
+      })
+
+      await tap.start(argv, {})
+
+      return forwarded
+    }
+
+    it('forwards the parsed selector and --max-chars to the DOM reader', async () => {
+      const [, read] = await frameCallArguments(['dom', '--selector', '.btn', '--max-chars', '50'])
+
+      // selector and the coerced --max-chars reach the extractor as call arguments.
+      expect(read).toEqual([{ value: '.btn' }, { value: 50 }, { value: 0 }])
+    })
+
+    it('reads the body when dom is given no selector', async () => {
+      const [guard, read] = await frameCallArguments(['dom'])
+
+      expect(guard).toEqual([{ value: 'body' }])
+      expect(read).toEqual([{ value: 'body' }, { value: 30000 }, { value: 0 }])
+    })
+
+    it('roots the tree at the body when aria is given no selector', async () => {
+      const [guard, read] = await frameCallArguments(['aria'])
+
+      expect(guard).toEqual([{ value: 'body' }])
+      // The body is then resolved as the element the projected tree is rooted at.
+      expect(read).toEqual([{ value: 'body' }, { value: 0 }])
+    })
+
+    it('rejects `inspect` with no selector, without reading the frame', async () => {
+      expect(await tap.start(['inspect'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain('"inspect" is missing the required --selector option.')
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('rejects excess positionals for dom, without reading the frame', async () => {
+      expect(await tap.start(['dom', '.a', '.b'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain('2 arguments were passed to "dom", but it takes none.')
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('rejects an option the command does not advertise, without reading the frame', async () => {
+      expect(await tap.start(['aria', '--nope'], {})).toBe(1)
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+
+    it('prints per-command usage for `<command> --help` and exits 0, without reading the frame', async () => {
+      for (const [name, heading] of [['dom', 'Usage: cypress tap dom'], ['aria', 'Usage: cypress tap aria'], ['inspect', 'Usage: cypress tap inspect']]) {
+        logger.reset()
+
+        expect(await tap.start([name, '--help'], {})).toBe(0)
+        expect(logger.print()).toContain(heading)
+      }
+
+      expect(withResolvedAutFrame).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('the schema handshake', () => {
+    it('rejects an unrecognizable schema', async () => {
+      mockConnection('not a schema')
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
+    })
+
+    it('rejects a future protocol version, telling the user to update the CLI', async () => {
+      mockConnection({ ...schema, schemaVersion: 2 })
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain('newer than this CLI')
+      expect(logger.print()).toContain('Update the CLI')
+    })
+
+    it('rejects an older protocol version, telling the user to update the running Cypress', async () => {
+      mockConnection({ ...schema, schemaVersion: 0 })
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain('older than this CLI')
+      expect(logger.print()).toContain('Update Cypress')
+    })
+
+    // The schema versions the handshake compares say nothing to whoever has to
+    // update one of the two, so the failure names the Cypress versions instead.
+    it('names both Cypress versions, whichever side is behind', async () => {
+      for (const schemaVersion of [2, 0]) {
+        logger.reset()
+        mockConnection({ ...schema, cypressVersion: '15.0.0', schemaVersion })
+
+        expect(await tap.start(['health'], {})).toBe(1)
+        expect(logger.print(), `schemaVersion ${schemaVersion}`).toContain(`running Cypress v15.0.0; this CLI is v${util.pkgVersion()}`)
+      }
+    })
+  })
+
+  describe('failure rendering', () => {
+    const failResolve = (err: unknown) => vi.mocked(resolveSession).mockRejectedValue(err)
+    const failSession = (err: unknown) => vi.mocked(withTapConnection).mockRejectedValue(err)
+
+    it('renders discovery errors with their code and exits 1', async () => {
+      failResolve(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.NO_SESSION.description)
+    })
+
+    it('renders a known transport failure as its mapped description and solution, and exits 1', async () => {
+      mockConnection()
+      failSession(tapError('CDP_UNREACHABLE', 'Could not open a debugging connection to the browser: socket hang up'))
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.CDP_UNREACHABLE.description)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.CDP_UNREACHABLE.solution)
+    })
+
+    it('renders the binding-not-found failure as its mapped guidance', async () => {
+      mockConnection()
+      failSession(tapError('BINDING_NOT_FOUND', 'Failed to connect to the runner page.'))
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.BINDING_NOT_FOUND.description)
+    })
+
+    it('falls back to the baked-in CLI command help when no session is found and help was wanted', async () => {
+      failResolve(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toMatchInlineSnapshot(`
+        "Usage: cypress tap [command] [args...] [options]
+
+        Interacts with a running Cypress session
+
+        Options:
+          -s, --session <pid>   target a specific running Cypress session by its server
+                                process id (pid)
+          --json                print the raw JSON result instead of the human-readable
+                                rendering
+          --timeout <ms>        how long to wait on any single call into the running
+                                Cypress, in milliseconds (default: 30000)
+          -h, --help            display help for command
+
+        Commands:
+          sessions [options]    list the running Cypress sessions this CLI can reach
+          status [options]      report where a running Cypress session is in its
+                                lifecycle
+          specs [options]       list the specs the running Cypress session can run,
+                                most recently modified first
+          run [options] <spec>  run (or rerun) a spec by its project-relative path
+          dom [options]         read the app-under-test DOM as HTML: the page body,
+                                or the one element a selector matches (with its
+                                subtree)
+          aria [options]        read the accessibility (ARIA) tree of the
+                                app-under-test page body, or the subtree at a selector
+          inspect [options]     inspect the element a selector matches: its tag,
+                                attributes, computed styles, box model, and
+                                accessibility node
+          command [options]     detail one command log entry of a test — its reporter
+                                row, the DOM snapshots pinnable on it, and its console
+                                properties
+          reporter [options]    render a test’s full reporter view — its routes,
+                                hooks, and command log — or, without --test-id, the
+                                spec-level overview: the spec’s stats and every suite’s
+                                tests
+          pin [options]         pin a command’s DOM snapshot into the live
+                                app-under-test frame so the dom/aria/inspect commands
+                                can read it; pass --clear to release
+        "
+      `)
+    })
+
+    it('lists both native and schema commands when an unknown command is requested offline', async () => {
+      failResolve(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['instancs', '--help'], {})).toBe(1)
+
+      const help = logger.print()
+
+      expect(help).toContain('Unknown command "instancs"')
+      expect(help).toContain('sessions')
+      expect(help).toContain('specs')
+    })
+
+    it('renders the baked-in per-command help when no session is found', async () => {
+      failResolve(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['command', '--help'], {})).toBe(0)
+      expect(logger.print()).toMatchInlineSnapshot(`
+        "Usage: cypress tap command [options]
+
+        detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties
+
+        Options:
+          -t, --test-id <test-id>        test id, as listed by the reporter command
+          -c, --command-id <command-id>  command id, as listed by the reporter command
+                                         — a row number (test body first when
+                                         duplicated), an e-prefixed event id, or
+                                         hook-qualified like "h1:3"
+          -a, --attempt <attempt>        1-based attempt (attempt 1 = first run);
+                                         defaults to the latest
+          -d, --depth <depth>            how many levels of nested console properties
+                                         to expand before summarizing the rest as "{n
+                                         keys}" / "[n items]": a number or "all"
+                                         (default 3, and a section over 8 rows folds at
+                                         any depth unless this is passed)
+          -s, --session <pid>            target a specific running Cypress session by
+                                         its server process id (pid)
+          --json                         print the raw JSON result instead of the
+                                         human-readable rendering — every console
+                                         property in full, however long, rather than
+                                         the long ones named by their length
+          --timeout <ms>                 how long to wait on any single call into the
+                                         running Cypress, in milliseconds (default:
+                                         30000)
+          -h, --help                     display help for command
+        "
+      `)
+    })
+
+    it('falls back to generic help (exit 0) for a bare invocation with no session found', async () => {
+      failResolve(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start([], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+    })
+
+    it('falls back to generic help for --help when a session is up but has no browser', async () => {
+      failResolve(tapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.NO_BROWSER_ATTACHED.description)
+    })
+
+    it('falls back to generic help for `<command> --help` when a session is up but has no browser', async () => {
+      failResolve(tapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+
+      expect(await tap.start(['run', '--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.NO_BROWSER_ATTACHED.description)
+    })
+
+    it('falls back to generic help for --help when the matched session is stale', async () => {
+      failResolve(tapError('STALE_SESSION', 'Cypress was previously running, but is no longer responding.'))
+
+      expect(await tap.start(['--help'], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.STALE_SESSION.description)
+    })
+
+    it('falls back to generic help (exit 0) for a bare invocation when a session is up but has no browser', async () => {
+      failResolve(tapError('NO_BROWSER_ATTACHED', 'Cypress is running (pid 4242, /projects/app), but no test browser is open. Open a browser in Cypress and try again.'))
+
+      expect(await tap.start([], {})).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.NO_BROWSER_ATTACHED.description)
+    })
+
+    it('still surfaces the discovery error when an actual command was requested', async () => {
+      failResolve(tapError('NO_SESSION', 'No running Cypress was found.'))
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(logger.print()).toContain(TAP_ERROR_COPY.NO_SESSION.description)
+    })
+
+    // Help is answerable without a session, so naming a pid that no longer exists
+    // must not cost the caller the listing it asked for.
+    it('falls back to generic help for --help when the named session is not found', async () => {
+      failResolve(new SessionNotFoundTapError(4321))
+
+      expect(await tap.start(['--help'], { session: 4321 })).toBe(0)
+      expect(logger.print()).toContain('Usage: cypress tap')
+      expect(logger.print()).not.toContain(TAP_ERROR_COPY.SESSION_NOT_FOUND.description)
+    })
+
+    it('reports the pid it was given when the named session is not found', async () => {
+      failResolve(new SessionNotFoundTapError(4321))
+
+      expect(await tap.start(['health'], { session: 4321 })).toBe(1)
+
+      const printed = vi.mocked(console.error).mock.calls.flat().join(' ')
+
+      expect(printed).toContain(TAP_ERROR_COPY.SESSION_NOT_FOUND.description)
+      expect(printed).toContain('Looked for --session 4321')
+    })
+
+    it('answers an unexpected error as an unknown failure', async () => {
+      failResolve(new Error('boom'))
+
+      expect(await tap.start(['health'], {})).toBe(1)
+      expect(vi.mocked(console.error).mock.calls.flat().join(' ')).toContain(TAP_ERROR_COPY.UNKNOWN_ERROR.description)
+    })
+  })
+})

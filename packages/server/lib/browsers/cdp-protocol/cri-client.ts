@@ -94,7 +94,7 @@ export interface ICriClient {
    * on its own session, so without this they bypass interception entirely
    * when the proxy is disabled.
    */
-  onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+  onChildTargetAttached?: (sessionId: string) => Promise<void>
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
@@ -127,7 +127,7 @@ export class CriClient implements ICriClient {
   private _crashed = false
   private cdpConnection: CDPConnection
 
-  public onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+  public onChildTargetAttached?: (sessionId: string) => Promise<void>
 
   private constructor (
     public targetId: string,
@@ -462,14 +462,22 @@ export class CriClient implements ICriClient {
       debug('error attaching to target cri: %o', { error, event })
     }
 
-    if (event.targetInfo.type === 'service_worker' && this.onServiceWorkerTargetAttached) {
+    // Chromium hosts a frame in its own renderer process when its site needs
+    // one — a cross-site frame under site isolation, or an origin-keyed agent
+    // cluster (e.g. https google origins). An out-of-process iframe's (OOPIF)
+    // network runs on its own CDP session, exactly like a service worker's:
+    // without enabling interception there, a cross-origin spec bridge's
+    // runner-bundle fetch escapes to the real origin (real
+    // accounts.google.com answers 404 and cy.origin waits forever on
+    // bridge:ready).
+    if ((event.targetInfo.type === 'service_worker' || event.targetInfo.type === 'iframe') && this.onChildTargetAttached) {
       try {
         // Must complete while the target is still paused — releasing the
-        // debugger first lets the service worker's script fetch escape
+        // debugger first lets the target's first fetches escape
         // uninterceptable.
-        await this.onServiceWorkerTargetAttached(event.sessionId)
+        await this.onChildTargetAttached(event.sessionId)
       } catch (error) {
-        debug('error enabling service worker interception: %o', { error, event })
+        debug('error enabling child-session interception: %o', { error, event })
       }
     }
 

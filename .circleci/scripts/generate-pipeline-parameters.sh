@@ -206,6 +206,17 @@ while IFS= read -r file; do
       system_tests=true
       unit_tests=true
       ;;
+    packages/agent-info/*)
+      cli_tests=true
+      unit_tests=true
+      ;;
+    packages/cypress-sessions/*)
+      app_ui_tests=true
+      cli_tests=true
+      server_tests=true
+      system_tests=true
+      unit_tests=true
+      ;;
     packages/runner/*)
       driver_tests=true
       app_ui_tests=true

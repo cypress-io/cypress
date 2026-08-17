@@ -66,6 +66,9 @@ describe('lib/adapters/internal-routes', () => {
 describe('lib/adapters/serve-internal-routes', () => {
   afterEach(() => {
     delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+    delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
   })
 
   function createMiddleware (response: any = {
@@ -315,6 +318,227 @@ describe('lib/adapters/serve-internal-routes', () => {
         'set-cookie': ['a=1'],
       },
       body: Buffer.from('created'),
+    })
+  })
+
+  it('asks the loopback for an identity-encoded response in cypress-in-cypress', async () => {
+    // The cy-in-cy parent forwards cloud-bundle loopbacks through its proxy
+    // pipeline, which rewrites a missing accept-encoding to 'gzip,identity' —
+    // and Fetch.fulfillRequest bodies are identity-only, so the loopback must
+    // ask for identity explicitly.
+    process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
+
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub()
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress/xhrs/foo',
+      method: 'GET',
+      headers: {
+        'accept-encoding': 'gzip, deflate, br',
+      },
+    }, next)
+
+    expect(serverRequest.create).to.have.been.calledWithMatch({
+      headers: {
+        'accept-encoding': 'identity',
+      },
+    }, true)
+  })
+
+  it('sends no accept-encoding on the loopback outside cypress-in-cypress', async () => {
+    // Single-hop loopbacks terminate at our own Express routes, which already
+    // serve identity when the header is absent.
+    const { middleware, serverRequest } = createMiddleware()
+    const next = sinon.stub()
+
+    await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress/xhrs/foo',
+      method: 'GET',
+      headers: {
+        'accept-encoding': 'gzip, deflate, br',
+      },
+    }, next)
+
+    const headers = serverRequest.create.firstCall.args[0].headers
+
+    expect(headers).not.to.have.property('accept-encoding')
+  })
+
+  it('decodes a gzip response body and drops the content-encoding header', async () => {
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    const zlib = require('zlib')
+    const source = 'export default { StudioPanel: true }'
+    const { middleware } = createMiddleware({
+      statusCode: 200,
+      headers: {
+        'content-type': 'application/javascript',
+        'content-encoding': 'gzip',
+      },
+      body: zlib.gzipSync(source),
+    })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress-studio/app-studio.js',
+      method: 'GET',
+    }, next)
+
+    expect(response.headers).to.deep.equal({ 'content-type': 'application/javascript' })
+    expect(response.body.toString()).to.equal(source)
+  })
+
+  it('drops content-encoding from an empty-body 304 without decoding', async () => {
+    process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+    const { middleware } = createMiddleware({
+      statusCode: 304,
+      headers: {
+        'content-encoding': 'gzip',
+        etag: 'W/"80a-abc"',
+      },
+      body: Buffer.alloc(0),
+    })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'http://localhost:1234/__cypress-studio/app-studio.js',
+      method: 'GET',
+    }, next)
+
+    expect(response.statusCode).to.equal(304)
+    // the cached entry being revalidated holds the identity bytes fulfilled
+    // earlier, so the refreshed headers must not claim an encoding
+    expect(response.headers).to.deep.equal({ etag: 'W/"80a-abc"' })
+    expect(response.body.length).to.equal(0)
+  })
+
+  describe('cypress-in-cypress inner (CYPRESS_INTERNAL_E2E_TESTING_SELF)', () => {
+    // The inner Cypress shares the browser page with the parent — its runner
+    // document is the parent's AUT document. Fulfilling own-origin internals
+    // here hides the pause from the parent's interception (injection,
+    // window:before:load), so the inner must release them to the wire.
+    it('releases the own-origin runner document to the next middleware', async () => {
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:1234/__/',
+        method: 'GET',
+        resourceType: 'other',
+      }, next)
+
+      expect(next).to.have.been.calledOnce
+      expect(serverRequest.create).not.to.have.been.called
+    })
+
+    it('releases own-origin namespace subresources with concrete types', async () => {
+      // the app's graphql calls — the parent's cy.intercept must see these
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:1234/__cypress/graphql/mutation-foo',
+        method: 'POST',
+        resourceType: 'xhr',
+      }, next)
+
+      expect(next).to.have.been.calledOnce
+      expect(serverRequest.create).not.to.have.been.called
+    })
+
+    it('still loops own-origin non-clientRoute documents back to Express', async () => {
+      // e.g. the CT fixture iframe under /__cypress/iframes — the parent must
+      // not get a chance to inject into frames the inner owns outright
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
+      const { middleware, serverRequest } = createMiddleware({
+        statusCode: 200,
+        headers: {},
+        body: 'ok',
+      })
+      const next = sinon.stub()
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:1234/__cypress/iframes/spec',
+        method: 'GET',
+        resourceType: 'other',
+      }, next)
+
+      expect(next).not.to.have.been.called
+      expect(serverRequest.create).to.have.been.calledOnce
+    })
+
+    it('releases own-origin clientRoute subresources to the next middleware', async () => {
+      // matches the e2e-mode topology, where the inner has no interception
+      // and the parent's pipeline carries /__/ assets already
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub().resolves({ id: 'req-1', statusCode: 200 })
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:1234/__/assets/app.js',
+        method: 'GET',
+        resourceType: 'script',
+      }, next)
+
+      expect(next).to.have.been.calledOnce
+      expect(serverRequest.create).not.to.have.been.called
+    })
+
+    it('still loops foreign-origin internal requests back to Express', async () => {
+      // e.g. internal routes requested on the CT dev-server origin — those
+      // never reach our Express over the wire, so the loopback must stay.
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
+      const { middleware, serverRequest } = createMiddleware({
+        statusCode: 200,
+        headers: {},
+        body: 'ok',
+      })
+      const next = sinon.stub()
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:5173/__cypress/xhrs/foo',
+        method: 'GET',
+        resourceType: 'other',
+      }, next)
+
+      expect(next).not.to.have.been.called
+      expect(serverRequest.create).to.have.been.calledOnce
+    })
+
+    it('keeps the loopback for own-origin internals outside cypress-in-cypress', async () => {
+      const { middleware, serverRequest } = createMiddleware({
+        statusCode: 200,
+        headers: {},
+        body: 'ok',
+      })
+      const next = sinon.stub()
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:1234/__/',
+        method: 'GET',
+      }, next)
+
+      expect(next).not.to.have.been.called
+      expect(serverRequest.create).to.have.been.calledOnce
     })
   })
 })

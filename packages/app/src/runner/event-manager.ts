@@ -89,6 +89,10 @@ export class EventManager {
     return Cypress
   }
 
+  get runComplete (): boolean {
+    return hasMochaRunEnded
+  }
+
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.
@@ -438,6 +442,10 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    // This instance's run has not ended. The flag is module-scoped so it
+    // outlives the instance that set it, and would otherwise report the
+    // previous run's completion until this one emits run:start.
+    hasMochaRunEnded = false
     this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally
@@ -1040,6 +1048,14 @@ export class EventManager {
     this._unpinSnapshot()
     this._hideSnapshot()
     this.reporterBus.emit('reporter:snapshot:unpinned')
+  }
+
+  // Sync the reporter's command-log pin state when a pin originates outside the
+  // reporter (e.g. the tap CLI). The AUT render is already done via the native
+  // `pin:snapshot` path, so — unlike snapshotUnpinned — this only notifies the
+  // reporter; it does not touch the snapshot store.
+  snapshotPinned (testId: string, logId: number | string) {
+    this.reporterBus.emit('reporter:snapshot:pinned', testId, logId)
   }
 
   _unpinSnapshot () {
