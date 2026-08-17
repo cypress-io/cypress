@@ -5,8 +5,10 @@ import { HttpIntercept } from '@packages/network-interception'
 import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
+import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
-import { shouldSkipResponseBody } from '../../../lib/browsers/cdp-protocol/should-skip-response-body'
+import type { ResponseBodyDisposition } from '../../../lib/browsers/cdp-protocol/classify-response-body'
+import { classifyResponseBody } from '../../../lib/browsers/cdp-protocol/classify-response-body'
 
 function createPausedRequest (options: {
   requestId: string
@@ -64,16 +66,22 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
   isFromExtraTarget?: boolean
   addPendingUrlWithoutPreRequest?: (url: string) => void
   onRequestCanceled?: (requestId: string) => void
+  classifyBody?: (event: Protocol.Fetch.RequestPausedEvent) => ResponseBodyDisposition
+  shouldCaptureBody?: () => boolean
+  bodyCapture?: CdpBodyCapture
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
+  const bodyCapture = options.bodyCapture ?? new CdpBodyCapture(client as any)
   const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
     isAUTFrame: options.isAUTFrame,
     isFromExtraTarget: options.isFromExtraTarget,
     addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
     onRequestCanceled: options.onRequestCanceled,
-  }, networkExtraInfo as any)
+    classifyBody: options.classifyBody,
+    shouldCaptureBody: options.shouldCaptureBody,
+  }, networkExtraInfo as any, bodyCapture)
 
-  return { transport, networkExtraInfo }
+  return { transport, networkExtraInfo, bodyCapture }
 }
 
 function onLoadingFailed (client: ReturnType<typeof createClient>, event: {
@@ -119,72 +127,6 @@ async function readStream (stream: NodeJS.ReadableStream): Promise<string> {
 }
 
 describe('CdpFetchTransport', () => {
-  describe('shouldSkipResponseBody', () => {
-    it('skips an EventSource resourceType with no content-type header', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'EventSource',
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
-    })
-
-    it('skips a plain text/event-stream content-type', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
-    })
-
-    it('skips text/event-stream with a charset parameter', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-        responseHeaders: [{ name: 'content-type', value: 'text/event-stream;charset=utf-8' }],
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
-    })
-
-    it('matches the content-type header name and value case-insensitively', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-        responseHeaders: [{ name: 'Content-Type', value: 'Text/Event-Stream' }],
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
-    })
-
-    it('skips multipart/x-mixed-replace', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-        responseHeaders: [{ name: 'content-type', value: 'multipart/x-mixed-replace' }],
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.true
-    })
-
-    it('does not skip text/html', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Document',
-        responseHeaders: [{ name: 'content-type', value: 'text/html' }],
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
-    })
-
-    // deliberately NOT skipped — documented residual gap. ndjson responses can
-    // also never finish, but they carry no reliable, provable content-type or
-    // resourceType signal the way SSE and multipart streams do.
-    it('does not skip application/x-ndjson', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-        responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
-    })
-
-    it('does not skip when the content-type is missing and resourceType is not EventSource', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
-    })
-
-    it('does not skip when responseHeaders is absent entirely', () => {
-      expect(shouldSkipResponseBody({
-        resourceType: 'Fetch',
-        responseHeaders: undefined,
-      } as Protocol.Fetch.RequestPausedEvent)).to.be.false
-    })
-  })
-
   describe('toNetworkError', () => {
     it('reports a refused connection the way Node does', () => {
       const err = toNetworkError('http://127.0.0.1:3333/should-err?_=1', 'ConnectionRefused') as Error & { code: string }
@@ -2138,14 +2080,17 @@ describe('CdpFetchTransport', () => {
     it('hands middleware an empty body for redirect pauses instead of asking CDP for one', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const middlewareSawBody = sinon.stub()
+      const middlewareSawResponse = sinon.stub()
       const { transport } = createTransport(client, { httpIntercept })
       const onRequestPaused = await startTransport(transport, client)
 
       httpIntercept.use(async (req, next) => {
         const response = await next(req)
 
-        middlewareSawBody(await readStream(response.bodyStream!))
+        middlewareSawResponse({
+          body: await readStream(response.bodyStream!),
+          bodySkipped: response.bodySkipped,
+        })
 
         return response
       })
@@ -2170,7 +2115,14 @@ describe('CdpFetchTransport', () => {
       await handled
 
       expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
-      expect(middlewareSawBody).to.have.been.calledWith('')
+
+      // Redirects classify 'materialize' and are not marked skipped:
+      // MaybeSendRedirectToClient ends every 3xx-with-location before the
+      // capture stage, so the marker would have no reader.
+      expect(middlewareSawResponse).to.have.been.calledWith({
+        body: '',
+        bodySkipped: undefined,
+      })
 
       // Middleware left the redirect's headers untouched, so continueResponse
       // omits the field and CDP keeps the browser's original location header.
@@ -2263,6 +2215,452 @@ describe('CdpFetchTransport', () => {
       expect(middlewareSawResponse).to.have.been.calledWith({
         body: '',
         bodySkipped: true,
+      })
+    })
+
+    // application/x-ndjson never finishes any more reliably than SSE does, but
+    // carried no provable resourceType/content-type signal for the old
+    // deny-list — this is the shape that wedged #34623. The stream-default
+    // fallback in classifyResponseBody (rather than another deny-list entry)
+    // is what fixes it.
+    it('skips the eager body fetch for a chunked ndjson response pause (#34623)', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const middlewareSawResponse = sinon.stub()
+
+      // A body read anywhere in this flow is the #34623 wedge: pin the
+      // symptom by making any getResponseBody call hang forever.
+      client.send.withArgs('Fetch.getResponseBody').returns(new Promise(() => {}))
+
+      // The composed classifier shape (real route predicate, no match) — the
+      // transport default deliberately materializes everything until
+      // composition wires this, so the default cannot exercise this path.
+      const { transport } = createTransport(client, {
+        httpIntercept,
+        classifyBody: (event) => classifyResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => false }),
+      })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        middlewareSawResponse({
+          body: await readStream(response.bodyStream!),
+          bodySkipped: response.bodySkipped,
+        })
+
+        return response
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'Fetch',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'Fetch',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [{ name: 'content-type', value: 'application/x-ndjson' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+      })
+
+      expect(middlewareSawResponse).to.have.been.calledWith({
+        body: '',
+        bodySkipped: true,
+      })
+    })
+
+    it('fulfills a stream-classified response when middleware sets a stub body', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return { ...response, body: 'stubbed' }
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'Fetch',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'Fetch',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [{ name: 'content-type', value: 'text/event-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+      expect(client.send).to.have.been.calledWith('Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+        body: Buffer.from('stubbed').toString('base64'),
+      })
+    })
+
+    it('materializes the body via getResponseBody for a provably finite response pause', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+        responseStatusCode: 200,
+      })
+
+      response.responseHeaders = [{ name: 'content-length', value: '5' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-request',
+      })
+    })
+
+    // Phase 3 composes classifyBody's hasMatchingRoute from cy.intercept's
+    // matchRoutes — simulated here with a closure standing in for that
+    // composition, since matchRoutes itself is out of scope for this phase.
+    it('materializes the body when the classifyBody option reports a matched route, overriding the stream default', async () => {
+      const client = createClient()
+      const classifyBody = sinon.stub().returns('materialize')
+      const { transport } = createTransport(client, { classifyBody })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('origin').toString('base64'),
+        base64Encoded: true,
+      })
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      await tick()
+
+      const response = createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        responseStatusCode: 200,
+      })
+
+      // Would classify 'stream' by default (deny-listed) — the option must win.
+      response.responseHeaders = [{ name: 'content-type', value: 'text/event-stream' }]
+
+      await onRequestPaused(response)
+      await handled
+
+      expect(classifyBody).to.have.been.calledWith(response)
+
+      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
+        requestId: 'fetch-request',
+      })
+    })
+
+    describe('body capture arming', () => {
+      it('arms the capture pump for a stream-classified response when shouldCaptureBody opts in', async () => {
+        const client = createClient()
+        let capturedResponse: any
+
+        const httpIntercept = {
+          handle: async (req: any, next: (outbound: any) => Promise<any>) => {
+            const response = await next(req)
+
+            capturedResponse = response
+
+            return response
+          },
+        }
+
+        const { transport } = createTransport(client, {
+          httpIntercept: httpIntercept as any,
+          classifyBody: () => 'stream',
+          shouldCaptureBody: () => true,
+        })
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }), 'session-1')
+
+        await tick()
+
+        await onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }), 'session-1')
+
+        await handled
+
+        expect(client.send).to.have.been.calledWith('Network.streamResourceContent', {
+          requestId: 'network-1',
+        }, 'session-1')
+
+        // The load-bearing invariant: nothing flows over Network.dataReceived
+        // until the pause is released, so an arm sent after continueResponse
+        // would lose the opening bytes.
+        const armIndex = client.send.getCalls().findIndex((call) => call.args[0] === 'Network.streamResourceContent')
+        const releaseIndex = client.send.getCalls().findIndex((call) => call.args[0] === 'Fetch.continueResponse')
+
+        expect(armIndex).to.be.greaterThan(-1)
+        expect(releaseIndex).to.be.greaterThan(armIndex)
+
+        expect(capturedResponse.captureStream).to.exist
+
+        const chunks: Buffer[] = []
+
+        capturedResponse.captureStream.on('data', (chunk: Buffer) => chunks.push(chunk))
+
+        const dataReceivedHandler = client.on.withArgs('Network.dataReceived').getCall(0).args[1]
+
+        dataReceivedHandler({
+          requestId: 'network-1',
+          data: Buffer.from('captured-chunk').toString('base64'),
+        }, 'session-1')
+
+        await tick()
+
+        expect(Buffer.concat(chunks).toString()).to.equal('captured-chunk')
+      })
+
+      it('does not arm the capture pump when shouldCaptureBody is unset (default)', async () => {
+        const client = createClient()
+        const { transport } = createTransport(client, {
+          classifyBody: () => 'stream',
+        })
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await tick()
+
+        await onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await handled
+
+        expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+      })
+
+      it('resolves the response and still continues the pause when arming the capture pump fails', async () => {
+        const client = createClient()
+
+        client.send.withArgs('Network.streamResourceContent').rejects(new Error('No resource with given identifier found'))
+
+        let capturedResponse: any
+
+        const httpIntercept = {
+          handle: async (req: any, next: (outbound: any) => Promise<any>) => {
+            const response = await next(req)
+
+            capturedResponse = response
+
+            return response
+          },
+        }
+
+        const { transport } = createTransport(client, {
+          httpIntercept: httpIntercept as any,
+          classifyBody: () => 'stream',
+          shouldCaptureBody: () => true,
+        })
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await tick()
+
+        await onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await handled
+
+        expect(capturedResponse.captureStream).to.be.undefined
+
+        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+          requestId: 'fetch-request',
+          responseCode: 200,
+        })
+      })
+
+      it('does not attempt to arm the capture pump when the pause carries no networkId', async () => {
+        const client = createClient()
+        const addPendingUrlWithoutPreRequest = sinon.stub()
+        const { transport } = createTransport(client, {
+          classifyBody: () => 'stream',
+          shouldCaptureBody: () => true,
+          addPendingUrlWithoutPreRequest,
+        })
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'download-pause-id',
+          url: 'https://example.test/cypress/fixtures/records.csv',
+        }))
+
+        await tick()
+
+        await onRequestPaused(createPausedRequest({
+          requestId: 'download-pause-id',
+          url: 'https://example.test/cypress/fixtures/records.csv',
+          responseStatusCode: 200,
+        }))
+
+        await handled
+
+        expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+      })
+
+      // The one place bodySkipped-adjacent handling and disposition diverge:
+      // a redirect's body is CDP-withheld, not browser-streamed, so there is
+      // nothing for the pump to capture.
+      it('does not arm the capture pump for a redirect pause even when capture is on', async () => {
+        const client = createClient()
+        const { transport } = createTransport(client, {
+          shouldCaptureBody: () => true,
+        })
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await tick()
+
+        const response = createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 302,
+        })
+
+        response.responseHeaders = [{ name: 'location', value: 'https://example.test/next' }]
+
+        await onRequestPaused(response)
+
+        await handled
+
+        expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+      })
+
+      it('releases a freshly armed capture when reset() rejects the flow during the arm await', async () => {
+        const client = createClient()
+        const armGate = Promise.withResolvers<any>()
+
+        client.send.withArgs('Network.streamResourceContent').returns(armGate.promise)
+
+        const { transport, bodyCapture } = createTransport(client, {
+          classifyBody: () => 'stream',
+          shouldCaptureBody: () => true,
+        })
+        const releaseSpy = sinon.spy(bodyCapture, 'release')
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        handled.catch(() => {})
+
+        await tick()
+
+        const responded = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await tick()
+
+        // the flow is rejected while Network.streamResourceContent is in flight
+        transport.reset()
+        armGate.resolve({ bufferedData: '' })
+
+        await responded
+
+        expect(releaseSpy).to.have.been.calledWith('network-1', undefined)
+
+        // the orphaned pause is released rather than left wedging the browser
+        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+          requestId: 'fetch-request',
+        })
+      })
+
+      it('resets and stops the capture pump with the transport lifecycle', async () => {
+        const client = createClient()
+        const bodyCapture = new CdpBodyCapture(client as any)
+        const startSpy = sinon.spy(bodyCapture, 'start')
+        const stopSpy = sinon.spy(bodyCapture, 'stop')
+        const resetSpy = sinon.spy(bodyCapture, 'reset')
+
+        const { transport } = createTransport(client, { bodyCapture })
+
+        await transport.start()
+        expect(startSpy).to.have.been.calledOnce
+
+        transport.reset()
+        expect(resetSpy).to.have.been.calledOnce
+
+        await transport.stop()
+        expect(stopSpy).to.have.been.calledOnce
+        // stop() resets internally — the second call is expected, not a leak
+        expect(resetSpy).to.have.been.calledTwice
       })
     })
 
@@ -2616,6 +3014,9 @@ describe('CdpFetchTransport', () => {
         'Fetch.requestPaused',
         'Fetch.requestPaused',
         'Network.loadingFailed',
+        'Network.dataReceived',
+        'Network.loadingFinished',
+        'Network.loadingFailed',
       ])
 
       expect(networkExtraInfo.start).to.have.been.calledOnce
@@ -2651,6 +3052,9 @@ describe('CdpFetchTransport', () => {
       expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
         'Fetch.requestPaused',
         'Fetch.requestPaused',
+        'Network.loadingFailed',
+        'Network.dataReceived',
+        'Network.loadingFinished',
         'Network.loadingFailed',
       ])
 

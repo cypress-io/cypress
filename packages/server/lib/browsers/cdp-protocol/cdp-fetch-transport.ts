@@ -10,10 +10,12 @@ import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
+import { CdpBodyCapture } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
-import { shouldSkipResponseBody } from './should-skip-response-body'
+import type { ResponseBodyDisposition } from './classify-response-body'
+import { classifyResponseBody } from './classify-response-body'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -108,6 +110,28 @@ type CdpFetchTransportOptions = {
    * tear the flow down the way a closed proxy socket does on the MITM path.
    */
   onRequestCanceled?: (requestId: string) => void
+  /**
+   * Decides whether a response pause takes the eager `Fetch.getResponseBody`
+   * (materialize) or the stream path (skip the read; the body is captured
+   * separately, if at all, via CdpBodyCapture).
+   */
+  classifyBody?: (event: Protocol.Fetch.RequestPausedEvent) => ResponseBodyDisposition
+  /**
+   * Gates whether a stream-classified response arms CdpBodyCapture. Defaults
+   * to false: without a consumer for the captured bytes (wired in a later
+   * phase), arming would just pump bytes nobody reads.
+   */
+  shouldCaptureBody?: () => boolean
+}
+
+// Until composition supplies the real route predicate and config flags, assume
+// every request could be intercepted and JS rewriting is on. Both assumptions
+// force materialize, which collapses the classifier to the retired deny-list's
+// rule alone: only provably stream-shaped responses skip the read. A default
+// that let the stream fallback go live here would hand cy.intercept handlers
+// empty bodies for every chunked API response.
+const defaultClassifyBody = (event: Protocol.Fetch.RequestPausedEvent): ResponseBodyDisposition => {
+  return classifyResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => true })
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -124,6 +148,11 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
   bodySkipped?: boolean
   bodyStream?: Readable
+  // Side-channel capture of the bytes the browser delivered for a
+  // stream-classified response (origin bytes when continued, the stubbed body
+  // when middleware fulfilled), armed via CdpBodyCapture — populated only when
+  // options.shouldCaptureBody opts in. Consumed by Test Replay in a later phase.
+  captureStream?: Readable
   fulfilled?: boolean
   originalBodyDigest?: BodyDigest
   requestId: string
@@ -183,6 +212,7 @@ export class CdpFetchTransport {
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
     private readonly options: CdpFetchTransportOptions = {},
     private readonly networkExtraInfo: CDPNetworkExtraInfo = new CDPNetworkExtraInfo(client),
+    private readonly bodyCapture: CdpBodyCapture = new CdpBodyCapture(client),
   ) {
     this.requestIdPrefix = options.isFromExtraTarget
       ? `extra-${++extraTargetTransportCount}:`
@@ -241,6 +271,7 @@ export class CdpFetchTransport {
     // Set-Cookie never appears on Fetch response pauses — the raw cookie
     // headers only arrive on the Network extraInfo events tracked here.
     this.networkExtraInfo.start()
+    this.bodyCapture.start()
     this.isStarted = true
 
     try {
@@ -252,6 +283,7 @@ export class CdpFetchTransport {
       this.client.off('Fetch.requestPaused', this.resolveResponse)
       this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.networkExtraInfo.stop()
+      this.bodyCapture.stop()
       this.isStarted = false
 
       throw err
@@ -291,6 +323,7 @@ export class CdpFetchTransport {
     // response pause, so nothing else would clear them.
     this.originRedirectedRequests.clear()
     this.networkExtraInfo.flush()
+    this.bodyCapture.reset()
   }
 
   async stop (): Promise<void> {
@@ -310,6 +343,7 @@ export class CdpFetchTransport {
       this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
+      this.bodyCapture.stop()
       this.isStarted = false
       debug('CDP Fetch transport stopped')
     }
@@ -712,11 +746,33 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    const bodySkipped = shouldSkipResponseBody(event)
+    const disposition = (this.options.classifyBody ?? defaultClassifyBody)(event)
+    const bodySkipped = disposition === 'stream'
     let originalBody: Buffer
+    let captureStream: Readable | undefined
 
     if (bodySkipped) {
       debug('skipping eager body fetch for stream-shaped response %s (resourceType=%s)', event.request.url, event.resourceType)
+
+      // Arming precedes releasing the pause: nothing flows over
+      // Network.dataReceived until Fetch.continueResponse, so the pump must
+      // already be listening before that happens or its opening bytes are lost.
+      if (event.networkId && this.options.shouldCaptureBody?.()) {
+        captureStream = await this.bodyCapture.arm(event.networkId, sessionId)
+
+        // reset()/stop() may have rejected this flow while arming awaited CDP.
+        // The freshly armed capture entry has no owner either — release it, or
+        // the pump keeps pushing browser bytes into a stream nobody will read.
+        if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
+          this.bodyCapture.release(event.networkId, sessionId)
+          debug('releasing response pause rejected while arming body capture: %s', event.request.url)
+          await this.safeSend('Fetch.continueResponse', {
+            requestId: event.requestId,
+          }, sessionId)
+
+          return
+        }
+      }
 
       // Stand in an empty body: its digest matches the empty body the
       // middleware materializes, so an untouched response takes
@@ -765,6 +821,7 @@ export class CdpFetchTransport {
       originalBodyDigest: digestBody(originalBody),
       sessionId,
       ...(bodySkipped ? { bodySkipped: true } : {}),
+      ...(captureStream ? { captureStream } : {}),
     })
   }
 
