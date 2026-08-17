@@ -11,6 +11,7 @@ linux-x64:
           pattern: /^electron\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
+      - equal: [ 'v8-snapshot-force-norewrite-all-bundles', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
@@ -18,6 +19,9 @@ linux-x64:
         context: test-runner:env-canary
         requires:
           - node_modules_install
+    - check-lockfile:
+        requires:
+          - build
     - check-ts:
         requires:
           - build
@@ -280,6 +284,7 @@ linux-x64:
           - npm-cypress-schematic
           - lint-types
           - linux-lint
+          - check-lockfile
           - percy-finalize
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
@@ -591,8 +596,21 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
+# Windows CI is expensive, so unlike the other platform workflows above it does not run on every 
+# develop/release push. It runs via CircleCI Scheduled Pipelines (configured in the CircleCI UI, not here)
+# that set run-windows-workflow=true, plus on the other filters listed below.
 windows:
-  when: *full-workflow-filters
+  when:
+    or:
+      - equal: [ true, << pipeline.parameters.run-windows-workflow >> ]
+      - and:
+          - *full-workflow-filters
+          - not:
+              or:
+                - equal: [ develop, << pipeline.git.branch >> ]
+                - matches:
+                    pattern: /^release\/\d+\.\d+\.\d+$/
+                    value: << pipeline.git.branch >>
   jobs:
     - node_modules_install:
         name: windows-node-modules-install

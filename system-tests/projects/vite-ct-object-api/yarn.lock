@@ -235,10 +235,10 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.24.2.tgz#0610af0fb8fec52be779d5b163bbbd6930150467"
   integrity sha512-2mLH46K1u3r6uwc95hU+OR9q/ggYMpnS7pSp83Ece1HUQgF9Nh/QwTK5rcgbFnV9j+08yBrU5sA/P0RK2MSBNA==
 
-"@testing-library/cypress@10.1.0":
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-10.1.0.tgz#e1f12e2f8206e7cdf12d3ca23b6d303d08f44180"
-  integrity sha512-tNkNtYRqPQh71xXKuMizr146zlellawUfDth7A/urYU4J66g0VGZ063YsS0gqS79Z58u1G/uo9UxN05qvKXMag==
+"@testing-library/cypress@10.1.3":
+  version "10.1.3"
+  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-10.1.3.tgz#c1ea24b799ca2b1d2e733325bb1b59cdbdfa7f2d"
+  integrity sha512-rVCH92TmU8idROHqCdTSp/bosIIUezihSwFfR/J2GZD0EAwyzRuYNseh54eziKJWjJ64BCXPT3X3jLO7v4yenQ==
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^10.1.0"

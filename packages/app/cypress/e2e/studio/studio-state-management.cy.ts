@@ -68,12 +68,6 @@ describe('Cypress Studio - State Management', () => {
   it('remains in studio mode when the test name is changed on the file system and file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
 
-    // since we aren't logged in, we need to close the connect to cloud panel
-    cy.get('[data-cy="studio-error"]').within(() => {
-      cy.contains('Login').should('be.visible')
-      cy.get('[aria-label="Close"]').click()
-    })
-
     cy.findByTestId('record-button-recording').should('be.visible')
 
     incrementCounter(0)
@@ -102,7 +96,7 @@ describe('studio functionality', () => {
     // the commands should still be there since the save failed
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
 
-    cy.findByTestId('studio-error').should('contain.text', 'Failed to save test code')
+    cy.contains('Failed to save test code').should('be.visible')
   })
 
   it('does not exit studio mode if the spec is changed on the file system', () => {

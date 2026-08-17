@@ -80,9 +80,8 @@ describe('experimentalSingleTabRunMode', () => {
 
   it('is not a valid config for e2e testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header').contains('Cypress configuration error')
     cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
   })
@@ -91,10 +90,9 @@ describe('experimentalSingleTabRunMode', () => {
 describe('experimentalOriginDependencies', () => {
   it('is a valid config for e2e testing', () => {
     cy.scaffoldProject('session-and-origin-e2e-specs')
-    cy.openProject('session-and-origin-e2e-specs')
+    cy.openProject('session-and-origin-e2e-specs', ['--e2e'])
 
     cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
   })
@@ -102,10 +100,9 @@ describe('experimentalOriginDependencies', () => {
   it('is not a valid config for component testing', () => {
     cy.scaffoldProject('session-and-origin-e2e-specs')
     // TODO: remove config file from session-and-origin-e2e-specs project once the experimental flag is removed
-    cy.openProject('session-and-origin-e2e-specs', ['--config-file', 'cypress-invalid-component.config.js'])
+    cy.openProject('session-and-origin-e2e-specs', ['--component', '--config-file', 'cypress-invalid-component.config.js'])
 
     cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalOriginDependencies experiment is currently only supported for End to End Testing')
   })
@@ -113,10 +110,9 @@ describe('experimentalOriginDependencies', () => {
   it('is not valid config when specified at root', () => {
     cy.scaffoldProject('session-and-origin-e2e-specs')
     // TODO: remove config file from session-and-origin-e2e-specs project once the experimental flag is removed
-    cy.openProject('session-and-origin-e2e-specs', ['--config-file', 'cypress-invalid-root.config.js'])
+    cy.openProject('session-and-origin-e2e-specs', ['--e2e', '--config-file', 'cypress-invalid-root.config.js'])
 
     cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalOriginDependencies experiment is currently only supported for End to End Testing')
   })

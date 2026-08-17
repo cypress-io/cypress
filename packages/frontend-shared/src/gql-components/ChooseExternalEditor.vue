@@ -9,6 +9,7 @@
       :label-id="labelId"
       :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
       class="w-[400px]"
+      data-cy="selectEditor"
       @update:model-value="updateEditor"
     >
       <template #input-prefix="{ value }">

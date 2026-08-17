@@ -1,6 +1,6 @@
 /// <reference path="../../../cli/types/cypress.d.ts" />
 
-import type { AllModeOptions, TestingType } from '.'
+import type { TestingType } from '.'
 
 export const RESOLVED_FROM = ['default', 'config', 'plugin', 'envFile', 'env', 'cli', 'runtime'] as const
 
@@ -31,11 +31,6 @@ export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypre
 export type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
   & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'excludeSpecPattern' | 'specPattern' | 'experimentalModifyObstructiveThirdPartyCode' | 'removeSRIAttributes' | 'injectDocumentDomain' | 'video' | 'videoCompression' | 'videosFolder' | 'resolvedNodeVersion' | 'resolvedNodePath' | 'trashAssetsBeforeRuns' | 'experimentalWebKitSupport' | 'justInTimeCompile'>
-
-export interface SettingsOptions {
-  testingType?: 'component' |'e2e'
-  args?: AllModeOptions
-}
 
 export type BannerState = {
   lastShown?: number

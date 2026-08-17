@@ -119,19 +119,11 @@ https://on.cypress.io/api/task
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     task.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/task.cy.js/throws when task returns undefined (     (1280x720)
-     failed).png                                                                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/task.cy.js/includes stack trace in error (faile     (1280x720)
-     d).png                                                                                         
 
 
 ====================================================================================================

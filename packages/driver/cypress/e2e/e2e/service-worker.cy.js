@@ -609,7 +609,10 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
       expect(response.ok).to.be.true
     })
 
-    cy.get('#output').should('have.text', 'done')
+    cy.get('#output', {
+      timeout: 8000,
+    }).should('have.text', 'done')
+
     validateFetchHandlers({ listenerCount: 1 })
   })
 

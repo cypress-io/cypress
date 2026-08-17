@@ -1,12 +1,10 @@
 describe('Error handling', () => {
   it('it handles a config error', () => {
     cy.scaffoldProject('unify-plugin-errors')
-    cy.openProject('unify-plugin-errors')
+    cy.openProject('unify-plugin-errors', ['--e2e'])
     cy.loginUser()
 
     cy.visitLaunchpad()
-
-    cy.get('[data-cy-testingType=e2e]').click()
 
     cy.get('body')
     .and('contain.text', 'threw an error from')

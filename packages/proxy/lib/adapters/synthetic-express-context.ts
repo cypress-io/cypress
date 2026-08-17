@@ -65,6 +65,14 @@ function parseCookieHeader (header?: string | string[]): Record<string, string> 
   }, {})
 }
 
+function parseUrlQuery (url: string): Record<string, string> {
+  try {
+    return Object.fromEntries(new URL(url, 'http://127.0.0.1').searchParams)
+  } catch {
+    return {}
+  }
+}
+
 function serializeCookie (name: string, value: string, options: CookieOptions = {}): string {
   const parts = [`${name}=${encodeURIComponent(value)}`]
   const path = options.path == null ? '/' : options.path
@@ -265,6 +273,8 @@ export function createSyntheticIncomingResponse (response: HttpResponse): Incomi
   // Match Node IncomingMessage: response middleware looks up content-encoding,
   // content-type, set-cookie, etc. with lowercase keys.
   incomingRes.headers = lowercaseHeaders(response.headers ?? {})
+  // The browser negotiates the protocol with the origin directly, so there is no
+  // httpVersion to report. Node already leaves it null on an unparsed IncomingMessage.
 
   return incomingRes
 }
@@ -284,9 +294,17 @@ export function createSyntheticExpressContext (request: HttpRequest): {
   req.url = request.url
   req.body = request.body
   req.requestId = request.id
+  req.resourceType = request.resourceType
   req.isAUTFrame = false
   req.isFromExtraTarget = false
   req.isSyncRequest = false
+  // cy.intercept's request message picks `query` off this req (SERIALIZABLE_REQ_PROPS).
+  // Express provides it on the MITM path; without it the driver-side merge re-derives
+  // it and falsely flags the request as modified.
+  req.query = parseUrlQuery(request.url)
+  // httpVersion is deliberately left unset. There is no browser→proxy hop to report
+  // here, and the protocol the browser negotiates with the origin is not knowable
+  // while the request is paused.
 
   return {
     req,

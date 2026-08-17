@@ -1,6 +1,7 @@
 import { NetworkProxy } from '@packages/proxy'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
+import { CdpFetchTransport } from '../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import { createCdpFetchRuntime, createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
@@ -38,19 +39,22 @@ describe('lib/network-runtime', () => {
     requestId: string
     networkId?: string
     url?: string
+    resourceType?: Protocol.Network.ResourceType
     responseStatusCode?: number
+    responseHeaders?: Protocol.Fetch.HeaderEntry[]
   }): Protocol.Fetch.RequestPausedEvent {
     return {
       requestId: options.requestId,
       networkId: options.networkId,
       frameId: 'frame-1',
-      resourceType: 'Document',
+      resourceType: options.resourceType ?? 'Document',
       request: {
         url: options.url ?? 'https://example.test/',
         method: 'GET',
         headers: {},
       },
       responseStatusCode: options.responseStatusCode,
+      responseHeaders: options.responseHeaders,
     } as Protocol.Fetch.RequestPausedEvent
   }
 
@@ -382,12 +386,638 @@ describe('lib/network-runtime', () => {
     expect(continueCall!.args[1]).to.include({ requestId: 'fetch-request' })
 
     await onRequestPaused(createPausedRequest({
-      requestId: 'fetch-response',
+      requestId: 'fetch-request',
       networkId: 'network-1',
       responseStatusCode: 200,
     }))
 
     await flush()
     await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'fetch-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').to.not.exist
+  })
+
+  // The legacy pipeline hands every response body back through the synthetic
+  // Express context, so an asset it does not rewrite has to come out
+  // byte-identical for the transport to release the origin response.
+  it('createCdpFetchRuntime continues asset responses the legacy pipeline leaves byte-identical', async () => {
+    const assetBody = Buffer.from('body { color: red; }')
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: assetBody.toString('base64'), base64Encoded: true }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const pause = {
+      requestId: 'asset-request',
+      networkId: 'network-asset-1',
+      url: 'https://example.test/app.css',
+      resourceType: 'Stylesheet' as Protocol.Network.ResourceType,
+    }
+
+    const handled = onRequestPaused(createPausedRequest(pause))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      ...pause,
+      responseStatusCode: 200,
+      responseHeaders: [{
+        name: 'content-type',
+        value: 'text/css',
+      }, {
+        name: 'content-length',
+        value: String(assetBody.length),
+      }],
+    }))
+
+    await flush()
+    await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'asset-request',
+      responseCode: 200,
+    })
+
+    // The pipeline left the headers alone, so the origin's own content-length
+    // survives by omitting responseHeaders rather than resending a copy of it.
+    expect(continueResponseCall!.args[1]).to.not.have.property('responseHeaders')
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').to.not.exist
+  })
+
+  it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      client,
+      // Exercise the correlation fallback path: no pre-request arrives, so the
+      // transport-normalized resourceType must survive onto req.
+      shouldCorrelatePreRequests: () => true,
+    })
+    const seenResourceTypes: Array<string | undefined> = []
+
+    // Registered after the legacy pipeline (which runs CorrelateBrowserPreRequest),
+    // so this observes req.resourceType post-fallback rather than pre-middleware.
+    runtime.networkInterception.use((req, next) => {
+      seenResourceTypes.push(req.resourceType)
+
+      return next(req)
+    })
+
+    // Resolve correlation immediately with no browserPreRequest so the
+    // transport value is the only source of resourceType.
+    sinon.stub(runtime.networkProxy.http.preRequests, 'get').callsFake((_req, _debug, cb) => {
+      cb({ browserPreRequest: undefined })
+
+      return undefined
+    })
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'fetch-xhr',
+      networkId: 'network-xhr',
+      resourceType: 'XHR',
+    }))
+
+    await flush()
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'fetch-xhr',
+      networkId: 'network-xhr',
+      resourceType: 'XHR',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+    await handled
+
+    expect(seenResourceTypes).to.include('xhr')
+  })
+
+  it('createCdpFetchRuntime redirects strategy:file URLs to the Cypress origin with loopback headers', async () => {
+    const client = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    deps.request = {
+      rp: sinon.stub(),
+      create: sinon.stub(),
+    } as any
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+    }))
+
+    await flush()
+
+    // No Node-side file-server fetch — the request stays on the wire and the
+    // Express direct-origin catch-all serves it.
+    expect(deps.request.create).to.not.have.been.called
+
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest').to.not.exist
+
+    // Page-invisible url override to our origin; loopback headers carry the
+    // impersonated URL so setProxiedUrl restores it Express-side.
+    const continueParams = continueCall!.args[1]
+
+    expect(continueParams.requestId).to.eq('file-request')
+    expect(continueParams.url).to.eq('http://localhost:2020/cypress/fixtures/records.csv')
+
+    const headerNames = continueParams.headers.map((h: { name: string }) => h.name)
+
+    expect(headerNames).to.include('x-cypress-internal-loopback')
+    expect(headerNames).to.include('x-cypress-internal-loopback-token')
+    expect(continueParams.headers.find((h: { name: string }) => h.name === 'x-cypress-internal-loopback').value)
+    .to.eq('http://localhost:2020/cypress/fixtures/records.csv')
+
+    // The response pause for a passed-through request is released untouched.
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse').to.exist
+    expect(continueResponseCall!.args[1]).to.deep.equal({ requestId: 'file-request' })
+  })
+
+  it('createCdpFetchRuntime releases the pause untouched when the origin-redirect continueRequest is rejected', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string, params: any) => {
+        // reject the full-args override, accept the bare release
+        if (method === 'Fetch.continueRequest' && params?.url) {
+          throw new Error('Invalid http header value')
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'file-request',
+      networkId: 'network-file-1',
+      url: 'http://localhost:2020/cypress/fixtures/records.csv',
+    }))
+
+    await flush()
+
+    const continueCalls = client.send.getCalls().filter((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCalls, 'override attempt plus bare fallback').to.have.length(2)
+    expect(continueCalls[0].args[1].url).to.exist
+    expect(continueCalls[1].args[1]).to.deep.equal({ requestId: 'file-request' })
+  })
+
+  it('createCdpFetchRuntime passes download pauses without networkId through without waiting for pre-request timeout', async function () {
+    this.timeout(5000)
+
+    const clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout'],
+    })
+
+    try {
+      const client = {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const deps = baseDeps()
+      const fileBody = Buffer.from('"Joe","Smith"')
+      const downloadUrl = 'http://localhost:2020/cypress/fixtures/records.csv'
+
+      deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+      deps.remoteStates.current = sinon.stub().returns({
+        origin: 'http://localhost:2020',
+        strategy: 'file',
+        fileServer: 'http://localhost:2021',
+        domainName: 'localhost',
+        props: null,
+      })
+
+      deps.request = {
+        rp: sinon.stub(),
+        create: sinon.stub().resolves({
+          statusCode: 200,
+          headers: {
+            'content-type': 'text/csv',
+            'content-disposition': 'attachment; filename="records.csv"',
+          },
+          body: fileBody,
+        }),
+      } as any
+
+      const runtime = createCdpFetchRuntime({
+        ...deps,
+        client,
+        shouldCorrelatePreRequests: () => true,
+      })
+      const addPendingSpy = sinon.spy(runtime.networkProxy, 'addPendingUrlWithoutPreRequest')
+      const onRequestPaused = await startCdpRuntime(runtime, client)
+
+      // Downloads omit networkId — without pre-registration the Express-side
+      // CorrelateBrowserPreRequest would wait the default 2000ms pre-request timeout.
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'download-file-request',
+        url: downloadUrl,
+      }))
+
+      await flush()
+      await clock.tickAsync(0)
+      await flush()
+
+      // Pre-registration still happens for pass-through pauses so the
+      // Express-side CorrelateBrowserPreRequest resolves immediately.
+      expect(addPendingSpy).to.have.been.calledOnceWith(downloadUrl)
+      expect(deps.request.create).to.not.have.been.called
+
+      const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+      expect(continueCall, 'expected Fetch.continueRequest before pre-request timeout').to.exist
+      expect(continueCall!.args[1].requestId).to.eq('download-file-request')
+      expect(continueCall!.args[1].url).to.eq(downloadUrl)
+
+      await handled
+    } finally {
+      clock.restore()
+    }
+  })
+
+  it('createCdpFetchRuntime continues http-strategy requests without hitting the file server', async () => {
+    const client = {
+      send: sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      }),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.request = {
+      rp: sinon.stub(),
+      create: sinon.stub().resolves({
+        statusCode: 200,
+        headers: {},
+        body: 'should-not-be-used',
+      }),
+    } as any
+
+    const runtime = createCdpFetchRuntime({ ...deps, client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    const handled = onRequestPaused(createPausedRequest({
+      requestId: 'http-request',
+      networkId: 'network-http-1',
+      url: 'https://example.test/app',
+    }))
+
+    await flush()
+
+    expect(deps.request.create).not.to.have.been.called
+
+    const continueCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'http-request',
+      networkId: 'network-http-1',
+      url: 'https://example.test/app',
+      responseStatusCode: 200,
+    }))
+
+    await flush()
+    await handled
+
+    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
+    const fulfillCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.fulfillRequest')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').to.exist
+    expect(continueResponseCall!.args[1]).to.include({
+      requestId: 'http-request',
+      responseCode: 200,
+    })
+
+    expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').to.not.exist
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget transports redirect strategy:file URLs like the main transport', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const deps = baseDeps()
+
+    deps.config = { ...deps.config, port: 2020 } as Cypress.Config
+
+    deps.remoteStates.current = sinon.stub().returns({
+      origin: 'http://localhost:2020',
+      strategy: 'file',
+      fileServer: 'http://localhost:2021',
+      domainName: 'localhost',
+      props: null,
+    })
+
+    const runtime = createCdpFetchRuntime({ ...deps, client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+
+    const onRequestPaused = (event: Protocol.Fetch.RequestPausedEvent) => {
+      return Promise.all(extraClient.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
+        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent) => void)(event)
+      }))
+    }
+
+    await onRequestPaused(createPausedRequest({
+      requestId: 'popup-file-request',
+      networkId: 'network-popup-1',
+      url: 'http://localhost:2020/cypress/fixtures/popup.html',
+    }))
+
+    await flush()
+
+    // Popup file traffic reaches Express either way — released untouched so
+    // the pipeline runs once there, not on the CDP side first.
+    const continueCall = extraClient.send.getCalls().find((call) => call.args[0] === 'Fetch.continueRequest')
+
+    expect(continueCall, 'expected Fetch.continueRequest').to.exist
+    expect(continueCall!.args[1].url).to.eq('http://localhost:2020/cypress/fixtures/popup.html')
+    expect(continueCall!.args[1].headers.map((h: { name: string }) => h.name))
+    .to.include('x-cypress-internal-loopback-token')
+
+    await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget starts a transport that shares the main intercept', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const detach = await runtime.attachExtraTarget(extraClient)
+
+    expect(extraClient.send).to.have.been.calledWith('Network.enable')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    })
+
+    expect(extraClient.on).to.have.been.calledWith('Fetch.requestPaused')
+    expect(extraClient.send.withArgs('Network.enable'))
+    .to.have.been.calledBefore(extraClient.send.withArgs('Fetch.enable'))
+
+    const transportReset = sinon.spy(CdpFetchTransport.prototype, 'reset')
+
+    runtime.reset()
+
+    // Asserts the extra transport itself reset, not just that reset() fired
+    // twice — a call count alone would also pass if the main transport's
+    // reset ran twice and the extra transport's never ran.
+    expect(transportReset).to.have.been.calledTwice
+    expect(transportReset.thisValues).to.include(runtime.fetchTransport)
+    expect(transportReset.thisValues.filter((transport) => transport !== runtime.fetchTransport)).to.have.length(1)
+
+    await detach()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+
+    await runtime.stop()
+  })
+
+  it('createCdpFetchRuntime enables Fetch on service worker sessions that attach to the page connection', async () => {
+    const client: {
+      send: sinon.SinonStub
+      on: sinon.SinonStub
+      off: sinon.SinonStub
+      onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+    } = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    expect(client.onServiceWorkerTargetAttached, 'hook is not registered before start').to.not.exist
+
+    await runtime.start()
+    client.send.resetHistory()
+
+    await client.onServiceWorkerTargetAttached!('sw-session')
+
+    // A service worker's script fetch and fetch-handler requests run on its own
+    // session, so they only reach the middleware onion (and cy.intercept) if
+    // Fetch is enabled there too.
+    expect(client.send).to.have.been.calledWith('Fetch.enable', {
+      patterns: [{
+        requestStage: 'Request',
+      }, {
+        requestStage: 'Response',
+      }],
+    }, 'sw-session')
+
+    await runtime.stop()
+
+    // The page client outlives the runtime, so a stale hook would enable Fetch
+    // against a transport that has already dropped its handlers.
+    expect(client.onServiceWorkerTargetAttached, 'hook is cleared on stop').to.not.exist
+  })
+
+  it('createCdpFetchRuntime clears the service worker hook when Fetch.enable fails', async () => {
+    const client: {
+      send: sinon.SinonStub
+      on: sinon.SinonStub
+      off: sinon.SinonStub
+      onServiceWorkerTargetAttached?: (sessionId: string) => Promise<void>
+    } = {
+      send: sinon.stub().rejects(new Error('enable failed')),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    await expect(runtime.start()).to.be.rejectedWith('enable failed')
+
+    expect(client.onServiceWorkerTargetAttached).to.not.exist
+  })
+
+  it('createCdpFetchRuntime stop also stops attached extra-target transports', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+    await runtime.stop()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  it('createCdpFetchRuntime stop does not hang on an extra-target transport that never answers Fetch.disable', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // models an extra target whose own CDP connection is already gone —
+    // Fetch.disable is sent but never answered
+    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+    await runtime.stop()
+
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+    expect(mainClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  it('createCdpFetchRuntime attachExtraTarget rejects promptly when stop() lands mid-attach', async () => {
+    const mainClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const extraClient = {
+      send: sinon.stub().resolves({}),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+
+    // park attachExtraTarget inside extraTransport.start() until we release it
+    const fetchEnableGate = Promise.withResolvers<void>()
+
+    extraClient.send.withArgs('Fetch.enable').returns(fetchEnableGate.promise)
+    // models a dead-but-open extra-target socket — Fetch.disable is sent but
+    // never answered, same as the sibling stop()/detach paths
+    extraClient.send.withArgs('Fetch.disable').returns(new Promise(() => {}))
+
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+
+    const attach = runtime.attachExtraTarget(extraClient)
+
+    await flush()
+
+    // stop() lands while attach is still awaiting Fetch.enable inside start()
+    await runtime.stop()
+
+    fetchEnableGate.resolve()
+
+    await expect(attach).to.be.rejectedWith('CDP Fetch runtime has been stopped')
+    expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
   })
 })

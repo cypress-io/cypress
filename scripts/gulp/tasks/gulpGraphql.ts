@@ -1,7 +1,6 @@
 // @ts-expect-error - no types
 import rp from '@cypress/request-promise'
 import path from 'path'
-import pDefer from 'p-defer'
 import chalk from 'chalk'
 import fs from 'fs-extra'
 import { buildSchema, extendSchema, GraphQLSchema, introspectionFromSchema, isObjectType, parse } from 'graphql'
@@ -45,7 +44,7 @@ export async function graphqlCodegenWatch () {
   const spawned = universalSpawn('graphql-codegen', ['--watch', '--config', 'graphql/graphql-codegen.yml'], {
     cwd: monorepoPaths.pkgDataContext,
   })
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
   let hasResolved = false
 
   spawned.stdout.on('data', (chunk) => {

@@ -2,7 +2,6 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
 import { ProtocolManagerShape } from '@packages/types'
 import type { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
-import pDefer from 'p-defer'
 import type Protocol from 'devtools-protocol'
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -181,6 +180,88 @@ describe('lib/browsers/cri-client', function () {
       })
     })
 
+    describe('when a service worker target attaches', () => {
+      const sessionId = 'sw-session'
+      let client: CriClient
+
+      // drains the async attach handler, which fireCDPEvent invokes without
+      // awaiting
+      const drain = () => new Promise((resolve) => setImmediate(resolve))
+
+      beforeEach(async () => {
+        client = await getClient({ host: HOST, fullyManageTabs: true })
+        criStub.send.resolves()
+      })
+
+      it('enables interception on the session before releasing the debugger', async () => {
+        const enabled = Promise.withResolvers<void>()
+
+        client.onServiceWorkerTargetAttached = sinon.stub().returns(enabled.promise)
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(client.onServiceWorkerTargetAttached).to.have.been.calledOnceWith(sessionId)
+
+        // a worker released before its session is intercepted fetches its own
+        // script straight off the network, bypassing the middleware onion
+        expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+        enabled.resolve()
+        await drain()
+
+        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('does not enable interception for other target types', async () => {
+        client.onServiceWorkerTargetAttached = sinon.stub().resolves()
+
+        await Promise.all(['page', 'other', 'iframe'].map((type) => {
+          return fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type } as Protocol.Target.TargetInfo,
+          })
+        }))
+
+        await drain()
+
+        expect(client.onServiceWorkerTargetAttached).not.to.have.been.called
+      })
+
+      it('releases the debugger even when enabling interception fails', async () => {
+        client.onServiceWorkerTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        // losing interception on one worker must not strand the target paused
+        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('releases the debugger when no interception hook is registered', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(criStub.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+    })
+
     context('#send', function () {
       it('calls cri.send with command and data', async function () {
         send.resolves()
@@ -345,7 +426,7 @@ describe('lib/browsers/cri-client', function () {
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
 
-      const reconnection = pDefer()
+      const reconnection = Promise.withResolvers()
 
       onReconnect.callsFake(() => reconnection.resolve())
       await reconnection.promise
@@ -371,7 +452,7 @@ describe('lib/browsers/cri-client', function () {
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
 
-      const reconnection = pDefer()
+      const reconnection = Promise.withResolvers()
 
       onReconnect.callsFake(() => reconnection.resolve())
       await reconnection.promise
@@ -396,7 +477,7 @@ describe('lib/browsers/cri-client', function () {
       // @ts-ignore
       await criStub.on.withArgs('disconnect').args[0][1]()
 
-      const reconnection = pDefer()
+      const reconnection = Promise.withResolvers()
 
       onReconnect.callsFake(() => reconnection.resolve())
       await reconnection.promise

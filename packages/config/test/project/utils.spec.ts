@@ -1,6 +1,6 @@
 import { vi, describe, it, beforeAll, beforeEach, expect } from 'vitest'
 import _ from 'lodash'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import Debug from 'debug'
 import os from 'node:os'
 

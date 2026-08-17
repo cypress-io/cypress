@@ -44,6 +44,7 @@
         'text-indigo-500': !disabled
       }"
       :disabled="disabled"
+      data-cy="card-title"
     >
       {{ title }}
     </button>

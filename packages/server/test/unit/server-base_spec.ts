@@ -356,6 +356,53 @@ describe('lib/server-base', () => {
     })
   })
 
+  describe('#attachCdpFetchExtraTarget', () => {
+    function createClient () {
+      return {
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+    }
+
+    beforeEach(function () {
+      this.server._openConfig = this.config
+      this.server._socket = {
+        toDriver: sinon.stub(),
+        close: sinon.stub(),
+        setProtocolManager: sinon.stub(),
+      }
+
+      this.server.getCurrentBrowser = () => null
+      this.server._netStubbingState = {
+        routes: [],
+        requests: {},
+        reset: sinon.stub(),
+      }
+    })
+
+    it('delegates to the CDP Fetch runtime when present', async function () {
+      const pageClient = createClient()
+      const extraClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(pageClient)
+
+      const detach = sinon.stub().resolves()
+      const attachExtraTarget = sinon.stub(this.server._cdpFetchRuntime, 'attachExtraTarget').resolves(detach)
+
+      const result = await this.server.attachCdpFetchExtraTarget(extraClient)
+
+      expect(attachExtraTarget).to.have.been.calledOnceWith(extraClient)
+      expect(result).to.equal(detach)
+    })
+
+    it('returns undefined when there is no CDP Fetch runtime', async function () {
+      const result = await this.server.attachCdpFetchExtraTarget(createClient())
+
+      expect(result).to.be.undefined
+    })
+  })
+
   describe('#createServer', () => {
     beforeEach(function () {
       this.port = 54321
@@ -580,6 +627,48 @@ describe('lib/server-base', () => {
       })
     })
 
+    describe('onResetServerState', () => {
+      beforeEach(function () {
+        this.config.blockHosts = 'localhost:3131'
+
+        return this.server.open(this.config, getOpenOptions())
+        .then(() => {
+          this.websocketOptions = {} as Record<string, any>
+          this.server.startWebsockets(1, 2, this.websocketOptions)
+        })
+      })
+
+      it('applies the blockHosts value the driver resolved for the upcoming test', function () {
+        this.websocketOptions.onResetServerState({ blockHosts: ['*.pendo.io'] })
+
+        expect(this.server._openConfig.blockHosts).to.deep.eq(['*.pendo.io'])
+      })
+
+      it('applies null so an override can clear blocking', function () {
+        this.websocketOptions.onResetServerState({ blockHosts: null })
+
+        expect(this.server._openConfig.blockHosts).to.be.null
+      })
+
+      it('leaves blockHosts alone when the payload omits it', function () {
+        this.websocketOptions.onResetServerState({})
+
+        expect(this.server._openConfig.blockHosts).to.eq('localhost:3131')
+      })
+
+      it('leaves blockHosts alone when there is no payload', function () {
+        this.websocketOptions.onResetServerState()
+
+        expect(this.server._openConfig.blockHosts).to.eq('localhost:3131')
+      })
+
+      it('is read by the network runtime, which shares the config object', function () {
+        this.websocketOptions.onResetServerState({ blockHosts: ['*.pendo.io'] })
+
+        expect(this.server._networkProxy.http.config.blockHosts).to.deep.eq(['*.pendo.io'])
+      })
+    })
+
     it('falls back to an empty rendered-HTML-origins map when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
       process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
 
@@ -612,6 +701,15 @@ describe('lib/server-base', () => {
       this.server.reset()
 
       expect(this.buffers.reset).to.be.called
+    })
+
+    it('restores the project-level blockHosts so an override cannot leak into the next spec', function () {
+      this.server._projectBlockHosts = 'localhost:3131'
+      this.server._openConfig.blockHosts = null
+
+      this.server.reset()
+
+      expect(this.server._openConfig.blockHosts).to.eq('localhost:3131')
     })
 
     it('sets the domain to the previous base url if set', function () {

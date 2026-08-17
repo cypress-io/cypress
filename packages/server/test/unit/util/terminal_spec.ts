@@ -1,5 +1,5 @@
 import snapshot from 'snap-shot-it'
-import stripAnsi from 'strip-ansi'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 import widestLine from 'widest-line'
 import * as env from '../../../lib/util/env'
 import * as terminal from '../../../lib/util/terminal'
