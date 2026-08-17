@@ -34,6 +34,7 @@ exports['fails prior to top change retry succeeds / shows the correct retry numb
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -54,12 +55,12 @@ exports['fails prior to top change retry succeeds / shows the correct retry numb
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  fails_prior_to_top_change_retry_suc      XX:XX        1        1        -        -        - │
-  │    ceeds.cy.ts                                                                                 │
+  │ ✔  fails_prior_to_top_change_re      XX:XX        1        1        -        -        -      1 │
+  │    try_succeeds.cy.ts                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                 XX:XX        1        1        -        -        -      1  
 
 
 `

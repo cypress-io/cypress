@@ -93,6 +93,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -105,11 +106,11 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  deterministic-flaky.cy.js                XX:XX        1        1        -        -        - │
+  │ ✔  deterministic-flaky.cy.js         XX:XX        1        1        -        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                 XX:XX        1        1        -        -        -      1  
 
 
 `
@@ -158,6 +159,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -170,11 +172,11 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  deterministic-flaky.cy.js                XX:XX        1        1        -        -        - │
+  │ ✔  deterministic-flaky.cy.js         XX:XX        1        1        -        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                 XX:XX        1        1        -        -        -      1  
 
 
 `
@@ -224,6 +226,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -236,11 +239,11 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  │ ✖  deterministic-flaky.cy.js         XX:XX        1        -        1        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)              XX:XX        1        -        1        -        -      1  
 
 
 `
@@ -294,6 +297,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -306,11 +310,11 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  │ ✖  deterministic-flaky.cy.js         XX:XX        1        -        1        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)              XX:XX        1        -        1        -        -      1  
 
 
 `
@@ -423,6 +427,7 @@ AssertionError: expected true to be false
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -435,11 +440,11 @@ AssertionError: expected true to be false
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  │ ✖  deterministic-flaky.cy.js         XX:XX        1        -        1        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)              XX:XX        1        -        1        -        -      1  
 
 
 `
@@ -489,6 +494,7 @@ AssertionError: expected true to be false
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -501,11 +507,11 @@ AssertionError: expected true to be false
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  deterministic-flaky.cy.js                XX:XX        1        -        1        -        - │
+  │ ✖  deterministic-flaky.cy.js         XX:XX        1        -        1        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)              XX:XX        1        -        1        -        -      1  
 
 
 `
@@ -568,6 +574,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        2                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -601,6 +608,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-and-pass-on-threshold"
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -709,6 +717,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -742,6 +751,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -775,6 +785,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -811,6 +822,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -823,32 +835,33 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  can-retry-from-afterEach.retries.mo      XX:XX        5        5        -        -        - │
-  │    chaEvents.cy.js                                                                             │
+  │ ✔  can-retry-from-afterEach.ret      XX:XX        5        5        -        -        -      2 │
+  │    ries.mochaEvents.cy.js                                                                      │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  can-retry-from-beforeEach.retries.m      XX:XX        1        1        -        -        - │
-  │    ochaEvents.cy.js                                                                            │
+  │ ✔  can-retry-from-beforeEach.re      XX:XX        1        1        -        -        -      1 │
+  │    tries.mochaEvents.cy.js                                                                     │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  cant-retry-from-before.retries.moch      XX:XX        1        -        1        -        - │
-  │    aEvents.cy.js                                                                               │
+  │ ✖  cant-retry-from-before.retri      XX:XX        1        -        1        -        -      - │
+  │    es.mochaEvents.cy.js                                                                        │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  does-not-serialize-dom-error.cy.js       XX:XX        1        -        1        -        - │
+  │ ✖  does-not-serialize-dom-error      XX:XX        1        -        1        -        -      - │
+  │    .cy.js                                                                                      │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  simple-fail.retries.mochaEvents.cy.      XX:XX        1        1        -        -        - │
-  │    js                                                                                          │
+  │ ✔  simple-fail.retries.mochaEve      XX:XX        1        1        -        -        -      1 │
+  │    nts.cy.js                                                                                   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  test-retry-with-hooks.retries.mocha      XX:XX        1        1        -        -        - │
-  │    Events.cy.js                                                                                │
+  │ ✔  test-retry-with-hooks.retrie      XX:XX        1        1        -        -        -      1 │
+  │    s.mochaEvents.cy.js                                                                         │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  test-retry-with-only.retries.mochaE      XX:XX        1        1        -        -        - │
-  │    vents.cy.js                                                                                 │
+  │ ✔  test-retry-with-only.retries      XX:XX        1        1        -        -        -      1 │
+  │    .mochaEvents.cy.js                                                                          │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  three-tests-with-retry.retries.moch      XX:XX        3        3        -        -        - │
-  │    aEvents.cy.js                                                                               │
+  │ ✔  three-tests-with-retry.retri      XX:XX        3        3        -        -        -      1 │
+  │    es.mochaEvents.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  2 of 8 failed (25%)                      XX:XX       14       12        2        -        -  
+    ✖  2 of 8 failed (25%)               XX:XX       14       12        2        -        -      7  
 
 
 `
@@ -935,6 +948,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exe
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        2                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -982,6 +996,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exe
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1107,6 +1122,7 @@ Error: test 1
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1153,6 +1169,7 @@ Error: test 1
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1199,6 +1216,7 @@ Error: test 2
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1248,6 +1266,7 @@ Error: test 2
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1260,32 +1279,33 @@ Error: test 2
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  can-retry-from-afterEach.retries.mo      XX:XX        5        3        2        -        - │
-  │    chaEvents.cy.js                                                                             │
+  │ ✖  can-retry-from-afterEach.ret      XX:XX        5        3        2        -        -      2 │
+  │    ries.mochaEvents.cy.js                                                                      │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  can-retry-from-beforeEach.retries.m      XX:XX        1        -        1        -        - │
-  │    ochaEvents.cy.js                                                                            │
+  │ ✖  can-retry-from-beforeEach.re      XX:XX        1        -        1        -        -      1 │
+  │    tries.mochaEvents.cy.js                                                                     │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  cant-retry-from-before.retries.moch      XX:XX        1        -        1        -        - │
-  │    aEvents.cy.js                                                                               │
+  │ ✖  cant-retry-from-before.retri      XX:XX        1        -        1        -        -      - │
+  │    es.mochaEvents.cy.js                                                                        │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  does-not-serialize-dom-error.cy.js       XX:XX        1        -        1        -        - │
+  │ ✖  does-not-serialize-dom-error      XX:XX        1        -        1        -        -      - │
+  │    .cy.js                                                                                      │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  simple-fail.retries.mochaEvents.cy.      XX:XX        1        -        1        -        - │
-  │    js                                                                                          │
+  │ ✖  simple-fail.retries.mochaEve      XX:XX        1        -        1        -        -      1 │
+  │    nts.cy.js                                                                                   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  test-retry-with-hooks.retries.mocha      XX:XX        1        -        1        -        - │
-  │    Events.cy.js                                                                                │
+  │ ✖  test-retry-with-hooks.retrie      XX:XX        1        -        1        -        -      1 │
+  │    s.mochaEvents.cy.js                                                                         │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  test-retry-with-only.retries.mochaE      XX:XX        1        -        1        -        - │
-  │    vents.cy.js                                                                                 │
+  │ ✖  test-retry-with-only.retries      XX:XX        1        -        1        -        -      1 │
+  │    .mochaEvents.cy.js                                                                          │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  three-tests-with-retry.retries.moch      XX:XX        3        2        1        -        - │
-  │    aEvents.cy.js                                                                               │
+  │ ✖  three-tests-with-retry.retri      XX:XX        3        2        1        -        -      1 │
+  │    es.mochaEvents.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  8 of 8 failed (100%)                     XX:XX       14        5        9        -        -  
+    ✖  8 of 8 failed (100%)              XX:XX       14        5        9        -        -      7  
 
 
 `
@@ -1357,6 +1377,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exe
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        2                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1396,6 +1417,7 @@ exports['e2e retries.experimentalStrategy / "detect-flake-but-always-fail" / exe
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1513,6 +1535,7 @@ Error: test 1
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1551,6 +1574,7 @@ Error: test 1
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1589,6 +1613,7 @@ Error: test 2
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1631,6 +1656,7 @@ Error: test 2
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -1643,32 +1669,33 @@ Error: test 2
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  can-retry-from-afterEach.retries.mo      XX:XX        5        3        2        -        - │
-  │    chaEvents.cy.js                                                                             │
+  │ ✖  can-retry-from-afterEach.ret      XX:XX        5        3        2        -        -      2 │
+  │    ries.mochaEvents.cy.js                                                                      │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  can-retry-from-beforeEach.retries.m      XX:XX        1        -        1        -        - │
-  │    ochaEvents.cy.js                                                                            │
+  │ ✖  can-retry-from-beforeEach.re      XX:XX        1        -        1        -        -      1 │
+  │    tries.mochaEvents.cy.js                                                                     │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  cant-retry-from-before.retries.moch      XX:XX        1        -        1        -        - │
-  │    aEvents.cy.js                                                                               │
+  │ ✖  cant-retry-from-before.retri      XX:XX        1        -        1        -        -      - │
+  │    es.mochaEvents.cy.js                                                                        │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  does-not-serialize-dom-error.cy.js       XX:XX        1        -        1        -        - │
+  │ ✖  does-not-serialize-dom-error      XX:XX        1        -        1        -        -      - │
+  │    .cy.js                                                                                      │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  simple-fail.retries.mochaEvents.cy.      XX:XX        1        -        1        -        - │
-  │    js                                                                                          │
+  │ ✖  simple-fail.retries.mochaEve      XX:XX        1        -        1        -        -      1 │
+  │    nts.cy.js                                                                                   │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  test-retry-with-hooks.retries.mocha      XX:XX        1        -        1        -        - │
-  │    Events.cy.js                                                                                │
+  │ ✖  test-retry-with-hooks.retrie      XX:XX        1        -        1        -        -      1 │
+  │    s.mochaEvents.cy.js                                                                         │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  test-retry-with-only.retries.mochaE      XX:XX        1        -        1        -        - │
-  │    vents.cy.js                                                                                 │
+  │ ✖  test-retry-with-only.retries      XX:XX        1        -        1        -        -      1 │
+  │    .mochaEvents.cy.js                                                                          │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  three-tests-with-retry.retries.moch      XX:XX        3        2        1        -        - │
-  │    aEvents.cy.js                                                                               │
+  │ ✖  three-tests-with-retry.retri      XX:XX        3        2        1        -        -      1 │
+  │    es.mochaEvents.cy.js                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  8 of 8 failed (100%)                     XX:XX       14        5        9        -        -  
+    ✖  8 of 8 failed (100%)              XX:XX       14        5        9        -        -      7  
 
 
 `

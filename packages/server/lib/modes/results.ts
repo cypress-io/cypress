@@ -92,6 +92,22 @@ export interface CypressRunResult {
   totalTests: number
 }
 
+/**
+ * A test is flaky when its attempts contain both a failure and a pass. Tests
+ * that ultimately fail are included on purpose: under the
+ * `detect-flake-but-always-fail` retry strategy a flaky test is reported as
+ * failed, and surfacing that flake is the point of the strategy.
+ */
+export const isFlakyTest = (test: { attempts?: Pick<AttemptResult, 'state'>[] }): boolean => {
+  const states = _.map(test.attempts, 'state')
+
+  return states.includes('passed') && states.includes('failed')
+}
+
+export const countFlakyTests = (tests?: { attempts?: Pick<AttemptResult, 'state'>[] }[]): number => {
+  return _.filter(tests, isFlakyTest).length
+}
+
 const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
   const duration = _.reduce(test.attempts, (memo, attempt) => {
     return memo + (attempt.wallClockDuration || 0)
@@ -122,6 +138,7 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
     duration: run.stats.wallClockDuration,
     endedAt: run.stats.wallClockEndedAt,
     failures: run.stats.failures,
+    flaky: countFlakyTests(run.tests),
     passes: run.stats.passes,
     pending: run.stats.pending,
     skipped: run.stats.skipped,
@@ -210,6 +227,7 @@ export const createPublicRunResults = (results: CypressRunResult): CypressComman
   startedTestsAt: results.startedTestsAt,
   totalDuration: results.totalDuration,
   totalFailed: results.totalFailed,
+  totalFlaky: _.sumBy(results.runs, (run) => countFlakyTests(run.tests)),
   totalPassed: results.totalPassed,
   totalPending: results.totalPending,
   totalSkipped: results.totalSkipped,

@@ -381,6 +381,7 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -418,17 +419,17 @@ exports['experimentalSingleTabRunMode / executes all specs in a single tab'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  1_fails.cy.js                            XX:XX        2        -        2        -        - │
+  │ ✖  1_fails.cy.js                     XX:XX        2        -        2        -        -      - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  2_foo.cy.js                              XX:XX        1        1        -        -        - │
+  │ ✔  2_foo.cy.js                       XX:XX        1        1        -        -        -      - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  3_retries.cy.js                          XX:XX        1        1        -        -        - │
+  │ ✔  3_retries.cy.js                   XX:XX        1        1        -        -        -      1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  999_final.cy.js                          XX:XX        1        1        -        -        - │
+  │ ✔  999_final.cy.js                   XX:XX        1        1        -        -        -      - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 4 failed (25%)                      XX:XX        5        3        2        -        -  
+    ✖  1 of 4 failed (25%)               XX:XX        5        3        2        -        -      1  
 
 
 `

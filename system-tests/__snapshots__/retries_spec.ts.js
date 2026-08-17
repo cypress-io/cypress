@@ -32,6 +32,7 @@ exports['retries / supports retries'] = `
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -51,11 +52,11 @@ exports['retries / supports retries'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  fail-twice.cy.js                         XX:XX        1        1        -        -        - │
+  │ ✔  fail-twice.cy.js                  XX:XX        1        1        -        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                 XX:XX        1        1        -        -        -      1  
 
 
 `
@@ -94,6 +95,7 @@ exports['retries / supports retries (chrome)'] = `
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  2                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -113,11 +115,11 @@ exports['retries / supports retries (chrome)'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  fail-twice.cy.js                         XX:XX        1        1        -        -        - │
+  │ ✔  fail-twice.cy.js                  XX:XX        1        1        -        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                 XX:XX        1        1        -        -        -      1  
 
 
 `
@@ -155,6 +157,7 @@ exports['retries / logs one attempt when both beforeEach and afterEach fail'] = 
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
+  │ Flaky:        1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -167,11 +170,11 @@ exports['retries / logs one attempt when both beforeEach and afterEach fail'] = 
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                       Tests  Passing  Failing  Pending  Skipped  Flaky  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  fail-in-both-hooks.cy.js                 XX:XX        1        1        -        -        - │
+  │ ✔  fail-in-both-hooks.cy.js          XX:XX        1        1        -        -        -      1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                 XX:XX        1        1        -        -        -      1  
 
 
 `

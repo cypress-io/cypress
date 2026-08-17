@@ -19,6 +19,7 @@ import type { HorizontalAlignment, Table } from 'cli-table3'
 import type { CypressRunResult } from '../modes/results'
 import type { IArtifact, ArtifactUploadResult } from '../cloud/artifacts/artifact'
 
+import { countFlakyTests } from '../modes/results'
 import { ArtifactKinds } from '../cloud/artifacts/artifact'
 
 type Screenshot = {
@@ -27,6 +28,8 @@ type Screenshot = {
   path: string
   specName: string
 }
+
+const FLAKY_COLUMN_WIDTH = 7
 
 export const cloudRecommendationMessage = `
   Debug faster with full visibility.
@@ -72,7 +75,7 @@ function formatBrowser (browser: Browser) {
   ]).join(' ')
 }
 
-function formatFooterSummary (results: any) {
+function formatFooterSummary (results: any, totalFlaky: number) {
   const { totalFailed, runs } = results
 
   const isCanceled = _.some(results.runs, { skippedSpec: true })
@@ -107,6 +110,7 @@ function formatFooterSummary (results: any) {
     colorIf(totalFailed, 'red'),
     colorIf(results.totalPending, 'cyan'),
     colorIf(results.totalSkipped, 'blue'),
+    ...(totalFlaky ? [colorIf(totalFlaky, 'yellow')] : []),
   ]
 }
 
@@ -123,7 +127,7 @@ function macOSRemovePrivate (str: string) {
   return str
 }
 
-function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any }, estimated: number) {
+function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any, tests?: { attempts?: { state: string }[] }[] }, estimated: number) {
   return {
     name: _.get(obj, 'spec.name'),
     relativeToCommonRoot: _.get(obj, 'spec.relativeToCommonRoot'),
@@ -132,6 +136,7 @@ function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[],
     pending: _.get(obj, 'stats.pending'),
     failures: _.get(obj, 'stats.failures'),
     skipped: _.get(obj, 'stats.skipped'),
+    flaky: countFlakyTests(obj.tests),
     duration: humanTime.long(_.get(obj, 'stats.wallClockDuration')),
     estimated: estimated && humanTime.long(estimated),
     screenshots: obj.screenshots && obj.screenshots.length,
@@ -314,8 +319,19 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
   })
 
   if (runs && runs.length) {
+    const flakyPerRun = _.map(runs, (run) => countFlakyTests(run.tests))
+    const totalFlaky = _.sum(flakyPerRun)
+
     const colAligns: HorizontalAlignment[] = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
     const colWidths = [3, 41, 11, 9, 9, 9, 9, 9]
+
+    // the table is capped at 100 columns, so the Flaky column is only worth the
+    // room it takes from the spec name when the run actually produced flake
+    if (totalFlaky) {
+      colAligns.push('right')
+      colWidths[1] -= FLAKY_COLUMN_WIDTH
+      colWidths.push(FLAKY_COLUMN_WIDTH)
+    }
 
     const table1 = terminal.table({
       colAligns,
@@ -330,6 +346,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
         gray('Failing'),
         gray('Pending'),
         gray('Skipped'),
+        ...(totalFlaky ? [gray('Flaky')] : []),
       ],
     })
 
@@ -343,10 +360,10 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
       colAligns,
       colWidths,
       type: 'noBorder',
-      head: formatFooterSummary(results),
+      head: formatFooterSummary(results, totalFlaky),
     })
 
-    _.each(runs, (run) => {
+    _.each(runs, (run, index) => {
       const { spec, stats } = run
 
       const ms = durationFormat(stats.wallClockDuration || 0)
@@ -358,6 +375,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
           '-',
           formattedSpec, color('SKIPPED', 'gray'),
           '-', '-', '-', '-', '-',
+          ...(totalFlaky ? ['-'] : []),
         ])
       }
 
@@ -370,6 +388,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
         colorIf(stats.failures, 'red'),
         colorIf(stats.pending, 'cyan'),
         colorIf(stats.skipped, 'blue'),
+        ...(totalFlaky ? [colorIf(flakyPerRun[index], 'yellow')] : []),
       ])
     })
 
@@ -420,6 +439,7 @@ export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: 
     ['Failing:', results.failures],
     ['Pending:', results.pending],
     ['Skipped:', results.skipped],
+    results.flaky ? ['Flaky:', results.flaky] : undefined,
     ['Screenshots:', results.screenshots],
     ['Video:', results.video],
     ['Duration:', results.duration],

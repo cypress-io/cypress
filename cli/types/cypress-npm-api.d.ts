@@ -252,6 +252,12 @@ declare namespace CypressCommandLine {
       duration?: ms
       endedAt: dateTimeISO
       failures: number
+      /**
+       * Number of tests that both failed and passed across their attempts.
+       * Flaky tests are also counted in `passes` or `failures`, depending on
+       * the `retries` strategy that determined their final state.
+       */
+      flaky: number
       passes: number
       pending: number
       skipped: number
@@ -294,6 +300,12 @@ declare namespace CypressCommandLine {
     startedTestsAt: dateTimeISO
     totalDuration: number
     totalFailed: number
+    /**
+     * Number of tests that both failed and passed across their attempts.
+     * Flaky tests are also counted in `totalPassed` or `totalFailed`, depending
+     * on the `retries` strategy that determined their final state.
+     */
+    totalFlaky: number
     totalPassed: number
     totalPending: number
     totalSkipped: number
