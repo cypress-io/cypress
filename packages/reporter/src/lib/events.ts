@@ -134,6 +134,14 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
+    // A pin driven from outside the reporter (e.g. the tap CLI): reflect it the
+    // way a user click would — highlight the command and open its test so the
+    // command (and its pin icon) actually render in the log.
+    runner.on('reporter:snapshot:pinned', action('snapshot:pinned', (testId: string, logId: number | string) => {
+      appState.pinnedSnapshotId = logId
+      runnablesStore.testById(testId)?.setIsOpen(true)
+    }))
+
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()

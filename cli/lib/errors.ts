@@ -5,7 +5,8 @@ import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
 
-const docsUrl = 'https://on.cypress.io'
+export const docsUrl = 'https://on.cypress.io'
+
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
 
