@@ -18,6 +18,12 @@ type NonSpecError = Error & { isNonSpec: boolean | undefined }
 type ChannelUrl = string
 type ChannelKey = string
 
+const serializeForInlineScript = (value: unknown) => {
+  return JSON.stringify(value ?? null).replace(/[<>\u2028\u2029]/g, (char) => {
+    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
+  })
+}
+
 class PrivilegedCommandsManager {
   channelKeys: Record<ChannelUrl, ChannelKey> = {}
   verifiedCommands: SpecOriginatedCommand[] = []
@@ -53,13 +59,13 @@ class PrivilegedCommandsManager {
     }))
 
     return `${script}({
-      browserFamily: '${options.browserFamily}',
-      isSpecBridge: ${options.isSpecBridge || 'false'},
-      key: '${key}',
-      namespace: '${options.namespace}',
-      scripts: '${specScripts}',
-      url: '${options.url}',
-      documentDomainContext: ${options.documentDomainContext},
+      browserFamily: ${serializeForInlineScript(options.browserFamily)},
+      isSpecBridge: ${serializeForInlineScript(!!options.isSpecBridge)},
+      key: ${serializeForInlineScript(key)},
+      namespace: ${serializeForInlineScript(options.namespace)},
+      scripts: ${serializeForInlineScript(specScripts)},
+      url: ${serializeForInlineScript(options.url)},
+      documentDomainContext: ${serializeForInlineScript(!!options.documentDomainContext)},
     })`
   }
 
