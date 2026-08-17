@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { filterAction as filterActionSchema, type FilterActionType, type TestAction_v1Type } from '../validations/cloudValidations'
+import type { FilterActionType, TestAction_v1Type } from '../validations/cloudValidations'
 
 // The `(skipped due to browser)` suffix is appended to a test's title by the
 // driver when a suite-/test-level `browser` config skips it. Cloud records the
@@ -9,7 +9,10 @@ import { filterAction as filterActionSchema, type FilterActionType, type TestAct
 const SKIPPED_DUE_TO_BROWSER_MESSAGE = ' (skipped due to browser)'
 
 const isFilterAction = (action: TestAction_v1Type): action is FilterActionType => {
-  return filterActionSchema.safeParse(action).success
+  return action?.action === 'FILTER' &&
+    action?.type === 'SPEC' &&
+    Array.isArray(action?.payload?.filter) &&
+    Array.isArray(action?.payload?.tests)
 }
 
 /**
