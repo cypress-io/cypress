@@ -3107,6 +3107,7 @@
     "./node_modules/semver/functions/rsort.js",
     "./node_modules/semver/functions/satisfies.js",
     "./node_modules/semver/functions/sort.js",
+    "./node_modules/semver/functions/truncate.js",
     "./node_modules/semver/functions/valid.js",
     "./node_modules/semver/index.js",
     "./node_modules/semver/internal/constants.js",
@@ -4078,5 +4079,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "049cee7145dc7294bbc05172a710688efeebcc0c87f782fbb47c8e942da55a95"
+  "deferredHash": "b649cd739ba1382707cf2a9f499a5c13246dd4cd37f264ba178d767a0546ceff"
 }
