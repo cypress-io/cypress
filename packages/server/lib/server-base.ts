@@ -1012,7 +1012,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // Fully tear down CDP Fetch (Fetch.disable + NetworkProxy.dispose). reset()
     // only clears in-flight state so the next test can keep using Fetch.
-    return Promise.resolve(this.swapCdpFetchRuntime())
+    const cdpFetchTeardown = this.swapCdpFetchRuntime()
+
+    // The swap above re-published 'proxy'. Refuse CONNECTs for the rest of
+    // teardown: close() destroys the https proxy concurrently, so one accepted
+    // here could bind an SNI server after closeHttpsProxy() has run. Same tick
+    // as the publish, so no CONNECT lands in between.
+    this._networkMode = undefined
+
+    return Promise.resolve(cdpFetchTeardown)
     .then(() => this.disposeProxyRuntime())
     .then(() => this._server!.destroyAsync())
     .then(() => {
