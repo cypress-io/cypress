@@ -227,8 +227,6 @@ describe('lib/server-base', () => {
       this.server._openConfig = this.config
       this.server._proxyRuntime = {
         networkProxy: { id: 'mitm' },
-        networkPolicyRegistration: { id: 'mitm-policy' },
-        networkInterceptionCore: { id: 'mitm-core' },
       }
 
       this.netStubbingState = { id: 'owned-by-open' }
@@ -278,8 +276,6 @@ describe('lib/server-base', () => {
       expect(stop).to.have.been.called
       expect(this.server._cdpFetchRuntime).to.be.undefined
       expect(this.server._networkProxy).to.eq(this.server._proxyRuntime.networkProxy)
-      expect(this.server._networkPolicyRegistration).to.eq(this.server._proxyRuntime.networkPolicyRegistration)
-      expect(this.server._networkInterceptionCore).to.eq(this.server._proxyRuntime.networkInterceptionCore)
       // the server owns the netStubbingState, so a runtime handoff must not move it
       expect(this.server._netStubbingState).to.eq(this.netStubbingState)
     })
@@ -446,10 +442,12 @@ describe('lib/server-base', () => {
       })
 
       expect(this.server._cdpFetchRuntime).to.exist
-      expect(this.server._networkProxy).to.exist
       expect(this.server._netStubbingState).to.exist
-      expect(this.server._networkPolicyRegistration).to.exist
-      expect(this.server._networkInterceptionCore).to.exist
+      // The request-time ctx reads its interception core off the installed
+      // NetworkProxy, so this observes the pointers production middleware
+      // observes.
+      expect(this.server._networkProxy).to.eq(this.server._cdpFetchRuntime.networkProxy)
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.eq(this.server._cdpFetchRuntime.networkInterceptionCore)
     })
 
     // Publishing the mode any earlier would point the request-time gates at a
@@ -500,6 +498,39 @@ describe('lib/server-base', () => {
       expect(this.server.isBrowserNetworkMode()).to.be.false
       expect(this.server._netStubbingState).to.equal(state)
       expect(this.server._networkProxy.http.netStubbingState).to.equal(state)
+    })
+
+    // Each runtime constructs its interception core (and the policy
+    // registration inside it) into its own NetworkProxy, and the middleware
+    // ctx reads the core off whichever NetworkProxy is installed. So the
+    // handoff invariant — every shared runtime pointer moves with
+    // `_networkMode` in one synchronous step — is observable here: after each
+    // switch, the middleware-visible core must be the active runtime's, never
+    // the other one's.
+    it('hands the middleware-visible interception core over with the runtime, in both directions', async function () {
+      _.extend(this.config, { port: 54321 })
+      sinon.stub(this.server, 'createExpressApp').returns({ use: sinon.stub() })
+      sinon.stub(this.server, 'createServer').resolves()
+      sinon.stub(this.server, 'ensureHttpsProxy').resolves()
+
+      await this.server.open(this.config, getOpenOptions())
+
+      const mitmCore = this.server._proxyRuntime.networkInterceptionCore
+
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.equal(mitmCore)
+
+      await this.server.createCdpFetchNetworkRuntime(createClient())
+
+      const cdpCore = this.server._cdpFetchRuntime.networkInterceptionCore
+
+      expect(cdpCore).not.to.equal(mitmCore)
+      expect(this.server.isBrowserNetworkMode()).to.be.true
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.equal(cdpCore)
+
+      await this.server.setNetworkMode(false)
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.equal(mitmCore)
     })
 
     it('applies a previously stored protocol manager to the late-bound CDP NetworkProxy', async function () {

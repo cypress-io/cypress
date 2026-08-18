@@ -53,7 +53,6 @@ import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
-import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
@@ -203,8 +202,11 @@ type WarningErr = Record<string, any>
  */
 type NetworkMode = 'browser' | 'proxy'
 
-// The three pointers that must always name the same runtime as `_networkMode`.
-type NetworkRuntimePointers = Pick<ProxyNetworkRuntime, 'networkProxy' | 'networkPolicyRegistration' | 'networkInterceptionCore'>
+// The pointer that must always name the same runtime as `_networkMode`. The
+// runtime's interception core (and the policy registration built into it) is
+// constructed into its NetworkProxy, so it travels with this pointer and
+// cannot drift on its own.
+type NetworkRuntimePointers = Pick<ProxyNetworkRuntime, 'networkProxy'>
 
 interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
@@ -228,8 +230,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
-  protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
-  protected _networkInterceptionCore?: NetworkInterceptionCore
   protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
   protected _proxyRuntime?: ProxyNetworkRuntime
   protected _openConfig?: Cfg
@@ -651,16 +651,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   /**
-   * Installs a network runtime's pointers and, when given, the mode that names
-   * it. Both must move together and without an await in between: any window
-   * where `_networkMode` and `_networkProxy` disagree routes requests into the
-   * wrong pipeline (an absolute-form request handed to the browser-interception
-   * branch, or a path-only one handed to the MITM proxy).
+   * Installs a network runtime's NetworkProxy and, when given, the mode that
+   * names it. Both must move together and without an await in between: any
+   * window where `_networkMode` and `_networkProxy` disagree routes requests
+   * into the wrong pipeline (an absolute-form request handed to the
+   * browser-interception branch, or a path-only one handed to the MITM proxy).
    */
   private useNetworkRuntime (runtime: NetworkRuntimePointers | undefined, mode?: NetworkMode) {
     this._networkProxy = runtime?.networkProxy
-    this._networkPolicyRegistration = runtime?.networkPolicyRegistration
-    this._networkInterceptionCore = runtime?.networkInterceptionCore
 
     if (mode) {
       this._networkMode = mode
