@@ -1,6 +1,5 @@
 import { CDPCommandQueue, Command } from '../../../lib/browsers/cdp-protocol/cdp-command-queue'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
-import pDeferred from 'p-defer'
 import _ from 'lodash'
 
 const { expect } = require('../../spec_helper')
@@ -92,6 +91,37 @@ describe('CDPCommandQueue', () => {
     })
   })
 
+  describe('.reject', () => {
+    it('rejects every enqueued command promise and empties the queue', async () => {
+      const queue = new CDPCommandQueue()
+
+      const first = queue.add(enableAnimation.command, enableAnimation.params)
+      const second = queue.add(removeAttribute.command, removeAttribute.params)
+      const err = new Error('connection closed')
+
+      queue.reject(err)
+
+      expect(queue.entries).to.have.lengthOf(0)
+      await expect(first).to.be.rejectedWith(err)
+      await expect(second).to.be.rejectedWith(err)
+    })
+
+    it('does not affect commands added after the rejection', async () => {
+      const queue = new CDPCommandQueue()
+
+      const beforeReject = queue.add(enableAnimation.command, enableAnimation.params)
+
+      queue.reject(new Error('connection closed'))
+      await expect(beforeReject).to.be.rejectedWith('connection closed')
+
+      const afterReject = queue.add(removeAttribute.command, removeAttribute.params)
+
+      expect(queue.entries).to.have.lengthOf(1)
+      queue.entries[0].deferred.resolve({ value: true })
+      await expect(afterReject).to.eventually.deep.equal({ value: true })
+    })
+  })
+
   describe('.extract', () => {
     let queue: CDPCommandQueue
     let searchCommand: Partial<Command<any>>
@@ -152,7 +182,7 @@ describe('CDPCommandQueue', () => {
       const queue = new CDPCommandQueue()
 
       queue.add(enableAnimation.command, enableAnimation.params)
-      const deferred = pDeferred()
+      const deferred = Promise.withResolvers()
 
       queue.unshift({
         command: enableAnimation.command,

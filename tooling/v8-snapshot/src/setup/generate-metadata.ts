@@ -3,6 +3,7 @@ import { BundlerMetadata, generateBundlerMetadata } from '../generator/snapshot-
 import debug from 'debug'
 import { ensureDirSync } from 'fs-extra'
 import path from 'path'
+import forceNorewrite from './force-no-rewrite'
 
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
@@ -21,6 +22,7 @@ async function createMeta ({
     pathsMapper,
     nodeModulesOnly,
     integrityCheckSource,
+    forceNorewrite,
   })
 }
 

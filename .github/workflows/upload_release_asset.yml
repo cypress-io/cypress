@@ -72,3 +72,21 @@ jobs:
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           files: SBOM.rpt
+
+  notify_failure:
+    # Alert the team only when a real release fails to produce or attach its
+    # SBOM. Manual workflow_dispatch runs are excluded so ad-hoc generation
+    # never pages anyone.
+    if: failure() && github.event_name == 'release'
+    needs:
+      - generate_sbom
+      - attach_to_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack of the failed release SBOM upload
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "<!subteam^${{ vars.APP_FOUNDATIONS_ONCALL_SUBTEAM_ID }}|app-foundations-oncall> :rotating_light: SBOM release upload failed for *${{ github.event.release.tag_name }}* — <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|view run>"

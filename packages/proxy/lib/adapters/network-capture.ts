@@ -9,7 +9,13 @@ import type { ResponseInterceptionMiddlewareCtx } from './types'
  */
 export async function notifyResponseStreamReceived (mw: ResponseInterceptionMiddlewareCtx): Promise<void> {
   if (!mw.protocolManager || !mw.req.browserPreRequest?.requestId) {
-    return
+    return mw.next()
+  }
+
+  // A skipped body means the transport never read it, not that it was empty.
+  // Notifying Replay here would record a false zero-length capture.
+  if (mw.resBodySkipped) {
+    return mw.next()
   }
 
   const preRequest = mw.req.browserPreRequest
@@ -42,6 +48,8 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
   } else {
     span?.end()
   }
+
+  mw.next()
 }
 
 /**

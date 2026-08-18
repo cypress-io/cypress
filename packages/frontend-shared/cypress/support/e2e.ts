@@ -9,7 +9,6 @@ import { GET_MAJOR_VERSION_FOR_CONTENT, type Browser, type FoundBrowser, type Op
 
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
-import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
 import type nock from 'nock'
@@ -40,7 +39,6 @@ export interface WithCtxInjected extends WithCtxOptions {
   require: typeof require
   process: typeof process
   sinon: typeof sinon
-  pDefer: typeof pDefer
   testState: Record<string, any>
   projectDir(projectName: ProjectFixtureDir): string
 }
@@ -320,7 +318,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
       return cy.withCtx(async (ctx, o) => {
         await ctx.lifecycleManager.waitForInitializeSuccess()
         ctx.actions.project.setAndLoadCurrentTestingType(o.mode)
-        const isInitialized = o.pDefer()
+        const isInitialized = Promise.withResolvers()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
         const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
@@ -437,12 +435,12 @@ function specsPageIsVisible (specsSetup) {
   return cy.get('[data-cy=spec-list-container]').should('be.visible')
 }
 
-function visitLaunchpad (options: { showWelcome?: boolean } = { showWelcome: false }) {
+function visitLaunchpad (options: { showWelcome?: boolean, spinnerTimeout?: number } = { showWelcome: false }) {
   cy.task<{ e2e_launchpadPort: number }>('getCyInCyVariables', ['e2e_launchpadPort']).then(({ e2e_launchpadPort }) => {
     function launchpadVisit () {
       return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
         return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
-          return cy.get('.spinner', { timeout: 10000, log: false }).should('not.exist').then(() => {
+          return cy.get('.spinner', { timeout: options.spinnerTimeout ?? 10000, log: false }).should('not.exist').then(() => {
             return val
           })
         })

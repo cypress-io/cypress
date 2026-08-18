@@ -44,9 +44,16 @@ if [[ "${RUN_PROXY_DISABLED_TESTS:-false}" == "true" || "${RUN_PROXY_DISABLED_TE
   run_proxy_disabled_tests=true
 fi
 
+# Opt-in only — never enabled by path filtering or emit_all_true. Set via
+# Trigger Pipeline → percy-enabled=true (setup config forwards it).
+percy_enabled=false
+if [[ "${PERCY_ENABLED:-false}" == "true" || "${PERCY_ENABLED:-}" == "1" ]]; then
+  percy_enabled=true
+fi
+
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "run-percy": $run_percy, "run-proxy-disabled-tests": $run_proxy_disabled_tests}
+{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests, "run-percy": $run_percy, "run-proxy-disabled-tests": $run_proxy_disabled_tests, "percy-enabled": $percy_enabled}
 EOF
 }
 
@@ -211,6 +218,17 @@ while IFS= read -r file; do
     packages/data-context/*)
       app_ui_tests=true
       launchpad_tests=true
+      server_tests=true
+      system_tests=true
+      unit_tests=true
+      ;;
+    packages/agent-info/*)
+      cli_tests=true
+      unit_tests=true
+      ;;
+    packages/cypress-sessions/*)
+      app_ui_tests=true
+      cli_tests=true
       server_tests=true
       system_tests=true
       unit_tests=true

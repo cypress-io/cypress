@@ -31,6 +31,22 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // cy.focused() resolves via document.activeElement, but the `:focus` and
+    // `:focused` pseudo-selectors are Cypress overrides delegating to our own
+    // isFocused logic. Exercise them directly as literal selectors so a broken
+    // pseudo registration is caught independently of the activeElement path.
+    it('matches the focused element via the :focus / :focused pseudo-selectors', () => {
+      const $button = cy.$$('#button')
+      const $input = cy.$$(':text:first')
+
+      $button.get(0).focus()
+
+      expect($button.is(':focus')).to.be.true
+      expect($button.is(':focused')).to.be.true
+      expect($input.is(':focus')).to.be.false
+      expect($input.is(':focused')).to.be.false
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {

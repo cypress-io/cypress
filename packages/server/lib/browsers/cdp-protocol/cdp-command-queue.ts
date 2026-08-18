@@ -1,5 +1,4 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
-import pDefer, { DeferredPromise } from 'p-defer'
 import type { CdpCommand } from './cdp_automation'
 import Debug from 'debug'
 
@@ -11,7 +10,7 @@ type CommandReturn<T extends CdpCommand> = ProtocolMapping.Commands[T]['returnTy
 export type Command<T extends CdpCommand> = {
   command: T
   params?: object
-  deferred: DeferredPromise<CommandReturn<T>>
+  deferred: PromiseWithResolvers<CommandReturn<T>>
   sessionId?: string
 }
 
@@ -30,7 +29,7 @@ export class CDPCommandQueue {
     debug('enqueing command %s', command)
     debugVerbose('enqueing command %s with params %o', command, params)
 
-    const deferred = pDefer<CommandReturn<TCmd>>()
+    const deferred = Promise.withResolvers<CommandReturn<TCmd>>()
 
     const commandPackage: Command<TCmd> = {
       command,
@@ -50,6 +49,23 @@ export class CDPCommandQueue {
   public clear () {
     debug('clearing command queue')
     this.queue = []
+  }
+
+  /**
+   * Rejects every enqueued command's deferred and empties the queue. Used when
+   * the connection reaches a terminal state, since enqueued commands are
+   * waiting on a reconnect that will never come and would otherwise hang forever.
+   */
+  public reject (error: Error) {
+    debug('rejecting %d enqueued command(s)', this.queue.length)
+
+    const entries = this.queue
+
+    this.queue = []
+
+    for (const entry of entries) {
+      entry.deferred.reject(error)
+    }
   }
 
   public extract<T extends CdpCommand> (search: Partial<Command<T>>): Command<T> | undefined {

@@ -87,7 +87,10 @@ describe('Choose a browser page', () => {
 
       cy.openProject('launchpad', ['--e2e', '--browser', path])
 
-      cy.visitLaunchpad()
+      // Launchpad re-fetches its config on an increasing backoff while the project
+      // loads (see Main.vue), so the loading spinner can outlast visitLaunchpad's
+      // default settle timeout under CI load. Allow more time so it can clear.
+      cy.visitLaunchpad({ spinnerTimeout: 30000 })
 
       cy.get('h1').should('contain', 'Choose a browser')
 
@@ -115,7 +118,7 @@ describe('Choose a browser page', () => {
       cy.get('[data-cy="alert-suffix-icon"]').click()
       cy.get('[data-cy="alert-header"]').should('not.exist')
 
-      cy.visitLaunchpad()
+      cy.visitLaunchpad({ spinnerTimeout: 30000 })
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })

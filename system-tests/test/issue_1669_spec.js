@@ -10,6 +10,7 @@ describe('e2e issue 1669', () => {
       snapshot: true,
       browser: 'chrome',
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
     })
   })
 })

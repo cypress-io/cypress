@@ -16,6 +16,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
 import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -88,12 +89,6 @@ export class OpenProject extends EventEmitter {
       browsers: cfg.browsers as FoundBrowser[],
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
-      ...(isProxyEnabled() ? { proxyServer: ensureProxyServer(cfg) } : {
-        hosts: cfg.hosts,
-        onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
-          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
-        },
-      }),
       socketIoRoute: cfg.socketIoRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: !!cfg.isTextTerminal,
@@ -101,6 +96,29 @@ export class OpenProject extends EventEmitter {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
+      // proxy launch opts must win over prevOptions: args may carry a normalized
+      // NO_PROXY that is wrong for the MITM path, and <-loopback> must never leak
+      // onto the disable-proxy path (#34351).
+      ...(isProxyEnabled() ? {
+        proxyServer: ensureProxyServer(cfg),
+        // the AUT is served over loopback by our own proxy, so subtract Chromium's
+        // implicit rules to keep that traffic proxied
+        // https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassList: '<-loopback>',
+      } : {
+        proxyServer: undefined,
+        proxyBypassList: undefined,
+        // Chromium-family only: Firefox/WebKit parse proxyServer differently and
+        // do not honor Chromium bypass / scheme-map syntax yet (#34351).
+        ...(browser.family === 'chromium' ? translateEgressPolicyToLaunchOpts(cfg.hosts) : {}),
+        hosts: cfg.hosts,
+        onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
+          return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
+        },
+        onExtraTargetCriClientReady: (client) => {
+          return this.projectBase!.server.attachCdpFetchExtraTarget(client)
+        },
+      }),
     }
 
     // if we don't have the isHeaded property
@@ -220,10 +238,14 @@ export class OpenProject extends EventEmitter {
     return this.projectBase?.resetBrowserState()
   }
 
-  closeOpenProjectAndBrowsers () {
-    this.projectBase?.close().catch((e) => {
+  async closeOpenProjectAndBrowsers () {
+    // Wait for the HTTP server to release its port before the next open
+    // (cy-in-cy reopens on hardcoded 4455; Windows is especially sensitive).
+    try {
+      await this.projectBase?.close()
+    } catch (e) {
       this._ctx?.logTraceError(e)
-    })
+    }
 
     this.resetOpenProject()
 

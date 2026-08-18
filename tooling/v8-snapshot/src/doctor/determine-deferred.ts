@@ -173,8 +173,10 @@ export async function determineDeferred (
     )
   }
 
+  // The `*/`-prefixed entries are filtered out of the persisted metafile, but the
+  // bundle we are about to create still has to honor them, so add them back here.
   return {
-    norewrite: filteredNorewrite,
+    norewrite: Array.from(new Set([...filteredNorewrite, ...opts.forceNorewrite])),
     deferred: updatedDeferred,
     healthy: updatedHealthy,
   }

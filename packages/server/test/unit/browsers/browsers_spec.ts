@@ -1,6 +1,5 @@
 import '../../spec_helper'
 
-import stripAnsi from 'strip-ansi'
 import os from 'os'
 import chalk from 'chalk'
 import browsers from '../../../lib/browsers'
@@ -8,11 +7,13 @@ import utils from '../../../lib/browsers/utils'
 import snapshot from 'snap-shot-it'
 import { EventEmitter } from 'events'
 import { exec } from 'child_process'
-import util from 'util'
+import util, { stripVTControlCharacters as stripAnsi } from 'util'
 import { createTestDataContext } from '../../support/helpers/data-context-helper'
 import electron from '../../../lib/browsers/electron'
 import chrome from '../../../lib/browsers/chrome'
+import * as firefox from '../../../lib/browsers/firefox'
 import Promise from 'bluebird'
+import { cypressSessions } from '../../../lib/cypress-sessions'
 import { deferred } from '../../support/helpers/deferred'
 import type { DataContext } from '@packages/data-context/src/DataContext'
 import type { BrowserInstance } from '../../../lib/browsers/types'
@@ -518,6 +519,61 @@ describe('lib/browsers/index', () => {
       return browsers.open({ name: 'electron', family: 'chromium' } as any, { url } as any, null, ctx).then(browsers.close).then(() => {
         expect(ctx.coreData.didBrowserPreviouslyHaveUnexpectedExit).eq(true)
       })
+    })
+  })
+
+  // Recorded for every family, not just the ones that speak CDP, so an external
+  // tool can tell a browser it cannot drive from no browser at all.
+  context('cypress sessions browser', () => {
+    it('does not record the browser when launch fails', async () => {
+      const setBrowser = sinon.spy(cypressSessions, 'setBrowser')
+      const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
+      const launchError = new Error('failed to launch')
+
+      browsers._setInstance(null)
+      sinon.stub(firefox, 'open').rejects(launchError)
+
+      await expect(browsers.open(browser as any, { url: 'http://localhost:3000' } as any, null, ctx)).to.be.rejectedWith(launchError)
+
+      expect(setBrowser).not.to.be.calledWith(browser)
+    })
+
+    it('does not record the browser when connecting fails', async () => {
+      const setBrowser = sinon.spy(cypressSessions, 'setBrowser')
+      const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
+      const connectError = new Error('failed to connect')
+
+      sinon.stub(firefox, 'connectToExisting').rejects(connectError)
+
+      await expect(browsers.connectToExisting(browser as any, { browsers: [] } as any, null)).to.be.rejectedWith(connectError)
+
+      expect(setBrowser).not.to.be.calledWith(browser)
+    })
+
+    it('records the browser on launch and clears it when the browser exits', async () => {
+      const setBrowser = sinon.spy(cypressSessions, 'setBrowser')
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      browsers._setInstance(browserInstance)
+
+      sinon.stub(firefox, 'open').resolves(browserInstance)
+      sinon.stub(firefox, 'clearInstanceState')
+      sinon.stub(Promise, 'delay').resolves()
+
+      const browser = { name: 'firefox', family: 'firefox', displayName: 'Firefox' }
+
+      await browsers.open(browser as any, { url, onBrowserClose: sinon.stub() } as any, null, ctx)
+
+      expect(setBrowser).to.be.calledWith(browser)
+
+      browserInstance.emit('exit')
+
+      expect(setBrowser).to.be.calledWith(null)
     })
   })
 

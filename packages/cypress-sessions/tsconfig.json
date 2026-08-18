@@ -1,0 +1,32 @@
+{
+  "include": [
+    "lib/**/*.ts",
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/__spec__/**",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "target": "ES2018",
+    "lib": ["es2021"],
+    "outDir": "./dist",
+    "rootDir": "./lib",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": false,
+    "strict": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  }
+}

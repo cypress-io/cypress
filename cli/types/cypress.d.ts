@@ -1392,6 +1392,10 @@ declare namespace Cypress {
 
     /**
      * Execute a system command.
+     *
+     * @deprecated `cy.exec()` has been deprecated and will be removed in a future major release.
+     * Use {@linkcode Chainable.task cy.task()} instead, which runs in Node without depending on
+     * the operating system, shell, or terminal of the machine running Cypress.
      * @see https://on.cypress.io/exec
      */
     exec(command: string, options?: Partial<ExecOptions>): Chainable<Exec>
@@ -2239,7 +2243,7 @@ declare namespace Cypress {
      * @example
      *    cy.env(['KEY_1', 'KEY_2']).then(({ KEY_1, KEY_2 }) => { ... })
      */
-    env(keys: string[]): Chainable<Record<string, any>>
+    env(keys: string[], options?: Partial<Loggable & Timeoutable>): Chainable<Record<string, any>>
 
     /**
      * Gets multiple environment variables with a specific type.
@@ -2250,7 +2254,7 @@ declare namespace Cypress {
      *      expect(KEY_2).to.be.a('number')
      *    })
      */
-    env<T extends object>(keys: string[]): Chainable<T>
+    env<T extends object>(keys: string[], options?: Partial<Loggable & Timeoutable>): Chainable<T>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -2808,7 +2812,33 @@ declare namespace Cypress {
 
   type experimentalCspAllowedDirectives = 'default-src' | 'child-src' | 'frame-src' | 'script-src' | 'script-src-elem' | 'form-action'
 
-  type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
+  /**
+   * The same values as the native `scrollIntoView`, one axis at a time.
+   */
+  type scrollBehaviorPosition = 'center' | 'start' | 'end' | 'nearest'
+
+  /**
+   * A single value applied to both axes, except for `top` and `bottom`, which
+   * align only the block (vertical) axis and leave the inline axis at the browser
+   * default.
+   */
+  type scrollBehaviorAlignment = scrollBehaviorPosition | 'top' | 'bottom'
+
+  /**
+   * How an element is scrolled into view before an action command:
+   *
+   * - `false` disables scrolling entirely.
+   * - An alignment aligns both axes, except `top` and `bottom`, which align only
+   *   the block axis.
+   * - `{ block, inline }` aligns each axis separately, for example
+   *   `{ block: 'start', inline: 'nearest' }` to leave horizontal scroll positions
+   *   untouched unless the element is off screen. An axis that is left out is
+   *   aligned by `scrollIntoView`'s own default.
+   */
+  type scrollBehaviorOptions = false | scrollBehaviorAlignment | {
+    block?: scrollBehaviorPosition
+    inline?: scrollBehaviorPosition
+  }
 
   /**
    * Options to affect Actionability checks
@@ -3060,6 +3090,9 @@ declare namespace Cypress {
     /**
      * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
      * @default 60000
+     * @deprecated `execTimeout` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
+     * removed in a future major release. Use {@linkcode ResolvedConfigOptions.taskTimeout taskTimeout} with
+     * {@linkcode Chainable.task cy.task()} instead.
      */
     execTimeout: number
     /**
@@ -3737,6 +3770,9 @@ declare namespace Cypress {
 
   /**
    * Options object to change the default behavior of cy.exec().
+   *
+   * @deprecated `ExecOptions` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
+   * removed in a future major release.
    */
   interface ExecOptions extends Loggable, Timeoutable {
     /**
@@ -6605,6 +6641,12 @@ declare namespace Cypress {
     set(options: Partial<EnqueuedCommandAttributes>): Log
   }
 
+  /**
+   * The result yielded by cy.exec().
+   *
+   * @deprecated `Exec` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
+   * removed in a future major release.
+   */
   interface Exec {
     exitCode: number
     stdout: string

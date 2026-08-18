@@ -42,6 +42,12 @@ interface ResponseMiddlewareProps {
   incomingResHadEmptyBody: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
+  /**
+   * Set by the synthetic proxy codec when the CDP Fetch transport deliberately
+   * never read the response body (stream-shaped, e.g. SSE). Consumed by the
+   * network capture adapter so it doesn't record a skipped body as an empty one.
+   */
+  resBodySkipped?: boolean
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
@@ -202,6 +208,7 @@ const FilterNonProxiedResponse: ResponseMiddleware = function () {
       'MaybeSendRedirectToClient',
       'CopyResponseStatusCode',
       'MaybeEndWithEmptyBody',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -619,9 +626,11 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   })
 }
 
-const CompressBody: ResponseMiddleware = async function () {
-  await this.networkInterceptionCore.notifyResponseStreamReceived(this)
+const NotifyResponseStreamReceived: ResponseMiddleware = function () {
+  return this.networkInterceptionCore.notifyResponseStreamReceived(this)
+}
 
+const CompressBody: ResponseMiddleware = function () {
   // Re-compress in the same order as the original content-encoding (innermost first).
   const order = this.contentEncodingOrder ?? []
 
@@ -687,6 +696,7 @@ export default {
   MaybeInjectHtml,
   MaybeRemoveSecurity,
   MaybeInjectServiceWorker,
+  NotifyResponseStreamReceived,
   CompressBody,
   SendResponseBodyToClient,
 }

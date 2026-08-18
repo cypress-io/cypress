@@ -51,6 +51,7 @@ describe('http/response-middleware', function () {
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
+      'NotifyResponseStreamReceived',
       'CompressBody',
       'SendResponseBodyToClient',
     ])
@@ -2727,8 +2728,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('CompressBody', function () {
-    const { CompressBody } = ResponseMiddleware
+  describe('NotifyResponseStreamReceived and CompressBody', function () {
+    const { CompressBody, NotifyResponseStreamReceived } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -2766,7 +2767,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2810,7 +2811,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2843,7 +2844,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2868,7 +2869,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2903,7 +2904,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([CompressBody], ctx)
+      await testMiddleware([NotifyResponseStreamReceived], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',

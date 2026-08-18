@@ -315,6 +315,21 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.wait('@create')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/28282
+    it('QUERY method shorthand is treated as a method, not a url', () => {
+      cy.intercept('QUERY', '/query-only', { statusCode: 200, body: 'ok' }).as('query')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/query-only", {
+            method: 'QUERY',
+          });`,
+        )
+      })
+
+      cy.wait('@query').its('request.method').should('eq', 'QUERY')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/16117
     it('can statically stub a url response with headers', () => {
       cy.intercept('/url', { headers: { foo: 'bar' }, body: 'something' })
@@ -1645,8 +1660,16 @@ describe('network stubbing', { retries: 15 }, function () {
 
         expect(req).to.include({
           method: 'GET',
-          httpVersion: '1.1',
         })
+
+        // NOTE: accepted MITM → CDP drift (#34562): proxy-off there is no browser→proxy
+        // hop to report, and the protocol negotiated with the origin is not knowable
+        // while the request is paused, so httpVersion is honestly absent.
+        if (Cypress.expose('PROXY_DISABLED')) {
+          expect(req.httpVersion).to.be.undefined
+        } else {
+          expect(req.httpVersion).to.eq('1.1')
+        }
 
         expect(req.url).to.match(/^http:\/\/localhost:3500\/def456/)
 
@@ -2213,6 +2236,7 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     context('body parsing', function () {
+      // `/post-only` is shared by other tests here, including one that fires a `GET /post-only`
       [
         ['application/json', '{"foo":"bar"}'],
         ['application/vnd.api+json', '{}'],
@@ -2220,7 +2244,7 @@ describe('network stubbing', { retries: 15 }, function () {
         it(`automatically parses ${contentType} request bodies`, function () {
           const p = Promise.defer()
 
-          cy.intercept('/post-only', (req) => {
+          cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
             expect(req.headers['content-type']).to.eq(contentType)
             expect(req.body).to.deep.eq({ foo: 'bar' })
 
@@ -2245,7 +2269,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
         const p = Promise.defer()
 
-        cy.intercept('/post-only', (req) => {
+        cy.intercept({ method: 'POST', url: '/post-only' }, (req) => {
           expect(req.body).to.deep.eq(JSON.stringify({ foo: 'bar' }))
 
           p.resolve()
@@ -2264,7 +2288,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('sets body to string if JSON is malformed', function () {
         const p = Promise.defer()
 
-        cy.intercept('/post-only*', (req) => {
+        cy.intercept({ method: 'POST', url: '/post-only*' }, (req) => {
           expect(req.body).to.deep.eq('{ foo::: }')
 
           p.resolve()
@@ -2782,7 +2806,14 @@ describe('network stubbing', { retries: 15 }, function () {
     context('correctly determines the content-length of an intercepted request', function () {
       it('when body is empty', function (done) {
         cy.intercept('/post-only', function (req) {
-          expect(req.headers['content-length']).to.eq('0')
+          // NOTE: accepted MITM → CDP drift (#34611): content-length is absent from
+          // the paused request — the browser sets it on the wire, so proxy-off there
+          // is no value to recompute from and none is synthesized for an emptied body.
+          if (Cypress.expose('PROXY_DISABLED')) {
+            expect(req.headers['content-length']).to.be.undefined
+          } else {
+            expect(req.headers['content-length']).to.eq('0')
+          }
 
           done()
         }).intercept('/post-only', function (req) {
@@ -2911,7 +2942,10 @@ describe('network stubbing', { retries: 15 }, function () {
           // that result in Express serving a 304
           // Cypress is not expected to understand cache mechanisms at this point -
           // if the user wants to break caching, they can DIY by editing headers
-          const expectedStatusCode = [200, 304][hits]
+          // NOTE: accepted MITM → CDP drift (#34611): the browser's HTTP cache sits
+          // between the origin and the Fetch pause, so revalidation is resolved before
+          // we see it and the second hit is reported as another 200 rather than a 304.
+          const expectedStatusCode = (Cypress.expose('PROXY_DISABLED') ? [200, 200] : [200, 304])[hits]
 
           expect(expectedStatusCode).to.exist
           expect(res.statusCode).to.eq(expectedStatusCode)
@@ -3549,6 +3583,16 @@ describe('network stubbing', { retries: 15 }, function () {
       it('can timeout when retrieving upstream response', {
         responseTimeout: 25,
       }, function (done) {
+        if (Cypress.expose('PROXY_DISABLED')) {
+          // NOTE: accepted MITM → CDP drift (#34611): responseTimeout bounds the
+          // upstream request Cypress makes itself. Proxy-off the browser owns that
+          // request, so there is no Cypress-side socket to time out and no error to
+          // assert — the response arrives normally instead.
+          this.skip()
+
+          return
+        }
+
         cy.once('fail', (err) => {
           expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
           .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
@@ -3795,7 +3839,10 @@ describe('network stubbing', { retries: 15 }, function () {
         $.get({ url, cache: true })
       })
       .wait('@image').its('response.statusCode').should('eq', 200)
-      .wait('@image').its('response.statusCode').should('eq', 304)
+      // NOTE: accepted MITM → CDP drift (#34611): the browser resolves the
+      // revalidation against its own cache before the Fetch pause, so the second
+      // response is reported as a 200 instead of the origin's 304.
+      .wait('@image').its('response.statusCode').should('eq', Cypress.expose('PROXY_DISABLED') ? 200 : 304)
     })
 
     // https://github.com/cypress-io/cypress/issues/14522

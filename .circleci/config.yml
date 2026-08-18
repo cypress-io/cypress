@@ -24,10 +24,20 @@ parameters:
   run-all-jobs:
     type: boolean
     default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
+  # (can also be set manually to run the Windows workflow)
+  run-windows-workflow:
+    type: boolean
+    default: false
   # Opt-in proxy-disabled (CDP Fetch) coverage. Default false so known-red
   # suites do not fail or cancel the pull-request workflow; enable via
   # Trigger Pipeline when investigating that path.
   run-proxy-disabled-tests:
+    type: boolean
+    default: false
+  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
+  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
+  percy-enabled:
     type: boolean
     default: false
 
@@ -172,6 +182,7 @@ jobs:
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
                 RUN_PROXY_DISABLED_TESTS: << pipeline.parameters.run-proxy-disabled-tests >>
+                PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

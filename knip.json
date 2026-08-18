@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
       "entry": [
@@ -31,7 +31,6 @@
         "@percy/cli",
         "bytenode",
         "chai-as-promised",
-        "detect-port",
         "mobx",
         "mocha-banner",
         "mocha-junit-reporter",
@@ -71,6 +70,11 @@
         "process"
       ]
     },
+    "packages/agent-info": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/app": {
       "entry": [
         "src/main.ts",
@@ -86,6 +90,9 @@
         "src/**/*.{ts,tsx,js,jsx,vue}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-typed-document-node/core"
       ]
     },
     "packages/frontend-shared": {
@@ -153,6 +160,9 @@
         "src/**/*.{ts,tsx,js,jsx,vue}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-typed-document-node/core"
       ]
     },
     "packages/example": {
@@ -281,6 +291,14 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/cypress-sessions": {
+      "entry": [
+        "lib/generated/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/net-stubbing": {
       "entry": [
         "lib/server/index.ts"
@@ -302,10 +320,18 @@
       ]
     },
     "packages/data-context": {
+      "entry": [
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@graphql-codegen/documents",
+        "@graphql-codegen/<<"
       ]
     },
     "packages/launcher": {
@@ -537,6 +563,9 @@
       ]
     },
     "npm/puppeteer": {
+      "entry": [
+        "src/support/index.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ],
@@ -625,7 +654,8 @@
         "src/v8-snapshot.ts",
         "src/setup/index.ts",
         "src/generator/blueprint.ts",
-        "src/blueprint/**/*.js"
+        "src/blueprint/**/*.js",
+        "src/doctor/process-script.worker.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
@@ -637,6 +667,9 @@
       ]
     },
     "tooling/electron-mksnapshot": {
+      "entry": [
+        "src/mksnapshot-bin.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ]
@@ -718,6 +751,7 @@
     "**/*.gen.js",
     "**/project-fixtures/**",
     "**/projects/**",
+    "packages/data-context/test/unit/codegen/files/**",
     "system-tests/lib/validations/**"
   ],
   "ignoreDependencies": [
@@ -746,8 +780,15 @@
     "zone.js"
   ],
   "ignoreBinaries": [
+    "arch",
+    "awk",
     "circleci",
     "cypress",
+    "ditto",
+    "iconutil",
+    "lipo",
+    "openssl",
+    "pgrep",
     "rm",
     "tar",
     "tslint",
@@ -756,7 +797,6 @@
   "rules": {
     "binaries": "error",
     "catalog": "error",
-    "classMembers": "error",
     "dependencies": "error",
     "duplicates": "error",
     "enumMembers": "error",
@@ -769,6 +809,29 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
+    "cli/lib/cypress-sessions/index.ts": [
+      "types"
+    ],
+    "cli/lib/cypress-sessions/record.ts": [
+      "types"
+    ],
+    "cli/lib/tap/contract.ts": [
+      "exports",
+      "types"
+    ],
+    "cli/lib/tap/tap-connection.ts": [
+      "exports",
+      "types"
+    ],
+    "cli/lib/tap/types.ts": [
+      "types"
+    ],
+    "packages/cypress-sessions/lib/contracts/command.ts": [
+      "types"
+    ],
+    "packages/server/lib/cypress-sessions.ts": [
+      "types"
+    ],
     "cli/types/cy-blob-util.d.ts": [
       "exports"
     ],
@@ -788,6 +851,12 @@
       "exports"
     ],
     "packages/server/lib/video_capture.ts": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/index.ts": [
+      "exports"
+    ],
+    "packages/server/lib/saved_state.ts": [
       "exports"
     ],
     "packages/data-context/graphql/index.ts": [
@@ -819,6 +888,21 @@
     ],
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
+    ],
+    "packages/app/src/tap/commands/pin.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/run-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/test-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/contract.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/definition.ts": [
+      "exports"
     ],
     "packages/app/src/studio/studio-app-types.ts": [
       "types"
@@ -865,6 +949,9 @@
     "packages/driver/src/cypress/server.ts": [
       "exports"
     ],
+    "packages/driver/src/cy/commands/actions/check.ts": [
+      "exports"
+    ],
     "packages/driver/src/cy/commands/actions/click.ts": [
       "exports"
     ],
@@ -890,6 +977,9 @@
       "exports"
     ],
     "packages/driver/src/cy/commands/actions/trigger.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/type.ts": [
       "exports"
     ],
     "packages/driver/src/cy/commands/querying/focused.ts": [
