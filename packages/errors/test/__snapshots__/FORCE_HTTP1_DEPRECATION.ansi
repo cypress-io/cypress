@@ -1,0 +1,5 @@
+[31m[95mWarning:[39m[31m The [33mforceHttp1[39m[31m option is deprecated and will be removed in a future version of Cypress.[39m
+[31m[39m
+[31mRemove it from your configuration to use the default network path.[39m
+[31m[39m
+[31mRead the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1[39m

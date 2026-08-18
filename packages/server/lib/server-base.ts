@@ -52,8 +52,7 @@ import type { AutomationCookie } from './automation/cookie/automation'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
-import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-runtime'
-import { isProxyDisabled } from './util/is-proxy-disabled'
+import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
@@ -93,7 +92,10 @@ const _hasValidSessionIdHeader = (req): boolean => {
   return Boolean(current) && typeof provided === 'string' && provided === current
 }
 
-export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+// `isNativeBrowserNetwork`: on that path the browser intercepts its own
+// traffic, so nothing transits the proxy and the force-proxy redirect must
+// not apply.
+export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress', isNativeBrowserNetwork: () => boolean) {
   const ALLOWED_PROXY_BYPASS_URLS = [
     '/',
     `/${namespace}/runner/cypress_runner.css`,
@@ -117,7 +119,7 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
   return function (req, res, next) {
     // if this request is a non-proxied cy-in-cy request,
     // we need to update the proxiedUrl and allow it to pass through
-    // (runs even when the MITM proxy is disabled — cy-in-cy self tests may use that path)
+    // (runs on both network paths — cy-in-cy self tests may use either)
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && _isNonProxiedRequest(req) && req.headers.referer) {
       const referrerUrl = new URL(req.headers.referer)
 
@@ -126,10 +128,10 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
       return next()
     }
 
-    // CDP Fetch owns browser traffic when the MITM proxy is disabled, so
+    // CDP Fetch owns browser traffic on the browser (CDP) network path, so
     // path-only requests to the Cypress server are expected — not a sign the
     // browser was launched outside Cypress.
-    if (isProxyDisabled()) {
+    if (isNativeBrowserNetwork()) {
       return next()
     }
 
@@ -193,6 +195,17 @@ const notSSE = (req, res) => {
 
 type WarningErr = Record<string, any>
 
+/**
+ * Which network runtime currently owns browser traffic. `undefined` means no
+ * launch has resolved it yet: request handling then follows MITM semantics,
+ * because the MITM runtime is the one that is installed, but a CONNECT is
+ * refused because no browser has claimed the proxy.
+ */
+type NetworkMode = 'browser' | 'proxy'
+
+// The three pointers that must always name the same runtime as `_networkMode`.
+type NetworkRuntimePointers = Pick<ProxyNetworkRuntime, 'networkProxy' | 'networkPolicyRegistration' | 'networkInterceptionCore'>
+
 interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
   testingType: Cypress.TestingType
@@ -218,9 +231,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   protected _networkInterceptionCore?: NetworkInterceptionCore
   protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
+  protected _proxyRuntime?: ProxyNetworkRuntime
   protected _openConfig?: Cfg
-  // Retained so late-bound CDP Fetch NetworkProxy (created after open when the
-  // MITM proxy is disabled) still receives protocol / pre-request settings.
+  // Resolved per launch, not at open: the browser is unknown until then (Chrome
+  // with `forceHttp1: false` takes the browser path, Firefox the proxy path).
+  // Published only alongside the runtime it names, so no awaited step can leave
+  // this claiming a path `_networkProxy` is not on. See `useNetworkRuntime`.
+  private _networkMode?: NetworkMode
+  // Retained so the CDP Fetch NetworkProxy, created per launch, still receives
+  // protocol / pre-request settings applied at open.
   private _protocolManager?: ProtocolManagerShape
   private _preRequestTimeout?: number
   // Tests can override `blockHosts` at runtime, so hold the project-level value to
@@ -230,6 +249,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
+  private _httpsProxyReady?: Promise<void>
   protected _graphqlWS?: GraphqlWsHandle
   private _closing?: Bluebird<any>
   protected _eventBus: EventEmitter
@@ -283,18 +303,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._netStubbingState, 'open')
   }
 
-  get networkPolicyRegistration () {
-    return this.ensureProp(this._networkPolicyRegistration, 'open')
-  }
-
-  get networkInterceptionCore () {
-    return this.ensureProp(this._networkInterceptionCore, 'open')
-  }
-
-  get httpsProxy () {
-    return this.ensureProp(this._httpsProxy, 'open')
-  }
-
   get remoteStates () {
     return this._remoteStates
   }
@@ -335,7 +343,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     debug('createServer connecting to server')
 
-    this.server.on('connect', this.onConnect.bind(this))
+    this.server.on('connect', (req, socket, head) => {
+      this.onConnect(req, socket, head).catch((err) => {
+        debug('CONNECT handling failed: %s', err?.stack || err)
+        socket.destroy()
+      })
+    })
 
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
@@ -346,20 +359,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // listening for proxied requests on the main server. The primary
     // remote state's `<root>` strategy reads `_fileServer.port()`
     // synchronously, so the fileServer must exist before the primary
-    // is computed. The httpsProxy comes after — it depends on the main
-    // server's port.
+    // is computed.
     this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
 
     const listenedPort = await this._listen(port)
 
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
-    if (!isProxyDisabled()) {
-      this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
-        onRequest: this.callListeners.bind(this),
-        onUpgrade: this.onSniUpgrade.bind(this),
-      }) as HttpsProxyServer
-    }
 
     let warning: WarningErr | undefined
 
@@ -419,18 +424,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    if (isProxyDisabled()) {
-      // CDP Fetch runtime attaches NetworkProxy later in createCdpFetchNetworkRuntime.
-      // Create netStubbingState now so startWebsockets can bind driver intercept registration.
-      this._netStubbingState = netStubbingState()
-    } else {
-      this.createNetworkProxy({
-        config,
-        remoteStates: this._remoteStates,
-        shouldCorrelatePreRequests,
-        getCurrentBrowser,
-      })
-    }
+    // Owned by the server for its whole lifetime: DriverInterceptRegistrationAdapter
+    // binds to this object at open and every network runtime must share it, or
+    // cy.intercept() stops matching.
+    this._netStubbingState = netStubbingState()
+
+    // The standing MITM proxy runtime is deliberately eager: constructing it costs
+    // ~6 KiB of retained heap in this process plus one sweep interval disposed at
+    // close, and binds no port and opens no file descriptor. That buys a
+    // Firefox/WebKit launch — or a Chrome→Firefox switch in open mode — a proxy
+    // that is already built. The expensive part, the https/SNI proxy and its root
+    // CA, stays behind ensureHttpsProxy().
+    this.createNetworkProxy({
+      config,
+      remoteStates: this._remoteStates,
+      shouldCorrelatePreRequests,
+      getCurrentBrowser,
+    })
 
     this.createHosts(config.hosts)
 
@@ -438,8 +448,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       config,
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
-      networkProxy: this._networkProxy,
-      getNetworkProxy: () => this._networkProxy,
+      // Lazy: the CDP Fetch runtime swaps NetworkProxy at each launch, so the
+      // routes must read whichever instance is current rather than capture one.
+      getNetworkProxy: () => this.networkProxy,
+      isBrowserNetworkMode: this.isBrowserNetworkMode,
       onError,
       getSpec,
       testingType,
@@ -453,6 +465,102 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // Preserve Bluebird-typed return value.
     return Bluebird.resolve(this.createServer(app, config, onWarning))
+  }
+
+  isBrowserNetworkMode = (): boolean => {
+    return this._networkMode === 'browser'
+  }
+
+  /**
+   * Prepares the server for the network path of the browser about to launch.
+   *
+   * The MITM direction is completed here: the https proxy is up and the MITM
+   * NetworkProxy is reinstalled in the same step as the mode that names it, so
+   * the old browser — still alive until `browsers.open` kills it — never sees a
+   * mode that disagrees with the installed runtime.
+   *
+   * The browser direction cannot be completed here: its runtime needs the page
+   * CRI client, which does not exist until `onPageCriClientReady`. So the mode is
+   * left alone and `createCdpFetchNetworkRuntime` publishes it together with the
+   * runtime it installs; until then the server keeps MITM request semantics,
+   * which is what the still-installed MITM runtime can actually serve.
+   */
+  async setNetworkMode (useBrowserNetworkInterception: boolean) {
+    if (useBrowserNetworkInterception) {
+      return
+    }
+
+    await this.ensureHttpsProxy()
+
+    // A switch away from the browser (CDP) network path (open-mode browser
+    // switch) is the only thing that tears its Fetch runtime down. Swapping in
+    // no successor hands the pointers and the mode back to the MITM runtime,
+    // and covers the case where there was no CDP runtime to stop.
+    await this.swapCdpFetchRuntime()
+  }
+
+  /**
+   * The MITM proxy path needs an https proxy; the native browser (CDP) path does
+   * not. Creating it generates a root CA on first use, so it stays deferred until
+   * a browser that needs it launches.
+   */
+  ensureHttpsProxy (): Promise<void> {
+    if (this._httpsProxy) {
+      return Promise.resolve()
+    }
+
+    if (this._httpsProxyReady) {
+      // Retained so CONNECTs arriving mid-creation await the same work rather
+      // than starting a second root CA generation.
+      return this._httpsProxyReady
+    }
+
+    if (!this._server?.listening) {
+      // The https proxy binds against this server's port, so there is nothing
+      // to create yet. Callers must not read this as "already created".
+      return Promise.reject(new Error('Server#createServer must first be called before creating the https proxy'))
+    }
+
+    // The IIFE keeps this assignment synchronous — making the method itself
+    // async would publish the memo a tick late, after a concurrent CONNECT
+    // had already missed it.
+    this._httpsProxyReady = (async () => {
+      try {
+        this._httpsProxy = await createHttpsProxy(appData.path('proxy'), this._port(), {
+          onRequest: this.callListeners.bind(this),
+          onUpgrade: this.onSniUpgrade.bind(this),
+        }) as HttpsProxyServer
+      } catch (err) {
+        // Memoizing a rejection would make one transient CA-write or bind failure
+        // fatal for every later launch and CONNECT in the session.
+        this._httpsProxyReady = undefined
+
+        throw err
+      }
+    })()
+
+    return this._httpsProxyReady
+  }
+
+  /**
+   * Settles any in-flight creation before tearing down, so a proxy that finishes
+   * after close() cannot leave a listening SNI server with no owner.
+   */
+  private async closeHttpsProxy () {
+    const ready = this._httpsProxyReady
+
+    if (ready) {
+      await ready.catch((err) => {
+        debug('https proxy creation failed while closing: %s', err?.stack || err)
+      })
+    }
+
+    const proxy = this._httpsProxy
+
+    this._httpsProxyReady = undefined
+    this._httpsProxy = undefined
+
+    await proxy?.close()
   }
 
   createExpressApp (config) {
@@ -481,7 +589,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return next()
     })
 
-    app.use(_forceProxyMiddleware(clientRoute, namespace))
+    app.use(_forceProxyMiddleware(clientRoute, namespace, this.isBrowserNetworkMode))
 
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
@@ -532,12 +640,31 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       request: this.request,
       serverBus: this._eventBus,
       getCurrentBrowser,
+      netStubbingState: this.netStubbingState,
     })
 
-    this._netStubbingState = runtime.netStubbingState
-    this._networkProxy = runtime.networkProxy
-    this._networkPolicyRegistration = runtime.networkPolicyRegistration
-    this._networkInterceptionCore = runtime.networkInterceptionCore
+    this._proxyRuntime = runtime
+
+    // Not published as 'proxy' here: no browser has launched, so a CONNECT
+    // arriving now is not one we opened the proxy for (see onConnect).
+    this.useNetworkRuntime(runtime)
+  }
+
+  /**
+   * Installs a network runtime's pointers and, when given, the mode that names
+   * it. Both must move together and without an await in between: any window
+   * where `_networkMode` and `_networkProxy` disagree routes requests into the
+   * wrong pipeline (an absolute-form request handed to the browser-interception
+   * branch, or a path-only one handed to the MITM proxy).
+   */
+  private useNetworkRuntime (runtime: NetworkRuntimePointers | undefined, mode?: NetworkMode) {
+    this._networkProxy = runtime?.networkProxy
+    this._networkPolicyRegistration = runtime?.networkPolicyRegistration
+    this._networkInterceptionCore = runtime?.networkInterceptionCore
+
+    if (mode) {
+      this._networkMode = mode
+    }
   }
 
   async createCdpFetchNetworkRuntime (
@@ -545,13 +672,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     isAUTFrame?: (frameId: string) => Promise<boolean>,
     onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
   ) {
-    await this.stopCdpFetchRuntime()
+    const config = this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config']
 
     const runtime = createCdpFetchRuntime({
       client,
       isAUTFrame,
       onAUTFrameNavigated,
-      config: this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config'],
+      config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       remoteStates: this._remoteStates,
       getFileServerToken: () => this._fileServer?.token,
@@ -562,23 +689,24 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getCurrentBrowser: this.getCurrentBrowser ?? (() => {
         throw new Error('getCurrentBrowser is not available')
       }),
-      netStubbingState: this._netStubbingState,
+      netStubbingState: this.netStubbingState,
     })
 
-    this._cdpFetchRuntime = runtime
-    this._networkProxy = runtime.networkProxy
-    this._netStubbingState = runtime.netStubbingState
-    this._networkPolicyRegistration = runtime.networkPolicyRegistration
-    this._networkInterceptionCore = runtime.networkInterceptionCore
+    // Publishing the mode here — rather than in setNetworkMode — is what keeps
+    // it in step with the runtime: this is the first moment a CDP runtime exists
+    // to serve what the browser network mode claims. Constructing the successor
+    // first is what lets one launch replace another's runtime without the mode
+    // ever naming the MITM path the browser is not on.
+    await this.swapCdpFetchRuntime(runtime)
 
-    // NetworkProxy was created after open(); re-apply settings that may have
-    // been stored while _networkProxy was still undefined.
+    // This NetworkProxy replaces the one settings were applied to at open, so
+    // re-apply them here.
     if (this._protocolManager) {
-      this._networkProxy.setProtocolManager(this._protocolManager)
+      runtime.networkProxy.setProtocolManager(this._protocolManager)
     }
 
     if (this._preRequestTimeout != null) {
-      this._networkProxy.setPreRequestTimeout(this._preRequestTimeout)
+      runtime.networkProxy.setPreRequestTimeout(this._preRequestTimeout)
     }
 
     await runtime.start()
@@ -598,20 +726,33 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
   }
 
-  private stopCdpFetchRuntime () {
+  /**
+   * Installs `successor` as the CDP Fetch runtime and tears the outgoing one
+   * down. No successor means browser traffic goes back to the standing MITM
+   * runtime.
+   *
+   * The successor is published before anything is awaited, so the mode and the
+   * pointers never disagree — in particular a replacement (spec change, new
+   * tab, relaunch) moves from one CDP runtime straight to the next, rather than
+   * spending the teardown claiming the MITM path the browser is not on.
+   *
+   * Disposal is deferred until after that publish so concurrent
+   * getNetworkProxy / addBrowserPreRequest callers cannot use a NetworkProxy
+   * whose sweep timer has already been cleared.
+   *
+   * Callers must await this before starting the successor: `Fetch.enable` is
+   * not additive within a session, so the outgoing runtime has to release the
+   * domain first.
+   */
+  private swapCdpFetchRuntime (successor?: CdpFetchNetworkRuntime) {
     // Stopping sends Fetch.disable to the previous page client, which may
     // already be gone (spec change, browser relaunch); failing to stop the
     // old runtime must not fail the next launch.
     const previous = this._cdpFetchRuntime
 
-    this._cdpFetchRuntime = undefined
+    this._cdpFetchRuntime = successor
 
-    // Drop the shared pointer before dispose so concurrent getNetworkProxy /
-    // addBrowserPreRequest callers cannot use a NetworkProxy whose sweep
-    // timer has already been cleared.
-    if (previous && this._networkProxy === previous.networkProxy) {
-      this._networkProxy = undefined
-    }
+    this.useNetworkRuntime(successor ?? this._proxyRuntime, successor ? 'browser' : 'proxy')
 
     if (!previous) {
       return
@@ -643,9 +784,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
     })
 
-    // Lazy lookup: under proxy-disabled mode NetworkProxy is created later in
-    // createCdpFetchNetworkRuntime, after websockets start. The legacy HTML
-    // injection pipeline populates this map once that runtime exists.
+    // Lazy lookup: which NetworkProxy is installed depends on the browser this
+    // launch resolves to — Chrome with `forceHttp1: false` swaps in a CDP Fetch one,
+    // Firefox keeps the MITM one — and that is unknown here.
     options.getRenderedHTMLOrigins = () => {
       return this._networkProxy?.http.getRenderedHTMLOrigins() ?? {}
     }
@@ -796,7 +937,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // Without the proxy, upgrades arrive on direct connections the CONNECT
       // port allow-list never saw — a loopback remoteAddress is the only
       // available gate (see #34513).
-      const isAllowed = isProxyDisabled()
+      const isAllowed = this.isBrowserNetworkMode()
         ? this.socketAllowed.isRequestFromLocalhost(req)
         : this.socketAllowed.isRequestAllowed(req)
 
@@ -871,11 +1012,47 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // Fully tear down CDP Fetch (Fetch.disable + NetworkProxy.dispose). reset()
     // only clears in-flight state so the next test can keep using Fetch.
-    return Promise.resolve(this.stopCdpFetchRuntime())
+    const cdpFetchTeardown = this.swapCdpFetchRuntime()
+
+    // The swap above re-published 'proxy'. Refuse CONNECTs for the rest of
+    // teardown: close() destroys the https proxy concurrently, so one accepted
+    // here could bind an SNI server after closeHttpsProxy() has run. Same tick
+    // as the publish, so no CONNECT lands in between.
+    this._networkMode = undefined
+
+    return Promise.resolve(cdpFetchTeardown)
+    .then(() => this.disposeProxyRuntime())
     .then(() => this._server!.destroyAsync())
     .then(() => {
       this.isListening = false
     })
+  }
+
+  /**
+   * The standing MITM runtime outlives every launch, so nothing else disposes
+   * it — and its PreRequests sweep interval keeps the whole Http graph alive.
+   * A ServerBase is created per ProjectBase.open(), so skipping this leaks one
+   * timer and graph per project open and testing-type switch.
+   */
+  private disposeProxyRuntime () {
+    const runtime = this._proxyRuntime
+
+    this._proxyRuntime = undefined
+    this._networkMode = undefined
+    // The server owns this state until close, so teardown is the only place that
+    // may drop it.
+    this._netStubbingState = undefined
+    this.useNetworkRuntime(undefined)
+
+    if (!runtime) {
+      return
+    }
+
+    try {
+      runtime.networkProxy.dispose()
+    } catch (err) {
+      debug('MITM NetworkProxy dispose failed: %s', err?.stack || err)
+    }
   }
 
   close () {
@@ -893,11 +1070,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       : Bluebird.resolve()
 
     this._closing = graphqlDispose.then(() => {
-      return Bluebird.all([
+      return Bluebird.all<any>([
         this._close(),
         this._socket?.close(),
         this._fileServer?.close(),
-        this._httpsProxy?.close(),
+        this.closeHttpsProxy(),
       ])
     })
     .then((res) => {
@@ -952,11 +1129,32 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  onConnect (req, socket, head) {
+  async onConnect (req, socket, head) {
     debug('Got CONNECT request from %s', req.url)
 
-    if (isProxyDisabled()) {
+    // Only a launch that resolved to the MITM path opens this server as a proxy.
+    // Before that — and on the native browser (CDP) path — a CONNECT is a stray
+    // client, a machine-level system proxy, or a leftover browser on this port;
+    // tunneling it would also generate a root CA that path never needs.
+    if (this._networkMode !== 'proxy') {
       socket.write('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
+      socket.end()
+
+      return
+    }
+
+    // The https proxy is created when a browser that needs it launches. A CONNECT
+    // can still race that creation, so wait for any in-flight work rather than
+    // assuming it exists — and retry it if a previous attempt failed.
+    try {
+      await this.ensureHttpsProxy()
+    } catch (err) {
+      debug('https proxy creation failed while handling a CONNECT: %s', err?.stack || err)
+    }
+
+    if (!this._httpsProxy) {
+      debug('CONNECT arrived before the https proxy was available')
+      socket.write('HTTP/1.1 502 Bad Gateway\r\n\r\nProxy is not ready\r\n')
       socket.end()
 
       return
@@ -964,7 +1162,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     socket.once('upstream-connected', this.socketAllowed.add)
 
-    return this.httpsProxy.connect(req, socket, head)
+    return this._httpsProxy.connect(req, socket, head)
   }
 
   _retryBaseUrlCheck (baseUrl, onWarning) {
@@ -1033,8 +1231,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         // TODO: add `body` here once bodies can be statically matched
       }
 
+      // Read the field, not the getter: teardown drops _netStubbingState, so a
+      // resolve:url racing close matches zero routes instead of throwing.
       // @ts-ignore
-      const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
+      const iterator = getRoutesForRequest(this._netStubbingState?.routes ?? [], proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done
 
@@ -1254,10 +1454,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           // refuses all CONNECTs when the proxy is disabled. Loopback-only —
           // this request never leaves 127.0.0.1.
           // Gated so proxy-on wire traffic is unchanged.
-          ...(isProxyDisabled() ? { tunnel: false } : {}),
+          ...(this.isBrowserNetworkMode() ? { tunnel: false } : {}),
           headers: {
             'x-cypress-resolving-url': '1',
-            ...(isProxyDisabled() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
+            ...(this.isBrowserNetworkMode() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
           },
         })
       }

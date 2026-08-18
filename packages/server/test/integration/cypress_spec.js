@@ -1134,6 +1134,8 @@ describe('lib/cypress', () => {
 
           sinon.stub(ProjectBase.prototype, 'resetBrowserState').resolves()
 
+          const createCdpFetchNetworkRuntime = sinon.spy(ServerBase.prototype, 'createCdpFetchNetworkRuntime')
+
           return cypress.start([
             `--run-project=${this.pluginBrowser}`,
             '--browser=chrome',
@@ -1165,7 +1167,10 @@ describe('lib/cypress', () => {
             expect(BrowserCriClient.create).to.have.been.calledOnce
             expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
 
-            expect(cdpAutomation._handlePausedRequests).to.have.been.calledOnce
+            // chrome launches on the browser (CDP) network path, where the Fetch
+            // runtime installed from onPageCriClientReady pauses requests instead
+            expect(createCdpFetchNetworkRuntime).to.have.been.calledOnce
+            expect(cdpAutomation._handlePausedRequests).not.to.have.been.called
             expect(cdpAutomation._listenForFrameTreeChanges).to.have.been.calledOnce
           })
         })

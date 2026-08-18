@@ -1373,6 +1373,14 @@ export const AllCypressErrors = {
       Learn more: https://on.cypress.io/cypress-env-migration
     `
   },
+  FORCE_HTTP1_DEPRECATION: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('forceHttp1')} option is deprecated and will be removed in a future version of Cypress.
+
+      Remove it from your configuration to use the default network path.
+
+      Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1`
+  },
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\
       The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in a future version of Cypress.

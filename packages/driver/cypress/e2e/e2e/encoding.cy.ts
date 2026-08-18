@@ -4,6 +4,11 @@
  * all three (html body, js global, css) in one visit.
  */
 
+// The default network path intercepts in the browser through CDP, which only
+// Chromium-family browsers support; Firefox, Electron, and WebKit stay on the
+// HTTP/1 proxy either way.
+const usesBrowserNetworkPath = !Cypress.config('forceHttp1') && Cypress.isBrowser([{ name: '!electron', family: 'chromium' }])
+
 const expectedText = (encodingType: string, assetType: string) => `encoding-${encodingType}-${assetType}`
 
 function assertEncodingPage (encodingType: string) {
@@ -23,7 +28,7 @@ function waitAndAssertInterceptions (alias: string, contentEncoding: string) {
       // net-stubbing already decoded, so content-encoding is honestly absent. The
       // document is exempt — an intercept-matched visit is still resolved Node-side
       // through the MITM pipeline, which reports the wire encoding on a decoded body.
-      const isBrowserFetched = Cypress.expose('PROXY_DISABLED') && !interception.request.url.endsWith('/html')
+      const isBrowserFetched = usesBrowserNetworkPath && !interception.request.url.endsWith('/html')
 
       if (isBrowserFetched) {
         expect(interception.response?.headers?.['content-encoding']).to.be.undefined
@@ -174,7 +179,7 @@ describe('encoding', () => {
       // The request will be successful but since the content-encoding is br,
       // the browser will fail to decode
       cy.wait('@brJs').then((interception) => {
-        if (Cypress.expose('PROXY_DISABLED')) {
+        if (usesBrowserNetworkPath) {
           // NOTE: accepted MITM → CDP drift (#34384): the netstack rejects this br
           // response before CDP emits any metadata-bearing event, so cy.intercept
           // can only observe the request phase.
@@ -192,7 +197,7 @@ describe('encoding', () => {
     })
 
     it('fails when brotli is requested due to insecure host', (done) => {
-      if (Cypress.expose('PROXY_DISABLED')) {
+      if (usesBrowserNetworkPath) {
         // NOTE: accepted MITM → CDP drift (#34386): buffered cy.visit documents are
         // fetched Node-side and fulfilled as identity bytes, so the browser never sees
         // an encoding to reject and the document loads. Subresources stay
@@ -229,7 +234,7 @@ describe('encoding', () => {
     })
 
     it('fails even when brotli is explicitly requested in the accept-encoding header', (done) => {
-      if (Cypress.expose('PROXY_DISABLED')) {
+      if (usesBrowserNetworkPath) {
         // NOTE: accepted MITM → CDP drift (#34386): buffered cy.visit documents are
         // fetched Node-side and fulfilled as identity bytes, so the browser never sees
         // an encoding to reject and the document loads. Subresources stay

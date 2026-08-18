@@ -166,6 +166,7 @@ describe('config/src/project/utils', () => {
     it('does not return CYPRESS_RESERVED_ENV_VARS', () => {
       const envs = {
         CYPRESS_INTERNAL_ENV: 'value',
+        CYPRESS_INTERNAL_DISABLE_PROXY: '1',
       } as unknown as NodeJS.ProcessEnv
 
       expect(getProcessEnvVars(envs)).toEqual({})
@@ -1319,6 +1320,7 @@ describe('config/src/project/utils', () => {
           expose: {},
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+          forceHttp1: { value: false, from: 'default' },
           hosts: { value: null, from: 'default' },
           includeShadowDom: { value: false, from: 'default' },
           injectDocumentDomain: { value: false, from: 'default' },
@@ -1451,6 +1453,7 @@ describe('config/src/project/utils', () => {
           },
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+          forceHttp1: { value: false, from: 'default' },
           hosts: { value: null, from: 'default' },
           includeShadowDom: { value: false, from: 'default' },
           injectDocumentDomain: { value: false, from: 'default' },

@@ -15,7 +15,6 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
 import { cypressSessions } from './cypress-sessions'
 import type {
@@ -215,9 +214,10 @@ export class ProjectBase extends EE {
       _.extend(cfg, config.setUrls(cfg))
     }
 
-    if (!isProxyDisabled()) {
-      cfg.proxyServer = cfg.proxyUrl
-    }
+    // The network path is per-launch and per-browser, so it is unknown here and
+    // the proxy address must always be available; the launch layer decides which
+    // browsers actually receive it. `omitConfigKeys` keeps it out of run results.
+    cfg.proxyServer = cfg.proxyUrl
 
     // store the cfg from
     // opening the server
@@ -684,9 +684,15 @@ export class ProjectBase extends EE {
     return !!this.browser
   }
 
-  setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
+  async setCurrentSpecAndBrowser (spec, browser: FoundBrowser, useBrowserNetworkInterception: boolean) {
     this.spec = spec
     this.browser = browser
+
+    // Awaited so the browser cannot launch and issue its first request while the
+    // CDP Fetch runtime is still installed: a proxy-path launch has to have its
+    // https proxy (first call may generate the root CA) and the shared network
+    // pointers handed back to the proxy runtime before then.
+    await this._server?.setNetworkMode(useBrowserNetworkInterception)
 
     if (this.browser.family !== 'chromium') {
       // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)

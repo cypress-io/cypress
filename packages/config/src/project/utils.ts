@@ -92,6 +92,9 @@ const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 
 const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
+  // `forceHttp1` replaced this and nothing reads it, but the *-cdp CI jobs still
+  // export it — unreserving it now would leak INTERNAL_DISABLE_PROXY into their
+  // `config.env`. Remove this entry with those jobs.
   'CYPRESS_INTERNAL_DISABLE_PROXY',
 ]
 

@@ -21,6 +21,7 @@ export namespace CyServer {
     clientRoute: string
     experimentalCspAllowList: boolean | Cypress.experimentalCspAllowedDirectives[]
     injectDocumentDomain: boolean
+    forceHttp1: boolean
     modifyObstructiveCode: boolean
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**

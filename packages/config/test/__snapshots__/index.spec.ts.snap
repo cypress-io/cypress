@@ -13,6 +13,7 @@ exports[`config/src/index > .getBreakingKeys > returns list of breaking config k
   "experimentalFastVisibility",
   "visibilityStrategy",
   "experimentalMemoryManagement",
+  "forceHttp1",
 ]
 `;
 
@@ -53,6 +54,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "expose": {},
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
+  "forceHttp1": false,
   "hideCommandLog": false,
   "hideRunnerUi": false,
   "hosts": null,
@@ -149,6 +151,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "expose": {},
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
+  "forceHttp1": false,
   "hideCommandLog": false,
   "hideRunnerUi": false,
   "hosts": null,
@@ -235,6 +238,7 @@ exports[`config/src/index > .getPublicConfigKeys > returns list of public config
   "visibilityStrategy",
   "fileServerFolder",
   "fixturesFolder",
+  "forceHttp1",
   "excludeSpecPattern",
   "includeShadowDom",
   "justInTimeCompile",

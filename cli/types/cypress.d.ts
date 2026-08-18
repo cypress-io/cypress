@@ -3092,6 +3092,14 @@ declare namespace Cypress {
      */
     fixturesFolder: string | false
     /**
+     * Routes Chrome, Chromium, and Edge through the legacy network path, which re-issues
+     * their connections over HTTP/1.1. Firefox, Electron, and WebKit always use it.
+     *
+     * @deprecated This option will be removed in a future version of Cypress.
+     * @default false
+     */
+    forceHttp1: boolean
+    /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
      */
