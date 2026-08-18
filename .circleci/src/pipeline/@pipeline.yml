@@ -31,6 +31,11 @@ parameters:
   run-proxy-disabled-tests:
     type: boolean
     default: false
+  # Opt-in Percy visual snapshots. Default false; set true via Trigger Pipeline
+  # (the setup config forwards it). Requires PERCY_TOKEN (test-runner:percy context).
+  percy-enabled:
+    type: boolean
+    default: false
   # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
   # (can also be set manually to run the Windows workflow)
   run-windows-workflow:
@@ -1015,11 +1020,13 @@ commands:
                 SPEC_ARGS=(--spec "$SPEC")
               fi
 
+              # Percy only runs when the percy-enabled pipeline parameter is set
+              # (Trigger Pipeline → percy-enabled=true) and PERCY_TOKEN is available.
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group "$GROUP" "${SPEC_ARGS[@]}"
@@ -1048,7 +1055,7 @@ commands:
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
             fi
@@ -1056,7 +1063,7 @@ commands:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
             else
@@ -1932,6 +1939,14 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
+      - unless:
+          condition: << pipeline.parameters.percy-enabled >>
+          steps:
+            - run:
+                # Percy runs opt-in only (Trigger Pipeline → percy-enabled=true),
+                # so by default there is no Percy build to finalize.
+                name: Percy disabled — skipping finalize
+                command: circleci-agent step halt
       # Uses an inline when: not: or: instead of halt-if-skipped because this
       # job depends on multiple parameters. CircleCI boolean parameters cannot
       # express or: logic, so a multi-condition inline step is required here.
@@ -2054,7 +2069,7 @@ jobs:
           name: Upload CLI snapshots for diffing
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
@@ -2864,7 +2879,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
@@ -2887,7 +2902,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
@@ -2909,7 +2924,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
