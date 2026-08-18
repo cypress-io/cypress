@@ -1231,8 +1231,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         // TODO: add `body` here once bodies can be statically matched
       }
 
+      // Read the field, not the getter: teardown drops _netStubbingState, so a
+      // resolve:url racing close matches zero routes instead of throwing.
       // @ts-ignore
-      const iterator = getRoutesForRequest(this.netStubbingState.routes, proxiedReq)
+      const iterator = getRoutesForRequest(this._netStubbingState?.routes ?? [], proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done
 
