@@ -11,6 +11,10 @@ interface MochaRunnerState {
   failed?: number
   pending?: number
   numLogs?: number
+  // the Cloud FILTER keep-list (test full titles) for test-level rerun
+  // optimization; carried across a cross-origin reload so the runner can
+  // re-prune the non-eligible tests when it resumes the spec
+  filteredTests?: string[] | null
 }
 
 export type RunState = MochaRunnerState & ReporterRunState & {

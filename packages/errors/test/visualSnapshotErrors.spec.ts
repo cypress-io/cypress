@@ -215,6 +215,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    CLOUD_RERUN_FAILED_TESTS: () => {
+      return {
+        default: [{ message: 'Re-running only the tests that did not pass in the previous run.' }],
+      }
+    },
     CLOUD_API_RESPONSE_FAILED_RETRYING: () => {
       return {
         default: [{

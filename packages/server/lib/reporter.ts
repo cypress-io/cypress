@@ -105,12 +105,16 @@ const getTitlePath = function (runnable: InternalRunnable, titles: string[] = []
     runnable.title = runnable.originalTitle
   }
 
-  if (runnable.title) {
+  // only the root suite is omitted (matching Mocha's native `titlePath()`);
+  // a non-root suite/test with an empty title still contributes a segment,
+  // so this stays byte-for-byte compatible with the title path Cloud stores
+  // for the rerun keep-list (built from the driver's native `titlePath()`)
+  if (!runnable.root) {
     // sanitize the title which may have been altered by a suite-/
     // test-level browser skip to ensure the original title is used
     const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
 
-    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
+    titles.unshift((runnable.title || '').replace(BROWSER_SKIP_TITLE, ''))
   }
 
   if (runnable.parent) {
@@ -334,6 +338,11 @@ export class Reporter {
   stats!: ReporterStats
   retriesConfig!: RetriesConfig
   runnables!: Record<string, InternalRunnable>
+  // When Cloud arms test-level rerun optimization, this holds the full titles of
+  // the tests that were executed. Non-executed (filtered-out) tests are then
+  // omitted from `results()`, so they are never reported to Cloud — the same way
+  // fully-skipped specs contribute nothing.
+  testFilter?: Set<string>
   mocha!: Mocha
   runner!: Mocha.Runner
   reporter!: Mocha.reporters.Base & { done?: (failures: number, resolve: () => void) => void }
@@ -365,6 +374,8 @@ export class Reporter {
     this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0, wallClockDuration: 0 }
     this.retriesConfig = config?.retries ?? {}
     this.runnables = {}
+    // reset per spec; set again by `setTestFilter` if this spec is filtered
+    this.testFilter = undefined
     rootRunnable = this._createRunnable(rootRunnable as RunnablePayload, 'suite')
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
@@ -487,6 +498,14 @@ export class Reporter {
 
       this.runner.ignoreLeaks = true
     }
+  }
+
+  // Restricts `results()` to the given tests (by full title). Used for test-level
+  // rerun optimization: the non-executed tests remain in `this.runnables` (so the
+  // reporter can render the spec tree) but are omitted from the results reported
+  // to Cloud. An empty/absent list means "no filtering" — report every test.
+  setTestFilter (eligibleFullTitles?: string[]) {
+    this.testFilter = eligibleFullTitles?.length ? new Set(eligibleFullTitles) : undefined
   }
 
   _createRunnable (runnableProps: RunnablePayload, type: 'suite' | 'test', parent?: InternalRunnable): InternalRunnable {
@@ -682,9 +701,14 @@ export class Reporter {
   }
 
   results (): ReporterResults {
+    const testFilter = this.testFilter
+
     const tests = _
     .chain(this.runnables)
     .filter({ type: 'test' })
+    // omit tests that were filtered out for a test-level rerun so they are not
+    // reported to Cloud (no partial/shallow records for non-executed tests)
+    .filter((test) => !testFilter || testFilter.has(getTitlePath(test).join(' ')))
     .map(this.normalizeTest)
     .value()
 

@@ -1299,7 +1299,8 @@ Request Sent:
   "runnerCapabilities": {
     "dynamicSpecsInSerialMode": true,
     "skipSpecAction": true,
-    "protocolMountVersion": 2
+    "protocolMountVersion": 2,
+    "filterTestsAction": true
   }
 }
 

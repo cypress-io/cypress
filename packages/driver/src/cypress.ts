@@ -890,6 +890,9 @@ class $Cypress {
       failed: this.runner.countByTestState(tests, 'failed'),
       pending: this.runner.countByTestState(tests, 'pending'),
       numLogs: LogUtils.countLogsByTests(tests),
+      // carry the test-level rerun keep-list across a cross-origin reload so the
+      // resumed spec re-prunes the non-eligible tests (see runner.setTestFilter)
+      filteredTests: this.runner.getTestFilter(),
     }
 
     return this.action('cy:collect:run:state').then((otherRunStates: ReporterRunState) => {
