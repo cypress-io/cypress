@@ -8,6 +8,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where passing a falsy, non-`null` `encoding` option to [`cy.request()`](https://on.cypress.io/request), such as `encoding: false`, crashed Cypress with an `Unknown encoding` error once the response arrived. Such values are now rejected up front with the same error as any other invalid encoding. Fixes [#24192](https://github.com/cypress-io/cypress/issues/24192).
 - Fixed an issue where WebKit runs could hang indefinitely when more parallel requests than the browser's per-host connection pool were intercepted by a [`cy.intercept()`](https://on.cypress.io/intercept) route with a request handler. Fixes [#33926](https://github.com/cypress-io/cypress/issues/33926) and addresses [#23807](https://github.com/cypress-io/cypress/issues/23807).
 - Fixed an issue where overriding [`blockHosts`](https://on.cypress.io/configuration#blockHosts) with test configuration (for example `describe('...', { blockHosts: [...] }, ...)`) had no effect, so requests were still blocked or allowed according to the project-level value. Test-level `blockHosts` overrides now take effect at runtime and are restored between specs. Fixes [#21151](https://github.com/cypress-io/cypress/issues/21151).
 - Fixed an issue where `cypress run` printed the `(Attempt N of M)` line twice for the same attempt when a `beforeEach` and an `afterEach` hook both failed during that attempt. Fixes [#26143](https://github.com/cypress-io/cypress/issues/26143).

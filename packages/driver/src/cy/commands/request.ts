@@ -199,7 +199,8 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      if (options.encoding) {
+      // `null` is a valid encoding - it makes the response body a Buffer
+      if (!_.isNull(options.encoding)) {
         if (!_.isString(options.encoding) || !Buffer.isEncoding(options.encoding)) {
           $errUtils.throwErrByPath('request.encoding_invalid', {
             args: {

@@ -336,6 +336,19 @@ describe('src/cy/commands/request', () => {
             })
           })
         })
+
+        it('sends `null` encoding to request the response body as a Buffer', () => {
+          cy.request({
+            url: 'http://localhost:8080/',
+            encoding: null,
+          })
+          .then(function () {
+            this.expectOptionsToBe({
+              url: 'http://localhost:8080/',
+              encoding: null,
+            })
+          })
+        })
       })
 
       context('gzip', () => {
@@ -1168,6 +1181,26 @@ describe('src/cy/commands/request', () => {
         cy.request({
           url: 'http://localhost:1234/foo',
           encoding: 'binaryX',
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/24192
+      it('throws when encoding is falsy but not `null`', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.request()` was called with invalid encoding: `false`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node\'s Buffer encoding.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/request')
+
+          done()
+        })
+
+        cy.request({
+          url: 'http://localhost:1234/foo',
+          encoding: false,
         })
       })
 
