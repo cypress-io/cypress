@@ -10,12 +10,16 @@ import rootPkg from '@packages/root'
 const {
   version,
   description,
-  homepage,
   license,
   bugs,
   repository,
   keywords,
 } = rootPkg as any
+
+// yarn 1 runs `url.parse()` on any manifest `homepage` it normalizes, which makes
+// Node emit DEP0169 on every yarn invocation in the monorepo. Keeping this out of
+// the root package.json keeps that noise out of every build, lint and test run.
+const homepage = 'https://cypress.io'
 
 // the rest of properties should come from the package.json in CLI folder
 const packageJsonSrc = path.join('package.json')
