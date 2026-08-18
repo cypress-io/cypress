@@ -150,6 +150,12 @@ export interface KeyPressParams {
   key: SupportedKey
 }
 
+export interface NavigateHistoryResult {
+  // false when the entry the AUT asked to traverse to belongs to the Cypress
+  // runner rather than to the application, in which case nothing was traversed
+  traversed: boolean
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -175,7 +181,7 @@ export interface AutomationCommands {
   'perform:user:gesture': CommandSignature<Record<string, never>, void>
   'get:aut:url': CommandSignature<void, string>
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
-  'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>
+  'navigate:aut:history': CommandSignature<{ historyNumber: number }, NavigateHistoryResult>
   'get:aut:title': CommandSignature<void, string>
 }
 

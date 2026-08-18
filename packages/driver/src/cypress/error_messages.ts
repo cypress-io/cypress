@@ -638,6 +638,15 @@ export default {
       message: `${cmd('go')} cannot accept \`0\`. The number must be greater or less than \`0\`.`,
       docsUrl: 'https://on.cypress.io/go',
     },
+    no_aut_history_entry: {
+      message: stripIndent`\
+        ${cmd('go')} could not navigate {{direction}} because the application under test has no page to go {{direction}} to.
+
+        The entry Cypress would have navigated to belongs to the Cypress runner, not to your application. Navigating to it would unload Cypress and restart the spec.
+
+        Navigate your application to another page before calling ${cmd('go')}, or remove this command.`,
+      docsUrl: 'https://on.cypress.io/go',
+    },
   },
   group: {
     missing_fn: '`group` API must be called with a function.',

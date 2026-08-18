@@ -903,9 +903,17 @@ context('lib/browsers/cdp_automation', () => {
           },
         })
 
+        this.sendDebuggerCommand.withArgs('Page.getNavigationHistory').resolves({
+          currentIndex: 0,
+          entries: [
+            { id: 1, url: 'http://localhost:3500/__/' },
+            { id: 2, url: 'http://localhost:3500/__/' },
+          ],
+        })
+
         const resp = await this.onRequest('navigate:aut:history', { historyNumber: 1 })
 
-        expect(resp).to.be.undefined
+        expect(resp).to.deep.equal({ traversed: true })
 
         expect(this.sendDebuggerCommand).to.be.calledWith('Runtime.evaluate', {
           expression: 'window.history.go(1)',

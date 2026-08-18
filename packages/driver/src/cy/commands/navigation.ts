@@ -592,11 +592,30 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         // with the remove window (just like cy.visit)
         const retWin = () => state('window')
 
-        // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
-        Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
+        const navigateHistory = Promise.try(() => {
+          // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
+          if (Cypress.isBrowser('webkit')) {
+            state('window').history.go(num)
 
-        Promise
-        .delay(100)
+            return { traversed: true }
+          }
+
+          return Cypress.automation('navigate:aut:history', { historyNumber: num })
+        })
+
+        return navigateHistory
+        .then((result) => {
+          if (result?.traversed === false) {
+            knownCommandCausedInstability = false
+
+            $errUtils.throwErrByPath('go.no_aut_history_entry', {
+              onFail: options._log,
+              args: { direction: num < 0 ? 'back' : 'forward' },
+            })
+          }
+
+          return Promise.delay(100)
+        })
         .then(() => {
           knownCommandCausedInstability = false
 

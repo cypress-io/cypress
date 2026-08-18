@@ -626,6 +626,29 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/23736
+  // the guard this asserts relies on the browser's navigation history, which is
+  // only available over CDP
+  context('#go across origins', { browser: { family: 'chromium' } }, () => {
+    it('errors rather than navigating the Cypress runner out of the history', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.go()` could not navigate back because the application under test has no page to go back to.')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/go')
+
+        done()
+      })
+
+      // visiting a new origin reloads the Cypress runner at that origin, leaving
+      // an entry for the runner itself in the browser's session history
+      cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
+
+      // back to the entry the runner was reloaded into, which the AUT shares
+      cy.go('back')
+      // and back into the entry belonging to the runner's previous origin
+      cy.go('back')
+    })
+  })
+
   context('#visit', () => {
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {

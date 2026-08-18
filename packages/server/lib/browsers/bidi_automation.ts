@@ -656,9 +656,7 @@ export class BidiAutomation {
         case 'navigate:aut:history':
         {
           if (this.autContextId) {
-            await bidiNavigateHistory(this.webDriverClient, this.autContextId, data.historyNumber)
-
-            return
+            return await bidiNavigateHistory(this.webDriverClient, this.autContextId, data.historyNumber)
           }
 
           throw new Error('Cannot navigate AUT frame history: no AUT context initialized')

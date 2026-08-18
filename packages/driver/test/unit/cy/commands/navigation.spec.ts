@@ -180,6 +180,10 @@ describe('cy/commands/navigation', () => {
     })
 
     describe('chromium/firefox', () => {
+      beforeEach(() => {
+        mockCypress.automation.mockResolvedValue({ traversed: true })
+      })
+
       it('sends the navigate:aut:history event to the backend via the automation client', () => {
         go.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, -1, {})
 
@@ -193,6 +197,14 @@ describe('cy/commands/navigation', () => {
         })
 
         expect(mockWindow.history.go).not.toHaveBeenCalled()
+      })
+
+      // https://github.com/cypress-io/cypress/issues/23736
+      it('errors when the entry to traverse to belongs to the Cypress runner', async () => {
+        mockCypress.automation.mockResolvedValue({ traversed: false })
+
+        await expect(go.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, -1, {}))
+        .rejects.toThrow('could not navigate back because the application under test has no page to go back to')
       })
 
       describe('webkit', () => {
