@@ -7,7 +7,6 @@
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run --config-file ./cypress.config.ts",
-    "cypress:run:force-http1": "node ../../scripts/cypress run --config-file ./cypress.config-forceHttp1.ts",
     "cypress:run:inject-document-domain": "node ../../scripts/cypress run --config-file ./cypress.config-injectDocumentDomain.ts",
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",

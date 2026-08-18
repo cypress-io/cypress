@@ -1,9 +1,4 @@
 exports['e2e non-proxied spec / passes'] = `
-Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress.
-
-Remove it from your configuration to use the default network path.
-
-Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1
 
 ====================================================================================================
 

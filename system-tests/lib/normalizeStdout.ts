@@ -21,6 +21,13 @@ const availableBrowsersRe = /(Available browsers found on your system are:)([\s\
 // run snapshots don't need to capture it. Matches the BROWSER_ELECTRON_DEPRECATED
 // error template in packages/errors/src/errors.ts.
 const electronDeprecationWarningRe = /Warning: The Electron browser is deprecated as a test browser and will be removed in a future version of Cypress\.\n\nSwitch to Chrome or another installed browser to avoid a breaking change when you upgrade\.\n\nRead more about supported browsers: https:\/\/on\.cypress\.io\/launching-browsers\n\n/g
+// Strip the forceHttp1 deprecation warning, printed ahead of the run header on
+// every run whose config sets forceHttp1 -- including CI jobs that set it for the
+// whole job. Matches the FORCE_HTTP1_DEPRECATION template in
+// packages/errors/src/errors.ts. Unlike the Electron warning above, this leaves
+// the trailing blank line: snapshots already have one before the `====` divider.
+// DELETE THIS when the forceHttp1 option is removed -- it is easy to miss here.
+const forceHttp1DeprecationWarningRe = /Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress\.\n\nRemove it from your configuration to use the default network path\.\n\nRead the documentation for the forceHttp1 configuration option: https:\/\/docs\.cypress\.io\/app\/references\/configuration#forceHttp1\n/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
@@ -180,6 +187,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
   // Strip the Electron deprecation warning so run-mode snapshots don't need to capture it
   .replace(electronDeprecationWarningRe, '')
+  // Strip the forceHttp1 deprecation warning so run-mode snapshots don't need to capture it
+  .replace(forceHttp1DeprecationWarningRe, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
   .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
   .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
