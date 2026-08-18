@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import os from 'os'
 import path from 'path'
 import { randomUUID } from 'crypto'
 
@@ -17,6 +16,12 @@ interface SpecOriginatedCommand {
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
 type ChannelUrl = string
 type ChannelKey = string
+
+const serializeForInlineScript = (value: unknown) => {
+  return JSON.stringify(value ?? null).replace(/[<>\u2028\u2029]/g, (char) => {
+    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
+  })
+}
 
 class PrivilegedCommandsManager {
   channelKeys: Record<ChannelUrl, ChannelKey> = {}
@@ -44,22 +49,16 @@ class PrivilegedCommandsManager {
     this.channelKeys[options.url] = key
 
     const script = (await fs.readFileAsync(path.join(__dirname, 'privileged-channel.js'))).toString()
-    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => {
-      if (os.platform() === 'win32') {
-        return relativeUrl.replaceAll('\\', '\\\\')
-      }
-
-      return relativeUrl
-    }))
+    const specScripts = JSON.stringify(options.scripts.map(({ relativeUrl }) => relativeUrl))
 
     return `${script}({
-      browserFamily: '${options.browserFamily}',
-      isSpecBridge: ${options.isSpecBridge || 'false'},
-      key: '${key}',
-      namespace: '${options.namespace}',
-      scripts: '${specScripts}',
-      url: '${options.url}',
-      documentDomainContext: ${options.documentDomainContext},
+      browserFamily: ${serializeForInlineScript(options.browserFamily)},
+      isSpecBridge: ${serializeForInlineScript(!!options.isSpecBridge)},
+      key: ${serializeForInlineScript(key)},
+      namespace: ${serializeForInlineScript(options.namespace)},
+      scripts: ${serializeForInlineScript(specScripts)},
+      url: ${serializeForInlineScript(options.url)},
+      documentDomainContext: ${serializeForInlineScript(!!options.documentDomainContext)},
     })`
   }
 
