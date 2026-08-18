@@ -3024,6 +3024,7 @@
     "./node_modules/semver/functions/rsort.js",
     "./node_modules/semver/functions/satisfies.js",
     "./node_modules/semver/functions/sort.js",
+    "./node_modules/semver/functions/truncate.js",
     "./node_modules/semver/functions/valid.js",
     "./node_modules/semver/index.js",
     "./node_modules/semver/internal/constants.js",
