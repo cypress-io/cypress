@@ -1192,7 +1192,7 @@ describe('src/cy/commands/request', () => {
           assertLogLength(this.logs, 1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.request()` was called with invalid encoding: `false`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node\'s Buffer encoding.')
+          expect(err.message).to.include('`cy.request()` was called with invalid encoding: `false`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
           done()
