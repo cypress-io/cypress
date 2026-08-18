@@ -3667,6 +3667,7 @@
     "./packages/server/lib/cloud/environment.ts",
     "./packages/server/lib/cloud/error_with_cause.ts",
     "./packages/server/lib/cloud/extract_atomic.ts",
+    "./packages/server/lib/cloud/filter_tests.ts",
     "./packages/server/lib/cloud/get_cloud_metadata.ts",
     "./packages/server/lib/cloud/machine_id.ts",
     "./packages/server/lib/cloud/network/fetch.ts",
