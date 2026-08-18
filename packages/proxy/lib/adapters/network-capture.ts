@@ -14,19 +14,24 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
 
   const preRequest = mw.req.browserPreRequest
   const requestId = getOriginalRequestId(preRequest.requestId)
+  const timings = {
+    cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+    cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+    proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+    cdpLagDuration: preRequest.cdpLagDuration,
+    proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+  }
 
   // A stream-classified response carries its captured bytes on a side channel
   // instead of mw.incomingResStream (which stays an empty stand-in so the
-  // middleware body path doesn't wedge on a never-ending stream). Notify
-  // Replay from that side channel without touching the body path. Gated on
+  // middleware body path doesn't wedge on a never-ending stream). Gated on
   // both flags: capture implies skipped, and if a materialized response ever
   // carried a capture stream, its real body must win via the normal path.
   if (mw.resCaptureStream && mw.resBodySkipped) {
     const captureSpan = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: mw.resMiddlewareSpan, isVerbose })
 
-    // Whichever close arrives first is the legitimate end — the source usually
-    // closes before the tee flushes, and a second span.end() would emit a
-    // misleading diag error for anyone troubleshooting with the OTel logger on.
+    // Whichever close arrives first is the legitimate end; a second span.end()
+    // would emit a misleading diag error under the OTel logger.
     let captureSpanEnded = false
     const endCaptureSpan = () => {
       if (captureSpanEnded) {
@@ -38,32 +43,26 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
     }
 
     // The tee's own close may never fire when the source is destroyed at spec
-    // reset (a bare destroy emits no error for a plain pipe to propagate);
-    // the source's close always fires, so it ends the span as a backstop.
+    // reset; the source's close always fires, so it backstops the span.
     mw.resCaptureStream.once('close', endCaptureSpan)
 
     const resultingStream = mw.protocolManager.responseStreamReceived({
       requestId,
       responseHeaders: mw.incomingRes.headers,
+      // the pump carries decoded bytes (Network.dataReceived is post-decoding)
       isAlreadyGunzipped: true,
       isAlreadyBrotliDecompressed: true,
       responseStream: mw.resCaptureStream,
       res: mw.res,
-      timings: {
-        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-        cdpLagDuration: preRequest.cdpLagDuration,
-        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
-      },
+      timings,
     })
 
     if (resultingStream) {
-      // Nothing else on this path consumes the tee; draining it here keeps
-      // backpressure from stalling Replay's writer. A failure only costs this
-      // capture — the client response was already served from the stand-in
-      // body, so it must never reach the error stage (unlike the normal path,
-      // where the tee IS the client body and an error must reset the client).
+      // Nothing else on this path consumes the tee; drain it so backpressure
+      // can't stall Replay's writer. A failure only costs this capture — the
+      // client response was already served from the stand-in body, so it must
+      // never reach the error stage (on the normal path the tee IS the client
+      // body, so there an error must reset the client).
       resultingStream.on('error', (err) => {
         mw.debug('capture stream notification failed %o', err)
         endCaptureSpan()
@@ -94,13 +93,7 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
     isAlreadyBrotliDecompressed: mw.isBrotliDecompressed,
     responseStream: mw.incomingResStream,
     res: mw.res,
-    timings: {
-      cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
-      cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
-      proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-      cdpLagDuration: preRequest.cdpLagDuration,
-      proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
-    },
+    timings,
   }
 
   const resultingStream = mw.protocolManager.responseStreamReceived(streamOptions)

@@ -154,47 +154,38 @@ const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number) && getResponseHeader(event.responseHeaders, 'location') !== undefined
 }
 
+// Middleware that reads or writes into even an empty body must see the real
+// one: HTML injection, obstructive-code rewriting, service-worker injection,
+// and cy.intercept route handlers all break silently on the empty stand-in
+// the stream path hands them.
+const bodyIsNeeded = (event: Protocol.Fetch.RequestPausedEvent, contentType: string | undefined, options: ShouldStreamResponseBodyOptions): boolean => {
+  return isInjectionEligible(event, contentType) ||
+    isJsRewriteEligible(contentType, options) ||
+    isServiceWorkerScriptRequest(event) ||
+    !!options.hasMatchingRoute?.(event)
+}
+
+// A content-length proves the body finite; 1xx/204/304/HEAD have no body at
+// all; CDP withholds redirect bodies entirely.
+const isDefinitivelyBounded = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+  return isProvablyFinite(event) || isNeverHasBodyStatus(event) || isRedirectPause(event)
+}
+
 export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEvent, options: ShouldStreamResponseBodyOptions = {}): boolean => {
   // Raw lowercased value, matched by substring throughout — parameters
   // (charset), newline-folded duplicates, and multi-value joins all survive.
   const contentType = getResponseHeader(event.responseHeaders, 'content-type')?.toLowerCase()
 
-  // Absolute: beats everything below, including a content-length and a
-  // matched route — these bodies provably never end, and materializing hangs
-  // getResponseBody.
+  // Provably endless beats everything, including a content-length and a
+  // matched route — materializing hangs getResponseBody (#34470), and a stub
+  // still works via the empty-body digest→fulfill path (#34593).
   if (isStreamShaped(event, contentType)) {
     return true
   }
 
-  if (isInjectionEligible(event, contentType)) {
+  if (bodyIsNeeded(event, contentType, options)) {
     return false
   }
 
-  if (isJsRewriteEligible(contentType, options)) {
-    return false
-  }
-
-  if (isServiceWorkerScriptRequest(event)) {
-    return false
-  }
-
-  // Route handlers read/modify bodies through the middleware body path,
-  // which the stream class hands an empty stand-in.
-  if (options.hasMatchingRoute?.(event)) {
-    return false
-  }
-
-  if (isProvablyFinite(event)) {
-    return false
-  }
-
-  if (isNeverHasBodyStatus(event)) {
-    return false
-  }
-
-  if (isRedirectPause(event)) {
-    return false
-  }
-
-  return true
+  return !isDefinitivelyBounded(event)
 }

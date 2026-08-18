@@ -21,13 +21,10 @@ type CaptureEntry = {
 
 /**
  * Pumps a stream-classified response's bytes out via
- * `Network.streamResourceContent` + `Network.dataReceived`, mirroring
- * CDPNetworkExtraInfo's session-scoped-map shape — but unlike extraInfo's
- * resolve-twice-is-a-no-op deferreds, pushes are not idempotent, so the
- * session-scoped keys are what protects against duplicate delivery here.
- * Armed once the response pause is classified as stream (before the pause is
- * released), so no bytes are lost between arming and the browser resuming
- * delivery.
+ * `Network.streamResourceContent` + `Network.dataReceived`. Armed before the
+ * pause is released, so no bytes are lost. Pushes are not idempotent (unlike
+ * CDPNetworkExtraInfo's deferreds) — the session-scoped keys are what
+ * protects against duplicate delivery.
  */
 export class CdpBodyCapture {
   private readonly captures = new Map<string, CaptureEntry>()
@@ -85,20 +82,11 @@ export class CdpBodyCapture {
 
   /**
    * Abandons a single armed capture whose flow lost its owner (e.g. reset()
-   * raced the arm await). Without this the pump would keep pushing browser
-   * bytes into a stream nobody will ever read. Destroys rather than ends:
-   * there is no consumer to deliver a partial capture to.
+   * raced the arm await), so the pump stops pushing into a stream nobody will
+   * read. Destroys rather than ends: there is no consumer for a partial capture.
    */
   release (networkId: string, sessionId?: string): void {
-    const key = this.getCaptureKey(networkId, sessionId)
-    const entry = this.captures.get(key)
-
-    if (!entry) {
-      return
-    }
-
-    entry.stream.destroy()
-    this.captures.delete(key)
+    this.drop(networkId, sessionId, 'destroy')
   }
 
   /**
@@ -142,17 +130,17 @@ export class CdpBodyCapture {
   }
 
   private onLoadingFinished = (event: Protocol.Network.LoadingFinishedEvent, sessionId?: string): void => {
-    this.endCapture(event.requestId, sessionId)
+    this.drop(event.requestId, sessionId, 'end')
   }
 
   // A failed load still leaves whatever was captured up to that point valid
   // for Test Replay — end the stream rather than erroring it, so a partial
   // capture is delivered instead of discarded.
   private onLoadingFailed = (event: Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
-    this.endCapture(event.requestId, sessionId)
+    this.drop(event.requestId, sessionId, 'end')
   }
 
-  private endCapture (networkId: string, sessionId?: string): void {
+  private drop (networkId: string, sessionId: string | undefined, mode: 'end' | 'destroy'): void {
     const key = this.getCaptureKey(networkId, sessionId)
     const entry = this.captures.get(key)
 
@@ -160,7 +148,7 @@ export class CdpBodyCapture {
       return
     }
 
-    entry.stream.end()
+    entry.stream[mode]()
     this.captures.delete(key)
   }
 }
