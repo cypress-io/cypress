@@ -4,7 +4,6 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import path from 'path'
 import fs from 'fs'
-import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
@@ -15,16 +14,10 @@ const debugVerbose = Debug('cypress-verbose:data-context:sources:GitDataSource')
 
 dayjs.extend(relativeTime)
 
-// We get the last modified time for each spec
-// using a shell command. The reason is
-// none of the Node.js git wrappers support
-// bulk fetching the last modified date and user.
-// Doing them one by one in a Node.js for loop is way too slow.
-// The fastest way to do it is using a shell command,
-// looping over each spec and processing the result of `git log`
-// The command is slightly different between macOS/Linux and Windows.
-// macOS/Linux: getInfoPosix
-// Windows: getInfoWindows
+// We get the last modified time for each spec by running `git log` once per
+// spec. The reason is none of the Node.js git wrappers support bulk fetching
+// the last modified date and user. The calls run with bounded concurrency,
+// since awaiting them one at a time is too slow for a large spec list.
 // Where possible, we use SimpleGit to get other git info, like
 // the status of untracked files and the current git username.
 
@@ -32,13 +25,11 @@ dayjs.extend(relativeTime)
 // $ git log -1 --pretty=format:%ci %ar %an <file>
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s([^|]*)\|([^|]*)\|([^|]*)/
-const GIT_LOG_COMMAND = `git log --max-count=1 --pretty="format:%ci %ar %an|%h|%s"`
+const GIT_LOG_ARGS = ['log', '--max-count=1', '--pretty=format:%ci %ar %an|%h|%s']
+const GIT_LOG_CONCURRENCY = 16
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
-function ensurePosixPathSeparators (text: string) {
-  return text.replace(/\\/g, '/') // normalize \ to /
-}
 interface GitInfo {
   author: string | null
   lastModifiedTimestamp: string | null
@@ -292,9 +283,7 @@ export class GitDataSource {
 
       if (!this.#gitErrored) {
         const [stdout, statusResultReturned] = await Promise.all([
-          os.platform() === 'win32'
-            ? this.#getInfoWindows(absolutePaths)
-            : this.#getInfoPosix(absolutePaths),
+          this.#getInfo(absolutePaths),
           this.#git?.status(),
         ])
 
@@ -379,68 +368,31 @@ export class GitDataSource {
     }
   }
 
-  async #getInfoPosix (absolutePaths: readonly string[]) {
+  async #getInfo (absolutePaths: readonly string[]) {
     debug('getting git info for %o:', absolutePaths)
-    // Escape any quotes within the filepath, then surround with quotes
-    const paths = absolutePaths
-    .map((p) => `"${path.resolve(p).replace(/\"/g, '\\"')}"`).join(' ')
-
-    // for file in {one,two} is valid in bash, but for file {one} is not
-    // no need to use a for loop for a single file
-    // IFS is needed to handle paths with white space.
-    const cmd = paths.length === 1
-      ? `${GIT_LOG_COMMAND} ${paths[0]}`
-      : `IFS=$'\n'; for file in ${paths}; do echo $(${GIT_LOG_COMMAND} $file); done`
-
-    debug('executing command: `%s`', cmd)
     debug('cwd: `%s`', this.#gitBaseDir)
 
-    const result = await execa(cmd, { shell: true, cwd: this.#gitBaseDir })
-    const stdout = result.stdout.split('\n')
+    const readOne = async (specPath: string) => {
+      // `--` keeps git from reading a spec path as a revision
+      const args = [...GIT_LOG_ARGS, '--', path.resolve(specPath)]
 
-    if (result.exitCode !== 0) {
-      debug(`command execution error: %o`, result)
+      try {
+        const result = await execa('git', args, { cwd: this.#gitBaseDir })
+
+        return result.stdout.trim()
+      } catch (err) {
+        debug('command execution error: %o', err)
+
+        return ''
+      }
     }
-
-    if (stdout.length !== absolutePaths.length) {
-      debug('unexpected command execution result: %o', result)
-      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
-    }
-
-    return stdout
-  }
-
-  async #getInfoWindows (absolutePaths: readonly string[]) {
-    debug('getting git info for %o:', absolutePaths)
-    const paths = absolutePaths.map((x) => `"${path.resolve(x)}"`).join(',')
-    const cmd = `FOR %x in (${paths}) DO (${GIT_LOG_COMMAND} %x)`
-
-    debug('executing command: `%s`', cmd)
-    debug('cwd: `%s`', this.#gitBaseDir)
-
-    const subprocess = execa(cmd, { shell: true, cwd: this.#gitBaseDir })
-    let result
-
-    try {
-      result = await subprocess
-    } catch (err) {
-      result = err
-    }
-
-    const stdout = ensurePosixPathSeparators(result.stdout).split('\r\n') // windows uses CRLF for carriage returns
 
     const output: string[] = []
 
-    for (const p of absolutePaths) {
-      const idx = stdout.findIndex((entry) => entry.includes(p))
-      const text = stdout[idx + 1] ?? ''
+    for (let i = 0; i < absolutePaths.length; i += GIT_LOG_CONCURRENCY) {
+      const batch = absolutePaths.slice(i, i + GIT_LOG_CONCURRENCY)
 
-      output.push(text)
-    }
-
-    if (output.length !== absolutePaths.length) {
-      debug('stdout', output)
-      throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${output.length}`)
+      output.push(...await Promise.all(batch.map((specPath) => readOne(specPath))))
     }
 
     return output

@@ -94,9 +94,9 @@ describe('GitDataSource', () => {
     expect(modified.lastModifiedTimestamp).not.toBeUndefined()
   })
 
-  it(`handles files with special characters on ${os.platform()}`, async () => {
+  const specialCharacterFilenames = () => {
     // Validates handling of edge cases from https://github.com/cypress-io/cypress/issues/22454
-    let filepaths = [
+    const filenames = [
       'file withSpace.cy.js',
       'file~WithTilde.cy.js',
       'file-withHyphen.cy.js',
@@ -107,15 +107,25 @@ describe('GitDataSource', () => {
       'file^withCarat.cy.js',
       'file=withEqual.cy.js',
       'file+withPlus.cy.js',
+      'file&withAmpersand.cy.js',
+      'file%withPercent.cy.js',
+      'file!withExclamation.cy.js',
+      'file$withDollar.cy.js',
+      'file(withParens).cy.js',
+      'file`withBacktick`.cy.js',
       'file\'withOneSingleQuote.cy.js',
     ]
 
     if (os.platform() !== 'win32') {
       // Double quote not a legal character on NTFS
-      filepaths.push('file"withOneDoubleQuote.cy.js')
+      filenames.push('file"withOneDoubleQuote.cy.js')
     }
 
-    filepaths = filepaths
+    return filenames
+  }
+
+  it(`handles files with special characters on ${os.platform()}`, async () => {
+    const filepaths = specialCharacterFilenames()
     .map((filename) => path.join(e2eFolder, filename))
     .map((filepath) => toPosix(filepath))
 
@@ -148,6 +158,44 @@ describe('GitDataSource', () => {
 
       expect(result?.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
       expect(result?.statusType).toEqual('created')
+    })
+  })
+
+  it(`reads committed git info for files with special characters on ${os.platform()}`, async () => {
+    const filepaths = specialCharacterFilenames()
+    .map((filename) => path.join(e2eFolder, filename))
+    .map((filepath) => toPosix(filepath))
+
+    await Promise.all(
+      filepaths.map((filepath) => fs.createFile(filepath)),
+    )
+
+    await git.add(filepaths)
+    await git.commit('add specs with special characters')
+
+    const dfd = Promise.withResolvers()
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: jest.fn(),
+      onGitInfoChange: dfd.resolve,
+      onError: jest.fn(),
+    })
+
+    gitInfo.setSpecs(filepaths)
+
+    await dfd.promise
+
+    // each spec resolves to its own commit info, so the results stay aligned
+    // with the order the paths were requested in
+    filepaths.forEach((filepath) => {
+      const result = gitInfo.gitInfoFor(filepath)
+
+      expect(result?.statusType).toEqual('unmodified')
+      expect(result?.subject).toEqual('add specs with special characters')
+      expect(result?.shortHash).toMatch(/^[0-9a-f]+$/)
+      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
     })
   })
 
