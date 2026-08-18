@@ -8,8 +8,7 @@ import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetc
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
-import type { ResponseBodyDisposition } from '../../../lib/browsers/cdp-protocol/classify-response-body'
-import { classifyResponseBody } from '../../../lib/browsers/cdp-protocol/classify-response-body'
+import { shouldStreamResponseBody } from '../../../lib/browsers/cdp-protocol/should-stream-response-body'
 
 function createPausedRequest (options: {
   requestId: string
@@ -67,7 +66,7 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
   isFromExtraTarget?: boolean
   addPendingUrlWithoutPreRequest?: (url: string) => void
   onRequestCanceled?: (requestId: string) => void
-  classifyBody?: (event: Protocol.Fetch.RequestPausedEvent) => ResponseBodyDisposition
+  shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
   shouldCaptureBody?: () => boolean
   bodyCapture?: CdpBodyCapture
 } = {}) {
@@ -78,7 +77,7 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
     isFromExtraTarget: options.isFromExtraTarget,
     addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
     onRequestCanceled: options.onRequestCanceled,
-    classifyBody: options.classifyBody,
+    shouldStreamBody: options.shouldStreamBody,
     shouldCaptureBody: options.shouldCaptureBody,
   }, networkExtraInfo as any, bodyCapture)
 
@@ -2171,7 +2170,7 @@ describe('CdpFetchTransport', () => {
 
       expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
 
-      // Redirects classify 'materialize' and are not marked skipped:
+      // Redirects are materialized and are not marked skipped:
       // MaybeSendRedirectToClient ends every 3xx-with-location before the
       // capture stage, so the marker would have no reader.
       expect(middlewareSawResponse).to.have.been.calledWith({
@@ -2276,7 +2275,7 @@ describe('CdpFetchTransport', () => {
     // application/x-ndjson never finishes any more reliably than SSE does, but
     // carried no provable resourceType/content-type signal for the old
     // deny-list — this is the shape that wedged #34623. The stream-default
-    // fallback in classifyResponseBody (rather than another deny-list entry)
+    // fallback in shouldStreamResponseBody (rather than another deny-list entry)
     // is what fixes it.
     it('skips the eager body fetch for a chunked ndjson response pause (#34623)', async () => {
       const client = createClient()
@@ -2292,7 +2291,7 @@ describe('CdpFetchTransport', () => {
       // composition wires this, so the default cannot exercise this path.
       const { transport } = createTransport(client, {
         httpIntercept,
-        classifyBody: (event) => classifyResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => false }),
+        shouldStreamBody: (event) => shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => false }),
       })
       const onRequestPaused = await startTransport(transport, client)
 
@@ -2413,13 +2412,13 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    // Phase 3 composes classifyBody's hasMatchingRoute from cy.intercept's
+    // network-runtime composes shouldStreamBody's hasMatchingRoute from cy.intercept's
     // matchRoutes — simulated here with a closure standing in for that
     // composition, since matchRoutes itself is out of scope for this phase.
-    it('materializes the body when the classifyBody option reports a matched route, overriding the stream default', async () => {
+    it('materializes the body when the shouldStreamBody option reports false, overriding the stream default', async () => {
       const client = createClient()
-      const classifyBody = sinon.stub().returns('materialize')
-      const { transport } = createTransport(client, { classifyBody })
+      const shouldStreamBody = sinon.stub().returns(false)
+      const { transport } = createTransport(client, { shouldStreamBody })
       const onRequestPaused = await startTransport(transport, client)
 
       client.send.withArgs('Fetch.getResponseBody').resolves({
@@ -2446,7 +2445,7 @@ describe('CdpFetchTransport', () => {
       await onRequestPaused(response)
       await handled
 
-      expect(classifyBody).to.have.been.calledWith(response)
+      expect(shouldStreamBody).to.have.been.calledWith(response)
 
       expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
         requestId: 'fetch-request',
@@ -2470,7 +2469,7 @@ describe('CdpFetchTransport', () => {
 
         const { transport } = createTransport(client, {
           httpIntercept: httpIntercept as any,
-          classifyBody: () => 'stream',
+          shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
         const onRequestPaused = await startTransport(transport, client)
@@ -2524,7 +2523,7 @@ describe('CdpFetchTransport', () => {
       it('does not arm the capture pump when shouldCaptureBody is unset (default)', async () => {
         const client = createClient()
         const { transport } = createTransport(client, {
-          classifyBody: () => 'stream',
+          shouldStreamBody: () => true,
         })
         const onRequestPaused = await startTransport(transport, client)
 
@@ -2565,7 +2564,7 @@ describe('CdpFetchTransport', () => {
 
         const { transport } = createTransport(client, {
           httpIntercept: httpIntercept as any,
-          classifyBody: () => 'stream',
+          shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
         const onRequestPaused = await startTransport(transport, client)
@@ -2597,7 +2596,7 @@ describe('CdpFetchTransport', () => {
         const client = createClient()
         const addPendingUrlWithoutPreRequest = sinon.stub()
         const { transport } = createTransport(client, {
-          classifyBody: () => 'stream',
+          shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
           addPendingUrlWithoutPreRequest,
         })
@@ -2660,7 +2659,7 @@ describe('CdpFetchTransport', () => {
         client.send.withArgs('Network.streamResourceContent').returns(armGate.promise)
 
         const { transport, bodyCapture } = createTransport(client, {
-          classifyBody: () => 'stream',
+          shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
         const releaseSpy = sinon.spy(bodyCapture, 'release')

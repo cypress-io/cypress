@@ -19,8 +19,7 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-clie
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
-import { classifyResponseBody } from './browsers/cdp-protocol/classify-response-body'
-import type { ResponseBodyDisposition } from './browsers/cdp-protocol/classify-response-body'
+import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
 import { normalizeResourceType } from './browsers/cdp-protocol/normalize-resource-type'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
@@ -192,8 +191,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // Deliberately looser than SetMatchingRoutes in two safe-direction ways: it
   // skips the dev-server exclusion, and it re-matches at response time against
   // the possibly-handler-mutated request URL. Both can only over-materialize.
-  const classifyBody = (event: Protocol.Fetch.RequestPausedEvent): ResponseBodyDisposition => {
-    return classifyResponseBody(event, {
+  const shouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+    return shouldStreamResponseBody(event, {
       modifyObstructiveCode: deps.config.modifyObstructiveCode,
       experimentalModifyObstructiveThirdPartyCode: deps.config.experimentalModifyObstructiveThirdPartyCode,
       hasMatchingRoute: (pausedEvent) => {
@@ -301,7 +300,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
     onRequestCanceled,
-    classifyBody,
+    shouldStreamBody,
     shouldCaptureBody,
   })
 
@@ -341,7 +340,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         isFromExtraTarget: true,
         resolveOriginRedirect,
         onRequestCanceled,
-        classifyBody,
+        shouldStreamBody,
         shouldCaptureBody,
       })
 

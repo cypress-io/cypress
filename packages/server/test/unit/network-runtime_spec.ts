@@ -1487,7 +1487,7 @@ describe('lib/network-runtime', () => {
     expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
   })
 
-  it('attachExtraTarget transports share the same classifyBody composition as the main transport', async () => {
+  it('attachExtraTarget transports share the same shouldStreamBody composition as the main transport', async () => {
     const mainClient = {
       send: sinon.stub().resolves({}),
       on: sinon.stub(),

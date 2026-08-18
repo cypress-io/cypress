@@ -14,8 +14,7 @@ import { CdpBodyCapture } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
-import type { ResponseBodyDisposition } from './classify-response-body'
-import { classifyResponseBody } from './classify-response-body'
+import { shouldStreamResponseBody } from './should-stream-response-body'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -111,11 +110,11 @@ type CdpFetchTransportOptions = {
    */
   onRequestCanceled?: (requestId: string) => void
   /**
-   * Decides whether a response pause takes the eager `Fetch.getResponseBody`
-   * (materialize) or the stream path (skip the read; the body is captured
-   * separately, if at all, via CdpBodyCapture).
+   * True when a response pause should skip the eager `Fetch.getResponseBody`
+   * and let the browser stream the body natively (captured separately, if at
+   * all, via CdpBodyCapture); false materializes as before.
    */
-  classifyBody?: (event: Protocol.Fetch.RequestPausedEvent) => ResponseBodyDisposition
+  shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
   /**
    * Gates whether a stream-classified response arms CdpBodyCapture. Defaults
    * to false: without a consumer for the captured bytes (wired in a later
@@ -126,12 +125,12 @@ type CdpFetchTransportOptions = {
 
 // Until composition supplies the real route predicate and config flags, assume
 // every request could be intercepted and JS rewriting is on. Both assumptions
-// force materialize, which collapses the classifier to the retired deny-list's
+// force materialize, which collapses the predicate to the retired deny-list's
 // rule alone: only provably stream-shaped responses skip the read. A default
 // that let the stream fallback go live here would hand cy.intercept handlers
 // empty bodies for every chunked API response.
-const defaultClassifyBody = (event: Protocol.Fetch.RequestPausedEvent): ResponseBodyDisposition => {
-  return classifyResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => true })
+const defaultShouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+  return shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => true })
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -746,8 +745,7 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    const disposition = (this.options.classifyBody ?? defaultClassifyBody)(event)
-    const bodySkipped = disposition === 'stream'
+    const bodySkipped = (this.options.shouldStreamBody ?? defaultShouldStreamBody)(event)
     let originalBody: Buffer
     let captureStream: Readable | undefined
 

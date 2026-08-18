@@ -9,13 +9,11 @@ import type { Protocol } from 'devtools-protocol'
 // transport concern. The stream verdict is still correct and hang-free for
 // such pauses.
 
-export type ResponseBodyDisposition = 'materialize' | 'stream'
-
-export interface ClassifyResponseBodyOptions {
-  // config-gated JS rewrite signals; Phase 3 composes these from resolved config
+export interface ShouldStreamResponseBodyOptions {
+  // config-gated JS rewrite signals, composed from resolved config by network-runtime
   modifyObstructiveCode?: boolean
   experimentalModifyObstructiveThirdPartyCode?: boolean
-  // returns true when a cy.intercept route matches this request; Phase 3 composes via matchRoutes
+  // returns true when a cy.intercept route matches this request, composed via matchRoutes
   hasMatchingRoute?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
 }
 
@@ -103,7 +101,7 @@ const isInjectionEligible = (event: Protocol.Fetch.RequestPausedEvent, contentTy
 // Only relevant when a JS-rewrite flag is on; which of the two flags is set
 // doesn't matter here — first- vs third-party scoping happens in the
 // middleware, and this rule only needs to know rewriting is possible at all.
-const isJsRewriteEligible = (contentType: string | undefined, options: ClassifyResponseBodyOptions): boolean => {
+const isJsRewriteEligible = (contentType: string | undefined, options: ShouldStreamResponseBodyOptions): boolean => {
   if (!options.modifyObstructiveCode && !options.experimentalModifyObstructiveThirdPartyCode) {
     return false
   }
@@ -156,7 +154,7 @@ const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number) && getResponseHeader(event.responseHeaders, 'location') !== undefined
 }
 
-export const classifyResponseBody = (event: Protocol.Fetch.RequestPausedEvent, options: ClassifyResponseBodyOptions = {}): ResponseBodyDisposition => {
+export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEvent, options: ShouldStreamResponseBodyOptions = {}): boolean => {
   // Raw lowercased value, matched by substring throughout — parameters
   // (charset), newline-folded duplicates, and multi-value joins all survive.
   const contentType = getResponseHeader(event.responseHeaders, 'content-type')?.toLowerCase()
@@ -165,38 +163,38 @@ export const classifyResponseBody = (event: Protocol.Fetch.RequestPausedEvent, o
   // matched route — these bodies provably never end, and materializing hangs
   // getResponseBody.
   if (isStreamShaped(event, contentType)) {
-    return 'stream'
+    return true
   }
 
   if (isInjectionEligible(event, contentType)) {
-    return 'materialize'
+    return false
   }
 
   if (isJsRewriteEligible(contentType, options)) {
-    return 'materialize'
+    return false
   }
 
   if (isServiceWorkerScriptRequest(event)) {
-    return 'materialize'
+    return false
   }
 
   // Route handlers read/modify bodies through the middleware body path,
   // which the stream class hands an empty stand-in.
   if (options.hasMatchingRoute?.(event)) {
-    return 'materialize'
+    return false
   }
 
   if (isProvablyFinite(event)) {
-    return 'materialize'
+    return false
   }
 
   if (isNeverHasBodyStatus(event)) {
-    return 'materialize'
+    return false
   }
 
   if (isRedirectPause(event)) {
-    return 'materialize'
+    return false
   }
 
-  return 'stream'
+  return true
 }
