@@ -31,6 +31,17 @@ function createCapture () {
   }
 }
 
+// Arms a capture and starts collecting its decoded chunks — shared by the
+// tests below that assert on accumulated data rather than stream lifecycle.
+async function armAndCollect (capture: CdpBodyCapture, networkId: string, sessionId?: string) {
+  const stream = (await capture.arm(networkId, sessionId))!
+  const chunks: Buffer[] = []
+
+  stream.on('data', (chunk: Buffer) => chunks.push(chunk))
+
+  return { stream, chunks }
+}
+
 // Drains the microtask queue deep enough to cross the PassThrough's internal
 // read/write scheduling.
 async function tick () {
@@ -127,10 +138,7 @@ describe('CdpBodyCapture', () => {
   describe('dataReceived', () => {
     it('pumps base64-decoded bytes into the armed stream', async () => {
       const { capture, dataReceived } = createCapture()
-      const stream = await capture.arm('network-1')
-      const chunks: Buffer[] = []
-
-      stream!.on('data', (chunk: Buffer) => chunks.push(chunk))
+      const { chunks } = await armAndCollect(capture, 'network-1')
 
       dataReceived({ requestId: 'network-1', data: Buffer.from('hello').toString('base64') })
 
@@ -149,10 +157,7 @@ describe('CdpBodyCapture', () => {
 
     it('ignores an event with no data payload', async () => {
       const { capture, dataReceived } = createCapture()
-      const stream = await capture.arm('network-1')
-      const chunks: Buffer[] = []
-
-      stream!.on('data', (chunk: Buffer) => chunks.push(chunk))
+      const { chunks } = await armAndCollect(capture, 'network-1')
 
       dataReceived({ requestId: 'network-1' })
 
@@ -163,21 +168,16 @@ describe('CdpBodyCapture', () => {
 
     it('isolates captures for the same networkId across different sessions', async () => {
       const { capture, dataReceived } = createCapture()
-      const rootStream = await capture.arm('network-1')
-      const sessionStream = await capture.arm('network-1', 'session-1')
-      const rootChunks: Buffer[] = []
-      const sessionChunks: Buffer[] = []
-
-      rootStream!.on('data', (chunk: Buffer) => rootChunks.push(chunk))
-      sessionStream!.on('data', (chunk: Buffer) => sessionChunks.push(chunk))
+      const root = await armAndCollect(capture, 'network-1')
+      const session = await armAndCollect(capture, 'network-1', 'session-1')
 
       dataReceived({ requestId: 'network-1', data: Buffer.from('root').toString('base64') })
       dataReceived({ requestId: 'network-1', data: Buffer.from('sess').toString('base64') }, 'session-1')
 
       await tick()
 
-      expect(Buffer.concat(rootChunks).toString()).to.equal('root')
-      expect(Buffer.concat(sessionChunks).toString()).to.equal('sess')
+      expect(Buffer.concat(root.chunks).toString()).to.equal('root')
+      expect(Buffer.concat(session.chunks).toString()).to.equal('sess')
     })
 
     // Bounds capture of a never-ending body so Test Replay always receives a
@@ -219,12 +219,10 @@ describe('CdpBodyCapture', () => {
     // delivered instead of discarded.
     it('ends (does not error) the stream on loadingFailed, preserving the partial capture', async () => {
       const { capture, dataReceived, loadingFailed } = createCapture()
-      const stream = await capture.arm('network-1')
-      const chunks: Buffer[] = []
+      const { stream, chunks } = await armAndCollect(capture, 'network-1')
       const errored = sinon.stub()
 
-      stream!.on('data', (chunk: Buffer) => chunks.push(chunk))
-      stream!.on('error', errored)
+      stream.on('error', errored)
 
       dataReceived({ requestId: 'network-1', data: Buffer.from('partial').toString('base64') })
       loadingFailed({ requestId: 'network-1', errorText: 'net::ERR_FAILED' })
@@ -267,7 +265,7 @@ describe('CdpBodyCapture', () => {
     it('destroys and drops a single armed capture', async () => {
       const { capture, dataReceived } = createCapture()
       const released = await capture.arm('network-1', 'session-1')
-      const kept = await capture.arm('network-2', 'session-1')
+      const kept = await armAndCollect(capture, 'network-2', 'session-1')
       const closed = onceEvent(released!, 'close')
 
       capture.release('network-1', 'session-1')
@@ -275,15 +273,13 @@ describe('CdpBodyCapture', () => {
       await closed
 
       // the sibling capture is untouched and still pumping
-      const chunks: Buffer[] = []
-      const sawData = onceEvent(kept!, 'data')
+      const sawData = onceEvent(kept.stream, 'data')
 
-      kept!.on('data', (chunk: Buffer) => chunks.push(chunk))
       dataReceived({ requestId: 'network-2', data: Buffer.from('still-live').toString('base64') }, 'session-1')
 
       await sawData
 
-      expect(Buffer.concat(chunks).toString()).to.equal('still-live')
+      expect(Buffer.concat(kept.chunks).toString()).to.equal('still-live')
     })
 
     it('is a no-op for a networkId with no in-flight capture', () => {

@@ -126,6 +126,48 @@ async function readStream (stream: NodeJS.ReadableStream): Promise<string> {
   return Buffer.concat(chunks).toString()
 }
 
+// Drives the paired request-stage/response-stage Fetch.requestPaused pauses
+// shared by the stream-classification and capture-arming tests below.
+async function driveResponsePause (
+  onRequestPaused: (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => Promise<unknown>,
+  requestOptions: Parameters<typeof createPausedRequest>[0],
+  response: { statusCode?: number, headers?: Protocol.Fetch.HeaderEntry[] } = {},
+  sessionId?: string,
+) {
+  const handled = onRequestPaused(createPausedRequest(requestOptions), sessionId)
+
+  await tick()
+
+  const responseEvent = createPausedRequest({ ...requestOptions, responseStatusCode: response.statusCode ?? 200 })
+
+  if (response.headers) {
+    responseEvent.responseHeaders = response.headers
+  }
+
+  await onRequestPaused(responseEvent, sessionId)
+  await handled
+
+  return responseEvent
+}
+
+// Captures the response HttpIntercept.handle hands back, for tests that need
+// to inspect the outbound response object (e.g. its captureStream) rather
+// than just the resulting CDP calls.
+function captureRawResponseIntercept () {
+  let response: any
+
+  return {
+    httpIntercept: {
+      handle: async (req: any, next: (outbound: any) => Promise<any>) => {
+        response = await next(req)
+
+        return response
+      },
+    } as any,
+    getResponse: () => response,
+  }
+}
+
 describe('CdpFetchTransport', () => {
   describe('toNetworkError', () => {
     it('reports a refused connection the way Node does', () => {
@@ -407,7 +449,9 @@ describe('CdpFetchTransport', () => {
       expect(response.bodySkipped).to.be.true
     })
 
-    it('copies captureStream from the transport response onto the neutral response', () => {
+    // Shared by both cases below: decode a request/network-1 pair, then decode
+    // its response with the given overrides layered on top of the same base.
+    function decodeNetworkOneResponse (overrides: Record<string, any>) {
       const codec = createCdpFetchCodec()
 
       codec.decodeRequest({
@@ -417,9 +461,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
       })
 
-      const captureStream = new Readable({ read () {} })
-
-      const response = codec.decodeResponse({
+      return codec.decodeResponse({
         id: 'network-1',
         url: 'https://example.test/',
         method: 'GET',
@@ -427,6 +469,14 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 200,
         responsePhrase: 'OK',
+        ...overrides,
+      })
+    }
+
+    it('copies captureStream from the transport response onto the neutral response', () => {
+      const captureStream = new Readable({ read () {} })
+
+      const response = decodeNetworkOneResponse({
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         captureStream,
@@ -436,23 +486,7 @@ describe('CdpFetchTransport', () => {
     })
 
     it('leaves captureStream unset on the neutral response when the transport response has none', () => {
-      const codec = createCdpFetchCodec()
-
-      codec.decodeRequest({
-        id: 'network-1',
-        url: 'https://example.test/',
-        method: 'GET',
-        headers: {},
-      })
-
-      const response = codec.decodeResponse({
-        id: 'network-1',
-        url: 'https://example.test/',
-        method: 'GET',
-        headers: {},
-        requestId: 'fetch-request',
-        responseCode: 200,
-        responsePhrase: 'OK',
+      const response = decodeNetworkOneResponse({
         responseHeaders: [{ name: 'content-type', value: 'text/html' }],
       })
 
@@ -2277,6 +2311,11 @@ describe('CdpFetchTransport', () => {
     // deny-list — this is the shape that wedged #34623. The stream-default
     // fallback in shouldStreamResponseBody (rather than another deny-list entry)
     // is what fixes it.
+    // application/x-ndjson never finishes any more reliably than SSE does, but
+    // carried no provable resourceType/content-type signal for the old
+    // deny-list — this is the shape that wedged #34623. The stream-default
+    // fallback in shouldStreamResponseBody (rather than another deny-list entry)
+    // is what fixes it.
     it('skips the eager body fetch for a chunked ndjson response pause (#34623)', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
@@ -2306,25 +2345,11 @@ describe('CdpFetchTransport', () => {
         return response
       })
 
-      const handled = onRequestPaused(createPausedRequest({
+      await driveResponsePause(onRequestPaused, {
         requestId: 'fetch-request',
         networkId: 'network-1',
         resourceType: 'Fetch',
-      }))
-
-      await tick()
-
-      const response = createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-        resourceType: 'Fetch',
-        responseStatusCode: 200,
-      })
-
-      response.responseHeaders = [{ name: 'content-type', value: 'application/x-ndjson' }]
-
-      await onRequestPaused(response)
-      await handled
+      }, { headers: [{ name: 'content-type', value: 'application/x-ndjson' }] })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
 
@@ -2351,25 +2376,11 @@ describe('CdpFetchTransport', () => {
         return { ...response, body: 'stubbed' }
       })
 
-      const handled = onRequestPaused(createPausedRequest({
+      await driveResponsePause(onRequestPaused, {
         requestId: 'fetch-request',
         networkId: 'network-1',
         resourceType: 'Fetch',
-      }))
-
-      await tick()
-
-      const response = createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-        resourceType: 'Fetch',
-        responseStatusCode: 200,
-      })
-
-      response.responseHeaders = [{ name: 'content-type', value: 'text/event-stream' }]
-
-      await onRequestPaused(response)
-      await handled
+      }, { headers: [{ name: 'content-type', value: 'text/event-stream' }] })
 
       expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
 
@@ -2387,25 +2398,11 @@ describe('CdpFetchTransport', () => {
       const { transport } = createTransport(client)
       const onRequestPaused = await startTransport(transport, client)
 
-      const handled = onRequestPaused(createPausedRequest({
+      await driveResponsePause(onRequestPaused, {
         requestId: 'fetch-request',
         networkId: 'network-1',
         resourceType: 'XHR',
-      }))
-
-      await tick()
-
-      const response = createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-        resourceType: 'XHR',
-        responseStatusCode: 200,
-      })
-
-      response.responseHeaders = [{ name: 'content-length', value: '5' }]
-
-      await onRequestPaused(response)
-      await handled
+      }, { headers: [{ name: 'content-length', value: '5' }] })
 
       expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
         requestId: 'fetch-request',
@@ -2426,24 +2423,11 @@ describe('CdpFetchTransport', () => {
         base64Encoded: true,
       })
 
-      const handled = onRequestPaused(createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-      }))
-
-      await tick()
-
-      const response = createPausedRequest({
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-        responseStatusCode: 200,
-      })
-
       // Would classify 'stream' by default (deny-listed) — the option must win.
-      response.responseHeaders = [{ name: 'content-type', value: 'text/event-stream' }]
-
-      await onRequestPaused(response)
-      await handled
+      const response = await driveResponsePause(onRequestPaused, {
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }, { headers: [{ name: 'content-type', value: 'text/event-stream' }] })
 
       expect(shouldStreamBody).to.have.been.calledWith(response)
 
@@ -2455,39 +2439,19 @@ describe('CdpFetchTransport', () => {
     describe('body capture arming', () => {
       it('arms the capture pump for a stream-classified response when shouldCaptureBody opts in', async () => {
         const client = createClient()
-        let capturedResponse: any
-
-        const httpIntercept = {
-          handle: async (req: any, next: (outbound: any) => Promise<any>) => {
-            const response = await next(req)
-
-            capturedResponse = response
-
-            return response
-          },
-        }
+        const { httpIntercept, getResponse } = captureRawResponseIntercept()
 
         const { transport } = createTransport(client, {
-          httpIntercept: httpIntercept as any,
+          httpIntercept,
           shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
         const onRequestPaused = await startTransport(transport, client)
 
-        const handled = onRequestPaused(createPausedRequest({
+        await driveResponsePause(onRequestPaused, {
           requestId: 'fetch-request',
           networkId: 'network-1',
-        }), 'session-1')
-
-        await tick()
-
-        await onRequestPaused(createPausedRequest({
-          requestId: 'fetch-request',
-          networkId: 'network-1',
-          responseStatusCode: 200,
-        }), 'session-1')
-
-        await handled
+        }, {}, 'session-1')
 
         expect(client.send).to.have.been.calledWith('Network.streamResourceContent', {
           requestId: 'network-1',
@@ -2502,11 +2466,11 @@ describe('CdpFetchTransport', () => {
         expect(armIndex).to.be.greaterThan(-1)
         expect(releaseIndex).to.be.greaterThan(armIndex)
 
-        expect(capturedResponse.captureStream).to.exist
+        expect(getResponse().captureStream).to.exist
 
         const chunks: Buffer[] = []
 
-        capturedResponse.captureStream.on('data', (chunk: Buffer) => chunks.push(chunk))
+        getResponse().captureStream.on('data', (chunk: Buffer) => chunks.push(chunk))
 
         const dataReceivedHandler = client.on.withArgs('Network.dataReceived').getCall(0).args[1]
 
@@ -2527,20 +2491,10 @@ describe('CdpFetchTransport', () => {
         })
         const onRequestPaused = await startTransport(transport, client)
 
-        const handled = onRequestPaused(createPausedRequest({
+        await driveResponsePause(onRequestPaused, {
           requestId: 'fetch-request',
           networkId: 'network-1',
-        }))
-
-        await tick()
-
-        await onRequestPaused(createPausedRequest({
-          requestId: 'fetch-request',
-          networkId: 'network-1',
-          responseStatusCode: 200,
-        }))
-
-        await handled
+        })
 
         expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
       })
@@ -2550,41 +2504,21 @@ describe('CdpFetchTransport', () => {
 
         client.send.withArgs('Network.streamResourceContent').rejects(new Error('No resource with given identifier found'))
 
-        let capturedResponse: any
-
-        const httpIntercept = {
-          handle: async (req: any, next: (outbound: any) => Promise<any>) => {
-            const response = await next(req)
-
-            capturedResponse = response
-
-            return response
-          },
-        }
+        const { httpIntercept, getResponse } = captureRawResponseIntercept()
 
         const { transport } = createTransport(client, {
-          httpIntercept: httpIntercept as any,
+          httpIntercept,
           shouldStreamBody: () => true,
           shouldCaptureBody: () => true,
         })
         const onRequestPaused = await startTransport(transport, client)
 
-        const handled = onRequestPaused(createPausedRequest({
+        await driveResponsePause(onRequestPaused, {
           requestId: 'fetch-request',
           networkId: 'network-1',
-        }))
+        })
 
-        await tick()
-
-        await onRequestPaused(createPausedRequest({
-          requestId: 'fetch-request',
-          networkId: 'network-1',
-          responseStatusCode: 200,
-        }))
-
-        await handled
-
-        expect(capturedResponse.captureStream).to.be.undefined
+        expect(getResponse().captureStream).to.be.undefined
 
         expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
           requestId: 'fetch-request',
@@ -2602,20 +2536,10 @@ describe('CdpFetchTransport', () => {
         })
         const onRequestPaused = await startTransport(transport, client)
 
-        const handled = onRequestPaused(createPausedRequest({
+        await driveResponsePause(onRequestPaused, {
           requestId: 'download-pause-id',
           url: 'https://example.test/cypress/fixtures/records.csv',
-        }))
-
-        await tick()
-
-        await onRequestPaused(createPausedRequest({
-          requestId: 'download-pause-id',
-          url: 'https://example.test/cypress/fixtures/records.csv',
-          responseStatusCode: 200,
-        }))
-
-        await handled
+        })
 
         expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
       })
@@ -2630,24 +2554,10 @@ describe('CdpFetchTransport', () => {
         })
         const onRequestPaused = await startTransport(transport, client)
 
-        const handled = onRequestPaused(createPausedRequest({
+        await driveResponsePause(onRequestPaused, {
           requestId: 'fetch-request',
           networkId: 'network-1',
-        }))
-
-        await tick()
-
-        const response = createPausedRequest({
-          requestId: 'fetch-request',
-          networkId: 'network-1',
-          responseStatusCode: 302,
-        })
-
-        response.responseHeaders = [{ name: 'location', value: 'https://example.test/next' }]
-
-        await onRequestPaused(response)
-
-        await handled
+        }, { statusCode: 302, headers: [{ name: 'location', value: 'https://example.test/next' }] })
 
         expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
       })
