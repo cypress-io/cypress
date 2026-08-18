@@ -3,7 +3,7 @@
 
 **Deprecations:**
 
-- [`cy.exec()`](https://on.cypress.io/exec) has been deprecated and will be removed in a future major release of Cypress. Because it runs a command through a shell, its behavior depends on the operating system, the shell, the login environment, and whether a terminal is attached, which is a long-running source of hangs and "command not found" failures that are difficult to diagnose. Use [`cy.task()`](https://on.cypress.io/task) instead, which runs in the Node process that loads your Cypress configuration, so there is no shell resolution and no per-platform quoting rules, and it can return structured values rather than stdout that has to be parsed. Addresses [#34639](https://github.com/cypress-io/cypress/issues/34639).
+- [`cy.exec()`](https://on.cypress.io/exec) has been deprecated and will be removed in a future major release of Cypress. Use [`cy.task()`](https://on.cypress.io/task) instead, which runs in Node without depending on the operating system, shell, or terminal of the machine running Cypress. Addresses [#34639](https://github.com/cypress-io/cypress/issues/34639).
 
 **Features:**
 
