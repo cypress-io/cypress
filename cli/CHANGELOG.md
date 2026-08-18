@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.21.0
 
+**Deprecations:**
+
+- [`cy.exec()`](https://on.cypress.io/exec) has been deprecated and will be removed in a future major release of Cypress. Because it runs a command through a shell, its behavior depends on the operating system, the shell, the login environment, and whether a terminal is attached, which is a long-running source of hangs and "command not found" failures that are difficult to diagnose. Use [`cy.task()`](https://on.cypress.io/task) instead, which runs in the Node process that loads your Cypress configuration, so there is no shell resolution and no per-platform quoting rules, and it can return structured values rather than stdout that has to be parsed. Addresses [#34639](https://github.com/cypress-io/cypress/issues/34639).
+
 **Features:**
 
 - Added the `cypress tap` command, which gives your AI agent direct access to your open-mode Cypress session. It lists the open-mode Cypress sessions running on the machine, starts and reruns a spec, reports a run's status and results, prints a failing test's error and Command Log, and inspects the DOM and accessibility tree of the application under test. Every subcommand prints readable output by default and machine-readable JSON with `--json`. Run `cypress tap --help` for the full list of subcommands. Addresses [#34036](https://github.com/cypress-io/cypress/issues/34036).

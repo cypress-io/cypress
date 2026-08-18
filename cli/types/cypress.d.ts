@@ -1392,6 +1392,10 @@ declare namespace Cypress {
 
     /**
      * Execute a system command.
+     *
+     * @deprecated `cy.exec()` has been deprecated and will be removed in a future major release.
+     * Use {@linkcode Chainable.task cy.task()} instead, which runs in Node without depending on
+     * the operating system, shell, or terminal of the machine running Cypress.
      * @see https://on.cypress.io/exec
      */
     exec(command: string, options?: Partial<ExecOptions>): Chainable<Exec>
