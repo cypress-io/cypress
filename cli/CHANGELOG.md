@@ -3,7 +3,7 @@
 
 **Deprecations:**
 
-- [`cy.exec()`](https://on.cypress.io/exec) has been deprecated and will be removed in a future major release of Cypress. Use [`cy.task()`](https://on.cypress.io/task) instead, which runs in Node without depending on the operating system, shell, or terminal of the machine running Cypress. Addresses [#34639](https://github.com/cypress-io/cypress/issues/34639).
+- [`cy.exec()`](https://on.cypress.io/exec) has been deprecated and will be removed in a future major release of Cypress. Use [`cy.task()`](https://on.cypress.io/task) instead, which runs in Node without depending on the operating system, shell, or terminal of the machine running Cypress. The [`execTimeout`](https://docs.cypress.io/app/references/configuration#Timeouts) configuration option is deprecated alongside it, in favor of [`taskTimeout`](https://docs.cypress.io/app/references/configuration#Timeouts). Addresses [#34639](https://github.com/cypress-io/cypress/issues/34639).
 
 **Features:**
 
