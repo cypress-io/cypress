@@ -1,13 +1,13 @@
 require('../../spec_helper')
 
-const { isBrowserNetworkMode, ensureProxyServer } = require('../../../lib/util/is-proxy-disabled')
+const { isBrowserNetworkMode, ensureProxyServer } = require('../../../lib/util/network-mode')
 
 const chrome = { name: 'chrome', family: 'chromium' }
 const electron = { name: 'electron', family: 'chromium' }
 const firefox = { name: 'firefox', family: 'firefox' }
 const webkit = { name: 'webkit', family: 'webkit' }
 
-describe('lib/util/is-proxy-disabled', () => {
+describe('lib/util/network-mode', () => {
   context('.isBrowserNetworkMode', () => {
     it('is true for chromium-family browsers by default', () => {
       expect(isBrowserNetworkMode({}, chrome)).to.be.true

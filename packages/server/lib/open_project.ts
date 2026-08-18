@@ -15,7 +15,7 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
-import { isBrowserNetworkMode, ensureProxyServer } from './util/is-proxy-disabled'
+import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 
 const debug = Debug('cypress:server:open_project')
