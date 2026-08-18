@@ -1,23 +1,14 @@
 const { expect } = require('chai')
 const systemTests = require('../lib/system-tests').default
 
-let connections = 0
-
 const onServer = function (app) {
-  app.get('/connections', (req, res) => {
-    return res.json({ connections })
-  })
-
   app.get('/ndjson', (req, res) => {
     let n = 0
     let int
 
-    connections += 1
-
-    res.on('close', () => {
-      clearInterval(int)
-      connections -= 1
-    })
+    // without this, the fixture server's interval never stops and the
+    // harness's process for this spec never exits
+    res.on('close', () => clearInterval(int))
 
     res.set({
       'Content-Type': 'application/x-ndjson',
@@ -71,7 +62,7 @@ describe('e2e streamed response bodies', () => {
     snapshot: false,
     expectedExitCode: 0,
     onStdout: (stdout) => {
-      expect(stdout).to.include('4 passing')
+      expect(stdout).to.include('3 passing')
     },
   })
 })

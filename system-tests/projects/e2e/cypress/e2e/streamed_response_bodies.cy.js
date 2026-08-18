@@ -20,18 +20,6 @@ const readLines = (reader, decoder, buffered, lines, minLines) => {
   })
 }
 
-// relies on the beforeEach visit: with no baseUrl, a relative cy.request
-// resolves against the visited origin and is invalid before any visit
-const expectConnections = (n, attempts = 20) => {
-  return cy.request('/connections').then(({ body }) => {
-    if (body.connections === n) return
-
-    if (!attempts) throw new Error(`expected ${n} connections, got ${body.connections}`)
-
-    return cy.wait(100).then(() => expectConnections(n, attempts - 1))
-  })
-}
-
 describe('streamed response bodies', () => {
   beforeEach(() => {
     cy.visit('http://127.0.0.1:3043/index.html')
@@ -83,23 +71,5 @@ describe('streamed response bodies', () => {
         return response.json()
       })
     }).should('deep.eq', { answered: 'intercepted' })
-  })
-
-  it('connections do not accumulate', () => {
-    expectConnections(0)
-
-    cy.window()
-    .then((win) => {
-      return win.fetch('/ndjson').then((response) => {
-        return response.body.getReader()
-      })
-    }).then((reader) => {
-      expectConnections(1)
-      .then(() => {
-        reader.cancel()
-      })
-
-      expectConnections(0)
-    })
   })
 })

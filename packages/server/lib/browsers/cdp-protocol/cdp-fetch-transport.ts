@@ -14,7 +14,6 @@ import { CdpBodyCapture } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
-import { shouldStreamResponseBody } from './should-stream-response-body'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -121,16 +120,6 @@ type CdpFetchTransportOptions = {
    * phase), arming would just pump bytes nobody reads.
    */
   shouldCaptureBody?: () => boolean
-}
-
-// Until composition supplies the real route predicate and config flags, assume
-// every request could be intercepted and JS rewriting is on. Both assumptions
-// force materialize, which collapses the predicate to the retired deny-list's
-// rule alone: only provably stream-shaped responses skip the read. A default
-// that let the stream fallback go live here would hand cy.intercept handlers
-// empty bodies for every chunked API response.
-const defaultShouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  return shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => true })
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
@@ -745,7 +734,8 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    const bodySkipped = (this.options.shouldStreamBody ?? defaultShouldStreamBody)(event)
+    // no predicate composed → materialize everything (the pre-feature behavior)
+    const bodySkipped = (this.options.shouldStreamBody ?? (() => false))(event)
     let originalBody: Buffer
     let captureStream: Readable | undefined
 

@@ -33,14 +33,14 @@ export class CdpBodyCapture {
 
   start (): void {
     this.client.on('Network.dataReceived', this.onDataReceived)
-    this.client.on('Network.loadingFinished', this.onLoadingFinished)
-    this.client.on('Network.loadingFailed', this.onLoadingFailed)
+    this.client.on('Network.loadingFinished', this.onLoadingEnded)
+    this.client.on('Network.loadingFailed', this.onLoadingEnded)
   }
 
   stop (): void {
     this.client.off('Network.dataReceived', this.onDataReceived)
-    this.client.off('Network.loadingFinished', this.onLoadingFinished)
-    this.client.off('Network.loadingFailed', this.onLoadingFailed)
+    this.client.off('Network.loadingFinished', this.onLoadingEnded)
+    this.client.off('Network.loadingFailed', this.onLoadingEnded)
     this.reset()
   }
 
@@ -129,14 +129,10 @@ export class CdpBodyCapture {
     this.pushToEntry(key, entry, Buffer.from(event.data, 'base64'))
   }
 
-  private onLoadingFinished = (event: Protocol.Network.LoadingFinishedEvent, sessionId?: string): void => {
-    this.drop(event.requestId, sessionId, 'end')
-  }
-
   // A failed load still leaves whatever was captured up to that point valid
-  // for Test Replay — end the stream rather than erroring it, so a partial
-  // capture is delivered instead of discarded.
-  private onLoadingFailed = (event: Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
+  // for Test Replay — end (not error) the stream on both events, so a partial
+  // capture from loadingFailed is delivered instead of discarded.
+  private onLoadingEnded = (event: Protocol.Network.LoadingFinishedEvent | Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
     this.drop(event.requestId, sessionId, 'end')
   }
 

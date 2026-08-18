@@ -33,8 +33,6 @@ const STREAM_CONTENT_TYPES = ['text/event-stream', 'multipart/x-mixed-replace']
 // substring-against-the-raw-value semantics.
 const JAVASCRIPT_CONTENT_TYPES = ['application/javascript', 'application/x-javascript', 'text/javascript']
 
-const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
-
 const CONTENT_LENGTH_RE = /^\d+$/
 
 const getResponseHeader = (responseHeaders: Protocol.Fetch.HeaderEntry[] | undefined, name: string): string | undefined => {
@@ -122,7 +120,11 @@ const isServiceWorkerScriptRequest = (event: Protocol.Fetch.RequestPausedEvent):
 
 // A malformed content-length proves nothing about the body's length, so it
 // must not count as finite — falling through lets a later rule (or the
-// stream default) decide instead.
+// stream default) decide instead. A parseable content-length is the only
+// proof of boundedness we accept; bodiless statuses and redirects stream
+// harmlessly — their skip marker is unread because MaybeEndWithEmptyBody and
+// MaybeSendRedirectToClient end the middleware chain before the capture
+// stage.
 const isProvablyFinite = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   const value = getResponseHeader(event.responseHeaders, 'content-length')
 
@@ -131,27 +133,6 @@ const isProvablyFinite = (event: Protocol.Fetch.RequestPausedEvent): boolean => 
   }
 
   return CONTENT_LENGTH_RE.test(value.trim())
-}
-
-// https://github.com/cypress-io/cypress/issues/4298
-// https://tools.ietf.org/html/rfc7230#section-3.3.3
-// Fetch.getResponseBody returns instantly for these — materializing costs
-// nothing extra and keeps the existing MaybeEndWithEmptyBody flow untouched.
-const isNeverHasBodyStatus = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  const status = event.responseStatusCode
-
-  if (typeof status === 'number' && ((status >= 100 && status < 200) || status === 204 || status === 304)) {
-    return true
-  }
-
-  return event.request.method.toUpperCase() === 'HEAD'
-}
-
-// Mirrors isRedirectPause in cdp-fetch-transport.ts: CDP withholds redirect
-// bodies, and the transport's existing empty-buffer handling already owns
-// this case.
-const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number) && getResponseHeader(event.responseHeaders, 'location') !== undefined
 }
 
 // Middleware that reads or writes into even an empty body must see the real
@@ -163,12 +144,6 @@ const bodyIsNeeded = (event: Protocol.Fetch.RequestPausedEvent, contentType: str
     isJsRewriteEligible(contentType, options) ||
     isServiceWorkerScriptRequest(event) ||
     !!options.hasMatchingRoute?.(event)
-}
-
-// A content-length proves the body finite; 1xx/204/304/HEAD have no body at
-// all; CDP withholds redirect bodies entirely.
-const isDefinitivelyBounded = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  return isProvablyFinite(event) || isNeverHasBodyStatus(event) || isRedirectPause(event)
 }
 
 export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEvent, options: ShouldStreamResponseBodyOptions = {}): boolean => {
@@ -187,5 +162,5 @@ export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEven
     return false
   }
 
-  return !isDefinitivelyBounded(event)
+  return !isProvablyFinite(event)
 }

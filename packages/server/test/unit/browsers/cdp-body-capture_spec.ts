@@ -14,8 +14,7 @@ function createClient () {
   }
 }
 
-function createCapture () {
-  const client = createClient()
+function createCapture (client = createClient()) {
   const capture = new CdpBodyCapture(client as any)
 
   capture.start()
@@ -58,49 +57,51 @@ function onceEvent (stream: NodeJS.ReadableStream, event: string): Promise<void>
 }
 
 describe('CdpBodyCapture', () => {
-  describe('start/stop', () => {
-    it('registers the Network handlers on start and removes them symmetrically on stop', () => {
-      const client = createClient()
-      const capture = new CdpBodyCapture(client as any)
+  it('registers the Network handlers on start, removes them symmetrically on stop, and destroys any live capture', async () => {
+    const client = createClient()
+    const capture = new CdpBodyCapture(client as any)
 
-      capture.start()
+    capture.start()
 
-      expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
-        'Network.dataReceived',
-        'Network.loadingFinished',
-        'Network.loadingFailed',
-      ])
+    expect(client.on.getCalls().map((call) => call.args[0])).to.deep.equal([
+      'Network.dataReceived',
+      'Network.loadingFinished',
+      'Network.loadingFailed',
+    ])
 
-      capture.stop()
+    const stream = await capture.arm('network-1')
+    const closed = onceEvent(stream!, 'close')
 
-      expect(client.off.getCalls().map((call) => call.args[0])).to.deep.equal([
-        'Network.dataReceived',
-        'Network.loadingFinished',
-        'Network.loadingFailed',
-      ])
-    })
+    capture.stop()
 
-    it('destroys live captures on stop', async () => {
-      const { capture } = createCapture()
-      const stream = await capture.arm('network-1')
-      const closed = onceEvent(stream!, 'close')
+    await closed
 
-      capture.stop()
-
-      await closed
-    })
+    expect(client.off.getCalls().map((call) => call.args[0])).to.deep.equal([
+      'Network.dataReceived',
+      'Network.loadingFinished',
+      'Network.loadingFailed',
+    ])
   })
 
   describe('arm', () => {
-    it('sends Network.streamResourceContent for the given networkId and sessionId', async () => {
-      const { client, capture } = createCapture()
+    it('sends Network.streamResourceContent for the given networkId/sessionId and pushes any bufferedData before dataReceived events', async () => {
+      const client = createClient()
+
+      client.send.withArgs('Network.streamResourceContent').resolves({
+        bufferedData: Buffer.from('buffered').toString('base64'),
+      })
+
+      const { capture } = createCapture(client)
 
       const stream = await capture.arm('network-1', 'session-1')
 
-      expect(stream).to.exist
       expect(client.send).to.have.been.calledWith('Network.streamResourceContent', {
         requestId: 'network-1',
       }, 'session-1')
+
+      const firstChunk = new Promise<Buffer>((resolve) => stream!.once('data', resolve))
+
+      expect((await firstChunk).toString()).to.equal('buffered')
     })
 
     it('returns undefined without throwing when CDP rejects the arm', async () => {
@@ -108,68 +109,22 @@ describe('CdpBodyCapture', () => {
 
       client.send.withArgs('Network.streamResourceContent').rejects(new Error('No resource with given identifier found'))
 
-      const capture = new CdpBodyCapture(client as any)
-
-      capture.start()
+      const { capture } = createCapture(client)
 
       const stream = await capture.arm('network-1')
 
       expect(stream).to.be.undefined
     })
-
-    it('pushes bufferedData from the arm response before any dataReceived events', async () => {
-      const client = createClient()
-
-      client.send.withArgs('Network.streamResourceContent').resolves({
-        bufferedData: Buffer.from('buffered').toString('base64'),
-      })
-
-      const capture = new CdpBodyCapture(client as any)
-
-      capture.start()
-
-      const stream = await capture.arm('network-1')
-      const firstChunk = new Promise<Buffer>((resolve) => stream!.once('data', resolve))
-
-      expect((await firstChunk).toString()).to.equal('buffered')
-    })
   })
 
   describe('dataReceived', () => {
-    it('pumps base64-decoded bytes into the armed stream', async () => {
-      const { capture, dataReceived } = createCapture()
-      const { chunks } = await armAndCollect(capture, 'network-1')
-
-      dataReceived({ requestId: 'network-1', data: Buffer.from('hello').toString('base64') })
-
-      await tick()
-
-      expect(Buffer.concat(chunks).toString()).to.equal('hello')
-    })
-
-    it('ignores dataReceived for a networkId that was never armed', async () => {
-      const { dataReceived } = createCapture()
-
-      expect(() => {
-        dataReceived({ requestId: 'unarmed-network', data: Buffer.from('x').toString('base64') })
-      }).not.to.throw()
-    })
-
-    it('ignores an event with no data payload', async () => {
-      const { capture, dataReceived } = createCapture()
-      const { chunks } = await armAndCollect(capture, 'network-1')
-
-      dataReceived({ requestId: 'network-1' })
-
-      await tick()
-
-      expect(chunks).to.have.length(0)
-    })
-
-    it('isolates captures for the same networkId across different sessions', async () => {
+    it('isolates captures for the same networkId across different sessions, ignoring an event with no data payload', async () => {
       const { capture, dataReceived } = createCapture()
       const root = await armAndCollect(capture, 'network-1')
       const session = await armAndCollect(capture, 'network-1', 'session-1')
+
+      // no data payload — must not throw or push anything
+      dataReceived({ requestId: 'network-1' })
 
       dataReceived({ requestId: 'network-1', data: Buffer.from('root').toString('base64') })
       dataReceived({ requestId: 'network-1', data: Buffer.from('sess').toString('base64') }, 'session-1')
@@ -232,76 +187,66 @@ describe('CdpBodyCapture', () => {
       expect(errored).not.to.have.been.called
       expect(Buffer.concat(chunks).toString()).to.equal('partial')
     })
-
-    it('is a no-op for a networkId with no in-flight capture', () => {
-      const { loadingFinished, loadingFailed } = createCapture()
-
-      expect(() => {
-        loadingFinished({ requestId: 'unarmed-network' })
-        loadingFailed({ requestId: 'unarmed-network', errorText: 'net::ERR_FAILED' })
-      }).not.to.throw()
-    })
   })
 
-  describe('reset', () => {
-    it('destroys and clears every in-flight capture', async () => {
-      const { capture } = createCapture()
-      const stream = await capture.arm('network-1')
-      const closed = onceEvent(stream!, 'close')
+  it('is a no-op for a networkId with no in-flight capture across dataReceived, loadingFinished, loadingFailed, and release', () => {
+    const { capture, dataReceived, loadingFinished, loadingFailed } = createCapture()
 
-      capture.reset()
-
-      await closed
-
-      // A capture armed under the same key after reset must not be confused
-      // with the destroyed one.
-      const nextStream = await capture.arm('network-1')
-
-      expect(nextStream).not.to.equal(stream)
-    })
+    expect(() => {
+      dataReceived({ requestId: 'unarmed-network', data: Buffer.from('x').toString('base64') })
+      loadingFinished({ requestId: 'unarmed-network' })
+      loadingFailed({ requestId: 'unarmed-network', errorText: 'net::ERR_FAILED' })
+      capture.release('network-unknown')
+    }).not.to.throw()
   })
 
-  describe('release', () => {
-    it('destroys and drops a single armed capture', async () => {
-      const { capture, dataReceived } = createCapture()
-      const released = await capture.arm('network-1', 'session-1')
-      const kept = await armAndCollect(capture, 'network-2', 'session-1')
-      const closed = onceEvent(released!, 'close')
+  it('reset destroys and clears every in-flight capture', async () => {
+    const { capture } = createCapture()
+    const stream = await capture.arm('network-1')
+    const closed = onceEvent(stream!, 'close')
 
-      capture.release('network-1', 'session-1')
+    capture.reset()
 
-      await closed
+    await closed
 
-      // the sibling capture is untouched and still pumping
-      const sawData = onceEvent(kept.stream, 'data')
+    // A capture armed under the same key after reset must not be confused
+    // with the destroyed one.
+    const nextStream = await capture.arm('network-1')
 
-      dataReceived({ requestId: 'network-2', data: Buffer.from('still-live').toString('base64') }, 'session-1')
-
-      await sawData
-
-      expect(Buffer.concat(kept.chunks).toString()).to.equal('still-live')
-    })
-
-    it('is a no-op for a networkId with no in-flight capture', () => {
-      const { capture } = createCapture()
-
-      expect(() => capture.release('network-unknown')).not.to.throw()
-    })
+    expect(nextStream).not.to.equal(stream)
   })
 
-  describe('re-arm on a live key', () => {
-    it('ends the previous stream before replacing it', async () => {
-      const { capture } = createCapture()
-      const first = await capture.arm('network-1')
-      const ended = onceEvent(first!, 'end')
+  it('release destroys and drops a single armed capture, leaving a sibling capture untouched and still pumping', async () => {
+    const { capture, dataReceived } = createCapture()
+    const released = await capture.arm('network-1', 'session-1')
+    const kept = await armAndCollect(capture, 'network-2', 'session-1')
+    const closed = onceEvent(released!, 'close')
 
-      first!.resume()
+    capture.release('network-1', 'session-1')
 
-      const second = await capture.arm('network-1')
+    await closed
 
-      await ended
+    // the sibling capture is untouched and still pumping
+    const sawData = onceEvent(kept.stream, 'data')
 
-      expect(second).not.to.equal(first)
-    })
+    dataReceived({ requestId: 'network-2', data: Buffer.from('still-live').toString('base64') }, 'session-1')
+
+    await sawData
+
+    expect(Buffer.concat(kept.chunks).toString()).to.equal('still-live')
+  })
+
+  it('re-arming a live key ends the previous stream before replacing it', async () => {
+    const { capture } = createCapture()
+    const first = await capture.arm('network-1')
+    const ended = onceEvent(first!, 'end')
+
+    first!.resume()
+
+    const second = await capture.arm('network-1')
+
+    await ended
+
+    expect(second).not.to.equal(first)
   })
 })

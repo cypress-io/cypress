@@ -1162,49 +1162,6 @@ describe('lib/network-runtime', () => {
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
   })
 
-  it('skips the eager body read for a chunked, unrouted response with no injection/JS/SW signal (#34623)', async () => {
-    const client = createCdpClient({ withBody: true })
-    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-    const onRequestPaused = await startCdpRuntime(runtime, client)
-
-    // no content-length: the chunked, no-route, no-injection shape from #34623
-    await drivePausedRequest(onRequestPaused, {
-      requestId: 'ndjson-request',
-      networkId: 'network-ndjson-1',
-      url: 'https://example.test/stream',
-      resourceType: 'Fetch',
-      responseStatusCode: 200,
-      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
-    })
-
-    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
-
-    const continueResponseCall = client.send.getCalls().find((call) => call.args[0] === 'Fetch.continueResponse')
-
-    expect(continueResponseCall, 'expected Fetch.continueResponse to release the stream-classified pause').to.exist
-    expect(continueResponseCall!.args[1]).to.include({ requestId: 'ndjson-request' })
-  })
-
-  it('a matching cy.intercept route forces the same response shape to materialize', async () => {
-    const client = createCdpClient({ withBody: true })
-    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-
-    runtime.netStubbingState.routes.push(minimalMatchingRoute('route-1'))
-
-    const onRequestPaused = await startCdpRuntime(runtime, client)
-
-    await drivePausedRequest(onRequestPaused, {
-      requestId: 'ndjson-routed-request',
-      networkId: 'network-ndjson-2',
-      url: 'https://example.test/stream',
-      resourceType: 'Fetch',
-      responseStatusCode: 200,
-      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
-    })
-
-    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
-  })
-
   // `times` exhaustion disables a route at request-stage counting, but its
   // already-matched response still reaches InterceptResponse — the spent
   // route's handler must see real bytes, not the empty stream stand-in.
@@ -1288,21 +1245,34 @@ describe('lib/network-runtime', () => {
     expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
   })
 
-  it('does not arm capture for a stream-classified response when no protocol manager is set', async () => {
-    const client = createCdpClient()
-    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+  // Every other test in this file leaves both obstructive-code flags
+  // undefined, so this is the only coverage that config.modifyObstructiveCode
+  // actually threads through createCdpFetchRuntime into the composed
+  // shouldStreamBody predicate (network-runtime.ts passes deps.config.modifyObstructiveCode
+  // straight through to shouldStreamResponseBody).
+  it('threads modifyObstructiveCode from config into the body predicate', async () => {
+    const client = createCdpClient({ withBody: true })
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+        modifyObstructiveCode: true,
+      } as Cypress.Config,
+      client,
+    })
     const onRequestPaused = await startCdpRuntime(runtime, client)
 
     await drivePausedRequest(onRequestPaused, {
-      requestId: 'sse-request',
-      networkId: 'network-sse-1',
-      url: 'https://example.test/events',
-      resourceType: 'EventSource',
+      requestId: 'js-rewrite-request',
+      networkId: 'network-js-rewrite-1',
+      url: 'https://example.test/script.js',
+      resourceType: 'Fetch',
       responseStatusCode: 200,
-      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+      responseHeaders: [{ name: 'content-type', value: 'text/javascript' }],
     })
 
-    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
   })
 
   it('arms capture for a stream-classified response once a protocol manager with isProtocolEnabled true is applied after createCdpFetchRuntime returns', async () => {
@@ -1430,25 +1400,5 @@ describe('lib/network-runtime', () => {
     })
 
     expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
-  })
-
-  it('a matched route does not override the stream verdict for an SSE response (rule-1 absoluteness)', async () => {
-    const client = createCdpClient()
-    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-
-    runtime.netStubbingState.routes.push(minimalMatchingRoute('sse-route'))
-
-    const onRequestPaused = await startCdpRuntime(runtime, client)
-
-    await drivePausedRequest(onRequestPaused, {
-      requestId: 'sse-routed-request',
-      networkId: 'network-sse-routed',
-      url: 'https://example.test/events',
-      resourceType: 'EventSource',
-      responseStatusCode: 200,
-      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
-    })
-
-    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
   })
 })

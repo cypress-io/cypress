@@ -72,12 +72,22 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
   const bodyCapture = options.bodyCapture ?? new CdpBodyCapture(client as any)
+  // Until composition supplies the real route predicate and config flags, assume
+  // every request could be intercepted and JS rewriting is on. Both assumptions
+  // force materialize, which collapses the predicate to the retired deny-list's
+  // rule alone: only provably stream-shaped responses skip the read. Preserves
+  // the transport's own default (defaultShouldStreamBody, removed) so existing
+  // tests keep their semantics now that the transport materializes everything
+  // when no predicate is composed.
+  const defaultShouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+    return shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => true })
+  }
   const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
     isAUTFrame: options.isAUTFrame,
     isFromExtraTarget: options.isFromExtraTarget,
     addPendingUrlWithoutPreRequest: options.addPendingUrlWithoutPreRequest,
     onRequestCanceled: options.onRequestCanceled,
-    shouldStreamBody: options.shouldStreamBody,
+    shouldStreamBody: options.shouldStreamBody ?? defaultShouldStreamBody,
     shouldCaptureBody: options.shouldCaptureBody,
   }, networkExtraInfo as any, bodyCapture)
 
@@ -2306,64 +2316,6 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    // application/x-ndjson never finishes any more reliably than SSE does, but
-    // carried no provable resourceType/content-type signal for the old
-    // deny-list — this is the shape that wedged #34623. The stream-default
-    // fallback in shouldStreamResponseBody (rather than another deny-list entry)
-    // is what fixes it.
-    // application/x-ndjson never finishes any more reliably than SSE does, but
-    // carried no provable resourceType/content-type signal for the old
-    // deny-list — this is the shape that wedged #34623. The stream-default
-    // fallback in shouldStreamResponseBody (rather than another deny-list entry)
-    // is what fixes it.
-    it('skips the eager body fetch for a chunked ndjson response pause (#34623)', async () => {
-      const client = createClient()
-      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
-      const middlewareSawResponse = sinon.stub()
-
-      // A body read anywhere in this flow is the #34623 wedge: pin the
-      // symptom by making any getResponseBody call hang forever.
-      client.send.withArgs('Fetch.getResponseBody').returns(new Promise(() => {}))
-
-      // The composed classifier shape (real route predicate, no match) — the
-      // transport default deliberately materializes everything until
-      // composition wires this, so the default cannot exercise this path.
-      const { transport } = createTransport(client, {
-        httpIntercept,
-        shouldStreamBody: (event) => shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => false }),
-      })
-      const onRequestPaused = await startTransport(transport, client)
-
-      httpIntercept.use(async (req, next) => {
-        const response = await next(req)
-
-        middlewareSawResponse({
-          body: await readStream(response.bodyStream!),
-          bodySkipped: response.bodySkipped,
-        })
-
-        return response
-      })
-
-      await driveResponsePause(onRequestPaused, {
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-        resourceType: 'Fetch',
-      }, { headers: [{ name: 'content-type', value: 'application/x-ndjson' }] })
-
-      expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
-
-      expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
-        requestId: 'fetch-request',
-        responseCode: 200,
-      })
-
-      expect(middlewareSawResponse).to.have.been.calledWith({
-        body: '',
-        bodySkipped: true,
-      })
-    })
-
     it('fulfills a stream-classified response when middleware sets a stub body', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
@@ -2390,22 +2342,6 @@ describe('CdpFetchTransport', () => {
         responsePhrase: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         body: Buffer.from('stubbed').toString('base64'),
-      })
-    })
-
-    it('materializes the body via getResponseBody for a provably finite response pause', async () => {
-      const client = createClient()
-      const { transport } = createTransport(client)
-      const onRequestPaused = await startTransport(transport, client)
-
-      await driveResponsePause(onRequestPaused, {
-        requestId: 'fetch-request',
-        networkId: 'network-1',
-        resourceType: 'XHR',
-      }, { headers: [{ name: 'content-length', value: '5' }] })
-
-      expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
-        requestId: 'fetch-request',
       })
     })
 

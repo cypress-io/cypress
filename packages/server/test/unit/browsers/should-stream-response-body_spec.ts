@@ -151,41 +151,14 @@ describe('shouldStreamResponseBody', () => {
     runCases(cases)
   })
 
-  describe('never has a body', () => {
-    const cases: Case[] = [
-      ['materializes a HEAD request', { method: 'HEAD' }, undefined, false],
-      ['matches HEAD case-insensitively', { method: 'head' }, undefined, false],
-    ]
-
-    for (const status of [100, 101, 199, 204, 304]) {
-      cases.push([`materializes status ${status}`, { responseStatusCode: status }, undefined, false])
-    }
-
-    cases.push(['streams an ordinary 200', { responseStatusCode: 200 }, undefined, true])
-
-    runCases(cases)
-  })
-
-  describe('redirect pause', () => {
-    const cases: Case[] = []
-
-    for (const status of [301, 302, 303, 307, 308]) {
-      cases.push([`materializes ${status} with a location header`, { responseStatusCode: status, responseHeaders: [{ name: 'location', value: 'https://example.test/next' }] }, undefined, false])
-    }
-
-    cases.push(
-      ['streams a redirect status with no location header', { responseStatusCode: 302 }, undefined, true],
-      // HTTP/1.1 origins usually send `Location:`, and CDP preserves casing
-      ['matches a capitalized Location header', { responseStatusCode: 302, responseHeaders: [{ name: 'Location', value: 'https://example.test/next' }] }, undefined, false],
-    )
-
-    runCases(cases)
-  })
-
   describe('default options', () => {
     it('behaves as if all flags were off when no options argument is passed', () => {
       expect(shouldStreamResponseBody(createEvent({ responseHeaders: contentType('text/javascript') }))).to.equal(true)
     })
+
+    runCases([
+      ['streams an ordinary 200', { responseStatusCode: 200 }, undefined, true],
+    ])
   })
 
   // the fix this module ships: a chunked JSON/xhr response (long-polling,
