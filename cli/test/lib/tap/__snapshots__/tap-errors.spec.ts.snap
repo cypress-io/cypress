@@ -109,12 +109,11 @@ Arguments:
                        command
 
 Options:
-  -s, --session <pid>  target a specific running Cypress session by its server
-                       process id (pid)
+  -s, --session <pid>  target a local Cypress session by its process id (PID)
   --json               print the raw JSON result instead of the human-readable
                        rendering
-  --timeout <ms>       how long to wait on any single call into the running
-                       Cypress, in milliseconds (default: 30000)
+  --timeout <ms>       how long to wait on any single call into the Cypress
+                       session, in milliseconds (default: 30000)
   -h, --help           display help for command"
 `;
 
@@ -126,18 +125,18 @@ The command was called with invalid options.
 
 Usage: cypress tap reporter [options]
 
-render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: the spec’s stats and every suite’s tests
+retrieve the test runner reporter for the spec or a specific test
 
 Options:
   -t, --test-id <test-id>  test id, as listed by the reporter command
   -a, --attempt <attempt>  1-based attempt (attempt 1 = first run); defaults to
                            the latest
-  -s, --session <pid>      target a specific running Cypress session by its
-                           server process id (pid)
+  -s, --session <pid>      target a local Cypress session by its process id
+                           (PID)
   --json                   print the raw JSON result instead of the
                            human-readable rendering
-  --timeout <ms>           how long to wait on any single call into the running
-                           Cypress, in milliseconds (default: 30000)
+  --timeout <ms>           how long to wait on any single call into the Cypress
+                           session, in milliseconds (default: 30000)
   -h, --help               display help for command"
 `;
 
@@ -311,42 +310,39 @@ Unknown command "oel2k"
 
 Usage: cypress tap [command] [args...] [options]
 
-Interacts with a running Cypress session
+Discover, control, and query an open-mode Cypress session from the command
+line. Programmatically run specs, review results, and inspect the
+application-under-test through the full test lifecycle.
 
 Options:
-  -s, --session <pid>   target a specific running Cypress session by its server
-                        process id (pid)
+  -s, --session <pid>   target a local Cypress session by its process id (PID)
   --json                print the raw JSON result instead of the human-readable
                         rendering
-  --timeout <ms>        how long to wait on any single call into the running
-                        Cypress, in milliseconds (default: 30000)
+  --timeout <ms>        how long to wait on any single call into the Cypress
+                        session, in milliseconds (default: 30000)
   -h, --help            display help for command
 
 Commands:
-  sessions [options]    list the running Cypress sessions this CLI can reach
-  status [options]      report where a running Cypress session is in its
-                        lifecycle
-  specs [options]       list the specs the running Cypress session can run,
-                        most recently modified first
+  sessions [options]    list the Cypress sessions this CLI can reach
+  status [options]      report where a Cypress session is in its lifecycle
+  specs [options]       list the specs the Cypress session can run, most
+                        recently modified first
   run [options] <spec>  run (or rerun) a spec by its project-relative path
-  dom [options]         read the app-under-test DOM as HTML: the page body,
-                        or the one element a selector matches (with its
-                        subtree)
+  dom [options]         read the application-under-test DOM as HTML: the page
+                        body, or a single element with its children by
+                        providing a CSS Selector
   aria [options]        read the accessibility (ARIA) tree of the
-                        app-under-test page body, or the subtree at a selector
-  inspect [options]     inspect the element a selector matches: its tag,
-                        attributes, computed styles, box model, and
-                        accessibility node
-  command [options]     detail one command log entry of a test — its reporter
-                        row, the DOM snapshots pinnable on it, and its console
-                        properties
-  reporter [options]    render a test’s full reporter view — its routes,
-                        hooks, and command log — or, without --test-id, the
-                        spec-level overview: the spec’s stats and every suite’s
-                        tests
+                        application-under-test page body, or the subtree at a
+                        selector
+  inspect [options]     retrieve the tag, attributes, computed styles, box
+                        model, and accessibility node of a specific element
+  command [options]     retrieve the reporter row, the pinnable DOM
+                        snapshots, and the console properties of a single
+                        command in a test
+  reporter [options]    retrieve the test runner reporter for the spec or a
+                        specific test
   pin [options]         pin a command’s DOM snapshot into the live
-                        app-under-test frame so the dom/aria/inspect commands
-                        can read it; pass --clear to release"
+                        application-under-test frame"
 `;
 
 exports[`lib/tap error rendering catalogue > UNKNOWN_ERROR 1`] = `
@@ -366,20 +362,20 @@ Unknown option "--bogus"
 
 Usage: cypress tap dom [options]
 
-read the app-under-test DOM as HTML: the page body, or the one element a selector matches (with its subtree)
+read the application-under-test DOM as HTML: the page body, or a single element with its children by providing a CSS Selector
 
 Options:
   -e, --selector <selector>    a CSS selector matching exactly one element
                                (default: "body")
   -m, --max-chars <max-chars>  cap on returned HTML characters (default: 30000)
-  --at <at>                    0-based index of the match to read, as listed by
-                               the index column when a selector matches several
-  -s, --session <pid>          target a specific running Cypress session by its
-                               server process id (pid)
+  --at <at>                    When a selector matches multiple elements, the
+                               0-based index of the match to read
+  -s, --session <pid>          target a local Cypress session by its process id
+                               (PID)
   --json                       print the raw JSON result instead of the
                                human-readable rendering
   --timeout <ms>               how long to wait on any single call into the
-                               running Cypress, in milliseconds (default:
+                               Cypress session, in milliseconds (default:
                                30000)
   -h, --help                   display help for command"
 `;
