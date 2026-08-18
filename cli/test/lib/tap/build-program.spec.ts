@@ -369,7 +369,7 @@ describe('lib/tap/build-program', () => {
     const helpOf = (name: string): string => subcommand(program, name).helpInformation().replace(/\s+/g, ' ')
 
     expect(helpOf('dom')).toContain('-e, --selector <selector> a CSS selector matching exactly one element (default: "body")')
-    expect(helpOf('aria')).toContain('-e, --selector <selector> a CSS selector matching exactly one element to root the tree at (default: "body")')
+    expect(helpOf('aria')).toContain('-e, --selector <selector> a CSS selector matching exactly one element (default: "body")')
 
     // inspect takes the same selector but requires it, so the only default it
     // renders is the --timeout every command shares.
