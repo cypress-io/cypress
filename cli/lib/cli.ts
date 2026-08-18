@@ -134,9 +134,9 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
-  session: 'target a specific running Cypress session by its server process id (pid)',
+  session: 'target a local Cypress session by its process id (PID)',
   json: 'print the raw JSON result instead of the human-readable rendering',
-  tapTimeout: 'how long to wait on any single call into the running Cypress, in milliseconds (default 30000)',
+  tapTimeout: 'how long to wait on any single call into the Cypress session, in milliseconds (default 30000)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
@@ -595,7 +595,7 @@ const cliModule = {
     program
     .command('tap')
     .usage('[command] [args...]')
-    .description('Interacts with a running Cypress session')
+    .description('Discover, control, and query an open-mode Cypress session from the command line')
     .helpOption(false)
     .allowUnknownOption(true)
     .option('-s, --session <pid>', text('session'), coerceAnyStringToInt)
