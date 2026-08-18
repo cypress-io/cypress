@@ -1124,6 +1124,44 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/24178
+    describe('inside cy.document().within()', () => {
+      it('searches the whole document', () => {
+        const link = cy.$$('#click-me a')
+
+        cy.document().within(() => {
+          cy.contains('click me 1').then(($link) => {
+            expect($link?.get(0)).to.eq(link.get(0))
+          })
+        })
+      })
+
+      it('escapes an enclosing within', () => {
+        const link = cy.$$('#click-me a')
+
+        cy.get('#complex-contains').within(() => {
+          cy.document().within(() => {
+            cy.contains('click me 1').then(($link) => {
+              expect($link?.get(0)).to.eq(link.get(0))
+            })
+          })
+        })
+      })
+
+      it('fails with an assertion error when the content is never found', { defaultCommandTimeout: 200 }, (done) => {
+        cy.on('fail', (err) => {
+          expect(err.name).to.eq('AssertionError')
+          expect(err.message).to.include('Expected to find content: \'brand new content\' within the element: <document> but never did.')
+
+          done()
+        })
+
+        cy.document().within(() => {
+          cy.contains('brand new content')
+        })
+      })
+    })
+
     // https://github.com/cypress-io/cypress/issues/25225
     it('returns only one element when given multiple subjects directly match selector', () => {
       // A case with only a text selector
