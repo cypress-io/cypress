@@ -372,7 +372,7 @@ declare namespace Cypress {
 
     /**
      * Utility functions for ensuring various properties about a subject.
-     * @see https://on.cypress.io/api/custom-queries
+     * @see https://on.cypress.io/ensure
      */
     ensure: Ensure
 
@@ -419,11 +419,13 @@ declare namespace Cypress {
      * //  specType: "integration"
      * // }
      * ```
+     * @see https://on.cypress.io/spec
      */
     spec: Spec
 
     /**
      * Currently executing test runnable instance.
+     * @see https://on.cypress.io/currenttest
      */
     currentTest: {
       title: string
@@ -432,11 +434,13 @@ declare namespace Cypress {
 
     /**
      * Information about current test retry
+     * @see https://on.cypress.io/currentretry
      */
     currentRetry: number
 
     /**
      * Information about the browser currently running the tests
+     * @see https://on.cypress.io/browser
      */
     browser: Browser
 
@@ -447,11 +451,13 @@ declare namespace Cypress {
 
     /**
      * Internal class for session management.
+     * @see https://on.cypress.io/session-api
      */
     session: Session
 
     /**
      * Current testing type, determined by the Test Runner chosen to run.
+     * @see https://on.cypress.io/testing-type
      */
     testingType: TestingType
 
@@ -597,6 +603,7 @@ declare namespace Cypress {
      * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
      * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
      * @param matcher browser name or matcher object to check.
+     * @see https://on.cypress.io/isbrowser
      */
     isBrowser(name: IsBrowserMatcher): boolean
 
@@ -784,7 +791,7 @@ declare namespace Cypress {
 
     /**
      * Used to include dependencies within the cy.origin() callback
-     * @see https://on.cypress.io/origin
+     * @see https://on.cypress.io/require
      */
     require: <T = any>(id: string) => T
 
@@ -1316,7 +1323,7 @@ declare namespace Cypress {
      *
      * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
-     * @see https://on.cypress.io/click
+     * @see https://on.cypress.io/rightclick
      * @example
      *    cy.get('button').rightclick('topRight')
      */
@@ -2357,7 +2364,7 @@ declare namespace Cypress {
      * Move time after overriding a native time function with [cy.clock()](https://on.cypress.io/clock).
      * `cy.clock()` must be called before `cy.tick()`
      *
-     * @see https://on.cypress.io/clock
+     * @see https://on.cypress.io/tick
      * @example
      *  cy.clock()
      *  ...
