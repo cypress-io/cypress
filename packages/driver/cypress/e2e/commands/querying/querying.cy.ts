@@ -1155,7 +1155,7 @@ describe('src/cy/commands/querying', () => {
 
     // https://github.com/cypress-io/cypress/issues/34305
     it('can find input type=submits by a partial, non-whitespace-bounded substring of value', () => {
-      cy.contains('User').then(($el) => {
+      cy.get('#contains-submit-values').contains('User').then(($el) => {
         const $input = $el as unknown as JQuery<HTMLInputElement>
 
         expect($input.length).to.eq(1)
@@ -1166,13 +1166,40 @@ describe('src/cy/commands/querying', () => {
 
     // https://github.com/cypress-io/cypress/issues/34305
     it('can find input type=submits by a partial substring of value, case-insensitively', () => {
-      cy.contains('user', { matchCase: false }).then(($el) => {
+      cy.get('#contains-submit-values').contains('user', { matchCase: false }).then(($el) => {
         const $input = $el as unknown as JQuery<HTMLInputElement>
 
         expect($input.length).to.eq(1)
         expect($input.is('input[type=submit]')).to.be.true
         expect($input.val()).to.eq('Username')
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34305
+    it('collapses whitespace in submit values, the same as element text', () => {
+      cy.get('#contains-submit-values').contains('click me').then(($el) => {
+        const $input = $el as unknown as JQuery<HTMLInputElement>
+
+        expect($input.length).to.eq(1)
+        expect($input.is('input[type=submit]')).to.be.true
+        expect($input.val()).to.eq('click\nme')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/8626
+    it('can find submit inputs by a value containing a single quote', () => {
+      cy.get('#contains-submit-values').contains('it\'s').then(($el) => {
+        const $input = $el as unknown as JQuery<HTMLInputElement>
+
+        expect($input.length).to.eq(1)
+        expect($input.is('input[type=submit]')).to.be.true
+        expect($input.val()).to.eq('it\'s')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34305
+    it('does not find submit inputs when the substring does not match', () => {
+      cy.get('#contains-submit-values').contains('Usernamex').should('not.exist')
     })
 
     it('has an optional filter argument', () => {
