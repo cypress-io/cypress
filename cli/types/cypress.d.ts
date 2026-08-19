@@ -3226,7 +3226,7 @@ declare namespace Cypress {
      */
     video: boolean
     /**
-     * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this [here](https://on.cypress.io/web-security#Disabling-Web-Security)
+     * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this [here](https://on.cypress.io/cross-origin-testing#Disabling-Web-Security)
      * @default true
      */
     chromeWebSecurity: boolean

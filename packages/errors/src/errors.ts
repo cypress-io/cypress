@@ -907,7 +907,7 @@ export const AllCypressErrors = {
 
       ${fmt.listItems(validEventNames)}
 
-      Learn more at https://on.cypress.io/writing-a-plugin#config
+      Learn more at https://on.cypress.io/plugins-api#config
 
       ${fmt.stackTrace(err)}
     `
