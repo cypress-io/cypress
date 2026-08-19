@@ -28,6 +28,12 @@ const argumentDescriptions = (params: readonly TapCommandParamSchema[]): Record<
 
 const JSON_DESCRIPTION = 'print the raw JSON result instead of the human-readable rendering'
 
+// commander wraps the option and command descriptions it renders but prints a
+// program description verbatim, so this one is wrapped to the same width by hand.
+const PROGRAM_DESCRIPTION = `Discover, control, and query an open-mode Cypress session from the command
+line. Programmatically run specs, review results, and inspect the
+application-under-test through the full test lifecycle.`
+
 // commander both applies a declared default and appends `(default: …)` to the
 // help it generates, which is the whole reason a schema carries one. Its types
 // cap the value at a string, but it stores and renders whatever it is handed,
@@ -42,9 +48,9 @@ const declareOption = (command: commander.Command, flags: string, description: s
 // `--timeout` keeps no alias: `-t` is worth more to `--test-id`, which is typed
 // far more often, and the shared flags have to spell the same on every command.
 const declareSharedOptions = (command: commander.Command, jsonDescription: string): void => {
-  command.option('-s, --session <pid>', 'target a specific running Cypress session by its server process id (pid)')
+  command.option('-s, --session <pid>', 'target a local Cypress session by its process id (PID)')
   command.option('--json', jsonDescription)
-  declareOption(command, '--timeout <ms>', 'how long to wait on any single call into the running Cypress, in milliseconds', DEFAULT_CDP_TIMEOUT_MS)
+  declareOption(command, '--timeout <ms>', 'how long to wait on any single call into the Cypress session, in milliseconds', DEFAULT_CDP_TIMEOUT_MS)
 }
 
 const declareOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): void => {
@@ -206,7 +212,7 @@ const newProgram = (): commander.Command => {
 
   program.exitOverride()
   program.addHelpCommand(false)
-  program.description('Interacts with a running Cypress session')
+  program.description(PROGRAM_DESCRIPTION)
   program.usage('[command] [args...] [options]')
   answerUnknownOption(program)
   answerUnknownCommand(program)

@@ -1271,42 +1271,39 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toMatchInlineSnapshot(`
         "Usage: cypress tap [command] [args...] [options]
 
-        Interacts with a running Cypress session
+        Discover, control, and query an open-mode Cypress session from the command
+        line. Programmatically run specs, review results, and inspect the
+        application-under-test through the full test lifecycle.
 
         Options:
-          -s, --session <pid>   target a specific running Cypress session by its server
-                                process id (pid)
+          -s, --session <pid>   target a local Cypress session by its process id (PID)
           --json                print the raw JSON result instead of the human-readable
                                 rendering
-          --timeout <ms>        how long to wait on any single call into the running
-                                Cypress, in milliseconds (default: 30000)
+          --timeout <ms>        how long to wait on any single call into the Cypress
+                                session, in milliseconds (default: 30000)
           -h, --help            display help for command
 
         Commands:
-          sessions [options]    list the running Cypress sessions this CLI can reach
-          status [options]      report where a running Cypress session is in its
-                                lifecycle
-          specs [options]       list the specs the running Cypress session can run,
-                                most recently modified first
+          sessions [options]    list the Cypress sessions this CLI can reach
+          status [options]      report where a Cypress session is in its lifecycle
+          specs [options]       list the specs the Cypress session can run, most
+                                recently modified first
           run [options] <spec>  run (or rerun) a spec by its project-relative path
-          dom [options]         read the app-under-test DOM as HTML: the page body,
-                                or the one element a selector matches (with its
-                                subtree)
+          dom [options]         read the application-under-test DOM as HTML: the page
+                                body, or a single element with its children by
+                                providing a CSS Selector
           aria [options]        read the accessibility (ARIA) tree of the
-                                app-under-test page body, or the subtree at a selector
-          inspect [options]     inspect the element a selector matches: its tag,
-                                attributes, computed styles, box model, and
-                                accessibility node
-          command [options]     detail one command log entry of a test — its reporter
-                                row, the DOM snapshots pinnable on it, and its console
-                                properties
-          reporter [options]    render a test’s full reporter view — its routes,
-                                hooks, and command log — or, without --test-id, the
-                                spec-level overview: the spec’s stats and every suite’s
-                                tests
+                                application-under-test page body, or the subtree at a
+                                selector
+          inspect [options]     retrieve the tag, attributes, computed styles, box
+                                model, and accessibility node of a specific element
+          command [options]     retrieve the reporter row, the pinnable DOM
+                                snapshots, and the console properties of a single
+                                command in a test
+          reporter [options]    retrieve the test runner reporter for the spec or a
+                                specific test
           pin [options]         pin a command’s DOM snapshot into the live
-                                app-under-test frame so the dom/aria/inspect commands
-                                can read it; pass --clear to release
+                                application-under-test frame
         "
       `)
     })
@@ -1330,7 +1327,8 @@ describe('lib/exec/tap', () => {
       expect(logger.print()).toMatchInlineSnapshot(`
         "Usage: cypress tap command [options]
 
-        detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties
+        Retrieves a single command from a test's command log: its reporter row, the DOM
+        snapshots pinnable on it, and any associated console properties.
 
         Options:
           -t, --test-id <test-id>        test id, as listed by the reporter command
@@ -1345,14 +1343,14 @@ describe('lib/exec/tap', () => {
                                          keys}" / "[n items]": a number or "all"
                                          (default 3, and a section over 8 rows folds at
                                          any depth unless this is passed)
-          -s, --session <pid>            target a specific running Cypress session by
-                                         its server process id (pid)
+          -s, --session <pid>            target a local Cypress session by its process
+                                         id (PID)
           --json                         print the raw JSON result instead of the
-                                         human-readable rendering — every console
-                                         property in full, however long, rather than
-                                         the long ones named by their length
+                                         human-readable rendering. This will output
+                                         every console property in full regardless of
+                                         length.
           --timeout <ms>                 how long to wait on any single call into the
-                                         running Cypress, in milliseconds (default:
+                                         Cypress session, in milliseconds (default:
                                          30000)
           -h, --help                     display help for command
         "
