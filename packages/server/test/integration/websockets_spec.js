@@ -52,6 +52,11 @@ describe('Web Sockets', () => {
           use: () => { },
         }
 
+        // these upgrades reach this server acting as a proxy, like a proxied
+        // browser — which only happens on the MITM path, and the server refuses
+        // CONNECT until a launch resolves it
+        await this.server.setNetworkMode(false)
+
         await this.server.startWebsockets(automationStub, config, {})
 
         return httpsServer.start(wssPort)
@@ -290,24 +295,22 @@ describe('Web Sockets', () => {
           })
         })
 
-        // TODO: this test will currently fail because we allow polling in development mode
-        // for webkit support. Restore this test before WebKit is available in production.
-        // it('fails to connect via polling', function (done) {
-        //   this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
-        //     path: this.cfg.socketIoRoute,
-        //     transports: ['polling'],
-        //     rejectUnauthorized: false,
-        //     reconnection: false,
-        //   })
+        it('fails to connect via polling', function (done) {
+          this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
+            path: this.cfg.socketIoRoute,
+            transports: ['polling'],
+            rejectUnauthorized: false,
+            reconnection: false,
+          })
 
-        //   this.wsClient.on('connect', () => {
-        //     return done(new Error('should not have been able to connect'))
-        //   })
+          this.wsClient.on('connect', () => {
+            return done(new Error('should not have been able to connect'))
+          })
 
-        //   return this.wsClient.io.on('error', () => {
-        //     return done()
-        //   })
-        // })
+          return this.wsClient.io.on('error', () => {
+            return done()
+          })
+        })
       })
     }
 

@@ -289,6 +289,13 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
+    env_removed: stripIndent`\
+      Overriding the \`env\` configuration was removed in Cypress version 16.0.0.
+
+      Please update to use \`expose: { KEY: value }\` to make a value readable in the browser for a suite or test.
+
+      https://on.cypress.io/cypress-env-migration
+    `,
   },
 
   contains: {
@@ -492,6 +499,22 @@ export default {
         ${cmd('env', '\'{{envVars}}\'')} failed with the following error:
 
         > "{{error}}"`,
+    },
+    removed ({ keys }: { keys: string[] }) {
+      const message = ['`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.']
+
+      if (keys.length === 1) {
+        message.push(`The key being accessed was: \`${keys[0]}\``)
+      } else if (keys.length > 1) {
+        message.push(`The keys being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
+      }
+
+      message.push('This call may come from a plugin. Update the plugin to a version that supports Cypress 16.')
+
+      return {
+        message: message.join('\n\n'),
+        docsUrl: 'https://on.cypress.io/cypress-env-migration',
+      }
     },
   },
 

@@ -183,8 +183,8 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
 
 function contentTypeOf (entries?: Protocol.Fetch.HeaderEntry[]): string | undefined {
   const values = entries
-    ?.filter(({ name }) => name.toLowerCase() === 'content-type')
-    .map(({ value }) => value)
+  ?.filter(({ name }) => name.toLowerCase() === 'content-type')
+  .map(({ value }) => value)
 
   return values?.length ? values.join(', ') : undefined
 }
@@ -298,8 +298,21 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.headers = toNetworkHeaders(httpRequest.headers)
       }
 
-      if (httpRequest.body !== undefined) {
+      // The net-stubbing pipeline normalizes every intercepted request to a
+      // string body, so a request the browser paused without one arrives back
+      // here as `''` — indistinguishable from a body a handler emptied. Sending
+      // that as postData makes Chrome attach `Content-Length: 0` to requests
+      // that never had a body (#24407). Only an empty body the pause itself
+      // carried is a real change worth forwarding.
+      if (httpRequest.body !== undefined && (httpRequest.body.length > 0 || transportRequest.postData !== undefined)) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
+
+        // A Buffer body must reach the transport as bytes: the utf8 string
+        // view above is lossy for binary payloads, and Fetch.continueRequest
+        // transmits base64-encoded bytes.
+        if (Buffer.isBuffer(httpRequest.body)) {
+          transportRequest.postDataBuffer = httpRequest.body
+        }
       }
 
       return transportRequest
@@ -321,6 +334,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         bodyStream: transportResponse.bodyStream,
         headers: stripWireEncodingHeaders(toHttpHeaders(transportResponse.responseHeaders)),
         statusCode: transportResponse.responseCode,
+        ...(transportResponse.bodySkipped ? { bodySkipped: true } : {}),
       }
     },
 

@@ -219,7 +219,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    overrideLevel: 'any',
+    overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {
     name: 'expose',
@@ -294,6 +294,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'forceHttp1',
+    defaultValue: false,
+    validation: validate.isBoolean,
     requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
@@ -698,6 +703,12 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   {
     name: 'experimentalMemoryManagement',
     errorKey: 'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'forceHttp1',
+    errorKey: 'FORCE_HTTP1_DEPRECATION',
+    shouldDisplayOrThrow: (value: any) => value === true,
     isWarning: true,
   },
 ] as const

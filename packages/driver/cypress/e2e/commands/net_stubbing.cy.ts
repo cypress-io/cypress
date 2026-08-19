@@ -20,6 +20,11 @@ const uniqueRoute = (route) => {
   return `${route}-${routeCount}`
 }
 
+// The default network path intercepts in the browser through CDP, which only
+// Chromium-family browsers support; Firefox, Electron, and WebKit stay on the
+// HTTP/1 proxy either way.
+const usesBrowserNetworkPath = !Cypress.config('forceHttp1') && Cypress.isBrowser([{ name: '!electron', family: 'chromium' }])
+
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
 describe('network stubbing', { retries: 15 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
@@ -1665,7 +1670,7 @@ describe('network stubbing', { retries: 15 }, function () {
         // NOTE: accepted MITM → CDP drift (#34562): proxy-off there is no browser→proxy
         // hop to report, and the protocol negotiated with the origin is not knowable
         // while the request is paused, so httpVersion is honestly absent.
-        if (Cypress.expose('PROXY_DISABLED')) {
+        if (usesBrowserNetworkPath) {
           expect(req.httpVersion).to.be.undefined
         } else {
           expect(req.httpVersion).to.eq('1.1')
@@ -2806,7 +2811,14 @@ describe('network stubbing', { retries: 15 }, function () {
     context('correctly determines the content-length of an intercepted request', function () {
       it('when body is empty', function (done) {
         cy.intercept('/post-only', function (req) {
-          expect(req.headers['content-length']).to.eq('0')
+          // NOTE: accepted MITM → CDP drift (#34611): content-length is absent from
+          // the paused request — the browser sets it on the wire, so proxy-off there
+          // is no value to recompute from and none is synthesized for an emptied body.
+          if (usesBrowserNetworkPath) {
+            expect(req.headers['content-length']).to.be.undefined
+          } else {
+            expect(req.headers['content-length']).to.eq('0')
+          }
 
           done()
         }).intercept('/post-only', function (req) {
@@ -2935,7 +2947,10 @@ describe('network stubbing', { retries: 15 }, function () {
           // that result in Express serving a 304
           // Cypress is not expected to understand cache mechanisms at this point -
           // if the user wants to break caching, they can DIY by editing headers
-          const expectedStatusCode = [200, 304][hits]
+          // NOTE: accepted MITM → CDP drift (#34611): the browser's HTTP cache sits
+          // between the origin and the Fetch pause, so revalidation is resolved before
+          // we see it and the second hit is reported as another 200 rather than a 304.
+          const expectedStatusCode = (usesBrowserNetworkPath ? [200, 200] : [200, 304])[hits]
 
           expect(expectedStatusCode).to.exist
           expect(res.statusCode).to.eq(expectedStatusCode)
@@ -3573,6 +3588,16 @@ describe('network stubbing', { retries: 15 }, function () {
       it('can timeout when retrieving upstream response', {
         responseTimeout: 25,
       }, function (done) {
+        if (usesBrowserNetworkPath) {
+          // NOTE: accepted MITM → CDP drift (#34611): responseTimeout bounds the
+          // upstream request Cypress makes itself. Proxy-off the browser owns that
+          // request, so there is no Cypress-side socket to time out and no error to
+          // assert — the response arrives normally instead.
+          this.skip()
+
+          return
+        }
+
         cy.once('fail', (err) => {
           expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
           .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
@@ -3819,7 +3844,10 @@ describe('network stubbing', { retries: 15 }, function () {
         $.get({ url, cache: true })
       })
       .wait('@image').its('response.statusCode').should('eq', 200)
-      .wait('@image').its('response.statusCode').should('eq', 304)
+      // NOTE: accepted MITM → CDP drift (#34611): the browser resolves the
+      // revalidation against its own cache before the Fetch pause, so the second
+      // response is reported as a 200 instead of the origin's 304.
+      .wait('@image').its('response.statusCode').should('eq', usesBrowserNetworkPath ? 200 : 304)
     })
 
     // https://github.com/cypress-io/cypress/issues/14522

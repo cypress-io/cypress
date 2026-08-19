@@ -1348,6 +1348,10 @@ declare namespace Cypress {
 
     /**
      * Execute a system command.
+     *
+     * @deprecated `cy.exec()` has been deprecated and will be removed in a future major release.
+     * Use {@linkcode Chainable.task cy.task()} instead, which runs in Node without depending on
+     * the operating system, shell, or terminal of the machine running Cypress.
      * @see https://on.cypress.io/exec
      */
     exec(command: string, options?: Partial<ExecOptions>): Chainable<Exec>
@@ -3036,6 +3040,9 @@ declare namespace Cypress {
     /**
      * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
      * @default 60000
+     * @deprecated `execTimeout` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
+     * removed in a future major release. Use {@linkcode ResolvedConfigOptions.taskTimeout taskTimeout} with
+     * {@linkcode Chainable.task cy.task()} instead.
      */
     execTimeout: number
     /**
@@ -3084,6 +3091,14 @@ declare namespace Cypress {
      * @default "cypress/fixtures"
      */
     fixturesFolder: string | false
+    /**
+     * Routes Chrome, Chromium, and Edge through the legacy network path, which re-issues
+     * their connections over HTTP/1.1. Firefox, Electron, and WebKit always use it.
+     *
+     * @deprecated This option will be removed in a future version of Cypress.
+     * @default false
+     */
+    forceHttp1: boolean
     /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
@@ -3706,6 +3721,9 @@ declare namespace Cypress {
 
   /**
    * Options object to change the default behavior of cy.exec().
+   *
+   * @deprecated `ExecOptions` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
+   * removed in a future major release.
    */
   interface ExecOptions extends Loggable, Timeoutable {
     /**
@@ -6574,6 +6592,12 @@ declare namespace Cypress {
     set(options: Partial<EnqueuedCommandAttributes>): Log
   }
 
+  /**
+   * The result yielded by cy.exec().
+   *
+   * @deprecated `Exec` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
+   * removed in a future major release.
+   */
   interface Exec {
     exitCode: number
     stdout: string

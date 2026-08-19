@@ -70,6 +70,11 @@
         "process"
       ]
     },
+    "packages/agent-info": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/app": {
       "entry": [
         "src/main.ts",
@@ -284,6 +289,14 @@
     "packages/errors": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/cypress-sessions": {
+      "entry": [
+        "lib/generated/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
     "packages/net-stubbing": {
@@ -787,6 +800,29 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
+    "cli/lib/cypress-sessions/index.ts": [
+      "types"
+    ],
+    "cli/lib/cypress-sessions/record.ts": [
+      "types"
+    ],
+    "cli/lib/tap/contract.ts": [
+      "exports",
+      "types"
+    ],
+    "cli/lib/tap/tap-connection.ts": [
+      "exports",
+      "types"
+    ],
+    "cli/lib/tap/types.ts": [
+      "types"
+    ],
+    "packages/cypress-sessions/lib/contracts/command.ts": [
+      "types"
+    ],
+    "packages/server/lib/cypress-sessions.ts": [
+      "types"
+    ],
     "cli/types/cy-blob-util.d.ts": [
       "exports"
     ],
@@ -843,6 +879,21 @@
     ],
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
+    ],
+    "packages/app/src/tap/commands/pin.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/run-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/test-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/contract.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/definition.ts": [
+      "exports"
     ],
     "packages/app/src/studio/studio-app-types.ts": [
       "types"

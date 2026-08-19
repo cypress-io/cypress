@@ -90,6 +90,10 @@ export class EventManager {
     return Cypress
   }
 
+  get runComplete (): boolean {
+    return hasMochaRunEnded
+  }
+
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
     // Moving away from the runner turns off all websocket listeners. addGlobalListeners adds them back
     // but connect is added when the websocket is created elsewhere so we need to add it back.
@@ -429,6 +433,10 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    // This instance's run has not ended. The flag is module-scoped so it
+    // outlives the instance that set it, and would otherwise report the
+    // previous run's completion until this one emits run:start.
+    hasMochaRunEnded = false
     this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally
@@ -520,9 +528,18 @@ export class EventManager {
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
-          const run = () => {
+          const run = (recordResponse?: { filteredTests?: string[] }) => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
+
+            // In run mode, Cloud may return a keep-list of tests to execute for
+            // test-level rerun optimization (the FILTER action). Tell the runner
+            // to run only those tests and skip the rest.
+            const filteredTests = recordResponse?.filteredTests
+
+            if (filteredTests?.length) {
+              Cypress.runner.setTestFilter(filteredTests)
+            }
 
             this._runDriver(runState, testState)
           }
@@ -546,6 +563,14 @@ export class EventManager {
           }
 
           if (runState.currentId) {
+            // re-apply the test-level rerun keep-list before resuming: the FILTER
+            // action is only delivered on the first load, so on a cross-origin
+            // reload we re-prune from the persisted run state (prune first so the
+            // index-based resume operates on the surviving tests)
+            if (runState.filteredTests?.length) {
+              Cypress.runner.setTestFilter(runState.filteredTests)
+            }
+
             // if we have a currentId it means
             // we need to tell the Cypress to skip
             // ahead to that test
@@ -1029,6 +1054,14 @@ export class EventManager {
     this._unpinSnapshot()
     this._hideSnapshot()
     this.reporterBus.emit('reporter:snapshot:unpinned')
+  }
+
+  // Sync the reporter's command-log pin state when a pin originates outside the
+  // reporter (e.g. the tap CLI). The AUT render is already done via the native
+  // `pin:snapshot` path, so — unlike snapshotUnpinned — this only notifies the
+  // reporter; it does not touch the snapshot store.
+  snapshotPinned (testId: string, logId: number | string) {
+    this.reporterBus.emit('reporter:snapshot:pinned', testId, logId)
   }
 
   _unpinSnapshot () {

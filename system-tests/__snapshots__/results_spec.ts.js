@@ -33,6 +33,7 @@ exports['module api and after:run results'] = `
     "visibilityStrategy": "modern",
     "fileServerFolder": "/path/to/fileServerFolder",
     "fixturesFolder": "/path/to/fixturesFolder",
+    "forceHttp1": false,
     "excludeSpecPattern": "*.hot-update.js",
     "includeShadowDom": false,
     "justInTimeCompile": true,

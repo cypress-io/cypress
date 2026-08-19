@@ -23,7 +23,6 @@ import memory from './memory'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
-import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -433,10 +432,10 @@ export = {
 
     // Blink's cache-aware font loading hard-fails uncached @font-face loads
     // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
-    // which the proxy-disabled transport always enables (crbug.com/1196004).
-    // Web fonts do not load at all with the proxy disabled unless this flag
-    // stays — do not remove it.
-    if (isProxyDisabled()) {
+    // which the CDP transport always enables (crbug.com/1196004). Web fonts do
+    // not load at all on the browser (CDP) network path unless this flag stays —
+    // do not remove it.
+    if (options.useBrowserNetworkInterception) {
       const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
 
       if (disableFeaturesIndex === -1) {
@@ -583,10 +582,10 @@ export = {
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
-    // Fetch must be wired here when the MITM proxy is disabled. The page is
+    // Fetch must be wired here on the browser (CDP) network path. The page is
     // already loaded — enable Page, listen for future frame changes, and seed
     // the frame tree so isAUTFrame works before any new frameAttached events.
-    if (isProxyDisabled()) {
+    if (options.useBrowserNetworkInterception) {
       await pageCriClient.send('Page.enable')
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await cdpAutomation.seedFrameTree(pageCriClient)
@@ -654,7 +653,7 @@ export = {
       utils.initializeCDP(pageCriClient, automation),
     ])
 
-    if (isProxyDisabled()) {
+    if (options.useBrowserNetworkInterception) {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 

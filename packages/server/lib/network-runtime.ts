@@ -1,6 +1,7 @@
+import Debug from 'debug'
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
-import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import type { NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
@@ -20,6 +21,8 @@ import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './brow
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
+const debug = Debug('cypress:server:network-runtime')
+
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
@@ -30,6 +33,9 @@ export type CreateProxyRuntimeDeps = {
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // Required, not created here: the server owns one state for its whole lifetime
+  // and every network runtime shares it.
+  netStubbingState: NetStubbingState
 }
 
 export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
@@ -40,9 +46,10 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 }
 
 export type CreateCdpFetchRuntimeDeps = {
-  // onServiceWorkerTargetAttached is a settable hook: the runtime assigns it
-  // so service worker sessions get Fetch enabled before they start running.
-  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onServiceWorkerTargetAttached'>
+  // onChildTargetAttached is a settable hook: the runtime assigns it so
+  // child sessions (service workers, origin-isolated iframes) get Fetch
+  // enabled before they start running.
+  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onChildTargetAttached'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
   // Protocol-neutral subscription to AUT document navigation commits,
   // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
@@ -56,8 +63,10 @@ export type CreateCdpFetchRuntimeDeps = {
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
-  // Prefer the state already bound to the driver socket (created at open()).
-  netStubbingState?: NetStubbingState
+  // Required: DriverInterceptRegistrationAdapter is bound by value to the state
+  // created at open(), so a second NetStubbingState here would leave every
+  // cy.intercept() registered against a state this runtime never matches.
+  netStubbingState: NetStubbingState
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -82,7 +91,7 @@ export type CdpFetchNetworkRuntime = {
  * Composition-root factory for the proxy-default network runtime.
  */
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
-  const stubbingState = netStubbingState()
+  const stubbingState = deps.netStubbingState
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -113,6 +122,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   networkInterception.use(createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
+    isBrowserNetworkMode: false,
   }))
 
   networkInterception.use(networkProxy.http.createLegacyProxyPipeline(networkProxy.codec))
@@ -150,7 +160,7 @@ const RUNTIME_STOPPED_ERROR = 'Cannot attach extra target: CDP Fetch runtime has
  * a synthetic Express ctx via createSyntheticProxyCodec.
  */
 export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
-  const stubbingState = deps.netStubbingState ?? netStubbingState()
+  const stubbingState = deps.netStubbingState
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -182,6 +192,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   const serveInternalRoutes = createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
+    isBrowserNetworkMode: true,
   })
 
   const attachStages = <TRequest, TResponse>(
@@ -201,12 +212,18 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
   networkProxy.withIntercept(expressInterception)
 
+  const syntheticCodec = createSyntheticProxyCodec({
+    createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
+  })
+
   const networkInterception = attachStages(
     new HttpIntercept(createCdpFetchCodec()),
-    createSyntheticProxyCodec({
-      createMiddlewareContext: (req, res) => networkProxy.http.createMiddlewareContext(req, res),
-    }),
+    syntheticCodec,
   )
+
+  // Every transport shares one synthetic codec, so a canceled request is torn
+  // down through the same exchange map no matter which target it paused on.
+  const onRequestCanceled = (requestId: string) => syntheticCodec.abortRequest(requestId)
 
   // Send strategy:file requests to the origin server over the wire, and let
   // Express serve them from the file server, rather than answering the pause
@@ -248,6 +265,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // pre-register so CorrelateBrowserPreRequest does not wait the full timeout.
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
+    onRequestCanceled,
   })
 
   // Extra-target transports share networkInterception so they cannot drift from
@@ -282,14 +300,10 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         throw new Error(RUNTIME_STOPPED_ERROR)
       }
 
-      // CDPNetworkExtraInfo (used by CdpFetchTransport for Set-Cookie) requires
-      // Network on this session. The browser-level Network.enable in
-      // _onAttachToTarget does not apply to this dedicated extra-target CRI client.
-      await client.send('Network.enable', DEFAULT_NETWORK_ENABLE_OPTIONS)
-
       const extraTransport = new CdpFetchTransport(client, networkInterception, {
         isFromExtraTarget: true,
         resolveOriginRedirect,
+        onRequestCanceled,
       })
 
       await extraTransport.start()
@@ -303,6 +317,18 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
         throw new Error(RUNTIME_STOPPED_ERROR)
       }
+
+      // CDPNetworkExtraInfo (Set-Cookie capture) needs Network on this dedicated
+      // session — the browser-level Network.enable in _onAttachToTarget does not
+      // apply here. It cannot be awaited: the target is auto-attached
+      // debugger-paused, and Network.enable's response requires the paused
+      // renderer, which only unpauses after this hook returns (#34512).
+      // Fetch.enable above is browser-serviced, so interception is already in
+      // place while paused; extra-info merging degrades gracefully if this
+      // settles late or the target is already closing.
+      client.send('Network.enable', DEFAULT_NETWORK_ENABLE_OPTIONS).catch((err) => {
+        debug('extra-target Network.enable failed: %s', err?.message || err)
+      })
 
       extraTargetTransports.add(extraTransport)
 
@@ -319,17 +345,19 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
 
-      // A service worker's network runs on its own CDP session — without
-      // enabling Fetch there, its script fetch and fetch-handler requests
-      // bypass the middleware onion (and cy.intercept) entirely.
-      deps.client.onServiceWorkerTargetAttached = (sessionId) => {
-        return fetchTransport.attachServiceWorkerSession(sessionId)
+      // Service workers and out-of-process iframes have their own CDP
+      // session — without enabling Fetch there, a worker's script fetch and an
+      // out-of-process iframe's (OOPIF) subresources (e.g. a cross-origin spec
+      // bridge's runner bundle) bypass the middleware onion entirely and
+      // escape to the real origin.
+      deps.client.onChildTargetAttached = (sessionId) => {
+        return fetchTransport.attachChildSession(sessionId)
       }
 
       try {
         await fetchTransport.start()
       } catch (err) {
-        deps.client.onServiceWorkerTargetAttached = undefined
+        deps.client.onChildTargetAttached = undefined
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
 
@@ -347,7 +375,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     },
     async stop () {
       stopped = true
-      deps.client.onServiceWorkerTargetAttached = undefined
+      deps.client.onChildTargetAttached = undefined
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 

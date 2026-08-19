@@ -100,7 +100,7 @@ declare global {
      */
     __CYPRESS_GQL_NO_SOCKET__?: string
     __CYPRESS_MODE__: 'run' | 'open'
-    __CYPRESS_PROXY_DISABLED__?: boolean
+    __CYPRESS_BROWSER_NETWORK_MODE__?: boolean
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
     __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
@@ -124,7 +124,7 @@ interface AppUrqlClientConfig {
   target: 'app'
   namespace: string
   socketIoRoute: string
-  proxyUrl?: string
+  port?: number | null
 }
 
 export type UrqlClientConfig = LaunchpadUrqlClientConfig | AppUrqlClientConfig
@@ -234,24 +234,28 @@ function getPubSubSource (config: PubSubConfig) {
   })
 }
 
-export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Location, 'protocol' | 'host'>, proxyDisabled: boolean) {
+export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Location, 'protocol' | 'host'>, isBrowserNetworkMode: boolean) {
   if (config.target === 'launchpad') {
     return `ws://${location.host}/__launchpad/graphql-ws`
   }
 
-  // With the proxy disabled the app is served at the AUT's superdomain, and CDP
-  // cannot intercept a WebSocket upgrade — the handshake has to name the Cypress
-  // server or it reaches the user's app server (see #34563).
-  const origin = proxyDisabled && config.proxyUrl ? new URL(config.proxyUrl) : location
+  // On the browser (CDP) network path the app is served at the AUT's superdomain, and
+  // CDP cannot intercept a WebSocket upgrade — the handshake has to name the Cypress
+  // server or it reaches the user's app server (see #34563). `port` is the port the
+  // server is listening on; `proxyUrl` is derived from the port that was requested and
+  // can still name a port nothing is bound to.
+  if (isBrowserNetworkMode && config.port) {
+    return `ws://localhost:${config.port}${config.socketIoRoute}-graphql`
+  }
 
   // http: -> ws:  &  https: -> wss:
-  const protocol = origin.protocol.replace('http', 'ws')
+  const protocol = location.protocol.replace('http', 'ws')
 
-  return `${protocol}//${origin.host}${config.socketIoRoute}-graphql`
+  return `${protocol}//${location.host}${config.socketIoRoute}-graphql`
 }
 
 function getSocketSource (config: UrqlClientConfig) {
   return createWsClient({
-    url: getGraphQLWsUrl(config, window.location, window.__CYPRESS_PROXY_DISABLED__ === true),
+    url: getGraphQLWsUrl(config, window.location, window.__CYPRESS_BROWSER_NETWORK_MODE__ === true),
   })
 }
