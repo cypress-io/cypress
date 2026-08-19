@@ -23,8 +23,11 @@ export type HttpResponse = {
   /**
    * A live stream of the bytes the browser actually delivered for a
    * stream-classified response (decoded for CDP capture, fulfilled bytes for
-   * stubbed responses). Threaded through to Test Replay capture separately
-   * from `bodyStream`, which the middleware body path must keep untouched.
+   * stubbed responses), consumed only by Test Replay. Deliberately not
+   * `bodyStream`: bodyStream feeds the middleware body path and must be fully
+   * consumable before the pause is released (for a stream-classified response
+   * it is the empty stand-in that keeps stubs working via the digest diff),
+   * while these bytes only begin to flow after the browser resumes delivery.
    */
   captureStream?: Readable
   headers?: HttpHeaders
