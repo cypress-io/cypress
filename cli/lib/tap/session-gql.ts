@@ -3,13 +3,12 @@ import Debug from 'debug'
 import { errors } from '../errors'
 import { throwTapError } from './tap-connection'
 import type { LiveSessionState } from '../cypress-sessions'
-import { SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import { SESSION_ID_HEADER, tapGraphqlPath } from '@packages/cypress-sessions'
 import type { TapGraphqlOperation } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 
 const GRAPHQL_HOST = '127.0.0.1'
-const GRAPHQL_PATH = '/__cypress/graphql'
 const DEFAULT_QUERY_TIMEOUT_MS = 4000
 
 interface GraphqlEnvelope {
@@ -47,7 +46,7 @@ const validateEnvelope = <T>(operationName: string, envelope: GraphqlEnvelope | 
 
 export const querySessionGraphql = async <TResult>(session: LiveSessionState, operation: TapGraphqlOperation<TResult>, timeoutMs: number = DEFAULT_QUERY_TIMEOUT_MS): Promise<TResult> => {
   const { operationName, query, variables } = operation
-  const url = `http://${GRAPHQL_HOST}:${session.serverPort}${GRAPHQL_PATH}/${operationName}`
+  const url = `http://${GRAPHQL_HOST}:${session.serverPort}${tapGraphqlPath(operationName)}`
 
   let response: { status: number, redirected: boolean, json (): Promise<unknown> }
 
@@ -65,11 +64,10 @@ export const querySessionGraphql = async <TResult>(session: LiveSessionState, op
   }
 
   // A valid request passes the server's force-proxy guard untouched; a redirect
-  // means the guard sent us to the runner page because the session doesn't allow
-  // direct tap GraphQL — an older Cypress that predates it (or one that rejected
-  // our session-id). Report that instead of the runner HTML as a data error.
+  // means the guard sent us to the runner page, so report that rather than
+  // failing on the runner HTML as a data error.
   if (response.redirected) {
-    return throwTapError('SESSION_OUTDATED', `The session redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
+    return throwTapError('GRAPHQL_REDIRECTED', `The session redirected the ${operationName} request instead of answering it.`)
   }
 
   if (response.status !== 200) {

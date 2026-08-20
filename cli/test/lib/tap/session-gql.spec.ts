@@ -45,7 +45,7 @@ describe('lib/tap/session-gql', () => {
 
     const [url, init] = fetchMock.mock.calls[0]
 
-    expect(url).toBe('http://127.0.0.1:49200/__cypress/graphql/TapSpecs')
+    expect(url).toBe('http://127.0.0.1:49200/__cypress/tap/graphql/TapSpecs')
     expect(init.method).toBe('POST')
     expect(init.headers).toEqual({ 'content-type': 'application/json', 'x-cypress-session-id': 'inst-1' })
     expect(JSON.parse(init.body)).toEqual({ ...request, variables: {} })
@@ -69,11 +69,11 @@ describe('lib/tap/session-gql', () => {
     })
   })
 
-  it('reports an unsupported session when the request is redirected away from GraphQL', async () => {
+  it('reports an unreachable session when the request is redirected away from GraphQL', async () => {
     fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      code: 'SESSION_OUTDATED',
+      code: 'GRAPHQL_REDIRECTED',
       message: expect.stringContaining('redirected'),
     })
   })

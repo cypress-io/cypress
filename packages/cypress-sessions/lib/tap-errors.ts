@@ -122,7 +122,7 @@ export const TAP_ERROR_COPY = {
     description: `The targeted ${TAP_TARGET} is newer than this CLI.`,
     solution: `Update the CLI with ${UPDATE_COMMAND}, then try again.`,
   },
-  /** Raised when the handshake reported an older schema version, or GraphQL redirected. */
+  /** Raised when the handshake reported an older schema version. */
   SESSION_OUTDATED: {
     description: `The targeted ${TAP_TARGET} is older than this CLI.`,
     solution: `Update Cypress in the running project with ${UPDATE_COMMAND}, restart it, then try again.`,
@@ -136,6 +136,8 @@ export const TAP_ERROR_COPY = {
     ...COMMAND_FAILED,
     recommendGhIssue: true,
   },
+  /** Raised when the tap GraphQL route redirected instead of answering. */
+  GRAPHQL_REDIRECTED: { ...UNREACHABLE },
 
   // The spec lifecycle
   /** Raised when a spec was read before any has run. */
