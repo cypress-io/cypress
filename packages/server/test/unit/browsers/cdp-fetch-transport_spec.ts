@@ -14,6 +14,7 @@ function createPausedRequest (options: {
   url?: string
   resourceType?: Protocol.Network.ResourceType
   responseStatusCode?: number
+  responseStatusText?: string
   responseErrorReason?: Protocol.Network.ErrorReason
 }): Protocol.Fetch.RequestPausedEvent {
   return {
@@ -27,6 +28,7 @@ function createPausedRequest (options: {
       headers: {},
     },
     responseStatusCode: options.responseStatusCode,
+    responseStatusText: options.responseStatusText,
     responseErrorReason: options.responseErrorReason,
   } as Protocol.Fetch.RequestPausedEvent
 }
@@ -429,6 +431,7 @@ describe('CdpFetchTransport', () => {
         },
         id: 'network-1',
         statusCode: 200,
+        statusMessage: 'OK',
         url: 'https://example.test/',
       })
 
@@ -759,6 +762,48 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 200,
       })
+    })
+
+    const interceptStatusMessage = async (responseStatusCode: number, responseStatusText: string) => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode, responseStatusText })
+
+      let seenStatusMessage
+
+      httpIntercept.use(async (req, next) => {
+        const res = await next(req)
+
+        seenStatusMessage = res.statusMessage
+
+        return res
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(request)
+
+      await tick()
+      await onRequestPaused(response)
+      await handled
+
+      return seenStatusMessage
+    }
+
+    it('exposes the reason phrase the browser read off the wire as statusMessage', async () => {
+      expect(await interceptStatusMessage(404, 'Not Found')).to.equal('Not Found')
+    })
+
+    // HTTP/2 carries no reason phrase, so Chrome reports an empty status text
+    // where the MITM path would have one, and res.statusMessage is published
+    // as a non-optional string.
+    it('synthesizes statusMessage from the status code when the protocol carries no reason phrase', async () => {
+      expect(await interceptStatusMessage(200, '')).to.equal('OK')
+    })
+
+    it('leaves statusMessage an empty string for a status code with no standard phrase', async () => {
+      expect(await interceptStatusMessage(599, '')).to.equal('')
     })
 
     it('marks AUT frame documents for the intercept pipeline without sending the header upstream', async () => {

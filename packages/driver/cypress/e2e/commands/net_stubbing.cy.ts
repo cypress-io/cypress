@@ -2884,6 +2884,18 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    it('receives the reason phrase as res.statusMessage', function (done) {
+      cy.intercept('/json-content-type*', function (req) {
+        req.reply(function (res) {
+          expect(res.statusMessage).to.eq('OK')
+
+          done()
+        })
+      }).then(function () {
+        $.get('/json-content-type')
+      })
+    })
+
     it('intercepts redirects as expected', function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`

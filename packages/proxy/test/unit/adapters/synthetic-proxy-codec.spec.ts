@@ -135,6 +135,29 @@ describe('createSyntheticExpressContext', () => {
     expect(incomingRes.headers['set-cookie']).to.deep.equal(['a=1', 'b=2'])
   })
 
+  it('carries the reason phrase through to statusMessage', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 404,
+      statusMessage: 'Not Found',
+    })
+
+    expect(incomingRes.statusMessage).to.equal('Not Found')
+  })
+
+  // Node leaves statusMessage null on an unparsed IncomingMessage, which
+  // breaks the non-optional string res.statusMessage is published as.
+  it('keeps statusMessage a string when the response carries no reason phrase', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+    })
+
+    expect(incomingRes.statusMessage).to.equal('')
+  })
+
   it('does not fabricate an httpVersion on the synthetic response', () => {
     const incomingRes = createSyntheticIncomingResponse({
       id: 'network-1',

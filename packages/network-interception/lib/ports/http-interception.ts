@@ -22,6 +22,7 @@ export type HttpResponse = {
   bodyStream?: Readable
   headers?: HttpHeaders
   statusCode?: number
+  statusMessage?: string
 }
 
 export interface TransportCodecPort<TRequest, TResponse> {

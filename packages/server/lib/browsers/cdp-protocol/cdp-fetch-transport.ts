@@ -128,6 +128,10 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
+  // The reason phrase the browser read off the wire, or a synthesized one for
+  // HTTP/2, which carries none. Inbound only: the outbound sends recompute the
+  // phrase because middleware may have changed the status code.
+  responsePhrase?: string
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
@@ -760,6 +764,7 @@ export class CdpFetchTransport {
       id: `${this.requestIdPrefix}${networkRequestId}`,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
+      responsePhrase: event.responseStatusText || STATUS_CODES[event.responseStatusCode] || '',
       responseHeaders,
       bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
       originalBodyDigest: digestBody(originalBody),
