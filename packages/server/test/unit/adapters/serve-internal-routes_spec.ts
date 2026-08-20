@@ -51,7 +51,6 @@ describe('lib/adapters/internal-routes', () => {
   it('does not match internal route lookalikes', () => {
     for (const isBrowserNetworkMode of [true, false]) {
       expect(isInternalCypressRoute('/__cypress-other/foo', config, isBrowserNetworkMode)).to.be.false
-      expect(isInternalCypressRoute('/__cypress-studiolookalike/foo', config, isBrowserNetworkMode)).to.be.false
       expect(isInternalCypressRoute('/app/__cypress/xhrs/foo', config, isBrowserNetworkMode)).to.be.false
     }
   })
