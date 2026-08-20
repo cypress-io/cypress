@@ -791,19 +791,15 @@ describe('CdpFetchTransport', () => {
       return seenStatusMessage
     }
 
+    // A custom phrase must survive verbatim, not be replaced by the standard one.
     it('exposes the reason phrase the browser read off the wire as statusMessage', async () => {
-      expect(await interceptStatusMessage(404, 'Not Found')).to.equal('Not Found')
+      expect(await interceptStatusMessage(200, 'Totally Fine')).to.equal('Totally Fine')
     })
 
-    // HTTP/2 carries no reason phrase, so Chrome reports an empty status text
-    // where the MITM path would have one, and res.statusMessage is published
-    // as a non-optional string.
-    it('synthesizes statusMessage from the status code when the protocol carries no reason phrase', async () => {
-      expect(await interceptStatusMessage(200, '')).to.equal('OK')
-    })
-
-    it('leaves statusMessage an empty string for a status code with no standard phrase', async () => {
-      expect(await interceptStatusMessage(599, '')).to.equal('')
+    // HTTP/2 carries no reason phrase: Chrome, Node's h2 compat layer, and
+    // fetch().statusText all report '' here, so synthesizing one would invent it.
+    it('reports an empty statusMessage when the protocol carries no reason phrase', async () => {
+      expect(await interceptStatusMessage(200, '')).to.equal('')
     })
 
     it('marks AUT frame documents for the intercept pipeline without sending the header upstream', async () => {
