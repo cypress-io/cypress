@@ -82,10 +82,10 @@ export const CYPRESS_STUDIO_ROUTE = '/__cypress-studio'
 
 export const CYPRESS_CY_PROMPT_ROUTE = '/__cypress-cy-prompt'
 
-const CLOUD_BUNDLE_ROUTES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
+const CLOUD_BUNDLE_NAMESPACES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
 
-export function isCloudBundleRoute (pathname: string): boolean {
-  return CLOUD_BUNDLE_ROUTES.some((route) => pathname.startsWith(route))
+export function isCloudBundleNamespace (pathname: string): boolean {
+  return CLOUD_BUNDLE_NAMESPACES.some((namespace) => pathname.startsWith(namespace))
 }
 
 // `isBrowserNetworkMode` is a property of the runtime that installed the caller,
@@ -98,7 +98,7 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
     return false
   }
 
-  if (isBrowserNetworkMode && isCloudBundleRoute(pathname)) {
+  if (isBrowserNetworkMode && isCloudBundleNamespace(pathname)) {
     return true
   }
 
