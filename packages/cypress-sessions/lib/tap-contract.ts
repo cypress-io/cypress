@@ -112,7 +112,9 @@ const selectorField = { name: 'selector', alias: 'e', type: 'string', required: 
 
 const commandMeta = {
   name: 'command',
-  description: 'detail one command log entry of a test — its reporter row, the DOM snapshots pinnable on it, and its console properties',
+  description: 'retrieve the reporter row, the pinnable DOM snapshots, and the console properties of a single command in a test',
+  details: `Retrieves a single command from a test's command log: its reporter row, the DOM
+snapshots pinnable on it, and any associated console properties.`,
   params: [],
   options: [
     { ...testIdField, required: true },
@@ -120,7 +122,7 @@ const commandMeta = {
     // `--json` is the CLI's own flag, but this command declares it because it
     // also changes what the command returns: nothing is withheld from a payload
     // that is not being rendered for reading room.
-    { name: 'json', type: 'boolean', required: false, description: 'print the raw JSON result instead of the human-readable rendering — every console property in full, however long, rather than the long ones named by their length' },
+    { name: 'json', type: 'boolean', required: false, description: 'print the raw JSON result instead of the human-readable rendering. This will output every console property in full regardless of length.' },
     attemptField,
     { name: 'depth', alias: 'd', type: 'string', required: false, description: 'how many levels of nested console properties to expand before summarizing the rest as "{n keys}" / "[n items]": a number or "all" (default 3, and a section over 8 rows folds at any depth unless this is passed)' },
   ],
@@ -128,16 +130,15 @@ const commandMeta = {
 
 const reporterMeta = {
   name: 'reporter',
-  description: 'render a test’s full reporter view — its routes, hooks, and command log — or, without --test-id, the spec-level overview: the spec’s stats and every suite’s tests',
-  details: `Shows test results the way the Cypress app's reporter panel does, right in
-your terminal. Pass --test-id <id> (test ids come from the spec overview this
-same command prints with no --test-id) to see one
-test's full story: its network routes, the hooks that ran, the complete
-command log, and the failure output when something went wrong. Add --attempt
-to view an earlier retry.
+  description: 'retrieve the test runner reporter for the spec or a specific test',
+  details: `Shows test results the way the Cypress reporter panel does.
 
-Leave --test-id off to get the spec-level overview instead: the spec's pass/fail
-stats and every suite's tests at a glance.`,
+By default, this will output the spec-level overview featuring the spec's
+pass/fail stats and every suite's tests including their IDs.
+
+Provide a --test-id <id> to see one test's full story: its routes, the hooks
+that ran, the complete command log, and the failure output when something went
+wrong. Add --attempt to view an earlier retry.`,
   params: [],
   options: [
     { ...testIdField, required: false },
@@ -147,7 +148,9 @@ stats and every suite's tests at a glance.`,
 
 const pinMeta = {
   name: 'pin',
-  description: 'pin a command’s DOM snapshot into the live app-under-test frame so the dom/aria/inspect commands can read it; pass --clear to release',
+  description: 'pin a command’s DOM snapshot into the live application-under-test frame',
+  details: `Pins a command's DOM snapshot into the live application-under-test frame so the
+dom/aria/inspect commands can read it. Pass --clear to release.`,
   params: [],
   options: [
     { ...testIdField, required: false },
@@ -160,7 +163,7 @@ const pinMeta = {
 
 const runStateMeta = {
   name: 'run-state',
-  description: 'report where the running Cypress session is in its run lifecycle',
+  description: 'report where the Cypress session is in its run lifecycle',
   params: [],
   options: [],
   hidden: true,
@@ -222,12 +225,13 @@ const runMeta = {
   description: 'run (or rerun) a spec by its project-relative path',
   details: `Runs (or reruns) a spec by its project-relative path, as listed by the specs
 command. If no browser is open it launches one, switching to the spec's testing
-type when needed, then requests the spec and returns immediately — returning does
-not mean the spec has started, let alone finished.
+type when needed, then requests the spec and returns immediately. This requests
+the spec to begin, but completion of this command does not guarantee the spec
+has started or finished.
 
-Poll the status command for progress. Read status first and keep its startedAt:
-a verdict still carrying that same startedAt describes the spec before this one,
-so wait for a verdict whose startedAt differs.`,
+Poll the 'status' command for progress. Read status first and keep its
+startedAt: a verdict still carrying that same startedAt describes the spec
+before this one, so wait for a verdict whose startedAt differs.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
@@ -235,9 +239,10 @@ so wait for a verdict whose startedAt differs.`,
 
 const sessionsMeta = {
   name: 'sessions',
-  description: 'list the running Cypress sessions this CLI can reach',
-  details: `Lists the running Cypress sessions this CLI can reach, as a JSON array. Pass
-a session's pid to \`--session\` to target it with another tap command.
+  description: 'list the Cypress sessions this CLI can reach',
+  details: `Lists the Cypress sessions this CLI can reach. Cypress must be running locally,
+support the \`tap\` command, and have an active Testing Type to be listed. A
+session can be targeted by its PID in other commands using \`--session\`.
 
 tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
 A session running any other browser is listed as unsupported, and every other
@@ -246,30 +251,40 @@ tap command refuses it.`,
 
 const statusMeta = {
   name: 'status',
-  description: 'report where a running Cypress session is in its lifecycle',
-  details: `Reports where a running Cypress session is in its lifecycle, as JSON — for
-polling and "where am I?" checks. Always exits 0 for a determinable stage
-(including "not connected"); a poller branches on the \`status\` field.
+  description: 'report where a Cypress session is in its lifecycle',
+  details: `Reports where a Cypress session is in its lifecycle, as JSON — for polling and
+"where am I?" checks. Always exits 0 for a determinable stage (including "not
+connected"); a poller branches on the \`status\` field.
 
-Stages: not connected, browser not selected, spec not selected, loading,
-running, passed, failed.
+Stages:
+- not connected: Cypress cannot be reached.
+- browser not selected: Cypress does not have a supported browser open.
+- spec not selected: Cypress has a browser open but no spec is selected.
+- loading: Cypress is loading the spec.
+- running: Cypress is running the spec.
+- passed: Cypress has completed the spec and all executed tests passed.
+- failed: Cypress failed to run the spec, or has completed the spec and at least
+  one test failed.
 
-Only passed and failed are verdicts. Loading is a selected spec still building,
-and stays loading for as long as the build takes, so a poller needs its own
-timeout. A spec whose build fails reports failed and carries the reason as
+Statuses other than passed and failed are intermediate states, indicating that
+Cypress requires additional instruction or is still processing. Loading stays
+loading for as long as the spec takes to build, so a poller needs its own
+timeout; a spec whose build fails reports failed and carries the reason as
 error — it ran no tests, so it reports no counts either.
 
-From loading onwards the output carries startedAt, the spec every other field
-describes (null while loading). A rerun leaves the previous spec's verdict
-readable until the incoming one starts, identical on every other field, so
-compare startedAt before believing a verdict.`,
+From loading onwards the output carries \`startedAt\`, the spec every other field
+describes (null while loading). In the event of a rerun the previous spec's
+verdict remains visible until the new one begins, identical on every other
+field, so use \`startedAt\` to validate whether output describes the previous
+spec or the new one.`,
 } as const satisfies TapNativeCommandSchema
 
 const specsMeta = {
   name: 'specs',
-  description: 'list the specs the running Cypress session can run, most recently modified first',
-  details: `Lists the specs the connected Cypress session can run, in descending order by last modified. To find other testing types you must open a new
-cypress session with that testing type specified.`,
+  description: 'list the specs the Cypress session can run, most recently modified first',
+  details: `Lists the specs the connected Cypress session can run, in descending order by
+last modified. To find other testing types you must connect to a Cypress
+session with that testing type active.`,
 } as const satisfies TapNativeCommandSchema
 
 // Every selector these three take must resolve to exactly one element, so a
@@ -277,10 +292,10 @@ cypress session with that testing type specified.`,
 // the same words, and names the remedy the ambiguity error offers.
 const SINGLE_ELEMENT_SELECTOR = 'a CSS selector matching exactly one element'
 
-const AMBIGUOUS_SELECTOR_HELP = `The selector must match exactly one element. When it matches more, nothing is
-read: the command answers with a numbered list of the matches, each with a
-unique selector. Re-run with --at <index> to read one of them, or with whichever
-selector you meant.`
+const AMBIGUOUS_SELECTOR_HELP = `The selector must match exactly one element. If it matches multiple elements
+nothing is read: the command answers with a numbered list of the matches (up to
+10), each with a unique selector. Re-run with --at <index> to read one of them,
+or with whichever selector you meant.`
 
 // Where `dom` and `aria` read from with no selector: the document element only
 // adds a <head> of script and style text; `--selector html` still reads it.
@@ -292,16 +307,16 @@ const atField = {
   name: 'at',
   type: 'number',
   required: false,
-  description: '0-based index of the match to read, as listed by the index column when a selector matches several',
+  description: 'When a selector matches multiple elements, the 0-based index of the match to read',
 } as const satisfies TapCommandOptionSchema
 
 const domMeta = {
   name: 'dom',
-  description: 'read the app-under-test DOM as HTML: the page body, or the one element a selector matches (with its subtree)',
-  details: `Reads the app-under-test DOM as HTML: the outerHTML of the element a CSS
-selector matches, including its full subtree. Without --selector it reads the
-page body; pass --selector html for the whole document. Output is capped
-browser-side so a heavy page never ships megabytes at once.
+  description: 'read the application-under-test DOM as HTML: the page body, or a single element with its children by providing a CSS Selector',
+  details: `Reads the application-under-test DOM as HTML: a single element matching a CSS
+Selector, and all of its children. Without --selector it reads the page body;
+pass --selector html for the entire document. Output is capped browser-side so a
+heavy page never ships megabytes at once.
 
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
@@ -314,15 +329,15 @@ ${AMBIGUOUS_SELECTOR_HELP}`,
 
 const ariaMeta = {
   name: 'aria',
-  description: 'read the accessibility (ARIA) tree of the app-under-test page body, or the subtree at a selector',
-  details: `Reads the accessibility (ARIA) tree of the app under test, rooted at the page
-body or at the element a CSS selector matches. Structural and text-only roles
-are dropped, leaving the compact role/name/state tree DevTools shows.
+  description: 'read the accessibility (ARIA) tree of the application-under-test page body, or the subtree at a selector',
+  details: `Reads the accessibility (ARIA) tree of the application under test, rooted at the
+page body or at the element a CSS Selector matches. Structural and text-only
+roles are dropped, leaving the compact role/name/state tree DevTools shows.
 
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
   options: [
-    { ...selectorField, defaultValue: TAP_DEFAULT_SELECTOR, description: `${SINGLE_ELEMENT_SELECTOR} to root the tree at` },
+    { ...selectorField, defaultValue: TAP_DEFAULT_SELECTOR, description: SINGLE_ELEMENT_SELECTOR },
     // The accessibility tree of a real app is deep; the cap keeps the projection
     // affordable for an LLM. A selector roots it at a subtree for finer reads.
     { name: 'max-nodes', alias: 'm', type: 'number', required: false, defaultValue: 200, description: 'cap on the number of accessibility nodes returned' },
@@ -332,9 +347,10 @@ ${AMBIGUOUS_SELECTOR_HELP}`,
 
 const inspectMeta = {
   name: 'inspect',
-  description: 'inspect the element a selector matches: its tag, attributes, computed styles, box model, and accessibility node',
-  details: `Inspects the element the selector matches: its tag, attributes, curated
-computed styles, box model, and accessibility node.
+  description: 'retrieve the tag, attributes, computed styles, box model, and accessibility node of a specific element',
+  details: `Inspects a single element matching a CSS Selector: outputs the tag, attributes,
+curated computed styles, box model, and that element's own accessibility node
+— where \`aria\` reads the whole tree, this reads the one node.
 
 ${AMBIGUOUS_SELECTOR_HELP}`,
   params: [],
