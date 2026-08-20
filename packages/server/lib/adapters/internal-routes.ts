@@ -84,8 +84,22 @@ export const CYPRESS_CY_PROMPT_ROUTE = '/__cypress-cy-prompt'
 
 const CLOUD_BUNDLE_ROUTES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
 
+// The bundles ship independently of the binary and hang sibling namespaces off
+// these bases (`/__cypress-studio-ai`, `/__cypress-studio-ai-anon`), so match
+// the whole family: an unmatched one escapes to the AUT's origin, which is
+// where the runner document's root-relative fetches land.
+function matchesRouteFamily (pathname: string, route: string): boolean {
+  if (!pathname.startsWith(route)) {
+    return false
+  }
+
+  const boundary = pathname[route.length]
+
+  return boundary === undefined || boundary === '/' || boundary === '-'
+}
+
 export function isCloudBundleRoute (pathname: string): boolean {
-  return CLOUD_BUNDLE_ROUTES.some((route) => matchesPathPrefix(pathname, route))
+  return CLOUD_BUNDLE_ROUTES.some((route) => matchesRouteFamily(pathname, route))
 }
 
 // `isBrowserNetworkMode` is a property of the runtime that installed the caller,
@@ -98,12 +112,15 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
     return false
   }
 
+  if (isBrowserNetworkMode && isCloudBundleRoute(pathname)) {
+    return true
+  }
+
   const internalRoutes = [
     config.namespace ? `/${config.namespace}` : undefined,
     config.clientRoute,
     config.socketIoRoute,
     config.socketIoRoute ? `${config.socketIoRoute}-graphql` : undefined,
-    ...(isBrowserNetworkMode ? CLOUD_BUNDLE_ROUTES : []),
   ].filter((route): route is string => Boolean(route))
 
   return internalRoutes.some((route) => matchesPathPrefix(pathname, route))

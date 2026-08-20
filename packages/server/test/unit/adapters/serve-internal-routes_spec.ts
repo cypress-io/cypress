@@ -33,16 +33,25 @@ describe('lib/adapters/internal-routes', () => {
     expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config, true)).to.be.true
   })
 
+  it('matches the studio and cy-prompt sibling namespaces on the browser (CDP) network path', () => {
+    expect(isInternalCypressRoute('/__cypress-studio-ai-anon/session', config, true)).to.be.true
+    expect(isInternalCypressRoute('/__cypress-studio-ai-anon/token', config, true)).to.be.true
+    expect(isInternalCypressRoute('/__cypress-studio-ai/generate', config, true)).to.be.true
+    expect(isInternalCypressRoute('/__cypress-cy-prompt-ai/generate', config, true)).to.be.true
+  })
+
   it('does not match studio or cy-prompt module-federation entries under the MITM proxy', () => {
     // The legacy pipeline already delivers these to Express; looping them back
     // skips later intercept stages and breaks studio.
     expect(isInternalCypressRoute('/__cypress-studio/app-studio.js', config, false)).to.be.false
+    expect(isInternalCypressRoute('/__cypress-studio-ai-anon/session', config, false)).to.be.false
     expect(isInternalCypressRoute('/__cypress-cy-prompt/app.js', config, false)).to.be.false
   })
 
   it('does not match internal route lookalikes', () => {
     for (const isBrowserNetworkMode of [true, false]) {
       expect(isInternalCypressRoute('/__cypress-other/foo', config, isBrowserNetworkMode)).to.be.false
+      expect(isInternalCypressRoute('/__cypress-studiolookalike/foo', config, isBrowserNetworkMode)).to.be.false
       expect(isInternalCypressRoute('/app/__cypress/xhrs/foo', config, isBrowserNetworkMode)).to.be.false
     }
   })
@@ -330,6 +339,38 @@ describe('lib/adapters/serve-internal-routes', () => {
       },
       body: Buffer.from('created'),
     })
+  })
+
+  it('loops studio AI requests made from the AUT origin back to the local Express router', async () => {
+    // The runner document is served on the AUT's superdomain, so the studio
+    // panel's root-relative fetches land there. Without the loopback they hit
+    // the user's own application server.
+    const { middleware, serverRequest } = createMiddleware({
+      statusCode: 200,
+      headers: { 'content-type': 'application/json' },
+      body: Buffer.from('{"token":"abc"}'),
+    })
+    const next = sinon.stub()
+
+    const response = await middleware({
+      id: 'req-1',
+      url: 'https://example.cypress.io/__cypress-studio-ai-anon/session',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        host: 'example.cypress.io',
+      },
+      body: '{}',
+    }, next)
+
+    expect(next).not.to.have.been.called
+    expect(serverRequest.create).to.have.been.calledWithMatch({
+      url: 'http://127.0.0.1:1234/__cypress-studio-ai-anon/session',
+      method: 'POST',
+      body: '{}',
+    }, true)
+
+    expect(response.statusCode).to.equal(200)
   })
 
   it('asks the loopback for an identity-encoded response in cypress-in-cypress', async () => {
