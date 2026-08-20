@@ -5,8 +5,8 @@ describe('e2e es modules', () => {
 
   it('passes', function () {
     return systemTests.exec(this, {
-      project: 'coffee-react-interop',
-      spec: 'es_modules_in_coffee_spec.coffee',
+      project: 'react-webpack-interop',
+      spec: 'es_modules_passing.cy.js',
       snapshot: true,
       noTypeScript: true,
     })

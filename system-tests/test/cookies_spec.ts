@@ -200,7 +200,6 @@ describe('e2e cookies', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       config: {
         baseUrl,
-        allowCypressEnv: false,
         env: {
           baseUrl,
           expectedDomain: 'localhost',
@@ -255,7 +254,6 @@ describe('e2e cookies', () => {
           browser: '!webkit', // TODO(webkit): fix+unskip
           config: {
             baseUrl,
-            allowCypressEnv: false,
             env: {
               baseUrl,
               expectedDomain: baseDomain,
@@ -279,7 +277,6 @@ describe('e2e cookies', () => {
       it('passes with no baseurl', {
         browser: '!webkit', // TODO(webkit): fix+unskip
         config: {
-          allowCypressEnv: false,
           env: {
             httpUrl,
             httpsUrl,
@@ -293,13 +290,7 @@ describe('e2e cookies', () => {
   })
 })
 
-const describeCrossOriginCookies = process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1'
-  ? describe.skip
-  : describe
-
-// NOTE: baseUrl 127.0.0.3 cookie verification fails under CDP for hosts/loopback
-// reasons outside #34464; MITM/proxy-enabled runs still cover this suite.
-describeCrossOriginCookies('cross-origin cookies, set:cookies', () => {
+describe('cross-origin cookies, set:cookies', () => {
   const onServer = (app) => {
     app.use(parser())
     app.use(cors({
@@ -361,7 +352,9 @@ describeCrossOriginCookies('cross-origin cookies, set:cookies', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://127.0.0.3:${httpPort}`,
-      allowCypressEnv: false,
+      // NOTE: baseUrl 127.0.0.3 cookie verification fails on the browser (CDP) network path
+      // for hosts/loopback reasons outside #34464
+      forceHttp1: true,
       env: {
         HTTP: httpPort,
         HTTPS: httpsPort,
@@ -415,7 +408,6 @@ describe('cookie jar stays in sync after same-origin requests', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://localhost:${httpPort}`,
-      allowCypressEnv: false,
     },
     spec: 'stale_cookie.cy.js',
   })

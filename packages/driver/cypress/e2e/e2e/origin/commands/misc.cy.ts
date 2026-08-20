@@ -6,12 +6,6 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="dom-link"]').click()
   })
 
-  it('.end()', () => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.get('#button').end().should('be.null')
-    })
-  })
-
   it('.exec()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')

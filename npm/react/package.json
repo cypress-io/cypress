@@ -29,9 +29,9 @@
     "react-dom": "18.3.1",
     "react-router": "6.28.0",
     "react-router-dom": "6.28.0",
-    "rollup": "3.29.5",
+    "rollup": "^4.60.2",
     "typescript": "~5.4.5",
-    "vite": "6.3.5"
+    "vite": "^8.0.9"
   },
   "peerDependencies": {
     "@types/react": "^18 || ^19",

@@ -1,6 +1,6 @@
-import { AppComponent } from './app.component'
+import { App } from './app'
 
 it('should pass', () => {
-  cy.mount(AppComponent)
+  cy.mount(App)
   cy.contains('angular-cli-configured')
 })

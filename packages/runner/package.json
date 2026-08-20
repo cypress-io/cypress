@@ -23,7 +23,6 @@
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
-    "@packages/rewriter": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",

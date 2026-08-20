@@ -139,7 +139,6 @@ class $Cypress {
   state!: StateFunc
   originalConfig: any
   config: any
-  env: any
   expose: any
   getTestRetries: any
   Cookies!: ICookies
@@ -257,12 +256,6 @@ class $Cypress {
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    // we assume we're interactive based on whether or
-    // not we're in a text terminal, but we keep this
-    // as a separate property so we can potentially
-    // slice up the behavior
-    config.isInteractive = !config.isTextTerminal || config.env?.INTERNAL_SIMULATE_OPEN_MODE
-
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
 
@@ -276,11 +269,9 @@ class $Cypress {
       longStackTraces: config.isInteractive,
     })
 
-    // TODO: env is unintentionally preserved between soft reruns unlike config.
-    // change this in the NEXT_BREAKING
-    const { env, expose } = config
+    const { expose } = config
 
-    config = _.omit(config, 'env', 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = _.omit(config, 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
@@ -318,17 +309,6 @@ class $Cypress {
       return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
-    const isAllowCypressEnvEnabled = this.config('allowCypressEnv')
-
-    const failCypressEnvWithWarning = (key) => {
-      const err = $errUtils.errByPath('config.allow_cypress_env', { key })
-
-      $utils.warning(err.message)
-
-      throw err
-    }
-
-    this.env = !isAllowCypressEnvEnabled ? failCypressEnvWithWarning : $SetterGetter.create(env)
     this.expose = $SetterGetter.create(expose)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
@@ -969,6 +949,29 @@ class $Cypress {
   // Cypress.require() is only valid inside the cy.origin() callback
   require () {
     $errUtils.throwErrByPath('require.invalid_outside_origin')
+  }
+
+  env (keyOrValues?: string | string[] | Record<string, any>) {
+    let keys: string[] = []
+
+    // an array holds the keys themselves, so reading Object.keys() off of it
+    // would report indexes rather than what the caller asked for
+    if (_.isArray(keyOrValues)) {
+      keys = _.compact(keyOrValues)
+    } else if (_.isObject(keyOrValues)) {
+      keys = Object.keys(keyOrValues)
+    } else if (keyOrValues) {
+      keys = [keyOrValues]
+    }
+
+    const specWindow = this.state?.('specWindow')
+
+    $errUtils.throwErrByPath('env.removed', {
+      args: { keys },
+      errProps: {
+        userInvocationStack: specWindow && $stackUtils.captureUserInvocationStack(specWindow.Error),
+      },
+    })
   }
 
   get currentTest () {

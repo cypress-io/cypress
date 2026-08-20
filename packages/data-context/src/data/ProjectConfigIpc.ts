@@ -1,7 +1,9 @@
 /* eslint-disable no-dupe-class-members */
-import { CypressError, getError } from '@packages/errors'
+import { getError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
 import type { DebugData, FullConfig, TestingType } from '@packages/types'
-import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
+import { ChildProcess, fork, spawn } from 'child_process'
+import type { ForkOptions } from 'child_process'
 import EventEmitter from 'events'
 import fs from 'fs'
 import path from 'path'
@@ -11,7 +13,6 @@ import { getTsconfig } from 'get-tsconfig'
 import { autoBindDebug, hasTypeScriptInstalled, shouldLoadConfigAsEsm, toPosix } from '../util'
 import _ from 'lodash'
 import os from 'os'
-import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
 import { TagStream } from '@packages/stderr-filtering'
@@ -75,7 +76,6 @@ export class ProjectConfigIpc extends EventEmitter {
 
   constructor (
     readonly nodePath: string | undefined | null,
-    readonly nodeVersion: string | undefined | null,
     readonly projectRoot: string,
     readonly configFilePath: string,
     readonly configFile: string | false,
@@ -358,13 +358,11 @@ export class ProjectConfigIpc extends EventEmitter {
     }
 
     /**
-     * use --import for node versions
-     * 20.6.0 and above for 20.x.x as --import is supported
-     * use --loader for node under 20.6.0 for 20.x.x.
+     * use --import for node versions 20.6.0 and above
      * NOTE: we need to use double quotes around the tsx path to account for paths with spaces or special characters.
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
-    let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader "${tsx}"` : `--import "${tsx}"`
+    const tsxLoader = `--import "${tsx}"`
 
     // If they've got TypeScript installed, we can use tsx for CommonJS and ESM.
     // @see https://tsx.is/dev-api/node-cli#node-js-cli

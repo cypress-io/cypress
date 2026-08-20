@@ -6,10 +6,16 @@ table { border-collapse: collapse; margin: 10px 0; }
 td, th { border: 1px solid #ccc; padding: 5px; }
 nav {
   display: block;
+  margin: 10px 0 20px;
+}
+nav ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 nav li {
-  display: inline-block;
-  list-style: none;
+  display: block;
+  margin: 4px 0;
 }
 
 [cy-expect="hidden"], [cy-legacy-expect="hidden"], [cy-fast-expect="hidden"] {

@@ -24,7 +24,6 @@ import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
 import { SESSIONS_ROUTE_PREFIX } from '@packages/cypress-sessions'
-import { isProxyDisabled } from './util/is-proxy-disabled'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -33,17 +32,22 @@ export interface InitializeRoutes {
   config: Cfg
   getSpec: () => FoundSpec | null
   nodeProxy: httpProxy
-  networkProxy?: NetworkProxy
-  getNetworkProxy?: () => NetworkProxy | undefined
+  /**
+   * Read per request, never captured: the CDP Fetch runtime installs a new
+   * NetworkProxy at every launch, and the network path can flip on this same
+   * router when the browser is switched in open mode.
+   */
+  getNetworkProxy: () => NetworkProxy
   remoteStates: RemoteStates
+  isBrowserNetworkMode: () => boolean
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
 }
 
 export const createCommonRoutes = ({
   config,
-  networkProxy,
   getNetworkProxy,
+  isBrowserNetworkMode,
   testingType,
   getSpec,
   remoteStates,
@@ -52,7 +56,6 @@ export const createCommonRoutes = ({
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
-  const resolveNetworkProxy = () => getNetworkProxy?.() ?? networkProxy
 
   // When a test visits an http:// site and we load our main app page,
   // (e.g. test has cy.visit('http://example.com'), we load http://example.com/__/)
@@ -114,27 +117,11 @@ export const createCommonRoutes = ({
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     router.get(`${CYPRESS_STUDIO_ROUTE}/*`, async (req, res) => {
-      const proxy = resolveNetworkProxy()
-
-      if (!proxy) {
-        return res.sendStatus(404)
-      }
-
-      await proxy.handleHttpRequest(req, res)
-
-      return
+      await getNetworkProxy().handleHttpRequest(req, res)
     })
 
     router.get(`${CYPRESS_CY_PROMPT_ROUTE}/*`, async (req, res) => {
-      const proxy = resolveNetworkProxy()
-
-      if (!proxy) {
-        return res.sendStatus(404)
-      }
-
-      await proxy.handleHttpRequest(req, res)
-
-      return
+      await getNetworkProxy().handleHttpRequest(req, res)
     })
 
     router.get('/status-code-test/:num', (req, res) => {
@@ -195,31 +182,11 @@ export const createCommonRoutes = ({
   })
 
   router.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
-    const proxy = resolveNetworkProxy()
-
-    if (!proxy) {
-      return res.sendStatus(404)
-    }
-
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
-    proxy.http.getRenderedHTMLOrigins()[origin] = true
+    getNetworkProxy().http.getRenderedHTMLOrigins()[origin] = true
 
     res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
-
-    return
-  })
-
-  router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
-    const proxy = resolveNetworkProxy()
-
-    if (!proxy) {
-      return res.sendStatus(404)
-    }
-
-    await proxy.handleSourceMapRequest(req, res)
-
-    return
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
@@ -317,7 +284,7 @@ export const createCommonRoutes = ({
     // Path-only clientRoute hits are expected when CDP Fetch replaces the
     // MITM proxy; only treat them as "not launched through Cypress" when the
     // HTTP proxy is supposed to be in use.
-    const nonProxied = !isProxyDisabled() && (req.proxiedUrl?.startsWith('/') ?? false)
+    const nonProxied = !isBrowserNetworkMode() && (req.proxiedUrl?.startsWith('/') ?? false)
 
     getCtx().actions.app.setBrowserUserAgent(req.headers['user-agent'])
 
@@ -327,7 +294,7 @@ export const createCommonRoutes = ({
     // https://github.com/cypress-io/cypress/issues/20147
     res.setHeader('Origin-Agent-Cluster', '?0')
 
-    getCtx().html.appHtml(nonProxied)
+    getCtx().html.appHtml(nonProxied, isBrowserNetworkMode())
     .then((html) => res.send(html))
     .catch((e) => res.status(500).send({ stack: e.stack }))
   })
@@ -361,78 +328,75 @@ export const createCommonRoutes = ({
     })
   }
 
-  // MITM catch-all: only when the proxy is enabled. CDP Fetch owns browser
-  // traffic when disabled; registering this after createCdpFetchNetworkRuntime
-  // would incorrectly send Express fall-through through createFetchOrigin.
-  if (!isProxyDisabled() && (getNetworkProxy || networkProxy)) {
-    router.all('*', async (req, res) => {
-      const proxy = resolveNetworkProxy()
+  // One catch-all route serving both network paths:
+  //  - the MITM proxy, where every browser request reaches this Express server
+  //  - the native browser network, where the browser intercepts its own traffic
+  //    and only the requests Cypress owns reach this Express server
+  //
+  // It branches per request rather than mounting one handler per path because
+  // the path is not known when this router is built — that happens at server
+  // open, before we know whether the launch is Chrome on the browser network or
+  // Firefox on the proxy, and open mode can switch browsers afterwards against
+  // this same router. Mounting both would not work either: the MITM branch
+  // never calls next(), so mount order would decide the behavior permanently.
+  router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
+    const proxy = getNetworkProxy()
 
-      if (!proxy) {
-        res.sendStatus(404)
+    // MITM path: every browser request arrives here in absolute form, so the
+    // pipeline owns all of it.
+    if (!isBrowserNetworkMode()) {
+      await proxy.handleHttpRequest(req, res)
 
-        return
-      }
+      return
+    }
+
+    // native browser (CDP) path: the Cypress origin only serves the traffic it owns, which
+    // reaches this router three ways:
+    //  - `strategy:file` requests the CDP transport deliberately redirects here. For example, a relative
+    //    `cy.visit('index.html')` and the assets that page pulls in, served off disk from the project root.
+    //  - `resolve:url` pre-flights this server forces through itself. For example, a `cy.visit()` whose URL
+    //    matches a `cy.intercept()` route, so net-stubbing gets a chance to reply.
+    //  - requests that never produce a Fetch pause at all (service-worker scripts come from the SW target).
+    // Anything else falls through: handing an arbitrary URL to the pipeline would send it back out to our own origin and loop.
+
+    // A loopback token means we steered this request here ourselves, rather
+    // than the browser. This means it is either:
+    //   - an intercept-matched cy.visit() pre-flight that _onResolveUrl forced through this server, or
+    //   - a strategy:file request the CDP transport redirected to our origin.
+    // setProxiedUrl has already restored the URL that was actually asked
+    // for, so hand it to the pipeline as-is. The fallback below rebuilds the
+    // URL from the Host header, which here would replace the real target and
+    // hide it from net-stubbing and the file-server rewrite.
+    if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && /^https?:\/\//.test(req.proxiedUrl)) {
+      debug('serving loopback-token request through the pipeline: %s %s', req.method, req.proxiedUrl)
 
       await proxy.handleHttpRequest(req, res)
-    })
-  }
 
-  // Direct-origin catch-all: with the MITM proxy disabled the Cypress origin
-  // serves the traffic it owns, which reaches this router three ways:
-  //  - `strategy:file` requests the CDP transport deliberately redirects here. For example, a relative
-  //    `cy.visit('index.html')` and the assets that page pulls in, served off disk from the project root.
-  //  - `resolve:url` pre-flights this server forces through itself. For example, a `cy.visit()` whose URL
-  //    matches a `cy.intercept()` route, so net-stubbing gets a chance to reply.
-  //  - requests that never produce a Fetch pause at all (service-worker scripts come from the SW target).
-  // Anything else falls through: handing an arbitrary URL to the pipeline would send it back out to our own origin and loop.
-  if (isProxyDisabled() && (getNetworkProxy || networkProxy)) {
-    router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
-      const proxy = resolveNetworkProxy()
+      return
+    }
 
-      if (!proxy) {
-        return next()
-      }
+    // Un-tokened direct traffic — nothing steered it here, it addressed us:
+    //   - service-worker scripts
+    //   - other requests that never produce a Fetch pause
+    // Resolve against the Host header, since the request may address us under
+    // an aliased name, and let the toFileServerUrl origin comparison decide:
+    // a forged Host grants nothing a caller could not get by using the right name.
+    const base = req.headers.host ? `${req.protocol}://${req.headers.host}` : resolveProxyUrlBase(config)
+    const absoluteUrl = new URL(req.url, base).href
 
-      // A loopback token means we steered this request here ourselves, rather
-      // than the browser. This means it is either:
-      //   - an intercept-matched cy.visit() pre-flight that _onResolveUrl forced through this server, or
-      //   - a strategy:file request the CDP transport redirected to our origin.
-      // setProxiedUrl has already restored the URL that was actually asked
-      // for, so hand it to the pipeline as-is. The fallback below rebuilds the
-      // URL from the Host header, which here would replace the real target and
-      // hide it from net-stubbing and the file-server rewrite.
-      if (isTrustedInternalLoopback(req.headers) && req.proxiedUrl && /^https?:\/\//.test(req.proxiedUrl)) {
-        debug('serving loopback-token request through the pipeline: %s %s', req.method, req.proxiedUrl)
+    if (toFileServerUrl(absoluteUrl, remoteStates.current())) {
+      debug('serving direct file server request through the pipeline: %s %s', req.method, absoluteUrl)
 
-        await proxy.handleHttpRequest(req, res)
+      req.proxiedUrl = absoluteUrl
+      await proxy.handleHttpRequest(req, res)
 
-        return
-      }
+      return
+    }
 
-      // Un-tokened direct traffic — nothing steered it here, it addressed us:
-      //   - service-worker scripts
-      //   - other requests that never produce a Fetch pause
-      // Resolve against the Host header, since the request may address us under
-      // an aliased name, and let the toFileServerUrl origin comparison decide:
-      // a forged Host grants nothing a caller could not get by using the right name.
-      const base = req.headers.host ? `${req.protocol}://${req.headers.host}` : resolveProxyUrlBase(config)
-      const absoluteUrl = new URL(req.url, base).href
+    debug('falling through, not a file server url: %s %s', req.method, absoluteUrl)
 
-      if (toFileServerUrl(absoluteUrl, remoteStates.current())) {
-        debug('serving direct file server request through the pipeline: %s %s', req.method, absoluteUrl)
-
-        req.proxiedUrl = absoluteUrl
-        await proxy.handleHttpRequest(req, res)
-
-        return
-      }
-
-      debug('falling through, not a file server url: %s %s', req.method, absoluteUrl)
-
-      return next()
-    })
-  }
+    return next()
+  })
 
   // when we experience uncaught errors
   // during routing just log them out to

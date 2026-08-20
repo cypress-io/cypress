@@ -15,12 +15,13 @@ import DebugContainer from '../debug/DebugContainer.vue'
 import { gql, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
-import { DebugDocument, DebugSpecsFragment, Debug_SpecsChangeDocument } from '../generated/graphql'
+import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
 import { computed, ref, watchEffect } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
 import { useRecordEvent } from '../composables/useRecordEvent'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { useSubscription } from '../graphql'
+import type { DebugSpecsFragment } from '../generated/graphql'
 
 const online = useOnline()
 

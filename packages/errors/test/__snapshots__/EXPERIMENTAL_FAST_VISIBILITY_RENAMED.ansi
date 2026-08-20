@@ -1,0 +1,3 @@
+[31mThe [33mexperimentalFastVisibility[39m[31m configuration option has been removed. The modern visibility algorithm is now the default.[39m
+[31m[39m
+[31mPlease remove [33mexperimentalFastVisibility[39m[31m from your configuration. To use the legacy algorithm instead, set [95mvisibilityStrategy: 'legacy'[39m[31m.[39m

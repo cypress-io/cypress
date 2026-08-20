@@ -10,7 +10,7 @@ import {
 } from './options'
 
 import type { BreakingErrResult, TestingType } from '@packages/types'
-import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
+import type { BreakingOption, BreakingOptionErrorKey, OverrideContext, OverrideLevel } from './options'
 import type { ErrResult } from './validation'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
@@ -205,7 +205,7 @@ export const validateNoBreakingTestingTypeConfig = (cfg: any, testingType: keyof
   return validateNoBreakingOptions(options, cfg, onWarning, onErr, testingType)
 }
 
-export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: boolean, onErr: (result: InvalidTestOverrideResult) => void) => {
+export const validateOverridableAtRunTime = (config: any, overrideContext: OverrideContext, onErr: (result: InvalidTestOverrideResult) => void) => {
   Object.keys(config).some((configKey) => {
     const overrideLevel: OverrideLevel = testOverrideLevels[configKey]
 
@@ -237,7 +237,11 @@ export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: 
     // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
     // https://github.com/cypress-io/cypress/issues/24365
 
-    if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
+    if (
+      overrideLevel === 'never' ||
+      (overrideLevel === 'suite' && overrideContext !== 'suite') ||
+      (overrideLevel === 'suiteOrTest' && overrideContext === 'runtime')
+    ) {
       onErr({
         invalidConfigKey: configKey,
         supportedOverrideLevel: overrideLevel,

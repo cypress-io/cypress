@@ -797,7 +797,6 @@ export const AllCypressErrors = {
 
         If you're running lots of tests on a memory intense application.
           - Try increasing the CPU/memory on the machine you're running on.
-          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
           - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
 
         You can learn more here:
@@ -825,7 +824,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Your ${fmt.highlight(`supportFile`)} is missing or invalid: ${fmt.path(supportFilePath)}
 
-        The supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).
+        The supportFile must be a .js or .ts file or be supported by your preprocessor plugin (if configured).
 
         Fix your support file, or set supportFile to ${fmt.highlightSecondary(`false`)} if a support file is not necessary for your project.
 
@@ -1326,6 +1325,14 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.`
   },
+  EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSourceRewriting`)} option was removed in ${fmt.cypressVersion(`16.0.0`)}.
+
+        The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting.
+
+        You can safely remove this option from your config.`
+  },
   JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
     The ${fmt.highlight(`justInTimeCompile`)} configuration is only supported for Component Testing.`
@@ -1337,15 +1344,42 @@ export const AllCypressErrors = {
       Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
     `
   },
-  CYPRESS_ENV_DEPRECATION: () => {
+  EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
     return errTemplate`\
-      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('allowCypressEnv')} configuration option is enabled. This allows any browser code to read values from ${fmt.highlight('Cypress.env()')}. This is insecure and will be removed in a future major version.
+      The ${fmt.highlight('experimentalFastVisibility')} configuration option has been removed. The modern visibility algorithm is now the default.
 
-      1. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration)
-      2. Set ${fmt.highlight('allowCypressEnv: false')} in your Cypress configuration to disable ${fmt.highlight('Cypress.env()')}
+      Please remove ${fmt.highlight('experimentalFastVisibility')} from your configuration. To use the legacy algorithm instead, set ${fmt.highlightSecondary(`visibilityStrategy: 'legacy'`)}.`
+  },
+  EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('experimentalMemoryManagement')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}. Memory management is now enabled by default under the ${fmt.highlight('manageBrowserMemory')} option.
+
+      Please remove ${fmt.highlight('experimentalMemoryManagement')} from your configuration. To keep memory management disabled, set ${fmt.highlightSecondary('manageBrowserMemory: false')}.`
+  },
+  VISIBILITY_STRATEGY_DEPRECATION: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight(`visibilityStrategy: 'legacy'`)} option is deprecated. The legacy visibility algorithm will be removed in a future version of Cypress.
+
+      Remove the ${fmt.highlight('visibilityStrategy')} option from your configuration to use the modern algorithm.`
+  },
+  ALLOW_CYPRESS_ENV_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('allowCypressEnv')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}.
+
+      ${fmt.highlight('Cypress.env()')} has been removed. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration).
+
+      You can safely remove ${fmt.highlight('allowCypressEnv')} from your configuration.
 
       Learn more: https://on.cypress.io/cypress-env-migration
     `
+  },
+  FORCE_HTTP1_DEPRECATION: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('forceHttp1')} option is deprecated and will be removed in a future version of Cypress.
+
+      Remove it from your configuration to use the default network path.
+
+      Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1`
   },
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\
@@ -1359,6 +1393,15 @@ export const AllCypressErrors = {
       The ${fmt.highlight('injectDocumentDomain')} option is only available for E2E testing.
 
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
+    `
+  },
+  BROWSER_ELECTRON_DEPRECATED: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('Electron')} browser is deprecated as a test browser and will be removed in a future version of Cypress.
+
+      Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.
+
+      Read more about supported browsers: https://on.cypress.io/launching-browsers
     `
   },
   INVALID_CONFIG_OPTION: (arg1: string[]) => {

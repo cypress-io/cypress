@@ -57,6 +57,7 @@ export class HtmlDataSource {
       'namespace',
       'socketIoRoute',
       'isDefaultProtocolEnabled',
+      'isInteractive',
       'hideCommandLog',
       'hideRunnerUi',
     ]
@@ -78,10 +79,8 @@ export class HtmlDataSource {
       // Error getting config, we will show an error screen when we render the page
     }
 
-    // If mitigating secrets via setting allowCypressEnv, we need to delete the env object and avoid serializing it completely to the browser
-    if (!cfg.allowCypressEnv) {
-      delete cfg.env
-    }
+    // Environment variables are only available to the spec via cy.env() on the server.
+    delete cfg.env
 
     // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
     // whenever the app is served/re-served
@@ -107,7 +106,7 @@ export class HtmlDataSource {
   /**
    * The app html includes the SSR'ed data to bootstrap the page for the app
    */
-  async appHtml (nonProxied: boolean) {
+  async appHtml (nonProxied: boolean, isBrowserNetworkMode: boolean) {
     if (nonProxied) {
       return this.ctx.fs.readFile(PATH_TO_NON_PROXIED_ERROR, 'utf-8')
     }
@@ -117,10 +116,10 @@ export class HtmlDataSource {
       this.makeServeConfig(),
     ])
 
-    return this.replaceBody(appHtml, serveConfig)
+    return this.replaceBody(appHtml, serveConfig, isBrowserNetworkMode)
   }
 
-  private replaceBody (html: string, serveConfig: object) {
+  private replaceBody (html: string, serveConfig: object, isBrowserNetworkMode: boolean) {
     return html.replace('<body>', `
       <body>
         <script>
@@ -133,7 +132,7 @@ export class HtmlDataSource {
           window.__CYPRESS_BROWSER__ = ${JSON.stringify(this.ctx.coreData.activeBrowser)}
           ${telemetry.isEnabled() ? `window.__CYPRESS_TELEMETRY__ = ${JSON.stringify({ context: telemetry.getActiveContextObject(), resources: telemetry.getResources(), isVerbose: telemetry.isVerbose() })}` : ''}
           ${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? `window.__CYPRESS_GQL_NO_SOCKET__ = 'true';` : ''}
-          ${process.env.CYPRESS_INTERNAL_DISABLE_PROXY === '1' ? `window.__CYPRESS_PROXY_DISABLED__ = true;` : ''}
+          ${isBrowserNetworkMode ? `window.__CYPRESS_BROWSER_NETWORK_MODE__ = true;` : ''}
         </script>
     `)
   }

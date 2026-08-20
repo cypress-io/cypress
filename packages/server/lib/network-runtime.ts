@@ -2,7 +2,7 @@ import Debug from 'debug'
 import type EventEmitter from 'events'
 import type { Protocol } from 'devtools-protocol'
 import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
-import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import type { NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
@@ -36,6 +36,9 @@ export type CreateProxyRuntimeDeps = {
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // Required, not created here: the server owns one state for its whole lifetime
+  // and every network runtime shares it.
+  netStubbingState: NetStubbingState
 }
 
 export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
@@ -63,8 +66,10 @@ export type CreateCdpFetchRuntimeDeps = {
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
-  // Prefer the state already bound to the driver socket (created at open()).
-  netStubbingState?: NetStubbingState
+  // Required: DriverInterceptRegistrationAdapter is bound by value to the state
+  // created at open(), so a second NetStubbingState here would leave every
+  // cy.intercept() registered against a state this runtime never matches.
+  netStubbingState: NetStubbingState
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -89,7 +94,7 @@ export type CdpFetchNetworkRuntime = {
  * Composition-root factory for the proxy-default network runtime.
  */
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
-  const stubbingState = netStubbingState()
+  const stubbingState = deps.netStubbingState
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -120,6 +125,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   networkInterception.use(createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
+    isBrowserNetworkMode: false,
   }))
 
   networkInterception.use(networkProxy.http.createLegacyProxyPipeline(networkProxy.codec))
@@ -157,7 +163,7 @@ const RUNTIME_STOPPED_ERROR = 'Cannot attach extra target: CDP Fetch runtime has
  * a synthetic Express ctx via createSyntheticProxyCodec.
  */
 export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
-  const stubbingState = deps.netStubbingState ?? netStubbingState()
+  const stubbingState = deps.netStubbingState
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -227,6 +233,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   const serveInternalRoutes = createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
+    isBrowserNetworkMode: true,
   })
 
   const attachStages = <TRequest, TResponse>(
