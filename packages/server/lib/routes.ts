@@ -116,9 +116,6 @@ export const createCommonRoutes = ({
   // If we are in cypress in cypress we need to pass along the studio and cy-prompt routes
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-    // `*` rather than `/*` to cover the bundles' sibling namespaces
-    // (/__cypress-studio-ai, /__cypress-studio-ai-anon), and `all` because
-    // those are POST routes.
     router.all(`${CYPRESS_STUDIO_ROUTE}*`, async (req, res) => {
       await getNetworkProxy().handleHttpRequest(req, res)
     })

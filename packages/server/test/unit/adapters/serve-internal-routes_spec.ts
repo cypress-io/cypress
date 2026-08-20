@@ -341,9 +341,6 @@ describe('lib/adapters/serve-internal-routes', () => {
   })
 
   it('loops studio AI requests made from the AUT origin back to the local Express router', async () => {
-    // The runner document is served on the AUT's superdomain, so the studio
-    // panel's root-relative fetches land there. Without the loopback they hit
-    // the user's own application server.
     const { middleware, serverRequest } = createMiddleware({
       statusCode: 200,
       headers: { 'content-type': 'application/json' },

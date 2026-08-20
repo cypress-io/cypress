@@ -84,10 +84,6 @@ export const CYPRESS_CY_PROMPT_ROUTE = '/__cypress-cy-prompt'
 
 const CLOUD_BUNDLE_ROUTES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
 
-// A bare prefix, not matchesPathPrefix: the bundles ship independently of the
-// binary and hang sibling namespaces off these bases
-// (`/__cypress-studio-ai`, `/__cypress-studio-ai-anon`), which a path-boundary
-// match would send to the AUT's origin instead.
 export function isCloudBundleRoute (pathname: string): boolean {
   return CLOUD_BUNDLE_ROUTES.some((route) => pathname.startsWith(route))
 }
