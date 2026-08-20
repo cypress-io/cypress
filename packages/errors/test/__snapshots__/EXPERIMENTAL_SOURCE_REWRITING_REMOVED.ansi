@@ -3,3 +3,4 @@
 [31mThe experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting.[39m
 [31m[39m
 [31mYou can safely remove this option from your config.[39m
+[31m[39m

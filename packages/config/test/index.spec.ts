@@ -1,6 +1,8 @@
 import { vi, describe, it, expect } from 'vitest'
 import path from 'path'
+import errors from '@packages/errors'
 import * as configUtil from '../src/index'
+import { breakingOptions, breakingRootOptions, testingTypeBreakingOptions } from '../src/options'
 
 describe('config/src/index', () => {
   describe('.allowed', () => {
@@ -267,6 +269,30 @@ describe('config/src/index', () => {
         value: undefined,
         testingType: 'e2e',
         configFile: 'config.js',
+      })
+    })
+  })
+
+  describe('breaking option warnings', () => {
+    const warningOptions = [
+      ...breakingOptions,
+      ...breakingRootOptions,
+      ...Object.values(testingTypeBreakingOptions).flat(),
+    ].filter((option) => option.isWarning)
+
+    // a single run can print several of these one after another, so each has to
+    // end with a blank line or the messages run together in the terminal
+    warningOptions.forEach(({ errorKey, name, newName }) => {
+      it(`${errorKey} ends with a blank line`, () => {
+        const err = errors.get(errorKey, {
+          name,
+          newName,
+          value: undefined,
+          configFile: 'cypress.config.js',
+          testingType: 'e2e',
+        })
+
+        expect(err.message).toMatch(/\n$/)
       })
     })
   })
