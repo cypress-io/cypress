@@ -51,6 +51,7 @@ export class CdpBodyCapture {
    */
   async arm (networkId: string, sessionId?: string): Promise<Readable | undefined> {
     const key = this.getCaptureKey(networkId, sessionId)
+    let entry: CaptureEntry | undefined
 
     try {
       const response = await this.client.send('Network.streamResourceContent', {
@@ -58,7 +59,8 @@ export class CdpBodyCapture {
       }, sessionId) as Protocol.Network.StreamResourceContentResponse
 
       const stream = new PassThrough()
-      const entry: CaptureEntry = { stream, bytesReceived: 0 }
+
+      entry = { stream, bytesReceived: 0 }
 
       // A re-arm for a live key would strand the previous stream un-ended,
       // hanging any consumer holding it — end it before replacing.
@@ -76,9 +78,14 @@ export class CdpBodyCapture {
     } catch (err) {
       debug('failed to arm body capture for %s: %s', key, (err as Error).message)
 
-      // The caller treats undefined as uncaptured, so a live entry left behind
-      // here would absorb dataReceived chunks with no owner to release it.
-      this.release(networkId, sessionId)
+      // The caller treats undefined as uncaptured, so an entry left behind
+      // would absorb chunks with no owner — but only tear down the entry THIS
+      // call created: when send() rejected, no entry was inserted, and the key
+      // may hold a predecessor whose stream Replay is still reading.
+      if (entry && this.captures.get(key) === entry) {
+        entry.stream.destroy()
+        this.captures.delete(key)
+      }
 
       return undefined
     }

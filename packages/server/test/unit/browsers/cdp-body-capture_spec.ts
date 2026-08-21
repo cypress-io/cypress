@@ -115,6 +115,28 @@ describe('CdpBodyCapture', () => {
 
       expect(stream).to.be.undefined
     })
+
+    // the failure cleanup must only tear down the entry the failing call
+    // created — a rejected send created none, and the key may hold a
+    // predecessor whose stream is still being read
+    it('a failed re-arm leaves the predecessor capture pumping', async () => {
+      const { client, capture, dataReceived } = createCapture()
+      const first = (await capture.arm('network-1'))!
+      const chunks: Buffer[] = []
+
+      first.on('data', (chunk: Buffer) => chunks.push(chunk))
+
+      client.send.withArgs('Network.streamResourceContent').rejects(new Error('boom'))
+
+      expect(await capture.arm('network-1')).to.be.undefined
+
+      dataReceived({ requestId: 'network-1', data: Buffer.from('still-live').toString('base64') })
+
+      await tick()
+
+      expect(Buffer.concat(chunks).toString()).to.equal('still-live')
+      expect(first.destroyed).to.be.false
+    })
   })
 
   describe('dataReceived', () => {
