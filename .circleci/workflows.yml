@@ -211,6 +211,22 @@ commands:
                   mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
+  clear-github-url-rewrites:
+    description: Drop git url rewrites so public git dependencies fetch anonymously
+    steps:
+      - run:
+          # the self-hosted macOS runners rewrite https://github.com to ssh, and the checkout
+          # key is scoped to this repo, so yarn cannot resolve our git-hosted dependencies
+          name: Clear github url rewrites
+          command: |
+            git config --global --get-regexp '^url\..*\.insteadof' || echo "no url rewrites configured"
+            for key in $(git config --global --name-only --get-regexp '^url\..*\.insteadof' 2>/dev/null || true); do
+              if [[ "$(git config --global --get "$key")" == *github.com* ]]; then
+                echo "removing $key"
+                git config --global --unset-all "$key"
+              fi
+            done
+
   select-python-for-node-gyp:
     description: Point node-gyp at a Python that still ships distutils
     steps:
@@ -1118,8 +1134,10 @@ commands:
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
             set -e
-            NEEDS_CODE_SIGNING=`node -p 'process.platform === "win32" || process.platform === "darwin"'`
-            if [[ "$NEEDS_CODE_SIGNING" == "true" ]]; then
+            NEEDS_CODE_SIGNING_WINDOWS=`node -p 'process.platform === "win32"'`
+            NEEDS_CODE_SIGNING_MAC=`node -p 'process.platform === "darwin"'`
+
+            if [[ "$NEEDS_CODE_SIGNING_MAC" == "true" ]]; then
               echo "Checking for required environment variables..."
               if [ -z "$CSC_LINK" ]; then
                 echo "Need to provide environment variable CSC_LINK"
@@ -1129,6 +1147,29 @@ commands:
               if [ -z "$CSC_KEY_PASSWORD" ]; then
                 echo "Need to provide environment variable CSC_KEY_PASSWORD"
                 echo "with password for unlocking certificate .p12 file"
+                exit 1
+              fi
+              echo "Succeeded."
+            elif [[ "$NEEDS_CODE_SIGNING_WINDOWS" == "true" ]]; then
+              echo "Checking for required environment variables..."
+              if [ -z "$WINDOWS_SIGN_USER_NAME" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_USER_NAME"
+                echo "with password for fetching and signing certificate"
+                exit 1
+              fi
+              if [ -z "$WINDOWS_SIGN_USER_PASSWORD" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_USER_PASSWORD"
+                echo "for fetching and signing certificate"
+                exit 1
+              fi
+              if [ -z "$WINDOWS_SIGN_CREDENTIAL_ID" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_CREDENTIAL_ID"
+                echo "for identifying certificate"
+                exit 1
+              fi
+              if [ -z "$WINDOWS_SIGN_USER_TOTP" ]; then
+                echo "Need to provide environment variable WINDOWS_SIGN_USER_TOTP"
+                echo "for signing certificate"
                 exit 1
               fi
               echo "Succeeded."
@@ -1301,6 +1342,11 @@ jobs:
             equal: [ *linux-arm64-executor, << parameters.executor >> ]
           steps:
             - select-python-for-node-gyp
+      - when:
+          condition:
+            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+          steps:
+            - clear-github-url-rewrites
       - verify-build-setup:
           executor: << parameters.executor >>
       - persist_to_workspace:
@@ -2148,7 +2194,7 @@ jobs:
           name: Download binary artifacts
           command: |
             source ./scripts/ensure-node.sh
-            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json
+            node ./scripts/binary/get-published-artifacts.js --pipelineInfo ~/triggered_pipeline.json --platformKey $(node ./scripts/get-platform-key.js)
       - persist_to_workspace:
           root: ~/
           paths:

@@ -7,7 +7,15 @@ const chalk = require('chalk')
 
 const execPromise = util.promisify(exec)
 
-const artifactJobName = 'publish-binary'
+// the linux-x64 workflow in cypress-publish-binary runs a job of its own; every
+// other platform runs the shared one
+const getArtifactJobName = (platformKey) => {
+  if (platformKey === 'linux-x64') {
+    return 'linux-amd-publish-binary'
+  }
+
+  return 'publish-binary'
+}
 
 const urlPaths = [
   '~/cypress/binary-url.json',
@@ -97,6 +105,8 @@ async function run (args) {
   if (!pipelineInfoFilePath) {
     throw new Error('--pipelineInfo must be provided as a parameter')
   }
+
+  const artifactJobName = getArtifactJobName(options.platformKey)
 
   console.log(`Parsing pipeline info from ${chalk.cyan(pipelineInfoFilePath)}...`)
 
