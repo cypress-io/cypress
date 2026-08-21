@@ -1,7 +1,7 @@
 import { toIdentityResponse } from '@packages/proxy'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleNamespace, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 type ServeInternalRoutesConfig = InternalRouteConfig
@@ -81,12 +81,12 @@ export function createServeInternalRoutesMiddleware ({
     // Re-entry after our own Express loopback. Require the process token —
     // AUT content can forge the URL header alone.
     if (isTrustedInternalLoopback(request.headers)) {
-      // Cloud-bundle routes re-enter on purpose: the cypress-in-cypress parent's
+      // Cloud-bundle namespaces re-enter on purpose: the cypress-in-cypress parent's
       // Express handlers forward them through the proxy to the child project.
       // Hand them to the legacy pipeline instead of swallowing the forward.
       // The token authenticates re-entry and must not reach the child project
       // or the AUT.
-      if (isCloudBundleRoute(url.pathname)) {
+      if (isCloudBundleNamespace(url.pathname)) {
         const headers = { ...request.headers }
 
         delete headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
