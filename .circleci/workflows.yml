@@ -211,6 +211,25 @@ commands:
                   mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
+  select-python-for-node-gyp:
+    description: Point node-gyp at a Python that still ships distutils
+    steps:
+      - run:
+          # the gyp bundled with node-gyp 8 imports distutils, which Python 3.12 dropped,
+          # and the machine image's default python3 is newer than that
+          name: Select Python for node-gyp
+          command: |
+            for python in python3.11 python3.10 python3.9 python3.8 /usr/bin/python3; do
+              if $python -c 'import distutils' &>/dev/null; then
+                echo "using $python ($($python --version)) for node-gyp"
+                echo "export PYTHON=$(command -v $python)" >> "$BASH_ENV"
+                exit 0
+              fi
+            done
+            echo "no Python with distutils found; node-gyp builds are expected to fail"
+            python3 --version
+            exit 1
+
   install-webkit-deps:
     steps:
       - run:
@@ -447,8 +466,6 @@ commands:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
     description: Install Node version matching .node-version
     steps:
-      # installing NVM will use git+ssh, so update known_hosts
-      - update_known_hosts
       - run:
           name: Install Node
           command: |
@@ -1279,6 +1296,11 @@ jobs:
     steps:
       - checkout
       - install-required-node
+      - when:
+          condition:
+            equal: [ *linux-arm64-executor, << parameters.executor >> ]
+          steps:
+            - select-python-for-node-gyp
       - verify-build-setup:
           executor: << parameters.executor >>
       - persist_to_workspace:
