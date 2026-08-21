@@ -128,10 +128,10 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
-  // The reason phrase the browser read off the wire, empty over HTTP/2, which
-  // carries none. Inbound only: the outbound sends recompute the phrase
-  // because middleware may have changed the status code.
-  responsePhrase?: string
+  // CDP's inbound reason phrase, verbatim; empty over HTTP/2, which carries
+  // none. Distinct from the outbound `responsePhrase` param below, which is
+  // recomputed because middleware may have changed the status code.
+  responseStatusText?: string
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
@@ -764,7 +764,7 @@ export class CdpFetchTransport {
       id: `${this.requestIdPrefix}${networkRequestId}`,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
-      responsePhrase: event.responseStatusText ?? '',
+      responseStatusText: event.responseStatusText ?? '',
       responseHeaders,
       bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
       originalBodyDigest: digestBody(originalBody),

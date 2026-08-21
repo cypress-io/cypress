@@ -413,7 +413,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -460,7 +460,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
       })
@@ -488,7 +488,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -521,7 +521,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -556,7 +556,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -572,7 +572,7 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('origin').toString('base64'),
         fulfilled: true,
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
       })
     })
 
