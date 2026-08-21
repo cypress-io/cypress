@@ -796,8 +796,6 @@ describe('CdpFetchTransport', () => {
       expect(await interceptStatusMessage(200, 'Totally Fine')).to.equal('Totally Fine')
     })
 
-    // HTTP/2 carries no reason phrase: Chrome, Node's h2 compat layer, and
-    // fetch().statusText all report '' here, so synthesizing one would invent it.
     it('reports an empty statusMessage when the protocol carries no reason phrase', async () => {
       expect(await interceptStatusMessage(200, '')).to.equal('')
     })

@@ -34,9 +34,6 @@ describe('dual-stack h2 origin', () => {
     cy.request('/api/data').its('body.protocol').should('eq', '1.1')
   })
 
-  // h2 carries no reason phrase on the wire, so there is none to report —
-  // the same empty string the browser's own fetch().statusText gives. Under
-  // forceHttp1 the MITM terminates at HTTP/1.1, which does carry one.
   it('reports res.statusMessage as the wire reason phrase, empty under h2', () => {
     const expectedStatusMessage = expectedBrowserProtocol === '2.0' ? '' : 'OK'
 

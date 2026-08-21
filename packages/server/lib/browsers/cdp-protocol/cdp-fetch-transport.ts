@@ -128,9 +128,6 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
-  // CDP's inbound reason phrase, verbatim; empty over HTTP/2, which carries
-  // none. Distinct from the outbound `responsePhrase` param below, which is
-  // recomputed because middleware may have changed the status code.
   responseStatusText?: string
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
