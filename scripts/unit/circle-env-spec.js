@@ -1,5 +1,3 @@
-const fs = require('fs').promises
-const sinon = require('sinon')
 const { expect } = require('chai')
 const { _checkCanaries } = require('../circle-env')
 
@@ -7,106 +5,55 @@ describe('circle-env', () => {
   let cachedEnv = { ...process.env }
 
   afterEach(() => {
-    sinon.restore()
-    Object.assign(process.env, cachedEnv)
+    process.env = cachedEnv
   })
 
   beforeEach(() => {
-    delete process.env.COPY_CIRCLE_ARTIFACTS
-    process.env.CI = 'true'
-    process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
+    process.env = { CI: 'true' }
   })
 
   context('with missing canaries', () => {
-    it('fails', async () => {
-      sinon.stub(fs, 'readFile')
-      .withArgs('/foo.json').resolves(JSON.stringify({
-        Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
-      }))
-
-      try {
-        await _checkCanaries()
-        throw new Error('should not reach')
-      } catch (err) {
-        expect(err.message).to.include('Missing MAIN_CANARY')
-      }
-    })
-
-    context('with no circleEnv', () => {
-      beforeEach(() => {
-        sinon.stub(fs, 'readFile')
-        .withArgs('/foo.json').resolves(JSON.stringify({
-          Dispatched: { TaskInfo: { Environment: {} } },
-        }))
+    context('internal PR', () => {
+      it('fails when neither canary is set', () => {
+        expect(() => _checkCanaries({ isContributorPR: false })).to.throw('Missing MAIN_CANARY')
       })
 
-      it('passes', async () => {
-        await _checkCanaries()
+      it('fails when only MAIN_CANARY is set', () => {
+        process.env.MAIN_CANARY = 'true'
+
+        expect(() => _checkCanaries({ isContributorPR: false })).to.throw('Missing CONTEXT_CANARY')
       })
 
-      it('fails if COPY_CIRCLE_ARTIFACTS does exist', async () => {
-        process.env.COPY_CIRCLE_ARTIFACTS = 'foo'
+      it('fails when only CONTEXT_CANARY is set', () => {
+        process.env.CONTEXT_CANARY = 'true'
 
-        try {
-          await _checkCanaries()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('COPY_CIRCLE_ARTIFACTS is set, but circleEnv is empty')
-        }
+        expect(() => _checkCanaries({ isContributorPR: false })).to.throw('Missing MAIN_CANARY')
       })
     })
 
-    context('with circleEnv plus only omitted keys', () => {
-      it('passes', async () => {
-        sinon.stub(fs, 'readFile')
-        .withArgs('/foo.json').resolves(JSON.stringify({
-          Dispatched: { TaskInfo: { Environment: {
-            CIRCLE_PLUGIN_TEST: 'baz',
-          } } },
-        }))
+    context('contributor PR', () => {
+      it('fails when MAIN_CANARY is set', () => {
+        process.env.MAIN_CANARY = 'true'
 
-        sinon.spy(console, 'warn')
-        await _checkCanaries()
-        expect(console.warn).to.be.calledWith('CircleCI env empty or contains only allowed envs, assuming this is a contributor PR. Not checking for canary variables.')
+        expect(() => _checkCanaries({ isContributorPR: true })).to.throw('MAIN_CANARY should not be present in a contributor PR.')
       })
 
-      it('also passes', async () => {
-        sinon.stub(fs, 'readFile')
-        .withArgs('/foo.json').resolves(JSON.stringify({
-          Dispatched: { TaskInfo: { Environment: {
-            CIRCLE_PLUGIN_TEST: 'baz',
-            MAIN_CANARY: 'qux',
-            CONTEXT_CANARY: 'quux',
-          } } },
-        }))
+      it('fails when CONTEXT_CANARY is set', () => {
+        process.env.CONTEXT_CANARY = 'true'
 
-        await _checkCanaries()
-      })
-
-      it('fails', async () => {
-        sinon.stub(fs, 'readFile')
-        .withArgs('/foo.json').resolves(JSON.stringify({
-          Dispatched: { TaskInfo: { Environment: {
-            CIRCLE_PLUGIN_TEST: 'baz',
-            SOME_OTHER_VAR: 'quux',
-          } } },
-        }))
-
-        try {
-          await _checkCanaries()
-        } catch (e) {
-          expect(e.message).to.equal('Missing MAIN_CANARY.')
-        }
+        expect(() => _checkCanaries({ isContributorPR: true })).to.throw('CONTEXT_CANARY should not be present in a contributor PR.')
       })
     })
   })
 
-  it('passes with canaries', async () => {
-    sinon.stub(fs, 'readFile')
-    .withArgs('/foo.json').resolves(JSON.stringify({
-      Dispatched: { TaskInfo: { Environment: { MAIN_CANARY: 'true', CONTEXT_CANARY: 'true' } } },
-    }))
+  it('passes with canaries', () => {
+    process.env.MAIN_CANARY = 'true'
+    process.env.CONTEXT_CANARY = 'true'
 
-    await _checkCanaries()
+    _checkCanaries({ isContributorPR: false })
+  })
+
+  it('passes for contributor PR', () => {
+    _checkCanaries({ isContributorPR: true })
   })
 })

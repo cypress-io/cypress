@@ -1,5 +1,12 @@
 version: 2.1
 
+parameters:
+  # branch of cypress-io/cypress-publish-binary to build the binary with. `main` tracks
+  # the current major, so v12 needs a branch pinned to the Node 16 era of that repo.
+  publish-binary-branch:
+    type: string
+    default: v12
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -33,6 +40,7 @@ mainBuildFilters: &mainBuildFilters
         - 'chore/update_webpack_deps_to_latest_webpack4_compat'
         - 'chore/bump_loaders_and_optimize_webpack'
         - 'publish-binary'
+        - 'mschile/v12'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -45,6 +53,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/v12', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -57,6 +66,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/v12', << pipeline.git.branch >> ]
     - equal: [ 'publish-binary', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
@@ -79,6 +89,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_webpack_deps_to_latest_webpack4_compat', << pipeline.git.branch >> ]
     - equal: [ 'chore/bump_loaders_and_optimize_webpack', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/v12', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -105,11 +116,8 @@ executors:
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
-  mac:
-    macos:
-      # Executor should have Node >= required version
-      xcode: "14.0.1"
-    resource_class: macos.x86.medium.gen2
+  darwin-amd64:
+    machine: true
     environment:
       PLATFORM: darwin
 
@@ -119,7 +127,7 @@ executors:
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
     machine:
-      image: windows-server-2019-vs2019:stable
+      image: windows-server-2022-gui:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.large
     environment:
@@ -132,7 +140,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2022.04.1
+      image: ubuntu-2004:2024.11.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -148,7 +156,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "chore/bump_loaders_and_optimize_webpack" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "publish-binary" && "$CIRCLE_BRANCH" != "chore/bump_loaders_and_optimize_webpack" && "$CIRCLE_BRANCH" != "mschile/v12" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -1167,7 +1175,7 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             echo $SHOULD_PERSIST_ARTIFACTS
-            node ./scripts/binary/trigger-publish-binary-pipeline.js
+            PUBLISH_BINARY_BRANCH="<< pipeline.parameters.publish-binary-branch >>" node ./scripts/binary/trigger-publish-binary-pipeline.js
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1298,12 +1306,10 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries on Linux
+          name: Check env canaries
           command: |
-            # only Docker has the required env data for this
-            if [[ $CI_DOCKER == 'true' ]]; then
-              node ./scripts/circle-env.js --check-canaries
-            fi
+            IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
+            node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
       - store-npm-logs
 
@@ -2905,6 +2911,7 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - build:
         name: linux-arm64-build
+        context: test-runner:env-canary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -2961,15 +2968,15 @@ darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
 
     - build:
         name: darwin-x64-build
         context: test-runner:env-canary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-node-modules-install
 
@@ -2980,33 +2987,34 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
     - test-kitchensink:
         name: darwin-x64-test-kitchensink
-        executor: mac
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
     - v8-integration-tests:
         name: darwin-x64-v8-integration-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
     - driver-integration-memory-tests:
         name: darwin-x64-driver-integration-memory-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
 
@@ -3020,6 +3028,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
 
     - build:
         name: darwin-arm64-build
+        context: test-runner:env-canary
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:

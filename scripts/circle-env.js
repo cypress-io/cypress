@@ -1,75 +1,44 @@
-const fs = require('fs').promises
-
-async function loadInternalTaskData () {
-  const filename = process.env.CIRCLE_INTERNAL_CONFIG
-
-  if (!filename) throw new Error('Missing CIRCLE_INTERNAL_CONFIG environment variable, cannot load Circle task data.')
-
-  const taskDataJson = await fs.readFile(filename, 'utf8')
-
-  try {
-    return JSON.parse(taskDataJson)
-  } catch (err) {
-    throw new Error(`An error occurred while parsing the Circle task data: ${err}`)
-  }
-}
-
 // check if the project env canary and context canary are both present to verify that this script is reading the right env
-async function checkCanaries () {
+function checkCanaries ({ isContributorPR }) {
   if (!process.env.CI) console.warn('This script will not work outside of CI.')
 
-  const circleEnv = await readCircleEnv()
+  const circleEnv = readProcessEnv()
 
-  // if the config contains only CIRCLE_PLUGIN_TEST, treat the config as if it were empty
-  const containsOnlyAllowedEnvs = () => {
-    const circleEnvKeys = Object.keys(circleEnv)
+  if (isContributorPR) {
+    console.log('Contributor PR detected. Verifying canary envs are not available.')
+    if (circleEnv.MAIN_CANARY) throw new Error('MAIN_CANARY should not be present in a contributor PR. Investigate why the CircleCI project level env var is being applied to this job.')
 
-    return circleEnvKeys.length === 0 || (circleEnvKeys.length === 1 &&
-      circleEnvKeys.includes('CIRCLE_PLUGIN_TEST'))
+    if (circleEnv.CONTEXT_CANARY) throw new Error('CONTEXT_CANARY should not be present in a contributor PR. Investigate why the test-runner:env-canary CircleCI context is being applied to this job.')
+
+    console.log('Contributor PR canaries checked and passed.')
+  } else {
+    console.log('Internal PR detected. Verifying canary envs are present.')
+    if (!circleEnv.MAIN_CANARY) throw new Error('Missing MAIN_CANARY env var which is used to ensure we are accessing the correct env vars in our CircleCI jobs. This env var should be defined in the CircleCI project settings. Investigate why it is missing.')
+
+    if (!circleEnv.CONTEXT_CANARY) throw new Error('Missing CONTEXT_CANARY env var which is used to ensure we are accessing the correct env vars in our CircleCI jobs. This env var should be defined in the test-runner:env-canary CircleCI context. Ensure this job has the test-runner:env-canary context applied.')
+
+    console.log('Internal PR canaries checked and passed.')
   }
-
-  if (containsOnlyAllowedEnvs()) {
-    return console.warn('CircleCI env empty or contains only allowed envs, assuming this is a contributor PR. Not checking for canary variables.')
-  }
-
-  if (!circleEnv.MAIN_CANARY) throw new Error('Missing MAIN_CANARY.')
-
-  if (!circleEnv.CONTEXT_CANARY) throw new Error('Missing CONTEXT_CANARY. Does this job have the test-runner:env-canary context?')
 }
 
-// Returns a map of environment variables defined for this job. `readCircleEnv()` differs from `process.env` - it will
-// only return environment variables explicitly specified for this job by CircleCI project env and contexts
-// NOTE: this Circle API is not stable, and yet it is the only way to access this information.
-async function readCircleEnv () {
-  const taskData = await loadInternalTaskData()
-
-  try {
-    // if this starts failing, try SSHing into a CircleCI job and see what changed in the $CIRCLE_INTERNAL_CONFIG file's schema
-    const circleEnv = taskData['Dispatched']['TaskInfo']['Environment']
-
-    if (!circleEnv) throw new Error('No Environment object was found.')
-
-    // last-ditch effort to check that an empty circle env is accurately reflecting process.env (external PRs)
-    if (process.env.COPY_CIRCLE_ARTIFACTS && Object.keys(circleEnv).length === 0) {
-      throw new Error('COPY_CIRCLE_ARTIFACTS is set, but circleEnv is empty')
-    }
-
-    return circleEnv
-  } catch (err) {
-    throw new Error(`An error occurred when reading the environment from Circle task data: ${err}`)
-  }
+function readProcessEnv () {
+  return process.env
 }
 
 module.exports = {
-  readCircleEnv,
+  readProcessEnv,
   _checkCanaries: checkCanaries,
 }
 
 if (require.main === module) {
-  if (process.argv.includes('--check-canaries')) {
-    checkCanaries()
-  } else {
-    console.error(`No options were passed, but ${__filename} was invoked as a script.`)
+  const args = process.argv.slice(2)
+
+  if (args.length !== 3 || args[0] !== '--check-canaries' || args[1] !== '--is-contributor-pr') {
+    console.error(`Invalid arguments. Usage: ${__filename} --check-canaries --is-contributor-pr <isContributorPR>`)
     process.exit(1)
   }
+
+  const isContributorPR = args[2] === 'true'
+
+  checkCanaries({ isContributorPR })
 }

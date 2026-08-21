@@ -27,4 +27,16 @@ echo "Installing Node $node_version"
 nvm install ${node_version}
 echo "Using Node $node_version"
 nvm use ${node_version}
+
+# the self-hosted macOS runners keep nvm's installs between jobs, and a long-idle install of
+# an older Node gets SIGKILLed by macOS instead of running, so replace it rather than use it
+if ! npm --version &>/dev/null; then
+  echo "npm is not runnable under Node $node_version, reinstalling it"
+  nvm deactivate
+  nvm uninstall ${node_version}
+  nvm install ${node_version}
+  nvm use ${node_version}
+  npm --version
+fi
+
 [[ $PLATFORM != 'windows' ]] && nvm alias default ${node_version} || sleep 2s

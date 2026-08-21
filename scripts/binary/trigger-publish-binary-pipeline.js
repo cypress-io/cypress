@@ -14,6 +14,7 @@ const { getNextVersionForBinary } = require('../get-next-version')
   }
 
   const body = JSON.stringify({
+    branch: process.env.PUBLISH_BINARY_BRANCH || 'main',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,

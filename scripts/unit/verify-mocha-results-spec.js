@@ -13,11 +13,7 @@ if (process.platform !== 'win32') {
     })
 
     beforeEach(() => {
-      process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
       sinon.stub(fs, 'readFile')
-      .withArgs('/foo.json').resolves(JSON.stringify({
-        Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
-      }))
 
       sinon.stub(fs, 'readdir').withArgs('/tmp/cypress/junit').resolves([
         'report.xml',
@@ -30,24 +26,6 @@ if (process.platform !== 'win32') {
       .resolves('<testsuites name="foo" time="1" tests="10" failures="0">')
 
       await verifyMochaResults()
-    })
-
-    context('env checking', () => {
-      it('checks for protected env and fails and removes results when found', async () => {
-        const spy = sinon.stub(fs, 'rm').withArgs('/tmp/cypress/junit', { recursive: true, force: true })
-
-        fs.readFile
-        .withArgs('/tmp/cypress/junit/report.xml')
-        .resolves('<testsuites name="foo" time="1" tests="10" failures="0">someval')
-
-        try {
-          await verifyMochaResults()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('somekey').and.not.include('someval')
-          expect(spy.getCalls().length).to.equal(1)
-        }
-      })
     })
 
     context('test result checking', () => {
