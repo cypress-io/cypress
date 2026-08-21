@@ -55,7 +55,6 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
         credit_card_enabled: false, // Disable Chrome's "Save card" pop up
       },
       // Chrome 138+ gates the "Translate this page?" bubble on this pref alone.
-      // https://github.com/cypress-io/cypress/issues/34662
       translate: {
         enabled: false,
       },
