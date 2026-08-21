@@ -118,6 +118,8 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // See disable-navigation-preload.ts (#34652).
+  disableServiceWorkerNavigationPreload?: boolean
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -338,6 +340,7 @@ export class Http {
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
+  disableServiceWorkerNavigationPreload?: boolean
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -354,6 +357,7 @@ export class Http {
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.disableServiceWorkerNavigationPreload = opts.disableServiceWorkerNavigationPreload
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -538,6 +542,7 @@ export class Http {
       },
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
+      disableServiceWorkerNavigationPreload: this.disableServiceWorkerNavigationPreload,
     }
 
     return ctx

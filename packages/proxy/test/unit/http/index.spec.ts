@@ -439,6 +439,37 @@ describe('http', function () {
     })
   })
 
+  describe('createMiddlewareContext', function () {
+    function createHttpWithFlag (disableServiceWorkerNavigationPreload?: boolean) {
+      return new Http({
+        config: {} as CyServer.Config,
+        middleware: {},
+        request: { rp: vi.fn() },
+        ...(disableServiceWorkerNavigationPreload !== undefined ? { disableServiceWorkerNavigationPreload } : {}),
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+    }
+
+    function createCtx (http: Http) {
+      return http.createMiddlewareContext({ proxiedUrl: 'http://example.test/', headers: {} } as any, {} as any)
+    }
+
+    // Pins the opts -> instance property -> ctx plumbing for
+    // disableServiceWorkerNavigationPreload (#34652) — MaybeInjectServiceWorker
+    // reads it off the middleware ctx (`this.disableServiceWorkerNavigationPreload`),
+    // which only exists if createMiddlewareContext copies it from the Http instance.
+    it('carries disableServiceWorkerNavigationPreload from the constructor opts onto the ctx', function () {
+      const ctx = createCtx(createHttpWithFlag(true))
+
+      expect(ctx.disableServiceWorkerNavigationPreload).toBe(true)
+    })
+
+    it('leaves disableServiceWorkerNavigationPreload undefined on the ctx when omitted from opts', function () {
+      const ctx = createCtx(createHttpWithFlag())
+
+      expect(ctx.disableServiceWorkerNavigationPreload).toBeUndefined()
+    })
+  })
+
   describe('Service Worker', function () {
     let config: CyServer.Config & Cypress.Config
     let middleware: HttpMiddlewareStacks

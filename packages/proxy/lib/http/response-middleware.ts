@@ -611,7 +611,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body)
+    const updatedBody = injectIntoServiceWorker(body, { disableServiceWorkerNavigationPreload: this.disableServiceWorkerNavigationPreload })
 
     const pt = new PassThrough
 

@@ -102,6 +102,25 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy.http.netStubbingState).to.equal(deps.netStubbingState)
   })
 
+  // See disable-navigation-preload.ts (#34652) for the mechanism; only the
+  // CDP Fetch runtime sets this flag.
+  it('createProxyRuntime does not disable service worker navigation preload', () => {
+    const runtime = createProxyRuntime(baseDeps())
+
+    expect(runtime.networkProxy.http.disableServiceWorkerNavigationPreload).to.not.exist
+  })
+
+  it('createCdpFetchRuntime disables service worker navigation preload on its NetworkProxy', () => {
+    const client = {
+      send: sinon.stub(),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    expect(runtime.networkProxy.http.disableServiceWorkerNavigationPreload).to.be.true
+  })
+
   it('registers default configurator network policies at startup', () => {
     const runtime = createProxyRuntime({
       ...baseDeps(),

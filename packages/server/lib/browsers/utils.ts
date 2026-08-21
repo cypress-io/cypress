@@ -14,6 +14,8 @@ import { telemetry } from '@packages/telemetry'
 import { fs } from '../util/fs'
 import * as extension from '@packages/extension'
 import getPort from 'get-port'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
+import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
 
 declare global {
   interface Window {
@@ -443,8 +445,21 @@ const initializeCDP = async (criClient: CriClient, automation: Automation) => {
     }
   })
 
+  // Window-realm half of #34652 (registration.navigationPreload called
+  // directly from the page; also sweeps registrations persisted from an
+  // earlier run, best-effort — see disable-navigation-preload.ts for the
+  // mechanism, its limits, and the worker-realm half, which this does not
+  // cover). Placed first in the bootstrap source below and self-contained
+  // (its own statements are try/caught, and it shares no bindings with the
+  // blocks after it), so nothing later in the script can prevent it from
+  // running.
+  const disableNavigationPreloadInWindow = isProxyDisabled()
+    ? `;${DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION};`
+    : ''
+
   await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `
+    ${disableNavigationPreloadInWindow}
     const binding = window['cypressUtilityBinding']
     delete window['cypressUtilityBinding']
     ;(${listenForDownload.toString()})(binding)

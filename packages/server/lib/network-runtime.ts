@@ -185,6 +185,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     getCurrentBrowser: deps.getCurrentBrowser,
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
+    // See disable-navigation-preload.ts (#34652) for why only this runtime
+    // sets it; createProxyRuntime (MITM) does not.
+    disableServiceWorkerNavigationPreload: true,
   })
 
   // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;
