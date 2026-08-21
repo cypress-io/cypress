@@ -12,6 +12,9 @@ export type HttpRequest = {
   headers?: HttpHeaders
   body?: HttpBody
   resourceType?: ResourceType
+  // Request-stage route-match result, threaded through to the response pause
+  // so classification agrees with the interception that actually ran.
+  hadMatchingRoutes?: boolean
 }
 
 export type HttpResponse = {

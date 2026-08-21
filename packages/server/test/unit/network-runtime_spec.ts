@@ -1167,24 +1167,34 @@ describe('lib/network-runtime', () => {
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
   })
 
-  // `times` exhaustion disables a route at request-stage counting, but its
-  // already-matched response still reaches InterceptResponse — the spent
-  // route's handler must see real bytes, not the empty stream stand-in.
-  it('a times-exhausted (disabled) route still forces its response to materialize', async () => {
+  // `times` exhaustion disables a route once request-stage counting reaches
+  // the limit — but that counting happens on the very request that trips it,
+  // so that request's own response must still materialize (its cy.intercept
+  // handler needs real bytes, not the empty stream stand-in). A route
+  // disabled by an earlier request must not be revived for a *later* one:
+  // that request never matched anything, so it correctly streams instead of
+  // risking a hang on an endless body (the bug this composition fixes —
+  // the old response-time re-match un-hid the disabled route for every
+  // later request too).
+  //
+  // Header fidelity (case-insensitive route `headers` matchers against
+  // browser-cased request headers) is no longer a concern at the response
+  // pause either: with no re-match, the only header view a route matcher
+  // ever sees is the one SetMatchingRoutes already lowercased at request
+  // stage.
+  it('materializes the request that spends a times-limited route, then streams the next one against the now-disabled route', async () => {
     const client = createCdpClient({ withBody: true })
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-    const spentRoute = minimalMatchingRoute('route-spent')
+    const timesRoute = minimalMatchingRoute('route-times')
 
-    spentRoute.routeMatcher.times = 1
-    spentRoute.matches = 1
-    spentRoute.disabled = true
-    runtime.netStubbingState.routes.push(spentRoute)
+    timesRoute.routeMatcher.times = 1
+    runtime.netStubbingState.routes.push(timesRoute)
 
     const onRequestPaused = await startCdpRuntime(runtime, client)
 
     await drivePausedRequest(onRequestPaused, {
-      requestId: 'spent-route-request',
-      networkId: 'network-spent-1',
+      requestId: 'times-first-request',
+      networkId: 'network-times-first',
       url: 'https://example.test/stream',
       resourceType: 'Fetch',
       responseStatusCode: 200,
@@ -1192,31 +1202,21 @@ describe('lib/network-runtime', () => {
     })
 
     expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
-  })
+    expect(timesRoute.disabled).to.be.true
 
-  // CDP preserves the browser's header casing; the composed matchable must be
-  // lowercased or header/auth route matchers silently stop matching.
-  it('matches a headers route matcher against browser-cased request headers', async () => {
-    const client = createCdpClient({ withBody: true })
-    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-    const headerRoute = minimalMatchingRoute('route-headers')
-
-    headerRoute.routeMatcher.headers = { 'x-token': 'abc' }
-    runtime.netStubbingState.routes.push(headerRoute)
-
-    const onRequestPaused = await startCdpRuntime(runtime, client)
+    client.send.resetHistory()
 
     await drivePausedRequest(onRequestPaused, {
-      requestId: 'cased-header-request',
-      networkId: 'network-cased-1',
+      requestId: 'times-second-request',
+      networkId: 'network-times-second',
       url: 'https://example.test/stream',
       resourceType: 'Fetch',
-      requestHeaders: { 'X-Token': 'abc' },
       responseStatusCode: 200,
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+    expect(client.send).to.have.been.calledWith('Fetch.continueResponse')
   })
 
   it('reads stubbingState.routes live — a route registered after the first stream-classified request still forces the next one to materialize', async () => {
@@ -1347,11 +1347,15 @@ describe('lib/network-runtime', () => {
 
     expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
 
+    // ExtractCypressMetadataHeaders restricts an extra-target request to the
+    // bare-minimum middleware (MaybeSetBasicAuthHeaders) — SetMatchingRoutes
+    // never runs for it, so a route registered in netStubbingState has no
+    // request-stage match to thread through, and the pause still streams.
     extraClient.send.resetHistory()
     runtime.netStubbingState.routes.push(minimalMatchingRoute('extra-route-1'))
 
     await drivePausedRequest(onExtraPaused, {
-      requestId: 'extra-ndjson-routed-request',
+      requestId: 'extra-ndjson-unrouted-request',
       networkId: 'extra-network-ndjson-2',
       url: 'https://example.test/stream',
       resourceType: 'Fetch',
@@ -1359,7 +1363,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expect(extraClient.send).to.have.been.calledWith('Fetch.getResponseBody')
+    expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
 
     // shouldCaptureBody parity: with recording on, a stream-classified pause
     // on the extra target arms capture on the extra target's own client

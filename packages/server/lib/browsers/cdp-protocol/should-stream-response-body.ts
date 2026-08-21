@@ -1,4 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
+import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript, serviceWorkerHeaderIsScript } from '@packages/proxy'
 
 // Decides, at a CDP Fetch Response-stage pause, whether the transport must
 // eagerly materialize the body (today's Fetch.getResponseBody) or can take
@@ -28,11 +29,6 @@ export interface ShouldStreamResponseBodyOptions {
 // the response and wedge.
 const STREAM_CONTENT_TYPES = ['text/event-stream', 'multipart/x-mixed-replace']
 
-// Mirrors resContentTypeIsJavaScript in
-// packages/proxy/lib/http/util/document-preparation.ts, including its
-// substring-against-the-raw-value semantics.
-const JAVASCRIPT_CONTENT_TYPES = ['application/javascript', 'application/x-javascript', 'text/javascript']
-
 const CONTENT_LENGTH_RE = /^\d+$/
 
 const getResponseHeader = (responseHeaders: Protocol.Fetch.HeaderEntry[] | undefined, name: string): string | undefined => {
@@ -57,28 +53,26 @@ const isStreamShaped = (event: Protocol.Fetch.RequestPausedEvent, contentType: s
   return !!contentType && STREAM_CONTENT_TYPES.some((type) => contentType.includes(type))
 }
 
-// Mirrors reqWillRenderHtml in packages/proxy/lib/http/util/document-preparation.ts,
-// but content-type containing html is checked as its own standalone signal
-// first: an html content-type is injectable regardless of what the request's
-// Accept header says, whereas the fallback (no content-type at all) still
-// needs the Accept-based heuristic reqWillRenderHtml uses for navigations.
-// A never-ending text/html stream (chunked-HTML comet) therefore still
+// Composes the same two signals as reqWillRenderHtml in
+// packages/proxy/lib/http/util/document-preparation.ts, but content-type
+// containing html is checked as its own standalone signal first: an html
+// content-type is injectable regardless of what the request's Accept header
+// says, whereas the fallback (no content-type at all) still needs the
+// Accept-based heuristic reqWillRenderHtml uses for navigations. A
+// never-ending text/html stream (chunked-HTML comet) therefore still
 // materializes and can wedge — injection correctness knowingly outranks
 // hang-avoidance for html, bounded by the transport's pause timeout.
 const willRenderHtml = (event: Protocol.Fetch.RequestPausedEvent, contentType: string | undefined): boolean => {
   if (contentType) {
-    return contentType.includes('html')
+    return contentTypeIsHtml(contentType)
   }
 
   const requestHeaders = event.request.headers
 
-  if (getRequestHeader(requestHeaders, 'x-requested-with')) {
-    return false
-  }
-
-  const accept = getRequestHeader(requestHeaders, 'accept')
-
-  return !!accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
+  return acceptWillRenderHtml(
+    getRequestHeader(requestHeaders, 'accept'),
+    getRequestHeader(requestHeaders, 'x-requested-with'),
+  )
 }
 
 // The HTML injector (rewriter.ts) writes into even an EMPTY body — it wraps
@@ -104,7 +98,7 @@ const isJsRewriteEligible = (contentType: string | undefined, options: ShouldStr
     return false
   }
 
-  return !!contentType && JAVASCRIPT_CONTENT_TYPES.some((type) => contentType.includes(type))
+  return contentTypeIsJavaScript(contentType)
 }
 
 // MaybeInjectServiceWorker (packages/proxy/lib/http/response-middleware.ts)
@@ -115,7 +109,7 @@ const isJsRewriteEligible = (contentType: string | undefined, options: ShouldStr
 const isServiceWorkerScriptRequest = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   const value = getRequestHeader(event.request.headers, 'service-worker')
 
-  return value?.toLowerCase() === 'script'
+  return serviceWorkerHeaderIsScript(value?.toLowerCase())
 }
 
 // A malformed content-length proves nothing about the body's length, so it

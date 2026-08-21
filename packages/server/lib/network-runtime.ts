@@ -20,7 +20,6 @@ import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
 import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
-import { normalizeResourceType } from './browsers/cdp-protocol/normalize-resource-type'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -192,34 +191,23 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
   // Shared by the main transport and every extra-target transport so a popup
   // can never classify or gate capture differently than the page that opened
-  // it — both pause through the same stubbingState and networkInterceptionCore.
+  // it.
   //
-  // Deliberately looser than SetMatchingRoutes in two safe-direction ways: it
-  // skips the dev-server exclusion, and it re-matches at response time against
-  // the possibly-handler-mutated request URL. Both can only over-materialize.
-  const shouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
+  // hasMatchingRoute is threaded in from the response pause's own
+  // request-stage result (see cdp-fetch-transport.ts) rather than re-matched
+  // here: the request-stage middleware (SetMatchingRoutes) is the
+  // authoritative match — it already did the `times` counting, saw the
+  // request before any handler mutated its URL or headers, and already
+  // excludes the dev server and disabled routes. Re-matching at response time
+  // would disagree with that: it would wrongly revive a `times`-exhausted
+  // route for a *later* request (which can wedge on an endless body), and
+  // handler-mutated requests would never re-match what the browser actually
+  // sent.
+  const shouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent, { hasMatchingRoute }: { hasMatchingRoute: boolean }): boolean => {
     return shouldStreamResponseBody(event, {
       modifyObstructiveCode: deps.config.modifyObstructiveCode,
       experimentalModifyObstructiveThirdPartyCode: deps.config.experimentalModifyObstructiveThirdPartyCode,
-      hasMatchingRoute: (pausedEvent) => {
-        // `times` exhaustion disables a route during request-stage counting, but
-        // its already-matched response still reaches InterceptResponse — a spent
-        // route's body is still needed, so match as if nothing were disabled.
-        // (debug.routes logs from this re-match report spent routes as matched;
-        // the authoritative match is the request-stage one.)
-        const routes = stubbingState.routes.map((route) => route.disabled ? { ...route, disabled: false } : route)
-
-        // CDP preserves the browser's header casing; route matchers (auth,
-        // headers) expect the middleware's lowercased view.
-        const headers = Object.fromEntries(Object.entries(pausedEvent.request.headers).map(([name, value]) => [name.toLowerCase(), value]))
-
-        return networkInterceptionCore.matchRoutes(routes, {
-          headers,
-          method: pausedEvent.request.method,
-          proxiedUrl: pausedEvent.request.url,
-          resourceType: normalizeResourceType(pausedEvent.resourceType),
-        }).length > 0
-      },
+      hasMatchingRoute: () => hasMatchingRoute,
     })
   }
 

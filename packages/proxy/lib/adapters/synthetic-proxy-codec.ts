@@ -161,6 +161,11 @@ export function createSyntheticProxyCodec (
       return {
         ...request,
         headers,
+        // This runs after the legacy request middleware chain (SetMatchingRoutes
+        // included), so ctx.req.matchingRoutes is the authoritative request-stage
+        // match — carried forward for the response pause's stream/materialize
+        // classification.
+        hadMatchingRoutes: !!ctx.req.matchingRoutes?.length,
       }
     },
 

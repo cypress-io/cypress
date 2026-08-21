@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import type { IncomingMessage } from 'http'
 import type { RemoteState, DocumentDomainInjection } from '@packages/network-tools'
 import type { CypressIncomingRequest } from '../../types'
@@ -22,23 +21,46 @@ export function reqMatchesPolicyBasedOnDomain (
   return false
 }
 
+// Pure, header-value-shaped predicates shared with should-stream-response-body.ts
+// (packages/server/lib/browsers/cdp-protocol) so both classifiers agree on
+// what counts as HTML/JS content-type and an HTML-rendering Accept header,
+// without either one re-deriving the type lists or matching semantics.
+
+export function contentTypeIsHtml (contentType: string | undefined): boolean {
+  return !!contentType && contentType.includes('html')
+}
+
+export function acceptWillRenderHtml (accept: string | undefined, xRequestedWith: string | undefined): boolean {
+  // don't inject if this is an XHR from jquery
+  if (xRequestedWith) {
+    return false
+  }
+
+  // don't inject if we didn't find both text/html and application/xhtml+xml
+  return !!accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
+}
+
+const JAVASCRIPT_CONTENT_TYPES = ['application/javascript', 'application/x-javascript', 'text/javascript']
+
+export function contentTypeIsJavaScript (contentType: string | undefined): boolean {
+  return !!contentType && JAVASCRIPT_CONTENT_TYPES.some((type) => contentType.includes(type))
+}
+
 export function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMessage) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
-  // don't inject if this is an XHR from jquery
-  if (req.headers['x-requested-with']) {
-    return
-  }
-
-  // don't inject if we didn't find both text/html and application/xhtml+xml,
-  const accept = req.headers['accept']
-
   // only check the content-type value, if it exists, to contains some type of html mimetype
   const contentType = res?.headers['content-type'] || ''
-  const contentTypeIsHtmlIfExists = contentType ? contentType.includes('html') : true
+  const contentTypeIsHtmlIfExists = contentType ? contentTypeIsHtml(contentType) : true
 
-  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml') && contentTypeIsHtmlIfExists
+  // 'accept' and 'x-requested-with' are single-value headers; CypressIncomingRequest
+  // types every header generically as string | string[], so narrow here to match
+  // what the browser actually sends (and what acceptWillRenderHtml expects).
+  return acceptWillRenderHtml(
+    req.headers['accept'] as string | undefined,
+    req.headers['x-requested-with'] as string | undefined,
+  ) && contentTypeIsHtmlIfExists
 }
 
 export function resContentTypeIs (res: IncomingMessage, contentType: string) {
@@ -46,8 +68,5 @@ export function resContentTypeIs (res: IncomingMessage, contentType: string) {
 }
 
 export function resContentTypeIsJavaScript (res: IncomingMessage) {
-  return _.some(
-    ['application/javascript', 'application/x-javascript', 'text/javascript']
-    .map(_.partial(resContentTypeIs, res)),
-  )
+  return contentTypeIsJavaScript(res.headers['content-type'])
 }

@@ -112,12 +112,16 @@ type CdpFetchTransportOptions = {
    * True when a response pause should skip the eager `Fetch.getResponseBody`
    * and let the browser stream the body natively (captured separately, if at
    * all, via CdpBodyCapture); false materializes as before.
+   *
+   * `hasMatchingRoute` is the request-stage route-match result stashed on the
+   * response-pause deferred (see the `next` callback in `interceptRequest`) —
+   * the authoritative match, not a response-time re-match.
    */
-  shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
+  shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent, context: { hasMatchingRoute: boolean }) => boolean
   /**
-   * Gates whether a stream-classified response arms CdpBodyCapture. Defaults
-   * to false: without a consumer for the captured bytes (wired in a later
-   * phase), arming would just pump bytes nobody reads.
+   * Gates whether a stream-classified response arms CdpBodyCapture. False
+   * (the default) when Test Replay is not recording — arming would just pump
+   * bytes nobody reads.
    */
   shouldCaptureBody?: () => boolean
 }
@@ -130,6 +134,9 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   requestId?: string
   resourceType?: ResourceType
   sessionId?: string
+  // Request-stage route-match result, threaded from the neutral request —
+  // see the `next` callback in `interceptRequest`.
+  hadMatchingRoutes?: boolean
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
@@ -139,7 +146,8 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   // Side-channel capture of the bytes the browser delivered for a
   // stream-classified response (origin bytes when continued, the stubbed body
   // when middleware fulfilled), armed via CdpBodyCapture — populated only when
-  // options.shouldCaptureBody opts in. Consumed by Test Replay in a later phase.
+  // options.shouldCaptureBody opts in. Handed to Test Replay by the capture
+  // notification middleware (proxy/lib/adapters/network-capture.ts).
   captureStream?: Readable
   fulfilled?: boolean
   originalBodyDigest?: BodyDigest
@@ -158,6 +166,10 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   headersReady: PromiseWithResolvers<void>
   // key into inFlightByNetworkId; absent when the pause carried no networkId
   networkKey?: string
+  // Request-stage route-match result, stashed once the outbound request comes
+  // back from the middleware onion — read by resolveResponse's shouldStreamBody
+  // call so classification agrees with the interception that actually ran.
+  hadMatchingRoutes?: boolean
 }
 
 export class CdpFetchTransport {
@@ -515,6 +527,12 @@ export class CdpFetchTransport {
       }
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
+        // The authoritative route match: computed once, at request stage, by
+        // the middleware that actually ran (SetMatchingRoutes) — read back by
+        // resolveResponse instead of re-matching against a possibly
+        // handler-mutated request at response time.
+        responseDeferred.hadMatchingRoutes = outbound.hadMatchingRoutes
+
         const headers = await this.continueRequestHeaders(event, outbound)
 
         debug('continuing request %s %s %o',
@@ -734,8 +752,8 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    // no predicate composed → materialize everything (the pre-feature behavior)
-    const bodySkipped = (this.options.shouldStreamBody ?? (() => false))(event)
+    // no predicate composed → materialize everything
+    const bodySkipped = this.options.shouldStreamBody?.(event, { hasMatchingRoute: deferred.hadMatchingRoutes ?? false }) ?? false
     let originalBody: Buffer
     let captureStream: Readable | undefined
 
@@ -745,7 +763,9 @@ export class CdpFetchTransport {
       // Arming precedes releasing the pause: nothing flows over
       // Network.dataReceived until Fetch.continueResponse, so the pump must
       // already be listening before that happens or its opening bytes are lost.
-      if (event.networkId && this.options.shouldCaptureBody?.()) {
+      // Redirect pauses never arm: their hop emits no loadingFinished, so an
+      // armed entry would sit unread until the transport resets.
+      if (event.networkId && !isRedirectPause(event) && this.options.shouldCaptureBody?.()) {
         captureStream = await this.bodyCapture.arm(event.networkId, sessionId)
 
         // reset()/stop() may have rejected this flow while arming awaited CDP.

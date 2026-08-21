@@ -39,8 +39,13 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
+// Pure predicate shared with should-stream-response-body.ts (packages/server/lib/browsers/cdp-protocol),
+// which does its own case-insensitive header-name lookup and needs only the
+// value check.
+export const serviceWorkerHeaderIsScript = (value: string | string[] | undefined) => value === 'script'
+
 export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
-  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
+  return serviceWorkerHeaderIsScript(headers?.['service-worker']) || serviceWorkerHeaderIsScript(headers?.['Service-Worker'])
 }
 
 export const isVerboseTelemetry = true

@@ -8,19 +8,21 @@ import type { ResponseInterceptionMiddlewareCtx } from './types'
  * Notify the protocol manager that a response stream is available for capture.
  */
 export async function notifyResponseStreamReceived (mw: ResponseInterceptionMiddlewareCtx): Promise<void> {
+  // The pump is only ever drained here — any exit that will not hand the
+  // capture stream to Replay must drain it, or it buffers to the capture cap.
+  const captureStream = mw.resCaptureStream
+
   if (!mw.protocolManager || !mw.req.browserPreRequest?.requestId) {
+    captureStream?.resume()
+
     return mw.next()
   }
 
-  // Capture implies skipped: a stream-classified response carries its bytes on
-  // this side channel while mw.incomingResStream stays an empty stand-in (a
-  // live never-ending stream there would wedge the body middleware). A skipped
-  // body with NO capture stream was never read at all (capture off, arm
-  // failure, no networkId) — notifying Replay would record a false zero-length
-  // capture, so it stays unrecorded. A materialized response ignores any stray
-  // capture stream: its real body wins.
-  const captureStream = mw.resBodySkipped ? mw.resCaptureStream : undefined
-
+  // A skipped body with NO capture stream was never read at all (capture off,
+  // arm failure, no networkId) — notifying Replay would record a false
+  // zero-length capture, so it stays unrecorded. The stream rides a side
+  // channel because mw.incomingResStream must stay an empty stand-in (a live
+  // never-ending stream there would wedge the body middleware).
   if (mw.resBodySkipped && !captureStream) {
     return mw.next()
   }
@@ -48,10 +50,18 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
   const streamOptions: ResponseStreamOptions = {
     requestId,
     responseHeaders: mw.incomingRes.headers,
-    // the pump carries decoded bytes (Network.dataReceived is post-decoding)
+    // The pump carries decoded bytes: Network.dataReceived's data field is the
+    // resource content after content decoding, harness-verified byte-identical
+    // for gzip, br, and zstd (Chrome 151). The wire content-encoding header is
+    // already stripped by the CDP codec, so these assert decoded rather than
+    // echoing the mw flags, which describe the MITM stream's state.
     isAlreadyGunzipped: captureStream ? true : mw.isGunzipped,
     isAlreadyBrotliDecompressed: captureStream ? true : mw.isBrotliDecompressed,
     responseStream: captureStream ?? mw.incomingResStream,
+    // On the stream path mw.res finishes within a tick (it carried the empty
+    // stand-in) — before the first captured byte exists. Replay must key
+    // capture completion on responseStream end, not res; confirmed via the
+    // recorded-run verification for this transport.
     res: mw.res,
     timings: {
       cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,

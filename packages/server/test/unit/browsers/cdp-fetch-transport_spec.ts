@@ -66,21 +66,19 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
   isFromExtraTarget?: boolean
   addPendingUrlWithoutPreRequest?: (url: string) => void
   onRequestCanceled?: (requestId: string) => void
-  shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
+  shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent, context: { hasMatchingRoute: boolean }) => boolean
   shouldCaptureBody?: () => boolean
   bodyCapture?: CdpBodyCapture
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
   const bodyCapture = options.bodyCapture ?? new CdpBodyCapture(client as any)
-  // Until composition supplies the real route predicate and config flags, assume
-  // every request could be intercepted and JS rewriting is on. Both assumptions
-  // force materialize, which collapses the predicate to the retired deny-list's
-  // rule alone: only provably stream-shaped responses skip the read. Preserves
-  // the transport's own default (defaultShouldStreamBody, removed) so existing
-  // tests keep their semantics now that the transport materializes everything
-  // when no predicate is composed.
-  const defaultShouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-    return shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => true })
+  // JS rewriting is assumed on and the route match is threaded straight
+  // through from the pause's own hadMatchingRoutes (nothing in this fake
+  // pipeline sets it unless a test's middleware does, so it defaults to
+  // false) — mirrors network-runtime's real composition instead of the
+  // retired always-true stand-in.
+  const defaultShouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent, { hasMatchingRoute }: { hasMatchingRoute: boolean }): boolean => {
+    return shouldStreamResponseBody(event, { modifyObstructiveCode: true, hasMatchingRoute: () => hasMatchingRoute })
   }
   const transport = new CdpFetchTransport(client as any, options.httpIntercept, {
     isAUTFrame: options.isAUTFrame,
@@ -2370,6 +2368,33 @@ describe('CdpFetchTransport', () => {
       expect(client.send).to.have.been.calledWith('Fetch.getResponseBody', {
         requestId: 'fetch-request',
       })
+    })
+
+    // network-runtime's real request-stage middleware (SetMatchingRoutes) sets
+    // req.matchingRoutes; the synthetic codec threads that into hadMatchingRoutes
+    // on the neutral request once middleware has run (M4). This pins the wiring
+    // from there through to the response pause's shouldStreamBody call, using a
+    // stand-in middleware in place of the real net-stubbing pipeline.
+    it('threads a request-stage route match through to shouldStreamBody as hasMatchingRoute', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const shouldStreamBody = sinon.stub().returns(false)
+      const { transport } = createTransport(client, { httpIntercept, shouldStreamBody })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.send.withArgs('Fetch.getResponseBody').resolves({
+        body: Buffer.from('origin').toString('base64'),
+        base64Encoded: true,
+      })
+
+      httpIntercept.use((req, next) => next({ ...req, hadMatchingRoutes: true }))
+
+      await driveResponsePause(onRequestPaused, {
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      })
+
+      expect(shouldStreamBody).to.have.been.calledWith(sinon.match.any, { hasMatchingRoute: true })
     })
 
     describe('body capture arming', () => {

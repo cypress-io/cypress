@@ -68,13 +68,17 @@ export class CdpBodyCapture {
       // Buffers are documented as zeroed for an armed-at-pause stream (nothing
       // flows before Fetch.continueResponse), but a non-empty value here is
       // still correct to forward if the browser ever behaves otherwise.
-      if (response.bufferedData) {
+      if (response?.bufferedData) {
         this.pushToEntry(key, entry, Buffer.from(response.bufferedData, 'base64'))
       }
 
       return stream
     } catch (err) {
       debug('failed to arm body capture for %s: %s', key, (err as Error).message)
+
+      // The caller treats undefined as uncaptured, so a live entry left behind
+      // here would absorb dataReceived chunks with no owner to release it.
+      this.release(networkId, sessionId)
 
       return undefined
     }
@@ -119,6 +123,13 @@ export class CdpBodyCapture {
   }
 
   private onDataReceived = (event: Protocol.Network.DataReceivedEvent, sessionId?: string): void => {
+    // dataReceived fires for every chunk of every response once Network is
+    // enabled; with nothing armed (e.g. recording off) the common case must
+    // cost nothing.
+    if (!this.captures.size) {
+      return
+    }
+
     const key = this.getCaptureKey(event.requestId, sessionId)
     const entry = this.captures.get(key)
 

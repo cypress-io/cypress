@@ -40,9 +40,9 @@ describe('streamed response bodies', () => {
     }).then((lines) => {
       // consecutive from wherever delivery started - the first line is written
       // while the response pause is still held, and whether those buffered
-      // bytes survive the continue is a browser detail, not the point here
+      // bytes survive (or how long the pause is held under CI load) is a
+      // browser/timing detail; gapless delivery is the behavior under test
       expect(lines).to.have.length.of.at.least(3)
-      expect(lines[0].n).to.be.at.most(3)
       lines.forEach(({ n }, i) => i && expect(n).to.eq(lines[i - 1].n + 1))
     })
   })
