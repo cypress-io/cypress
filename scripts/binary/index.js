@@ -23,6 +23,8 @@ const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 const { exec } = require('child_process')
+const xvfb = require('../../cli/lib/exec/xvfb').default
+const smoke = require('./smoke')
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -212,6 +214,34 @@ const deploy = {
 
       return build.packageElectronApp(options)
     })
+  },
+
+  async smoke (options) {
+    console.log('#smoke')
+
+    if (options == null) {
+      options = this.parseOptions(process.argv)
+    }
+
+    debug('parsed build options %o', options)
+
+    await askMissingOptions(['version'])(options)
+
+    let usingXvfb = xvfb.isNeeded()
+
+    try {
+      if (usingXvfb) {
+        await xvfb.start()
+      }
+
+      await build.testExecutableVersion(meta.buildAppExecutable(), options.version)
+
+      await smoke.test(meta.buildAppExecutable(), meta.buildAppDir())
+    } finally {
+      if (usingXvfb) {
+        await xvfb.stop()
+      }
+    }
   },
 
   zip (options) {

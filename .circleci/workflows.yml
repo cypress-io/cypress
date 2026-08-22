@@ -1209,6 +1209,12 @@ commands:
               yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
       - run:
+          name: Smoke Test the Cypress binary
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js)
+      - run:
           name: Zip the binary
           command: |
             if [[ $PLATFORM == 'linux' ]]; then

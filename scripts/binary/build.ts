@@ -12,8 +12,6 @@ import tar from 'tar'
 
 import * as packages from './util/packages'
 import * as meta from './meta'
-import xvfb from '../../cli/lib/exec/xvfb'
-import smoke from './smoke'
 import { spawn, execSync } from 'child_process'
 import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
@@ -308,26 +306,6 @@ export async function packageElectronApp (options: BuildCypressAppOpts) {
 
   console.log(stdout)
 
-  // runSmokeTests
-  let usingXvfb = xvfb.isNeeded()
-
-  try {
-    if (usingXvfb) {
-      await xvfb.start()
-    }
-
-    log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
-    await testExecutableVersion(meta.buildAppExecutable(), version)
-
-    const executablePath = meta.buildAppExecutable()
-
-    await smoke.test(executablePath, meta.buildAppDir())
-  } finally {
-    if (usingXvfb) {
-      await xvfb.stop()
-    }
-  }
-
   // verifyAppCanOpen
   if (platform === 'darwin' && !skipSigning) {
     const appFolder = meta.zipDir()
@@ -419,7 +397,7 @@ async function testDistVersion (distDir: string, version: string) {
   console.log('✅ using node --version works')
 }
 
-async function testExecutableVersion (buildAppExecutable: string, version: string) {
+export async function testExecutableVersion (buildAppExecutable: string, version: string) {
   log('#testVersion')
 
   console.log('testing built app executable version')
