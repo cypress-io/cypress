@@ -247,7 +247,35 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
   })
 }
 
+// TEMPORARY: renaming inside the built app fails with EPERM on the darwin runners even
+// though develop does the same thing on the same machines, so report what macOS thinks
+// the app and the file are before we touch them
+const reportDarwinFilePermissions = async (buildAppDir, file) => {
+  if (os.platform() !== 'darwin') return
+
+  const app = path.resolve(buildAppDir, '..', '..', '..')
+
+  for (const command of [
+    'sw_vers',
+    'id',
+    `ls -lO@ "${file}"`,
+    `stat -f 'flags=%Sf perms=%Sp owner=%Su:%Sg' "${file}"`,
+    `xattr -l "${file}"`,
+    `ls -ldO@ "${app}"`,
+    `xattr -l "${app}"`,
+    `codesign -dv --verbose=2 "${app}"`,
+  ]) {
+    try {
+      console.log(`$ ${command}\n${cp.execSync(`${command} 2>&1`, { encoding: 'utf8' })}`)
+    } catch (err) {
+      console.log(`$ ${command} -> could not run: ${err.message}`)
+    }
+  }
+}
+
 const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
+  await reportDarwinFilePermissions(buildAppDir, path.join(buildAppDir, 'index.js'))
+
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 

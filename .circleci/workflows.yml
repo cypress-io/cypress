@@ -1379,13 +1379,6 @@ jobs:
           command: |
             IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
             node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
-      - run:
-          # gulpfile.js requires @packages/ts/register through this link, and on Windows it
-          # goes missing somewhere between saving and restoring the node_modules cache
-          name: Check workspace links survived the node_modules cache
-          command: |
-            ls -l node_modules/@packages || echo "node_modules/@packages is missing entirely"
-            node -e "console.log('resolved:', require.resolve('@packages/ts/register'))" || echo "@packages/ts/register is NOT resolvable"
       - build-and-persist
       - store-npm-logs
 
