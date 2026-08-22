@@ -23,7 +23,7 @@ const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 const { exec } = require('child_process')
-const xvfb = require('../../cli/lib/exec/xvfb').default
+const xvfb = require('../../cli/lib/exec/xvfb')
 const smoke = require('./smoke')
 
 const success = (str) => {
