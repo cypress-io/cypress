@@ -24,10 +24,10 @@ const electronDeprecationWarningRe = /Warning: The Electron browser is deprecate
 // Strip the forceHttp1 deprecation warning, printed ahead of the run header on
 // every run whose config sets forceHttp1 -- including CI jobs that set it for the
 // whole job. Matches the FORCE_HTTP1_DEPRECATION template in
-// packages/errors/src/errors.ts. Unlike the Electron warning above, this leaves
-// the trailing blank line: snapshots already have one before the `====` divider.
+// packages/errors/src/errors.ts. Like the Electron warning above, the whole block
+// goes: snapshots already have a blank line before the `====` divider.
 // DELETE THIS when the forceHttp1 option is removed -- it is easy to miss here.
-const forceHttp1DeprecationWarningRe = /Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress\.\n\nRemove it from your configuration to use the default network path\.\n\nRead the documentation for the forceHttp1 configuration option: https:\/\/docs\.cypress\.io\/app\/references\/configuration#forceHttp1\n/g
+const forceHttp1DeprecationWarningRe = /Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress\.\n\nRemove it from your configuration to use the default network path\.\n\nRead the documentation for the forceHttp1 configuration option: https:\/\/docs\.cypress\.io\/app\/references\/configuration#forceHttp1\n\n/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g

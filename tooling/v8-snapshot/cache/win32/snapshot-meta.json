@@ -3667,6 +3667,7 @@
     "./packages/server/lib/cloud/environment.ts",
     "./packages/server/lib/cloud/error_with_cause.ts",
     "./packages/server/lib/cloud/extract_atomic.ts",
+    "./packages/server/lib/cloud/filter_tests.ts",
     "./packages/server/lib/cloud/get_cloud_metadata.ts",
     "./packages/server/lib/cloud/machine_id.ts",
     "./packages/server/lib/cloud/network/fetch.ts",
@@ -3938,5 +3939,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "34b027c75ff27ceb6b6859b60580fb154c7fa859cc07a04fa29077d100befbe3"
+  "deferredHash": "f999dccd23a4f4b3c480b383e751f073d28388a281e415f5c01e9b4425eb2b04"
 }
