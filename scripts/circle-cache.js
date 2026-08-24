@@ -87,12 +87,13 @@ async function unpackCircleCache () {
 
   await Promise.all(
     paths.map(async (src) => {
-      await fsExtra.move(
-        src,
-        src
-        .replace(CACHE_DIR, BASE_DIR)
-        .replace(/(.*?)_node_modules/, `$1/node_modules`),
-      )
+      const dest = src
+      .replace(CACHE_DIR, BASE_DIR)
+      .replace(/(.*?)_node_modules/, `$1/node_modules`)
+
+      // self-hosted M1 doesn't always clear this directory between runs, so remove it
+      await fsExtra.remove(dest)
+      await fsExtra.move(src, dest)
     }),
   )
 
