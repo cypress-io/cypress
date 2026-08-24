@@ -94,6 +94,13 @@ const _hasValidSessionIdHeader = (req): boolean => {
   return Boolean(current) && typeof provided === 'string' && provided === current
 }
 
+const _isTapRequest = (req, namespace: string): boolean => {
+  const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+  return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
+    (trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req))
+}
+
 export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const ALLOWED_PROXY_BYPASS_URLS = [
     '/',
@@ -102,14 +109,8 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
     `/${namespace}/runner/favicon.ico`,
   ]
 
-  const isCliTapRequest = (trimmedUrl: string, req) => {
-    return trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req)
-  }
-
   const isAllowedProxyBypass = (trimmedUrl: string, req) => {
-    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) ||
-      trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
-      isCliTapRequest(trimmedUrl, req)
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || _isTapRequest(req, namespace)
   }
 
   // normalize clientRoute to help with comparison
@@ -491,7 +492,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(this.useMorgan())
+      app.use(this.useMorgan(namespace))
     }
 
     // errorhandler
@@ -503,9 +504,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return app
   }
 
-  useMorgan () {
+  useMorgan (namespace = '__cypress') {
     return require('morgan')('dev', {
-      skip: () => GracefulExit.isShuttingDown,
+      // #34668: tap probes and posts GraphQL on every CLI invocation, burying the user's own output
+      skip: (req) => GracefulExit.isShuttingDown || (_isNonProxiedRequest(req) && _isTapRequest(req, namespace)),
     })
   }
 
