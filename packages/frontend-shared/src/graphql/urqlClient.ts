@@ -103,7 +103,7 @@ declare global {
     __CYPRESS_PROXY_DISABLED__?: boolean
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
-    __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
+    __CYPRESS_BROWSER__: Partial<Browser> & { majorVersion: string | number }
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId

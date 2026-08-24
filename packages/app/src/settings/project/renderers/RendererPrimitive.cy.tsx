@@ -1,7 +1,7 @@
 import { CONFIG_LEGEND_COLOR_MAP } from '../ConfigSourceColors'
 import RenderPrimitive from './RenderPrimitive.vue'
 
-function mountWithPrimitive (value: string| number | null, from: string) {
+function mountWithPrimitive (value: string | number | null, from: string) {
   cy.mount(() => {
     return (
       <div class="p-12 overflow-auto">

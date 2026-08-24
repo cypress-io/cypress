@@ -6,7 +6,7 @@ import { defaultMessages } from '@cy/i18n'
 let specs: Array<any> = []
 
 describe('InlineSpecList', () => {
-  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
+  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: { specFilter?: string, experimentalRunAllSpecs?: boolean } = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
     onResult: (ctx) => {
       if (!ctx.currentProject?.specs) {
         return ctx

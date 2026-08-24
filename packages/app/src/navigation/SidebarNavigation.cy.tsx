@@ -6,7 +6,7 @@ import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudType
 import { cloneDeep } from 'lodash'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
-function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, latestCloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
+function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, latestCloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean } = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
   let _gql: SidebarNavigationFragment
 

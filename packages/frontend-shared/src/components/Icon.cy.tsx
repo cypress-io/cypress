@@ -41,8 +41,7 @@ describe('<Icon />', () => {
       { textSizes.map((size, i) => (
         <span class={`text-${size} text-${colors[i]}-500 text-center`}>
           {size }<Icon icon={IconHeart}></Icon>
-        </span>))
-      }
+        </span>))}
     </div>
     ))
   })

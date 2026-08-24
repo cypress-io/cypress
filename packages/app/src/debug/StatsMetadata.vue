@@ -127,7 +127,7 @@ const results = computed(() => {
 })
 
 const arrMapping = computed(() => {
-  const acc: {browsers: string[], oses: string[], firstBrowser: string, firstOs: string} = { browsers: [], oses: [], firstBrowser: '', firstOs: '' }
+  const acc: { browsers: string[], oses: string[], firstBrowser: string, firstOs: string } = { browsers: [], oses: [], firstBrowser: '', firstOs: '' }
   const uniqueBrowsers = new Set<string>()
   const uniqueOSes = new Set<string>()
 

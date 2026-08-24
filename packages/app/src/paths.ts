@@ -1,9 +1,8 @@
-/* eslint-disable no-redeclare */
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
-export function getPathForPlatform(): null
+export function getPathForPlatform (): null
 
-export function getPathForPlatform(posixPath: string): string
+export function getPathForPlatform (posixPath: string): string
 
 export function getPathForPlatform (posixPath?: string) {
   if (!posixPath) {

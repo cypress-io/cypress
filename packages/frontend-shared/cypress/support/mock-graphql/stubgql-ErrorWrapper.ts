@@ -46,5 +46,5 @@ export const StubErrorWrapper = {
 } as const
 
 // For type checking
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const _typeCheck: MaybeResolver<ErrorWrapper> = StubErrorWrapper

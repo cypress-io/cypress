@@ -162,7 +162,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     subscriptionHooks.set(name, hook)
   }
 
-  function stubSubscriptionEvent <T extends TypedDocumentNode<any, any>> (
+  function stubSubscriptionEvent<T extends TypedDocumentNode<any, any>> (
     document: T,
     emitEvent: () => ResultOf<T>,
   ) {

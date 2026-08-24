@@ -5,7 +5,7 @@ function specRowSelector (specFileName: string) {
   return `[data-cy-row="${specFileName}"]`
 }
 
-function dotSelector (specFileName: string, dotNumber: 0 | 1 | 2 |'latest') {
+function dotSelector (specFileName: string, dotNumber: 0 | 1 | 2 | 'latest') {
   return `${specRowSelector(specFileName)} [data-cy="run-status-dot-${dotNumber}"]`
 }
 
@@ -44,10 +44,10 @@ function validateTooltip (status: string) {
   })
 }
 
-function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus|'PLACEHOLDER') {
+function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus | 'PLACEHOLDER') {
   const latestStatusSpinning = latestRunStatus === 'RUNNING'
 
-  type dotIndex = Parameters<typeof dotSelector>[1];
+  type dotIndex = Parameters<typeof dotSelector>[1]
   const indexes: Exclude<dotIndex, 'latest'>[] = [0, 1, 2]
 
   indexes.forEach((i) => {

@@ -237,7 +237,7 @@ const groupByCommit = computed(() => {
     mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
   }
 
-  const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
+  const result = Object.keys(grouped).reduce<Record<string, { sha: string, message: string | undefined | null, runs: typeof props.runs }>>((acc, curr) => {
     acc[curr] = {
       sha: curr,
       message: grouped[curr][0].commitInfo?.summary,

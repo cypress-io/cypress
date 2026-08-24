@@ -4,7 +4,7 @@ import { ComputedRef, Ref, ref, watch } from 'vue'
 import _ from 'lodash'
 import { FuzzyFoundSpec, getPlatform } from './tree/useCollapsibleTree'
 
-export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
+export function fuzzySortSpecs<T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
   const normalizedSearchValue = normalizeSpecValue(searchValue)
 
   const fuzzySortResult = fuzzySort

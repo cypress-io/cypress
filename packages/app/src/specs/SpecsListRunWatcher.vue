@@ -26,7 +26,7 @@ subscription SpecsListRunWatcher($id: ID!) {
 `
 
 const props = defineProps<{
-  run: {runId: string, status: CloudRunStatus | null }
+  run: { runId: string, status: CloudRunStatus | null }
 }>()
 
 const emits = defineEmits<{

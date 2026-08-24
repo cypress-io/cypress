@@ -15,6 +15,7 @@ yarn workspace @packages/eslint-config lint
 src/
   baseConfig.ts     Core flat-config with TypeScript, import, and stylistic rules
   cliOverrides.ts   Overrides applied for CLI/Node.js contexts
+  frontendOverrides.ts  Overrides applied for the Vue frontend packages
   index.ts          Main entry: composes and exports the full flat-config array
 ```
 

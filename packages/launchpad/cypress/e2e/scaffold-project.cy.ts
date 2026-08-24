@@ -93,7 +93,7 @@ function scaffoldAndOpenCTProject (opts: {
   cy.contains('Continue').click()
 }
 
-function assertScaffoldedFilesAreCorrect (opts: { language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string, customDirectory?: string}) {
+function assertScaffoldedFilesAreCorrect (opts: { language: 'js' | 'ts', testingType: Cypress.TestingType, ctFramework?: string, customDirectory?: string }) {
   cy.withCtx((ctx) => ctx.currentProject).then((currentProject) => {
     cy.task<SnapshotScaffoldTestResult>('snapshotCypressDirectory', {
       currentProject,

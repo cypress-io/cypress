@@ -7,7 +7,7 @@ import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRu
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
 import { StubErrorWrapper } from './stubgql-ErrorWrapper'
 
-type MaybeResolveMap = {[K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]>}
+type MaybeResolveMap = { [K in keyof CodegenTypeMap]: MaybeResolver<CodegenTypeMap[K]> }
 
 export const GQLStubRegistry = {
   Wizard: stubWizard,
@@ -26,5 +26,5 @@ export const GQLStubRegistry = {
 } as const
 
 // For Type checking
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const _x: Partial<MaybeResolveMap> = GQLStubRegistry

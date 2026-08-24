@@ -53,7 +53,7 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const debugArtifacts = computed(() => {
-  return props.failedTests.reduce<{[groupID: string]: DebugArtifact[] }>((acc, curr) => {
+  return props.failedTests.reduce<{ [groupID: string]: DebugArtifact[] }>((acc, curr) => {
     acc[curr.instance?.groupId ?? ''] = getDebugArtifacts(curr.instance, t)
 
     return acc

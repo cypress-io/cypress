@@ -42,7 +42,7 @@ const { t } = useI18n()
 
 const props = defineProps<ResultCountsProps>()
 
-type CountType= 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
+type CountType = 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
 
 interface Status {
   value: number | string | null

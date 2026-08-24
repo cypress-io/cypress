@@ -1,4 +1,3 @@
-/* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '../store/mobx-runner-store'
@@ -35,7 +34,7 @@ let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
 }>) => {
   return undefined
 }
-let crossOriginLogs: {[key: string]: Cypress.Log} = {}
+let crossOriginLogs: { [key: string]: Cypress.Log } = {}
 let hasMochaRunEnded: boolean = false
 
 interface AddGlobalListenerOptions {

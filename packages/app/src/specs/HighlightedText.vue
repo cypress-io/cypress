@@ -21,7 +21,7 @@
 import { computed } from 'vue'
 
 const props = withDefaults(
-  defineProps<{text: string, indexes: number[], highlightClasses?: string}>(),
+  defineProps<{ text: string, indexes: number[], highlightClasses?: string }>(),
   { text: '', indexes: () => [], highlightClasses: 'text-white' },
 )
 

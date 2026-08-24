@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
 // tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'

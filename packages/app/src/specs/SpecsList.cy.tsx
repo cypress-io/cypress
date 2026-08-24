@@ -62,8 +62,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         cy.percySnapshot('full list')
         const longestSpec = specs.reduce((acc, spec) =>
-          acc.relative.length < spec.relative.length ? spec : acc
-        , specs[0])
+          acc.relative.length < spec.relative.length ? spec : acc,
+         specs[0])
 
         cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
         .as('specsListInput')

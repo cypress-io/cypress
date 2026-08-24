@@ -1,5 +1,5 @@
 type ProtocolInfo = {
-  type: 'cy:protocol-snapshot' | 'log:added' | 'log:changed' | 'page:loading'| 'test:before:run:async' | 'test:before:after:run:async' | 'test:after:run:async' | 'url:changed' | 'viewport:changed'
+  type: 'cy:protocol-snapshot' | 'log:added' | 'log:changed' | 'page:loading' | 'test:before:run:async' | 'test:before:after:run:async' | 'test:after:run:async' | 'url:changed' | 'viewport:changed'
   timestamp: DOMHighResTimeStamp
 }
 

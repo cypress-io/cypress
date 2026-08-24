@@ -19,7 +19,7 @@ export function useVirtualListNavigation ({
   scrollTo,
 }: UseVirtualListApi) {
   const activeItem = ref<number | null>(null)
-  const itemRefs = ref<{[key: number]: any}>({})
+  const itemRefs = ref<{ [key: number]: any }>({})
   const setItemRef = (el, index: number) => {
     if (el) {
       itemRefs.value[index] = el

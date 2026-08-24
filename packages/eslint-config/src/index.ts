@@ -2,6 +2,8 @@ export * from './baseConfig'
 
 export * from './cliOverrides'
 
+export * from './frontendOverrides'
+
 import * as globalImport from 'globals'
 
 export const globals = {

@@ -66,7 +66,7 @@ export default {
 import _ from 'lodash'
 
 import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes, Ref } from 'vue'
-// eslint-disable-next-line no-duplicate-imports
+
 import { computed, useSlots, useAttrs } from 'vue'
 import { useModelWrapper } from '../composables'
 
