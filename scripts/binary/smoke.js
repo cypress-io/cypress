@@ -19,6 +19,12 @@ const shouldSkipProjectTest = () => {
   return os.platform() === 'win32'
 }
 
+// macOS stops letting a process modify an app bundle once the app has been launched, unless
+// that process holds App Management, which our mac CI runners are denied
+const shouldSkipIntegrityTest = () => {
+  return os.platform() === 'darwin'
+}
+
 const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
   const rand = String(_.random(0, 1000))
 
@@ -331,7 +337,12 @@ const test = async function (buildAppExecutable, buildAppDir) {
   await runProjectTest(buildAppExecutable, e2e)
   await runFailingProjectTest(buildAppExecutable, e2e)
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-    await runIntegrityTest(buildAppExecutable, buildAppDir, e2e)
+    if (shouldSkipIntegrityTest()) {
+      console.log('skipping integrity test')
+    } else {
+      await runIntegrityTest(buildAppExecutable, buildAppDir, e2e)
+    }
+
     await runV8SnapshotProjectTest(buildAppExecutable, e2e)
   }
 
