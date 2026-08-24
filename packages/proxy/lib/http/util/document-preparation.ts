@@ -1,6 +1,7 @@
 import type { IncomingMessage } from 'http'
 import type { RemoteState, DocumentDomainInjection } from '@packages/network-tools'
 import type { CypressIncomingRequest } from '../../types'
+import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript } from '@packages/network-interception'
 
 export function reqMatchesPolicyBasedOnDomain (
   req: CypressIncomingRequest,
@@ -19,31 +20,6 @@ export function reqMatchesPolicyBasedOnDomain (
   }
 
   return false
-}
-
-// Pure, header-value-shaped predicates shared with should-stream-response-body.ts
-// (packages/server/lib/browsers/cdp-protocol) so both classifiers agree on
-// what counts as HTML/JS content-type and an HTML-rendering Accept header,
-// without either one re-deriving the type lists or matching semantics.
-
-export function contentTypeIsHtml (contentType: string | undefined): boolean {
-  return !!contentType && contentType.includes('html')
-}
-
-export function acceptWillRenderHtml (accept: string | undefined, xRequestedWith: string | undefined): boolean {
-  // don't inject if this is an XHR from jquery
-  if (xRequestedWith) {
-    return false
-  }
-
-  // don't inject if we didn't find both text/html and application/xhtml+xml
-  return !!accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
-}
-
-const JAVASCRIPT_CONTENT_TYPES = ['application/javascript', 'application/x-javascript', 'text/javascript']
-
-export function contentTypeIsJavaScript (contentType: string | undefined): boolean {
-  return !!contentType && JAVASCRIPT_CONTENT_TYPES.some((type) => contentType.includes(type))
 }
 
 export function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMessage) {

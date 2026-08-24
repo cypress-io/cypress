@@ -125,6 +125,10 @@ describe('notifyResponseStreamReceived', () => {
     // The middleware body path must keep its empty stand-in stream.
     expect(mw.incomingResStream).toBe(incomingResStream)
 
+    // consumption clears the field so the codec's res-close hook won't drain
+    // a stream Replay is reading
+    expect(mw.resCaptureStream).toBeUndefined()
+
     // A capture failure must stay local (debug log), never reach mw.onError —
     // the error stage would emit a spurious driver-visible request error.
     expect(teeStream.on).toHaveBeenCalledWith('error', expect.any(Function))

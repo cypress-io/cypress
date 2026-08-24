@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript, serviceWorkerHeaderIsScript } from '@packages/proxy'
+import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript, serviceWorkerHeaderIsScript } from '@packages/network-interception'
 
 // Decides, at a CDP Fetch Response-stage pause, whether the transport must
 // eagerly materialize the body (today's Fetch.getResponseBody) or can take

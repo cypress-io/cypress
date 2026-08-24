@@ -180,7 +180,19 @@ export function createSyntheticProxyCodec (
       }
 
       if (response.captureStream) {
-        (ctx as unknown as ResponseInterceptionMiddlewareCtx).resCaptureStream = response.captureStream
+        const mwCtx = ctx as unknown as ResponseInterceptionMiddlewareCtx
+
+        mwCtx.resCaptureStream = response.captureStream
+
+        // The middleware chain can end before the capture-notification stage
+        // runs (an early res.end(), or an error routing to the error stage).
+        // The synthetic res always closes when the flow ends, however it
+        // ended — so drain any capture stream nobody consumed, or an endless
+        // body's pump would buffer until the transport resets. The
+        // notification clears resCaptureStream once Replay has the stream.
+        ctx.res.once('close', () => {
+          mwCtx.resCaptureStream?.resume()
+        })
       }
 
       return ctx

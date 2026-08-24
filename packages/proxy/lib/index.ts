@@ -19,6 +19,4 @@ export { createProxyNetworkInterception } from './adapters/create-proxy-network-
 
 export type { CreateProxyNetworkInterceptionOptions } from './adapters/create-proxy-network-interception'
 
-export { defaultMiddleware, serviceWorkerHeaderIsScript } from './http'
-
-export { contentTypeIsHtml, acceptWillRenderHtml, contentTypeIsJavaScript } from './http/util/document-preparation'
+export { defaultMiddleware } from './http'

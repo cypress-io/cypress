@@ -8,13 +8,12 @@ import type { ResponseInterceptionMiddlewareCtx } from './types'
  * Notify the protocol manager that a response stream is available for capture.
  */
 export async function notifyResponseStreamReceived (mw: ResponseInterceptionMiddlewareCtx): Promise<void> {
-  // The pump is only ever drained here — any exit that will not hand the
-  // capture stream to Replay must drain it, or it buffers to the capture cap.
+  // Consuming the capture stream clears mw.resCaptureStream; the synthetic
+  // codec's res-close hook drains whatever is still set when the flow ends,
+  // so a chain that never reaches this stage cannot strand the pump.
   const captureStream = mw.resCaptureStream
 
   if (!mw.protocolManager || !mw.req.browserPreRequest?.requestId) {
-    captureStream?.resume()
-
     return mw.next()
   }
 
@@ -78,12 +77,15 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
     // With no tee, nothing will read a capture stream; drain it so the pump's
     // bytes are discarded instead of buffering to the capture cap.
     captureStream?.resume()
+    mw.resCaptureStream = undefined
     endSpan()
 
     return mw.next()
   }
 
   if (captureStream) {
+    mw.resCaptureStream = undefined
+
     // Nothing else on this path consumes the tee; drain it so backpressure
     // can't stall Replay's writer. A failure only costs this capture — the
     // client response was already served from the stand-in body, so it must
