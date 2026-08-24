@@ -506,7 +506,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   useMorgan (namespace = '__cypress') {
     return require('morgan')('dev', {
-      // #34668: tap probes and posts GraphQL on every CLI invocation, burying the user's own output
       skip: (req) => GracefulExit.isShuttingDown || (_isNonProxiedRequest(req) && _isTapRequest(req, namespace)),
     })
   }
