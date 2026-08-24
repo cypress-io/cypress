@@ -506,7 +506,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   useMorgan (namespace = '__cypress') {
     return require('morgan')('dev', {
-      skip: (req) => GracefulExit.isShuttingDown || (_isNonProxiedRequest(req) && _isTapRequest(req, namespace)),
+      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req, namespace),
     })
   }
 
