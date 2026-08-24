@@ -562,7 +562,7 @@ export class CommandQueue extends Queue<$Command> {
       onFinish: this.run,
     })
 
-    this.state('promise', promise)
+    void this.state('promise', promise)
     this.state('reject', reject)
     this.state('cancel', () => {
       cancel()

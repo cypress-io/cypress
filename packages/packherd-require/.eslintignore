@@ -1,0 +1,3 @@
+**/dist
+**/tsconfig.json
+**/test/fixtures

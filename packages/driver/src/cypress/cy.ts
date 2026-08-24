@@ -231,8 +231,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.Cypress = Cypress
     this.Cookies = Cookies
     // TODO: this should be awaited
-    /* tslint:disable:no-floating-promises */
-    initVideoRecorder(Cypress)
+    void initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
 
@@ -963,7 +962,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.queue.reset()
 
     // reset the promise again
-    this.state('promise', undefined)
+    void this.state('promise', undefined)
     this.state('hookId', hookId)
     this.state('runnable', runnable)
     this.state('ctx', runnable.ctx)

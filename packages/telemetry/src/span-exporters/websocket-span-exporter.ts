@@ -82,7 +82,7 @@ export class OTLPTraceExporter
     const popPromise = () => {
       const index = this._sendingPromises.indexOf(promise)
 
-      this._sendingPromises.splice(index, 1)
+      void this._sendingPromises.splice(index, 1)
     }
 
     promise.then(popPromise, popPromise)

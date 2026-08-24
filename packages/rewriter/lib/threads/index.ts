@@ -67,7 +67,7 @@ function wrapProcessExit () {
   // @ts-ignore
   process.exit = _.once(async (...args) => {
     debug('intercepted process.exit called, closing worker threads')
-    terminateAllWorkers()
+    void terminateAllWorkers()
     .delay(100)
     .finally(() => {
       debug('all workers terminated, exiting for real')

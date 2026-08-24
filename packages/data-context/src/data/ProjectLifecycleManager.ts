@@ -495,7 +495,7 @@ export class ProjectLifecycleManager {
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
-      s.currentProjectGitInfo?.destroy()
+      void s.currentProjectGitInfo?.destroy()
       s.currentProjectGitInfo = new GitDataSource({
         isRunMode: this.ctx.isRunMode,
         projectRoot,

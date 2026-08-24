@@ -14,7 +14,6 @@ yarn workspace @packages/ts test
 - `registerDir.js` — Registers ts-node for an entire directory tree
 - `tsconfig.json` — Base TypeScript config shared across the monorepo
 - `tsconfig.dom.json` — TypeScript config variant for browser/DOM contexts
-- `tslint.json` — TSLint config (legacy linting) shared across packages
 
 **Gotchas / Notes**
 

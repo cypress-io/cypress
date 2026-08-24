@@ -54,14 +54,14 @@ export class NotificationActions {
       // If the new run has the same run number and last time we saw the run it had 0 failures and now it has more than 0
       // failures, then it just started failing.
       if ((cachedRun.runNumber === newRun.runNumber) && (cachedRun.totalFailed === 0 && newRun.totalFailed > 0)) {
-        this.sendRunFailingNotification(newRun)
+        void this.sendRunFailingNotification(newRun)
       } else {
-        this.sendRunStartedNotification(newRun)
+        void this.sendRunStartedNotification(newRun)
       }
     }
 
     // If it has a status that isn't RUNNING, it must be done, whether it completed with failure, via cancelation, or other.
-    this.sendRunCompletedNotification(newRun, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
+    void this.sendRunCompletedNotification(newRun, newRun.status.toLowerCase() as NotifyWhenRunCompletes)
   }
 
   async #showRunNotification (body: string, run: RelevantRunInfo) {

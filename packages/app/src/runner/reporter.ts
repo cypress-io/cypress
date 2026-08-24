@@ -150,7 +150,7 @@ function renderReporter (
 
   const revealTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
 
-  Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
+  void Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
     frame.style.visibility = ''
   })
 }

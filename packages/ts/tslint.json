@@ -1,8 +1,0 @@
-{
-  "rules": {
-    "no-floating-promises": true
-  },
-  "jsRules": {
-    "no-empty": true
-  }
-}

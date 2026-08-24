@@ -39,8 +39,7 @@ export function getTitleFromAutomation (Cypress: Cypress.Cypress, options: Parti
   this.set('onFail', (err, timedOut) => {
     // if we are actively retrying or the assertion failed, we want to retry
     if (err.name === 'TitleNotYetAvailableError' || err.name === 'AssertionError') {
-      // tslint:disable-next-line no-floating-promises
-      getTitleFromAutomation()
+      void getTitleFromAutomation()
     } else {
       throw err
     }
@@ -51,8 +50,7 @@ export function getTitleFromAutomation (Cypress: Cypress.Cypress, options: Parti
       return documentTitle
     }
 
-    // tslint:disable-next-line no-floating-promises
-    getTitleFromAutomation()
+    void getTitleFromAutomation()
 
     throw mostRecentError
   }

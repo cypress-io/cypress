@@ -5,14 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "test-watch": "vitest watch",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "test-watch": "vitest watch"
   },
   "dependencies": {
     "@packages/socket": "0.0.0-development",

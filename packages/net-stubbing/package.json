@@ -5,13 +5,12 @@
   "main": "./lib/server",
   "scripts": {
     "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .ts,.json, .",
     "test": "vitest",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "test-watch": "vitest watch",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "test-watch": "vitest watch"
   },
   "dependencies": {
     "@packages/network-interception": "0.0.0-development",

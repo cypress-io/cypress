@@ -94,7 +94,12 @@ For each package in the batch:
 1. **Remove old ESLint config and plugin references:**
    - Delete `.eslintrc`, `.eslintrc.json`, or `.eslintrc.js` in the package.
    - Remove any references to `@cypress/eslint-plugin-dev` in `package.json` (if present).
-   - **Remove TSLint configs:** Delete `tslint.json` and remove `tslint` dependencies from `package.json`.
+   - TSLint is already gone repo-wide — `packages/ts/tslint.json` and every `tslint`
+     script and dependency were removed. The one rule it enforced,
+     `no-floating-promises`, is now an ESLint rule. Packages still on the root
+     `.eslintrc.js` get it from the `typeAwareSources` override there; migrate a
+     package by dropping it from that map and adding `typeCheckedConfig` to its
+     `eslint.config.ts` instead.
 2. **Add a new ESLint config file:**
    - Create `eslint.config.ts` in the package root:
      ```ts

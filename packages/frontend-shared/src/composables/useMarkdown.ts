@@ -119,7 +119,7 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, op
         const url = link.getAttribute('href')
 
         if (url) {
-          open(url)
+          void open(url)
         }
       })
     })

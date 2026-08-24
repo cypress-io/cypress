@@ -10,11 +10,10 @@
     "build-prod": "yarn build",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
-    "test-unit": "vitest run",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "test-unit": "vitest run"
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",

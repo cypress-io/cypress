@@ -16,7 +16,7 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
   Cypress.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
     cookiesToSend = cookiesToSend.concat(cookies)
 
-    Cypress.backend('cross:origin:cookies:received')
+    void Cypress.backend('cross:origin:cookies:received')
 
     if (waitingToSend) return
 
@@ -37,7 +37,7 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
 
     // if the application is already stable, sync the cookies to the automation client immediately
     if (cy.state('isStable')) {
-      syncCookiesViaAutomation()
+      void syncCookiesViaAutomation()
     } else {
       // otherwise, wait until stability is achieved
       // this event allows running a handler before stability is released.

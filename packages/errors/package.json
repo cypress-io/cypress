@@ -15,13 +15,12 @@
     "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "clean": "rimraf cjs esm",
     "lint": "eslint",
     "test": "yarn test-unit",
     "test-unit": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
 
   },

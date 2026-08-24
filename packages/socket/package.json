@@ -10,14 +10,13 @@
     "build:browser": "rimraf browser && tsc -p tsconfig.browser.json",
     "build:node": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:node:esm": "rimraf esm && tsc -p tsconfig.esm.json",
-    "check-ts": "tsc -p tsconfig.browser.json --noEmit && tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint",
+    "check-ts": "tsc -p tsconfig.browser.json --noEmit && tsc -p tsconfig.cjs.json --noEmit",
     "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "yarn build:browser -- -w & yarn build:node -- -w"
   },
   "dependencies": {

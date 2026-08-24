@@ -172,7 +172,7 @@ export class EventManager {
 
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
-        rerun()
+        void rerun()
       }
     })
 
@@ -286,7 +286,7 @@ export class EventManager {
 
     const studioInitTest = ({ testId }: { testId: string }, cb?: () => void) => {
       this.studioStore.setTestId(testId)
-      rerun()
+      void rerun()
     }
 
     this.reporterBus.on('studio:init:test', studioInitTest)

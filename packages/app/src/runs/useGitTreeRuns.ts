@@ -62,7 +62,7 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
   })
 
   function reExecuteRunsQuery () {
-    query.executeQuery()
+    void query.executeQuery()
   }
 
   return {

@@ -68,8 +68,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     debug('created request subscription %o', { eventName, request, subscription, handler })
 
-    // tslint:disable:no-floating-promises
-    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+    void emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
   }
 
   const getCanonicalInterception = (): Interception => {
@@ -185,7 +184,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       queryObj = createQueryObject()
       queryProxy = createQueryProxy(queryObj)
     },
-    // tslint:disable:no-floating-promises
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
         $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
@@ -200,7 +198,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
       }
 
-      // tslint:disable:no-floating-promises
       subscribe(eventName, handler)
 
       return userReq
@@ -225,7 +222,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-      // tslint:disable:no-floating-promises
       subscribe('response:callback', responseHandler)
 
       return finish(true)

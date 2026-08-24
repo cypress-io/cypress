@@ -9,7 +9,7 @@
     "build:lib": "tsc -p tsconfig.lib.json",
     "build:v2": "webpack-cli",
     "build:v3": "tsc -p tsconfig.app.v3.json",
-    "check-ts": "tsc -p tsconfig.json --noEmit && yarn -s tslint -p tsconfig.json",
+    "check-ts": "tsc -p tsconfig.json --noEmit",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
@@ -18,7 +18,6 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest run",
     "test-watch": "yarn test-unit --watch",
-    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./dist/v2/background.js",
     "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'"
   },
   "dependencies": {

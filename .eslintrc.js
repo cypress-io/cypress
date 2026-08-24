@@ -24,6 +24,39 @@ const validators = specifiedRules
   },
 )
 
+// `no-floating-promises` needs type information, so linting these paths builds a
+// TypeScript program. Keep the globs to the source directories each package's
+// tsconfig already covers — a file outside the program fails to parse rather
+// than being skipped.
+const typeAwareSources = {
+  app: ['src/**/*.{ts,tsx}', 'cypress/**/*.{ts,tsx}'],
+  config: ['src/**/*.ts'],
+  'data-context': ['src/**/*.ts', 'graphql/**/*.ts'],
+  driver: ['src/**/*.ts'],
+  extension: ['app/**/*.ts', 'lib/**/*.ts'],
+  'frontend-shared': ['src/**/*.{ts,tsx}', 'cypress/**/*.{ts,tsx}'],
+  icons: ['index.ts'],
+  launcher: ['index.ts', 'lib/**/*.ts'],
+  launchpad: ['src/**/*.{ts,tsx}', 'cypress/**/*.{ts,tsx}'],
+  'net-stubbing': ['lib/**/*.ts'],
+  network: ['lib/**/*.ts'],
+  'network-interception': ['lib/**/*.ts'],
+  'network-tools': ['lib/**/*.ts'],
+  'packherd-require': ['src/**/*.ts'],
+  proxy: ['lib/**/*.ts'],
+  reporter: ['src/**/*.{ts,tsx}', 'cypress/**/*.ts'],
+  'resolve-dist': ['lib/**/*.ts'],
+  rewriter: ['lib/**/*.ts'],
+  runner: ['src/**/*.{ts,tsx}', 'injection/**/*.ts'],
+  'scaffold-config': ['src/**/*.ts'],
+  socket: ['lib/**/*.ts'],
+  telemetry: ['src/**/*.ts'],
+  'v8-snapshot-require': ['src/**/*.ts'],
+}
+
+const typeAwareFiles = Object.entries(typeAwareSources)
+.flatMap(([pkg, globs]) => globs.map((glob) => `packages/${pkg}/${glob}`))
+
 module.exports = {
   root: true,
   plugins: [
@@ -78,6 +111,23 @@ module.exports = {
       ],
       rules: {
         'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+      },
+    },
+    {
+      files: typeAwareFiles,
+      // loaded from index.html rather than imported, so it is the one source
+      // file the launchpad tsconfig's program never reaches
+      excludedFiles: ['packages/launchpad/src/main.ts'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: __dirname,
+      },
+      plugins: [
+        '@typescript-eslint',
+      ],
+      rules: {
+        '@typescript-eslint/no-floating-promises': 'error',
       },
     },
     {

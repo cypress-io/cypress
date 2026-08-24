@@ -35,8 +35,7 @@ export function useSpecFilter (savedFilter?: string) {
   })
 
   // initialize spec filter in store
-  // tslint:disable:no-floating-promises
-  setSpecFilter(specFilterModel.value)
+  void setSpecFilter(specFilterModel.value)
 
   return {
     specFilterModel,

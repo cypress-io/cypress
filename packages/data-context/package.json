@@ -9,15 +9,14 @@
     "build-prod": "tsc || echo 'built, with errors'",
     "build:graphql": "graphql-codegen --config ./graphql/graphql-codegen.yml",
     "build:schema": "node ./scripts/build.js",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf --glob \"./{src,test,graphql}/**/*.js\"",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
     "nexus-build": "ts-node ./scripts/nexus-build.ts",
     "test": "yarn test-unit",
     "test-debug": "node --experimental-vm-modules --inspect-brk node_modules/.bin/jest --runInBand --testTimeout=600000",
-    "test-unit": "yarn node --experimental-vm-modules node_modules/.bin/jest --runInBand",
-    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./src/gen/nxs.gen.ts"
+    "test-unit": "yarn node --experimental-vm-modules node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "@babel/code-frame": "7.27.1",
@@ -102,8 +101,7 @@
     "@types/server-destroy": "^1.0.4",
     "@types/stringify-object": "^3.0.0",
     "jest": "^30.1.3",
-    "ts-jest": "^29.4.4",
-    "tslint": "^6.1.3"
+    "ts-jest": "^29.4.4"
   },
   "files": [
     "src",

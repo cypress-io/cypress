@@ -8,7 +8,7 @@
     "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
@@ -16,7 +16,6 @@
     "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest run",
     "test-watch": "yarn test-unit --watch",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "tsc -p tsconfig.cjs.json --watch"
   },
   "dependencies": {

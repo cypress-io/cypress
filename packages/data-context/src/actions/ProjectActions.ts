@@ -154,7 +154,7 @@ export class ProjectActions {
       this.ctx.actions.electron.showItemInFolder(projectPath)
     }
 
-    execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
+    void execa(this.ctx.coreData.localSettings.preferences.preferredEditorBinary, [projectPath])
   }
 
   setAndLoadCurrentTestingType (type: TestingType) {

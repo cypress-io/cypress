@@ -1,4 +1,4 @@
-import { baseConfig } from '@packages/eslint-config'
+import { baseConfig, typeCheckedConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -10,4 +10,5 @@ export default [
       },
     },
   },
+  ...typeCheckedConfig(['src/**/*.ts']),
 ]

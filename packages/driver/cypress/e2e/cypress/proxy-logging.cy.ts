@@ -50,7 +50,6 @@ describe('Proxy Logging', () => {
       // TODO(webkit): fix+unskip for webkit release
       browser: '!webkit',
     }, (done) => {
-      // tslint:disable:no-floating-promises
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -138,7 +137,6 @@ describe('Proxy Logging', () => {
 
       // delay the fetch call by 100ms to ensure it gets
       // triggered during the cy.wait() below
-      // tslint:disable:no-floating-promises
       setTimeout(() => {
         fetch('/some-url')
       }, 100)
@@ -189,7 +187,6 @@ describe('Proxy Logging', () => {
       it('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
-          // tslint:disable:no-floating-promises
           fetch('/some-url')
         })
 
@@ -255,7 +252,6 @@ describe('Proxy Logging', () => {
       it('shows successful indicator for 304 Not Modified responses', (done) => {
         cy.intercept('/some-url', { statusCode: 304 }).as('alias')
         .then(() => {
-          // tslint:disable:no-floating-promises
           fetch('/some-url')
         })
 

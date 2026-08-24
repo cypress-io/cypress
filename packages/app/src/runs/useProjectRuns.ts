@@ -90,8 +90,7 @@ export const useProjectRuns = (online: Ref<boolean>): RunsComposable => {
   function startPolling () {
     timeout = window.setTimeout(function fetchNewerRuns () {
       if (variables.value && online.value) {
-        // tslint:disable:no-floating-promises
-        refetcher.executeMutation(variables.value)
+        void refetcher.executeMutation(variables.value)
         .then(() => {
           startPolling()
         })
@@ -119,7 +118,7 @@ export const useProjectRuns = (online: Ref<boolean>): RunsComposable => {
   })
 
   function reExecuteRunsQuery () {
-    query.executeQuery()
+    void query.executeQuery()
   }
 
   return {

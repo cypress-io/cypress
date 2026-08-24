@@ -51,8 +51,7 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
   this.set('onFail', (err) => {
     // if we are actively retrying or the assertion failed, we want to retry
     if (err.name === 'UrlNotYetAvailableError' || err.name === 'AssertionError') {
-      // tslint:disable-next-line no-floating-promises
-      getUrlFromAutomation()
+      void getUrlFromAutomation()
     } else {
       throw err
     }
@@ -73,8 +72,7 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
       // This does NOT apply if the assertion is chained directly after the command, like cy.location().should('equal', 'https://www.foobar.com').
       // This examples DOES call the onFail handler and fetching the url will be retried from the context of the onFail handler.
       if (options?.retryAfterResolve && hasBeenInitiallyResolved) {
-        // tslint:disable-next-line no-floating-promises
-        getUrlFromAutomation()
+        void getUrlFromAutomation()
       }
 
       // We only want to retry if the url object has been resolved at least once.
@@ -84,8 +82,7 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
       return fullUrlObj
     }
 
-    // tslint:disable-next-line no-floating-promises
-    getUrlFromAutomation()
+    void getUrlFromAutomation()
 
     throw mostRecentError
   }

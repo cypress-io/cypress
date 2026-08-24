@@ -6,13 +6,12 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "build-test": "yarn build-prod --noEmit",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "check-ts": "tsc --noEmit",
     "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run",
-    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"
   },
   "dependencies": {
     "ast-types": "^0.16.1",

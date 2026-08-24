@@ -48,8 +48,7 @@ export class CDPSocketServer extends EventEmitter {
 
   // @ts-expect-error TODO: fix emit type
   emit = async (event: string, ...args: any[]) => {
-    // tslint:disable-next-line:no-floating-promises
-    this._cdpSocket?.emit(event, ...args)
+    void this._cdpSocket?.emit(event, ...args)
 
     return true
   }

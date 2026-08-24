@@ -212,7 +212,6 @@ describe('cy.origin Cypress API', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.foobar.com:3500', () => {
-        // tslint:disable:no-floating-promises
         Cypress.session.clearAllSavedSessions()
       })
     })

@@ -67,7 +67,7 @@ export default (Commands, Cypress, cy, state) => {
     // next viewport change
     const configDefaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
 
-    setViewportAndSynchronize(configDefaultViewport.viewportWidth, configDefaultViewport.viewportHeight)
+    void setViewportAndSynchronize(configDefaultViewport.viewportWidth, configDefaultViewport.viewportHeight)
   })
 
   const setViewportAndSynchronize = (width, height) => {

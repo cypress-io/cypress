@@ -443,7 +443,7 @@ class $Cypress {
     this.areSourceMapsAvailable = false
 
     const run = () => {
-      $scriptUtils.runScripts({
+      void $scriptUtils.runScripts({
         browser: this.config('browser'),
         scripts,
         specWindow,
