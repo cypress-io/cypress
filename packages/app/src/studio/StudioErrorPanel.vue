@@ -68,6 +68,7 @@ const props = withDefaults(defineProps<{
   learnMoreUrl?: string
   onRetry: () => void
 }>(), {
+  learnMoreUrl: undefined,
   title: 'Something went wrong',
   message: 'There was a problem with Cypress Studio. Our team has been notified. If the problem persists, please try again later.',
   icon: () => {

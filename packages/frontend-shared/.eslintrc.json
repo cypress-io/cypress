@@ -27,11 +27,17 @@
       "rules": {
         "vue/no-v-html": "off",
         "no-spaced-func": "off",
-        "no-restricted-imports": [
+        "no-restricted-imports": "off",
+        "@typescript-eslint/no-restricted-imports": [
           "error",
           {
             "patterns": [
-              "@packages/data-context/*"
+              {
+                "group": [
+                  "@packages/data-context/*"
+                ],
+                "allowTypeImports": true
+              }
             ]
           }
         ]
