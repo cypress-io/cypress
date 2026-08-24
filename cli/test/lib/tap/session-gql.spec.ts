@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { querySessionGraphql } from '../../../lib/tap/session-gql'
+import { verifySessionRecord } from '../../../lib/cypress-sessions'
 import type { LiveSessionState } from '../../../lib/cypress-sessions'
+
+vi.mock('../../../lib/cypress-sessions', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../lib/cypress-sessions')>()),
+  verifySessionRecord: vi.fn(),
+}))
 
 const session: LiveSessionState = {
   schemaVersion: 1,
@@ -24,11 +30,21 @@ const request = {
 
 const jsonResponse = (payload: unknown, status = 200) => ({ status, json: async () => payload })
 
+const redirected = { status: 200, redirected: true, json: async () => '<!doctype html>' }
+
+// Whether an unserved path redirects or 404s depends on which of the MITM proxy and
+// CDP owns browser traffic in the session, so both have to reach the fallback.
+const unserved = [
+  ['redirects', redirected],
+  ['answers 404', { status: 404, redirected: false, json: async () => '' }],
+] as const
+
 describe('lib/tap/session-gql', () => {
   const fetchMock = vi.fn()
 
   beforeEach(() => {
     fetchMock.mockReset()
+    vi.mocked(verifySessionRecord).mockReset()
     vi.stubGlobal('fetch', fetchMock)
   })
 
@@ -69,12 +85,42 @@ describe('lib/tap/session-gql', () => {
     })
   })
 
-  it('reports an unreachable session when the request is redirected away from GraphQL', async () => {
-    fetchMock.mockResolvedValue({ status: 200, redirected: true, json: async () => '<!doctype html>' })
+  // Sessions that predate the fixed tap route still serve GraphQL under the default
+  // namespace, so an unserved path there is retried rather than failed.
+  for (const [condition, answer] of unserved) {
+    it(`falls back to the legacy path when the tap route ${condition}`, async () => {
+      fetchMock
+      .mockResolvedValueOnce(answer)
+      .mockResolvedValueOnce(jsonResponse({ data: { currentProject: null } }))
+
+      expect(await querySessionGraphql(session, request)).toEqual({ currentProject: null })
+
+      expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+        'http://127.0.0.1:49200/__cypress/tap/graphql/TapSpecs',
+        'http://127.0.0.1:49200/__cypress/graphql/TapSpecs',
+      ])
+    })
+  }
+
+  // Neither path being served is about the session, not the request: the probe says
+  // whether it is still there, and so which of the two failures it really is.
+  it('reports an outdated session when neither path is served but it is still live', async () => {
+    fetchMock.mockResolvedValue(redirected)
+    vi.mocked(verifySessionRecord).mockResolvedValue(session)
 
     await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
-      code: 'GRAPHQL_REDIRECTED',
-      message: expect.stringContaining('redirected'),
+      code: 'SESSION_OUTDATED',
+      message: expect.stringContaining('TapSpecs'),
+    })
+  })
+
+  it('reports a stale session when neither path is served and it stopped answering', async () => {
+    fetchMock.mockResolvedValue(redirected)
+    vi.mocked(verifySessionRecord).mockResolvedValue(null)
+
+    await expect(querySessionGraphql(session, request)).rejects.toMatchObject({
+      code: 'STALE_SESSION',
+      message: expect.stringContaining('TapSpecs'),
     })
   })
 

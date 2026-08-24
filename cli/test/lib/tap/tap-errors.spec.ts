@@ -28,7 +28,6 @@ describe('lib/tap error registry', () => {
         "COMMAND_NOT_FOUND",
         "FRAME_READ_FAILED",
         "GRAPHQL_FAILED",
-        "GRAPHQL_REDIRECTED",
         "GRAPHQL_UNREACHABLE",
         "INVALID_ARGUMENTS",
         "INVALID_OPTIONS",
@@ -141,7 +140,7 @@ describe('lib/tap error registry', () => {
     .map((codes) => codes.sort())
 
     expect(shared.sort()).to.deep.eq([
-      ['BINDING_NOT_FOUND', 'CDP_UNREACHABLE', 'GRAPHQL_REDIRECTED', 'GRAPHQL_UNREACHABLE', 'STALE_SESSION'],
+      ['BINDING_NOT_FOUND', 'CDP_UNREACHABLE', 'GRAPHQL_UNREACHABLE', 'STALE_SESSION'],
       ['BINDING_THREW', 'FRAME_READ_FAILED', 'GRAPHQL_FAILED', 'STALE_HANDLE'],
       ['PROTOCOL_MISMATCH', 'UNKNOWN_ERROR'],
     ])
@@ -604,11 +603,6 @@ describe('lib/tap error rendering catalogue', () => {
     GRAPHQL_FAILED: {
       invocation: 'cypress tap specs',
       failure: new TapError('GRAPHQL_FAILED'),
-    },
-    // cli/lib/tap/session-gql.ts
-    GRAPHQL_REDIRECTED: {
-      invocation: 'cypress tap specs',
-      failure: new TapError('GRAPHQL_REDIRECTED'),
     },
     // cli/lib/tap/aut/frame.ts; also the app-side commands in packages/app/src/tap/commands/
     SPEC_NOT_STARTED: {

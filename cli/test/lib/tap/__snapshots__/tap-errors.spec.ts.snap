@@ -87,13 +87,6 @@ If the problem persists, search for an existing issue or open a GitHub issue at
   {color:blue}https://github.com/cypress-io/cypress/issues{/color}"
 `;
 
-exports[`lib/tap error rendering catalogue > GRAPHQL_REDIRECTED 1`] = `
-"> cypress tap specs
-Could not reach the Cypress session.
-
-Make sure Cypress is still open with a browser, then run the command again. If it was just started, it may still be loading."
-`;
-
 exports[`lib/tap error rendering catalogue > GRAPHQL_UNREACHABLE 1`] = `
 "> cypress tap specs
 Could not reach the Cypress session.

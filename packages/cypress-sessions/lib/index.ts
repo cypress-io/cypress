@@ -22,6 +22,11 @@ export const SESSION_ID_HEADER = 'x-cypress-session-id'
 // knowing only the port from the record.
 export const TAP_GRAPHQL_ROUTE_PREFIX = '/__cypress/tap/graphql/'
 
+// Where tap GraphQL lived before the fixed route, under the default `namespace`.
+// The CLI falls back to it to keep tapping sessions that predate the route, and it
+// can go once those are no longer supported.
+export const LEGACY_TAP_GRAPHQL_PATH = '/__cypress/graphql'
+
 export type SessionTestingType = 'e2e' | 'component' | null
 
 export interface CypressSession {
