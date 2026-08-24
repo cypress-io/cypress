@@ -17,6 +17,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
+import { cypressSessions } from './cypress-sessions'
 import type {
   BannersState,
   FoundBrowser,
@@ -254,6 +255,12 @@ export class ProjectBase extends EE {
       projectRoot: this.projectRoot,
     })
 
+    // Cypress sessions only apply to an interactive (`cypress open`) session that an
+    // external tool can attach to; skip it for headless `cypress run`.
+    if (!cfg.isTextTerminal) {
+      await cypressSessions.addSession({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
+    }
+
     await this.saveState(stateToSave)
 
     if (cfg.isTextTerminal) {
@@ -323,6 +330,7 @@ export class ProjectBase extends EE {
 
     await Promise.all([
       this.server?.close(),
+      cypressSessions.remove(),
     ])
 
     this._isServerOpen = false
@@ -598,7 +606,12 @@ export class ProjectBase extends EE {
 
         if (this._recordTests) {
           this._protocolManager?.addRunnables(runnables)
-          await this._recordTests?.(runnables, cb)
+          // when test-level rerun optimization is armed, this resolves to the
+          // full titles of the tests that will actually execute; tell the
+          // reporter to omit the rest from what it reports to Cloud
+          const filteredTests = await this._recordTests?.(runnables, cb)
+
+          reporterInstance?.setTestFilter(filteredTests)
 
           this._recordTests = null
 

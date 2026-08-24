@@ -71,6 +71,7 @@ const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
   'protocolMountVersion': 2,
+  'filterTestsAction': true,
 }
 
 let responseCache = {}

@@ -35,6 +35,11 @@ parameters:
   run-proxy-disabled-tests:
     type: boolean
     default: false
+  # Opt-in Percy visual snapshots. Default false so CI skips Percy; enable via
+  # Trigger Pipeline when a visual review is needed. Requires PERCY_TOKEN.
+  percy-enabled:
+    type: boolean
+    default: false
 
 commands:
   persist:
@@ -177,6 +182,7 @@ jobs:
               environment:
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
                 RUN_PROXY_DISABLED_TESTS: << pipeline.parameters.run-proxy-disabled-tests >>
+                PERCY_ENABLED: << pipeline.parameters.percy-enabled >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

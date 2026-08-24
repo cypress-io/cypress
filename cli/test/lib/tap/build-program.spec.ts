@@ -1,0 +1,488 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import commander from 'commander'
+
+import { buildTapProgram } from '../../../lib/tap/build-program'
+import { buildTapSchema, type TapSchema } from '@packages/cypress-sessions'
+
+const schema: TapSchema = {
+  schemaVersion: 1,
+  cypressVersion: '15.0.0',
+  commands: [
+    {
+      name: 'health',
+      description: 'check that a running Cypress session is reachable',
+      params: [],
+      options: [],
+    },
+    {
+      name: 'launch',
+      description: 'launch a spec by its project-relative path',
+      params: [
+        { name: 'spec', type: 'string', required: true, description: 'project-relative spec path' },
+      ],
+      options: [
+        { name: 'browser', alias: 'b', type: 'string', required: false, description: 'which browser to run in' },
+        { name: 'port', type: 'number', required: false, description: 'a port to listen on' },
+        { name: 'headed', type: 'boolean', required: false, description: 'show the browser' },
+      ],
+    },
+    {
+      name: 'open',
+      description: 'open a spec at a line',
+      params: [
+        { name: 'spec', type: 'string', required: true, description: 'project-relative spec path' },
+        { name: 'line', type: 'number', required: false, description: 'a one-based line number' },
+      ],
+      options: [],
+    },
+    {
+      name: 'run-state',
+      description: 'report where the running Cypress session is in its run lifecycle',
+      params: [],
+      options: [],
+      hidden: true,
+    },
+  ],
+}
+
+// A command whose options carry defaults, kept apart from `schema` so the tests
+// asserting that an unsupplied option is simply absent keep meaning something.
+const defaulting: TapSchema = {
+  schemaVersion: 1,
+  cypressVersion: '15.0.0',
+  commands: [
+    {
+      name: 'probe',
+      description: 'read something out of a running Cypress session',
+      params: [],
+      options: [
+        { name: 'selector', alias: 'e', type: 'string', required: false, defaultValue: 'body', description: 'a CSS selector' },
+        { name: 'max-chars', alias: 'm', type: 'number', required: false, defaultValue: 30_000, description: 'cap on returned characters' },
+      ],
+    },
+  ],
+}
+
+const subcommand = (program: commander.Command, name: string): commander.Command => {
+  return program.commands.find((command) => command.name() === name)!
+}
+
+describe('lib/tap/build-program', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  it('registers the CLI-native commands first, then one subcommand per advertised command', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(program.commands.map((command) => command.name())).toEqual(['sessions', 'status', 'specs', 'run', 'dom', 'aria', 'inspect', 'health', 'launch', 'open'])
+  })
+
+  it('omits commands flagged hidden from the program (still exec-able, just not advertised)', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(program.commands.map((command) => command.name())).not.toContain('run-state')
+  })
+
+  it('shadows a schema-advertised command that collides with a CLI-native one', () => {
+    // An older session still advertises `run` over the binding; the CLI-native
+    // command wins, so only one `run` registers and it carries the native grammar.
+    const program = buildTapProgram({
+      schemaVersion: 1,
+      cypressVersion: '14.0.0',
+      commands: [{
+        name: 'run',
+        description: 'run a spec by its project-relative path',
+        params: [{ name: 'spec', type: 'string', required: true, description: 'project-relative spec path' }],
+        options: [{ name: 'browser', alias: 'b', type: 'string', required: false, description: 'which browser to run in' }],
+      }],
+    }, vi.fn())
+
+    expect(program.commands.filter((command) => command.name() === 'run')).toHaveLength(1)
+    expect(subcommand(program, 'run').helpInformation()).not.toContain('--browser')
+  })
+
+  it('names the program so generated usage reads `cypress tap <command>`', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(subcommand(program, 'launch').helpInformation()).toContain('Usage: cypress tap launch [options] <spec>')
+  })
+
+  it('sets a top-level usage reflecting that options follow the command, not precede it', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(program.usage()).toBe('[command] [args...] [options]')
+    expect(program.helpInformation()).toContain('Usage: cypress tap [command] [args...] [options]')
+    expect(program.helpInformation()).not.toContain('[options] [command]')
+  })
+
+  it('derives positional grammar from each param schema (required <>, optional [])', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(program.helpInformation()).toContain('launch [options] <spec>')
+    expect(subcommand(program, 'open').usage()).toBe('[options] <spec> [line]')
+  })
+
+  it('renders a rich per-command help with the param descriptions', () => {
+    const program = buildTapProgram(schema, vi.fn())
+    const help = subcommand(program, 'open').helpInformation()
+
+    expect(help).toContain('Arguments:')
+    expect(help).toContain('spec')
+    expect(help).toContain('project-relative spec path')
+    expect(help).toContain('a one-based line number')
+  })
+
+  it('forwards positional strings to dispatch keyed by schema param name, uninterpreted', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(schema, dispatch)
+
+    program.parse(['open', 'cypress/e2e/a.cy.js', '42'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js', line: '42' }, {})
+  })
+
+  it('keys only the supplied positionals, omitting an absent trailing optional', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(schema, dispatch)
+
+    program.parse(['open', 'cypress/e2e/a.cy.js'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('open', { spec: 'cypress/e2e/a.cy.js' }, {})
+  })
+
+  it('dispatches a no-param command with an empty arg map and no options', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(schema, dispatch)
+
+    program.parse(['health'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('health', {}, {})
+  })
+
+  // An invocation short of what the command declares is a tap failure like any
+  // other — not commander's own message on stderr and its own exit code — and it
+  // reads as the instance would report the same omission.
+  it('raises a tap failure naming every required positional left out', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['launch'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '"launch" is missing the required <spec> argument.',
+      }),
+    )
+
+    expect(console.error).not.toHaveBeenCalled()
+  })
+
+  it('raises a tap failure counting operands beyond the declared params', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['launch', 'a.cy.js', 'extra'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '2 arguments were passed to "launch", but it takes at most 1.',
+      }),
+    )
+  })
+
+  it('raises a tap failure for operands passed to a no-param command', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_ARGUMENTS',
+        detail: '1 argument was passed to "health", but it takes none.',
+      }),
+    )
+  })
+
+  it('raises a tap failure for an option given without its value', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['launch', 'a.cy.js', '--browser'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_OPTIONS',
+        detail: '"launch" was given the --browser option without a value.',
+      }),
+    )
+  })
+
+  // A name the schema has no command for is a tap failure like any other, raised
+  // with the listing that answers it rather than reported in commander's voice.
+  it('raises a tap failure naming a command not in the schema, and the help that lists them', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['bogus'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'UNKNOWN_COMMAND',
+        detail: expect.stringContaining('Unknown command "bogus"'),
+      }),
+    )
+  })
+
+  it('declares each schema option (with its alias) in the per-command help', () => {
+    const program = buildTapProgram(schema, vi.fn())
+    const help = subcommand(program, 'launch').helpInformation()
+
+    expect(help).toContain('Options:')
+    expect(help).toContain('-b, --browser <browser>')
+    expect(help).toContain('which browser to run in')
+    expect(help).toContain('--headed')
+  })
+
+  it('forwards parsed option values to dispatch as raw strings keyed by name, uninterpreted', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(schema, dispatch)
+
+    program.parse(['launch', 'a.cy.js', '--browser', 'chrome', '--port', '8080', '--headed'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'chrome', port: '8080', headed: 'true' })
+  })
+
+  it('declares and forwards the reporter listing options from the shared contract', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
+    const help = subcommand(program, 'reporter').helpInformation()
+
+    expect(help).toContain('--test-id <test-id>')
+    expect(help).toContain('--attempt <attempt>')
+
+    program.parse(['reporter', '--test-id', 'r2', '--attempt', '1'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('reporter', {}, { 'test-id': 'r2', attempt: '1' })
+  })
+
+  it('declares and forwards command --command-id from the shared contract', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
+    const help = subcommand(program, 'command').helpInformation()
+
+    expect(help).toContain('--test-id <test-id>')
+    expect(help).toContain('--command-id <command-id>')
+    expect(help).toContain('--attempt <attempt>')
+
+    program.parse(['command', '--test-id', 'r2', '--command-id', 'log-3', '--attempt', '1'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': 'log-3', 'attempt': '1' })
+  })
+
+  // `command` declares --json in its schema so the session can be told, but the
+  // flag every command shares is still declared once, and it is that one the
+  // help lists — with the command's own wording.
+  it('declares a schema’s own --json once, keeping its description', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+    const help = subcommand(program, 'command').helpInformation()
+
+    expect(help.match(/--json/g)).toHaveLength(1)
+    expect(help.replace(/\s+/g, ' ')).toContain('every console property in full')
+    expect(subcommand(program, 'reporter').helpInformation().replace(/\s+/g, ' ')).toContain('--json print the raw JSON result')
+  })
+
+  it('forwards an option the renderer reads alongside the rest', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
+    const help = subcommand(program, 'command').helpInformation()
+
+    expect(help).toContain('--depth <depth>')
+    expect(help).not.toContain('--path')
+
+    program.parse(['command', '--test-id', 'r2', '--command-id', '3', '--depth', '2'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith(
+      'command',
+      {},
+      { 'test-id': 'r2', 'command-id': '3', depth: '2' },
+    )
+  })
+
+  it('resolves a short alias to its option name', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(schema, dispatch)
+
+    program.parse(['launch', 'a.cy.js', '-b', 'firefox'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, { browser: 'firefox' })
+  })
+
+  it('resolves every alias the shared contract declares', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(buildTapSchema('15.0.0'), dispatch)
+
+    program.parse(['command', '-t', 'r2', '-c', '3', '-a', '1', '-d', '2'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('command', {}, { 'test-id': 'r2', 'command-id': '3', attempt: '1', depth: '2' })
+  })
+
+  it('renders each alias alongside its long spelling in the generated help', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+
+    expect(subcommand(program, 'command').helpInformation()).toContain('-t, --test-id <test-id>')
+    expect(subcommand(program, 'aria').helpInformation()).toContain('-e, --selector <selector>')
+    expect(subcommand(program, 'status').helpInformation()).toContain('-s, --session <pid>')
+  })
+
+  // Commander accepts a short flag claimed twice within one command and silently
+  // lets the last declaration win, so nothing but this catches an alias that
+  // collides with another option or with -h.
+  it('claims each short flag at most once per command', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+
+    for (const command of [program, ...program.commands]) {
+      const shorts = ['-h', ...command.options.map((option) => option.short).filter(Boolean)]
+
+      expect(new Set(shorts).size, `${command.name()} declares a short flag twice`).toBe(shorts.length)
+    }
+  })
+
+  it('omits options the user did not supply', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(schema, dispatch)
+
+    program.parse(['launch', 'a.cy.js'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('launch', { spec: 'a.cy.js' }, {})
+  })
+
+  it('forwards a schema option’s default when the flag is absent, and the supplied value when it is not', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(defaulting, dispatch)
+
+    program.parse(['probe'], { from: 'user' })
+    program.parse(['probe', '--selector', '.btn', '--max-chars', '50'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenNthCalledWith(1, 'probe', {}, { 'selector': 'body', 'max-chars': '30000' })
+    expect(dispatch).toHaveBeenNthCalledWith(2, 'probe', {}, { 'selector': '.btn', 'max-chars': '50' })
+  })
+
+  it('renders each declared default in the per-command help, quoting a string and not a number', () => {
+    const program = buildTapProgram(defaulting, vi.fn())
+    const help = subcommand(program, 'probe').helpInformation().replace(/\s+/g, ' ')
+
+    expect(help).toContain('-e, --selector <selector> a CSS selector (default: "body")')
+    expect(help).toContain('-m, --max-chars <max-chars> cap on returned characters (default: 30000)')
+  })
+
+  it('renders the dom and aria selector defaults from the shared contract, leaving inspect’s required selector without one', () => {
+    const program = buildTapProgram(buildTapSchema('15.0.0'), vi.fn())
+    const helpOf = (name: string): string => subcommand(program, name).helpInformation().replace(/\s+/g, ' ')
+
+    expect(helpOf('dom')).toContain('-e, --selector <selector> a CSS selector matching exactly one element (default: "body")')
+    expect(helpOf('aria')).toContain('-e, --selector <selector> a CSS selector matching exactly one element (default: "body")')
+
+    // inspect takes the same selector but requires it, so the only default it
+    // renders is the --timeout every command shares.
+    expect(helpOf('inspect').match(/\(default:/g)).toHaveLength(1)
+  })
+
+  it('raises a tap failure naming a flag not in the schema, and the help that lists them', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(() => program.parse(['launch', 'a.cy.js', '--nope'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'UNKNOWN_OPTION',
+        detail: expect.stringContaining('Unknown option "--nope"'),
+      }),
+    )
+  })
+
+  it('treats a schema command that omits params as having no positionals', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram({
+      protocolVersion: 1,
+      cypressVersion: '15.0.0',
+      commands: [{
+        name: 'health',
+        description: 'check that a running Cypress session is reachable',
+      }],
+    } as TapSchema, dispatch)
+
+    program.parse(['health'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('health', {}, {})
+
+    expect(() => program.parse(['health', 'extra'], { from: 'user' })).toThrowError(
+      expect.objectContaining({ code: 'INVALID_ARGUMENTS' }),
+    )
+  })
+
+  const dashedSchema: TapSchema = {
+    protocolVersion: 1,
+    cypressVersion: '15.0.0',
+    commands: [{
+      name: 'export',
+      description: 'export results',
+      params: [],
+      options: [
+        { name: 'dry-run', type: 'boolean', required: false, description: 'preview without writing' },
+        { name: 'output-file', type: 'string', required: false, description: 'where to write results' },
+      ],
+    }],
+  }
+
+  it('forwards a dashed boolean option keyed by its raw schema name despite commander camelCasing it', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dashedSchema, dispatch)
+
+    program.parse(['export', '--dry-run'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'dry-run': 'true' })
+  })
+
+  it('forwards a dashed value option keyed by its raw schema name despite commander camelCasing it', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dashedSchema, dispatch)
+
+    program.parse(['export', '--output-file', 'out.json'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('export', {}, { 'output-file': 'out.json' })
+  })
+
+  it('omits dashed options the user did not supply', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dashedSchema, dispatch)
+
+    program.parse(['export'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('export', {}, {})
+  })
+
+  it('forwards a dashed param name keyed by its raw schema name (positionals bypass camelCasing)', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram({
+      protocolVersion: 1,
+      cypressVersion: '15.0.0',
+      commands: [{
+        name: 'show',
+        description: 'show a spec',
+        params: [{ name: 'spec-path', type: 'string', required: true, description: 'project-relative spec path' }],
+        options: [],
+      }],
+    }, dispatch)
+
+    program.parse(['show', 'a.cy.js'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('show', { 'spec-path': 'a.cy.js' }, {})
+  })
+
+  it('declares a required value option with requiredOption, and names it when left out', () => {
+    const program = buildTapProgram({
+      schemaVersion: 1,
+      cypressVersion: '15.0.0',
+      commands: [{
+        name: 'login',
+        description: 'log in',
+        params: [],
+        options: [{ name: 'token', type: 'string', required: true, description: 'an auth token' }],
+      }],
+    }, vi.fn())
+
+    expect(() => program.parse(['login'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'INVALID_OPTIONS',
+        detail: '"login" is missing the required --token option.',
+      }),
+    )
+  })
+})

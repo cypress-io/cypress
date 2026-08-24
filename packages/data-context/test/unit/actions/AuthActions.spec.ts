@@ -26,6 +26,15 @@ describe('AuthActions', () => {
       expect(ctx.coreData.user).toEqual(expect.objectContaining({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' }))
     })
 
+    it('kicks off a checkAuth to backfill the cloud user id', async () => {
+      const checkAuth = jest.spyOn(actions, 'checkAuth').mockResolvedValue(undefined)
+
+      // @ts-expect-error - incorrect number of arguments
+      await actions.login()
+
+      expect(checkAuth).toHaveBeenCalled()
+    })
+
     it('focuses the main window if there is no activeBrowser', async () => {
       ctx.coreData.activeBrowser = null
 
@@ -338,6 +347,47 @@ describe('AuthActions', () => {
       })
 
       expect(result.data?.autoProvisionedProjectId).toBe('my-project')
+    })
+  })
+
+  describe('.checkAuth', () => {
+    let ctx: DataContext
+    let actions: AuthActions
+
+    beforeEach(() => {
+      ctx = createTestDataContext('open')
+      ctx.coreData.user = { name: 'steve', email: 'steve@apple.com', authToken: 'foo' }
+      actions = new AuthActions(ctx)
+    })
+
+    it('backfills the cloud user id onto the cached user', async () => {
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
+        data: { cloudViewer: { id: 'cloud-user-1', email: 'steve@apple.com', fullName: 'steve' } },
+      } as any)
+
+      await actions.checkAuth()
+
+      expect(ctx.coreData.user?.id).toBe('cloud-user-1')
+    })
+
+    it('logs out instead when the cloud reports no viewer', async () => {
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: { cloudViewer: null } } as any)
+
+      await actions.checkAuth()
+
+      expect(ctx.coreData.user).toBeNull()
+    })
+
+    it('keeps the user logged in and id-less on a network error', async () => {
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
+        data: null,
+        error: { networkError: new Error('offline') },
+      } as any)
+
+      await actions.checkAuth()
+
+      expect(ctx.coreData.user).toEqual(expect.objectContaining({ name: 'steve' }))
+      expect(ctx.coreData.user?.id).toBeUndefined()
     })
   })
 
