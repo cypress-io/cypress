@@ -99,6 +99,38 @@ async function unpackCircleCache () {
   console.log(`Unpacked globbed node_modules from ${CACHE_DIR} to ${packageGlobs.join(', ')}`)
 
   await fsExtra.remove(CACHE_DIR)
+
+  await restoreWorkspaceLinks()
+}
+
+// Circle's Windows cache keeps the directories under the root node_modules but drops the
+// symlinks yarn puts inside them, so anything requiring a workspace by name (gulpfile.js
+// requiring @packages/ts/register, for one) fails until they are put back
+async function restoreWorkspaceLinks () {
+  const packageJsons = glob.sync(`${BASE_DIR}/{${workspacePaths.join(',')}}/package.json`)
+  const restored = []
+
+  await Promise.all(
+    packageJsons.map(async (packageJsonPath) => {
+      const { name } = require(packageJsonPath)
+
+      if (!name) return
+
+      const link = p(`node_modules/${name}`)
+
+      if (await fsExtra.pathExists(link)) return
+
+      // a link the cache left dangling has to go before it can be replaced
+      await fsExtra.remove(link)
+      await fsExtra.ensureSymlink(path.dirname(packageJsonPath), link, 'junction')
+
+      restored.push(name)
+    }),
+  )
+
+  if (restored.length) {
+    console.log(`Recreated ${restored.length} workspace links the cache dropped: ${restored.join(', ')}`)
+  }
 }
 
 function hashFile (filePath) {

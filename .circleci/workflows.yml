@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  publish-binary-branch:
+    type: string
+    default: v13
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -30,6 +35,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
+        - 'mschile/cypress-v13-ci-build-f2c711'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,6 +47,7 @@ macWorkflowFilters: &darwin-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'bump-electron-27.3.10', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/cypress-v13-ci-build-f2c711', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -52,6 +59,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'bump-electron-27.3.10', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/cypress-v13-ci-build-f2c711', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -75,6 +83,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
     - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - equal: [ 'chore/update_internal_browser_images', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/cypress-v13-ci-build-f2c711', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -125,7 +134,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2023.07.1
+      image: ubuntu-2004:2024.11.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -141,7 +150,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "bump-electron-27.3.10" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "bump-electron-27.3.10" && "$CIRCLE_BRANCH" != "mschile/cypress-v13-ci-build-f2c711" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -205,6 +214,37 @@ commands:
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
                   mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
+
+  clear-github-url-rewrites:
+    description: Drop git url rewrites so public git dependencies fetch anonymously
+    steps:
+      - run:
+          name: Clear github url rewrites
+          command: |
+            git --no-pager config --global --get-regexp '^url\..*\.insteadof' || echo "no url rewrites configured"
+            for key in $(git config --global --name-only --get-regexp '^url\..*\.insteadof' 2>/dev/null || true); do
+              if [[ "$(git config --global --get "$key")" == *github.com* ]]; then
+                echo "removing $key"
+                git config --global --unset-all "$key"
+              fi
+            done
+
+  select-python-for-node-gyp:
+    description: Point node-gyp at a Python that still ships distutils
+    steps:
+      - run:
+          name: Select Python for node-gyp
+          command: |
+            for python in python3.11 python3.10 python3.9 python3.8 /usr/bin/python3; do
+              if $python -c 'import distutils' &>/dev/null; then
+                echo "using $python ($($python --version)) for node-gyp"
+                echo "export PYTHON=$(command -v $python)" >> "$BASH_ENV"
+                exit 0
+              fi
+            done
+            echo "no Python with distutils found; node-gyp builds are expected to fail"
+            python3 --version
+            exit 1
 
   install-webkit-deps:
     steps:
@@ -1253,7 +1293,7 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             echo $SHOULD_PERSIST_ARTIFACTS
-            node ./scripts/binary/trigger-publish-binary-pipeline.js
+            PUBLISH_BINARY_BRANCH="<< pipeline.parameters.publish-binary-branch >>" node ./scripts/binary/trigger-publish-binary-pipeline.js
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1354,9 +1394,18 @@ jobs:
         default: false
     resource_class: << parameters.resource_class >>
     steps:
-      - update_known_hosts
       - checkout
       - install-required-node
+      - when:
+          condition:
+            equal: [ *linux-arm64-executor, << parameters.executor >> ]
+          steps:
+            - select-python-for-node-gyp
+      - when:
+          condition:
+            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+          steps:
+            - clear-github-url-rewrites
       - verify-build-setup:
           executor: << parameters.executor >>
       - persist_to_workspace:
@@ -1386,12 +1435,10 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries on Linux
+          name: Check env canaries
           command: |
-            # only Docker has the required env data for this
-            if [[ $CI_DOCKER == 'true' ]]; then
-              node ./scripts/circle-env.js --check-canaries
-            fi
+            IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
+            node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
       - store-npm-logs
 
@@ -3296,6 +3343,7 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - build:
         name: linux-arm64-build
+        context: test-runner:env-canary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -3398,6 +3446,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
 
     - build:
         name: darwin-arm64-build
+        context: test-runner:env-canary
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:

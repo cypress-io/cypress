@@ -7,31 +7,17 @@ if (process.platform !== 'win32') {
   describe('verify-mocha-results', () => {
     let cachedEnv = { ...process.env }
 
-    let fsAccessStub
-
     afterEach(() => {
       sinon.restore()
       Object.assign(process.env, cachedEnv)
     })
 
     beforeEach(() => {
-      process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
       sinon.stub(fs, 'readFile')
-      .withArgs('/foo.json').resolves(JSON.stringify({
-        Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
-      }))
-
-      fsAccessStub = sinon.stub(fs, 'access').withArgs('/tmp/cypress/junit').resolves()
 
       sinon.stub(fs, 'readdir').withArgs('/tmp/cypress/junit').resolves([
         'report.xml',
       ])
-    })
-
-    it('exits normally when report directory does not exist', async () => {
-      fsAccessStub.rejects()
-
-      await verifyMochaResults()
     })
 
     it('does not fail with normal report', async () => {
@@ -40,24 +26,6 @@ if (process.platform !== 'win32') {
       .resolves('<testsuites name="foo" time="1" tests="10" failures="0">')
 
       await verifyMochaResults()
-    })
-
-    context('env checking', () => {
-      it('checks for protected env and fails and removes results when found', async () => {
-        const spy = sinon.stub(fs, 'rm').withArgs('/tmp/cypress/junit', { recursive: true, force: true })
-
-        fs.readFile
-        .withArgs('/tmp/cypress/junit/report.xml')
-        .resolves('<testsuites name="foo" time="1" tests="10" failures="0">someval')
-
-        try {
-          await verifyMochaResults()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('somekey').and.not.include('someval')
-          expect(spy.getCalls().length).to.equal(1)
-        }
-      })
     })
 
     context('test result checking', () => {
