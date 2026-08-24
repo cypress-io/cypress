@@ -563,7 +563,10 @@ commands:
           command: |
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
-              apt update && apt install -y docker.io
+              # the image's Google Chrome apt key has expired, which fails the whole
+              # update; the Debian indexes docker.io comes from still refresh
+              apt update || true
+              apt install -y docker.io
               if [[ ! -f centos7-builder.tar || -n $REBUILD_CENTOS_BUILDER_IMAGE ]]; then
                   echo "*" > .dockerignore
                   docker build -t centos7-builder -f centos7-builder.Dockerfile .
