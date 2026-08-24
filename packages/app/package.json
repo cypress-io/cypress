@@ -14,7 +14,7 @@
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run:e2e:update:snapshots": "CYPRESS_SNAPSHOT_UPDATE=1 yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --spec **/*mochaEvents* --browser chrome --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT",
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "start": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
     "test": "echo 'ok'",
     "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./src/router/router.ts, *.gen.ts",
