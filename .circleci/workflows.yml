@@ -1217,17 +1217,29 @@ commands:
           command: |
             if [[ $PLATFORM != 'darwin' ]]; then echo "not darwin, skipping"; exit 0; fi
 
+            try_rename () {
+              local file="$1/Contents/Resources/app/index.js"
+              if mv "$file" "$file.bak" 2>/dev/null; then
+                echo "    $2 rename: OK"
+                mv "$file.bak" "$file"
+              else
+                echo "    $2 rename: FAILED"
+              fi
+            }
+
             report () {
               echo "--- $1"
               codesign -dv --verbose=2 "$1" 2>&1 | grep -E 'Identifier|Runtime Version|Notarization|flags=' || true
-              xattr "$1" || true
-              local file="$1/Contents/Resources/app/index.js"
-              if mv "$file" "$file.bak" 2>/dev/null; then
-                echo "    rename: OK"
-                mv "$file.bak" "$file"
-              else
-                echo "    rename: FAILED ($?)"
-              fi
+              echo "    xattr before launch: $(xattr "$1" | tr '\n' ' ')"
+              try_rename "$1" "before launch:"
+
+              "$1/Contents/MacOS/Cypress" -- --smoke-test --ping=4242 > /dev/null 2>&1 &
+              local pid=$!
+              ( sleep 90; kill -9 $pid 2> /dev/null ) &
+              wait $pid 2> /dev/null
+
+              echo "    xattr after launch:  $(xattr "$1" | tr '\n' ' ')"
+              try_rename "$1" "after launch: "
             }
 
             report "$(ls -d /tmp/cypress-build/darwin/build/*/Cypress.app | head -1)"
