@@ -25,19 +25,21 @@ const mitmOpts = {
 }
 
 // Helper function to create consistent mock preferences for testing
-const createMockDefaultPreferences = () => ({
-  default: {
-    fake_preference: {
-      value: 'value',
+const createMockDefaultPreferences = () => {
+  return {
+    default: {
+      fake_preference: {
+        value: 'value',
+      },
     },
-  },
-  defaultSecure: {},
-  localState: {
-    fake_local_state: {
-      value: 'value',
+    defaultSecure: {},
+    localState: {
+      fake_local_state: {
+        value: 'value',
+      },
     },
-  },
-})
+  }
+}
 
 // Helper function to mock _getDefaultChromePreferences with consistent fake preferences
 const mockGetDefaultChromePreferences = () => {
@@ -123,7 +125,7 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('ServiceWorker.enable')
 
-        expect(utils.initializeCDP).to.be.calledOnce
+        expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, false)
       })
     })
 
@@ -132,6 +134,7 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
+        expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, true)
       })
     })
 

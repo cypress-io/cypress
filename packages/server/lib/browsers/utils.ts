@@ -14,7 +14,6 @@ import { telemetry } from '@packages/telemetry'
 import { fs } from '../util/fs'
 import * as extension from '@packages/extension'
 import getPort from 'get-port'
-import { isProxyDisabled } from '../util/is-proxy-disabled'
 import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
 
 declare global {
@@ -417,7 +416,7 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
-const initializeCDP = async (criClient: CriClient, automation: Automation) => {
+const initializeCDP = async (criClient: CriClient, automation: Automation, useBrowserNetworkInterception: boolean) => {
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
     name: 'cypressUtilityBinding',
@@ -452,8 +451,11 @@ const initializeCDP = async (criClient: CriClient, automation: Automation) => {
   // cover). Placed first in the bootstrap source below and self-contained
   // (its own statements are try/caught, and it shares no bindings with the
   // blocks after it), so nothing later in the script can prevent it from
-  // running.
-  const disableNavigationPreloadInWindow = isProxyDisabled()
+  // running. Gated on the launch-time browser-network flag (the caller's
+  // useBrowserNetworkInterception, resolved from isBrowserNetworkMode in
+  // network-mode.ts) rather than a process-global: only the browser network
+  // (CDP Fetch) path pauses requests, so only it needs this fallback.
+  const disableNavigationPreloadInWindow = useBrowserNetworkInterception
     ? `;${DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION};`
     : ''
 

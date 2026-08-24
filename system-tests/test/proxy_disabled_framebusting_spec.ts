@@ -1,21 +1,23 @@
 import systemTests from '../lib/system-tests'
 
-// #34652: with the proxy disabled, CDP Fetch interception (Chromium-only) never
-// sees a service worker's navigation preload request - it goes straight to the
-// origin. The renderer's document therefore keeps its raw framebusting headers
-// (X-Frame-Options / CSP frame-ancestors) and skips Cypress's document
-// injection, so the AUT iframe refuses to load. Plain SW `fetch(e.request)`
-// passthrough is intercepted fine (that's #34566); only the preload request
-// escapes - this affects sites that serve documents through a navigation-preload
-// service worker (as the reported amazon.com / youtube.com repros do). With the
-// proxy enabled, the preload request traverses the MITM proxy and gets stripped
-// there instead, so the same page loads. The remediation disables navigation
-// preload when the proxy is disabled - via a script prepended to the service
-// worker itself (worker realm) plus a page bootstrap script evaluated on every
-// new document (window realm), see disable-navigation-preload.ts - so the SW's
-// fetch handler falls back to fetch(e.request), which IS intercepted. The
-// [proxy disabled] variant here guards that behavior, while the [proxy enabled]
-// control keeps exercising real preload through the MITM.
+// #34652: on the browser network (CDP Fetch) path - the default for Chrome/
+// Chromium/Edge, see isBrowserNetworkMode in network-mode.ts - CDP Fetch
+// interception never sees a service worker's navigation preload request - it
+// goes straight to the origin. The renderer's document therefore keeps its raw
+// framebusting headers (X-Frame-Options / CSP frame-ancestors) and skips
+// Cypress's document injection, so the AUT iframe refuses to load. Plain SW
+// `fetch(e.request)` passthrough is intercepted fine (that's #34566); only the
+// preload request escapes - this affects sites that serve documents through a
+// navigation-preload service worker (as the reported amazon.com / youtube.com
+// repros do). With forceHttp1 (the deprecated HTTP/1 MITM proxy path), the
+// preload request traverses the MITM proxy and gets stripped there instead, so
+// the same page loads. The remediation disables navigation preload on the
+// browser network path - via a script prepended to the service worker itself
+// (worker realm) plus a page bootstrap script evaluated on every new document
+// (window realm), see disable-navigation-preload.ts - so the SW's fetch
+// handler falls back to fetch(e.request), which IS intercepted. The
+// [browser network] variant here guards that behavior, while the [forceHttp1]
+// control keeps exercising real preload through the MITM proxy.
 //
 // The AUT iframe's first visit is a real navigation, but its response is served
 // from Cypress's server-side resolve:url buffer, and no service worker controls
@@ -28,15 +30,15 @@ import systemTests from '../lib/system-tests'
 // worker-realm call guards the injector's script-prepend seam, and the
 // page-side call in the pageSource script below guards the window-realm
 // bootstrap-script seam. Deleting either seam re-enables real preload and
-// turns the [proxy disabled] variant red.
+// turns the [browser network] variant red.
 const swSource = `
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     // Order is load-bearing: claim() (which gates the page's sw-ready flag via
-    // .controller) only runs after enable() settles, so the proxy-enabled
-    // control is guaranteed to have preload active before the spec bounces.
-    // Under proxy-disabled, Cypress patches enable() to a resolving no-op —
+    // .controller) only runs after enable() settles, so the forceHttp1 control
+    // is guaranteed to have preload active before the spec bounces. On the
+    // browser network path, Cypress patches enable() to a resolving no-op —
     // activation completing at all is part of what this test proves.
     await self.registration.navigationPreload.enable()
     await self.clients.claim()
@@ -74,11 +76,12 @@ navigator.serviceWorker.ready
   .then(markPageEnableSettled, markPageEnableSettled)
 
 // Poll .controller AND pageEnableSettled rather than navigationPreload.getState():
-// under proxy-disabled Cypress no-ops both enable() calls, so getState().enabled
-// never becomes true. Order is load-bearing on both sides the same way: claim()
-// (which gates .controller) only runs after the worker-realm enable() settles, and
-// pageEnableSettled only flips after the window-realm enable() above settles -
-// each guarantees its own seam had a chance to run before the return visit.
+// on the browser network path Cypress no-ops both enable() calls, so
+// getState().enabled never becomes true. Order is load-bearing on both sides
+// the same way: claim() (which gates .controller) only runs after the
+// worker-realm enable() settles, and pageEnableSettled only flips after the
+// window-realm enable() above settles - each guarantees its own seam had a
+// chance to run before the return visit.
 const check = () => {
   if (navigator.serviceWorker.controller && pageEnableSettled) {
     document.getElementById('app').textContent = 'sw-ready'
@@ -112,7 +115,7 @@ const onOtherServer = function (app) {
   })
 }
 
-describe('e2e proxy disabled framebusting', () => {
+describe('e2e browser network framebusting', () => {
   systemTests.setup({
     servers: [{
       port: 4466,
@@ -123,29 +126,28 @@ describe('e2e proxy disabled framebusting', () => {
     }],
   })
 
-  systemTests.it('neutralizes framebusting protections behind a nav-preload service worker [proxy disabled]', {
+  // The opt-in full-suite forceHttp1 CI jobs export CYPRESS_forceHttp1=true
+  // (see .circleci @pipeline.yml); CLI config always beats env, so the
+  // explicit `forceHttp1: false` below is what pins this variant to the
+  // browser network path there.
+  systemTests.it('neutralizes framebusting protections behind a nav-preload service worker [browser network]', {
     browser: 'chrome',
     spec: 'proxy_disabled_framebusting.cy.js',
     expectedExitCode: 0,
-    processEnv: {
-      CYPRESS_INTERNAL_DISABLE_PROXY: '1',
-    },
     config: {
+      forceHttp1: false,
       pageLoadTimeout: 15000,
     },
   })
 
-  // Explicit '0' so this control stays proxy-enabled even inside the CI cdp job whose
-  // shell exports CYPRESS_INTERNAL_DISABLE_PROXY=1; is-proxy-disabled checks strict
-  // equality with '1', so a proxy-enabled run has to override it back to '0' here.
-  systemTests.it('neutralizes framebusting protections behind a nav-preload service worker [proxy enabled]', {
+  // forceHttp1: true selects the MITM path — the control proving real
+  // navigation preload still works there.
+  systemTests.it('neutralizes framebusting protections behind a nav-preload service worker [forceHttp1]', {
     browser: 'chrome',
     spec: 'proxy_disabled_framebusting.cy.js',
     expectedExitCode: 0,
-    processEnv: {
-      CYPRESS_INTERNAL_DISABLE_PROXY: '0',
-    },
     config: {
+      forceHttp1: true,
       pageLoadTimeout: 15000,
     },
   })

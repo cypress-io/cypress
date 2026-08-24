@@ -11,20 +11,10 @@ describe('lib/browsers/utils', () => {
       }
     }
 
-    // A CI shell can export CYPRESS_INTERNAL_DISABLE_PROXY=1 ambiently (the
-    // cdp-remediated jobs do). spec_helper only restores the env snapshot
-    // *after* each test, so that ambient value would otherwise leak into
-    // the "proxy enabled" test below and make it fail — clear it up front
-    // instead of relying on a previous test's cleanup to have run first.
-    beforeEach(() => {
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-    })
-
-    it('includes the window navigation-preload expression in the new-document bootstrap script when the proxy is disabled', async () => {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+    it('includes the window navigation-preload expression in the new-document bootstrap script when useBrowserNetworkInterception is true', async () => {
       const criClient = createCriClient()
 
-      await utils.initializeCDP(criClient as any, {} as any)
+      await utils.initializeCDP(criClient as any, {} as any, true)
 
       const call = criClient.send.getCalls().find((c) => c.args[0] === 'Page.addScriptToEvaluateOnNewDocument')
 
@@ -35,10 +25,10 @@ describe('lib/browsers/utils', () => {
       expect(() => new Function(call!.args[1].source)).not.to.throw()
     })
 
-    it('excludes the window navigation-preload expression from the new-document bootstrap script when the proxy is enabled', async () => {
+    it('excludes the window navigation-preload expression from the new-document bootstrap script when useBrowserNetworkInterception is false', async () => {
       const criClient = createCriClient()
 
-      await utils.initializeCDP(criClient as any, {} as any)
+      await utils.initializeCDP(criClient as any, {} as any, false)
 
       const call = criClient.send.getCalls().find((c) => c.args[0] === 'Page.addScriptToEvaluateOnNewDocument')
 

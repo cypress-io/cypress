@@ -20,9 +20,9 @@ declare const self: ServiceWorkerGlobalScopeLike
  * Disables navigation preload so a service worker's fetch handler falls back
  * to `fetch(e.request)` — the path CDP Fetch can intercept. A navigation
  * preload response bypasses `Fetch.requestPaused` entirely (a known CDP
- * limitation shared by puppeteer/playwright), so with the proxy disabled it
- * reaches the renderer with framebusting headers unstripped and no Cypress
- * injection (#34652).
+ * limitation shared by puppeteer/playwright), so on the browser network (CDP
+ * Fetch) path it reaches the renderer with framebusting headers unstripped
+ * and no Cypress injection (#34652).
  *
  * `registration.navigationPreload` is reachable from two realms, and each
  * needs its own seam:
@@ -36,7 +36,8 @@ declare const self: ServiceWorkerGlobalScopeLike
  *   immediately after `serviceWorker.register()`): `enable()` is closed
  *   deterministically by `DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION`
  *   below, which `initializeCDP` in browsers/utils.ts evaluates before any
- *   page script runs, on every new document while the proxy is disabled.
+ *   page script runs, on every new document when the browser network path
+ *   is active.
  *   That same expression also sweeps `serviceWorkerContainer.
  *   getRegistrations()` to `disable()` a persisted registration from an
  *   earlier run (whose script the pipeline never refetches, so the worker
@@ -59,8 +60,8 @@ declare const self: ServiceWorkerGlobalScopeLike
  *
  * `getState()` is left untouched in both realms — it keeps reporting the
  * real state (disabled). Code that polls `getState().enabled === true` to
- * confirm preload is active will wait forever under proxy-disabled. A
- * service worker that calls `respondWith(e.preloadResponse)` with no
+ * confirm preload is active will wait forever on the browser network path.
+ * A service worker that calls `respondWith(e.preloadResponse)` with no
  * fallback still fails its navigation; the spec and MDN mandate a fallback,
  * and spoofing `preloadResponse` at either seam is infeasible.
  */

@@ -364,7 +364,7 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        utils.initializeCDP(pageCriClient, automation),
+        utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
         // Note that we are omitting `file_systems` as it is very non-performant to clear:
         // https://github.com/cypress-io/cypress/pull/32703
