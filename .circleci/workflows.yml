@@ -1209,6 +1209,36 @@ commands:
               yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
       - run:
+          # TEMPORARY: the runner is denied App Management, so it cannot modify a signed and
+          # notarized bundle, yet develop's integrity test does exactly that from this same
+          # process. Compare our bundle against a released one to see what macOS treats
+          # differently.
+          name: Compare bundle protection against a released binary
+          command: |
+            if [[ $PLATFORM != 'darwin' ]]; then echo "not darwin, skipping"; exit 0; fi
+
+            report () {
+              echo "--- $1"
+              codesign -dv --verbose=2 "$1" 2>&1 | grep -E 'Identifier|Runtime Version|Notarization|flags=' || true
+              xattr "$1" || true
+              local file="$1/Contents/Resources/app/index.js"
+              if mv "$file" "$file.bak" 2>/dev/null; then
+                echo "    rename: OK"
+                mv "$file.bak" "$file"
+              else
+                echo "    rename: FAILED ($?)"
+              fi
+            }
+
+            report "$(ls -d /tmp/cypress-build/darwin/build/*/Cypress.app | head -1)"
+
+            mkdir -p /tmp/appcmp && cd /tmp/appcmp
+            curl -sL -o latest.zip "https://download.cypress.io/desktop?platform=darwin&arch=$(node -p 'process.arch')"
+            unzip -q -o latest.zip -d latest
+            report /tmp/appcmp/latest/Cypress.app
+
+            exit 0
+      - run:
           name: Smoke Test the Cypress binary
           command: |
             source ./scripts/ensure-node.sh
