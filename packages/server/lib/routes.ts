@@ -257,7 +257,6 @@ export const createCommonRoutes = ({
     router.get(`${SESSIONS_ROUTE_PREFIX}:sessionId`, async (req, res) => {
       const state = cypressSessions.getCurrent()
 
-      // #34668: the probe is kept out of the morgan log, so this is the only trace tap attached
       debug('session probe for %s; current session is %s', req.params.sessionId, state?.sessionId ?? 'none')
 
       if (!state || req.params.sessionId !== state.sessionId) {
