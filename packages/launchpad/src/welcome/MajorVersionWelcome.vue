@@ -28,7 +28,7 @@
             data-cy="release-highlights"
           >
             <h1 class="font-medium text-center mb-[8px] tracking-tighter text-[22px] leading-snug text-gray-1000">
-              {{ t('majorVersionWelcome.title') }}
+              What's New in Cypress
             </h1>
 
             <div class="mb-[16px]">
@@ -44,23 +44,32 @@
             </div>
             <div class="children:mb-[16px]">
               <p>
-                <strong>Cypress 16 supports HTTP/2.</strong> Your application is now tested over the same protocol it uses in production — multiplexed requests, no six-connection ceiling — so modern apps load faster under test and behave the way your users actually experience them.
+                Faster tests, less flake, and a few breaking changes that may require updates.
               </p>
               <p>
-                <strong>Your tests are faster and more reliable out of the box.</strong> Visibility checks now delegate to the browser’s native <InlineCodeFragment>Element.checkVisibility()</InlineCodeFragment>, <ExternalLink href="https://on.cypress.io/type">
+                <strong>Faster tests.</strong> Cypress now uses HTTP/2 in Chromium-based browsers whenever your server supports it, so request-heavy pages load in parallel instead of queuing behind a handful of connections. <ExternalLink href="https://on.cypress.io/type">
                   <InlineCodeFragment>cy.type()</InlineCodeFragment>
-                </ExternalLink> no longer pauses between keystrokes, and <ExternalLink href="https://on.cypress.io/getcookie">
-                  <InlineCodeFragment>cy.getCookie()</InlineCodeFragment>
-                </ExternalLink>, <InlineCodeFragment>cy.getAllCookies()</InlineCodeFragment>, <InlineCodeFragment>cy.getAllLocalStorage()</InlineCodeFragment>, and <InlineCodeFragment>cy.getAllSessionStorage()</InlineCodeFragment> have become query commands that retry until your assertions pass — so cookies and storage that arrive asynchronously no longer flake your tests.
+                </ExternalLink> no longer pauses between keystrokes, and visibility checks use a faster algorithm.
               </p>
               <p>
-                This release also includes breaking changes that may require updates to your project — most notably the removal of <InlineCodeFragment>Cypress.env()</InlineCodeFragment> in favor of <ExternalLink href="https://on.cypress.io/expose">
+                <strong>Less flake, more stability.</strong> Browser memory management is on by default, so long runs are less likely to crash the renderer process. Cookie and storage reads
+                are now query commands that retry until your assertions pass, so values that arrive asynchronously no longer fail a test by a few milliseconds.
+              </p>
+              <p>
+                <strong>Other changes.</strong> <InlineCodeFragment>Cypress.env()</InlineCodeFragment> has been removed, and tests that call it will fail until you migrate to
+                <ExternalLink href="https://on.cypress.io/env">
+                  <InlineCodeFragment>cy.env()</InlineCodeFragment>
+                </ExternalLink>
+                or <ExternalLink href="https://on.cypress.io/expose">
                   <InlineCodeFragment>Cypress.expose()</InlineCodeFragment>
-                </ExternalLink> and <InlineCodeFragment>cy.env()</InlineCodeFragment>, and the deprecation of Electron as a test browser. See the <ExternalLink href="https://on.cypress.io/cypress-env-migration">
+                </ExternalLink>. Electron is deprecated as a test browser but is still available in this release.
+              </p>
+              <p>
+                See the <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#Migrating-to-Cypress-160">
                   migration guide
-                </ExternalLink> and our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
-                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink> for the full list.
+                </ExternalLink> for steps to upgrade and the <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
+                  changelog
+                </ExternalLink> for the full list of changes.
               </p>
             </div>
           </div>
@@ -177,13 +186,13 @@
           data-cy="major-version-welcome-continue"
           @click="handleClick"
         >
-          {{ t('majorVersionWelcome.actionContinue') }}
+          Continue
           <i-cy-chevron-right_x16 class="icon-dark-white ml-[8px]" />
         </Button>
         <ExternalLink
           href="https://on.cypress.io/changelog"
         >
-          {{ t('majorVersionWelcome.linkReleaseNotes') }}
+          View full changelog
         </ExternalLink>
       </div>
     </div>
@@ -192,13 +201,10 @@
 
 <script lang="ts" setup>
 import Button from '@cypress-design/vue-button'
-import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'
 import { computed, ref } from 'vue'
-
-const { t } = useI18n()
 
 const scroller = ref<HTMLElement | null>(null)
 const wrapper = ref<HTMLElement | null>(null)
