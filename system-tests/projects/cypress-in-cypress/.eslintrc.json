@@ -10,12 +10,27 @@
     "@cypress/dev"
   ],
   "extends": [
-    "../../../packages/frontend-shared/.eslintrc.json"
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests",
+    "plugin:vue/vue3-recommended"
   ],
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
   "env": {
     "cypress/globals": true
   },
   "overrides": [
+    {
+      "files": [
+        "*.vue"
+      ],
+      "rules": {
+        "vue/no-v-html": "off",
+        "no-spaced-func": "off"
+      }
+    },
     {
       "files": [
         "*.ts"
