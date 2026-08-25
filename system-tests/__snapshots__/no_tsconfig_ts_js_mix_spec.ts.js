@@ -22,7 +22,7 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-TsConfigNotFoundError: No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.
+TsConfigNotFoundError: No tsconfig.json found. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.
       [stack trace lines]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:

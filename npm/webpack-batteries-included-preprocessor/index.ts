@@ -84,10 +84,18 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
   // returns null if tsconfig cannot be found in the path/parent hierarchy
   const configFile = getTsConfig.getTsconfig(file.filePath)
 
-  if (!configFile && typescriptExtensionRegex.test(file.filePath)) {
-    debug('no user tsconfig.json found. Throwing TsConfigNotFoundError')
-    // @see https://github.com/cypress-io/cypress/issues/18938
-    throw new TsConfigNotFoundError()
+  if (!configFile) {
+    if (typescriptExtensionRegex.test(file.filePath)) {
+      debug('no user tsconfig.json found. Throwing TsConfigNotFoundError')
+      // @see https://github.com/cypress-io/cypress/issues/18938
+      throw new TsConfigNotFoundError()
+    }
+
+    // ts-loader has no config to compile against, and a spec that isn't
+    // TypeScript has no need for one, so leave it to the JavaScript rules
+    debug(`no user tsconfig.json found, skipping TypeScript support for ${file.filePath}`)
+
+    return options
   }
 
   debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)

@@ -19,7 +19,7 @@ describe('e2e no tsconfig ts js mix', () => {
     async onRun (exec, browserName) {
       const { stdout } = await exec()
 
-      expect(stdout).to.include('TsConfigNotFoundError: No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+      expect(stdout).to.include('TsConfigNotFoundError: No tsconfig.json found. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
     },
   })
 })

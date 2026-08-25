@@ -44,10 +44,29 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
 
     it('adds typescript config if path is specified', () => {
+      vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+        config: {
+          compilerOptions: {
+            module: 'ESNext',
+            moduleResolution: 'Bundler',
+          },
+        },
+        path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
+      })
+
       const result = getFullWebpackOptions('file/path', 'typescript/path')
 
       expect(result.module.rules).toHaveLength(4)
       expect(result.module.rules[3].use[0].loader).toContain('ts-loader')
+    })
+
+    it('does not add typescript config for a non-typescript file when no tsconfig.json is found', () => {
+      vi.mocked(getTsConfig).getTsconfig.mockReturnValue(null)
+
+      const result = getFullWebpackOptions('file/path.js', 'typescript/path')
+
+      expect(result.module.rules).toHaveLength(3)
+      expect(result.module.rules.some((rule) => rule.use?.some((use) => use.loader?.includes('ts-loader')))).toBe(false)
     })
 
     it('adds the BundleAnalyzerPlugin if the user is trying to debug their bundle', async () => {
