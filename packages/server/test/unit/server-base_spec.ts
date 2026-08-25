@@ -109,7 +109,7 @@ describe('lib/server-base', () => {
     })
 
     it('passes dev format and skip that mirrors GracefulExit.isShuttingDown', async function () {
-      this.server.useMorgan('__cypress')
+      this.server.useMorgan()
 
       const req = { proxiedUrl: '/__cypress/iframes/foo', headers: {} }
 
@@ -139,7 +139,7 @@ describe('lib/server-base', () => {
 
       beforeEach(function () {
         getCurrent = sinon.stub(cypressSessions, 'getCurrent').returns({ sessionId: 'abc' })
-        this.server.useMorgan('__cypress')
+        this.server.useMorgan()
       })
 
       afterEach(() => {
@@ -154,12 +154,12 @@ describe('lib/server-base', () => {
         expect(skip('/__cypress/sessions/abc')).to.be.true
       })
 
-      it('skips a non-proxied graphql request carrying the current session id', () => {
-        expect(skip('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' })).to.be.true
+      it('skips a non-proxied tap graphql request carrying the current session id', () => {
+        expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' })).to.be.true
       })
 
-      it('logs a graphql request whose session id header does not match', () => {
-        expect(skip('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).to.be.false
+      it('logs a tap graphql request whose session id header does not match', () => {
+        expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).to.be.false
       })
 
       it('logs a graphql request from the app, which sends no session id header', () => {
