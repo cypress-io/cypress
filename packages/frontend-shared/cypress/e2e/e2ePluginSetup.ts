@@ -1,7 +1,3 @@
-import { hookRequire } from '@packages/server/hook-require'
-
-hookRequire({ forceTypeScript: false })
-
 // Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
 // from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
 // will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.

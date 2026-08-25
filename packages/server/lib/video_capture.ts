@@ -5,21 +5,55 @@ import ffmpeg from 'fluent-ffmpeg'
 import stream from 'stream'
 import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
-import { path as ffprobePath } from '@ffprobe-installer/ffprobe'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
 import type { FfprobeData } from 'fluent-ffmpeg'
+import path from 'path'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
 // extra verbose logs for logging individual frames
 const debugFrames = Debug('cypress-verbose:server:video:frames')
 
+const resolveFfprobePath = () => {
+  const binary = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+  const platformArch = `${process.platform}-${process.arch}`
+  const ffprobeDir = path.dirname(require.resolve('@ffprobe-installer/ffprobe/package.json'))
+  const nodeModulesIdx = ffprobeDir.indexOf('node_modules')
+
+  const candidates = [
+    path.join(ffprobeDir, '..', platformArch, binary),
+    path.join(ffprobeDir, 'node_modules', '@ffprobe-installer', platformArch, binary),
+  ]
+
+  if (process.env.PROJECT_BASE_DIR) {
+    candidates.unshift(path.join(process.env.PROJECT_BASE_DIR, 'node_modules', '@ffprobe-installer', platformArch, binary))
+  }
+
+  if (nodeModulesIdx !== -1) {
+    candidates.push(path.join(
+      ffprobeDir.substring(0, nodeModulesIdx),
+      'node_modules',
+      '@ffprobe-installer',
+      platformArch,
+      binary,
+    ))
+  }
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate
+    }
+  }
+
+  throw new Error(`Could not find ffprobe executable, tried ${candidates.map((c) => `"${c}"`).join(', ')}`)
+}
+
 debug('using ffmpeg from %s', ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
-ffmpeg.setFfprobePath(ffprobePath)
+ffmpeg.setFfprobePath(resolveFfprobePath())
 
 const deferredPromise = function () {
   let reject

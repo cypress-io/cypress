@@ -1,6 +1,9 @@
 {
   "extends": "./../ts/tsconfig.json",
   "include": [
+    "index.ts",
+    "hook-require.ts",
+    "start-cypress.ts",
     "lib/*.ts",
     "lib/**/*.ts",
   ],
