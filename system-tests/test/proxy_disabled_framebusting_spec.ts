@@ -53,6 +53,10 @@ self.addEventListener('fetch', (e) => {
 
       return fetch(e.request)
     })())
+  } else if (new URL(e.request.url).pathname === '/probe') {
+    // Passthrough for the page's readiness probe (see pageSource): lets the
+    // page observe whether worker-originated fetches are intercepted yet.
+    e.respondWith(fetch(e.request))
   }
 })
 `
@@ -82,12 +86,28 @@ navigator.serviceWorker.ready
 // worker-realm enable() settles, and pageEnableSettled only flips after the
 // window-realm enable() above settles - each guarantees its own seam had a
 // chance to run before the return visit.
+//
+// The /probe poll is a third readiness condition: a worker's fetches can run
+// before Cypress's page connection attaches to the new worker session and
+// enables interception on it (the attach race tracked in #34674), and until
+// then worker-served navigations bypass header stripping - the very behavior
+// this test asserts on. The probe is passed through the worker (see
+// swSource) and the origin serves it with X-Frame-Options, which
+// interception always strips: the header disappearing from a same-origin
+// fetch is direct evidence that worker-originated traffic is intercepted, so
+// the test's navigations exercise only the navigation-preload behavior.
 const check = () => {
-  if (navigator.serviceWorker.controller && pageEnableSettled) {
-    document.getElementById('app').textContent = 'sw-ready'
-  } else {
-    setTimeout(check, 50)
+  if (!navigator.serviceWorker.controller || !pageEnableSettled) {
+    return setTimeout(check, 50)
   }
+
+  fetch('/probe').then((res) => {
+    if (res.headers.get('x-frame-options')) {
+      return setTimeout(check, 250)
+    }
+
+    document.getElementById('app').textContent = 'sw-ready'
+  }, () => setTimeout(check, 250))
 }
 
 check()
@@ -117,6 +137,15 @@ const onSwServer = function (app) {
   app.get('/sw.js', (req, res) => {
     res.setHeader('Cache-Control', 'no-store')
     res.type('application/javascript').send(swSource)
+  })
+
+  // Readiness probe (see pageSource): served with a framebusting header that
+  // interception strips, so its presence in the page's fetch response means
+  // worker-originated traffic is not intercepted yet.
+  app.get('/probe', (req, res) => {
+    res.setHeader('X-Frame-Options', 'DENY')
+    res.setHeader('Cache-Control', 'no-store')
+    res.send('probe')
   })
 }
 
