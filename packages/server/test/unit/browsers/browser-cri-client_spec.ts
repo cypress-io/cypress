@@ -184,6 +184,7 @@ describe('lib/browsers/browser-cri-client', function () {
             targetId: 'main-target-id',
           },
           resettingBrowserTargets: false,
+          sessionTargetInfo: new Map(),
         },
         CriConstructor: sinon.stub(),
         event: {
@@ -483,6 +484,38 @@ describe('lib/browsers/browser-cri-client', function () {
       // error is caught or else the test would fail
     })
 
+    // Recorded so a later crash-and-reload on this session (which carries no
+    // TargetInfo of its own - see Inspector.targetReloadedAfterCrash) can
+    // still be told apart as a service worker (or not) and routed through
+    // the same interception hold as a fresh attach (#34674).
+    it('records the session -> TargetInfo mapping for every attach, not just service workers', async () => {
+      // iframe (like service_worker) takes the "not an extra target" branch
+      // directly; the default 'page' type would otherwise route through the
+      // extra-target connect flow this test isn't exercising.
+      options.event.targetInfo.type = 'iframe'
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(options.browserCriClient.sessionTargetInfo.get('session-id')).to.equal(options.event.targetInfo)
+    })
+
+    // Ordering proof, same shape as elsewhere in this file: the mapping must
+    // be visible to a lookup that races the handler, not just to one that
+    // waits for it to finish - Inspector.targetReloadedAfterCrash can fire
+    // for this session before this attach has awaited anything.
+    it('records the session -> TargetInfo mapping before the first await (Network.enable)', async () => {
+      options.event.targetInfo.type = 'iframe'
+      options.browserClient.send.withArgs('Network.enable', sinon.match.any, 'session-id').returns(new Promise(() => {}))
+
+      // not awaited - the handler is left suspended inside Network.enable
+      BrowserCriClient._onAttachToTarget(options as any)
+
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(options.browserCriClient.sessionTargetInfo.get('session-id')).to.equal(options.event.targetInfo)
+    })
+
     // #34674: a paused service worker attaches on both this (browser-level)
     // connection and the page connection. Releasing it here before the page
     // connection has enabled session-scoped Fetch interception lets the
@@ -578,6 +611,142 @@ describe('lib/browsers/browser-cri-client', function () {
     })
   })
 
+  context('._manageTabs', () => {
+    // Exercises the real Target.detachedFromTarget and
+    // Inspector.targetReloadedAfterCrash listeners _manageTabs registers,
+    // rather than calling private handlers directly - there's no other way
+    // to reach them.
+    async function setup (childTargetInterceptionTimeoutMs?: number) {
+      const browserClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+      const browserCriClient: any = {
+        sessionTargetInfo: new Map(),
+      }
+
+      await BrowserCriClient._manageTabs({
+        browserClient: browserClient as any,
+        browserCriClient,
+        browserName: 'Chrome',
+        host: 'localhost',
+        onAsynchronousError: sinon.stub(),
+        port: 1234,
+        ...(childTargetInterceptionTimeoutMs !== undefined ? { childTargetInterceptionTimeoutMs } : {}),
+      } as any)
+
+      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+      const detachHandler = browserClient.on.withArgs('Target.detachedFromTarget').args[0][1]
+
+      return { browserClient, browserCriClient, crashHandler, detachHandler }
+    }
+
+    describe('Target.detachedFromTarget', () => {
+      it('evicts the session -> TargetInfo mapping', async () => {
+        const { browserCriClient, detachHandler } = await setup()
+        const sessionId = 'sw-session'
+
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+
+        detachHandler({ sessionId, targetId: 'sw-target-id' })
+
+        expect(browserCriClient.sessionTargetInfo.has(sessionId)).to.be.false
+      })
+    })
+
+    // #34674: mid-test, an AUT navigation can make a service worker "crash"
+    // in CDP terms. Inspector.targetReloadedAfterCrash is a second release
+    // path for the exact same worker _onAttachToTarget originally paused -
+    // released here uninstrumented, it can serve the crash-and-reload's own
+    // navigation (and any that follow) with zero pauses, the same escape
+    // #34674 closes on the ordinary attach path.
+    describe('Inspector.targetReloadedAfterCrash', () => {
+      it('awaits confirmed interception before releasing a crashed, mapped, non-extension service worker', async () => {
+        const { browserClient, browserCriClient, crashHandler } = await setup()
+        const targetId = 'sw-target-id'
+        const sessionId = 'sw-session'
+
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId, type: 'service_worker', url: 'https://example.test/sw.js' })
+
+        const interceptionConfirmed = Promise.withResolvers<void>()
+
+        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(interceptionConfirmed.promise)
+
+        const released = crashHandler({}, sessionId)
+
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(browserCriClient.waitForChildTargetInterception).to.have.been.calledWith(targetId)
+        expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+        interceptionConfirmed.resolve()
+        await released
+
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('releases immediately when the session has no recorded TargetInfo', async () => {
+        const { browserClient, crashHandler } = await setup()
+
+        await crashHandler({}, 'unmapped-session')
+
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'unmapped-session')
+      })
+
+      it('releases immediately for a mapped extension service worker', async () => {
+        const { browserClient, browserCriClient, crashHandler } = await setup()
+        const sessionId = 'ext-session'
+
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'ext-target', type: 'service_worker', url: 'chrome-extension://abc123/background.js' })
+        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await crashHandler({}, sessionId)
+
+        expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      // MITM parity: on that path nothing ever sets waitForChildTargetInterception,
+      // so a mapped, non-extension service worker session must still release
+      // immediately rather than hold against a field that will never appear.
+      it('releases immediately for a mapped, non-extension service worker when waitForChildTargetInterception is unset', async () => {
+        const { browserClient, browserCriClient, crashHandler } = await setup()
+        const sessionId = 'sw-session'
+
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+
+        await crashHandler({}, sessionId)
+
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('releases a mapped, non-service-worker session immediately without consulting the field', async () => {
+        const { browserClient, browserCriClient, crashHandler } = await setup()
+        const sessionId = 'page-session'
+
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'page-target', type: 'page', url: 'https://example.test/' })
+        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await crashHandler({}, sessionId)
+
+        expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('releases the crashed service worker once the interception-confirmation timeout elapses', async () => {
+        const { browserClient, browserCriClient, crashHandler } = await setup(5)
+        const sessionId = 'sw-session'
+
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await crashHandler({}, sessionId)
+
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+    })
+  })
+
   context('._onTargetDestroyed', () => {
     describe('when not the currently attached target', () => {
       let options: any
@@ -602,6 +771,7 @@ describe('lib/browsers/browser-cri-client', function () {
               close: sinon.stub().resolves(),
             },
             resettingBrowserTargets: false,
+            sessionTargetInfo: new Map(),
           },
           event: {
             targetId: 'target-id',
@@ -702,6 +872,20 @@ describe('lib/browsers/browser-cri-client', function () {
         BrowserCriClient._onTargetDestroyed(options as any)
 
         expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).to.be.called
+      })
+
+      // Target.targetDestroyed carries no sessionId, unlike detachedFromTarget
+      // - this is the fallback sweep for whichever session(s) were recorded
+      // against the destroyed targetId (#34674).
+      it('evicts any session -> TargetInfo mapping recorded for the destroyed target', () => {
+        options.browserCriClient.hasExtraTargetClient.returns(false)
+        options.browserCriClient.sessionTargetInfo.set('sw-session', { targetId: 'target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+        options.browserCriClient.sessionTargetInfo.set('other-session', { targetId: 'some-other-target-id', type: 'page', url: 'https://example.test/' })
+
+        BrowserCriClient._onTargetDestroyed(options as any)
+
+        expect(options.browserCriClient.sessionTargetInfo.has('sw-session')).to.be.false
+        expect(options.browserCriClient.sessionTargetInfo.has('other-session')).to.be.true
       })
     })
   })

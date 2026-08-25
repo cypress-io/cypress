@@ -170,7 +170,7 @@ describe('e2e browser network framebusting', () => {
     // and whether the return document's requests were intercepted. Remove
     // once the CI failure is understood.
     processEnv: {
-      DEBUG: 'cypress:server:browsers:cdp-fetch-transport,cypress:server:browsers:cri-client',
+      DEBUG: 'cypress:server:browsers:cdp-fetch-transport,cypress:server:browsers:cri-client,cypress:server:browsers:browser-cri-client',
     },
     config: {
       forceHttp1: false,
