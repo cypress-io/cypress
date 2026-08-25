@@ -1,10 +1,7 @@
 // tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import MajorVersionWelcome from './MajorVersionWelcome.vue'
 import interval from 'human-interval'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
-
-const text = defaultMessages.majorVersionWelcome
 
 describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 }, () => {
   it('renders expected interactive content', () => {
@@ -27,9 +24,9 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     })
 
     cy.get('[data-cy="major-version-welcome-footer"]').within(() => {
-      cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes)
-      cy.contains('button', text.actionContinue).scrollIntoView()
-      cy.contains('button', text.actionContinue).click()
+      cy.contains('a[href="https://on.cypress.io/changelog"]', 'View full changelog')
+      cy.contains('button', 'Continue').scrollIntoView()
+      cy.contains('button', 'Continue').click()
     })
 
     cy.wrap(continueStub).should('have.been.calledOnce')
