@@ -14,12 +14,13 @@ describe('framebusting protections', () => {
     // outlast the default command timeout on loaded CI containers
     cy.get('#app', { timeout: 15000 }).should('have.text', 'sw-ready')
 
-    // bounce to another origin so the return navigation is a fresh document load
-    // handled by the (still-registered) service worker
-    cy.visit('http://localhost:4477/')
-    cy.origin('http://localhost:4477', () => {
-      cy.get('#other')
-    })
+    // bounce to another page on the same origin so the return navigation is a
+    // fresh document load handled by the service worker; staying in the
+    // worker's scope keeps it alive, so the return visit exercises the
+    // navigation-preload path rather than a worker cold-start (see the spec
+    // file's /other.html comment)
+    cy.visit('http://localhost:4466/other.html')
+    cy.get('#other')
 
     // the return visit's document navigation is handled by the active service
     // worker; a navigation preload request would bypass CDP Fetch interception and

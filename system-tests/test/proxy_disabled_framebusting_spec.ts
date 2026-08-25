@@ -102,16 +102,21 @@ const onSwServer = function (app) {
     res.send(pageSource)
   })
 
+  // Same-origin bounce target, inside the service worker's scope. Staying on
+  // the worker's origin keeps the AUT a client of the worker, so Chrome never
+  // stops it: the return navigation is served by the already-attached worker
+  // instance. A cross-origin bounce leaves the worker clientless and Chrome
+  // stops it; the return navigation then cold-starts a fresh worker whose
+  // fetches race the new session's Fetch enablement (a separate interception
+  // gap, tracked outside #34652).
+  app.get('/other.html', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store')
+    res.send('<html><body><h1 id="other">other</h1></body></html>')
+  })
+
   app.get('/sw.js', (req, res) => {
     res.setHeader('Cache-Control', 'no-store')
     res.type('application/javascript').send(swSource)
-  })
-}
-
-const onOtherServer = function (app) {
-  app.get('/', (req, res) => {
-    res.setHeader('Cache-Control', 'no-store')
-    res.send('<html><body><h1 id="other">other</h1></body></html>')
   })
 }
 
@@ -120,9 +125,6 @@ describe('e2e browser network framebusting', () => {
     servers: [{
       port: 4466,
       onServer: onSwServer,
-    }, {
-      port: 4477,
-      onServer: onOtherServer,
     }],
   })
 
