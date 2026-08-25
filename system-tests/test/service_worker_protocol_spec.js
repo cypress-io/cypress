@@ -53,7 +53,13 @@ describe('capture-protocol', () => {
             // Only correlations occur in the service worker for this asset
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load.js': ['frame id'],
-            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker.html': ['frame id', 'no frame id', 'no frame id'],
+            // On the browser network path (chrome) navigation preload is
+            // disabled (#34652), so the service-worker-controlled navigation
+            // has no preload request to correlate; electron stays on the
+            // HTTP/1 proxy, where preload is active and correlated.
+            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker.html': browser === 'chrome'
+              ? ['frame id', 'no frame id']
+              : ['frame id', 'no frame id', 'no frame id'],
           })
 
           expect(parsedProtocolEvents.exceptionThrown).to.be.false
@@ -86,7 +92,12 @@ describe('capture-protocol', () => {
             'http://localhost:2121/cypress/fixtures/service-worker-assets/example.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/cached-service-worker.json': ['no frame id'],
             'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/load-with-service-worker-preloaded.js': ['no frame id'],
-            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker_preloaded.html': ['no frame id', 'no frame id', 'no frame id', 'no frame id'],
+            // Same navigation-preload split as above (#34652): the preloaded
+            // worker's navigations produce preload correlations only on the
+            // HTTP/1 proxy path (electron), not on the browser network path.
+            'http://localhost:2121/cypress/fixtures/service-worker-assets/scope/service_worker_preloaded.html': browser === 'chrome'
+              ? ['no frame id', 'no frame id']
+              : ['no frame id', 'no frame id', 'no frame id', 'no frame id'],
           })
 
           expect(parsedProtocolEvents.exceptionThrown).to.be.false

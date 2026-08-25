@@ -10,7 +10,9 @@ describe('framebusting protections', () => {
     // (also a no-op on that path — see pageSource in the same file), guarding
     // the separate window-realm seam alongside the worker-realm one above
     cy.visit('http://localhost:4466/')
-    cy.get('#app').should('have.text', 'sw-ready')
+    // service worker install/activate spawns a worker process, which can
+    // outlast the default command timeout on loaded CI containers
+    cy.get('#app', { timeout: 15000 }).should('have.text', 'sw-ready')
 
     // bounce to another origin so the return navigation is a fresh document load
     // handled by the (still-registered) service worker
