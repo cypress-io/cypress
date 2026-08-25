@@ -47,7 +47,8 @@ const disabledFeatures = [
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
 
-  // Disable manual option and popup prompt of Chrome translation
+  // Disable manual option and popup prompt of Chrome translation. Applies
+  // below Chrome 138 only; 138+ is gated on the `translate.enabled` preference.
   // https://github.com/cypress-io/cypress/issues/28225
   'Translate',
 ]

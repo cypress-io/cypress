@@ -116,11 +116,11 @@ export const createCommonRoutes = ({
   // If we are in cypress in cypress we need to pass along the studio and cy-prompt routes
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-    router.get(`${CYPRESS_STUDIO_ROUTE}/*`, async (req, res) => {
+    router.all(`${CYPRESS_STUDIO_ROUTE}*`, async (req, res) => {
       await getNetworkProxy().handleHttpRequest(req, res)
     })
 
-    router.get(`${CYPRESS_CY_PROMPT_ROUTE}/*`, async (req, res) => {
+    router.all(`${CYPRESS_CY_PROMPT_ROUTE}*`, async (req, res) => {
       await getNetworkProxy().handleHttpRequest(req, res)
     })
 
@@ -223,6 +223,8 @@ export const createCommonRoutes = ({
   if (!config.isTextTerminal) {
     router.get(`${SESSIONS_ROUTE_PREFIX}:sessionId`, async (req, res) => {
       const state = cypressSessions.getCurrent()
+
+      debug('session probe for %s; current session is %s', req.params.sessionId, state?.sessionId ?? 'none')
 
       if (!state || req.params.sessionId !== state.sessionId) {
         return res.sendStatus(404)

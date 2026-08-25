@@ -36,6 +36,13 @@
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
 ## 15.20.2
+## 15.21.1
+
+**Bugfixes:**
+
+- Fixed an issue where Chrome and Firefox offered to translate the application under test, showing a translation prompt during the run. Fixes [#34662](https://github.com/cypress-io/cypress/issues/34662).
+- Fixed an issue where every `cypress tap` command printed HTTP request lines, such as `GET /__cypress/sessions/<id>`, to the terminal of the `cypress open` session it attached to, burying that session's own output. Fixes [#34668](https://github.com/cypress-io/cypress/issues/34668).
+
 ## 15.21.0
 
 **Deprecations:**

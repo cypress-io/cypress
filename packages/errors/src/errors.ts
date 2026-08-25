@@ -1279,7 +1279,8 @@ export const AllCypressErrors = {
     return errTemplate`\
         The ${fmt.highlight(`experimentalJustInTimeCompile`)} configuration option was removed in ${fmt.cypressVersion(`14.0.0`)}.
         A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
   },
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
     return errTemplate`\
@@ -1288,7 +1289,8 @@ export const AllCypressErrors = {
         You can safely remove this option from your config.
 
         https://on.cypress.io/session
-        https://on.cypress.io/origin`
+        https://on.cypress.io/origin
+    `
   },
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
     return errTemplate`\
@@ -1302,7 +1304,8 @@ export const AllCypressErrors = {
 
         Cypress Studio is now available for all users.
 
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
   },
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
     const code = errPartial`
@@ -1323,7 +1326,8 @@ export const AllCypressErrors = {
 
         \`cy.prompt\` is now available for all users.
 
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
   },
   EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
     return errTemplate`\
@@ -1331,7 +1335,8 @@ export const AllCypressErrors = {
 
         The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting.
 
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
   },
   JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
@@ -1348,19 +1353,22 @@ export const AllCypressErrors = {
     return errTemplate`\
       The ${fmt.highlight('experimentalFastVisibility')} configuration option has been removed. The modern visibility algorithm is now the default.
 
-      Please remove ${fmt.highlight('experimentalFastVisibility')} from your configuration. To use the legacy algorithm instead, set ${fmt.highlightSecondary(`visibilityStrategy: 'legacy'`)}.`
+      Please remove ${fmt.highlight('experimentalFastVisibility')} from your configuration. To use the legacy algorithm instead, set ${fmt.highlightSecondary(`visibilityStrategy: 'legacy'`)}.
+    `
   },
   EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
     return errTemplate`\
       The ${fmt.highlight('experimentalMemoryManagement')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}. Memory management is now enabled by default under the ${fmt.highlight('manageBrowserMemory')} option.
 
-      Please remove ${fmt.highlight('experimentalMemoryManagement')} from your configuration. To keep memory management disabled, set ${fmt.highlightSecondary('manageBrowserMemory: false')}.`
+      Please remove ${fmt.highlight('experimentalMemoryManagement')} from your configuration. To keep memory management disabled, set ${fmt.highlightSecondary('manageBrowserMemory: false')}.
+    `
   },
   VISIBILITY_STRATEGY_DEPRECATION: () => {
     return errTemplate`\
       ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight(`visibilityStrategy: 'legacy'`)} option is deprecated. The legacy visibility algorithm will be removed in a future version of Cypress.
 
-      Remove the ${fmt.highlight('visibilityStrategy')} option from your configuration to use the modern algorithm.`
+      Remove the ${fmt.highlight('visibilityStrategy')} option from your configuration to use the modern algorithm.
+    `
   },
   ALLOW_CYPRESS_ENV_REMOVED: () => {
     return errTemplate`\
@@ -1379,7 +1387,8 @@ export const AllCypressErrors = {
 
       Remove it from your configuration to use the default network path.
 
-      Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1`
+      Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1
+    `
   },
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\
@@ -1447,7 +1456,8 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.
 
-        https://on.cypress.io/migration-guide`
+        https://on.cypress.io/migration-guide
+    `
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG: (errShape: BreakingErrResult) => {

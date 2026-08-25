@@ -82,10 +82,10 @@ export const CYPRESS_STUDIO_ROUTE = '/__cypress-studio'
 
 export const CYPRESS_CY_PROMPT_ROUTE = '/__cypress-cy-prompt'
 
-const CLOUD_BUNDLE_ROUTES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
+const CLOUD_BUNDLE_NAMESPACES = [CYPRESS_STUDIO_ROUTE, CYPRESS_CY_PROMPT_ROUTE]
 
-export function isCloudBundleRoute (pathname: string): boolean {
-  return CLOUD_BUNDLE_ROUTES.some((route) => matchesPathPrefix(pathname, route))
+export function isCloudBundleNamespace (pathname: string): boolean {
+  return CLOUD_BUNDLE_NAMESPACES.some((namespace) => pathname.startsWith(namespace))
 }
 
 // `isBrowserNetworkMode` is a property of the runtime that installed the caller,
@@ -98,12 +98,15 @@ export function isInternalCypressRoute (pathname: string, config: InternalRouteC
     return false
   }
 
+  if (isBrowserNetworkMode && isCloudBundleNamespace(pathname)) {
+    return true
+  }
+
   const internalRoutes = [
     config.namespace ? `/${config.namespace}` : undefined,
     config.clientRoute,
     config.socketIoRoute,
     config.socketIoRoute ? `${config.socketIoRoute}-graphql` : undefined,
-    ...(isBrowserNetworkMode ? CLOUD_BUNDLE_ROUTES : []),
   ].filter((route): route is string => Boolean(route))
 
   return internalRoutes.some((route) => matchesPathPrefix(pathname, route))

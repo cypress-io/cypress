@@ -106,6 +106,9 @@ const defaultPreferences = {
   // Do not warn when multiple tabs will be opened
   'browser.tabs.warnOnOpen': false,
 
+  // Do not offer to translate the page under test
+  'browser.translations.enable': false,
+
   // Disable the UI tour.
   'browser.uitour.enabled': false,
   // Turn off search suggestions in the location bar so as not to trigger
