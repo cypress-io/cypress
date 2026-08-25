@@ -5,6 +5,7 @@
 
 - Fixed an issue where Chrome and Firefox offered to translate the application under test, showing a translation prompt during the run. Fixes [#34662](https://github.com/cypress-io/cypress/issues/34662).
 - Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
+- Fixed an issue where every `cypress tap` command printed HTTP request lines, such as `GET /__cypress/sessions/<id>`, to the terminal of the `cypress open` session it attached to, burying that session's own output. Fixes [#34668](https://github.com/cypress-io/cypress/issues/34668).
 
 ## 15.21.0
 

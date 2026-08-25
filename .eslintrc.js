@@ -28,7 +28,6 @@ module.exports = {
   root: true,
   plugins: [
     '@cypress/dev',
-    'graphql',
   ],
   extends: [
     'plugin:@cypress/dev/general',
@@ -81,6 +80,27 @@ module.exports = {
         'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
       },
     },
+    {
+      // `eslint-plugin-graphql` pays its per-file cost on every linted file, not
+      // just the ones holding a `gql` template, and that cost dominates lint time.
+      // Scope it to the packages that actually use `gql` — add a package here if
+      // it starts using it.
+      files: [
+        'packages/{app,frontend-shared,launchpad,data-context}/**/*.{js,jsx,ts,tsx,vue}',
+      ],
+      plugins: [
+        'graphql',
+      ],
+      rules: {
+        'graphql/capitalized-type-name': ['warn', graphqlOpts],
+        'graphql/no-deprecated-fields': ['error', graphqlOpts],
+        'graphql/template-strings': ['error', { ...graphqlOpts, validators }],
+        'graphql/required-fields': [
+          'error',
+          { ...graphqlOpts, requiredFields: ['id'] },
+        ],
+      },
+    },
   ],
   rules: {
     'no-duplicate-imports': 'off',
@@ -110,13 +130,6 @@ module.exports = {
         selector: `MemberExpression[object.name='fs'][property.name=/^[A-z]+Sync$/]:not(MemberExpression[property.name='existsSync']), MemberExpression[property.name=/^[A-z]+Sync$/]:not(MemberExpression[property.name='existsSync']):has(MemberExpression[property.name='fs'])`,
         message: 'Synchronous fs calls should not be used in Cypress. Use an async API instead.',
       },
-    ],
-    'graphql/capitalized-type-name': ['warn', graphqlOpts],
-    'graphql/no-deprecated-fields': ['error', graphqlOpts],
-    'graphql/template-strings': ['error', { ...graphqlOpts, validators }],
-    'graphql/required-fields': [
-      'error',
-      { ...graphqlOpts, requiredFields: ['id'] },
     ],
   },
   settings: {

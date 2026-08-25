@@ -257,6 +257,8 @@ export const createCommonRoutes = ({
     router.get(`${SESSIONS_ROUTE_PREFIX}:sessionId`, async (req, res) => {
       const state = cypressSessions.getCurrent()
 
+      debug('session probe for %s; current session is %s', req.params.sessionId, state?.sessionId ?? 'none')
+
       if (!state || req.params.sessionId !== state.sessionId) {
         return res.sendStatus(404)
       }
