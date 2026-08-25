@@ -141,10 +141,12 @@ describe('lib/server-base', () => {
     })
 
     it('passes dev format and skip that mirrors GracefulExit.isShuttingDown', async function () {
-      this.server.useMorgan()
+      this.server.useMorgan('__cypress')
+
+      const req = { proxiedUrl: '/__cypress/iframes/foo', headers: {} }
 
       expect(lastMorganFactoryArgs.format).to.eq('dev')
-      expect(lastMorganFactoryArgs.options.skip()).to.be.false
+      expect(lastMorganFactoryArgs.options.skip(req)).to.be.false
 
       let resolveStep
       const stepPromise = new Promise((resolve) => {
@@ -155,13 +157,54 @@ describe('lib/server-base', () => {
 
       const exitPromise = GracefulExit.exitGracefully(0)
 
-      expect(lastMorganFactoryArgs.options.skip()).to.be.true
+      expect(lastMorganFactoryArgs.options.skip(req)).to.be.true
 
       resolveStep()
 
       await exitPromise
 
-      expect(lastMorganFactoryArgs.options.skip()).to.be.false
+      expect(lastMorganFactoryArgs.options.skip(req)).to.be.false
+    })
+
+    describe('tap request logging', () => {
+      let getCurrent
+
+      beforeEach(function () {
+        getCurrent = sinon.stub(cypressSessions, 'getCurrent').returns({ sessionId: 'abc' })
+        this.server.useMorgan('__cypress')
+      })
+
+      afterEach(() => {
+        getCurrent.restore()
+      })
+
+      const skip = (proxiedUrl, headers = {}) => {
+        return lastMorganFactoryArgs.options.skip({ proxiedUrl, headers })
+      }
+
+      it('skips the non-proxied session probe', () => {
+        expect(skip('/__cypress/sessions/abc')).to.be.true
+      })
+
+      it('skips a non-proxied graphql request carrying the current session id', () => {
+        expect(skip('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' })).to.be.true
+      })
+
+      it('logs a graphql request whose session id header does not match', () => {
+        expect(skip('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).to.be.false
+      })
+
+      it('logs a graphql request from the app, which sends no session id header', () => {
+        expect(skip('/__cypress/graphql/Specs')).to.be.false
+      })
+
+      it('logs a proxied request that mimics the probe path', () => {
+        expect(skip('http://example.com/__cypress/sessions/abc')).to.be.false
+      })
+
+      it('logs everything else', () => {
+        expect(skip('/__cypress/iframes/foo')).to.be.false
+      })
     })
   })
 
