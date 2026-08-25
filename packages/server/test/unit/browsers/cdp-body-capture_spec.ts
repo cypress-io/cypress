@@ -116,6 +116,27 @@ describe('CdpBodyCapture', () => {
       expect(stream).to.be.undefined
     })
 
+    // arming holds the response pause open, so a send that never settles must
+    // not hang the page — capture is best-effort, delivery is not
+    it('gives up arming when the CDP send never settles', async () => {
+      const client = createClient()
+
+      client.send.withArgs('Network.streamResourceContent').returns(new Promise(() => {}))
+
+      const { capture } = createCapture(client)
+      const clock = sinon.useFakeTimers({ shouldAdvanceTime: true })
+
+      try {
+        const armed = capture.arm('network-1')
+
+        await clock.tickAsync(2000)
+
+        expect(await armed).to.be.undefined
+      } finally {
+        clock.restore()
+      }
+    })
+
     // the failure cleanup must only tear down the entry the failing call
     // created — a rejected send created none, and the key may hold a
     // predecessor whose stream is still being read

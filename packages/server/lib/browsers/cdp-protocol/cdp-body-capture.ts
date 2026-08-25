@@ -14,6 +14,14 @@ type CdpBodyCaptureClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 // not global: N concurrent unconsumed streams hold up to N times this cap.
 const CAPTURE_BYTE_CAP = 10 * 1024 * 1024
 
+// Arming sits on the critical path: the response pause is not released until
+// it settles. A CDP send to a crashed renderer never resolves and is never
+// aborted, so an unbounded wait here would hang the page — the exact failure
+// this transport exists to avoid. Capture is best-effort; delivery is not.
+const ARM_TIMEOUT_MS = 2000
+
+const ARM_TIMED_OUT = Symbol('arm timed out')
+
 type CaptureEntry = {
   stream: PassThrough
   bytesReceived: number
@@ -54,9 +62,31 @@ export class CdpBodyCapture {
     let entry: CaptureEntry | undefined
 
     try {
-      const response = await this.client.send('Network.streamResourceContent', {
+      const sent = this.client.send('Network.streamResourceContent', {
         requestId: networkId,
-      }, sessionId) as Protocol.Network.StreamResourceContentResponse
+      }, sessionId) as Promise<Protocol.Network.StreamResourceContentResponse>
+
+      // a send that settles after the race is over has no reader; swallow a
+      // late rejection so it can't surface as an unhandled rejection
+      sent.catch(() => {})
+
+      let armTimer: NodeJS.Timeout | undefined
+
+      const response = await Promise.race([
+        sent,
+        new Promise<typeof ARM_TIMED_OUT>((resolve) => {
+          armTimer = setTimeout(() => resolve(ARM_TIMED_OUT), ARM_TIMEOUT_MS)
+          armTimer.unref?.()
+        }),
+      ])
+
+      clearTimeout(armTimer)
+
+      if (response === ARM_TIMED_OUT) {
+        debug('arming body capture timed out after %dms, releasing the pause uncaptured: %s', ARM_TIMEOUT_MS, key)
+
+        return undefined
+      }
 
       const stream = new PassThrough()
 
