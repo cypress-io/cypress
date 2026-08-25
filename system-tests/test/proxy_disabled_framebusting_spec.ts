@@ -134,6 +134,13 @@ describe('e2e browser network framebusting', () => {
     browser: 'chrome',
     spec: 'proxy_disabled_framebusting.cy.js',
     expectedExitCode: 0,
+    // TODO(#34652): temporary diagnostics for a CI-only page-load timeout on
+    // the return visit — shows whether the SW-session Fetch attach happened
+    // and whether the return document's requests were intercepted. Remove
+    // once the CI failure is understood.
+    processEnv: {
+      DEBUG: 'cypress:server:browsers:cdp-fetch-transport,cypress:server:browsers:cri-client',
+    },
     config: {
       forceHttp1: false,
       pageLoadTimeout: 15000,
