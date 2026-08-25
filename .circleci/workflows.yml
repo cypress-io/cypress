@@ -246,6 +246,20 @@ commands:
             python3 --version
             exit 1
 
+  # TEMPORARY: tracking down where node_modules/electron/path.txt goes missing on Windows
+  debug-electron-install:
+    parameters:
+      label:
+        type: string
+    steps:
+      - run:
+          name: "Debug electron install (<< parameters.label >>)"
+          command: |
+            echo "--- << parameters.label >> ---"
+            ls -la node_modules/electron 2>&1 | head -30 || echo "MISSING node_modules/electron"
+            echo "path.txt: $(cat node_modules/electron/path.txt 2>&1 || echo MISSING)"
+            ls node_modules/electron/dist 2>&1 | head -10 || echo "MISSING dist"
+
   install-webkit-deps:
     steps:
       - run:
@@ -418,12 +432,16 @@ commands:
             PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
+      - debug-electron-install:
+          label: after-yarn-install
       - when:
           condition: <<parameters.build-better-sqlite3>>
           steps:
             - build-better-sqlite3
       - prepare-modules-cache:
           dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
+      - debug-electron-install:
+          label: before-save-cache
       - when:
           condition: <<parameters.only-cache-for-root-user>> # we don't move to /tmp since we don't need to worry about different users
           steps:
@@ -1233,6 +1251,8 @@ commands:
             else
               echo "Not code signing for this platform"
             fi
+      - debug-electron-install:
+          label: after-cache-restore
       - run:
           name: Build the Cypress binary
           no_output_timeout: "45m"
