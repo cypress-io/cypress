@@ -15,16 +15,25 @@ import systemTests from '../lib/system-tests'
 // browser network path - via a script prepended to the service worker itself
 // (worker realm) plus a page bootstrap script evaluated on every new document
 // (window realm), see disable-navigation-preload.ts - so the SW's fetch
-// handler falls back to fetch(e.request), which IS intercepted. The
-// [browser network] variant here guards that behavior, while the [forceHttp1]
-// control keeps exercising real preload through the MITM proxy.
+// handler falls back to fetch(e.request), which IS intercepted.
 //
-// The AUT iframe's first visit is a real navigation, but its response is served
-// from Cypress's server-side resolve:url buffer, and no service worker controls
-// the client yet at that point. Service worker registrations are cleared between
-// specs (not between tests within a spec), so the repro needs a single test that
-// registers the SW, then navigates away and back so the return visit's document
-// request is the one served through the SW's (now-active) navigation preload.
+// This spec asserts the remediation mechanism directly rather than the
+// original SW-served-navigation framebusting repro: in the live browser, both
+// realms' navigationPreload.enable() calls settle (sw-ready implies this) and
+// navigationPreload.getState().enabled ends up false on the browser network
+// path (both seams no-op'd it) and true under forceHttp1 (both seams are
+// inert on MITM, so the SW's real enable() call sticks). What is deliberately
+// NOT asserted here is a worker-served return navigation rendering
+// unbusted - on CI containers Chrome culls this fixture's worker within
+// ~200ms of first use (ordinary renderer teardown on navigation, not a
+// crash event) and the cold-started replacement can serve navigations for
+// as long as ~3s before Target.attachedToTarget is delivered on either CDP
+// connection. CDP offers no pre-execution hook for a target, so no
+// coordination scheme can close that gap - it is the irreducible remainder
+// of #34674 (the product-side holds landed there cover every case CDP
+// actually notifies on). #34674 carries the navigation-level regression
+// recipe to restore once that gap is closed some other way.
+//
 // Both realms that can call navigationPreload.enable() are exercised here,
 // each guarding its own seam (see disable-navigation-preload.ts): this
 // worker-realm call guards the injector's script-prepend seam, and the
@@ -37,9 +46,10 @@ self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     // Order is load-bearing: claim() (which gates the page's sw-ready flag via
     // .controller) only runs after enable() settles, so the forceHttp1 control
-    // is guaranteed to have preload active before the spec bounces. On the
-    // browser network path, Cypress patches enable() to a resolving no-op —
-    // activation completing at all is part of what this test proves.
+    // is guaranteed to have preload active before the spec's assertion reads
+    // getState(). On the browser network path, Cypress patches enable() to a
+    // resolving no-op — activation completing at all is part of what this
+    // test proves.
     await self.registration.navigationPreload.enable()
     await self.clients.claim()
   })())
@@ -79,23 +89,27 @@ navigator.serviceWorker.ready
   .then((reg) => reg.navigationPreload.enable())
   .then(markPageEnableSettled, markPageEnableSettled)
 
-// Poll .controller AND pageEnableSettled rather than navigationPreload.getState():
-// on the browser network path Cypress no-ops both enable() calls, so
-// getState().enabled never becomes true. Order is load-bearing on both sides
-// the same way: claim() (which gates .controller) only runs after the
-// worker-realm enable() settles, and pageEnableSettled only flips after the
-// window-realm enable() above settles - each guarantees its own seam had a
-// chance to run before the return visit.
+// Poll .controller AND pageEnableSettled rather than navigationPreload.getState()
+// here: on the browser network path Cypress no-ops both enable() calls, so
+// getState().enabled never becomes true, and this poll is what the spec's own
+// getState() assertion waits on. Order is load-bearing on both sides the same
+// way: claim() (which gates .controller) only runs after the worker-realm
+// enable() settles, and pageEnableSettled only flips after the window-realm
+// enable() above settles - each guarantees its own seam had a chance to run
+// before the getState() readout.
 //
-// The /probe poll is a third readiness condition: a worker's fetches can run
-// before Cypress's page connection attaches to the new worker session and
-// enables interception on it (the attach race tracked in #34674), and until
-// then worker-served navigations bypass header stripping - the very behavior
-// this test asserts on. The probe is passed through the worker (see
-// swSource) and the origin serves it with X-Frame-Options, which
-// interception always strips: the header disappearing from a same-origin
-// fetch is direct evidence that worker-originated traffic is intercepted, so
-// the test's navigations exercise only the navigation-preload behavior.
+// The /probe poll can't prevent an injector miss - by the time this page
+// script runs, a worker that cold-started before the injector's script-prepend
+// seam attached has already made its real enable() call (the #34674 gap this
+// spec's header disclaims). Its value is diagnostic rather than corrective: a
+// worker whose session interception is stuck or never covered surfaces here as
+// a clear sw-ready timeout instead of a confusing getState() assertion
+// failure, and it keeps the SW-session interception path (Fetch enabled on
+// the worker's own CDP session) live-exercised by this spec. The probe is
+// passed through the worker (see swSource) and the origin serves it with
+// X-Frame-Options, which interception always strips: the header disappearing
+// from a same-origin fetch is evidence that worker-originated traffic is
+// intercepted.
 const check = () => {
   if (!navigator.serviceWorker.controller || !pageEnableSettled) {
     return setTimeout(check, 50)
@@ -120,18 +134,6 @@ const onSwServer = function (app) {
     res.setHeader('Content-Security-Policy', 'frame-ancestors \'none\'')
     res.setHeader('Cache-Control', 'no-store')
     res.send(pageSource)
-  })
-
-  // Same-origin bounce target, inside the service worker's scope. Staying on
-  // the worker's origin keeps the AUT a client of the worker, so Chrome never
-  // stops it: the return navigation is served by the already-attached worker
-  // instance. A cross-origin bounce leaves the worker clientless and Chrome
-  // stops it; the return navigation then cold-starts a fresh worker whose
-  // fetches race the new session's Fetch enablement (a separate interception
-  // gap, tracked in #34674).
-  app.get('/other.html', (req, res) => {
-    res.setHeader('Cache-Control', 'no-store')
-    res.send('<html><body><h1 id="other">other</h1></body></html>')
   })
 
   app.get('/sw.js', (req, res) => {
@@ -161,32 +163,31 @@ describe('e2e browser network framebusting', () => {
   // (see .circleci @pipeline.yml); CLI config always beats env, so the
   // explicit `forceHttp1: false` below is what pins this variant to the
   // browser network path there.
-  systemTests.it('neutralizes framebusting protections behind a nav-preload service worker [browser network]', {
+  systemTests.it('disables navigation preload behind a nav-preload service worker [browser network]', {
     browser: 'chrome',
     spec: 'proxy_disabled_framebusting.cy.js',
     expectedExitCode: 0,
-    // TODO(#34652): temporary diagnostics for a CI-only page-load timeout on
-    // the return visit — shows whether the SW-session Fetch attach happened
-    // and whether the return document's requests were intercepted. Remove
-    // once the CI failure is understood.
-    processEnv: {
-      DEBUG: 'cypress:server:browsers:cdp-fetch-transport,cypress:server:browsers:cri-client,cypress:server:browsers:browser-cri-client',
-    },
     config: {
       forceHttp1: false,
       pageLoadTimeout: 15000,
+      env: {
+        expectedNavigationPreloadEnabled: false,
+      },
     },
   })
 
   // forceHttp1: true selects the MITM path — the control proving real
   // navigation preload still works there.
-  systemTests.it('neutralizes framebusting protections behind a nav-preload service worker [forceHttp1]', {
+  systemTests.it('leaves navigation preload enabled behind a nav-preload service worker [forceHttp1]', {
     browser: 'chrome',
     spec: 'proxy_disabled_framebusting.cy.js',
     expectedExitCode: 0,
     config: {
       forceHttp1: true,
       pageLoadTimeout: 15000,
+      env: {
+        expectedNavigationPreloadEnabled: true,
+      },
     },
   })
 })
