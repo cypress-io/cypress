@@ -28,7 +28,7 @@
             data-cy="release-highlights"
           >
             <h1 class="font-medium text-center mb-[8px] tracking-tighter text-[22px] leading-snug text-gray-1000">
-              {{ t('majorVersionWelcome.title') }}
+              What's New in Cypress
             </h1>
 
             <div class="mb-[16px]">
@@ -43,14 +43,33 @@
               </span>
             </div>
             <div class="children:mb-[16px]">
-              <!-- TODO: Replace with approved v16 launch copy. -->
               <p>
-                Cypress 16 is here. This version includes breaking changes that may require updates to your project.
+                Faster tests, less flake, and a few breaking changes that may require updates.
               </p>
               <p>
-                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
-                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink>.
+                <strong>Faster tests.</strong> Cypress now uses HTTP/2 in Chromium-based browsers whenever your server supports it, so request-heavy pages load in parallel instead of queuing behind a handful of connections. <ExternalLink href="https://on.cypress.io/type">
+                  <InlineCodeFragment>cy.type()</InlineCodeFragment>
+                </ExternalLink> no longer pauses between keystrokes, and visibility checks use a faster algorithm.
+              </p>
+              <p>
+                <strong>Less flake, more stability.</strong> Browser memory management is on by default, so long runs are less likely to crash the renderer process. Cookie and storage reads
+                are now query commands that retry until your assertions pass, so values that arrive asynchronously no longer fail a test by a few milliseconds.
+              </p>
+              <p>
+                <strong>Other changes.</strong> <InlineCodeFragment>Cypress.env()</InlineCodeFragment> has been removed, and tests that call it will fail until you migrate to
+                <ExternalLink href="https://on.cypress.io/env">
+                  <InlineCodeFragment>cy.env()</InlineCodeFragment>
+                </ExternalLink>
+                or <ExternalLink href="https://on.cypress.io/expose">
+                  <InlineCodeFragment>Cypress.expose()</InlineCodeFragment>
+                </ExternalLink>. Electron is deprecated as a test browser but is still available in this release.
+              </p>
+              <p>
+                See the <ExternalLink href="https://on.cypress.io/migration-guide?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#Migrating-to-Cypress-160">
+                  migration guide
+                </ExternalLink> for steps to upgrade and the <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
+                  changelog
+                </ExternalLink> for the full list of changes.
               </p>
             </div>
           </div>
@@ -167,13 +186,13 @@
           data-cy="major-version-welcome-continue"
           @click="handleClick"
         >
-          {{ t('majorVersionWelcome.actionContinue') }}
+          Continue
           <i-cy-chevron-right_x16 class="icon-dark-white ml-[8px]" />
         </Button>
         <ExternalLink
           href="https://on.cypress.io/changelog"
         >
-          {{ t('majorVersionWelcome.linkReleaseNotes') }}
+          View full changelog
         </ExternalLink>
       </div>
     </div>
@@ -182,13 +201,10 @@
 
 <script lang="ts" setup>
 import Button from '@cypress-design/vue-button'
-import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'
 import { computed, ref } from 'vue'
-
-const { t } = useI18n()
 
 const scroller = ref<HTMLElement | null>(null)
 const wrapper = ref<HTMLElement | null>(null)

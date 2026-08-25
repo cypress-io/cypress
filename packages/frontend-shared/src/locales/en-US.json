@@ -906,11 +906,6 @@
       "link": "install Cypress"
     }
   },
-  "majorVersionWelcome": {
-    "title": "What's New in Cypress",
-    "actionContinue": "Continue",
-    "linkReleaseNotes": "View full changelog"
-  },
   "setupWizard": {
     "selectFramework": {
       "title": "Project setup",
