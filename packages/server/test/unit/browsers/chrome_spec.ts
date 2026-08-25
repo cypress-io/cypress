@@ -57,6 +57,7 @@ describe('lib/browsers/chrome', () => {
         },
         close: sinon.stub().resolves(),
         on: sinon.stub(),
+        whenChildTargetHandled: sinon.stub().resolves(),
       }
 
       this.browserCriClient = {
@@ -135,6 +136,48 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
         expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, true)
+      })
+    })
+
+    // #34674: a service worker auto-attaches on both the browser and page
+    // connections; the browser connection defers releasing it until the page
+    // connection confirms session-scoped Fetch interception is in place.
+    it('wires waitForChildTargetInterception to the page client on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.waitForChildTargetInterception).to.be.a('function')
+
+        this.browserCriClient.waitForChildTargetInterception('target-id')
+
+        expect(this.pageCriClient.whenChildTargetHandled).to.have.been.calledWith('target-id')
+      })
+    })
+
+    // #34674: a paused service worker's browser-level attach handler consults
+    // this field - if it were only set after navigation started, an attach
+    // racing the navigation could read it as unset and skip the wait.
+    it('wires waitForChildTargetInterception before navigating', function () {
+      let wasSetBeforeNavigate = false
+      const self = this
+
+      this.pageCriClient.send = sinon.stub().callsFake((command) => {
+        if (command === 'Page.navigate' && typeof self.browserCriClient.waitForChildTargetInterception === 'function') {
+          wasSetBeforeNavigate = true
+        }
+
+        return Promise.resolve()
+      })
+
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(wasSetBeforeNavigate).to.be.true
+      })
+    })
+
+    it('does not wire waitForChildTargetInterception on the MITM path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.waitForChildTargetInterception).to.be.undefined
       })
     })
 

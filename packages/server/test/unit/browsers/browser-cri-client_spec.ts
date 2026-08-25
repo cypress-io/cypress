@@ -482,6 +482,100 @@ describe('lib/browsers/browser-cri-client', function () {
       await criClient.on.lastCall.args[1]({ requestId: 'request-id', request: { url: '' } })
       // error is caught or else the test would fail
     })
+
+    // #34674: a paused service worker attaches on both this (browser-level)
+    // connection and the page connection. Releasing it here before the page
+    // connection has enabled session-scoped Fetch interception lets the
+    // worker's first navigations bypass interception entirely.
+    describe('waitForChildTargetInterception (#34674)', () => {
+      beforeEach(() => {
+        options.event.targetInfo.type = 'service_worker'
+        options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+      })
+
+      it('awaits it before releasing a paused service worker', async () => {
+        const interceptionConfirmed = Promise.withResolvers<void>()
+
+        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(interceptionConfirmed.promise)
+
+        const attached = BrowserCriClient._onAttachToTarget(options as any)
+
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(options.browserCriClient.waitForChildTargetInterception).to.have.been.calledWith('target-id')
+        expect(options.browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+        interceptionConfirmed.resolve()
+        await attached
+
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('releases the worker once the timeout elapses without confirmation', async () => {
+        options.childTargetInterceptionTimeoutMs = 5
+        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('releases the worker if the waiter rejects', async () => {
+        options.browserCriClient.waitForChildTargetInterception = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('releases immediately when no waiter is registered (field absent)', async () => {
+        expect(options.browserCriClient.waitForChildTargetInterception).to.be.undefined
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('is never consulted for a non-service-worker target (iframe)', async () => {
+        options.event.targetInfo.type = 'iframe'
+        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      // The page connection never attaches the Cypress extension's own
+      // service worker, so it would eat the full timeout on every attach and
+      // on every MV3 idle-restart, stalling the extension's own automation.
+      it('is never consulted for the extension service worker, and releases immediately', async () => {
+        options.event.targetInfo.url = 'chrome-extension://abc123/background.js'
+        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('is never consulted for an extra target (popup/page)', async () => {
+        options.event.targetInfo.type = 'page'
+        const criClient = {
+          send: sinon.stub(),
+          on: sinon.stub(),
+        }
+
+        options.CriConstructor.returns(criClient)
+        options.browserClient.send.withArgs('Fetch.enable').resolves()
+        options.browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(options.browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+    })
   })
 
   context('._onTargetDestroyed', () => {

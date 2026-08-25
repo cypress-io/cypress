@@ -292,6 +292,283 @@ describe('lib/browsers/cri-client', function () {
       })
     })
 
+    describe('#whenChildTargetHandled', () => {
+      const targetId = 'target-id'
+      const sessionId = 'sw-session'
+      let client: CriClient
+
+      const drain = () => new Promise((resolve) => setImmediate(resolve))
+
+      beforeEach(async () => {
+        client = await getClient({ host: HOST, fullyManageTabs: true })
+        criStub.send.resolves()
+      })
+
+      it('resolves a waiter registered before the target attaches', async () => {
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+        expect(resolved).to.be.false
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'page', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
+      it('resolves immediately for a target that already finished attaching', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'page', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+      })
+
+      it('resolves pending waiters when the client closes, rather than leaving them hanging on a dead connection', async () => {
+        let resolved = false
+
+        client.whenChildTargetHandled('never-attaches').then(() => {
+          resolved = true
+        })
+
+        await client.close()
+
+        expect(resolved).to.be.true
+      })
+
+      // Order-proof against a deferred onChildTargetAttached hook, same style
+      // as the "enables interception ... before releasing the debugger" test
+      // above: completion must not be observable until the hook (and the
+      // Fetch enable it runs) has actually finished.
+      it('resolves only after the onChildTargetAttached hook completes', async () => {
+        const enabled = Promise.withResolvers<void>()
+        let resolved = false
+
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+
+        enabled.resolve()
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
+      it('resolves even when the onChildTargetAttached hook rejects', async () => {
+        const enabled = Promise.withResolvers<void>()
+        let resolved = false
+
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+
+        enabled.reject(new Error('ProtocolError: Inspected target closed'))
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
+      it('resolves immediately for a waiter registered after the client has already closed', async () => {
+        await client.close()
+
+        await expect(client.whenChildTargetHandled('anything')).to.be.fulfilled
+      })
+    })
+
+    describe('eviction on detach/destroy (#34674 service worker restarts)', () => {
+      const targetId = 'target-id'
+      const sessionId = 'sw-session'
+      let client: CriClient
+
+      const drain = () => new Promise((resolve) => setImmediate(resolve))
+
+      beforeEach(async () => {
+        client = await getClient({ host: HOST, fullyManageTabs: true })
+        criStub.send.resolves()
+      })
+
+      // Guards against a target id being reused for a restarted service
+      // worker instance — without evicting the stale "handled" entry on
+      // detach, a waiter registered for the new instance would resolve
+      // immediately against the old one's completion, reinstating the
+      // exact race #34674 fixes.
+      it('waits again for a target that re-attaches after detaching', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+
+        fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
+
+        await drain()
+
+        const enabled = Promise.withResolvers<void>()
+        let resolved = false
+
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+
+        enabled.resolve()
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
+      it('does not retain a stale "handled" entry for a target that detached without re-attaching', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
+
+        await drain()
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+      })
+
+      it('also evicts on Target.targetDestroyed, in case that is what actually arrives on this connection', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        fireCDPEvent('Target.targetDestroyed', { targetId })
+
+        await drain()
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+      })
+
+      // A detach that arrives while the attach handler is still suspended
+      // mid-flight (at onChildTargetAttached, here) finds nothing in
+      // _handledTargetIds to evict yet — the entry doesn't exist until the
+      // handler resumes and adds it, by which point the detach has already
+      // passed. Without an in-flight identity check, that resumed handler
+      // still adds the (now-stale) entry, permanently short-circuiting a
+      // fresh waiter for whatever comes next.
+      it('does not mark a target handled from a stale attach that resumes after a mid-flight detach', async () => {
+        const enabled = Promise.withResolvers<void>()
+
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
+
+        await drain()
+
+        // the stale attach's hook now resolves and the handler resumes
+        enabled.resolve()
+        await drain()
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+      })
+
+      it('resolves a pending waiter promptly when its target detaches', async () => {
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+        expect(resolved).to.be.false
+
+        fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
+
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+    })
+
     context('#send', function () {
       it('calls cri.send with command and data', async function () {
         send.resolves()

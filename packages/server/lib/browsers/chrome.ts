@@ -661,6 +661,16 @@ export = {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
 
+      // A service worker auto-attaches on both the browser-level connection
+      // and this page connection; the browser connection defers releasing a
+      // paused one until this promise resolves, so it never starts serving
+      // navigations before Fetch interception is enabled on its session
+      // here (#34674). Reassigned on every attachListeners call so it always
+      // points at the current page client - connectToNewSpec reuses the same
+      // pageCriClient across specs, but resetBrowserTargets can swap in a new
+      // one before this runs again.
+      browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
+
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
       await this._navigateUsingCRI(pageCriClient, url)

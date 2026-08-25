@@ -59,6 +59,8 @@ interface AttachedToTargetOptions {
   host: string
   port: number
   protocolManager?: ProtocolManagerShape
+  // Overrides CHILD_TARGET_INTERCEPTION_TIMEOUT_MS. Exposed for tests only.
+  childTargetInterceptionTimeoutMs?: number
 }
 
 interface TargetDestroyedOptions {
@@ -68,6 +70,13 @@ interface TargetDestroyedOptions {
   event: Protocol.Target.TargetDestroyedEvent
   onAsynchronousError: Function
 }
+
+// How long to wait for the page connection to confirm session-scoped Fetch
+// interception on a paused service worker before releasing it anyway
+// (#34674). CI containers have observed the page connection's own attach
+// handling land up to ~2s after the browser connection's; this leaves
+// headroom without wedging a worker indefinitely if that never arrives.
+const CHILD_TARGET_INTERCEPTION_TIMEOUT_MS = 4000
 
 const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string): Promise<string> => {
   // since we may be attempting to connect to multiple hosts, 'connected'
@@ -193,6 +202,14 @@ export class BrowserCriClient {
   gracefulShutdown?: Boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
+  /**
+   * Set by the browser-network launch path so a paused service worker is not
+   * released before the page connection has enabled Fetch interception on
+   * its session — a service worker auto-attaches on both this (browser-level)
+   * connection and the page connection, and releasing it here first lets its
+   * earliest navigations bypass interception (#34674).
+   */
+  waitForChildTargetInterception?: (targetId: string) => Promise<void>
 
   private constructor (options: BrowserCriClientOptions) {
     this.browserClient = options.browserClient
@@ -296,6 +313,12 @@ export class BrowserCriClient {
       try {
         // Things like service workers will effectively crash in terms of CDP when the page is reloaded in the middle of things
         // We will still auto attach in this case, but we need to runIfWaitingForDebugger to get the page back to a running state
+        //
+        // This is a second release path for a service worker and does not
+        // consult waitForChildTargetInterception - this event carries no
+        // targetId to key the wait on, and a crashed worker is already
+        // broken; leaving it paused waiting on interception confirmation
+        // that may never come would be worse than releasing it uninstrumented.
         await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       } catch (error) {
         // it's possible that the target was closed before we can run. If so, just ignore
@@ -307,7 +330,7 @@ export class BrowserCriClient {
   }
 
   static async _onAttachToTarget (options: AttachedToTargetOptions) {
-    const { browserClient, browserCriClient, CriConstructor, event, host, port, protocolManager } = options
+    const { browserClient, browserCriClient, CriConstructor, event, host, port, protocolManager, childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS } = options
     const CreateCRI = CriConstructor || CRI
     const { sessionId, targetInfo, waitingForDebugger } = event
     let { targetId, url } = targetInfo
@@ -383,6 +406,46 @@ export class BrowserCriClient {
       || url.includes('chrome-extension://')
     ) {
       debug('Not an extra target (id: %s)', targetId)
+
+      // A service worker auto-attaches on this connection and the page
+      // connection at once. The page connection is what enables
+      // session-scoped Fetch interception for it (cri-client.ts's
+      // onChildTargetAttached), so releasing the worker here first can let
+      // it start serving navigations before that lands (#34674). Timed out
+      // rather than awaited outright: a stalled or dead page connection must
+      // not wedge the worker paused forever.
+      //
+      // Skipped for the Cypress extension's own service worker
+      // (chrome-extension://, already checked above): the page connection
+      // never attaches those, so this would burn the full timeout on every
+      // attach and on every MV3 idle-restart, stalling the extension's own
+      // automation.
+      if (targetInfo.type === 'service_worker' && !url.includes('chrome-extension://') && browserCriClient.waitForChildTargetInterception) {
+        const timedOut = Symbol('childTargetInterceptionTimedOut')
+        let timeoutHandle: NodeJS.Timeout | undefined
+
+        try {
+          const outcome = await Promise.race([
+            browserCriClient.waitForChildTargetInterception(targetId),
+            new Promise((resolve) => {
+              timeoutHandle = setTimeout(() => resolve(timedOut), childTargetInterceptionTimeoutMs)
+            }),
+          ])
+
+          if (outcome === timedOut) {
+            debug('releasing service worker %s without confirmed interception coverage: %s', targetId, `timed out after ${childTargetInterceptionTimeoutMs}ms`)
+          }
+        } catch (error) {
+          debug('releasing service worker %s without confirmed interception coverage: %s', targetId, error)
+        } finally {
+          // The winning side of the race leaves the other timer/promise
+          // outstanding - clear it so a won-by-confirmation race doesn't
+          // leave a live timer for the full timeout duration.
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle)
+          }
+        }
+      }
 
       // in these cases, we don't want to track the targets as extras.
       // we're only interested in extra tabs or windows
