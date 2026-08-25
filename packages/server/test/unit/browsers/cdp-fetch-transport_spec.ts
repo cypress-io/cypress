@@ -2567,6 +2567,52 @@ describe('CdpFetchTransport', () => {
         })
       })
 
+      // a browser cancel rejects the flow but leaves inFlightRequests intact,
+      // so the fetch-id check alone cannot see it — only the network key is
+      // dropped, and loadingFailed arrives before the entry exists so the
+      // pump's own reap never runs either
+      it('releases a freshly armed capture when the browser cancels during the arm await', async () => {
+        const client = createClient()
+        const armGate = Promise.withResolvers<any>()
+
+        client.send.withArgs('Network.streamResourceContent').returns(armGate.promise)
+
+        const { transport, bodyCapture } = createTransport(client, {
+          shouldStreamBody: () => true,
+          shouldCaptureBody: () => true,
+        })
+        const releaseSpy = sinon.spy(bodyCapture, 'release')
+        const onRequestPaused = await startTransport(transport, client)
+
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        handled.catch(() => {})
+
+        await tick()
+
+        const responded = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await tick()
+
+        onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+        armGate.resolve({ bufferedData: '' })
+
+        await responded
+
+        expect(releaseSpy).to.have.been.calledWith('network-1', undefined)
+
+        expect(client.send).to.have.been.calledWith('Fetch.continueResponse', {
+          requestId: 'fetch-request',
+        })
+      })
+
       it('resets and stops the capture pump with the transport lifecycle', async () => {
         const client = createClient()
         const bodyCapture = new CdpBodyCapture(client as any)

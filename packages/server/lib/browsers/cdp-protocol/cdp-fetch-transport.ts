@@ -768,10 +768,16 @@ export class CdpFetchTransport {
       if (event.networkId && !isRedirectPause(event) && this.options.shouldCaptureBody?.()) {
         captureStream = await this.bodyCapture.arm(event.networkId, sessionId)
 
-        // reset()/stop() may have rejected this flow while arming awaited CDP.
-        // The freshly armed capture entry has no owner either — release it, or
-        // the pump keeps pushing browser bytes into a stream nobody will read.
-        if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
+        // The flow may have been rejected while arming awaited CDP, by
+        // reset()/stop() or by a browser cancel. Those leave different traces:
+        // reset clears both maps, while onLoadingFailed only drops the network
+        // key — so a cancel is invisible to the fetch-id check alone. Either
+        // way the freshly armed capture entry has no owner: release it, or the
+        // pump keeps pushing browser bytes into a stream nobody will read.
+        const ownerLost = this.inFlightRequests.get(fetchRequestId) !== deferred ||
+          (deferred.networkKey !== undefined && this.inFlightByNetworkId.get(deferred.networkKey) !== deferred)
+
+        if (ownerLost) {
           this.bodyCapture.release(event.networkId, sessionId)
           debug('releasing response pause rejected while arming body capture: %s', event.request.url)
           await this.safeSend('Fetch.continueResponse', {
