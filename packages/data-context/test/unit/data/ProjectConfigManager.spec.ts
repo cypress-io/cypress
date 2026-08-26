@@ -40,8 +40,8 @@ describe('ProjectConfigManager', () => {
     })
   })
 
-  // A rejection here is picked up as a failed graceful-exit teardown step and
-  // turns a passing `cypress run` into exit code 1, so every path must resolve.
+  // Every path must resolve, since a rejection here fails a graceful-exit
+  // teardown step and turns a passing `cypress run` into exit code 1.
   describe('#mainProcessWillDisconnect', () => {
     const stubEventsIpc = (send: () => boolean) => {
       const listeners: Record<string, () => void> = {}

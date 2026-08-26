@@ -30,9 +30,8 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 
-// How long to wait for the child to ack `main:process:will:disconnect`. This has
-// to stay comfortably below the graceful exit teardown budget (5s by default,
-// `CYPRESS_INTERNAL_TEARDOWN_TIMEOUT`) — a wait that outlives it loses the race
+// Must stay below the graceful exit teardown budget (5s by default,
+// `CYPRESS_INTERNAL_TEARDOWN_TIMEOUT`); a wait that outlives it loses the race
 // to the force-exit, which ends the process with code 1.
 const MAIN_PROCESS_WILL_DISCONNECT_ACK_TIMEOUT_MS = 3000
 
@@ -660,7 +659,6 @@ export class ProjectConfigManager {
    * killed moments later, so every outcome resolves. Rejecting would surface as
    * a failed graceful-exit teardown step and flip an otherwise passing
    * `cypress run` to exit code 1.
-   * @returns promise
    */
   mainProcessWillDisconnect (): Promise<void> {
     return new Promise((resolve) => {
@@ -673,9 +671,8 @@ export class ProjectConfigManager {
 
       debug('sending main:process:will:disconnect message')
 
-      // A child that already exited or disconnected can never ack, and it
-      // emitted its `exit`/`disconnect` before the listeners below were
-      // attached, so waiting on them would only burn the timeout.
+      // A child that is already gone emitted its `exit` and `disconnect` before
+      // the listeners below were attached, leaving nothing left to settle on.
       if (!this._eventsIpc.send('main:process:will:disconnect')) {
         debug('child process is already gone, nothing to wait for')
         resolve()
