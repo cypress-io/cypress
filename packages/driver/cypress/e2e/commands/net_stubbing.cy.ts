@@ -1697,8 +1697,7 @@ describe('network stubbing', { retries: 15 }, function () {
     it('receives a binary request body in handler as bytes', function () {
       const bytes = new Uint8Array(4096)
 
-      // 0x80-0xff are lone continuation bytes, so a utf8 view of this payload
-      // collapses into replacement characters and loses its length
+      // covers every byte value, so the payload is not valid utf8
       for (let i = 0; i < bytes.length; i++) {
         bytes[i] = (i * 7 + 0x80) & 0xff
       }
