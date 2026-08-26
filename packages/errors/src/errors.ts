@@ -1245,12 +1245,6 @@ export const AllCypressErrors = {
 
       We have failed the current spec and aborted the run.`
   },
-  CYPRESS_PROCESS_CLOSED_UNEXPECTEDLY: (signal: string) => {
-    return errTemplate`\
-      We detected that the Cypress process was killed by signal ${fmt.highlight(signal)} instead of exiting on its own.
-
-      Any results printed above were reported before this happened, but the run did not finish cleanly.`
-  },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
         The ${fmt.highlight('launchOptions')} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:

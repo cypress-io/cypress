@@ -942,11 +942,6 @@ describe('visual error templates', () => {
         default: ['chrome'],
       }
     },
-    CYPRESS_PROCESS_CLOSED_UNEXPECTEDLY: () => {
-      return {
-        default: ['SIGKILL'],
-      }
-    },
     UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {
       return {
         default: [

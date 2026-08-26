@@ -12,7 +12,7 @@ import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import { toObject, toArray } from './util/args'
 import { telemetry } from '@packages/telemetry'
-import { get as getError, warning as errorsWarning } from './errors'
+import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
@@ -111,7 +111,7 @@ export = {
         return require('./modes')(mode, options)
       }
 
-      return new Promise(async (resolve, reject) => {
+      return new Promise(async (resolve) => {
         debug('starting Electron')
         const cypressElectron = require('@packages/electron')
 
@@ -126,14 +126,6 @@ export = {
 
         child.on('close', (exitCode, signal) => {
           debug('electron closed with', { code: exitCode, signal })
-
-          // A signal means the app was killed rather than exiting on its own. Mapping it to an
-          // exit code hides the crash - in run mode it reads as that many failing tests. An
-          // interrupt this process is already handling is not a crash; that teardown owns the code.
-          if (signal && !GracefulExit.isShuttingDown) {
-            return reject(getError('CYPRESS_PROCESS_CLOSED_UNEXPECTEDLY', signal))
-          }
-
           const code = signal ? 1 : (exitCode ?? 0)
 
           if (mode === 'smokeTest') {
