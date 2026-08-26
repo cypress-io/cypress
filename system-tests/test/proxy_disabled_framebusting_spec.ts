@@ -136,8 +136,16 @@ const onSwServer = function (app) {
     res.send(pageSource)
   })
 
+  // Cacheable on purpose: a culled worker's cold-start update check refetches
+  // its script, and that fetch can escape interception (#34674). With
+  // no-store, the escaped refetch returns the raw, uninjected script, Chrome
+  // sees different bytes than the installed (injected) version, installs it
+  // as a new worker version, and that version's activate runs a real
+  // enable() - flipping the very flag this spec asserts on. A cached script
+  // makes every update check reuse the injected bytes, so no unpatched
+  // version can ever install.
   app.get('/sw.js', (req, res) => {
-    res.setHeader('Cache-Control', 'no-store')
+    res.setHeader('Cache-Control', 'max-age=3600')
     res.type('application/javascript').send(swSource)
   })
 
