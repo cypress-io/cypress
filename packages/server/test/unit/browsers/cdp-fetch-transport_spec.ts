@@ -495,6 +495,27 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.postDataBuffer).to.deep.equal(edited)
     })
 
+    // Chrome omits postData for a payload too long to inline, leaving the
+    // entries as the only record that the request had a body at all.
+    it('encodes an emptied body when only the entries recorded the pause body', () => {
+      const codec = createCdpFetchCodec()
+      const body = Buffer.from([0x80, 0x81, 0x82, 0x83])
+      const transportRequest: CdpFetchTransportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'POST',
+        headers: {},
+        hasPostData: true,
+        postDataEntries: [{ bytes: body.toString('base64') }],
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      codec.encodeRequest({ ...request, body: '' })
+
+      expect(transportRequest.postData).to.equal('')
+    })
+
     it('encodes a binary body a handler emptied', () => {
       const codec = createCdpFetchCodec()
       const body = Buffer.from([0x80, 0x81, 0x82, 0x83])

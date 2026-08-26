@@ -326,13 +326,18 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         Buffer.isBuffer(httpRequest.body) &&
         httpRequest.body.equals(transportRequest.pausePostDataBuffer)
 
+      // Either field alone is proof the pause carried a body: postData is
+      // omitted for a payload too long to inline, leaving the entries as the
+      // only record of it.
+      const pauseCarriedBody = transportRequest.postData !== undefined || transportRequest.pausePostDataBuffer !== undefined
+
       // The net-stubbing pipeline normalizes every intercepted request to a
       // string body, so a request the browser paused without one arrives back
       // here as `''` — indistinguishable from a body a handler emptied. Sending
       // that as postData makes Chrome attach `Content-Length: 0` to requests
       // that never had a body (#24407). Only an empty body the pause itself
       // carried is a real change worth forwarding.
-      if (!bodyUnchanged && httpRequest.body !== undefined && (httpRequest.body.length > 0 || transportRequest.postData !== undefined)) {
+      if (!bodyUnchanged && httpRequest.body !== undefined && (httpRequest.body.length > 0 || pauseCarriedBody)) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
 
         // A Buffer body must reach the transport as bytes: the utf8 string
