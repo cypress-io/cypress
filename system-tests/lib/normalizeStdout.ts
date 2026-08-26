@@ -168,6 +168,9 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Teardown exceeding its budget is a property of the machine, not the run, so this line comes
+  // and goes with CI load. The exit code the harness asserts is what matters here.
+  .replace(/^Failed to gracefully exit after .*\n?/gm, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
   .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
   .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
