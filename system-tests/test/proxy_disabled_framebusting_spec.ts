@@ -73,7 +73,11 @@ self.addEventListener('fetch', (e) => {
 
 const pageSource = `
 <html><body><h1 id="app">app</h1><script>
-navigator.serviceWorker.register('/sw.js')
+// updateViaCache: 'all' makes worker update checks honor the script's
+// max-age (main-script checks bypass the HTTP cache by default) - see the
+// /sw.js route comment for why an update check must never refetch from the
+// origin here
+navigator.serviceWorker.register('/sw.js', { updateViaCache: 'all' })
 
 // Window-realm call guarding the bootstrap-script seam (see swSource's
 // comment above). \`reg\` here is the worker's own registration, reached
