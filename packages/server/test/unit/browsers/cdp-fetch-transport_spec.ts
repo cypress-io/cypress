@@ -3503,7 +3503,7 @@ describe('CdpFetchTransport', () => {
     })
   })
 
-  describe('browser request cancellation', () => {
+  describe('browser request failures and cancellation', () => {
     // Parks a flow in the middleware onion the way pre-request correlation
     // does, so the cancellation arrives while the request pause is still held.
     function parkedIntercept () {
@@ -3513,6 +3513,25 @@ describe('CdpFetchTransport', () => {
       httpIntercept.use(async () => parked.promise)
 
       return { httpIntercept, parked }
+    }
+
+    function capturingIntercept () {
+      let capturedError: (Error & { code?: string }) | undefined
+      const errorCaptured = Promise.withResolvers<Error & { code?: string }>()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+
+      httpIntercept.use(async (request, next) => {
+        try {
+          return await next(request)
+        } catch (err) {
+          capturedError = err as Error & { code?: string }
+          errorCaptured.resolve(capturedError)
+
+          throw err
+        }
+      })
+
+      return { httpIntercept, errorCaptured: errorCaptured.promise, getCapturedError: () => capturedError }
     }
 
     it('aborts a flow still paused in the middleware onion', async () => {
@@ -3571,26 +3590,67 @@ describe('CdpFetchTransport', () => {
       expect(client.send).not.to.have.been.calledWith('Fetch.fulfillRequest')
     })
 
-    it('leaves a genuine network failure to the response error pause', async () => {
+    it('rejects a non-canceled network failure when no response pause arrives', async () => {
       const client = createClient()
-      const { httpIntercept, parked } = parkedIntercept()
+      const { httpIntercept, errorCaptured } = capturingIntercept()
       const onRequestCanceled = sinon.stub()
       const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
 
-      onRequestPaused(createPausedRequest({
+      const handled = onRequestPaused(createPausedRequest({
         requestId: 'fetch-request',
         networkId: 'network-1',
+        url: 'https://example.test/failed',
       }))
 
       await tick()
 
       onLoadingFailed(client, { requestId: 'network-1', canceled: false, errorText: 'net::ERR_CONNECTION_REFUSED' })
 
-      expect(onRequestCanceled).not.to.have.been.called
+      try {
+        const capturedError = await Promise.race([
+          errorCaptured,
+          new Promise<undefined>((resolve) => setImmediate(() => resolve(undefined))),
+        ])
 
-      parked.reject(new Error('unparked'))
+        expect(capturedError, 'LOADING_FAILED_PENDING_SENTINEL: non-canceled loadingFailed did not reject the pending response').to.not.be.undefined
+        expect(capturedError?.message).to.equal('CDP Fetch response failed for https://example.test/failed: net::ERR_CONNECTION_REFUSED')
+        expect(onRequestCanceled).not.to.have.been.called
+      } finally {
+        transport.reset()
+        await handled
+      }
+    })
+
+    it('keeps the response error pause reason when loadingFailed follows', async () => {
+      const client = createClient()
+      const { httpIntercept, getCapturedError } = capturingIntercept()
+      const onRequestCanceled = sinon.stub()
+      const { transport } = createTransport(client, { httpIntercept, onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'http://127.0.0.1:3333/failed',
+      }))
+
       await tick()
+
+      const responseHandled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'http://127.0.0.1:3333/failed',
+        responseErrorReason: 'ConnectionRefused',
+      }))
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: false, errorText: 'net::ERR_FAILED' })
+
+      await responseHandled
+      await handled
+
+      expect(getCapturedError()?.message).to.equal('connect ECONNREFUSED 127.0.0.1:3333')
+      expect(getCapturedError()?.code).to.equal('ECONNREFUSED')
+      expect(onRequestCanceled).not.to.have.been.called
     })
 
     it('ignores a cancellation for a request it never paused', async () => {

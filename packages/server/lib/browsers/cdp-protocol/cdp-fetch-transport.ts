@@ -167,6 +167,7 @@ type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   headersReady: PromiseWithResolvers<void>
   // key into inFlightByNetworkId; absent when the pause carried no networkId
   networkKey?: string
+  requestUrl: string
   // Request-stage route-match result, stashed once the outbound request comes
   // back from the middleware onion — read by resolveResponse's shouldStreamBody
   // call so classification agrees with the interception that actually ran.
@@ -362,15 +363,12 @@ export class CdpFetchTransport {
    * flow still in request middleware (typically parked in pre-request
    * correlation, whose 2s timer would otherwise expire and log a warning), the
    * rejection covers one already continued and waiting on a response pause.
+   *
+   * A non-canceled failure normally has a Fetch response error pause, but when
+   * Chrome omits it, Network.loadingFailed is the only terminal signal and must
+   * reject the pending response with the browser's failure reason.
    */
   private onLoadingFailed = (event: Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
-    // A request that failed on the wire still gets a Fetch response pause
-    // carrying its error reason — resolveResponse owns those, and treating
-    // them as cancellations here would silence a real failure.
-    if (!event.canceled) {
-      return
-    }
-
     const networkKey = this.getNetworkKey(event.requestId, sessionId)
     const deferred = this.inFlightByNetworkId.get(networkKey)
 
@@ -378,9 +376,16 @@ export class CdpFetchTransport {
       return
     }
 
-    debug('browser canceled in-flight request %s', networkKey)
-
     this.inFlightByNetworkId.delete(networkKey)
+
+    if (!event.canceled) {
+      debug('browser failed in-flight request %s: %s', networkKey, event.errorText)
+      deferred.reject(toNetworkError(deferred.requestUrl, event.errorText))
+
+      return
+    }
+
+    debug('browser canceled in-flight request %s', networkKey)
     this.options.onRequestCanceled?.(`${this.requestIdPrefix}${event.requestId}`)
     deferred.reject(new Error(`CDP Fetch request canceled by the browser: ${networkKey}`))
   }
@@ -507,6 +512,7 @@ export class CdpFetchTransport {
       const responseDeferred: ResponsePauseDeferred = {
         ...Promise.withResolvers<CdpFetchTransportResponse>(),
         headersReady: Promise.withResolvers<void>(),
+        requestUrl: event.request.url,
         ...(event.networkId ? { networkKey: this.getNetworkKey(event.networkId, sessionId) } : {}),
       }
 
@@ -533,6 +539,7 @@ export class CdpFetchTransport {
         // resolveResponse instead of re-matching against a possibly
         // handler-mutated request at response time.
         responseDeferred.hadMatchingRoutes = outbound.hadMatchingRoutes
+        responseDeferred.requestUrl = outbound.url
 
         const headers = await this.continueRequestHeaders(event, outbound)
 

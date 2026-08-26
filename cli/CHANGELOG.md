@@ -36,6 +36,10 @@
 - Cypress now supports HTTP/2 and HTTP/3 in Chrome, Chromium, and Edge. Your application is tested over the same protocol it uses in production, with multiplexed requests and no six-connection ceiling, so modern apps load faster under test and behave the way your users actually experience them. Cypress also stops terminating TLS for the application under test, so the browser validates your origin's real certificate instead of one Cypress generates. See [Native network interception](https://docs.cypress.io/app/guides/native-network-interception). Addresses [#3708](https://github.com/cypress-io/cypress/issues/3708).
 - `Angular` version 22 is now supported within component testing, including Launchpad project detection and the `@cypress/schematic` Angular CLI integration. Addresses [#33753](https://github.com/cypress-io/cypress/issues/33753).
 
+**Bugfixes:**
+
+- Chrome, Chromium, and Edge test runs using native network interception now report the browser's failure reason promptly when an intercepted request fails, instead of waiting 30 seconds and reporting a timeout. Fixes [#34689](https://github.com/cypress-io/cypress/issues/34689).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `37.6.0` to `41.7.0`.

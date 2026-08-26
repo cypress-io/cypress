@@ -60,8 +60,8 @@ function formatAddress (url: string, address?: NodeNetworkError['address']): str
  * Builds the error a failed CDP Fetch response pause rejects with, shaped like
  * the Node error the MITM path would have produced for the same condition.
  */
-export function toNetworkError (url: string, errorReason: Protocol.Network.ErrorReason): Error {
-  const mapped = NODE_NETWORK_ERRORS[errorReason]
+export function toNetworkError (url: string, errorReason: string): Error {
+  const mapped = NODE_NETWORK_ERRORS[errorReason as Protocol.Network.ErrorReason]
 
   if (!mapped) {
     return new Error(`CDP Fetch response failed for ${url}: ${errorReason}`)
