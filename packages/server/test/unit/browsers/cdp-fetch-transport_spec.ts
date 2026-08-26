@@ -519,7 +519,7 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.postDataBuffer).to.deep.equal(edited)
     })
 
-    // Chrome omits postData for a payload too long to inline, leaving the
+    // CDP may omit postData for a payload too long to inline, leaving the
     // entries as the only record that the request had a body at all.
     it('encodes an emptied body when only the entries recorded the pause body', () => {
       const codec = createCdpFetchCodec()

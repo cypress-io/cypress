@@ -181,10 +181,10 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
-// The base64 entries are the byte-accurate view of a paused body, which is why
-// CDP deprecates the utf8 `postData` string in their favor. Chrome withholds
-// `bytes` for a body it never materialized (a ReadableStream upload) —
-// concatenating those would forge an empty body in place of one it cannot supply.
+// `postData` is a utf8 string, so it mangles a binary body; the entries carry
+// that same body as base64. An entry with no `bytes` means the browser has no
+// copy of the body to hand over — it never buffered a streamed upload — which
+// is not the same as an empty body, so report no body rather than invent one.
 function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | undefined {
   if (!entries?.length || entries.some(({ bytes }) => bytes === undefined)) {
     return undefined

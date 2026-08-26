@@ -132,7 +132,8 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   // postData is its lossy utf8 string view, kept for pause comparison.
   postDataBuffer?: Buffer
   // Byte-accurate body the pause itself carried, decoded from postDataEntries.
-  // Undefined when the browser withheld the bytes — see toPausePostData.
+  // Undefined when the browser reported no bytes for it, as it does for a
+  // streamed upload it never buffered — see toPausePostData.
   pausePostDataBuffer?: Buffer
   requestId?: string
   resourceType?: ResourceType
