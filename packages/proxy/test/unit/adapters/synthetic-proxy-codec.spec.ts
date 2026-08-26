@@ -1,4 +1,4 @@
-import { Readable } from 'stream'
+import { PassThrough, Readable } from 'stream'
 import zlib from 'zlib'
 import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
@@ -559,7 +559,7 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
   })
 
-  it('copies bodySkipped onto the ctx as resBodySkipped', () => {
+  it('copies bodySkipped and captureStream onto the ctx as resBodySkipped and resCaptureStream', () => {
     const codec = createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => {
         return {
@@ -576,18 +576,100 @@ describe('createSyntheticProxyCodec', () => {
       headers: {},
     })
 
+    const captureStream = Readable.from(['origin'])
+
     codec.encodeResponse({
       id: 'network-skipped',
       url: 'https://example.test/',
       statusCode: 200,
       bodySkipped: true,
       bodyStream: Readable.from(['']),
+      captureStream,
     })
 
     expect(ctx.resBodySkipped).to.equal(true)
+    // reference identity, not just presence — resCaptureStream must be the same stream
+    expect(ctx.resCaptureStream).to.equal(captureStream)
   })
 
-  it('leaves resBodySkipped unset when bodySkipped is absent', () => {
+  it('drains an unconsumed capture stream when the synthetic res closes', async () => {
+    let ctx: any
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        ctx = { req, res }
+
+        return ctx
+      },
+    })
+
+    codec.encodeRequest({
+      id: 'network-drain',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const captureStream = new PassThrough()
+
+    codec.encodeResponse({
+      id: 'network-drain',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+      captureStream,
+    })
+
+    // the notification stage never ran (early end / error path) — closing the
+    // synthetic res must put the orphaned pump into flowing mode
+    expect(captureStream.readableFlowing).to.not.equal(true)
+
+    ctx.res.destroy()
+
+    await new Promise((resolve) => setImmediate(resolve))
+
+    expect(captureStream.readableFlowing).to.equal(true)
+  })
+
+  it('leaves a consumed capture stream alone when the synthetic res closes', async () => {
+    let ctx: any
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        ctx = { req, res }
+
+        return ctx
+      },
+    })
+
+    codec.encodeRequest({
+      id: 'network-consumed',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    const captureStream = new PassThrough()
+
+    codec.encodeResponse({
+      id: 'network-consumed',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+      captureStream,
+    })
+
+    // the notification stage consumed the stream and cleared the ctx field
+    ctx.resCaptureStream = undefined
+
+    ctx.res.destroy()
+
+    await new Promise((resolve) => setImmediate(resolve))
+
+    expect(captureStream.readableFlowing).to.equal(null)
+  })
+
+  it('leaves resBodySkipped and resCaptureStream unset when bodySkipped and captureStream are absent', () => {
     const codec = createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => {
         return {
@@ -612,6 +694,7 @@ describe('createSyntheticProxyCodec', () => {
     })
 
     expect(ctx.resBodySkipped).to.be.undefined
+    expect(ctx.resCaptureStream).to.be.undefined
   })
 
   it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {

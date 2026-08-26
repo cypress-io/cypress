@@ -32,6 +32,7 @@ import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
+import { serviceWorkerHeaderIsScript } from '@packages/network-interception'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -39,8 +40,12 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
+// Pure predicate shared with should-stream-response-body.ts (packages/server/lib/browsers/cdp-protocol),
+// which does its own case-insensitive header-name lookup and needs only the
+// value check.
+
 export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
-  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
+  return serviceWorkerHeaderIsScript(headers?.['service-worker']) || serviceWorkerHeaderIsScript(headers?.['Service-Worker'])
 }
 
 export const isVerboseTelemetry = true

@@ -315,6 +315,12 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         }
       }
 
+      // Carries the request-stage route-match result to the transport, which
+      // stashes it on the response-pause deferred for shouldStreamBody.
+      if (httpRequest.hadMatchingRoutes !== undefined) {
+        transportRequest.hadMatchingRoutes = httpRequest.hadMatchingRoutes
+      }
+
       return transportRequest
     },
 
@@ -335,6 +341,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         headers: stripWireEncodingHeaders(toHttpHeaders(transportResponse.responseHeaders)),
         statusCode: transportResponse.responseCode,
         ...(transportResponse.bodySkipped ? { bodySkipped: true } : {}),
+        ...(transportResponse.captureStream ? { captureStream: transportResponse.captureStream } : {}),
       }
     },
 
