@@ -33,12 +33,17 @@ function preparePackageForNpmRelease (json) {
   delete json.nyc
   delete json.workspaces
 
+  // the binary is uploaded under CIRCLE_SHA1 and this sha is what the installer builds the
+  // download url from, so prefer it over the checkout, which CI builds this package from an
+  // attached workspace whose git state can lag behind
+  const commitSha = process.env.CIRCLE_SHA1 || getStdout('git rev-parse HEAD')
+
   _.extend(json, {
     version,
     buildInfo: {
       commitBranch: process.env.CIRCLE_BRANCH || getStdout('git branch --show-current'),
-      commitSha: getStdout('git rev-parse HEAD'),
-      commitDate: new Date(getStdout('git show -s --format=%ci')).toISOString(),
+      commitSha,
+      commitDate: new Date(getStdout(`git show -s --format=%ci ${commitSha}`) || getStdout('git show -s --format=%ci')).toISOString(),
       stable: false,
     },
     description,
