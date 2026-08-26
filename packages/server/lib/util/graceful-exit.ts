@@ -184,7 +184,7 @@ export class GracefulExit {
           try {
             const ms = getTeardownTimeoutMs()
 
-            console.log(`Failed to gracefully exit after ${ms}ms. Exiting with the existing code ${code}.`)
+            console.log(`Failed to gracefully exit after ${ms}ms. This does not affect the exit code (${code}).`)
           } catch (e) {
             console.log('Error forcing exit: ', e)
           } finally {
