@@ -6,6 +6,10 @@ const onServer = function (app) {
   })
 
   app.get('/req', (req, res) => {
+    // without this an allowed cross-origin request fails on CORS and reports the same
+    // zero status as a blocked one, so the test would pass even when nothing is blocked
+    res.header('Access-Control-Allow-Origin', '*')
+
     return res.sendStatus(200)
   })
 

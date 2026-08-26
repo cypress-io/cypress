@@ -1,7 +1,9 @@
 const { expect, sinon } = require('../../spec_helper')
 
 import { ProtocolManagerShape, REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER, SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
-import { CdpAutomation, normalizeResourceType } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { normalizeResourceType } from '../../../lib/browsers/cdp-protocol/normalize-resource-type'
+import { CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'
 
 context('lib/browsers/cdp_automation', () => {
   context('.normalizeResourceType', () => {
@@ -124,6 +126,35 @@ context('lib/browsers/cdp_automation', () => {
         expect(startScreencast).to.have.been.calledWith('Page.startScreencast')
         expect(writeVideoFrame).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
         expect(screencastFrameAck).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+      })
+
+      it('swallows a CDPDisconnectedError from the ack (e.g. racing a terminal disconnect)', async function () {
+        const writeVideoFrame = sinon.stub()
+        const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
+
+        this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
+        this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').rejects(new CDPDisconnectedError('Page.screencastFrameAck will not run as the CRI connection to Target foo has been closed'))
+
+        await cdpAutomation.startVideoRecording(writeVideoFrame, {})
+
+        const screencastFrameHandler = this.onFn.withArgs('Page.screencastFrame').args[0][1]
+
+        await expect(screencastFrameHandler(frameMeta)).to.be.fulfilled
+      })
+
+      it('rethrows other errors from the ack', async function () {
+        const writeVideoFrame = sinon.stub()
+        const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
+        const err = new Error('boom')
+
+        this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
+        this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').rejects(err)
+
+        await cdpAutomation.startVideoRecording(writeVideoFrame, {})
+
+        const screencastFrameHandler = this.onFn.withArgs('Page.screencastFrame').args[0][1]
+
+        await expect(screencastFrameHandler(frameMeta)).to.be.rejectedWith(err)
       })
     })
 

@@ -7,6 +7,7 @@ import net from 'net'
 import { ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { cypressSessions } from '../../../lib/cypress-sessions'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -49,7 +50,10 @@ describe('lib/browsers/browser-cri-client', function () {
     on = sinon.stub()
     send = sinon.stub()
     close = sinon.stub()
-    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager: undefined, fullyManageTabs: undefined }).resolves({
+    onError = sinon.stub()
+    // the browser-level client wraps onAsynchronousError and passes an
+    // onCriConnectionClosed handler, so match loosely on the stable fields
+    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager: undefined, fullyManageTabs: undefined })).resolves({
       send,
       on,
       close,
@@ -60,7 +64,7 @@ describe('lib/browsers/browser-cri-client', function () {
     })
 
     getClient = ({ protocolManager, fullyManageTabs } = {}) => {
-      criClientCreateStub = criClientCreateStub.withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager, fullyManageTabs }).resolves({
+      criClientCreateStub = criClientCreateStub.withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager, fullyManageTabs })).resolves({
         send,
         on,
         close,
@@ -130,6 +134,38 @@ describe('lib/browsers/browser-cri-client', function () {
 
       expect(criImport.Version).to.be.calledTwice
     })
+
+    it('advertises the browser websocket url to cypress sessions once connected', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(cypressSessions, 'setCdpBrowserWsUrl')
+
+      await getClient()
+
+      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url')
+    })
+
+    it('clears the cypress sessions cdp url when the browser connection is lost', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(cypressSessions, 'setCdpBrowserWsUrl')
+
+      await getClient()
+
+      const createArgs = criClientCreateStub.getCall(0).args[0]
+
+      setCdpBrowserWsUrl.resetHistory()
+
+      // a graceful disconnect, or reconnection halting due to closure
+      createArgs.onCriConnectionClosed()
+      expect(setCdpBrowserWsUrl).to.be.calledWith(null)
+
+      setCdpBrowserWsUrl.resetHistory()
+
+      // the browser crashed or was quit externally: reconnection ultimately failed
+      const err = new Error('reconnect failed')
+
+      createArgs.onAsynchronousError(err)
+      expect(setCdpBrowserWsUrl).to.be.calledWith(null)
+      // the original error handler still runs
+      expect(onError).to.be.calledWith(err)
+    })
   })
 
   context('._onAttachToTarget', () => {
@@ -143,6 +179,7 @@ describe('lib/browsers/browser-cri-client', function () {
         },
         browserCriClient: {
           addExtraTargetClient: sinon.stub(),
+          getExtraTargetClient: sinon.stub().returns(undefined),
           currentlyAttachedTarget: {
             targetId: 'main-target-id',
           },
@@ -336,6 +373,100 @@ describe('lib/browsers/browser-cri-client', function () {
       })
     })
 
+    it('delegates Fetch ownership to onExtraTargetCriClientReady when provided', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+      const detach = sinon.stub().resolves()
+      const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
+      const tracked = { client: criClient, targetInfo: options.event.targetInfo }
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = onExtraTargetCriClientReady
+      options.browserCriClient.getExtraTargetClient.returns(tracked)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(onExtraTargetCriClientReady).to.be.calledOnceWith(criClient)
+      expect(tracked.detach).to.equal(detach)
+      expect(criClient.send).not.to.be.calledWith('Fetch.enable')
+      expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+    })
+
+    it('releases the transport when the extra target is destroyed during attach', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+      // a detach that never settles models an extra target whose own CDP
+      // connection is already gone — if _onAttachToTarget awaited this, the
+      // test would time out instead of completing
+      const detach = sinon.stub().returns(new Promise(() => {}))
+      const onExtraTargetCriClientReady = sinon.stub().resolves(detach)
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = onExtraTargetCriClientReady
+      // Target destroyed mid-await — tracker entry already removed
+      options.browserCriClient.getExtraTargetClient.returns(undefined)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(onExtraTargetCriClientReady).to.be.calledOnceWith(criClient)
+      expect(detach).to.be.calledOnce
+      expect(criClient.send).not.to.be.calledWith('Fetch.enable')
+      expect(criClient.on).not.to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+    })
+
+    it('falls back to header-only continue when onExtraTargetCriClientReady throws', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = sinon.stub().rejects(new Error('attach failed'))
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+      criClient.send.withArgs('Fetch.enable').resolves()
+      criClient.send.withArgs('Fetch.continueRequest').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(criClient.send).to.be.calledWith('Fetch.enable')
+      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+
+      await criClient.on.lastCall.args[1]({
+        requestId: 'request-id',
+        request: { headers: {} },
+      })
+
+      expect(criClient.send).to.be.calledWith('Fetch.continueRequest', {
+        requestId: 'request-id',
+        headers: [
+          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+        ],
+      })
+    })
+
+    it('falls back to header-only continue when onExtraTargetCriClientReady returns undefined', async () => {
+      const criClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+      }
+
+      options.CriConstructor.returns(criClient)
+      options.browserCriClient.onExtraTargetCriClientReady = sinon.stub().resolves(undefined)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+      criClient.send.withArgs('Fetch.enable').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expect(criClient.send).to.be.calledWith('Fetch.enable')
+      expect(criClient.on).to.be.calledWith('Fetch.requestPaused', sinon.match.func)
+    })
+
     it('ignores any errors from continuing request', async () => {
       const criClient = {
         send: sinon.stub(),
@@ -403,6 +534,18 @@ describe('lib/browsers/browser-cri-client', function () {
 
         BrowserCriClient._onTargetDestroyed(options as any)
 
+        expect(client.close).to.be.called
+      })
+
+      it('detaches the extra target Fetch transport when present', () => {
+        const detach = sinon.stub().resolves()
+        const client = { close: sinon.stub().resolves() }
+
+        options.browserCriClient.getExtraTargetClient.returns({ client, detach })
+
+        BrowserCriClient._onTargetDestroyed(options as any)
+
+        expect(detach).to.be.called
         expect(client.close).to.be.called
       })
 
@@ -762,6 +905,21 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
       expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-2' })
       // error is caught or else the test would fail
+    })
+
+    it('does not wait on the extra target Fetch transport detaching', async () => {
+      const browserClient = await getClient() as any
+
+      browserClient.browserClient.send = sinon.stub().resolves()
+
+      browserClient.addExtraTargetClient({ targetId: 'target-id-1' }, {})
+      // a detach that never settles models an extra target whose own CDP
+      // connection is already gone
+      browserClient.getExtraTargetClient('target-id-1').detach = sinon.stub().returns(new Promise(() => {}))
+
+      await browserClient.closeExtraTargets()
+
+      expect(browserClient.browserClient.send).to.be.calledWith('Target.closeTarget', { targetId: 'target-id-1' })
     })
   })
 

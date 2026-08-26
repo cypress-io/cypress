@@ -12,6 +12,12 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
     return mw.next()
   }
 
+  // A skipped body means the transport never read it, not that it was empty.
+  // Notifying Replay here would record a false zero-length capture.
+  if (mw.resBodySkipped) {
+    return mw.next()
+  }
+
   const preRequest = mw.req.browserPreRequest
   const requestId = getOriginalRequestId(preRequest.requestId)
 

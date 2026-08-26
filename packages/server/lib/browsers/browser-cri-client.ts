@@ -7,9 +7,11 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cdp-protocol/cri-client'
+import { cypressSessions } from '../cypress-sessions'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
-import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
+import type { CyPromptManagerShape, ProtocolManagerShape, CdpClientShape, OnExtraTargetCriClientReady, ExtraTargetDetach } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { EXTRA_TARGET_HEADER } from './constants'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -23,6 +25,7 @@ type BrowserCriClientOptions = {
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
+  onExtraTargetCriClientReady?: OnExtraTargetCriClientReady
 }
 
 type BrowserCriClientCreateOptions = {
@@ -35,6 +38,7 @@ type BrowserCriClientCreateOptions = {
   protocolManager?: ProtocolManagerShape
   cyPromptManager?: CyPromptManagerShape
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
+  onExtraTargetCriClientReady?: OnExtraTargetCriClientReady
 }
 
 interface ManageTabsOptions {
@@ -160,6 +164,7 @@ type TargetId = string
 interface ExtraTarget {
   client: CRI.Client
   targetInfo: Protocol.Target.TargetInfo
+  detach?: ExtraTargetDetach
 }
 
 export class BrowserCriClient {
@@ -173,6 +178,7 @@ export class BrowserCriClient {
   private cyPromptManager?: CyPromptManagerShape
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
+  onExtraTargetCriClientReady?: OnExtraTargetCriClientReady
   currentlyAttachedTarget: CriClient | undefined
   currentlyAttachedProtocolTarget: CriClient | undefined
   currentlyAttachedCyPromptTarget: CriClient | undefined
@@ -198,6 +204,7 @@ export class BrowserCriClient {
     this.protocolManager = options.protocolManager
     this.fullyManageTabs = options.fullyManageTabs
     this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
+    this.onExtraTargetCriClientReady = options.onExtraTargetCriClientReady
   }
 
   /**
@@ -225,6 +232,7 @@ export class BrowserCriClient {
       port,
       protocolManager,
       onServiceWorkerClientEvent,
+      onExtraTargetCriClientReady,
     } = options
 
     const host = await ensureLiveBrowser(hosts, port, browserName)
@@ -232,12 +240,18 @@ export class BrowserCriClient {
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
 
+      const clearSessionCdpUrl = () => cypressSessions.setCdpBrowserWsUrl(null)
+
       const browserClient = await CriClient.create({
         target: versionInfo.webSocketDebuggerUrl,
-        onAsynchronousError,
+        onAsynchronousError: (err) => {
+          clearSessionCdpUrl()
+          onAsynchronousError(err)
+        },
         onReconnect,
         protocolManager,
         fullyManageTabs,
+        onCriConnectionClosed: clearSessionCdpUrl,
       })
 
       const browserCriClient = new BrowserCriClient({
@@ -250,7 +264,10 @@ export class BrowserCriClient {
         protocolManager,
         fullyManageTabs,
         onServiceWorkerClientEvent,
+        onExtraTargetCriClientReady,
       })
+
+      cypressSessions.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl)
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
@@ -392,32 +409,67 @@ export class BrowserCriClient {
 
     browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
 
-    try {
-      await extraTargetCriClient.send('Fetch.enable')
-    } catch (err) {
-      // swallow this error so it doesn't crash Cypress
-      debug('Fetch.enable failed on extra target#%s: %s', targetId, err)
-    }
-
-    // we mark extra targets with this header, so that the proxy can recognize
-    // where they came from and run only the minimal middleware necessary
-    extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
-      // headers are received as an object but need to be an array to modify them
-      const headers = _.map(params.request.headers, (value, name) => ({ name, value }))
-
-      const details: Protocol.Fetch.ContinueRequestRequest = {
-        requestId: params.requestId,
-        headers: [
-          ...headers,
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
-        ],
+    // Fetch.enable + continue must stay paired — enabling without a continue
+    // handler pauses every popup request forever. Used whenever
+    // onExtraTargetCriClientReady is absent, returns no CDP Fetch runtime, or
+    // fails: mark extra targets with this header so the MITM proxy can
+    // recognize where they came from and run only the minimal middleware
+    // necessary.
+    const fallbackToHeaderOnlyContinue = async () => {
+      try {
+        await extraTargetCriClient.send('Fetch.enable')
+      } catch (enableErr) {
+        // swallow this error so it doesn't crash Cypress
+        debug('Fetch.enable failed on extra target#%s: %s', targetId, enableErr)
       }
 
-      extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
-        // swallow this error so it doesn't crash Cypress
-        debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+      extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+        // headers are received as an object but need to be an array to modify them
+        const headers = _.map(params.request.headers, (value, name) => ({ name, value }))
+
+        const details: Protocol.Fetch.ContinueRequestRequest = {
+          requestId: params.requestId,
+          headers: [
+            ...headers,
+            { name: EXTRA_TARGET_HEADER, value: 'true' },
+          ],
+        }
+
+        extraTargetCriClient.send('Fetch.continueRequest', details).catch((err) => {
+          // swallow this error so it doesn't crash Cypress
+          debug('continueRequest failed, url: %s, error: %s', params.request.url, err?.stack || err)
+        })
       })
-    })
+    }
+
+    let detach: ExtraTargetDetach | undefined
+
+    try {
+      detach = await browserCriClient.onExtraTargetCriClientReady?.(extraTargetCriClient as CdpClientShape)
+    } catch (err) {
+      debug('onExtraTargetCriClientReady failed on extra target#%s: %s', targetId, err)
+    }
+
+    if (detach) {
+      const tracked = browserCriClient.getExtraTargetClient(targetId)
+
+      if (tracked) {
+        tracked.detach = detach
+      } else {
+        // Target was destroyed while attaching, so _onTargetDestroyed could
+        // not call detach (it was not stored yet). Not awaited: a raw
+        // extra-target CRI client has no crash guard, so Fetch.disable to a
+        // dead renderer may never answer and would suspend this handler
+        // frame forever. Matches _onTargetDestroyed's own detach call.
+        Promise.resolve(detach()).catch((err) => {
+          debug('error detaching orphaned extra target Fetch transport %s: %o', targetId, err)
+        })
+      }
+    } else {
+      // No hook, hook returned no CDP Fetch runtime, or the hook failed —
+      // keep requests flowing without shared middleware.
+      await fallbackToHeaderOnlyContinue()
+    }
 
     await run()
   }
@@ -435,7 +487,13 @@ export class BrowserCriClient {
     if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
       if (browserCriClient.hasExtraTargetClient(targetId)) {
         debug('Close extra target client (id: %s)')
-        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch((err) => {
+        const extra = browserCriClient.getExtraTargetClient(targetId)!
+
+        Promise.resolve(extra.detach?.()).catch((err) => {
+          debug('error detaching extra target Fetch transport %s: %o', targetId, err)
+        })
+
+        extra.client.close().catch((err) => {
           debug('error closing extra target client %s: %o', targetId, err)
         })
 
@@ -700,6 +758,11 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
+  // Detaching the Fetch transport is left to `Target.targetDestroyed`, which
+  // already does it. Extra-target clients are raw chrome-remote-interface
+  // handles with no crashed state, so a `Fetch.disable` sent to an already-dead
+  // renderer can go unanswered. This runs before every test, so waiting on
+  // detach here would risk hanging teardown on a dead popup.
   async closeExtraTargets () {
     await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId]) => {
       debug('Close extra target (id: %s)', targetId)
@@ -743,6 +806,8 @@ export class BrowserCriClient {
     this.gracefulShutdown = gracefulShutdown
 
     this.onClose && this.onClose(gracefulShutdown)
+
+    cypressSessions.setCdpBrowserWsUrl(null)
 
     if (this.connected === false) {
       debug('browser cri client is already closed')

@@ -29,23 +29,25 @@ describe('Socket', function () {
     expect(socket.io.opts.transports[0].name).toEqual('WS')
   })
 
-  it('creates a websocket for chromium browsers', function () {
-    // @ts-expect-error
-    global.window = {}
-    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
+  describe('automation socket browsers', function () {
+    beforeEach(() => {
+      // @ts-expect-error
+      global.window = {}
+    })
 
-    // @ts-expect-error
-    expect(socket._namespace).toEqual('/path/default')
-  })
+    it('creates an automation socket for chromium browsers', function () {
+      const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
 
-  it('creates a websocket for webkit browsers', function () {
-    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
+      // @ts-expect-error
+      expect(socket._namespace).toEqual('/path/default')
+    })
 
-    // @ts-expect-error
-    expect(socket.io.opts.path).toEqual('/path')
-    // socket.io-client 4.6+ normalizes string transports into transport classes; the polling transport class is named "XHR".
-    // @ts-expect-error
-    expect(socket.io.opts.transports[0].name).toEqual('XHR')
+    it('creates an automation socket for webkit browsers', function () {
+      const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
+
+      // @ts-expect-error
+      expect(socket._namespace).toEqual('/path/default')
+    })
   })
 
   describe('.getPathToClientSource', function () {

@@ -734,24 +734,6 @@ const toLoggableError = (maybeError: unknown): LoggableError => {
   }
 }
 
-const getUnsupportedPlugin = (runnable) => {
-  if (!(runnable.invocationDetails && runnable.invocationDetails.originalFile && runnable.err && runnable.err.message)) {
-    return null
-  }
-
-  const pluginsErrors = {
-    '@cypress/code-coverage': 'glob pattern string required',
-  }
-
-  const unsupportedPluginFound = Object.keys(pluginsErrors).find((plugin) => runnable.invocationDetails.originalFile.includes(plugin))
-
-  if (unsupportedPluginFound && pluginsErrors[unsupportedPluginFound] && runnable.err.message.includes(pluginsErrors[unsupportedPluginFound])) {
-    return unsupportedPluginFound
-  }
-
-  return null
-}
-
 const extendErrorMessages = (errorMessages: any) => {
   allErrorMessages = {
     ...allErrorMessages,
@@ -768,7 +750,6 @@ export default {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
-  getUnsupportedPlugin,
   getUserInvocationStack,
   isAssertionErr,
   isChaiValidationErr,

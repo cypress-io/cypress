@@ -4,6 +4,8 @@ import type EventEmitter from 'events'
 import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
+import RequestMiddleware from '../../../lib/http/request-middleware'
+import { testMiddleware } from '../http/helpers'
 
 async function readStream (stream: Readable): Promise<string> {
   const chunks: Buffer[] = []
@@ -39,6 +41,45 @@ describe('createSyntheticExpressContext', () => {
     expect(req.headers['content-type']).to.equal('application/x-www-form-urlencoded')
     expect(req.cookies).to.deep.equal({ a: '1', b: 'two words' })
     expect(await readStream(req)).to.equal('name=value')
+  })
+
+  it('copies resourceType from the neutral request onto req', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/',
+      resourceType: 'xhr',
+    })
+
+    expect(req.resourceType).to.equal('xhr')
+  })
+
+  it('populates query like the Express-served MITM request', () => {
+    // cy.intercept's request message picks query off req (SERIALIZABLE_REQ_PROPS);
+    // without it the driver falsely flags requests as modified.
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/search?foo=bar&baz=two%20words',
+    })
+
+    expect(req.query).to.deep.equal({ foo: 'bar', baz: 'two words' })
+  })
+
+  it('leaves httpVersion unset rather than reporting a protocol it cannot know', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/plain',
+    })
+
+    expect(req).not.to.have.property('httpVersion')
+  })
+
+  it('populates an empty query for urls without a search string', () => {
+    const { req } = createSyntheticExpressContext({
+      id: 'network-1',
+      url: 'https://example.test/plain',
+    })
+
+    expect(req.query).to.deep.equal({})
   })
 
   it('lowercases request header keys like Node IncomingMessage', () => {
@@ -92,6 +133,16 @@ describe('createSyntheticExpressContext', () => {
     })
 
     expect(incomingRes.headers['set-cookie']).to.deep.equal(['a=1', 'b=2'])
+  })
+
+  it('does not fabricate an httpVersion on the synthetic response', () => {
+    const incomingRes = createSyntheticIncomingResponse({
+      id: 'network-1',
+      url: 'https://example.test/',
+      statusCode: 200,
+    })
+
+    expect(incomingRes.httpVersion).to.be.null
   })
 
   it('keeps malformed cookie values without throwing', () => {
@@ -506,5 +557,179 @@ describe('createSyntheticProxyCodec', () => {
     expect(outbound.headers).to.not.have.property('accept-encoding')
     // the middleware's own view stays intact
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
+  })
+
+  it('copies bodySkipped onto the ctx as resBodySkipped', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-skipped',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    codec.encodeResponse({
+      id: 'network-skipped',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodySkipped: true,
+      bodyStream: Readable.from(['']),
+    })
+
+    expect(ctx.resBodySkipped).to.equal(true)
+  })
+
+  it('leaves resBodySkipped unset when bodySkipped is absent', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-not-skipped',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    codec.encodeResponse({
+      id: 'network-not-skipped',
+      url: 'https://example.test/',
+      statusCode: 200,
+      bodyStream: Readable.from(['origin']),
+    })
+
+    expect(ctx.resBodySkipped).to.be.undefined
+  })
+
+  it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
+    const { ExtractCypressMetadataHeaders } = RequestMiddleware
+
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+          debug: () => {},
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-extra',
+      url: 'https://example.test/download-basic-auth.csv',
+      method: 'GET',
+      headers: {
+        'x-cypress-is-from-extra-target': 'true',
+        accept: '*/*',
+      },
+    })
+
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal('true')
+    expect(ctx.req.isFromExtraTarget).to.equal(false)
+
+    let maybeSetBasicAuthHeadersRan = false
+    let skippedMiddlewareRan = false
+
+    await testMiddleware({
+      ExtractCypressMetadataHeaders,
+      MaybeSetBasicAuthHeaders () {
+        maybeSetBasicAuthHeadersRan = true
+        this.next()
+      },
+      MaybeSimulateSecHeaders () {
+        skippedMiddlewareRan = true
+        this.next()
+      },
+    }, ctx)
+
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.be.undefined
+    expect(ctx.req.isFromExtraTarget).to.equal(true)
+    expect(maybeSetBasicAuthHeadersRan).to.equal(true)
+    expect(skippedMiddlewareRan).to.equal(false)
+  })
+
+  describe('abortRequest', () => {
+    function createCodec () {
+      return createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => {
+          return {
+            req,
+            res,
+          } as any
+        },
+      })
+    }
+
+    it('destroys the exchange of an in-flight request', async () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-abort',
+        url: 'https://example.test/1mb',
+        method: 'GET',
+        headers: {},
+      })
+
+      const closed = new Promise<void>((resolve) => ctx.res.once('close', () => resolve()))
+
+      codec.abortRequest('network-abort')
+
+      await closed
+
+      expect(ctx.req.destroyed, 'req destroyed').to.equal(true)
+      expect(ctx.res.destroyed, 'res destroyed').to.equal(true)
+    })
+
+    it('is a no-op for an unknown request id', () => {
+      expect(() => createCodec().abortRequest('never-seen')).not.to.throw()
+    })
+
+    it('is a no-op once the request has been released', () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-released',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      codec.releaseRequest?.('network-released')
+      codec.abortRequest('network-released')
+
+      expect(ctx.res.destroyed).to.equal(false)
+    })
+
+    it('does not re-destroy an exchange that is already aborted', () => {
+      const codec = createCodec()
+      const ctx = codec.encodeRequest({
+        id: 'network-twice',
+        url: 'https://example.test/',
+        method: 'GET',
+        headers: {},
+      })
+
+      let closeCount = 0
+
+      ctx.res.on('close', () => closeCount++)
+
+      codec.abortRequest('network-twice')
+      codec.abortRequest('network-twice')
+
+      return new Promise<void>((resolve) => setTimeout(resolve, 10)).then(() => {
+        expect(closeCount).to.equal(1)
+      })
+    })
   })
 })

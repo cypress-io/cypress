@@ -1,12 +1,19 @@
 import type { Protocol } from 'devtools-protocol'
 import debugModule from 'debug'
+import { STATUS_CODES } from 'http'
 import { Readable } from 'stream'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { HttpIntercept } from '@packages/network-interception'
+import type { ResourceType } from '@packages/proxy'
+import type { BodyDigest } from './body-digest'
+import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
-import { AUT_FRAME_HEADER } from '../constants'
+import { toNetworkError } from './cdp-network-error'
+import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
+import { normalizeResourceType } from './normalize-resource-type'
+import { shouldSkipResponseBody } from './should-skip-response-body'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -16,19 +23,68 @@ type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 
+// Shared by every session this transport enables so none of them can drift
+// into pausing a different set of requests than the others.
+const FETCH_PATTERNS: Protocol.Fetch.EnableRequest = {
+  patterns: [{
+    requestStage: 'Request',
+  }, {
+    requestStage: 'Response',
+  }],
+}
+
 // CDP refuses Fetch.getResponseBody for a pause in the redirect-received state,
 // and documents a redirect status plus a location header as the way to tell that
 // state apart from response-received. Drift from MITM: redirect bodies are
 // therefore empty to middleware under proxy-disabled mode — CDP cannot provide
 // them — so 3xx handling differs from the MITM path, which may still surface
-// whatever the origin sent.
+// whatever the origin sent. That empty buffer is also the origin digest source,
+// so an untouched 3xx continues natively while a middleware that writes a body
+// onto one falls back to fulfill.
 const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
   return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
     && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
 }
 
+// Internal Cypress markers injected onto paused requests for the
+// intercept/legacy pipeline. Must never be forwarded to the origin — parity
+// with ExtractCypressMetadataHeaders on the MITM path.
+const INTERNAL_MARKER_HEADERS = new Set([
+  AUT_FRAME_HEADER.toLowerCase(),
+  EXTRA_TARGET_HEADER.toLowerCase(),
+])
+
+// Splits internal Cypress markers out of a header set in a single pass,
+// reporting whether any were present.
+const partitionInternalMarkers = (headers: Protocol.Network.Headers) => {
+  const kept: Protocol.Network.Headers = {}
+  let hadMarker = false
+
+  for (const [name, value] of Object.entries(headers)) {
+    if (INTERNAL_MARKER_HEADERS.has(name.toLowerCase())) {
+      hadMarker = true
+    } else {
+      kept[name] = value
+    }
+  }
+
+  return { kept, hadMarker }
+}
+
+// Unique per transport instance in this process — only needs to disambiguate
+// concurrent extra-target sessions sharing one HttpIntercept, not to be
+// globally unpredictable.
+let extraTargetTransportCount = 0
+
 type CdpFetchTransportOptions = {
   isAUTFrame?: (frameId: string) => Promise<boolean>
+  /**
+   * When true, mark every paused request with X-Cypress-Is-From-Extra-Target
+   * so ExtractCypressMetadataHeaders can restrict the legacy pipeline to the
+   * minimal extra-target middleware (MaybeSetBasicAuthHeaders). Stripped
+   * before Fetch.continueRequest, same as the AUT frame marker.
+   */
+  isFromExtraTarget?: boolean
   /**
    * Pre-register a URL that will never receive Network.requestWillBeSent
    * (download-manager pauses omit networkId). Mirrors the MITM download-click
@@ -36,18 +92,40 @@ type CdpFetchTransportOptions = {
    * the full pre-request timeout.
    */
   addPendingUrlWithoutPreRequest?: (url: string) => void
+  /**
+   * When set for a URL, the transport releases the request pause with a
+   * page-invisible `Fetch.continueRequest` url override (plus the returned
+   * headers) and releases the response pause untouched. No middleware runs
+   * on the CDP side. Used to send strategy:file requests to the Cypress
+   * origin regardless of what origin the page believes it is on — the wire
+   * request lands on our Express server (which runs the pipeline exactly
+   * once) while the page keeps its impersonated URL.
+   */
+  resolveOriginRedirect?: (url: string) => { url: string, headers: Record<string, string> } | undefined
+  /**
+   * Called with the HttpIntercept request id when the browser cancels a
+   * request that is still paused in the middleware onion, so the pipeline can
+   * tear the flow down the way a closed proxy socket does on the MITM path.
+   */
+  onRequestCanceled?: (requestId: string) => void
 }
 
 export interface CdpFetchTransportRequest extends CdpFetchRequest {
   id: string
+  // Byte-accurate body for Fetch.continueRequest when middleware set a Buffer;
+  // postData is its lossy utf8 string view, kept for pause comparison.
+  postDataBuffer?: Buffer
   requestId?: string
+  resourceType?: ResourceType
   sessionId?: string
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
+  bodySkipped?: boolean
   bodyStream?: Readable
   fulfilled?: boolean
+  originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
@@ -61,10 +139,42 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
  */
 type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   headersReady: PromiseWithResolvers<void>
+  // key into inFlightByNetworkId; absent when the pause carried no networkId
+  networkKey?: string
 }
 
 export class CdpFetchTransport {
   private readonly inFlightRequests = new Map<string, ResponsePauseDeferred>()
+  /**
+   * The same flows as `inFlightRequests`, keyed by session-scoped Network
+   * request id. Cancellation only ever arrives on the Network domain
+   * (`Network.loadingFailed`), which knows nothing about Fetch request ids.
+   */
+  private readonly inFlightByNetworkId = new Map<string, ResponsePauseDeferred>()
+  /**
+   * Prefix for HttpIntercept / synthetic-codec request ids when this transport
+   * owns an extra-target session. CDP network/request ids are only unique per
+   * session; without a prefix, concurrent extra targets (or an extra target
+   * overlapping the main target) would collide in the shared intercept maps.
+   */
+  private readonly requestIdPrefix: string
+
+  /**
+   * Fetch.requestIds this transport redirected to the Cypress origin at the
+   * request stage (see `options.resolveOriginRedirect`).
+   *
+   * Request and response pauses arrive as separate events, so the response
+   * side needs this to recognize a redirected flow:
+   *
+   * - `interceptRequest` adds the id when a redirect resolves, then continues
+   *   the request with the url override.
+   * - `resolveResponse` deletes the id and releases that pause untouched.
+   *   Express already ran the pipeline for these — running it again here
+   *   would double-process the response.
+   * - `reset` clears the rest: a flow aborted before its response pause
+   *   arrives (navigation away) has nothing else to remove its entry.
+   */
+  private readonly originRedirectedRequests = new Set<string>()
 
   private isStarted = false
 
@@ -73,19 +183,47 @@ export class CdpFetchTransport {
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
     private readonly options: CdpFetchTransportOptions = {},
     private readonly networkExtraInfo: CDPNetworkExtraInfo = new CDPNetworkExtraInfo(client),
-  ) {}
+  ) {
+    this.requestIdPrefix = options.isFromExtraTarget
+      ? `extra-${++extraTargetTransportCount}:`
+      : ''
+  }
 
   /**
-   * Enables the CDP Fetch domain and starts intercepting requests.
+   * Enables the Fetch domain on a single CDP session.
    *
-   * This transport must be the sole owner of the Fetch domain on its CDP
-   * session. `Fetch.enable` is not additive: the last call on a session
-   * replaces the pattern list, while `Fetch.requestPaused` handlers stack.
-   * Enabling this alongside `cdp_automation._handlePausedRequests` on the
-   * same session clobbers patterns and races `continueRequest` calls, which
-   * can drop the `X-Cypress-Is-AUT-Frame` header or hang document requests
-   * until the response-pause timeout. Coordinating the two owners is out of
-   * scope; do not enable both on one session.
+   * `Fetch.enable` is scoped to the session it is sent on. Omitting
+   * `sessionId` enables the connection's own session — the target this
+   * transport was constructed for, plus its subframes — and reaches nothing
+   * else. Sibling sessions on the same connection keep their own Fetch state,
+   * so each one whose traffic must run the middleware onion needs its own
+   * call; without it, that session's requests never pause and go straight to
+   * the network.
+   *
+   * Only the enable is per-session. Pauses from every enabled session arrive
+   * on the shared connection carrying their own `sessionId`, which
+   * `interceptRequest`/`resolveResponse` thread back through each reply, so
+   * one pair of handlers serves all of them.
+   *
+   * Within a session, enabling is not additive: the last call replaces the
+   * pattern list (while `Fetch.requestPaused` handlers stack). This transport
+   * must therefore be the sole owner of the Fetch domain on every session it
+   * enables. Enabling alongside `cdp_automation._handlePausedRequests` on one
+   * session clobbers patterns and races `continueRequest` calls, which can
+   * drop the `X-Cypress-Is-AUT-Frame` header or hang document requests until
+   * the response-pause timeout. Coordinating two owners is out of scope; do
+   * not enable both on one session.
+   */
+  private async enableFetch (sessionId?: string): Promise<void> {
+    debug('enabling CDP Fetch on session %s', sessionId ?? '<own>')
+
+    await this.client.send('Fetch.enable', FETCH_PATTERNS, sessionId)
+  }
+
+  /**
+   * Attaches the Fetch handlers and enables interception on this transport's
+   * own session. Child sessions that attach later (service workers,
+   * origin-isolated iframes) come through `attachChildSession`.
    */
   async start (): Promise<void> {
     if (this.isStarted) {
@@ -97,29 +235,49 @@ export class CdpFetchTransport {
     debug('starting CDP Fetch transport')
     this.client.on('Fetch.requestPaused', this.interceptRequest)
     this.client.on('Fetch.requestPaused', this.resolveResponse)
+    // The Fetch domain reports nothing when a paused request is canceled, so
+    // the Network domain is the only signal that a flow is never coming back.
+    this.client.on('Network.loadingFailed', this.onLoadingFailed)
     // Set-Cookie never appears on Fetch response pauses — the raw cookie
     // headers only arrive on the Network extraInfo events tracked here.
     this.networkExtraInfo.start()
     this.isStarted = true
 
     try {
-      await this.client.send('Fetch.enable', {
-        patterns: [{
-          requestStage: 'Request',
-        }, {
-          requestStage: 'Response',
-        }],
-      })
+      await this.enableFetch()
 
       debug('CDP Fetch transport started')
     } catch (err) {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.networkExtraInfo.stop()
       this.isStarted = false
 
       throw err
     }
+  }
+
+  /**
+   * Enables interception on a child session attached to this transport's
+   * connection. Those targets run their network on their own session rather
+   * than the page's — a service worker's script fetch and fetch handlers, an
+   * out-of-process iframe's (OOPIF) subresources — so without this their
+   * requests bypass the middleware onion (and `cy.intercept`) entirely and
+   * escape to the real origin.
+   *
+   * Must run while the target is still waiting for the debugger; the caller
+   * (CriClient._onAttachedToTarget) sequences this before
+   * Runtime.runIfWaitingForDebugger.
+   */
+  async attachChildSession (sessionId: string): Promise<void> {
+    if (!this.isStarted) {
+      debug('attachChildSession skipped (transport not started)')
+
+      return
+    }
+
+    await this.enableFetch(sessionId)
   }
 
   /**
@@ -129,6 +287,9 @@ export class CdpFetchTransport {
   reset (): void {
     debug('resetting CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
     this.rejectAll(new Error('CDP Fetch transport reset'))
+    // Redirected flows aborted mid-request (navigation away) never reach a
+    // response pause, so nothing else would clear them.
+    this.originRedirectedRequests.clear()
     this.networkExtraInfo.flush()
   }
 
@@ -146,6 +307,7 @@ export class CdpFetchTransport {
     } finally {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
       this.isStarted = false
@@ -153,8 +315,96 @@ export class CdpFetchTransport {
     }
   }
 
+  /**
+   * The browser canceling a paused request — test isolation navigating to
+   * about:blank is the common case — leaves its flow with nothing to wait for:
+   * CDP emits no Fetch event for an abandoned pause, and the request never
+   * reaches the network, so no pre-request or response pause is ever coming.
+   *
+   * Propagating the cancellation lets the pipeline's existing teardown run,
+   * which on the MITM path is driven by the dying proxy socket. Both halves
+   * are needed and neither is a no-op for the other's case: the abort covers a
+   * flow still in request middleware (typically parked in pre-request
+   * correlation, whose 2s timer would otherwise expire and log a warning), the
+   * rejection covers one already continued and waiting on a response pause.
+   */
+  private onLoadingFailed = (event: Protocol.Network.LoadingFailedEvent, sessionId?: string): void => {
+    // A request that failed on the wire still gets a Fetch response pause
+    // carrying its error reason — resolveResponse owns those, and treating
+    // them as cancellations here would silence a real failure.
+    if (!event.canceled) {
+      return
+    }
+
+    const networkKey = this.getNetworkKey(event.requestId, sessionId)
+    const deferred = this.inFlightByNetworkId.get(networkKey)
+
+    if (!deferred) {
+      return
+    }
+
+    debug('browser canceled in-flight request %s', networkKey)
+
+    this.inFlightByNetworkId.delete(networkKey)
+    this.options.onRequestCanceled?.(`${this.requestIdPrefix}${event.requestId}`)
+    deferred.reject(new Error(`CDP Fetch request canceled by the browser: ${networkKey}`))
+  }
+
+  private getNetworkKey (networkRequestId: string, sessionId?: string): string {
+    return `${sessionId ?? 'root'}:${networkRequestId}`
+  }
+
   private interceptRequest = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
     if (event.responseErrorReason || typeof event.responseStatusCode === 'number') {
+      return
+    }
+
+    let originRedirect: { url: string, headers: Record<string, string> } | undefined
+
+    try {
+      originRedirect = this.options.resolveOriginRedirect?.(event.request.url)
+    } catch (err) {
+      // A resolver failure must not strand the pause — fall through to the
+      // normal interception flow.
+      debug('resolveOriginRedirect failed for %s: %s', event.request.url, (err as Error).message)
+    }
+
+    if (originRedirect) {
+      debug('redirecting %s to the Cypress origin (%s) — page keeps its URL', event.request.url, originRedirect.url)
+
+      // The Express-side pipeline still runs pre-request correlation for the
+      // direct request, so pauses without networkId (download-manager) must be
+      // pre-registered here just like intercepted ones. Correlation keys on
+      // the page URL — Network events report it, not the override.
+      if (!event.networkId) {
+        this.options.addPendingUrlWithoutPreRequest?.(event.request.url)
+      }
+
+      this.originRedirectedRequests.add(event.requestId)
+
+      try {
+        await this.client.send('Fetch.continueRequest', {
+          requestId: event.requestId,
+          // The url override is not observable by the page: location, history,
+          // Network events, and the HTTP cache all keep the impersonated URL.
+          url: originRedirect.url,
+          headers: [
+            ...Object.entries(event.request.headers).map(([name, value]) => ({ name, value: String(value) })),
+            ...Object.entries(originRedirect.headers).map(([name, value]) => ({ name, value })),
+          ],
+        }, sessionId)
+      } catch (err) {
+        debug('origin-redirect continueRequest failed for %s, releasing untouched: %s', event.request.url, (err as Error).message)
+
+        // If CDP rejected the override params, a bare release still frees the
+        // pause. The set entry stays valid: the un-overridden request reaches
+        // the same origin (the override is identity today), and its response
+        // pause must still be released untouched.
+        await this.safeSend('Fetch.continueRequest', {
+          requestId: event.requestId,
+        }, sessionId)
+      }
+
       return
     }
 
@@ -191,8 +441,9 @@ export class CdpFetchTransport {
         headers: {
           ...event.request.headers,
         },
-        id: networkRequestId,
+        id: `${this.requestIdPrefix}${networkRequestId}`,
         requestId: event.requestId,
+        resourceType: normalizeResourceType(event.resourceType),
         sessionId,
       }
 
@@ -210,9 +461,18 @@ export class CdpFetchTransport {
         request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
       }
 
+      // Extra-target sessions (popups / _blank) share this transport with
+      // isFromExtraTarget so MaybeSetBasicAuthHeaders still runs under
+      // CYPRESS_INTERNAL_DISABLE_PROXY=1 (MITM never sees those requests).
+      if (this.options.isFromExtraTarget) {
+        debug('marking extra-target request %s', event.request.url)
+        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = 'true'
+      }
+
       const responseDeferred: ResponsePauseDeferred = {
         ...Promise.withResolvers<CdpFetchTransportResponse>(),
         headersReady: Promise.withResolvers<void>(),
+        ...(event.networkId ? { networkKey: this.getNetworkKey(event.networkId, sessionId) } : {}),
       }
 
       // reset()/stop() may reject this before the continue callback races on
@@ -227,6 +487,10 @@ export class CdpFetchTransport {
       deferred = responseDeferred
 
       this.inFlightRequests.set(fetchRequestId, deferred)
+
+      if (deferred.networkKey) {
+        this.inFlightByNetworkId.set(deferred.networkKey, deferred)
+      }
 
       response = await this.httpIntercept.handle(request, async (outbound) => {
         const headers = await this.continueRequestHeaders(event, outbound)
@@ -245,7 +509,14 @@ export class CdpFetchTransport {
           requestId: event.requestId,
           ...(outbound.url !== event.request.url ? { url: outbound.url } : {}),
           ...(outbound.method !== event.request.method ? { method: outbound.method } : {}),
-          ...(outbound.postData !== event.request.postData ? { postData: outbound.postData } : {}),
+          // Fetch.continueRequest's postData is a CDP binary param (base64
+          // over JSON); the pause's event.request.postData is plaintext, so
+          // only the outgoing value is encoded. Sending plaintext makes CDP
+          // reject the continue ("invalid base64 string") — or worse, accept
+          // base64-shaped plaintext and hand the origin corrupted bytes.
+          ...(outbound.postDataBuffer || outbound.postData !== event.request.postData
+            ? { postData: (outbound.postDataBuffer ?? Buffer.from(outbound.postData ?? '', 'utf8')).toString('base64') }
+            : {}),
           ...(headers ? { headers } : {}),
         }, outbound.sessionId)
 
@@ -284,6 +555,11 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // CDP rejects a status code it has no built-in reason phrase for
+          // ("Invalid http status code or phrase"), which turns req.reply(777)
+          // into a silently released pause. Node's MITM path serves unknown
+          // codes with the phrase "unknown"; mirror that.
+          responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
@@ -293,6 +569,10 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
           responseCode: response.responseCode,
+          // Chrome rejects a code it has no built-in phrase for; for every
+          // known code, omit the phrase so the origin's own phrase survives
+          // the pass-through untouched.
+          ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
         }, response.sessionId)
       }
@@ -312,9 +592,28 @@ export class CdpFetchTransport {
       }
 
       if (!requestContinued) {
-        await this.safeSend('Fetch.continueRequest', {
-          requestId: event.requestId,
-        }, sessionId)
+        // A requested network error (cy.intercept forceNetworkError) must
+        // reach the page as one — MITM resets the connection; here the pause
+        // is failed. Everything else releases untouched as before.
+        if ((err as Error & { isForceNetworkError?: boolean })?.isForceNetworkError) {
+          await this.safeSend('Fetch.failRequest', {
+            requestId: event.requestId,
+            errorReason: 'Failed',
+          }, sessionId)
+        } else {
+          await this.safeSend('Fetch.continueRequest', {
+            requestId: event.requestId,
+          }, sessionId)
+        }
+      } else if ((err as Error & { isForceNetworkError?: boolean })?.isForceNetworkError) {
+        // A network error requested from a response handler
+        // (res.send({ forceNetworkError: true })) must reach the page as one
+        // too. The request stage already continued, so the pause in hand is the
+        // response — fail it rather than releasing the origin's response.
+        await this.safeSend('Fetch.failRequest', {
+          requestId: response?.requestId ?? responseRequestId ?? event.requestId,
+          errorReason: 'Failed',
+        }, response?.sessionId ?? responseSessionId ?? sessionId)
       } else {
         const continueRequestId = response?.requestId ?? responseRequestId
 
@@ -331,6 +630,28 @@ export class CdpFetchTransport {
 
   private resolveResponse = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<void> => {
     if (!event.responseErrorReason && typeof event.responseStatusCode !== 'number') {
+      return
+    }
+
+    if (this.originRedirectedRequests.delete(event.requestId)) {
+      debug('releasing redirected response pause for %s', event.request.url)
+
+      // Nothing consumes extraInfo tracking for a redirected flow.
+      if (event.networkId) {
+        this.networkExtraInfo.clear(event.networkId, sessionId)
+      }
+
+      if (event.responseErrorReason) {
+        await this.safeSend('Fetch.failRequest', {
+          requestId: event.requestId,
+          errorReason: event.responseErrorReason,
+        }, sessionId)
+      } else {
+        await this.safeSend('Fetch.continueResponse', {
+          requestId: event.requestId,
+        }, sessionId)
+      }
+
       return
     }
 
@@ -364,7 +685,7 @@ export class CdpFetchTransport {
 
     if (event.responseErrorReason) {
       debug('response error pause for matched request %s: %s', event.request.url, event.responseErrorReason)
-      deferred.reject(new Error(`CDP Fetch response failed for ${event.request.url}: ${event.responseErrorReason}`))
+      deferred.reject(toNetworkError(event.request.url, event.responseErrorReason))
 
       await this.safeSend('Fetch.failRequest', {
         requestId: event.requestId,
@@ -391,18 +712,30 @@ export class CdpFetchTransport {
 
     deferred.headersReady.resolve()
 
-    let bodyStream: Readable
+    const bodySkipped = shouldSkipResponseBody(event)
+    let originalBody: Buffer
 
-    try {
-      bodyStream = await this.fetchResponseBody(event, sessionId)
-    } catch (err) {
-      deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
+    if (bodySkipped) {
+      debug('skipping eager body fetch for stream-shaped response %s (resourceType=%s)', event.request.url, event.resourceType)
 
-      await this.safeSend('Fetch.continueResponse', {
-        requestId: event.requestId,
-      }, sessionId)
+      // Stand in an empty body: its digest matches the empty body the
+      // middleware materializes, so an untouched response takes
+      // continueResponse and the browser reads the origin stream directly.
+      // Middleware that sets a body still diffs against this digest and
+      // fulfills.
+      originalBody = Buffer.alloc(0)
+    } else {
+      try {
+        originalBody = await this.fetchResponseBody(event, sessionId)
+      } catch (err) {
+        deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
-      return
+        await this.safeSend('Fetch.continueResponse', {
+          requestId: event.requestId,
+        }, sessionId)
+
+        return
+      }
     }
 
     // reset() may have rejected this flow while the merge/fetch awaited CDP.
@@ -424,12 +757,14 @@ export class CdpFetchTransport {
 
     deferred.resolve({
       ...event.request,
-      id: networkRequestId,
+      id: `${this.requestIdPrefix}${networkRequestId}`,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
       responseHeaders,
-      bodyStream,
+      bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
+      originalBodyDigest: digestBody(originalBody),
       sessionId,
+      ...(bodySkipped ? { bodySkipped: true } : {}),
     })
   }
 
@@ -454,18 +789,16 @@ export class CdpFetchTransport {
     ]
   }
 
-  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Readable> => {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {
     if (isRedirectPause(event)) {
-      return Readable.from([])
+      return Buffer.alloc(0)
     }
 
     const response = await this.client.send('Fetch.getResponseBody', {
       requestId: event.requestId,
     }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
 
-    const body = Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
-
-    return Readable.from(body.length ? [body] : [])
+    return Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {
@@ -507,39 +840,23 @@ export class CdpFetchTransport {
   }
 
   /**
-   * Builds continueRequest headers when outbound headers differ from the pause
-   * (excluding X-Cypress-Is-AUT-Frame). That marker is injected onto the paused
-   * request for the intercept/legacy pipeline and must never be forwarded to
-   * the origin — parity with ExtractCypressMetadataHeaders on the MITM path.
+   * Builds continueRequest headers when outbound headers differ from the pause,
+   * excluding internal Cypress markers (see partitionInternalMarkers).
    */
   private continueRequestHeaders = async (
     event: Protocol.Fetch.RequestPausedEvent,
     outbound: CdpFetchTransportRequest,
   ): Promise<Protocol.Fetch.HeaderEntry[] | undefined> => {
-    const stripAut = (headers: Protocol.Network.Headers) => {
-      return Object.fromEntries(
-        Object.entries(headers).filter(([name]) => {
-          return name.toLowerCase() !== AUT_FRAME_HEADER.toLowerCase()
-        }),
-      )
-    }
-
-    const outboundWithoutAut = stripAut(outbound.headers ?? {})
-    const originalWithoutAut = stripAut(event.request.headers)
-    const originalHadAut = Object.keys(event.request.headers).some((name) => {
-      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
-    })
-    const outboundHadAut = Object.keys(outbound.headers ?? {}).some((name) => {
-      return name.toLowerCase() === AUT_FRAME_HEADER.toLowerCase()
-    })
+    const original = partitionInternalMarkers(event.request.headers)
+    const withoutMarkers = partitionInternalMarkers(outbound.headers ?? {})
 
     // No meaningful header mutations and nothing to strip — omit headers from
     // continueRequest so CDP keeps the browser's original set.
-    if (!this.headersChanged(outboundWithoutAut, originalWithoutAut) && !originalHadAut && !outboundHadAut) {
+    if (!this.headersChanged(withoutMarkers.kept, original.kept) && !original.hadMarker && !withoutMarkers.hadMarker) {
       return
     }
 
-    return this.toContinueRequestHeaders(outboundWithoutAut)
+    return this.toContinueRequestHeaders(withoutMarkers.kept)
   }
 
   // Must NOT clear extraInfo tracking on success — the next response under a
@@ -551,6 +868,10 @@ export class CdpFetchTransport {
     }
 
     this.inFlightRequests.delete(fetchRequestId)
+
+    if (deferred?.networkKey && this.inFlightByNetworkId.get(deferred.networkKey) === deferred) {
+      this.inFlightByNetworkId.delete(deferred.networkKey)
+    }
   }
 
   private rejectAll (err: Error): void {

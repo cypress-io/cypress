@@ -31,7 +31,9 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
+import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import { cypressSessions } from './cypress-sessions'
+import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
@@ -55,7 +57,7 @@ import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime } from './network-r
 import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -85,13 +87,31 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
+const _hasValidSessionIdHeader = (req): boolean => {
+  const provided = req.headers[SESSION_ID_HEADER]
+  const current = cypressSessions.getCurrent()?.sessionId
+
+  return Boolean(current) && typeof provided === 'string' && provided === current
+}
+
+const _isTapRequest = (req, namespace: string): boolean => {
+  const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+  return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
+    (trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req))
+}
+
+export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   const ALLOWED_PROXY_BYPASS_URLS = [
     '/',
     `/${namespace}/runner/cypress_runner.css`,
     `/${namespace}/runner/cypress_runner.js`, // TODO: fix this
     `/${namespace}/runner/favicon.ico`,
   ]
+
+  const isAllowedProxyBypass = (trimmedUrl: string, req) => {
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || _isTapRequest(req, namespace)
+  }
 
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
@@ -124,7 +144,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
       return next()
     }
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl, req) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
@@ -205,10 +225,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // MITM proxy is disabled) still receives protocol / pre-request settings.
   private _protocolManager?: ProtocolManagerShape
   private _preRequestTimeout?: number
+  // Tests can override `blockHosts` at runtime, so hold the project-level value to
+  // restore between specs. Kept here rather than in the network runtime, which is
+  // rebuilt mid-run and would snapshot an active override.
+  private _projectBlockHosts?: Cfg['blockHosts']
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: GraphqlWsHandle
+  private _closing?: Bluebird<any>
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -377,6 +402,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('server open')
     this.testingType = testingType
     this._openConfig = config
+    this._projectBlockHosts = config.blockHosts
     this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -466,7 +492,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(this.useMorgan())
+      app.use(this.useMorgan(namespace))
     }
 
     // errorhandler
@@ -478,9 +504,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return app
   }
 
-  useMorgan () {
+  useMorgan (namespace = '__cypress') {
     return require('morgan')('dev', {
-      skip: () => GracefulExit.isShuttingDown,
+      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req, namespace),
     })
   }
 
@@ -564,6 +590,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     await runtime.start()
   }
 
+  async attachCdpFetchExtraTarget (
+    client: Pick<ICriClient, 'send' | 'on' | 'off'>,
+  ): Promise<ExtraTargetDetach | undefined> {
+    return this._cdpFetchRuntime?.attachExtraTarget(client)
+  }
+
   private resetCdpFetchRuntime () {
     try {
       this._cdpFetchRuntime?.reset()
@@ -626,12 +658,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
-    options.onResetServerState = () => {
+    options.onResetServerState = ({ blockHosts }: { blockHosts?: Cfg['blockHosts'] } = {}) => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
       this.resetCdpFetchRuntime()
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
+
+      // only apply blockHosts when the caller explicitly sent a value. the config object
+      // is shared with every network runtime and read at enforcement time, so assigning
+      // it here is enough for both current and later-created runtimes to see it.
+      if (blockHosts !== undefined && this._openConfig) {
+        this._openConfig.blockHosts = blockHosts
+      }
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
@@ -760,7 +799,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this.socketAllowed.isRequestAllowed(req)) {
+      // Without the proxy, upgrades arrive on direct connections the CONNECT
+      // port allow-list never saw — a loopback remoteAddress is the only
+      // available gate (see #34513).
+      const isAllowed = isProxyDisabled()
+        ? this.socketAllowed.isRequestFromLocalhost(req)
+        : this.socketAllowed.isRequestAllowed(req)
+
+      if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }
@@ -807,6 +853,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resetCdpFetchRuntime()
     this._networkProxy?.clearCredentials()
+
+    // discard any per-test blockHosts override so it can't leak into the next spec
+    if (this._openConfig) {
+      this._openConfig.blockHosts = this._projectBlockHosts
+    }
+
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
@@ -833,6 +885,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
+    if (this._closing) {
+      return this._closing
+    }
+
     // graphql-ws clients must be closed before the HTTP server is destroyed.
     const graphqlDispose = this._graphqlWS?.dispose
       ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
@@ -842,7 +898,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
       : Bluebird.resolve()
 
-    return graphqlDispose.then(() => {
+    this._closing = graphqlDispose.then(() => {
       return Bluebird.all([
         this._close(),
         this._socket?.close(),
@@ -855,6 +911,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       return res
     })
+    .finally(() => {
+      this._closing = undefined
+    })
+
+    return this._closing
   }
 
   end () {
@@ -1189,8 +1250,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          // With the MITM proxy disabled, the server is not a proxy. The
+          // `proxy` option above still delivers this request in absolute form,
+          // so it lands on the direct-origin catch-all in routes.ts — the token
+          // is what marks it as our own loopback there, letting the catch-all
+          // route it through the interception pipeline so the stub can reply.
+          // `tunnel: false` keeps https URLs on that same absolute-form path:
+          // the default CONNECT tunnel would be rejected by onConnect, which
+          // refuses all CONNECTs when the proxy is disabled. Loopback-only —
+          // this request never leaves 127.0.0.1.
+          // Gated so proxy-on wire traffic is unchanged.
+          ...(isProxyDisabled() ? { tunnel: false } : {}),
           headers: {
             'x-cypress-resolving-url': '1',
+            ...(isProxyDisabled() ? { [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken } : {}),
           },
         })
       }

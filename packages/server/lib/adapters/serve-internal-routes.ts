@@ -1,6 +1,7 @@
+import { toIdentityResponse } from '@packages/proxy'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isInternalCypressRoute, isTrustedInternalLoopback, resolveProxyUrlBase } from './internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleRoute, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
 
 type ServeInternalRoutesConfig = InternalRouteConfig
@@ -72,10 +73,25 @@ export function createServeInternalRoutesMiddleware ({
       return next(request)
     }
 
-    // Re-entry after our own Express loopback: no route handler owned this path,
-    // so the catch-all proxy saw it again. Stop instead of looping forever.
-    // Require the process token — AUT content can forge the URL header alone.
+    // Re-entry after our own Express loopback. Require the process token —
+    // AUT content can forge the URL header alone.
     if (isTrustedInternalLoopback(request.headers)) {
+      // Cloud-bundle routes re-enter on purpose: the cypress-in-cypress parent's
+      // Express handlers forward them through the proxy to the child project.
+      // Hand them to the legacy pipeline instead of swallowing the forward.
+      // The token authenticates re-entry and must not reach the child project
+      // or the AUT.
+      if (isCloudBundleRoute(url.pathname)) {
+        const headers = { ...request.headers }
+
+        delete headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
+        delete headers[CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]
+
+        return next({ ...request, headers })
+      }
+
+      // Otherwise no route handler owned this path and the catch-all proxy saw
+      // it again. Stop instead of looping forever.
       return {
         id: request.id,
         url: request.url,
@@ -83,6 +99,46 @@ export function createServeInternalRoutesMiddleware ({
         headers: { 'content-type': 'text/plain' },
         body: 'Not Found',
       }
+    }
+
+    // In cypress-in-cypress the inner Cypress shares the browser page with the
+    // parent, and exactly one of the inner's documents belongs to both
+    // pipelines: the runner document (clientRoute) IS the parent's AUT
+    // document. Fulfilling it here answers the pause before the parent's
+    // interception ever sees it, so the parent cannot inject and
+    // window:before:load dies silently. It reaches our Express over the wire
+    // without the loopback, so release it and leave the pause chain to the
+    // parent.
+    //
+    // Only that document. Releasing other own-origin internals (e.g. the CT
+    // fixture iframe under /__cypress/iframes) invites the parent's partial
+    // injection into frames it does not own, which reroutes the inner AUT's
+    // deliberate test errors to the parent as cross-origin uncaught
+    // exceptions. Foreign-origin internal routes (the CT dev server origin)
+    // keep the loopback for the same reason as before: they never reach our
+    // Express over the wire.
+    // Two release classes, both matching the (passing) e2e-mode topology
+    // where the inner has no interception at all:
+    //   - clientRoute paths: the runner document (the parent's AUT page,
+    //     which the parent must inject) and its static assets
+    //   - concrete subresource types (xhr/fetch/script/...): e.g. the app's
+    //     /__cypress/graphql calls, which the parent's cy.intercept must see.
+    //     Injection never touches non-documents, so these cannot re-trigger
+    //     the parent-injection problem.
+    // Documents normalize to 'other' at this layer, so a non-clientRoute
+    // 'other' is conservatively kept on the loopback — that keeps the CT
+    // fixture iframe (/__cypress/iframes) out of the parent's partial
+    // injection, which reroutes the inner AUT's deliberate test errors to
+    // the parent as cross-origin uncaught exceptions.
+    if (
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+      && isCypressServerOrigin(request.url, config)
+      && (
+        (config.clientRoute && matchesPathPrefix(url.pathname, config.clientRoute))
+        || (request.resourceType && request.resourceType !== 'other')
+      )
+    ) {
+      return next(request)
     }
 
     // Fulfill via Express for both same-origin and cross-origin internals.
@@ -100,6 +156,33 @@ export function createServeInternalRoutesMiddleware ({
       method: request.method ?? 'GET',
       headers: {
         ...filterHeaders(request.headers),
+        // In Cypress-in-Cypress runs this loopback takes a second hop, and
+        // that hop gzips the response:
+        //
+        //   1. The child project's app (the AUT, http://localhost:4455) asks
+        //      for /__cypress-studio/app-studio.js on its own origin.
+        //   2. The parent Cypress's CDP interception pauses the request, and
+        //      this middleware (the parent's instance) loops it back to the
+        //      parent's own Express server.
+        //   3. The parent has no studio routes of its own — its cy-in-cy
+        //      passthrough (routes.ts) re-enters the proxy pipeline to
+        //      forward the request to the child at 4455, where the real
+        //      cloud-bundle routes live.
+        //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
+        //      rewrites a MISSING accept-encoding (filterHeaders strips it
+        //      above) to 'gzip,identity', so the child's studio route
+        //      responds gzipped.
+        //
+        // Fetch.fulfillRequest bodies are identity-only — the browser runs no
+        // decoders on fulfilled responses — so a gzipped body reaches the
+        // page as unparseable bytes. An explicit 'identity' survives the
+        // rewrite (only br/gzip tokens are kept, with 'identity' as the
+        // fallback), so every hop in the chain serves an unencoded body.
+        // Single-hop loopbacks (real users) already serve identity for an
+        // absent header, so this is only needed where the second hop exists.
+        ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+          ? { 'accept-encoding': 'identity' }
+          : {}),
         [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
         [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
       },
@@ -111,12 +194,16 @@ export function createServeInternalRoutesMiddleware ({
       simple: false,
     }, true)
 
-    return {
+    // Fetch.fulfillRequest bodies are identity-only — the browser runs no
+    // content-encoding decoders on fulfilled responses. A hop past the loopback
+    // can still compress (the cy-in-cy parent's proxy re-adds accept-encoding),
+    // so normalize the same way the synthetic codec does before fulfilling.
+    return toIdentityResponse({
       id: request.id,
       url: request.url,
       statusCode: response.statusCode,
       headers: filterHeaders(response.headers),
       body: response.body,
-    }
+    })
   }
 }

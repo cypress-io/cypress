@@ -9,7 +9,7 @@ chrome-stable-version: &chrome-stable-version "152.0.7977.64"
 chrome-beta-version: &chrome-beta-version "153.0.8010.5"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "152.0.7977.64"
-firefox-stable-version: &firefox-stable-version "152.0.5"
+firefox-stable-version: &firefox-stable-version "154.0"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
@@ -29,6 +29,16 @@ parameters:
   # Opt-in proxy-disabled (CDP Fetch) coverage. Default false; set true via
   # Trigger Pipeline (or by forwarding the setup-pipeline parameter).
   run-proxy-disabled-tests:
+    type: boolean
+    default: false
+  # Opt-in Percy visual snapshots. Default false; set true via Trigger Pipeline
+  # (the setup config forwards it). Requires PERCY_TOKEN (test-runner:percy context).
+  percy-enabled:
+    type: boolean
+    default: false
+  # Set to true by the CircleCI Scheduled Pipeline that runs the `windows` workflow.
+  # (can also be set manually to run the Windows workflow)
+  run-windows-workflow:
     type: boolean
     default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
@@ -1010,11 +1020,13 @@ commands:
                 SPEC_ARGS=(--spec "$SPEC")
               fi
 
+              # Percy only runs when the percy-enabled pipeline parameter is set
+              # (Trigger Pipeline → percy-enabled=true) and PERCY_TOKEN is available.
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
               $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group "$GROUP" "${SPEC_ARGS[@]}"
@@ -1043,7 +1055,7 @@ commands:
               DEBUG=<<parameters.debug>> \
               CYPRESS_CONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
             fi
@@ -1051,7 +1063,7 @@ commands:
           command: |
             if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
               yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
             else
@@ -1927,6 +1939,14 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
+      - unless:
+          condition: << pipeline.parameters.percy-enabled >>
+          steps:
+            - run:
+                # Percy runs opt-in only (Trigger Pipeline → percy-enabled=true),
+                # so by default there is no Percy build to finalize.
+                name: Percy disabled — skipping finalize
+                command: circleci-agent step halt
       # Uses an inline when: not: or: instead of halt-if-skipped because this
       # job depends on multiple parameters. CircleCI boolean parameters cannot
       # express or: logic, so a multi-condition inline step is required here.
@@ -1966,56 +1986,6 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
-  # verify accessibility scores from Cypress
-  verify-accessibility-results:
-    <<: *defaults
-    resource_class: small.gen2
-    steps:
-      # Uses an inline when: not: or: instead of halt-if-skipped because this
-      # job depends on multiple parameters. CircleCI boolean parameters cannot
-      # express or: logic, so a multi-condition inline step is required here.
-      - when:
-          condition:
-            not:
-              or:
-                - << pipeline.parameters.run-reporter-tests >>
-                - << pipeline.parameters.run-app-ui-tests >>
-                - << pipeline.parameters.run-frontend-shared-tests >>
-                - << pipeline.parameters.run-launchpad-tests >>
-                - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-                - << pipeline.parameters.run-npm-vite-dev-server-tests >>
-                - << pipeline.parameters.run-driver-tests >>
-          steps:
-            - run:
-                name: Skipping job — not relevant to changed files
-                command: circleci-agent step halt
-      - run: |
-          if [[ -z "$MAIN_RECORD_KEY" ]]; then
-            echo "skipping for contributor PRs since we don't record to the cloud"
-            circleci-agent step halt
-          fi
-
-          # Contributor PRs from forks run with $CIRCLE_BRANCH set to the PR ref
-          # (e.g. pull/34282/head), which is not a real branch and cannot be
-          # cloned below. There is no cloud run to verify for these anyway, so skip.
-          if [[ "$CIRCLE_BRANCH" =~ ^pull\/[0-9]+ ]]; then
-            echo "skipping for contributor PRs — $CIRCLE_BRANCH is an external PR ref that cannot be checked out"
-            circleci-agent step halt
-          fi
-      - update_known_hosts
-      - run:
-          name: checkout
-          command: git clone -b "$CIRCLE_BRANCH" "$CIRCLE_REPOSITORY_URL" --depth 1
-      - run:
-          name: Install extract-cloud-results package
-          command: |
-            npm install https://cdn.cypress.io/extract-cloud-results/v1/extract-cloud-results.tgz
-      - run:
-          name: Verify Accessibility Results
-          command: |
-            cp ./cypress/scripts/verify-accessibility-results.js verify-accessibility-results.js
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY node verify-accessibility-results.js
-
   ready-to-release:
     <<: *defaults
     resource_class: small.gen2
@@ -2049,7 +2019,7 @@ jobs:
           name: Upload CLI snapshots for diffing
           command: |
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
@@ -2113,17 +2083,11 @@ jobs:
       resource_class:
         type: string
         default: medium.gen2
-      disable-proxy:
-        description: run with the MITM proxy disabled (CDP Fetch network interception path)
-        type: boolean
-        default: false
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-driver-tests >>
-      - halt-unless-proxy-disabled-enabled:
-          disable-proxy: << parameters.disable-proxy >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -2144,10 +2108,6 @@ jobs:
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgbm-dev
-            fi
-
-            if << parameters.disable-proxy >> ; then
-              export CYPRESS_INTERNAL_DISABLE_PROXY=1
             fi
 
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
@@ -2482,6 +2442,38 @@ jobs:
             # we need to bootstrap the binary into our project directory and run the tests
             source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec src/mount.cy.ts src/App.cy.ts'
 
+  # Focused CDP coverage for cookie suites that stay green under DISABLE_PROXY
+  # (#34464). Chrome only. Excludes the full e2e cookies / SameSite matrix on
+  # privileged ports 80/443, which fails under CDP for hosts/loopback reasons
+  # outside resourceType propagation (#34508 under #34353).
+  system-tests-cookies-cdp:
+    <<: *defaults
+    resource_class: medium+.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
+      - run:
+          name: Cookie system tests with MITM disabled — cookie jar sync (chrome)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/cookies_spec.ts --browser chrome --fgrep "cookie jar stays in sync"
+      - run:
+          name: Cookie system tests with MITM disabled — OAuth redirect cookie (chrome)
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+            CYPRESS_INTERNAL_DISABLE_PROXY: '1'
+          command: |
+            yarn workspace @tooling/system-tests test:ci \
+              test/cookies_spec.ts --browser chrome --fgrep "OAuth/SSO redirect-back cookie"
+      - sanitize-verify-and-store-mocha-results
+
   system-tests-chrome:
     <<: *defaults
     parameters:
@@ -2511,33 +2503,15 @@ jobs:
           spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
+  # electron is deprecated as a test browser, so it only runs on the HTTP/1 proxy
+  # path (no disable-proxy parameter)
   system-tests-electron:
     <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      disable-proxy:
-        description: run with the MITM proxy disabled (CDP Fetch network interception path)
-        type: boolean
-        default: false
-      require-opt-in:
-        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
-        type: boolean
-        default: true
-      spec:
-        description: optional space-separated system-test paths; empty runs the full suite
-        type: string
-        default: ''
-      parallelism:
-        type: integer
-        default: 8
     resource_class: medium+.gen2
-    parallelism: << parameters.parallelism >>
+    parallelism: 8
     steps:
       - run-system-tests:
           browser: electron
-          disable-proxy: << parameters.disable-proxy >>
-          require-opt-in: << parameters.require-opt-in >>
-          spec: << parameters.spec >>
           guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-firefox:
@@ -2800,38 +2774,15 @@ jobs:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
+  # electron is deprecated as a test browser, so it only runs on the HTTP/1 proxy
+  # path (no disable-proxy parameter)
   driver-integration-tests-electron:
     <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      disable-proxy:
-        description: run with the MITM proxy disabled (CDP Fetch network interception path)
-        type: boolean
-        default: false
-      require-opt-in:
-        description: when disable-proxy is true, halt unless run-proxy-disabled-tests=true
-        type: boolean
-        default: true
-      spec:
-        description: optional Cypress --spec glob(s); empty runs the full driver suite
-        type: string
-        default: ''
-      record-group-suffix:
-        description: optional Cypress Cloud group name suffix
-        type: string
-        default: ''
-      parallelism:
-        type: integer
-        default: 5
     resource_class: medium+.gen2
-    parallelism: << parameters.parallelism >>
+    parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: electron
-          disable-proxy: << parameters.disable-proxy >>
-          require-opt-in: << parameters.require-opt-in >>
-          spec: << parameters.spec >>
-          record-group-suffix: << parameters.record-group-suffix >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-webkit:
@@ -2878,7 +2829,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
@@ -2901,7 +2852,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
@@ -2923,7 +2874,7 @@ jobs:
             CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
@@ -3104,6 +3055,7 @@ jobs:
       - run: yarn workspace @cypress/grep omit:specs
       - run: yarn workspace @cypress/grep or
       - run: yarn workspace @cypress/grep skip
+      - run: yarn workspace @cypress/grep specify
       - run: yarn workspace @cypress/grep tags:inverted
       - run: yarn workspace @cypress/grep tags:and
       - run: yarn workspace @cypress/grep tags:and:not

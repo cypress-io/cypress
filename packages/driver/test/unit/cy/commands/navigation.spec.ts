@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect, beforeEach, MockedObject } from 'vitest'
-import { go, reload } from '../../../../src/cy/commands/navigation'
+import { go, reload, resetServerState } from '../../../../src/cy/commands/navigation'
 import $utils from '../../../../src/cypress/utils'
 import type{ $Cy } from '../../../../src/cypress/cy'
 
@@ -29,6 +29,9 @@ describe('cy/commands/navigation', () => {
       log: vi.fn(),
       automation: vi.fn(),
       isBrowser: vi.fn(),
+      backend: vi.fn(),
+      // @ts-expect-error
+      isCrossOriginSpecBridge: false,
       ensure: {
         // @ts-expect-error
         commandCanCommunicateWithAUT: vi.fn(),
@@ -116,6 +119,46 @@ describe('cy/commands/navigation', () => {
           expect($utils.locReload).toHaveBeenCalledWith(true, mockWindow)
         })
       })
+    })
+  })
+
+  describe('resetServerState', () => {
+    beforeEach(() => {
+      mockCypress.config.mockImplementation((key) => {
+        // @ts-expect-error
+        if (key === 'blockHosts') {
+          return ['*.foo.com']
+        }
+      })
+    })
+
+    it('resets the redirection count for the upcoming test', () => {
+      resetServerState(mockCypress, mockState)
+
+      expect(mockState).toHaveBeenCalledWith('redirectionCount', {})
+    })
+
+    it('sends the resolved blockHosts so the server picks up test config overrides', () => {
+      resetServerState(mockCypress, mockState)
+
+      expect(mockCypress.backend).toHaveBeenCalledWith('reset:server:state', { blockHosts: ['*.foo.com'] })
+    })
+
+    it('sends null when blockHosts is unset so an override can be cleared', () => {
+      mockCypress.config.mockImplementation(() => undefined)
+
+      resetServerState(mockCypress, mockState)
+
+      expect(mockCypress.backend).toHaveBeenCalledWith('reset:server:state', { blockHosts: null })
+    })
+
+    it('omits blockHosts from a cross-origin spec bridge', () => {
+      // @ts-expect-error
+      mockCypress.isCrossOriginSpecBridge = true
+
+      resetServerState(mockCypress, mockState)
+
+      expect(mockCypress.backend).toHaveBeenCalledWith('reset:server:state', {})
     })
   })
 

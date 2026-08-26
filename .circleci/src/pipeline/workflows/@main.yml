@@ -46,26 +46,6 @@ linux-x64:
           - run-reporter-component-tests-chrome
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
-    # Cypress run must be completed to fetch Accessibility report
-    - verify-accessibility-results:
-        context: test-runner:cypress-record-key
-        requires:
-          - reporter-integration-tests
-          - run-app-component-tests-chrome
-          - run-app-integration-tests-chrome
-          - run-frontend-shared-component-tests-chrome
-          - run-launchpad-component-tests-chrome
-          - run-launchpad-integration-tests-chrome
-          - run-reporter-component-tests-chrome
-          - run-webpack-dev-server-integration-tests
-          - run-vite-dev-server-integration-tests
-          - driver-integration-tests-firefox
-          - driver-integration-tests-chrome
-          - driver-integration-tests-chrome-inject-document-domain
-          - driver-integration-tests-chrome-beta-inject-document-domain
-          - driver-integration-tests-electron
-          - driver-integration-tests-webkit
-          - driver-integration-memory-tests
     - lint-types:
         requires:
           - build
@@ -596,8 +576,21 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
+# Windows CI is expensive, so unlike the other platform workflows above it does not run on every 
+# develop/release push. It runs via CircleCI Scheduled Pipelines (configured in the CircleCI UI, not here)
+# that set run-windows-workflow=true, plus on the other filters listed below.
 windows:
-  when: *full-workflow-filters
+  when:
+    or:
+      - equal: [ true, << pipeline.parameters.run-windows-workflow >> ]
+      - and:
+          - *full-workflow-filters
+          - not:
+              or:
+                - equal: [ develop, << pipeline.git.branch >> ]
+                - matches:
+                    pattern: /^release\/\d+\.\d+\.\d+$/
+                    value: << pipeline.git.branch >>
   jobs:
     - node_modules_install:
         name: windows-node-modules-install

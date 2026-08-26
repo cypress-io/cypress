@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp-protocol/cdp_automation'
+import { normalizeResourceType } from './cdp-protocol/normalize-resource-type'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
@@ -10,6 +10,8 @@ import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
 import { convertPlaywrightCookieToCyCookie, convertCyCookieToPlaywrightCookie } from '../automation/cookie/converters/webkit'
 import utils from './utils'
 import type { CyCookie } from '../automation/cookie/util'
+import type { CDPSocketServer } from '@packages/socket'
+import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER } from './constants'
 
@@ -27,6 +29,7 @@ type WebKitAutomationOpts = {
   videoApi?: RunModeVideoApi
   userAgent?: string | null
   isHeadless: boolean
+  cdpSocketServer?: CDPSocketServer
 }
 
 export class WebKitAutomation {
@@ -36,12 +39,14 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
+  cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
+    this.cdpSocketServer = opts.cdpSocketServer
   }
 
   // static initializer to avoid "not definitively declared"
@@ -83,6 +88,9 @@ export class WebKitAutomation {
     await this.context.exposeBinding('cypressDownloadLinkClicked', (source, downloadUrl) => {
       this.automation.onDownloadLinkClicked?.(downloadUrl)
     })
+
+    // the automation socket must attach before the runner navigates so its window bindings exist when the driver connects
+    await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
 
     this.handleRequestEvents()
 

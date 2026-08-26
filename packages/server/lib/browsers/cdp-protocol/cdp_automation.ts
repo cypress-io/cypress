@@ -8,12 +8,14 @@ import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
-import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/cookie/util'
 import { convertCdpCookiesToCyCookies, convertCyCookieToCdpCookie } from '../../automation/cookie/converters/cdp'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import { CDPDisconnectedError } from './cri-errors'
+import { normalizeResourceType } from './normalize-resource-type'
 import { cdpKeyPress } from '../../automation/commands/key_press'
 import { AUT_FRAME_HEADER } from '../constants'
 
@@ -35,15 +37,6 @@ export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY
     format: 'jpeg',
     everyNthFrame,
   }
-}
-
-export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
-  resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
-  if (validResourceTypes.includes(resourceType as ResourceType)) {
-    return resourceType as ResourceType
-  }
-
-  return 'other'
 }
 
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
@@ -73,11 +66,6 @@ const findFrameById = (frameTree: HasFrame | undefined, frameId: string): HasFra
 
   return undefined
 }
-
-// the resource types passed through to request middleware / cy.intercept matching; any
-// other type reported by the protocol (e.g. 'document', 'media', 'preflight') normalizes to 'other'
-// CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
 
 export class CdpAutomation implements CDPClient, AutomationMiddleware {
   on: OnFn
@@ -112,8 +100,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       try {
         await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
       } catch (e) {
-        // swallow this error if the CRI connection was reset
-        if (!e.message.includes('browser CRI connection was reset')) {
+        // swallow this error if the CRI connection was reset - the ack racing a
+        // disconnect is expected and not actionable
+        if (!CDPDisconnectedError.isCDPDisconnectedError(e)) {
           throw e
         }
       }
@@ -308,19 +297,21 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     return _.get(cookies, 0, null)
   }
 
-  private _updateFrameTree = (client: CriClient, eventName) => async () => {
-    debugVerbose(`update frame tree for ${eventName}`)
+  private _updateFrameTree = (client: CriClient, eventName) => {
+    return async () => {
+      debugVerbose(`update frame tree for ${eventName}`)
 
-    this.gettingFrameTree = (async () => {
-      try {
-        this.frameTree = (await client.send('Page.getFrameTree')).frameTree
-        debugVerbose('frame tree updated')
-      } catch (err) {
-        debugVerbose('failed to update frame tree:', err.stack)
-      } finally {
-        this.gettingFrameTree = null
-      }
-    })()
+      this.gettingFrameTree = (async () => {
+        try {
+          this.frameTree = (await client.send('Page.getFrameTree')).frameTree
+          debugVerbose('frame tree updated')
+        } catch (err) {
+          debugVerbose('failed to update frame tree:', err.stack)
+        } finally {
+          this.gettingFrameTree = null
+        }
+      })()
+    }
   }
 
   private _continueRequest = (client, params, header?) => {

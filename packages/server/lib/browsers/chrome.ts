@@ -54,6 +54,10 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
         profile_enabled: false, // Disable Chrome's "Save address" pop up
         credit_card_enabled: false, // Disable Chrome's "Save card" pop up
       },
+      // Chrome 138+ gates the "Translate this page?" bubble on this pref alone.
+      translate: {
+        enabled: false,
+      },
     },
     defaultSecure: {},
     localState: {
@@ -748,6 +752,7 @@ export = {
       protocolManager: options.protocolManager,
       fullyManageTabs: true,
       onServiceWorkerClientEvent: automation.onServiceWorkerClientEvent,
+      onExtraTargetCriClientReady: options.onExtraTargetCriClientReady,
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
