@@ -10,7 +10,6 @@ import _ from 'lodash'
 import chokidar from 'chokidar'
 import {
   validate as validateConfig,
-  validateNoBreakingConfigLaunchpad,
   validateNoBreakingConfigRoot,
   validateNoBreakingTestingTypeConfig,
   setupFullConfigWithDefaults,
@@ -31,6 +30,20 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // how long to wait for a reply to an execute:plugins ipc message before
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
+
+// keep in sync with getTeardownTimeoutMs in @packages/server lib/util/graceful-exit.ts, which owns
+// this budget; data-context cannot import from the server, so the default is mirrored here
+const DEFAULT_TEARDOWN_TIMEOUT_MS = 5000
+// the disconnect ack has to give up well before the teardown budget expires, or the force-exit cuts
+// off the rest of teardown instead; derived so lowering the budget cannot invert the two
+const TEARDOWN_BUDGET_FRACTION = 0.4
+
+function mainProcessWillDisconnectTimeoutMs (): number {
+  const configured = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
+  const budget = Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_TEARDOWN_TIMEOUT_MS
+
+  return Math.max(1, Math.floor(budget * TEARDOWN_BUDGET_FRACTION))
+}
 
 export type OnFinalConfigLoadedOptions = {
   shouldRestartBrowser: boolean
@@ -422,24 +435,6 @@ export class ProjectConfigManager {
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     }, this._testingType)
-
-    return validateNoBreakingConfigLaunchpad(
-      config,
-      (type, obj) => {
-        const error = getError(type, obj)
-
-        this.options.ctx.onWarning(error)
-
-        return error
-      },
-      (type, obj) => {
-        const error = getError(type, obj)
-
-        this.options.onError(error)
-
-        throw error
-      },
-    )
   }
 
   onLoadError = async (error: any) => {
@@ -656,19 +651,27 @@ export class ProjectConfigManager {
     return new Promise((resolve, reject) => {
       if (!this._eventsIpc) {
         debug(`mainProcessWillDisconnect message not set, no IPC available`)
-        reject()
+        reject(new Error('mainProcessWillDisconnect has no IPC available'))
 
         return
       }
 
       debug('sending main:process:will:disconnect message')
-      this._eventsIpc.send('main:process:will:disconnect')
+      // send reports false for a child that is gone or whose ipc backlog is full; a gone child has
+      // already emitted exit/disconnect, so the listeners below would never fire and this would
+      // stall for the full timeout. Either way there is no ack coming.
+      if (!this._eventsIpc.send('main:process:will:disconnect')) {
+        debug('could not send to the child process, nothing to wait for')
+        resolve()
 
-      // If for whatever reason we don't get an ack in 5s, bail.
+        return
+      }
+
+      // If for whatever reason we don't get an ack, bail.
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
         reject(new Error('mainProcessWillDisconnect message timed out'))
-      }, 5000)
+      }, mainProcessWillDisconnectTimeoutMs())
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
         debug('Received main:process:will:disconnect:ack')

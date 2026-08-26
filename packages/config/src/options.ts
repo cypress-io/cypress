@@ -109,10 +109,6 @@ export interface BreakingOption {
    */
   isWarning?: boolean
   /**
-    * Whether to show the error message in the launchpad
-    */
-  showInLaunchpad?: boolean
-  /**
    * Whether to display or throw the error message based on the configuration value present.
    */
   shouldDisplayOrThrow?: (value: any) => boolean
