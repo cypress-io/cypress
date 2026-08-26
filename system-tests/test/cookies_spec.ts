@@ -502,7 +502,6 @@ describe('OAuth/SSO redirect-back cookie', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://localhost:${primaryPort}`,
-      allowCypressEnv: false,
     },
     spec: 'oauth_redirect_cookie.cy.js',
   })
