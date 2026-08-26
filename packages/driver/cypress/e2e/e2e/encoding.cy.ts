@@ -178,6 +178,8 @@ describe('encoding', () => {
 
       // The request will be successful but since the content-encoding is br,
       // the browser will fail to decode
+      let brJsInterception
+
       cy.wait('@brJs').then((interception) => {
         if (usesBrowserNetworkPath) {
           // NOTE: accepted MITM → CDP drift (#34384): the netstack rejects this br
@@ -185,15 +187,38 @@ describe('encoding', () => {
           // can only observe the request phase.
           expect(interception.request).to.exist
           expect(interception.response).to.be.undefined
+
+          // #34565: the browser knows the load failed and why, so the
+          // rejection must surface as interception.error. cy.wait resolves
+          // at the request phase and network:error arrives asynchronously —
+          // retry against the interception, which is mutated in place when
+          // it lands.
+          cy.wrap(interception).should((errored) => {
+            expect(errored.state).to.eq('Errored')
+            expect(errored.error, 'interception.error').to.exist
+          })
         } else {
           expect(interception.response?.statusCode).to.eq(200)
           expect(interception.response?.headers?.['content-encoding']).to.eq('br')
           expect(interception.request.headers['accept-encoding']).to.eq('gzip, deflate')
+
+          brJsInterception = interception
         }
       })
 
       // Assert that the encoding-js element is still gzip since br failed to decode
       cy.get('#encoding-js').should('have.text', 'encoding-gzip-js')
+
+      cy.then(() => {
+        if (!usesBrowserNetworkPath) {
+          // MITM observes the response directly and never routes it through
+          // the network:error path, so the interception reaches Complete
+          // with interception.error unset — the asymmetry with the
+          // proxy-off branch above is the point.
+          expect(brJsInterception.state).to.eq('Complete')
+          expect(brJsInterception.error).to.be.undefined
+        }
+      })
     })
 
     it('fails when brotli is requested due to insecure host', (done) => {
