@@ -14,6 +14,7 @@ import {
   pathUpToProjectName,
   normalizeStdout,
   browserNameVersionRe,
+  teardownBudgetNoticeRe,
 } from './normalizeStdout'
 
 const isCi = require('ci-info').isCI
@@ -570,6 +571,31 @@ cp = Bluebird.promisifyAll(cp)
 
 const processEnvCache = _.clone(process.env)
 
+// The budget notices are stripped from snapshots (see normalizeStdout) because whether teardown fits in
+// its budget depends on how loaded the machine is, not on the run. Tally them here so the trend stays
+// visible in the job output, and so a root-cause fix can be told apart from a quiet machine.
+const teardownBudget = { runs: 0, runsOverBudget: 0, notices: 0 }
+
+const recordTeardownBudget = (output: string) => {
+  const notices = output.match(teardownBudgetNoticeRe)
+
+  teardownBudget.runs++
+
+  if (notices) {
+    teardownBudget.runsOverBudget++
+    teardownBudget.notices += notices.length
+  }
+}
+
+process.on('exit', () => {
+  if (!teardownBudget.runs) {
+    return
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
+})
+
 Bluebird.config({
   longStackTraces: true,
 })
@@ -1053,6 +1079,8 @@ const systemTests = {
     let stderr = ''
 
     const exit = function (code: number | null, signal: NodeJS.Signals | null | undefined) {
+      recordTeardownBudget(stdout)
+
       if (interruptRequested) {
         return {
           code,

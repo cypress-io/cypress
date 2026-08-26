@@ -13,6 +13,8 @@ const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib
 
 const debug = Debug('cypress:server:start-cypress')
 
+const TELEMETRY_SHUTDOWN_TIMEOUT_MS = 1000
+
 process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
 configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
 process.env['CYPRESS'] = 'true'
@@ -56,6 +58,8 @@ if (isRunningElectron) {
 
   telemetry.startSpan({ name: 'cypress', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
 
+  // The OTLP flush bounds itself at 10s (exporter) to 30s (batch processor) across up to 5 retries, so a
+  // slow collector would otherwise spend the whole exit budget. Dropped spans cost less than a late exit.
   GracefulExit.addStep(async (code) => {
     try {
       const span = telemetry.getSpan('cypress')
@@ -71,7 +75,7 @@ if (isRunningElectron) {
     } catch (error) {
       debug('Error during telemetry shutdown on exit: %o', error)
     }
-  }, 'finalize telemetry')
+  }, 'finalize telemetry', TELEMETRY_SHUTDOWN_TIMEOUT_MS)
 
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 

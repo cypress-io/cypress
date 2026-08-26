@@ -25,6 +25,8 @@ interface KillOptions {
   nullOut?: boolean
   unbind?: boolean
   isOrphanedBrowserProcess?: boolean
+  /** Stop waiting on the browser's `exit` event after this long; it has been signalled regardless. */
+  timeoutMs?: number
 }
 
 const kill = (options: KillOptions = {}) => {
@@ -49,15 +51,29 @@ const kill = (options: KillOptions = {}) => {
   }
 
   return new Promise<void>((resolve) => {
-    instanceToKill.once('exit', () => {
+    let timer: NodeJS.Timeout | undefined
+
+    const done = () => {
+      clearTimeout(timer)
+
       if (options.unbind) {
         instanceToKill.removeAllListeners()
       }
 
-      debug('browser process killed')
-
       resolve()
+    }
+
+    instanceToKill.once('exit', () => {
+      debug('browser process killed')
+      done()
     })
+
+    if (options.timeoutMs) {
+      timer = setTimeout(() => {
+        debug('browser process did not exit within %dms, leaving the rest to the OS', options.timeoutMs)
+        done()
+      }, options.timeoutMs)
+    }
 
     debug('killing browser process')
 
