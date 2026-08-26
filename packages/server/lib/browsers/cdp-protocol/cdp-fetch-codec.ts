@@ -181,11 +181,10 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
-// `postData` is a utf8 string, so a binary body arrives already mangled into
-// replacement characters; the base64 entries are the byte-accurate view, which
-// is why CDP deprecates `postData` in their favor. Chrome withholds `bytes` for
-// a body it never materialized (a ReadableStream upload) — concatenating those
-// would forge an empty body in place of one it simply cannot supply.
+// The base64 entries are the byte-accurate view of a paused body, which is why
+// CDP deprecates the utf8 `postData` string in their favor. Chrome withholds
+// `bytes` for a body it never materialized (a ReadableStream upload) —
+// concatenating those would forge an empty body in place of one it cannot supply.
 function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | undefined {
   if (!entries?.length || entries.some(({ bytes }) => bytes === undefined)) {
     return undefined
@@ -320,11 +319,11 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       }
 
       // An untouched body returns either as the Buffer decodeRequest handed out
-      // or as net-stubbing's utf8 view of it, and neither is the string the
-      // pause carried — Chrome and Node disagree on how many replacement
-      // characters an invalid sequence collapses to. So the transport's string
-      // comparison cannot recognize it, and writing either field here would
-      // upload that mangled re-encode in place of the body the browser has.
+      // or as net-stubbing's utf8 view of it, and the transport's string
+      // comparison recognizes neither, so writing either field below would
+      // upload a mangled re-encode in place of the body the browser holds.
+      // A lossy view re-encodes wider than the bytes it came from, so its
+      // length is no shortcut for this comparison.
       const pauseBody = transportRequest.pausePostDataBuffer
       const bodyUnchanged = pauseBody !== undefined && (Buffer.isBuffer(httpRequest.body)
         ? httpRequest.body.equals(pauseBody)
