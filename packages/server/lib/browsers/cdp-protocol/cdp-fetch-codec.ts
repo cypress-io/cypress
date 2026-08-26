@@ -181,10 +181,9 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
-// `postData` is a utf8 string, so it mangles a binary body; the entries carry
-// that same body as base64. An entry with no `bytes` means the browser has no
-// copy of the body to hand over — it never buffered a streamed upload — which
-// is not the same as an empty body, so report no body rather than invent one.
+// An entry without `bytes` means the browser has no copy of the body to give —
+// it never buffered a streamed upload. That is not an empty body, so decode
+// nothing rather than report one.
 function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | undefined {
   if (!entries?.length || entries.some(({ bytes }) => bytes === undefined)) {
     return undefined
@@ -292,6 +291,9 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         url: transportRequest.url,
         method: transportRequest.method,
         headers: transportRequest.headers,
+        // The entries' bytes come first because `postData` is a utf8 string:
+        // every byte of a binary body that is not valid utf8 already reached us
+        // as U+FFFD, and no re-encoding recovers the original.
         body: transportRequest.pausePostDataBuffer ?? transportRequest.postData,
         resourceType: transportRequest.resourceType,
       }
@@ -319,11 +321,10 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       }
 
       // An untouched body returns either as the Buffer decodeRequest handed out
-      // or as net-stubbing's utf8 view of it, and the transport's string
-      // comparison recognizes neither, so writing either field below would
-      // upload a mangled re-encode in place of the body the browser holds.
-      // A lossy view re-encodes wider than the bytes it came from, so its
-      // length is no shortcut for this comparison.
+      // or as net-stubbing's utf8 view of it, and the transport recognizes
+      // neither as unchanged, so writing either field below would replace the
+      // browser's own bytes with a re-encoding of their U+FFFD view. Length is
+      // no shortcut here: each replaced byte re-encodes to three.
       const pauseBody = transportRequest.pausePostDataBuffer
       const bodyUnchanged = pauseBody !== undefined && (Buffer.isBuffer(httpRequest.body)
         ? httpRequest.body.equals(pauseBody)
