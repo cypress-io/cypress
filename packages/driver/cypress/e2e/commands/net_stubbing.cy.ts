@@ -1707,11 +1707,13 @@ describe('network stubbing', { retries: 15 }, function () {
 
       cy.intercept('POST', '/upload', (req) => {
         seen = req.body
-      })
+      }).as('upload')
 
       cy.window().then((win) => {
         return win.fetch('/upload', { method: 'POST', body: new Blob([bytes]) })
       })
+
+      cy.wait('@upload')
 
       cy.then(() => {
         expect(seen).to.be.an('ArrayBuffer')

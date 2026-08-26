@@ -181,16 +181,18 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
-// The pause's `postData` is a utf8 string, so a binary body reaches it already
-// mangled into replacement characters. `postDataEntries` carries the same body
-// base64-encoded, which is why CDP deprecates `postData` in its favor.
-//
-// Chrome omits `bytes` for a body it never materialized (a ReadableStream
-// upload), and those entries describe a body whose bytes are simply
-// unavailable — concatenating them would forge an empty one.
+// `postData` is a utf8 string, so a binary body arrives already mangled into
+// replacement characters; the base64 entries are the byte-accurate view, which
+// is why CDP deprecates `postData` in their favor. Chrome withholds `bytes` for
+// a body it never materialized (a ReadableStream upload) — concatenating those
+// would forge an empty body in place of one it simply cannot supply.
 function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | undefined {
   if (!entries?.length || entries.some(({ bytes }) => bytes === undefined)) {
     return undefined
+  }
+
+  if (entries.length === 1) {
+    return Buffer.from(entries[0].bytes!, 'base64')
   }
 
   return Buffer.concat(entries.map(({ bytes }) => Buffer.from(bytes!, 'base64')))
@@ -282,6 +284,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         requestId: transportRequest.requestId,
         headerNames: Object.keys(transportRequest.headers ?? {}),
         hasPostData: transportRequest.hasPostData,
+        postDataChars: transportRequest.postData?.length,
         postDataBytes: transportRequest.pausePostDataBuffer?.length,
       })
 
@@ -316,20 +319,20 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.headers = toNetworkHeaders(httpRequest.headers)
       }
 
-      // A binary body round-trips as the Buffer decodeRequest handed out, and
-      // its utf8 view is not the string the pause carried — Chrome and Node
-      // disagree on how many replacement characters an invalid sequence
-      // collapses to. Comparing bytes is the only way to tell an untouched body
-      // from an edited one, and leaving both fields as the pause set them is
-      // what keeps the transport from re-sending bytes the browser already has.
-      const bodyUnchanged = transportRequest.pausePostDataBuffer !== undefined &&
-        Buffer.isBuffer(httpRequest.body) &&
-        httpRequest.body.equals(transportRequest.pausePostDataBuffer)
+      // An untouched body returns either as the Buffer decodeRequest handed out
+      // or as net-stubbing's utf8 view of it, and neither is the string the
+      // pause carried — Chrome and Node disagree on how many replacement
+      // characters an invalid sequence collapses to. So the transport's string
+      // comparison cannot recognize it, and writing either field here would
+      // upload that mangled re-encode in place of the body the browser has.
+      const pauseBody = transportRequest.pausePostDataBuffer
+      const bodyUnchanged = pauseBody !== undefined && (Buffer.isBuffer(httpRequest.body)
+        ? httpRequest.body.equals(pauseBody)
+        : httpRequest.body === pauseBody.toString('utf8'))
 
-      // Either field alone is proof the pause carried a body: postData is
-      // omitted for a payload too long to inline, leaving the entries as the
-      // only record of it.
-      const pauseCarriedBody = transportRequest.postData !== undefined || transportRequest.pausePostDataBuffer !== undefined
+      // postData is omitted for a payload too long to inline, so either field
+      // alone is proof the pause carried a body.
+      const pauseCarriedBody = transportRequest.postData !== undefined || pauseBody !== undefined
 
       // The net-stubbing pipeline normalizes every intercepted request to a
       // string body, so a request the browser paused without one arrives back

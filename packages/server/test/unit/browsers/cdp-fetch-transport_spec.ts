@@ -472,6 +472,30 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.postData).to.equal(body.toString('utf8'))
     })
 
+    // net-stubbing hands a body back as a string whenever the content-type
+    // claims utf8, even for bytes that are not. Re-encoding that string would
+    // upload replacement characters in place of the body the browser holds.
+    it('does not re-encode a binary body the pipeline stringified but left untouched', () => {
+      const codec = createCdpFetchCodec()
+      const body = Buffer.from([0x80, 0x81, 0x82, 0x83])
+      const transportRequest: CdpFetchTransportRequest = {
+        id: 'network-1',
+        url: 'https://example.test/',
+        method: 'POST',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        postData: 'chrome-lossy-view',
+        postDataEntries: [{ bytes: body.toString('base64') }],
+      }
+
+      const request = codec.decodeRequest(transportRequest)
+
+      // what handle-intercept-request does for a body it classifies as utf8
+      codec.encodeRequest({ ...request, body: (request.body as Buffer).toString('utf8') })
+
+      expect(transportRequest).not.to.have.property('postDataBuffer')
+      expect(transportRequest.postData).to.equal('chrome-lossy-view')
+    })
+
     // Chrome and Node disagree on how many replacement characters an invalid
     // sequence collapses to, so the utf8 view cannot be trusted to tell an
     // edited binary body from an untouched one — only the bytes can.
