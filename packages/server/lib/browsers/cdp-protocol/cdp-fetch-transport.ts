@@ -131,6 +131,9 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   // Byte-accurate body for Fetch.continueRequest when middleware set a Buffer;
   // postData is its lossy utf8 string view, kept for pause comparison.
   postDataBuffer?: Buffer
+  // Byte-accurate body the pause itself carried, decoded from postDataEntries.
+  // Undefined when the browser withheld the bytes — see toPausePostData.
+  pausePostDataBuffer?: Buffer
   requestId?: string
   resourceType?: ResourceType
   sessionId?: string
