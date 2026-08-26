@@ -184,7 +184,7 @@ export class GracefulExit {
           try {
             const ms = getTeardownTimeoutMs()
 
-            console.log(`Failed to gracefully exit after ${ms}ms. Exiting with code ${code}. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
+            console.log(`Failed to gracefully exit after ${ms}ms. Exiting with the existing code ${code}.`)
           } catch (e) {
             console.log('Error forcing exit: ', e)
           } finally {
