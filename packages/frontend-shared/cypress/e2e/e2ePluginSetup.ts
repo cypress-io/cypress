@@ -5,20 +5,8 @@ hookRequire({ forceTypeScript: false })
 // Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
 // from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
 // will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.
-import {
-  getOperationName,
-  Response,
-  makeGraphQLServer,
-  clearCtx,
-  DataContext,
-  globalPubSub,
-  setCtx,
-  buildSchema,
-  execute,
-  ExecutionResult,
-  GraphQLError,
-  parse,
-} from './prod-dependencies'
+import { getOperationName, Response, makeGraphQLServer, clearCtx, DataContext, globalPubSub, setCtx, buildSchema, execute, GraphQLError, parse } from './prod-dependencies'
+import type { ExecutionResult } from './prod-dependencies'
 
 import path from 'path'
 import execa from 'execa'

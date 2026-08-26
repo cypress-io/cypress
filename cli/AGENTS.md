@@ -12,9 +12,7 @@ The `cli/` workspace contains the `cypress` npm package — the user-facing CLI 
 
 ### Component-Testing Adapters
 
-**@cypress/angular** — Mount adapter for Angular 18+ components using zone.js-based change detection.
-
-**@cypress/angular-zoneless** — Mount adapter for Angular 20+ components using the experimental zoneless change detection strategy (no zone.js).
+**@cypress/angular** — Mount adapter for Angular 21+ components.
 
 **@cypress/mount-utils** — Internal shared utilities and types that all CT mount adapters depend on. Not intended for direct use by end users.
 

@@ -755,7 +755,7 @@ describe('lib/screenshots', () => {
         scaled: true,
         blackout: [],
         startTime: '2018-06-27T20:17:19.537Z',
-        specName: 'integration/spec.coffee',
+        specName: 'integration/spec.cy.ts',
       }
 
       this.details = {
@@ -765,7 +765,7 @@ describe('lib/screenshots', () => {
         multipart: false,
         pixelRatio: 1,
         name: 'my-screenshot',
-        specName: 'integration/spec.coffee',
+        specName: 'integration/spec.cy.ts',
         testFailure: true,
         path: '/path/to/my-screenshot.png',
       }
@@ -786,7 +786,7 @@ describe('lib/screenshots', () => {
           multipart: false,
           pixelRatio: 1,
           name: 'my-screenshot',
-          specName: 'integration/spec.coffee',
+          specName: 'integration/spec.cy.ts',
           testFailure: true,
           path: '/path/to/my-screenshot.png',
           scaled: true,
@@ -815,7 +815,7 @@ describe('lib/screenshots', () => {
           multipart: false,
           pixelRatio: 1,
           name: 'my-screenshot',
-          specName: 'integration/spec.coffee',
+          specName: 'integration/spec.cy.ts',
           testFailure: true,
           path: '/new/path/to/screenshot.png',
           scaled: true,
@@ -837,7 +837,7 @@ describe('lib/screenshots', () => {
           multipart: false,
           pixelRatio: 1,
           name: 'my-screenshot',
-          specName: 'integration/spec.coffee',
+          specName: 'integration/spec.cy.ts',
           testFailure: true,
           path: '/path/to/my-screenshot.png',
           scaled: true,

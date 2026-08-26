@@ -1,4 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
+import { netStubbingState } from '@packages/net-stubbing'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
 import { CdpFetchTransport } from '../../lib/browsers/cdp-protocol/cdp-fetch-transport'
@@ -36,6 +37,9 @@ describe('lib/network-runtime', () => {
       } as any,
       serverBus: { emit: sinon.stub() } as any,
       getCurrentBrowser: () => ({}) as any,
+      // required for both runtimes: the state is created at server open and every
+      // runtime has to share it
+      netStubbingState: netStubbingState(),
     }
   }
 
@@ -44,6 +48,7 @@ describe('lib/network-runtime', () => {
     networkId?: string
     url?: string
     resourceType?: Protocol.Network.ResourceType
+    requestHeaders?: Record<string, string>
     responseStatusCode?: number
     responseHeaders?: Protocol.Fetch.HeaderEntry[]
   }): Protocol.Fetch.RequestPausedEvent {
@@ -55,7 +60,7 @@ describe('lib/network-runtime', () => {
       request: {
         url: options.url ?? 'https://example.test/',
         method: 'GET',
-        headers: {},
+        headers: options.requestHeaders ?? {},
       },
       responseStatusCode: options.responseStatusCode,
       responseHeaders: options.responseHeaders,
@@ -89,12 +94,74 @@ describe('lib/network-runtime', () => {
     await new Promise((resolve) => setImmediate(resolve))
   }
 
-  it('createProxyRuntime constructs networkProxy and netStubbingState', () => {
-    const runtime = createProxyRuntime(baseDeps())
+  // withBody: true answers Fetch.getResponseBody with an empty body, for
+  // tests that assert whether it was called; plain clients just resolve
+  // every send() with {}.
+  function createCdpClient (options: { withBody?: boolean } = {}) {
+    const send = options.withBody
+      ? sinon.stub().callsFake(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: '', base64Encoded: false }
+        }
+
+        return {}
+      })
+      : sinon.stub().resolves({})
+
+    return { send, on: sinon.stub(), off: sinon.stub() }
+  }
+
+  // Drives the paired request-stage/response-stage Fetch.requestPaused pauses
+  // shared by the classification tests below, flushing the legacy
+  // middleware's async stages between and after each one.
+  async function drivePausedRequest (
+    onPaused: (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => Promise<unknown>,
+    options: Parameters<typeof createPausedRequest>[0],
+  ) {
+    const { responseStatusCode, responseHeaders, ...requestOptions } = options
+    const handled = onPaused(createPausedRequest(requestOptions))
+
+    await flush()
+
+    await onPaused(createPausedRequest({ ...requestOptions, responseStatusCode, responseHeaders }))
+
+    await flush()
+    await handled
+  }
+
+  // Same "replay every registered Fetch.requestPaused handler" shape as
+  // startCdpRuntime's returned function, for a client not started via it
+  // (e.g. an extra-target client whose handlers register through attachExtraTarget).
+  function wirePausedHandler (client: { on: sinon.SinonStub }) {
+    return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
+      return Promise.all(client.on.withArgs('Fetch.requestPaused').getCalls().map((call) => {
+        return (call.args[1] as (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void)(event, sessionId)
+      }))
+    }
+  }
+
+  // hasInterceptor: false keeps net-stubbing's before:request subscription
+  // fire-and-forget (planSubscriptions awaits it only for a route with a live
+  // driver-side handler) — exercising the driver round trip is out of scope
+  // for these classification tests, and awaiting it here would hang forever
+  // since there is no driver to answer.
+  const minimalMatchingRoute = (id: string) => {
+    return {
+      id,
+      routeMatcher: { url: '*' },
+      hasInterceptor: false,
+      getFixture: sinon.stub(),
+      matches: 0,
+    } as any
+  }
+
+  it('createProxyRuntime constructs networkProxy and reuses the provided netStubbingState', () => {
+    const deps = baseDeps()
+    const runtime = createProxyRuntime(deps)
 
     expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
-    expect(runtime.netStubbingState.routes).to.deep.equal([])
-    expect(runtime.netStubbingState.requests).to.deep.equal({})
+    expect(runtime.netStubbingState).to.equal(deps.netStubbingState)
+    expect(runtime.networkProxy.http.netStubbingState).to.equal(deps.netStubbingState)
   })
 
   it('registers default configurator network policies at startup', () => {
@@ -258,7 +325,7 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy.http.netStubbingState).to.equal(existingState)
   })
 
-  it('createCdpFetchRuntime registers blocked-hosts policy for the CDP path', () => {
+  it('createCdpFetchRuntime registers blocked-hosts policy for the browser (CDP) network path', () => {
     const client = {
       send: sinon.stub(),
       on: sinon.stub(),
@@ -1098,5 +1165,249 @@ describe('lib/network-runtime', () => {
 
     await expect(attach).to.be.rejectedWith('CDP Fetch runtime has been stopped')
     expect(extraClient.send).to.have.been.calledWith('Fetch.disable')
+  })
+
+  // `times` exhaustion disables a route once request-stage counting reaches
+  // the limit — but that counting happens on the very request that trips it,
+  // so that request's own response must still materialize (its cy.intercept
+  // handler needs real bytes, not the empty stream stand-in). A route
+  // disabled by an earlier request must not be revived for a *later* one:
+  // that request never matched anything, so it correctly streams instead of
+  // risking a hang on an endless body (the bug this composition fixes —
+  // the old response-time re-match un-hid the disabled route for every
+  // later request too).
+  //
+  // Header fidelity (case-insensitive route `headers` matchers against
+  // browser-cased request headers) is no longer a concern at the response
+  // pause either: with no re-match, the only header view a route matcher
+  // ever sees is the one SetMatchingRoutes already lowercased at request
+  // stage.
+  it('materializes the request that spends a times-limited route, then streams the next one against the now-disabled route', async () => {
+    const client = createCdpClient({ withBody: true })
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const timesRoute = minimalMatchingRoute('route-times')
+
+    timesRoute.routeMatcher.times = 1
+    runtime.netStubbingState.routes.push(timesRoute)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'times-first-request',
+      networkId: 'network-times-first',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+    expect(timesRoute.disabled).to.be.true
+
+    client.send.resetHistory()
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'times-second-request',
+      networkId: 'network-times-second',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+    expect(client.send).to.have.been.calledWith('Fetch.continueResponse')
+  })
+
+  it('reads stubbingState.routes live — a route registered after the first stream-classified request still forces the next one to materialize', async () => {
+    const client = createCdpClient({ withBody: true })
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'ndjson-first',
+      networkId: 'network-ndjson-first',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(client.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+    client.send.resetHistory()
+    runtime.netStubbingState.routes.push(minimalMatchingRoute('route-2'))
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'ndjson-second',
+      networkId: 'network-ndjson-second',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+  })
+
+  // Every other test in this file leaves both obstructive-code flags
+  // undefined, so this is the only coverage that config.modifyObstructiveCode
+  // actually threads through createCdpFetchRuntime into the composed
+  // shouldStreamBody predicate (network-runtime.ts passes deps.config.modifyObstructiveCode
+  // straight through to shouldStreamResponseBody).
+  it('threads modifyObstructiveCode from config into the body predicate', async () => {
+    const client = createCdpClient({ withBody: true })
+    const runtime = createCdpFetchRuntime({
+      ...baseDeps(),
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+        modifyObstructiveCode: true,
+      } as Cypress.Config,
+      client,
+    })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'js-rewrite-request',
+      networkId: 'network-js-rewrite-1',
+      url: 'https://example.test/script.js',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/javascript' }],
+    })
+
+    expect(client.send).to.have.been.calledWith('Fetch.getResponseBody')
+  })
+
+  it('arms capture for a stream-classified response once a protocol manager with isProtocolEnabled true is applied after createCdpFetchRuntime returns', async () => {
+    const client = createCdpClient()
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    // Mirrors production: server-base applies the protocol manager to
+    // networkProxy (via setProtocolManager) only after createCdpFetchRuntime
+    // has already returned it.
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'sse-request-armed',
+      networkId: 'network-sse-armed',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    })
+
+    const armCall = client.send.getCalls().find((call) => call.args[0] === 'Network.streamResourceContent')
+
+    expect(armCall, 'expected Network.streamResourceContent to arm capture').to.exist
+    expect(armCall!.args[1]).to.deep.equal({ requestId: 'network-sse-armed' })
+  })
+
+  it('does not arm capture when the protocol manager reports isProtocolEnabled false', async () => {
+    const client = createCdpClient()
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: false } as any)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'sse-request-disabled',
+      networkId: 'network-sse-disabled',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    })
+
+    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
+  })
+
+  it('attachExtraTarget transports share the same shouldStreamBody composition as the main transport', async () => {
+    const mainClient = createCdpClient()
+    const extraClient = createCdpClient({ withBody: true })
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client: mainClient })
+
+    await runtime.start()
+    await runtime.attachExtraTarget(extraClient)
+
+    const onExtraPaused = wirePausedHandler(extraClient)
+
+    await drivePausedRequest(onExtraPaused, {
+      requestId: 'extra-ndjson-request',
+      networkId: 'extra-network-ndjson-1',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+    // ExtractCypressMetadataHeaders restricts an extra-target request to the
+    // bare-minimum middleware (MaybeSetBasicAuthHeaders) — SetMatchingRoutes
+    // never runs for it, so a route registered in netStubbingState has no
+    // request-stage match to thread through, and the pause still streams.
+    extraClient.send.resetHistory()
+    runtime.netStubbingState.routes.push(minimalMatchingRoute('extra-route-1'))
+
+    await drivePausedRequest(onExtraPaused, {
+      requestId: 'extra-ndjson-unrouted-request',
+      networkId: 'extra-network-ndjson-2',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(extraClient.send).not.to.have.been.calledWith('Fetch.getResponseBody')
+
+    // shouldCaptureBody parity: with recording on, a stream-classified pause
+    // on the extra target arms capture on the extra target's own client
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
+    runtime.netStubbingState.routes.length = 0
+    extraClient.send.resetHistory()
+
+    await drivePausedRequest(onExtraPaused, {
+      requestId: 'extra-armed-request',
+      networkId: 'extra-network-armed',
+      url: 'https://example.test/stream',
+      resourceType: 'Fetch',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
+    })
+
+    expect(extraClient.send).to.have.been.calledWith('Network.streamResourceContent', {
+      requestId: 'extra-network-armed',
+    })
+
+    await runtime.stop()
+  })
+
+  it('stops arming capture when the protocol manager is cleared mid-run', async () => {
+    const client = createCdpClient()
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    runtime.networkProxy.setProtocolManager({ isProtocolEnabled: true } as any)
+
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+
+    // the other half of the late-binding contract: clearing the manager must
+    // take effect on the very next pause, not at the next runtime start
+    runtime.networkProxy.setProtocolManager(undefined as any)
+
+    await drivePausedRequest(onRequestPaused, {
+      requestId: 'sse-request-cleared',
+      networkId: 'network-sse-cleared',
+      url: 'https://example.test/events',
+      resourceType: 'EventSource',
+      responseStatusCode: 200,
+      responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+    })
+
+    expect(client.send).not.to.have.been.calledWith('Network.streamResourceContent')
   })
 })

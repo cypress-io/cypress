@@ -7,7 +7,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, rewriter, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (33 packages total)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
 - **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
@@ -128,7 +128,6 @@ yarn clean-deps && yarn
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
-- **`@packages/rewriter`** — JavaScript source rewriter that transforms test and app code for Cypress compatibility (instrument, polyfill, inject).
 
 ### Configuration & Data
 
@@ -168,7 +167,6 @@ yarn clean-deps && yarn
 - **`@cypress/react`** — Component testing adapter for React.
 - **`@cypress/vue`** — Component testing adapter for Vue.js.
 - **`@cypress/angular`** — Component testing adapter for Angular.
-- **`@cypress/angular-zoneless`** — Angular adapter without zone.js.
 - **`@cypress/svelte`** — Component testing adapter for Svelte.
 - **`@cypress/mount-utils`** — Shared utilities used by all component testing adapters.
 
@@ -177,7 +175,7 @@ yarn clean-deps && yarn
 - **`@cypress/webpack-dev-server`** — Webpack Dev Server launcher for component testing.
 - **`@cypress/vite-dev-server`** — Vite Dev Server launcher for component testing.
 - **`@cypress/webpack-preprocessor`** — Webpack preprocessor for bundling test spec files.
-- **`@cypress/webpack-batteries-included-preprocessor`** — Webpack preprocessor with batteries included (TypeScript, CoffeeScript, etc.).
+- **`@cypress/webpack-batteries-included-preprocessor`** — Webpack preprocessor with batteries included (TypeScript, etc.).
 - **`@cypress/vite-plugin-cypress-esm`** — Vite plugin for mutable ESM modules in browser tests.
 
 ### Plugins & Dev Tooling (published via `npm/`)

@@ -1,5 +1,4 @@
 import {
-  Exchange,
   Client,
   createClient,
   dedupExchange,
@@ -8,6 +7,7 @@ import {
   subscriptionExchange,
   CombinedError,
 } from '@urql/core'
+import type { Exchange } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import type { SocketShape } from '@packages/socket/browser/client'
@@ -100,7 +100,7 @@ declare global {
      */
     __CYPRESS_GQL_NO_SOCKET__?: string
     __CYPRESS_MODE__: 'run' | 'open'
-    __CYPRESS_PROXY_DISABLED__?: boolean
+    __CYPRESS_BROWSER_NETWORK_MODE__?: boolean
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
     __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
@@ -234,17 +234,17 @@ function getPubSubSource (config: PubSubConfig) {
   })
 }
 
-export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Location, 'protocol' | 'host'>, proxyDisabled: boolean) {
+export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Location, 'protocol' | 'host'>, isBrowserNetworkMode: boolean) {
   if (config.target === 'launchpad') {
     return `ws://${location.host}/__launchpad/graphql-ws`
   }
 
-  // With the proxy disabled the app is served at the AUT's superdomain, and CDP
-  // cannot intercept a WebSocket upgrade — the handshake has to name the Cypress
+  // On the browser (CDP) network path the app is served at the AUT's superdomain, and
+  // CDP cannot intercept a WebSocket upgrade — the handshake has to name the Cypress
   // server or it reaches the user's app server (see #34563). `port` is the port the
   // server is listening on; `proxyUrl` is derived from the port that was requested and
   // can still name a port nothing is bound to.
-  if (proxyDisabled && config.port) {
+  if (isBrowserNetworkMode && config.port) {
     return `ws://localhost:${config.port}${config.socketIoRoute}-graphql`
   }
 
@@ -256,6 +256,6 @@ export function getGraphQLWsUrl (config: UrqlClientConfig, location: Pick<Locati
 
 function getSocketSource (config: UrqlClientConfig) {
   return createWsClient({
-    url: getGraphQLWsUrl(config, window.location, window.__CYPRESS_PROXY_DISABLED__ === true),
+    url: getGraphQLWsUrl(config, window.location, window.__CYPRESS_BROWSER_NETWORK_MODE__ === true),
   })
 }

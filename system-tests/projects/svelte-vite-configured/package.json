@@ -8,13 +8,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^5.0.0",
-    "@tsconfig/svelte": "^5.0.4",
-    "svelte": "^5.2.7",
-    "svelte-check": "^4.1.0",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tsconfig/svelte": "^5.0.8",
+    "svelte": "^5.55.5",
+    "svelte-check": "^4.4.7",
     "tslib": "^2.8.1",
-    "typescript": "~5.6.2",
-    "vite": "^6.3.2"
+    "typescript": "~5.9.3",
+    "vite": "^8.0.9"
   },
   "type": "module",
   "projectFixtureDirectory": "svelte"

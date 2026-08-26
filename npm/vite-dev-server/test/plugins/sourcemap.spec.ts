@@ -1,6 +1,6 @@
 import { vi, describe, it, expect } from 'vitest'
 
-import { Plugin } from 'vite-5'
+import { Plugin } from 'vite-8'
 import { ViteDevServerConfig } from '../../src/devServer'
 import { Vite } from '../../src/getVite'
 import { CypressSourcemap } from '../../src/plugins'

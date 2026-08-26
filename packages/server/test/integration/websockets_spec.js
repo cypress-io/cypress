@@ -52,6 +52,11 @@ describe('Web Sockets', () => {
           use: () => { },
         }
 
+        // these upgrades reach this server acting as a proxy, like a proxied
+        // browser — which only happens on the MITM path, and the server refuses
+        // CONNECT until a launch resolves it
+        await this.server.setNetworkMode(false)
+
         await this.server.startWebsockets(automationStub, config, {})
 
         return httpsServer.start(wssPort)
