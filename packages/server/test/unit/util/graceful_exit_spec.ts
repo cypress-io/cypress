@@ -81,17 +81,35 @@ describe('lib/util/graceful-exit', () => {
 
   it('keeps the requested exit code when a step throws', async () => {
     const exitStub = sinon.stub(process, 'exit')
-    const laterStep = sinon.stub().resolves()
+    let healthyStepFinished = false
 
     GracefulExit.addStep(async () => {
       throw new Error('step failed')
     }, 'failing-step')
 
-    GracefulExit.addStep(laterStep as any, 'healthy-step')
+    // resolves on a later tick, so this only holds if teardown awaited it despite the sibling failure
+    GracefulExit.addStep(async () => {
+      await new Promise((resolve) => setImmediate(resolve))
+      healthyStepFinished = true
+    }, 'healthy-step')
 
     await GracefulExit.exitGracefully(0)
 
-    expect(laterStep).to.have.been.calledOnce
+    expect(healthyStepFinished, 'a failing step must not abort the others').to.be.true
+    expect(exitStub).to.have.been.calledWith(0)
+  })
+
+  it('reports the failing step without changing the exit code', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+    const logStub = sinon.stub(console, 'log')
+
+    GracefulExit.addStep(async () => {
+      throw new Error('step failed')
+    }, 'failing-step')
+
+    await GracefulExit.exitGracefully(0)
+
+    expect(logStub.args.flat().join('\n')).to.include('failing-step')
     expect(exitStub).to.have.been.calledWith(0)
   })
 

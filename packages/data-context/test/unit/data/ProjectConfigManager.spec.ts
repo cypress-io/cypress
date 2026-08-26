@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
 import { createTestDataContext } from '../helper'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
@@ -20,6 +20,36 @@ describe('ProjectConfigManager', () => {
       onInitialConfigLoaded: () => {},
       onFinalConfigLoaded: () => Promise.resolve(),
       refreshLifecycle: () => Promise.resolve(),
+    })
+  })
+
+  afterEach(() => {
+    delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
+  })
+
+  describe('#mainProcessWillDisconnect', () => {
+    it('rejects with an error when there is no IPC', async () => {
+      await expect(configManager.mainProcessWillDisconnect()).rejects.toThrow('mainProcessWillDisconnect has no IPC available')
+    })
+
+    it('gives up well before the process teardown budget expires', async () => {
+      process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '1000'
+
+      const listeners: Record<string, () => void> = {}
+
+      // never acks, so the promise can only settle via its own timeout
+      ;(configManager as any)._eventsIpc = {
+        send: () => {},
+        on: (event: string, listener: () => void) => {
+          listeners[event] = listener
+        },
+      }
+
+      const started = Date.now()
+
+      await expect(configManager.mainProcessWillDisconnect()).rejects.toThrow('timed out')
+
+      expect(Date.now() - started).toBeLessThan(1000)
     })
   })
 

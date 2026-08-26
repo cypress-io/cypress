@@ -29,8 +29,17 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 
-// must stay comfortably under the process teardown budget - see mainProcessWillDisconnect
-const MAIN_PROCESS_WILL_DISCONNECT_TIMEOUT_MS = 2000
+const DEFAULT_TEARDOWN_TIMEOUT_MS = 5000
+// the disconnect ack has to give up well before the teardown budget expires, or the force-exit cuts
+// off the rest of teardown instead; derived so lowering the budget cannot invert the two
+const TEARDOWN_BUDGET_FRACTION = 0.4
+
+function mainProcessWillDisconnectTimeoutMs (): number {
+  const configured = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
+  const budget = Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_TEARDOWN_TIMEOUT_MS
+
+  return Math.max(1, Math.floor(budget * TEARDOWN_BUDGET_FRACTION))
+}
 
 export type OnFinalConfigLoadedOptions = {
   shouldRestartBrowser: boolean
@@ -647,13 +656,11 @@ export class ProjectConfigManager {
       debug('sending main:process:will:disconnect message')
       this._eventsIpc.send('main:process:will:disconnect')
 
-      // If for whatever reason we don't get an ack, bail. This runs inside the process teardown
-      // budget (CYPRESS_INTERNAL_TEARDOWN_TIMEOUT, 5s), so it has to give up well before that or
-      // the force-exit cuts off the rest of teardown instead.
+      // If for whatever reason we don't get an ack, bail.
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
         reject(new Error('mainProcessWillDisconnect message timed out'))
-      }, MAIN_PROCESS_WILL_DISCONNECT_TIMEOUT_MS)
+      }, mainProcessWillDisconnectTimeoutMs())
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
         debug('Received main:process:will:disconnect:ack')

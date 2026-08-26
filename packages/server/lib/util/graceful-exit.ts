@@ -165,7 +165,7 @@ export class GracefulExit {
       this.processTeardown = null
       this.teardownStartedAt = null
       this.steps.clear()
-      process.exit(code ?? 0)
+      process.exit(code)
     }
   }
 
