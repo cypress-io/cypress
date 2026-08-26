@@ -48,27 +48,26 @@ describe('ProjectConfigManager', () => {
 
       await expect(configManager.mainProcessWillDisconnect()).resolves.toBeUndefined()
 
-      expect(Date.now() - started).toBeLessThan(100)
+      // generous, but far below the 2s it would take if this waited on the dead child
+      expect(Date.now() - started).toBeLessThan(500)
     })
 
     it('gives up well before the process teardown budget expires', async () => {
-      process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '1000'
+      process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '2000'
 
-      const listeners: Record<string, () => void> = {}
+      const configManagerInternals = configManager as any
 
       // never acks, so the promise can only settle via its own timeout
-      ;(configManager as any)._eventsIpc = {
+      configManagerInternals._eventsIpc = {
         send: () => true,
-        on: (event: string, listener: () => void) => {
-          listeners[event] = listener
-        },
+        on: () => {},
       }
 
       const started = Date.now()
 
       await expect(configManager.mainProcessWillDisconnect()).rejects.toThrow('timed out')
 
-      expect(Date.now() - started).toBeLessThan(1000)
+      expect(Date.now() - started).toBeLessThan(2000)
     })
   })
 

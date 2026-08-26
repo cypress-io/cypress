@@ -29,6 +29,8 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 
+// keep in sync with getTeardownTimeoutMs in @packages/server lib/util/graceful-exit.ts, which owns
+// this budget; data-context cannot import from the server, so the default is mirrored here
 const DEFAULT_TEARDOWN_TIMEOUT_MS = 5000
 // the disconnect ack has to give up well before the teardown budget expires, or the force-exit cuts
 // off the rest of teardown instead; derived so lowering the budget cannot invert the two
@@ -654,10 +656,11 @@ export class ProjectConfigManager {
       }
 
       debug('sending main:process:will:disconnect message')
-      // a killed or disconnected child already emitted exit/disconnect, so the listeners below
-      // would never fire and this would stall for the full timeout waiting on a dead process
+      // send reports false for a child that is gone or whose ipc backlog is full; a gone child has
+      // already emitted exit/disconnect, so the listeners below would never fire and this would
+      // stall for the full timeout. Either way there is no ack coming.
       if (!this._eventsIpc.send('main:process:will:disconnect')) {
-        debug('child process is already gone, nothing to wait for')
+        debug('could not send to the child process, nothing to wait for')
         resolve()
 
         return

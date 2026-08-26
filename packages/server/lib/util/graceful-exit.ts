@@ -9,6 +9,7 @@ const SIGNAL_DEDUP_MS = 200
 function getTeardownTimeoutMs (): number {
   const n = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
 
+  // the disconnect ack in @packages/data-context ProjectConfigManager derives from this default
   return Number.isFinite(n) && n > 0 ? n : 5000
 }
 
