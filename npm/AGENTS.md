@@ -19,7 +19,7 @@ The `npm/` directory contains the publicly published npm packages for the Cypres
 - **@cypress/webpack-dev-server** — Implements the object-syntax `devServer` API for Cypress component testing backed by Webpack Dev Server
 - **@cypress/vite-dev-server** — Implements the object-syntax `devServer` API for Cypress component testing backed by Vite (supports Vite 5, 6, and 7)
 - **@cypress/webpack-preprocessor** — Cypress file preprocessor for bundling test files via Webpack 5; requires peer deps (`@babel/core`, `babel-loader`, etc.) to be installed by the consumer
-- **@cypress/webpack-batteries-included-preprocessor** — Wrapper around `@cypress/webpack-preprocessor` that bundles Babel, TypeScript, and CoffeeScript loaders so consumers do not need to configure them separately
+- **@cypress/webpack-batteries-included-preprocessor** — Wrapper around `@cypress/webpack-preprocessor` that bundles Babel and TypeScript loaders so consumers do not need to configure them separately
 - **@cypress/vite-plugin-cypress-esm** — Vite plugin (alpha) that wraps ES modules in a `Proxy` to allow mutation/mocking of ESM namespaces in component tests
 
 ### Plugins & Dev Tooling

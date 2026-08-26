@@ -17,9 +17,6 @@ when:
         equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-    # temporary branches that can be removed after merging
-    - not:
-        equal: [ 'mschile/electron_41', << pipeline.git.branch >> ]
 
 jobs:
   # Internal PRs — install and build run immediately

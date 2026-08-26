@@ -148,7 +148,7 @@ while IFS= read -r file; do
     *.md|*.mdx|*.txt|*.png|*.jpg|*.gif|*.svg|*.ico|\
     LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig|\
     guides/*|assets/*|\
-    .eslintrc.js|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
+    .eslintrc.js|.eslintignore|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
     .percy.yml|.releaserc.js|renovate.json|docker-compose.yml|lerna.json|\
     electron-builder.json|knip.json|nx.json|jsconfig.json|autobarrel.json|\
     mocha-reporter-config.json|apollo.config.js|\
