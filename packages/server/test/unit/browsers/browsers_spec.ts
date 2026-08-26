@@ -474,10 +474,14 @@ describe('lib/browsers/index', () => {
 
       const startedAt = Date.now()
 
+      const removeAllListenersSpy = sinon.spy(browserInstance, 'removeAllListeners')
+
       await browsers.close({ timeoutMs: 50 })
 
       expect(Date.now() - startedAt).to.be.lessThan(1000)
       expect(browserInstance.kill).to.be.calledOnce
+      // the process is still alive, so its later events still need listeners
+      expect(removeAllListenersSpy).not.to.have.been.called
     })
 
     it('waits indefinitely when no timeoutMs is given', async () => {
