@@ -26,6 +26,6 @@ module.exports = {
   ],
   extends: 'semantic-release-monorepo',
   branches: [
-    { name: 'develop', channel: 'latest' },
+    { name: 'chore/test_16_release_npm_packages', channel: 'latest' },
   ],
 }
