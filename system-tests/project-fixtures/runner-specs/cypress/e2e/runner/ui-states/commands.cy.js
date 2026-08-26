@@ -14,7 +14,7 @@ describe('Command Options and UI Display Tests', () => {
       cy.log(obj)
     })
 
-    cy.get('div').each(($div) => { }).end()
+    cy.get('div').each(($div) => { })
 
     cy.fixture('uiStates')
 
@@ -137,9 +137,11 @@ describe('Command Options and UI Display Tests', () => {
   })
 
   it('verify element visibility state', () => {
-    cy.visit('cypress/fixtures/commandsActions.html')
+    cy.visit('cypress/fixtures/uiStates.html')
 
-    cy.get('#scroll-horizontal button')
+    // `#c` has inline `style="display: none"`, which the modern visibility
+    // algorithm detects (scroll-clipping is no longer treated as hidden).
+    cy.get('#c')
     .should('not.be.visible')
   })
 

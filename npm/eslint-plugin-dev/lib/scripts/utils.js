@@ -6,7 +6,7 @@ const sh = require('shelljs')
 const Promise = require('bluebird')
 const debug = require('debug')('lint/util')
 
-const filesRegex = /\.(js|jsx|ts|tsx|coffee|json|eslintrc)$/
+const filesRegex = /\.(js|jsx|ts|tsx|json|eslintrc)$/
 
 Promise.config({
   warnings: true,

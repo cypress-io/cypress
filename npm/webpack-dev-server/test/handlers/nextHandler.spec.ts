@@ -9,12 +9,6 @@ const expectWatchOverrides = (webpackConfig: Configuration) => {
   expect((webpackConfig.watchOptions?.ignored as RegExp)?.test('**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**')).toBe(true)
 }
 
-const expectPagesDir = (webpackConfig: Configuration, projectRoot: string) => {
-  const ReactLoadablePlugin: any = webpackConfig.plugins?.find((plugin) => plugin.constructor.name === 'ReactLoadablePlugin')
-
-  expect(ReactLoadablePlugin.pagesOrAppDir).toEqual(path.join(projectRoot, 'pages'))
-}
-
 const expectWebpackSpan = (webpackConfig: Configuration) => {
   const ProfilingPlugin: any = webpackConfig.plugins?.find((plugin) => plugin.constructor.name === 'ProfilingPlugin')
 
@@ -51,8 +45,8 @@ const expectCacheOverrides = (webpackConfig: Configuration, projectRoot: string)
 
 // can take a while since we install node_modules
 describe('nextHandler', { timeout: 60000 }, function () {
-  it('sources from a next-14 project', async () => {
-    const projectRoot = await scaffoldMigrationProject('next-14')
+  it('sources from a next-16 project', async () => {
+    const projectRoot = await scaffoldMigrationProject('next-16')
 
     process.chdir(projectRoot)
 
@@ -62,7 +56,6 @@ describe('nextHandler', { timeout: 60000 }, function () {
     } as WebpackDevServerConfig)
 
     expectWatchOverrides(webpackConfig)
-    expectPagesDir(webpackConfig, projectRoot)
     expectWebpackSpan(webpackConfig)
     expectGlobalStyleOverrides(webpackConfig)
     expectCacheOverrides(webpackConfig, projectRoot)
@@ -72,7 +65,7 @@ describe('nextHandler', { timeout: 60000 }, function () {
   })
 
   it('throws if nodeVersion is set to bundled', async () => {
-    const projectRoot = await scaffoldMigrationProject('next-14')
+    const projectRoot = await scaffoldMigrationProject('next-16')
 
     process.chdir(projectRoot)
 

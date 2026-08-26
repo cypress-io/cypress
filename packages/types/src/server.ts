@@ -109,6 +109,13 @@ export type BrowserLaunchOpts = {
   // Only set when the MITM proxy is disabled: `hosts` is translated into
   // browser-level resolver rules instead of the Node-side DNS remap.
   hosts?: { [host: string]: string } | null
+  /**
+   * Whether this launch intercepts browser traffic in the browser itself (CDP
+   * Fetch) instead of the HTTP/1 MITM proxy. `forceHttp1` and the browser both
+   * decide it, so it is resolved once per launch (openProject.launch) and every
+   * consumer reads this rather than re-deriving it.
+   */
+  useBrowserNetworkInterception: boolean
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

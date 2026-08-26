@@ -26,9 +26,6 @@ jobs:
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
     environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
-    strategy:
-      matrix:
-        node-version: [22.x]
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -39,7 +36,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version-file: .node-version
           # Cache only on pull_request (internal PRs) — pull_request_target writes scope to the base branch and could be poisoned by an approved fork PR.
           cache: ${{ github.event_name == 'pull_request' && 'yarn' || '' }}
       - name: Run yarn

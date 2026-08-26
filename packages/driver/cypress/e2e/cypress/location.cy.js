@@ -2,7 +2,7 @@ const { _, Location } = Cypress
 
 const urls = {
   blank: 'about:blank',
-  cypress: 'http://0.0.0.0:2020/__/#/tests/app.coffee',
+  cypress: 'http://0.0.0.0:2020/__/#/tests/app.cy.js',
   signin: 'http://localhost:2020/signin',
   users: 'http://localhost:2020/users/1',
   google: 'https://www.google.com',

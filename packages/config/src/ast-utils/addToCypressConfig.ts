@@ -161,33 +161,25 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
       return dedent`
         import { defineConfig } from 'cypress'
 
-        export default defineConfig({
-          allowCypressEnv: false,
-        })
+        export default defineConfig({})
       `
     }
 
     return dedent`
       const { defineConfig } = require('cypress')
 
-      module.exports = defineConfig({
-        allowCypressEnv: false,
-      })
+      module.exports = defineConfig({})
     `
   }
 
   if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
     return dedent`
-      export default {
-        allowCypressEnv: false,
-      }
+      export default {}
     `
   }
 
   return dedent`
-    module.exports = {
-      allowCypressEnv: false,
-    }
+    module.exports = {}
   `
 }
 

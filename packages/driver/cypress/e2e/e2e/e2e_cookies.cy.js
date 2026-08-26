@@ -13,8 +13,7 @@ const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { same
 describe('e2e cookies spec', () => {
   it('simple cookie', () => {
     cy.setCookie('foo', 'bar')
-    cy.getCookie('foo', 'bar')
-    .then((cookie) => expect(cookie).exist)
+    cy.getCookie('foo', 'bar').should('exist')
   })
 
   context('__Host- prefix', () => {
@@ -28,12 +27,12 @@ describe('e2e cookies spec', () => {
         secure: true,
       })
 
-      cy.getCookie('__Host-foobar').then(((cookie) => {
+      cy.getCookie('__Host-foobar').should((cookie) => {
         expect(cookie).exist
         expect(cookie.domain).match(/^\.?example\.com$/)
         expect(cookie.path).eq('/')
         expect(cookie.secure).is.true
-      }))
+      })
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
@@ -75,12 +74,12 @@ describe('e2e cookies spec', () => {
         secure: true,
       })
 
-      cy.getCookie('__Secure-foobar').then(((cookie) => {
+      cy.getCookie('__Secure-foobar').should((cookie) => {
         expect(cookie).exist
         expect(cookie.domain).match(/^\.?example\.com$/)
         expect(cookie.path).eq('/foo')
         expect(cookie.secure).is.true
-      }))
+      })
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
