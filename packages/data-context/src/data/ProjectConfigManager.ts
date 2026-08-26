@@ -654,7 +654,14 @@ export class ProjectConfigManager {
       }
 
       debug('sending main:process:will:disconnect message')
-      this._eventsIpc.send('main:process:will:disconnect')
+      // a killed or disconnected child already emitted exit/disconnect, so the listeners below
+      // would never fire and this would stall for the full timeout waiting on a dead process
+      if (!this._eventsIpc.send('main:process:will:disconnect')) {
+        debug('child process is already gone, nothing to wait for')
+        resolve()
+
+        return
+      }
 
       // If for whatever reason we don't get an ack, bail.
       const timeoutId = setTimeout(() => {

@@ -32,6 +32,25 @@ describe('ProjectConfigManager', () => {
       await expect(configManager.mainProcessWillDisconnect()).rejects.toThrow('mainProcessWillDisconnect has no IPC available')
     })
 
+    it('resolves immediately when the child process is already gone', async () => {
+      // send() reports false for a killed or disconnected child; its exit/disconnect events have
+      // already fired, so waiting on them would stall for the full timeout
+      const configManagerInternals = configManager as any
+
+      configManagerInternals._eventsIpc = {
+        send: () => false,
+        on: () => {
+          throw new Error('should not wait on a child that is already gone')
+        },
+      }
+
+      const started = Date.now()
+
+      await expect(configManager.mainProcessWillDisconnect()).resolves.toBeUndefined()
+
+      expect(Date.now() - started).toBeLessThan(100)
+    })
+
     it('gives up well before the process teardown budget expires', async () => {
       process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '1000'
 
@@ -39,7 +58,7 @@ describe('ProjectConfigManager', () => {
 
       // never acks, so the promise can only settle via its own timeout
       ;(configManager as any)._eventsIpc = {
-        send: () => {},
+        send: () => true,
         on: (event: string, listener: () => void) => {
           listeners[event] = listener
         },
