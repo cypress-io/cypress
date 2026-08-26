@@ -2124,7 +2124,7 @@ jobs:
 
   verify-release-readiness:
     <<: *defaults
-    resource_class: small.gen2
+    resource_class: medium.gen2
     parallelism: 1
     environment:
       GITHUB_TOKEN: $GH_TOKEN
