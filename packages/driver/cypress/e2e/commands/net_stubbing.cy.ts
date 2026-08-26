@@ -2884,6 +2884,20 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    // A custom phrase can only have come off the wire, so this fails if the
+    // phrase is reconstructed from the status code instead of read.
+    it('receives the origin reason phrase as res.statusMessage', function (done) {
+      cy.intercept('/status-code*', function (req) {
+        req.reply(function (res) {
+          expect(res.statusMessage).to.eq('Totally Fine')
+
+          done()
+        })
+      }).then(function () {
+        $.get('/status-code?code=200&message=Totally%20Fine')
+      })
+    })
+
     it('intercepts redirects as expected', function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`

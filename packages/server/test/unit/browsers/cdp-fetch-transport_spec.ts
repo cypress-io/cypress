@@ -16,6 +16,7 @@ function createPausedRequest (options: {
   url?: string
   resourceType?: Protocol.Network.ResourceType
   responseStatusCode?: number
+  responseStatusText?: string
   responseErrorReason?: Protocol.Network.ErrorReason
 }): Protocol.Fetch.RequestPausedEvent {
   return {
@@ -29,6 +30,7 @@ function createPausedRequest (options: {
       headers: {},
     },
     responseStatusCode: options.responseStatusCode,
+    responseStatusText: options.responseStatusText,
     responseErrorReason: options.responseErrorReason,
   } as Protocol.Fetch.RequestPausedEvent
 }
@@ -403,7 +405,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -421,6 +423,7 @@ describe('CdpFetchTransport', () => {
         },
         id: 'network-1',
         statusCode: 200,
+        statusMessage: 'OK',
         url: 'https://example.test/',
       })
 
@@ -449,7 +452,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
       })
@@ -523,7 +526,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -556,7 +559,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
         bodySkipped: true,
         originalBodyDigest: digestBody(Buffer.alloc(0)),
@@ -591,7 +594,7 @@ describe('CdpFetchTransport', () => {
         headers: {},
         requestId: 'fetch-request',
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/plain',
@@ -607,7 +610,7 @@ describe('CdpFetchTransport', () => {
         body: Buffer.from('origin').toString('base64'),
         fulfilled: true,
         responseCode: 200,
-        responsePhrase: 'OK',
+        responseStatusText: 'OK',
       })
     })
 
@@ -797,6 +800,42 @@ describe('CdpFetchTransport', () => {
         requestId: 'fetch-request',
         responseCode: 200,
       })
+    })
+
+    const interceptStatusMessage = async (responseStatusCode: number, responseStatusText: string) => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+      const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode, responseStatusText })
+
+      let seenStatusMessage
+
+      httpIntercept.use(async (req, next) => {
+        const res = await next(req)
+
+        seenStatusMessage = res.statusMessage
+
+        return res
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(request)
+
+      await tick()
+      await onRequestPaused(response)
+      await handled
+
+      return seenStatusMessage
+    }
+
+    // A custom phrase must survive verbatim, not be replaced by the standard one.
+    it('exposes the reason phrase the browser read off the wire as statusMessage', async () => {
+      expect(await interceptStatusMessage(200, 'Totally Fine')).to.equal('Totally Fine')
+    })
+
+    it('reports an empty statusMessage when the protocol carries no reason phrase', async () => {
+      expect(await interceptStatusMessage(200, '')).to.equal('')
     })
 
     it('marks AUT frame documents for the intercept pipeline without sending the header upstream', async () => {

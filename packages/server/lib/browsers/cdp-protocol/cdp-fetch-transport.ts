@@ -153,6 +153,7 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   originalBodyDigest?: BodyDigest
   requestId: string
   responseCode: number
+  responseStatusText?: string
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
@@ -830,6 +831,7 @@ export class CdpFetchTransport {
       id: `${this.requestIdPrefix}${networkRequestId}`,
       requestId: event.requestId,
       responseCode: event.responseStatusCode,
+      responseStatusText: event.responseStatusText ?? '',
       responseHeaders,
       bodyStream: Readable.from(originalBody.length ? [originalBody] : []),
       originalBodyDigest: digestBody(originalBody),
