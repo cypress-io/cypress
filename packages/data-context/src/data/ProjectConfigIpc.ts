@@ -118,7 +118,7 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
   send(event: 'loadConfig'): boolean
-  send(event: 'main:process:will:disconnect'): void
+  send(event: 'main:process:will:disconnect'): boolean
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
       debug('not sending %s message to child process. Killed? %s, Connected? %s', event, this._childProcess.killed, this._childProcess.connected)
