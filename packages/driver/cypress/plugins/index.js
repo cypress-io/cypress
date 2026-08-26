@@ -43,6 +43,11 @@ module.exports = async (on, config) => {
   on('file:preprocessor', wp({ webpackOptions }))
 
   on('task', {
+    'remove:file' (filePath) {
+      fs.removeSync(path.resolve(config.projectRoot, filePath))
+
+      return null
+    },
     'return:arg' (arg) {
       return arg
     },

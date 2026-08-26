@@ -6,12 +6,6 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="dom-link"]').click()
   })
 
-  it('.exec()', () => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
-    })
-  })
-
   it('.focused()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
@@ -73,23 +67,6 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
 
       cy.on('log:changed', (attrs, log) => {
         logs.set(attrs.id, log)
-      })
-    })
-
-    it('.exec()', () => {
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.exec('echo foobar')
-      })
-
-      cy.shouldWithTimeout(() => {
-        const { consoleProps } = findCrossOriginLogs('exec', logs, 'foobar.com')
-
-        expect(consoleProps.name).to.equal('exec')
-        expect(consoleProps.type).to.equal('command')
-        expect(consoleProps.props['Shell Used']).to.be.undefined
-        expect(consoleProps.props.Yielded).to.have.property('exitCode').that.equals(0)
-        expect(consoleProps.props.Yielded).to.have.property('stderr').that.equals('')
-        expect(consoleProps.props.Yielded).to.have.property('stdout').that.equals('foobar')
       })
     })
 

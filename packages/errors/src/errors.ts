@@ -1377,6 +1377,17 @@ export const AllCypressErrors = {
       Learn more: https://on.cypress.io/cypress-env-migration
     `
   },
+  EXEC_TIMEOUT_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('execTimeout')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}.
+
+      ${fmt.highlight('cy.exec()')} has been removed. Replace ${fmt.highlight('cy.exec()')} calls with ${fmt.highlight('cy.task()')}, and use ${fmt.highlight('taskTimeout')} to configure how long those tasks may run.
+
+      You can safely remove ${fmt.highlight('execTimeout')} from your configuration.
+
+      Learn more: https://on.cypress.io/task
+    `
+  },
   FORCE_HTTP1_DEPRECATION: () => {
     return errTemplate`\
       ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('forceHttp1')} option is deprecated and will be removed in a future version of Cypress.
