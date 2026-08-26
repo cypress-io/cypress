@@ -3702,7 +3702,6 @@
     "./packages/server/lib/cypress-sessions.ts",
     "./packages/server/lib/cypress.ts",
     "./packages/server/lib/environment.ts",
-    "./packages/server/lib/exec.ts",
     "./packages/server/lib/experiments.ts",
     "./packages/server/lib/file_server.ts",
     "./packages/server/lib/files.ts",
