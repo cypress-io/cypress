@@ -30,6 +30,12 @@ const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 // logging (when debug logging is enabled)
 const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 
+// How long to wait for the child to ack `main:process:will:disconnect`. This has
+// to stay comfortably below the graceful exit teardown budget (5s by default,
+// `CYPRESS_INTERNAL_TEARDOWN_TIMEOUT`) — a wait that outlives it loses the race
+// to the force-exit, which ends the process with code 1.
+const MAIN_PROCESS_WILL_DISCONNECT_ACK_TIMEOUT_MS = 3000
+
 export type OnFinalConfigLoadedOptions = {
   shouldRestartBrowser: boolean
 }
@@ -649,25 +655,38 @@ export class ProjectConfigManager {
 
   /**
    * Informs the child process if the main process will soon disconnect.
+   *
+   * This is a courtesy signal that lets the child flush telemetry before it is
+   * killed moments later, so every outcome resolves. Rejecting would surface as
+   * a failed graceful-exit teardown step and flip an otherwise passing
+   * `cypress run` to exit code 1.
    * @returns promise
    */
   mainProcessWillDisconnect (): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!this._eventsIpc) {
         debug(`mainProcessWillDisconnect message not set, no IPC available`)
-        reject()
+        resolve()
 
         return
       }
 
       debug('sending main:process:will:disconnect message')
-      this._eventsIpc.send('main:process:will:disconnect')
 
-      // If for whatever reason we don't get an ack in 5s, bail.
+      // A child that already exited or disconnected can never ack, and it
+      // emitted its `exit`/`disconnect` before the listeners below were
+      // attached, so waiting on them would only burn the timeout.
+      if (!this._eventsIpc.send('main:process:will:disconnect')) {
+        debug('child process is already gone, nothing to wait for')
+        resolve()
+
+        return
+      }
+
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
-        reject(new Error('mainProcessWillDisconnect message timed out'))
-      }, 5000)
+        resolve()
+      }, MAIN_PROCESS_WILL_DISCONNECT_ACK_TIMEOUT_MS)
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
         debug('Received main:process:will:disconnect:ack')

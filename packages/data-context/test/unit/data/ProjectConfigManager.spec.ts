@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import { createTestDataContext } from '../helper'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
@@ -37,6 +37,62 @@ describe('ProjectConfigManager', () => {
       // @ts-expect-error
       configManager._eventsIpc = undefined
       expect(configManager.eventProcessPid).toEqual(undefined)
+    })
+  })
+
+  // A rejection here is picked up as a failed graceful-exit teardown step and
+  // turns a passing `cypress run` into exit code 1, so every path must resolve.
+  describe('#mainProcessWillDisconnect', () => {
+    const stubEventsIpc = (send: () => boolean) => {
+      const listeners: Record<string, () => void> = {}
+
+      // @ts-expect-error
+      configManager._eventsIpc = {
+        send,
+        on: (event: string, listener: () => void) => {
+          listeners[event] = listener
+        },
+      }
+
+      return listeners
+    }
+
+    it('resolves when there is no IPC', async () => {
+      // @ts-expect-error
+      configManager._eventsIpc = undefined
+
+      await expect(configManager.mainProcessWillDisconnect()).resolves.toBeUndefined()
+    })
+
+    it('resolves when the child process is already gone', async () => {
+      stubEventsIpc(() => false)
+
+      await expect(configManager.mainProcessWillDisconnect()).resolves.toBeUndefined()
+    })
+
+    it('resolves when the child process acks', async () => {
+      const listeners = stubEventsIpc(() => true)
+      const promise = configManager.mainProcessWillDisconnect()
+
+      listeners['main:process:will:disconnect:ack']()
+
+      await expect(promise).resolves.toBeUndefined()
+    })
+
+    it('resolves when the ack times out', async () => {
+      jest.useFakeTimers()
+
+      try {
+        stubEventsIpc(() => true)
+
+        const promise = configManager.mainProcessWillDisconnect()
+
+        await jest.advanceTimersByTimeAsync(3000)
+
+        await expect(promise).resolves.toBeUndefined()
+      } finally {
+        jest.useRealTimers()
+      }
     })
   })
 })
