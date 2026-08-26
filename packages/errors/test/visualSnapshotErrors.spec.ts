@@ -599,11 +599,6 @@ describe('visual error templates', () => {
         default: ['project-id-123', '/path/to/cypress.config.js'],
       }
     },
-    NO_PROJECT_ID: () => {
-      return {
-        default: ['/path/to/project/cypress.config.js'],
-      }
-    },
     NO_PROJECT_FOUND_AT_PROJECT_ROOT: () => {
       return {
         default: ['/path/to/project'],

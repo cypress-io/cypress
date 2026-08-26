@@ -8,7 +8,6 @@ import _ from 'lodash'
 import chokidar from 'chokidar'
 import {
   validate as validateConfig,
-  validateNoBreakingConfigLaunchpad,
   validateNoBreakingConfigRoot,
   validateNoBreakingTestingTypeConfig,
   setupFullConfigWithDefaults,
@@ -424,24 +423,6 @@ export class ProjectConfigManager {
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
     }, this._testingType)
-
-    return validateNoBreakingConfigLaunchpad(
-      config,
-      (type, obj) => {
-        const error = getError(type, obj)
-
-        this.options.ctx.onWarning(error)
-
-        return error
-      },
-      (type, obj) => {
-        const error = getError(type, obj)
-
-        this.options.onError(error)
-
-        throw error
-      },
-    )
   }
 
   onLoadError = async (error: any) => {
