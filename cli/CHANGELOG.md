@@ -39,7 +39,7 @@
 **Bugfixes:**
 
 - Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
-- When [`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/configuration#Experiments) is enabled, the [`after:run`](https://on.cypress.io/after-run-api) handler now runs when a project is closed in `cypress open`, as documented. Previously it never ran. Addressed in [#34700](https://github.com/cypress-io/cypress/pull/34700).
+- Fixed an issue where the [`after:run`](https://on.cypress.io/after-run-api) event handler would not run when a project was closed in `cypress open` mode and [`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/configuration#Experiments) was set. Addressed in [#34700](https://github.com/cypress-io/cypress/pull/34700).
 
 **Dependency Updates:**
 
