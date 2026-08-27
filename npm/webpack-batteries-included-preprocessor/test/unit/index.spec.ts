@@ -65,7 +65,7 @@ describe('webpack-batteries-included-preprocessor', () => {
 
       const result = getFullWebpackOptions('file/path.js', 'typescript/path')
 
-      expect(result.module.rules).toHaveLength(3)
+      expect(result.module.rules).toHaveLength(2)
       expect(result.module.rules.some((rule) => rule.use?.some((use) => use.loader?.includes('ts-loader')))).toBe(false)
     })
 

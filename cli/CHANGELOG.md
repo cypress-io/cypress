@@ -39,6 +39,7 @@
 **Bugfixes:**
 
 - Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
+- Fixed an issue where a JavaScript spec failed to run with `TS18002: The 'files' list in config file 'tsconfig.json' is empty.` when the project had `typescript` installed but no `tsconfig.json` file. Addresses [#18938](https://github.com/cypress-io/cypress/issues/18938).
 
 **Dependency Updates:**
 
@@ -51,7 +52,6 @@
 
 - Fixed an issue where Chrome and Firefox offered to translate the application under test, showing a translation prompt during the run. Fixes [#34662](https://github.com/cypress-io/cypress/issues/34662).
 - Fixed an issue where every `cypress tap` command printed HTTP request lines, such as `GET /__cypress/sessions/<id>`, to the terminal of the `cypress open` session it attached to, burying that session's own output. Fixes [#34668](https://github.com/cypress-io/cypress/issues/34668).
-- Fixed an issue where a JavaScript spec failed to run with `TS18002: The 'files' list in config file 'tsconfig.json' is empty.` when the project had `typescript` installed but no `tsconfig.json` file. Addressed in [#34677](https://github.com/cypress-io/cypress/pull/34677).
 
 ## 15.21.0
 
