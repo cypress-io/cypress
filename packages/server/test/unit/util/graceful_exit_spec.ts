@@ -281,6 +281,31 @@ describe('lib/util/graceful-exit', () => {
     exitStub.restore()
   })
 
+  it('a reset cancels the step bounds of an in-flight teardown', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '200'
+
+    const exitStub = sinon.stub(process, 'exit')
+    const logStub = sinon.stub(console, 'log')
+
+    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+
+    void GracefulExit.exitGracefully(0)
+
+    GracefulExit.resetForTesting()
+
+    await new Promise((r) => setTimeout(r, 400))
+
+    logStub.restore()
+
+    // a step timer that outlives the reset settles the abandoned flush, and its `finally` exits the
+    // process for real once a spec restores the stub, taking the rest of the suite with it
+    expect(exitStub, 'a cancelled teardown still exited the process').not.to.have.been.called
+
+    exitStub.restore()
+  })
+
   it('does not leak an unhandled rejection when an abandoned step rejects later', async function () {
     this.timeout(5000)
 

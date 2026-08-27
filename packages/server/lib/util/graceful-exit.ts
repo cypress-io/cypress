@@ -54,6 +54,7 @@ export class GracefulExit {
   private forceExitTimeout: NodeJS.Timeout | undefined
   private steps: Map<string, ExitStep> = new Map()
   private pendingSteps: Map<string, string> = new Map()
+  private stepTimeouts: Set<NodeJS.Timeout> = new Set()
   private debug: Debug.Debugger
 
   /**
@@ -128,6 +129,7 @@ export class GracefulExit {
     }
 
     inst.clearForceExitTimeout()
+    inst.clearStepTimeouts()
 
     inst.steps.clear()
     inst.pendingSteps.clear()
@@ -170,6 +172,7 @@ export class GracefulExit {
           Promise.resolve(fn(code)).then(() => 'settled' as const),
           new Promise<'timedOut'>((resolve) => {
             timer = setTimeout(() => resolve('timedOut'), budget)
+            this.stepTimeouts.add(timer)
           }),
         ])
 
@@ -184,7 +187,11 @@ export class GracefulExit {
         console.log(`An error occurred during the "${name}" teardown step. This does not affect the exit code (${code}).`)
         console.log(error)
       } finally {
-        clearTimeout(timer)
+        if (timer) {
+          this.stepTimeouts.delete(timer)
+          clearTimeout(timer)
+        }
+
         this.pendingSteps.delete(key)
       }
     }))
@@ -195,6 +202,18 @@ export class GracefulExit {
       clearTimeout(this.forceExitTimeout)
       this.forceExitTimeout = undefined
     }
+  }
+
+  /**
+   * Cancels the bounds of steps still in flight. A step timer that outlives the teardown it belongs to
+   * settles that abandoned flush, whose `finally` then exits the process for real.
+   */
+  private clearStepTimeouts (): void {
+    for (const timer of this.stepTimeouts) {
+      clearTimeout(timer)
+    }
+
+    this.stepTimeouts.clear()
   }
 
   private async flushAndExit (code: number): Promise<number | void> {
