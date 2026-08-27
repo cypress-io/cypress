@@ -129,8 +129,8 @@ export class ProjectActions {
     // from the project server's close, and the config manager owns the plugins process
     // that has to answer it.
     await this.api.closeActiveProject()
-    resetIssuedWarnings()
     await this.ctx.lifecycleManager.clearCurrentProject()
+    resetIssuedWarnings()
   }
 
   private set projects (projects: ProjectShape[]) {

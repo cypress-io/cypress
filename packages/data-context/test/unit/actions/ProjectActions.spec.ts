@@ -322,17 +322,25 @@ describe('ProjectActions', () => {
     it('closes the active project before tearing down the lifecycle', async () => {
       const calls: string[] = []
 
+      // closeActiveProject yields before resolving, so running the two concurrently would
+      // interleave the markers rather than just reordering them
       ;(ctx._apis.projectApi.closeActiveProject as jest.Mock).mockImplementation(async () => {
-        calls.push('closeActiveProject')
+        calls.push('closeActiveProject:start')
+        await new Promise((resolve) => setImmediate(resolve))
+        calls.push('closeActiveProject:end')
       })
 
       jest.spyOn(ctx.lifecycleManager, 'clearCurrentProject').mockImplementation(async () => {
-        calls.push('lifecycleManager.clearCurrentProject')
+        calls.push('clearCurrentProject:start')
       })
 
       await actions.clearCurrentProject()
 
-      expect(calls).toEqual(['closeActiveProject', 'lifecycleManager.clearCurrentProject'])
+      expect(calls).toEqual([
+        'closeActiveProject:start',
+        'closeActiveProject:end',
+        'clearCurrentProject:start',
+      ])
     })
   })
 })

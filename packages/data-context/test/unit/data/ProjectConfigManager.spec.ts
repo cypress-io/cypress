@@ -77,14 +77,30 @@ describe('ProjectConfigManager', () => {
   describe('#destroy', () => {
     it('unregisters plugin events bound to the ipc it kills', async () => {
       const configManagerInternals = configManager as any
+      let cleanedUp = false
 
-      configManagerInternals._eventsIpc = { cleanupIpc: () => {} }
+      configManagerInternals._eventsIpc = {
+        cleanupIpc: () => {
+          cleanedUp = true
+        },
+      }
 
-      eventRegistrar.registerEvent('after:run', () => new Promise(() => {}))
+      eventRegistrar.registerEvent('after:run', () => {})
 
       expect(eventRegistrar.hasNodeEvent('after:run')).toBe(true)
 
       await configManager.destroy()
+
+      expect(cleanedUp).toBe(true)
+      expect(eventRegistrar.hasNodeEvent('after:run')).toBe(false)
+      // the killed ipc must not be reachable afterwards
+      expect(configManager.eventProcessPid).toBeUndefined()
+    })
+
+    it('does not throw when there is no ipc', async () => {
+      eventRegistrar.registerEvent('after:run', () => {})
+
+      await expect(configManager.destroy()).resolves.toBeUndefined()
 
       expect(eventRegistrar.hasNodeEvent('after:run')).toBe(false)
     })
