@@ -38,6 +38,7 @@
 
 **Bugfixes:**
 
+- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
 
 **Dependency Updates:**
@@ -50,7 +51,6 @@
 **Bugfixes:**
 
 - Fixed an issue where Chrome and Firefox offered to translate the application under test, showing a translation prompt during the run. Fixes [#34662](https://github.com/cypress-io/cypress/issues/34662).
-- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed an issue where every `cypress tap` command printed HTTP request lines, such as `GET /__cypress/sessions/<id>`, to the terminal of the `cypress open` session it attached to, burying that session's own output. Fixes [#34668](https://github.com/cypress-io/cypress/issues/34668).
 
 ## 15.21.0
