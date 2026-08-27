@@ -709,6 +709,11 @@ export class ProjectConfigManager {
       this._eventsIpc.cleanupIpc()
     }
 
+    // Every registered handler resolves off a reply from the ipc killed above, and that
+    // reply has no timeout. Leaving them registered means a later `after:run`/`after:spec`
+    // awaits a reply that can never arrive.
+    this.options.eventRegistrar.reset()
+
     this._state = 'pending'
     this._cachedLoadConfig = undefined
     this._cachedFullConfig = undefined

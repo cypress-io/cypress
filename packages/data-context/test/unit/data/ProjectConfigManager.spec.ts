@@ -4,10 +4,13 @@ import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
 
 let configManager: ProjectConfigManager
+let eventRegistrar: EventRegistrar
 
 describe('ProjectConfigManager', () => {
   beforeEach(() => {
     const ctx = createTestDataContext('open')
+
+    eventRegistrar = new EventRegistrar()
 
     configManager = new ProjectConfigManager({
       ctx,
@@ -15,7 +18,7 @@ describe('ProjectConfigManager', () => {
       projectRoot: 'test/root',
       handlers: [],
       hasCypressEnvFile: false,
-      eventRegistrar: new EventRegistrar(),
+      eventRegistrar,
       onError: (error) => {},
       onInitialConfigLoaded: () => {},
       onFinalConfigLoaded: () => Promise.resolve(),
@@ -68,6 +71,22 @@ describe('ProjectConfigManager', () => {
       await expect(configManager.mainProcessWillDisconnect()).rejects.toThrow('timed out')
 
       expect(Date.now() - started).toBeLessThan(2000)
+    })
+  })
+
+  describe('#destroy', () => {
+    it('unregisters plugin events bound to the ipc it kills', async () => {
+      const configManagerInternals = configManager as any
+
+      configManagerInternals._eventsIpc = { cleanupIpc: () => {} }
+
+      eventRegistrar.registerEvent('after:run', () => new Promise(() => {}))
+
+      expect(eventRegistrar.hasNodeEvent('after:run')).toBe(true)
+
+      await configManager.destroy()
+
+      expect(eventRegistrar.hasNodeEvent('after:run')).toBe(false)
     })
   })
 
