@@ -281,6 +281,42 @@ describe('lib/util/graceful-exit', () => {
     exitStub.restore()
   })
 
+  it('does not leak an unhandled rejection when an abandoned step rejects later', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '100'
+
+    const exitStub = sinon.stub(process, 'exit')
+    const logStub = sinon.stub(console, 'log')
+    const unhandled: unknown[] = []
+    const onUnhandled = (reason: unknown) => unhandled.push(reason)
+    // lib/unhandled_exceptions exits the process with code 1 on an unhandled rejection, which would
+    // overwrite a passing run's exit code; capture instead so a leak fails an assertion
+    const foreignListeners = process.listeners('unhandledRejection').slice()
+
+    process.removeAllListeners('unhandledRejection')
+    process.on('unhandledRejection', onUnhandled)
+
+    // rejects after its own bound expires, when flushSteps is no longer awaiting it
+    GracefulExit.addStep(() => new Promise((_resolve, reject) => {
+      setTimeout(() => reject(new Error('late teardown failure')), 150)
+    }), 'rejects-after-its-bound')
+
+    await GracefulExit.exitGracefully(0)
+
+    await new Promise((r) => setTimeout(r, 300))
+
+    process.removeListener('unhandledRejection', onUnhandled)
+    foreignListeners.forEach((listener) => process.on('unhandledRejection', listener))
+    logStub.restore()
+
+    expect(unhandled, 'an abandoned step leaked an unhandled rejection').to.be.empty
+    expect(exitStub).to.have.been.calledWith(0)
+    expect(exitStub).not.to.have.been.calledWith(1)
+
+    exitStub.restore()
+  })
+
   it('honors a step-specific timeout shorter than the shared budget', async function () {
     this.timeout(5000)
 
