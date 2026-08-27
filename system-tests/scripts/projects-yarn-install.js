@@ -28,8 +28,8 @@ async function main () {
     const project = path.dirname(packageJsonPath)
     const projectDir = path.join(projectsDir, project)
 
-    if (project.includes('yarn-v4.3.1-pnp-dep-resolution')) {
-      log('found project yarn-v4.3.1-pnp-dep-resolution, skipping dependency install as this requires corepack for yarn 4')
+    if (project.includes('yarn-v4.15.0-pnp-dep-resolution')) {
+      log('found project yarn-v4.15.0-pnp-dep-resolution, skipping dependency install as this requires corepack for yarn 4')
       log('this project is an exception and tested inside a docker container with corepack and yarn 4 installed against the built cypress binary')
       continue
     }

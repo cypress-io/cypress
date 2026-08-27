@@ -599,11 +599,6 @@ describe('visual error templates', () => {
         default: ['project-id-123', '/path/to/cypress.config.js'],
       }
     },
-    NO_PROJECT_ID: () => {
-      return {
-        default: ['/path/to/project/cypress.config.js'],
-      }
-    },
     NO_PROJECT_FOUND_AT_PROJECT_ROOT: () => {
       return {
         default: ['/path/to/project'],
@@ -1101,6 +1096,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
@@ -1135,6 +1136,12 @@ describe('visual error templates', () => {
       }
     },
 
+    FORCE_HTTP1_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+
     INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
       return {
         default: [],
@@ -1142,6 +1149,11 @@ describe('visual error templates', () => {
     },
 
     INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+    BROWSER_ELECTRON_DEPRECATED: () => {
       return {
         default: [],
       }
@@ -1161,7 +1173,22 @@ describe('visual error templates', () => {
         default: ['http://localhost:8080'],
       }
     },
-    CYPRESS_ENV_DEPRECATION: () => {
+    ALLOW_CYPRESS_ENV_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
+      return {
+        default: [],
+      }
+    },
+    VISIBILITY_STRATEGY_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
       return {
         default: [],
       }

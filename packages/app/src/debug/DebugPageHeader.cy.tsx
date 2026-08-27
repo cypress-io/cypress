@@ -1,4 +1,5 @@
-import { CloudRunStatus, DebugPageHeaderFragmentDoc } from '../generated/graphql-test'
+import type { CloudRunStatus } from '../generated/graphql-test'
+import { DebugPageHeaderFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'

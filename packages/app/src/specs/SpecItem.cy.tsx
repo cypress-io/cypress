@@ -54,7 +54,14 @@ describe('SpecItem', () => {
     // It should have a title attribute that is equal to the full file name
     cy.contains(specFileName.substring(0, 20)).should('be.visible').parent().should('have.attr', 'title', `${specFileName}.cy.tsx`)
 
-    // The file extension shouldn't be visible because it is past the truncation point
-    cy.contains('.cy.tsx').should('not.be.visible')
+    // The file extension shouldn't be visible because it is past the truncation
+    // point. The modern visibility algorithm doesn't detect text-overflow
+    // ellipsis as hidden, so assert geometrically that the truncating ancestor
+    // (the `.truncate` div) is actually clipping its content.
+    cy.contains('.cy.tsx').closest('.truncate').then(($el) => {
+      const el = $el[0] as HTMLElement
+
+      expect(el.scrollWidth).to.be.greaterThan(el.clientWidth)
+    })
   })
 })

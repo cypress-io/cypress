@@ -14,6 +14,14 @@ import { expect } from 'chai'
 
 const openOpts = {
   onError: () => {},
+  useBrowserNetworkInterception: true,
+}
+
+// The Fetch-based AUT header injection only runs on the MITM path; the native
+// browser (CDP) path hands Fetch ownership to the network runtime instead.
+const mitmOpts = {
+  ...openOpts,
+  useBrowserNetworkInterception: false,
 }
 
 // Helper function to create consistent mock preferences for testing
@@ -102,7 +110,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('focuses on the page, calls CRI Page.navigate, enables Page/Network/Fetch events, and sets download behavior', function () {
-      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
 
@@ -116,6 +124,14 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('ServiceWorker.enable')
 
         expect(utils.initializeCDP).to.be.calledOnce
+      })
+    })
+
+    it('leaves Fetch to the network runtime on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
       })
     })
 
@@ -440,12 +456,8 @@ describe('lib/browsers/chrome', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
-      afterEach(() => {
-        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-      })
-
       it('sends Fetch.enable only for Document ResourceType', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open('chrome', 'http://', mitmOpts, this.automation)
 
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
           patterns: [{
@@ -454,9 +466,7 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      it('delegates Fetch ownership to the CDP runtime when the proxy is disabled', async function () {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+      it('delegates Fetch ownership to the CDP runtime on the browser (CDP) network path', async function () {
         const onPageCriClientReady = sinon.stub().resolves()
 
         await chrome.open('chrome', 'http://', {
@@ -481,7 +491,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('does not add header when not a document', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open('chrome', 'http://', mitmOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
           requestId: '1234',
@@ -492,7 +502,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('does not add header when it is a spec frame request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open('chrome', 'http://', mitmOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -511,7 +521,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open('chrome', 'http://', mitmOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -543,7 +553,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('gets frame tree on Page.frameAttached', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open('chrome', 'http://', mitmOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -551,7 +561,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('gets frame tree on Page.frameDetached', async function () {
-        await chrome.open('chrome', 'http://', openOpts, this.automation)
+        await chrome.open('chrome', 'http://', mitmOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 
@@ -597,13 +607,7 @@ describe('lib/browsers/chrome', () => {
   })
 
   describe('#connectToExisting', () => {
-    afterEach(() => {
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-    })
-
-    it('wires CDP Fetch when the proxy is disabled (cy-in-cy path)', async function () {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+    it('wires CDP Fetch on the browser (CDP) network path (cy-in-cy path)', async function () {
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
@@ -643,7 +647,7 @@ describe('lib/browsers/chrome', () => {
       expect(onPageCriClientReady).to.have.been.calledOnceWith(pageCriClient, cdpAutomation.isAUTFrame)
     })
 
-    it('does not wire CDP Fetch when the proxy is enabled', async function () {
+    it('does not wire CDP Fetch on the MITM path', async function () {
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
@@ -667,7 +671,7 @@ describe('lib/browsers/chrome', () => {
       await chrome.connectToExisting(
         { displayName: 'Chrome' } as any,
         {
-          ...openOpts,
+          ...mitmOpts,
           url: 'http://localhost:3000/__/',
           onPageCriClientReady,
         },
@@ -1101,43 +1105,31 @@ describe('lib/browsers/chrome', () => {
     })
 
     context('cache-aware font loading', () => {
-      afterEach(() => {
-        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-      })
-
-      it('disables it when the proxy is disabled', () => {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
-        const args = chrome._getArgs({}, {})
+      it('disables it on the browser (CDP) network path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: true })
         const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
 
         expect(disableFeatures).to.include('WebFontsCacheAwareTimeoutAdaption')
         expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
       })
 
-      it('keeps it when the proxy is enabled', () => {
-        const args = chrome._getArgs({}, {})
+      it('keeps it on the MITM path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: false })
 
         expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('WebFontsCacheAwareTimeoutAdaption')
       })
     })
 
     context('HTTPS upgrades', () => {
-      afterEach(() => {
-        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-      })
-
-      it('disables HttpsUpgrades when the proxy is disabled', () => {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
-        const args = chrome._getArgs({}, {})
+      it('disables HttpsUpgrades on the browser (CDP) network path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: true })
         const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
 
         expect(disableFeatures).to.include('HttpsUpgrades')
       })
 
-      it('disables HttpsUpgrades when the proxy is enabled', () => {
-        const args = chrome._getArgs({}, {})
+      it('disables HttpsUpgrades on the MITM path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: false })
         const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
 
         expect(disableFeatures).to.include('HttpsUpgrades')

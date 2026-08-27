@@ -15,7 +15,8 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
-import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
+import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 
 const debug = Debug('cypress:server:open_project')
@@ -81,6 +82,13 @@ export class OpenProject extends EventEmitter {
     debug('open project url %s', url)
 
     const cfg = this.projectBase.getConfig()
+    // The one place we decide, for this launch, whether the browser intercepts
+    // its own traffic (Chrome, Chromium, and Edge) or everything is routed
+    // through the HTTP/1 MITM proxy (Firefox, WebKit, Electron, or forceHttp1).
+    // Everything downstream — the launch args below, the CDP wiring, and the
+    // server's request-time gates — reads this resolved value rather than
+    // re-deriving it from config, so the two can never disagree.
+    const useBrowserNetworkInterception = isBrowserNetworkMode(cfg, browser)
 
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
@@ -96,21 +104,14 @@ export class OpenProject extends EventEmitter {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
+      useBrowserNetworkInterception,
       // proxy launch opts must win over prevOptions: args may carry a normalized
       // NO_PROXY that is wrong for the MITM path, and <-loopback> must never leak
-      // onto the disable-proxy path (#34351).
-      ...(isProxyEnabled() ? {
-        proxyServer: ensureProxyServer(cfg),
-        // the AUT is served over loopback by our own proxy, so subtract Chromium's
-        // implicit rules to keep that traffic proxied
-        // https://github.com/cypress-io/cypress/issues/1872
-        proxyBypassList: '<-loopback>',
-      } : {
+      // onto the browser (CDP) network path (#34351).
+      ...(useBrowserNetworkInterception ? {
         proxyServer: undefined,
         proxyBypassList: undefined,
-        // Chromium-family only: Firefox/WebKit parse proxyServer differently and
-        // do not honor Chromium bypass / scheme-map syntax yet (#34351).
-        ...(browser.family === 'chromium' ? translateEgressPolicyToLaunchOpts(cfg.hosts) : {}),
+        ...translateEgressPolicyToLaunchOpts(cfg.hosts),
         hosts: cfg.hosts,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
@@ -118,6 +119,12 @@ export class OpenProject extends EventEmitter {
         onExtraTargetCriClientReady: (client) => {
           return this.projectBase!.server.attachCdpFetchExtraTarget(client)
         },
+      } : {
+        proxyServer: ensureProxyServer(cfg),
+        // the AUT is served over loopback by our own proxy, so subtract Chromium's
+        // implicit rules to keep that traffic proxied
+        // https://github.com/cypress-io/cypress/issues/1872
+        proxyBypassList: '<-loopback>',
       }),
     }
 
@@ -130,7 +137,7 @@ export class OpenProject extends EventEmitter {
       browser.isHeadless = false
     }
 
-    this.projectBase.setCurrentSpecAndBrowser(spec, browser)
+    await this.projectBase.setCurrentSpecAndBrowser(spec, browser, useBrowserNetworkInterception)
 
     const automation = this.projectBase.getAutomation()
 
@@ -220,8 +227,8 @@ export class OpenProject extends EventEmitter {
     return this.relaunchBrowser()
   }
 
-  closeBrowser () {
-    return browsers.close()
+  closeBrowser (timeoutMs?: number) {
+    return browsers.close({ timeoutMs })
   }
 
   async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
@@ -249,7 +256,10 @@ export class OpenProject extends EventEmitter {
 
     this.resetOpenProject()
 
-    return this.closeBrowser()
+    // The browser is signalled either way; this only decides how long we wait for its process to be
+    // gone. A browser with several renderers takes seconds to reap on a loaded machine, and on the way
+    // out that wait sits inside the exit budget every teardown step shares, so bound it there.
+    return this.closeBrowser(GracefulExit.isShuttingDown ? getPeerWaitTimeoutMs() : undefined)
   }
 
   close () {

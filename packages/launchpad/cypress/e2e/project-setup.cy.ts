@@ -62,7 +62,8 @@ describe('Launchpad: Setup Project', () => {
 
     cy.findByRole('radio', { name: 'Chrome v1' })
     cy.findByRole('radio', { name: 'Firefox v6' })
-    cy.findByRole('radio', { name: 'Electron v13' })
+    // Electron's accessible name includes its deprecated ribbon text.
+    cy.findByRole('radio', { name: /Electron v13/ })
     cy.findByRole('radio', { name: 'Edge v9' })
   }
 
@@ -598,7 +599,7 @@ describe('Launchpad: Setup Project', () => {
     // Would be great to fully support Plug n Play eventually, but right now it causes issues relating
     // to not correctly detecting dependencies when installing the binary.
     it.skip('works with Yarn 3 Plug n Play', () => {
-      scaffoldAndOpenProject('yarn-v3.1.1-pnp', ['--component'])
+      scaffoldAndOpenProject('yarn-v3.2.0-pnp', ['--component'])
 
       cy.visitLaunchpad()
 

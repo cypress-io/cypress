@@ -25,7 +25,8 @@ import TransitionGroupQuickFade from '@cy/components/transitions/TransitionGroup
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { computed, watchEffect } from 'vue'
-import { SetTestsForDebugDocument, SwitchTestingTypeAndRelaunchDocument, TestingTypeEnum } from '../generated/graphql'
+import { SetTestsForDebugDocument, SwitchTestingTypeAndRelaunchDocument } from '../generated/graphql'
+import type { TestingTypeEnum } from '../generated/graphql'
 import DebugSpec from './DebugSpec.vue'
 import type { CloudDebugSpec } from './utils/DebugMapping'
 

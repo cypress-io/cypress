@@ -24,6 +24,7 @@
 import { Dialog, DialogOverlay } from '@headlessui/vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import type { VNode } from 'vue'
 import type { CyPromptAppDefaultShape, MoreInfoNeededModalContentsShape } from './prompt-app-types'
 import { usePromptStore } from '../store/prompt-store'
 import PromptErrorMessage from './PromptErrorMessage.vue'
@@ -33,7 +34,7 @@ interface CyPromptApp { default: CyPromptAppDefaultShape }
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
 interface Root {
-  render: (element: JSX.Element) => void
+  render: (element: VNode) => void
   unmount: () => void
 }
 

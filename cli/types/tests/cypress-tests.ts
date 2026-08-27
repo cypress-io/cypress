@@ -48,13 +48,6 @@ namespace CypressConfigTests {
 
 namespace CypressEnvTests {
   // Just making sure these are valid - no real type safety
-  Cypress.env('foo')
-  Cypress.env('foo', 'bar')
-  Cypress.env().foo
-  Cypress.env({
-    foo: 'bar',
-  })
-
   cy.env(['KEY_1', 'KEY_2']) // $ExpectType Chainable<Record<string, any>>
   cy.env(['KEY_1', 'KEY_2'], { log: false }) // $ExpectType Chainable<Record<string, any>>
   cy.env(['KEY_1', 'KEY_2'], { timeout: 1000 }) // $ExpectType Chainable<Record<string, any>>
@@ -921,7 +914,6 @@ namespace CypressTestConfigOverridesTests {
   it('test', {
     animationDistanceThreshold: 10,
     defaultCommandTimeout: 6000,
-    env: {},
     expose: {},
     execTimeout: 6000,
     includeShadowDom: true,
@@ -1210,7 +1202,10 @@ namespace CypressLocalStorageTests {
     result // $ExpectType StorageByOrigin
   })
   cy.getAllLocalStorage({ log: false })
+  cy.getAllLocalStorage({ timeout: 10 })
+  cy.getAllLocalStorage({ log: false, timeout: 10 })
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+  cy.getAllLocalStorage({ timeout: '10' }) // $ExpectError
 
   cy.clearAllLocalStorage().then((result) => {
     result // $ExpectType null
@@ -1222,7 +1217,10 @@ namespace CypressLocalStorageTests {
     result // $ExpectType StorageByOrigin
   })
   cy.getAllSessionStorage({ log: false })
+  cy.getAllSessionStorage({ timeout: 10 })
+  cy.getAllSessionStorage({ log: false, timeout: 10 })
   cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+  cy.getAllSessionStorage({ timeout: '10' }) // $ExpectError
 
   cy.clearAllSessionStorage().then((result) => {
     result // $ExpectType null

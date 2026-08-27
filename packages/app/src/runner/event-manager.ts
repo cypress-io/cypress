@@ -10,7 +10,8 @@ import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { EntrySource, useStudioStore } from '../store/studio-store'
+import type { EntrySource } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
@@ -685,14 +686,14 @@ export class EventManager {
 
     Cypress.on('run:start', async () => {
       hasMochaRunEnded = false
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
     })
 
     Cypress.on('run:end', async () => {
       hasMochaRunEnded = true
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('end:memory:profiling')
       }
     })
@@ -740,9 +741,7 @@ export class EventManager {
 
       this.studioStore.interceptTest(test)
 
-      // if the experimental flag is on and we are in a chromium based browser,
-      // check the memory pressure to determine if garbage collection is needed
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
           test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })

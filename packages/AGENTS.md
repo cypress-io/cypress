@@ -27,7 +27,6 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/network** — Node.js networking utilities: HTTP/HTTPS proxy-aware agents, CA certificate management, and connection helpers.
 - **@packages/network-tools** — Isomorphic (browser + Node.js) low-level networking utilities: CORS helpers, URI parsing, domain utilities.
 - **@packages/https-proxy** — Intercepts TLS connections by acting as a dynamic CA; generates per-hostname certificates on the fly using `node-forge`.
-- **@packages/rewriter** — Rewrites JS and HTML at proxy time to inject Cypress instrumentation (e.g., `document.domain` injection, spec bridge).
 
 ### Configuration & Data
 

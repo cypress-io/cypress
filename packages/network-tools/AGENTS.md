@@ -39,5 +39,5 @@ lib/
 ## Integration Points
 
 - Consumed by **@packages/driver** (browser) for CORS and URI utilities used in command implementations.
-- Consumed by **@packages/rewriter** and **@packages/proxy** (Node.js) for the same CORS and URI logic on the server side.
+- Consumed by **@packages/proxy** (Node.js) for the same CORS and URI logic on the server side.
 - Consumed by **@packages/config** for URL/domain validation.
