@@ -484,6 +484,30 @@ describe('lib/browsers/index', () => {
       expect(removeAllListenersSpy).not.to.have.been.called
     })
 
+    it('waits indefinitely when timeoutMs is present but undefined', async () => {
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = sinon.stub()
+
+      browsers._setInstance(browserInstance)
+
+      // open_project always passes the option object, so an absent bound arrives as an explicit
+      // undefined property; it has to keep waiting, the way a project switch relies on
+      let settled = false
+      const closed = browsers.close({ timeoutMs: undefined }).then(() => {
+        settled = true
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      expect(settled).to.be.false
+
+      browserInstance.emit('exit')
+      await closed
+
+      expect(settled).to.be.true
+    })
+
     it('waits indefinitely when no timeoutMs is given', async () => {
       const browserInstance = new EventEmitter() as BrowserInstance
 
