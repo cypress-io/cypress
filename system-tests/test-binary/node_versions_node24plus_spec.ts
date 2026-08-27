@@ -3,7 +3,6 @@ import { beforePrePullImages } from '../lib/docker'
 
 const IMAGES = [
   'cypress/base:24.0.0',
-  'cypress/base:25.0.0',
   'cypress/base:26.0.0',
 ]
 

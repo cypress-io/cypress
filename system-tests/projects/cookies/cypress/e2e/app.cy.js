@@ -20,7 +20,7 @@ describe('Cookies', () => {
 
     cy.getCookies()
     .should('have.length', 1)
-    .then((cookies) => {
+    .should((cookies) => {
       const c = cookies[0]
 
       expect(c.domain).to.eq('localhost')
@@ -38,7 +38,7 @@ describe('Cookies', () => {
 
     cy.clearCookies().should('be.null')
     cy.setCookie('wtf', 'bob', { httpOnly: true, path: '/foo', secure: true })
-    cy.getCookie('wtf').then((c) => {
+    cy.getCookie('wtf').should((c) => {
       expect(c.domain).to.eq('localhost')
       expect(c.httpOnly).to.eq(true)
       expect(c.name).to.eq('wtf')

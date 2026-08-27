@@ -5,7 +5,6 @@ import { devServer } from '@cypress/vite-dev-server'
 import.meta.resolve
 
 export default defineConfig({
-  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     specPattern: 'src/**/*.ts',

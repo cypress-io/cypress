@@ -1,10 +1,11 @@
 import _ from 'lodash'
+import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
 import { clearStorage, getStorage, StorageType } from './sessions/storage'
 
-type Options = Partial<Cypress.Loggable>
+type Options = Partial<Cypress.Loggable & Cypress.Timeoutable>
 
 const clearLocalStorage = (state, keys) => {
   const local = window.localStorage
@@ -23,38 +24,6 @@ const clearLocalStorage = (state, keys) => {
   return remote
 }
 
-const getAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
-  const options: Options = {
-    log: true,
-    ...userOptions,
-  }
-
-  let storageByOrigin: Cypress.StorageByOrigin = {}
-
-  Cypress.log({
-    hidden: options.log === false,
-    consoleProps () {
-      const obj = {}
-
-      if (Object.keys(storageByOrigin).length) {
-        obj['Yielded'] = storageByOrigin
-      }
-
-      return obj
-    },
-  })
-
-  const storages = await getStorage(Cypress, { origin: '*' })
-
-  storageByOrigin = storages[type].reduce((memo, storage) => {
-    memo[storage.origin] = storage.value
-
-    return memo
-  }, {} as Cypress.StorageByOrigin)
-
-  return storageByOrigin
-}
-
 const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
   const options: Options = {
     log: true,
@@ -69,10 +38,96 @@ const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypre
 }
 
 export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) => {
-  Commands.addAll({
-    getAllLocalStorage: getAllStorage.bind(null, 'localStorage', Cypress),
-    getAllSessionStorage: getAllStorage.bind(null, 'sessionStorage', Cypress),
+  // getAllLocalStorage and getAllSessionStorage are query commands: they re-read
+  // storage from all origins and retry attached assertions until they pass or time out.
+  function createGetAllStorageQuery (type: StorageType, commandName: string, userOptions: Options = {}) {
+    const options: Options = {
+      log: true,
+      ...userOptions,
+    }
 
+    const timeout = options.timeout || config('defaultCommandTimeout')
+
+    this.set('timeout', timeout)
+
+    let storageByOrigin: Cypress.StorageByOrigin = {}
+    let hasResult = false
+    let pending: Promise<void> | null = null
+    let mostRecentError = $errUtils.cypressErrByPath('getAllStorage.timed_out', {
+      args: { cmd: commandName, timeout },
+    })
+
+    Cypress.log({
+      hidden: options.log === false,
+      timeout,
+      consoleProps () {
+        const obj = {}
+
+        if (Object.keys(storageByOrigin).length) {
+          obj['Yielded'] = storageByOrigin
+        }
+
+        return obj
+      },
+    })
+
+    const fetch = () => {
+      // getStorage attaches a `message` listener to the shared spec window, so the
+      // pending guard serializes the reads one command issues while retrying. It's
+      // per-command: a trailing read can briefly overlap the next command's, but
+      // that's benign since each command yields only its own storage type.
+      if (pending) {
+        return
+      }
+
+      // getStorage bounds itself, so wrapping it in our own `.timeout()` would only
+      // clear `pending` while the underlying read kept running, defeating the guard
+      // above. The command's overall timeout is handled by the query retry mechanism.
+      pending = Promise.try(() => {
+        return getStorage(Cypress, { origin: '*' })
+      })
+      .then((storages) => {
+        storageByOrigin = storages[type].reduce((memo, storage) => {
+          memo[storage.origin] = storage.value
+
+          return memo
+        }, {} as Cypress.StorageByOrigin)
+
+        hasResult = true
+      })
+      .catch((err) => {
+        mostRecentError = err
+      })
+      .finally(() => {
+        pending = null
+      })
+    }
+
+    return () => {
+      if (hasResult) {
+        // re-read in the background (keeping the current result) so retries -
+        // including assertions chained through another query - see fresh storage.
+        fetch()
+
+        return storageByOrigin
+      }
+
+      fetch()
+
+      // no result yet - throw to retry once the pending read resolves.
+      throw mostRecentError
+    }
+  }
+
+  Commands.addQuery('getAllLocalStorage', function getAllLocalStorage (userOptions: Options = {}) {
+    return createGetAllStorageQuery.call(this, 'localStorage', 'getAllLocalStorage', userOptions)
+  })
+
+  Commands.addQuery('getAllSessionStorage', function getAllSessionStorage (userOptions: Options = {}) {
+    return createGetAllStorageQuery.call(this, 'sessionStorage', 'getAllSessionStorage', userOptions)
+  })
+
+  Commands.addAll({
     clearAllLocalStorage: clearAllStorage.bind(null, 'localStorage', Cypress),
     clearAllSessionStorage: clearAllStorage.bind(null, 'sessionStorage', Cypress),
 

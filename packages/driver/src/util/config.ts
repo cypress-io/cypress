@@ -56,13 +56,21 @@ export const syncConfigToCurrentOrigin = (config: Cypress.Config) => {
   const shallowConfigDiff = syncToCurrentOrigin(config, Cypress.config())
   const valuesToSync = omitConfigReadOnlyDifferences(shallowConfigDiff)
 
-  Cypress.config(valuesToSync)
-}
+  // These values are already-resolved config from the other origin, not user overrides, so
+  // skip test-override validation while applying them. Otherwise syncing viewportWidth/
+  // viewportHeight (which can't be set via Cypress.config() during a test) would throw here,
+  // and skipping the sync would leave those values stale in a reused spec bridge. In a spec
+  // bridge window.top is cross-origin, so mirror the target the config setter reads from.
+  const skipValidateConfigTarget = Cypress.isCrossOriginSpecBridge ? window : window.top!
+  const previousSkipValidateConfig = skipValidateConfigTarget.__cySkipValidateConfig
 
-export const syncEnvToCurrentOrigin = (env: Cypress.ObjectLike) => {
-  const shallowConfigDiff = syncToCurrentOrigin(env, Cypress.env())
+  skipValidateConfigTarget.__cySkipValidateConfig = true
 
-  Cypress.env(shallowConfigDiff)
+  try {
+    Cypress.config(valuesToSync)
+  } finally {
+    skipValidateConfigTarget.__cySkipValidateConfig = previousSkipValidateConfig
+  }
 }
 
 export const syncExposeToCurrentOrigin = (expose: Cypress.ObjectLike) => {
@@ -75,8 +83,21 @@ export const preprocessConfig = (config: Cypress.Config) => {
   return preprocessForSerialization(config) as Cypress.Config
 }
 
-export const preprocessEnv = (env: Cypress.ObjectLike) => {
-  return preprocessForSerialization(env) as Cypress.Config
+/**
+ * Prepares config to initialize a cross-origin spec bridge.
+ * isInteractive is read-only and must reflect the server-computed run/open mode value
+ * from bootstrap, not testing overrides on the primary origin (e.g. defaults.js).
+ */
+export const preprocessConfigForSpecBridge = (
+  config: Cypress.Config,
+  originalConfig: { isInteractive?: boolean, isTextTerminal?: boolean },
+) => {
+  const preprocessed = preprocessConfig(config)
+
+  return {
+    ..._.omit(preprocessed, 'isInteractive'),
+    isInteractive: originalConfig.isInteractive ?? !originalConfig.isTextTerminal,
+  }
 }
 
 export const preprocessExpose = (expose: Cypress.ObjectLike) => {
@@ -98,6 +119,13 @@ export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => 
   return undefined
 }
 
+// Extra guidance appended to the generic `suite_or_test_only` error, keyed by config option.
+// Add an entry here when a new `suiteOrTest` option needs option-specific advice.
+const suiteOrTestOnlyGuidance: Record<string, string> = {
+  viewportWidth: ' To change the viewport during a test, use `cy.viewport()`.',
+  viewportHeight: ' To change the viewport during a test, use `cy.viewport()`.',
+}
+
 // Configuration can be override at multiple run-time levels. Ensure the configuration keys can
 // be override and that the provided override values are the correct type.
 //
@@ -113,20 +141,29 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
   const mochaOverrideLevel = getMochaOverrideLevel(state)
 
   if (!skipConfigOverrideValidation && mochaOverrideLevel !== 'restoring') {
-    const isSuiteOverride = mochaOverrideLevel === 'suite'
+    const overrideContext = mochaOverrideLevel === 'suite' || mochaOverrideLevel === 'test'
+      ? mochaOverrideLevel
+      : state('duringUserTestExecution') ? 'runtime' : undefined
 
-    validateOverridableAtRunTime(config, isSuiteOverride, (validationResult) => {
+    validateOverridableAtRunTime(config, overrideContext, (validationResult) => {
       let errKey = 'config.cypress_config_api.read_only'
 
-      if (validationResult.supportedOverrideLevel === 'global_only') {
+      if (validationResult.invalidConfigKey === 'env') {
+        errKey = 'config.env_removed'
+      } else if (validationResult.supportedOverrideLevel === 'global_only') {
         errKey = 'config.invalid_mocha_config_override.global_only'
       } else if (validationResult.supportedOverrideLevel === 'suite') {
         errKey = 'config.invalid_mocha_config_override.suite_only'
+      } else if (validationResult.supportedOverrideLevel === 'suiteOrTest') {
+        errKey = 'config.cypress_config_api.suite_or_test_only'
       } else if (mochaOverrideLevel) {
         errKey = 'config.invalid_mocha_config_override.read_only'
       }
 
-      throw new (state('specWindow').Error)($errUtils.errByPath(errKey, validationResult))
+      throw new (state('specWindow').Error)($errUtils.errByPath(errKey, {
+        ...validationResult,
+        additionalInfo: suiteOrTestOnlyGuidance[validationResult.invalidConfigKey] ?? '',
+      }))
     })
   }
 

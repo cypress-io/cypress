@@ -26,10 +26,9 @@ describe('lib/routes', () => {
           namespace: 'namespace',
         } as Cfg,
         getSpec: sinon.stub().returns({}),
-        // @ts-expect-error
-        networkProxy: {
+        getNetworkProxy: () => ({
           handleHttpRequest: () => {},
-        } as NetworkProxy,
+        } as unknown as NetworkProxy),
         nodeProxy: {} as HttpProxy,
         onError: () => {},
         // @ts-expect-error
@@ -43,6 +42,7 @@ describe('lib/routes', () => {
             },
           }),
         } as RemoteStates,
+        isBrowserNetworkMode: () => false,
         testingType: 'e2e',
       }
     })
@@ -287,11 +287,10 @@ describe('lib/routes', () => {
 
   describe('clientRoute non-proxied guard', () => {
     afterEach(() => {
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
       sinon.restore()
     })
 
-    function getClientRouteHandler (configOverrides: Partial<Cfg> = {}) {
+    function getClientRouteHandler (isBrowserNetworkMode: boolean) {
       const router = {
         get: sinon.stub(),
         post: sinon.stub(),
@@ -307,19 +306,18 @@ describe('lib/routes', () => {
         config: {
           clientRoute: '/__/',
           namespace: '__cypress',
-          ...configOverrides,
         } as Cfg,
         getSpec: sinon.stub().returns({}),
-        // @ts-expect-error
-        networkProxy: {
+        getNetworkProxy: () => ({
           handleHttpRequest: () => {},
-        } as NetworkProxy,
+        } as unknown as NetworkProxy),
         nodeProxy: {} as HttpProxy,
         onError: () => {},
         // @ts-expect-error
         remoteStates: {
           hasPrimary: sinon.stub().returns(false),
         } as RemoteStates,
+        isBrowserNetworkMode: () => isBrowserNetworkMode,
         testingType: 'e2e',
       })
 
@@ -329,7 +327,7 @@ describe('lib/routes', () => {
     }
 
     it('serves Whoops for path-only clientRoute when the HTTP proxy is enabled', async () => {
-      const handler = getClientRouteHandler()
+      const handler = getClientRouteHandler(false)
       const appHtml = sinon.stub(getCtx().html, 'appHtml').resolves('<html>whoops</html>')
       const res = {
         setHeader: sinon.stub(),
@@ -342,13 +340,11 @@ describe('lib/routes', () => {
         headers: {},
       }, res)
 
-      expect(appHtml).to.have.been.calledWith(true)
+      expect(appHtml).to.have.been.calledWith(true, false)
     })
 
     it('serves the runner app for path-only clientRoute when CDP replaces the HTTP proxy', async () => {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
-      const handler = getClientRouteHandler()
+      const handler = getClientRouteHandler(true)
       const appHtml = sinon.stub(getCtx().html, 'appHtml').resolves('<html>runner</html>')
       const res = {
         setHeader: sinon.stub(),
@@ -361,18 +357,12 @@ describe('lib/routes', () => {
         headers: {},
       }, res)
 
-      expect(appHtml).to.have.been.calledWith(false)
+      expect(appHtml).to.have.been.calledWith(false, true)
     })
   })
 
-  describe('direct-origin catch-all (proxy disabled)', () => {
-    afterEach(() => {
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-    })
-
-    function setupCatchAll ({ remoteState }) {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+  describe('catch-all', () => {
+    function setupCatchAll ({ remoteState, isBrowserNetworkMode = () => true, getNetworkProxy }: { remoteState: any, isBrowserNetworkMode?: () => boolean, getNetworkProxy?: () => NetworkProxy }) {
       const router = {
         get: sinon.stub(),
         post: sinon.stub(),
@@ -385,6 +375,10 @@ describe('lib/routes', () => {
       })
       const handleHttpRequest = sinon.stub().resolves()
 
+      // production always supplies the lazy getter — the CDP Fetch runtime
+      // installs a new NetworkProxy at every launch
+      getNetworkProxy = getNetworkProxy ?? (() => ({ handleHttpRequest } as unknown as NetworkProxy))
+
       createCommonRoutes({
         config: {
           clientRoute: '/__/',
@@ -392,10 +386,7 @@ describe('lib/routes', () => {
           port: 2020,
         } as Cfg,
         getSpec: sinon.stub().returns({}),
-        // @ts-expect-error
-        networkProxy: {
-          handleHttpRequest,
-        } as NetworkProxy,
+        getNetworkProxy,
         nodeProxy: {} as HttpProxy,
         onError: () => {},
         // @ts-expect-error
@@ -403,12 +394,15 @@ describe('lib/routes', () => {
           hasPrimary: sinon.stub().returns(false),
           current: sinon.stub().returns(remoteState),
         } as RemoteStates,
+        isBrowserNetworkMode,
         testingType: 'e2e',
       })
 
-      const catchAllCall = router.all.args.find((args) => args[0] === '*')
+      const catchAllCalls = router.all.args.filter((args) => args[0] === '*')
 
-      return { handler: catchAllCall?.[1], handleHttpRequest }
+      expect(catchAllCalls, 'exactly one catch-all is mounted so the network path decides at request time').to.have.length(1)
+
+      return { handler: catchAllCalls[0]?.[1], handleHttpRequest }
     }
 
     const fileRemoteState = {
@@ -418,6 +412,42 @@ describe('lib/routes', () => {
       domainName: 'localhost',
       props: null,
     }
+
+    it('hands every request to the pipeline on the MITM path', async () => {
+      const { handler, handleHttpRequest } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+        isBrowserNetworkMode: () => false,
+      })
+      const req = { url: 'http://example.com/anything', method: 'GET', headers: {} }
+      const res = {}
+      const next = sinon.stub().throws('next() should not be called')
+
+      await handler(req, res, next)
+
+      expect(handleHttpRequest).to.have.been.calledWith(req, res)
+    })
+
+    it('follows the network path in effect when it flips on the same router', async () => {
+      let isCdp = false
+      const { handler, handleHttpRequest } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+        isBrowserNetworkMode: () => isCdp,
+      })
+      const mitmReq = { url: 'http://example.com/anything', method: 'GET', headers: {} }
+
+      await handler(mitmReq, {}, sinon.stub().throws('next() should not be called'))
+
+      expect(handleHttpRequest).to.have.been.calledWith(mitmReq)
+
+      isCdp = true
+      const cdpReq = { url: '/anything', method: 'GET', headers: {} }
+      const next = sinon.stub()
+
+      await handler(cdpReq, {}, next)
+
+      expect(next).to.have.been.called
+      expect(handleHttpRequest).to.not.have.been.calledWith(cdpReq)
+    })
 
     it('serves strategy:file requests through the interception pipeline', async () => {
       const { handler, handleHttpRequest } = setupCatchAll({ remoteState: fileRemoteState })
@@ -491,6 +521,34 @@ describe('lib/routes', () => {
 
       expect(next).to.have.been.called
       expect(handleHttpRequest).to.not.have.been.called
+    })
+
+    // the CDP Fetch runtime replaces NetworkProxy at every launch, so a captured
+    // instance would keep serving requests through a disposed pipeline
+    it('resolves the NetworkProxy per request, so a launch swap is observed', async () => {
+      const first = { handleHttpRequest: sinon.stub().resolves() }
+      const second = { handleHttpRequest: sinon.stub().resolves() }
+      let current = first
+
+      const { handler } = setupCatchAll({
+        remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
+        isBrowserNetworkMode: () => false,
+        getNetworkProxy: () => current as unknown as NetworkProxy,
+      })
+
+      const firstReq = { url: 'http://example.com/one', method: 'GET', headers: {} }
+
+      await handler(firstReq, {}, sinon.stub().throws('next() should not be called'))
+
+      expect(first.handleHttpRequest).to.have.been.calledWith(firstReq)
+
+      current = second
+      const secondReq = { url: 'http://example.com/two', method: 'GET', headers: {} }
+
+      await handler(secondReq, {}, sinon.stub().throws('next() should not be called'))
+
+      expect(second.handleHttpRequest).to.have.been.calledWith(secondReq)
+      expect(first.handleHttpRequest).to.have.been.calledOnce
     })
 
     it('falls through for URLs the file server cannot resolve', async () => {

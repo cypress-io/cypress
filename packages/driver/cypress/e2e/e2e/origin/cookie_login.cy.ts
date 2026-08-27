@@ -720,7 +720,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           doc.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
         })
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
             domain: 'www.foobar.com',
             httpOnly: false,
@@ -849,7 +849,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.document().its('cookie').should('include', 'name=value')
         cy.get('[data-cy="doc-cookie"]').invoke('text').should('equal', 'name=value')
-        cy.getCookie('name').then((cookie) => {
+        cy.getCookie('name').should((cookie) => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
             domain: 'www.foobar.com',
             httpOnly: false,

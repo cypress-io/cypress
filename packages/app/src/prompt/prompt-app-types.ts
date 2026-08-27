@@ -3,6 +3,7 @@
 // It should not be modified directly in the app.
 
 import type Emitter from 'component-emitter'
+import type { VNode } from 'vue'
 
 const SPEC_DIRTY_DATA_MODULES = Object.freeze({
   STUDIO: {
@@ -44,7 +45,7 @@ export interface GetCodeModalContentsProps {
 
 export type GetCodeModalContentsShape = (
   props: GetCodeModalContentsProps
-) => JSX.Element
+) => VNode
 
 export interface CyPromptEventManager {
   ws: Emitter
@@ -63,7 +64,7 @@ export interface MoreInfoNeededModalContentsProps {
 
 export type MoreInfoNeededModalContentsShape = (
   props: MoreInfoNeededModalContentsProps
-) => JSX.Element
+) => VNode
 
 export interface CyPromptAppDefaultShape {
   // Purposefully do not use React in this signature to avoid conflicts when this type gets

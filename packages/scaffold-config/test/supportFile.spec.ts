@@ -160,11 +160,10 @@ describe('supportFileComponent', () => {
   })
 
   describe('angular', () => {
-    for (const mountModule of ['cypress/angular', 'cypress/angular-zoneless'] as const) {
-      it(`handles ${mountModule} and TS`, () => {
-        const actual = supportFileComponent('ts', mountModule)
+    it(`handles cypress/angular and TS`, () => {
+      const actual = supportFileComponent('ts', 'cypress/angular')
 
-        expect(actual).toEqual(dedent`
+      expect(actual).toEqual(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -183,7 +182,7 @@ describe('supportFileComponent', () => {
         // Import commands.js using ES2015 syntax:
         import './commands'
 
-        import { mount } from '${mountModule}'
+        import { mount } from 'cypress/angular'
 
         // Augment the Cypress namespace to include type definitions for
         // your custom command.
@@ -202,8 +201,7 @@ describe('supportFileComponent', () => {
         // Example use:
         // cy.mount(MyComponent)
       `)
-      })
-    }
+    })
   })
 
   describe('svelte', () => {

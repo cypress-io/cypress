@@ -29,7 +29,6 @@ describe('e2e blockHosts test config override', () => {
     settings: {
       blockHosts: 'localhost:3131',
       e2e: {
-        allowCypressEnv: false,
         baseUrl: 'http://localhost:3232',
       },
     },
