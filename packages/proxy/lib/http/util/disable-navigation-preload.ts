@@ -1,28 +1,42 @@
 // structural stand-in for the webworker lib's NavigationPreloadManager — the
 // real lib can't be referenced because lib="webworker" conflicts with the
-// dom lib program-wide (see service-worker-injector.ts for the same trick)
+// dom lib program-wide (see service-worker-injector.ts for the same trick).
+// Declared once and shared by both expressions below: the worker-realm
+// expression only needs `registration`, the window-realm expression only
+// needs `NavigationPreloadManager` and `navigator.serviceWorker`, so every
+// member of GlobalLike below is optional.
 interface NavigationPreloadManager {
   enable (): Promise<void>
   disable (): Promise<void>
+}
+
+interface NavigationPreloadManagerCtor {
+  prototype?: NavigationPreloadManager
 }
 
 interface ServiceWorkerRegistrationLike {
   navigationPreload?: NavigationPreloadManager
 }
 
-interface ServiceWorkerGlobalScopeLike {
-  registration?: ServiceWorkerRegistrationLike
+interface ServiceWorkerContainerLike {
+  getRegistrations? (): Promise<ServiceWorkerRegistrationLike[]>
 }
 
-declare const self: ServiceWorkerGlobalScopeLike
+interface GlobalLike {
+  registration?: ServiceWorkerRegistrationLike
+  NavigationPreloadManager?: NavigationPreloadManagerCtor
+  navigator?: { serviceWorker?: ServiceWorkerContainerLike }
+}
+
+declare const self: GlobalLike
 
 /**
  * Disables navigation preload so a service worker's fetch handler falls back
  * to `fetch(e.request)` — the path CDP Fetch can intercept. A navigation
- * preload response bypasses `Fetch.requestPaused` entirely (a known CDP
- * limitation shared by puppeteer/playwright), so on the browser network (CDP
- * Fetch) path it reaches the renderer with framebusting headers unstripped
- * and no Cypress injection (#34652).
+ * preload response bypasses `Fetch.requestPaused` entirely (verified
+ * empirically by Cypress), so on the browser network (CDP Fetch) path it
+ * reaches the renderer with framebusting headers unstripped and no Cypress
+ * injection (#34652).
  *
  * `registration.navigationPreload` is reachable from two realms, and each
  * needs its own seam:
@@ -93,28 +107,9 @@ function __cypressDisableNavigationPreload () {
 
 export const DISABLE_NAVIGATION_PRELOAD_EXPRESSION = `(${__cypressDisableNavigationPreload})()`
 
-// structural stand-in for the dom lib's NavigationPreloadManager constructor,
-// reachable only from the window realm — its prototype is the same
-// NavigationPreloadManager shape declared above, since both realms expose
-// the identical manager type
-interface NavigationPreloadManagerCtor {
-  prototype?: NavigationPreloadManager
-}
-
-interface ServiceWorkerContainerLike {
-  getRegistrations? (): Promise<ServiceWorkerRegistrationLike[]>
-}
-
-interface WindowLike {
-  NavigationPreloadManager?: NavigationPreloadManagerCtor
-  navigator?: { serviceWorker?: ServiceWorkerContainerLike }
-}
-
-declare const window: WindowLike
-
 function __cypressDisableNavigationPreloadInWindow () {
   try {
-    const ctor = window.NavigationPreloadManager
+    const ctor = self.NavigationPreloadManager
 
     if (ctor && ctor.prototype && typeof ctor.prototype.enable === 'function') {
       ctor.prototype.enable = function () {
@@ -128,7 +123,7 @@ function __cypressDisableNavigationPreloadInWindow () {
   }
 
   try {
-    const container = window.navigator && window.navigator.serviceWorker
+    const container = self.navigator && self.navigator.serviceWorker
 
     if (!container || typeof container.getRegistrations !== 'function') {
       return

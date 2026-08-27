@@ -205,16 +205,37 @@ export class BrowserCriClient {
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
   /**
-   * Set by the browser-network launch path so a paused service worker is not
-   * released before the page connection has enabled Fetch interception on
-   * its session — a service worker auto-attaches on both this (browser-level)
-   * connection and the page connection, and releasing it here first lets its
-   * earliest navigations bypass interception (#34674). Consulted from both
-   * _onAttachToTarget (a fresh attach) and the Inspector.targetReloadedAfterCrash
-   * handler (a mid-test crash-and-reload on an already-attached target — the
-   * other release path for the same worker).
+   * Cross-connection hold closing #34674's interception gap:
+   *
+   *   1. SW target spawns, debugger-paused (waitForDebuggerOnStart)
+   *   2. It attaches on BOTH connections:
+   *      - browser connection (this class) → must not release it yet
+   *      - page connection → runs Fetch.enable on the worker's session
+   *   3. This connection holds Runtime.runIfWaitingForDebugger until the page
+   *      connection confirms step 2 (whenChildTargetHandled), or 4s passes
+   *   4. Worker runs; its fetch(e.request) passthroughs now pause and get the
+   *      synthetic proxy treatment (headers stripped, injection applied)
+   *
+   * Without the hold, step 4 can start before step 2 finishes: a cold-started
+   * worker serves its first navigations straight to the origin (#34674).
+   * Fail-open on purpose — an uninstrumented worker is a flaky test, a worker
+   * held forever is a hung browser. Unset outside the browser network path.
    */
   waitForChildTargetInterception?: (targetId: string) => Promise<void>
+  /**
+   * Set alongside waitForChildTargetInterception, on the same launch path.
+   * The two connections' Inspector.targetReloadedAfterCrash handlers arrive
+   * on independent websockets - nothing orders which one this browser
+   * connection's crash handler sees relative to the page connection's own.
+   * Called immediately before the crash-reload hold only — a fresh attach
+   * needs no invalidation, and invalidating there would wipe a confirmation
+   * the page connection may already have committed for that same attach.
+   * This deterministically invalidates the page connection's view of the
+   * target as handled, so the hold can never read a stale confirmation left
+   * over from before the crash and release on a false positive - worst case
+   * it just fails open at the timeout instead (#34674).
+   */
+  invalidateChildTargetInterception?: (targetId: string) => void
   /**
    * sessionId -> the target's full TargetInfo, captured in _onAttachToTarget
    * (the only place a TargetInfo is available) and evicted on
@@ -356,6 +377,13 @@ export class BrowserCriClient {
           debug('crash-release-no-waiter: session %s is service worker %s but no interception waiter is registered, releasing immediately', sessionId, targetInfo.targetId)
         } else {
           debug('crash-release-held: session %s (service worker %s) holding for confirmed interception coverage before release', sessionId, targetInfo.targetId)
+
+          // Deterministic, not a race against the page connection's own
+          // Inspector.targetReloadedAfterCrash handler: without this, the
+          // hold below could read a "handled" entry left over from before
+          // the crash and release on a false confirmation (#34674).
+          browserCriClient.invalidateChildTargetInterception?.(targetInfo.targetId)
+
           await this._holdForChildTargetInterception(browserCriClient, { targetId: targetInfo.targetId, timeoutMs: childTargetInterceptionTimeoutMs })
         }
       } catch (error) {
@@ -373,12 +401,9 @@ export class BrowserCriClient {
     await Promise.all(promises)
   }
 
-  /**
-   * Races waitForChildTargetInterception (when set) against timeoutMs and
-   * releases either way - shared by _onAttachToTarget and
-   * Inspector.targetReloadedAfterCrash so both release paths for a paused
-   * service worker apply identical logic (#34674).
-   */
+  // Races waitForChildTargetInterception against timeoutMs and returns either
+  // way; the caller is what actually releases the target - see
+  // waitForChildTargetInterception's doc comment for the full timeline (#34674).
   private static async _holdForChildTargetInterception (browserCriClient: BrowserCriClient, { targetId, timeoutMs }: { targetId: string, timeoutMs: number }): Promise<void> {
     if (!browserCriClient.waitForChildTargetInterception) {
       return
@@ -448,6 +473,44 @@ export class BrowserCriClient {
       debug('error adding service worker binding:', error)
     }
 
+    // the url often isn't specified with this event, so we get it from
+    // Target.getTargets. Done ahead of the !waitingForDebugger return below
+    // (rather than only for extra-target classification further down) so a
+    // target that attaches already running still gets sessionTargetInfo
+    // backfilled - it's not a fresh attach again, so this is its only chance
+    // (#34674: the crash-reload path otherwise stays stuck classifying it
+    // off the attach event's empty url forever).
+    if (!url) {
+      try {
+        const { targetInfos } = await browserClient.send('Target.getTargets')
+
+        const thisTarget = targetInfos.find((target) => target.targetId === targetId)
+
+        if (thisTarget) {
+          url = thisTarget.url
+
+          // The early set above (recorded so it's visible to a crash-reload
+          // racing this handler) captured the event's TargetInfo, which
+          // still has the pre-backfill empty url - update it so a later
+          // crash-reload classifies this target off the same url this
+          // handler just used.
+          browserCriClient.sessionTargetInfo.set(sessionId, { ...targetInfo, url })
+        }
+      } catch (error) {
+        // it's possible that the target was closed before we could look it
+        // up, in that case, just ignore - this listener has no catch of its
+        // own, so an uncaught rejection here would surface as an unhandled
+        // rejection and crash the run (unhandled_exceptions.ts). Falling
+        // through leaves url as '' here, so this target can't be classified
+        // as DevTools/Launchpad/extension below - it falls through as
+        // unclassified, which in practice means the connection is dying and
+        // the extra-target connect attempt just below fails too; a service
+        // worker that can't be recognized as the extension's own takes the
+        // full hold instead of the immediate release.
+        debug('error backfilling target url from Target.getTargets:', error)
+      }
+    }
+
     if (!waitingForDebugger) {
       debug('Not waiting for debugger (id: %s)', targetId)
 
@@ -462,18 +525,6 @@ export class BrowserCriClient {
       } catch (error) {
         // it's possible that the target was closed before we could tell it to run, in that case, just ignore
         debug('error running Runtime.runIfWaitingForDebugger: %o', error)
-      }
-    }
-
-    // the url often isn't specified with this event, so we get it
-    // from Target.getTargets
-    if (!url) {
-      const { targetInfos } = await browserClient.send('Target.getTargets')
-
-      const thisTarget = targetInfos.find((target) => target.targetId === targetId)
-
-      if (thisTarget) {
-        url = thisTarget.url
       }
     }
 
@@ -495,15 +546,8 @@ export class BrowserCriClient {
     ) {
       debug('Not an extra target (id: %s)', targetId)
 
-      // A service worker auto-attaches on this connection and the page
-      // connection at once. The page connection is what enables
-      // session-scoped Fetch interception for it (cri-client.ts's
-      // onChildTargetAttached), so releasing the worker here first can let
-      // it start serving navigations before that lands (#34674). Timed out
-      // rather than awaited outright: a stalled or dead page connection must
-      // not wedge the worker paused forever. _holdForChildTargetInterception
-      // is shared with the other release path for the same worker
-      // (Inspector.targetReloadedAfterCrash) so both apply identical logic.
+      // See waitForChildTargetInterception's doc comment for the full
+      // timeline this hold closes (#34674).
       if (targetInfo.type === 'service_worker' && url.includes('chrome-extension://')) {
         // The page connection never attaches the Cypress extension's own
         // service worker, so holding here would burn the full timeout on

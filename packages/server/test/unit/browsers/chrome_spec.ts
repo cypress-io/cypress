@@ -58,6 +58,7 @@ describe('lib/browsers/chrome', () => {
         close: sinon.stub().resolves(),
         on: sinon.stub(),
         whenChildTargetHandled: sinon.stub().resolves(),
+        invalidateChildTargetHandled: sinon.stub(),
       }
 
       this.browserCriClient = {
@@ -178,6 +179,29 @@ describe('lib/browsers/chrome', () => {
       return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
       .then(() => {
         expect(this.browserCriClient.waitForChildTargetInterception).to.be.undefined
+      })
+    })
+
+    // #34674: the two connections' Inspector.targetReloadedAfterCrash
+    // handlers race on independent websockets - the browser connection
+    // invalidates its view of a crash-reloaded target deterministically
+    // before it holds, rather than depending on this connection's own
+    // crash-reload handler winning that race.
+    it('wires invalidateChildTargetInterception to the page client on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.invalidateChildTargetInterception).to.be.a('function')
+
+        this.browserCriClient.invalidateChildTargetInterception('target-id')
+
+        expect(this.pageCriClient.invalidateChildTargetHandled).to.have.been.calledWith('target-id')
+      })
+    })
+
+    it('does not wire invalidateChildTargetInterception on the MITM path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.invalidateChildTargetInterception).to.be.undefined
       })
     })
 

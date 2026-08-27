@@ -266,9 +266,12 @@ export class CdpFetchTransport {
    * requests bypass the middleware onion (and `cy.intercept`) entirely and
    * escape to the real origin.
    *
-   * Must run while the target is still waiting for the debugger; the caller
-   * (CriClient._onAttachedToTarget) sequences this before
-   * Runtime.runIfWaitingForDebugger.
+   * Must run while the target is still waiting for the debugger: callers
+   * (CriClient._onAttachedToTarget for a fresh attach,
+   * _onChildTargetReloadedAfterCrash for a crash reload) run this before
+   * whichever connection releases the debugger — the page connection never
+   * sends Runtime.runIfWaitingForDebugger itself; that stays the browser
+   * connection's job.
    */
   async attachChildSession (sessionId: string): Promise<void> {
     if (!this.isStarted) {
@@ -277,6 +280,9 @@ export class CdpFetchTransport {
       return
     }
 
+    // Network.enable must never be added here — it does not respond on a
+    // debugger-paused worker, which would deadlock every #34674 hold into
+    // its 4s fallback.
     await this.enableFetch(sessionId)
   }
 

@@ -118,7 +118,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
       return FakeNavigationPreloadManager
     }
 
-    function createFakeWindow (options: {
+    function createFakeSelf (options: {
       NavigationPreloadManager?: Function
       getRegistrations?: Function
     } = {}) {
@@ -128,15 +128,15 @@ describe('lib/http/util/disable-navigation-preload', () => {
       }
     }
 
-    function evaluateWindow (fakeWindow: unknown) {
-      return evaluate(DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION, 'window', fakeWindow)
+    function evaluateWindow (fakeSelf: unknown) {
+      return evaluate(DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION, 'self', fakeSelf)
     }
 
     it('replaces NavigationPreloadManager.prototype.enable with a resolving no-op', async () => {
       const originalEnable = vi.fn().mockRejectedValue(new Error('original enable should not be called'))
       const Ctor = createManagerCtor(originalEnable)
 
-      evaluateWindow(createFakeWindow({ NavigationPreloadManager: Ctor }))
+      evaluateWindow(createFakeSelf({ NavigationPreloadManager: Ctor }))
 
       expect(Ctor.prototype.enable).not.toBe(originalEnable)
       await expect(new (Ctor as any)().enable()).resolves.toBeUndefined()
@@ -144,11 +144,11 @@ describe('lib/http/util/disable-navigation-preload', () => {
     })
 
     it('is inert when NavigationPreloadManager is absent', () => {
-      expect(() => evaluateWindow(createFakeWindow())).not.toThrow()
+      expect(() => evaluateWindow(createFakeSelf())).not.toThrow()
     })
 
     it('is inert when navigator.serviceWorker is absent', () => {
-      expect(() => evaluateWindow(createFakeWindow({ NavigationPreloadManager: createManagerCtor() }))).not.toThrow()
+      expect(() => evaluateWindow(createFakeSelf({ NavigationPreloadManager: createManagerCtor() }))).not.toThrow()
     })
 
     it('calls disable() once per registration returned by getRegistrations()', async () => {
@@ -159,7 +159,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
         { navigationPreload: { disable: disableB } },
       ])
 
-      evaluateWindow(createFakeWindow({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))
+      evaluateWindow(createFakeSelf({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))
 
       await flush()
 
@@ -180,7 +180,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
       process.on('unhandledRejection', unhandled)
 
       try {
-        evaluateWindow(createFakeWindow({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))
+        evaluateWindow(createFakeSelf({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))
 
         await flush()
 
@@ -197,7 +197,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
       process.on('unhandledRejection', unhandled)
 
       try {
-        evaluateWindow(createFakeWindow({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))
+        evaluateWindow(createFakeSelf({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))
 
         await flush()
 
@@ -211,7 +211,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
       function Ctor (this: any) {}
       Ctor.prototype.enable = 'not a function'
 
-      expect(() => evaluateWindow(createFakeWindow({ NavigationPreloadManager: Ctor }))).not.toThrow()
+      expect(() => evaluateWindow(createFakeSelf({ NavigationPreloadManager: Ctor }))).not.toThrow()
       expect(Ctor.prototype.enable).toBe('not a function')
     })
 
@@ -222,7 +222,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
       // precisely to be honest about the guard needing to handle this.
       const ctorWithoutPrototype = () => {}
 
-      expect(() => evaluateWindow(createFakeWindow({ NavigationPreloadManager: ctorWithoutPrototype }))).not.toThrow()
+      expect(() => evaluateWindow(createFakeSelf({ NavigationPreloadManager: ctorWithoutPrototype }))).not.toThrow()
     })
 
     it('skips a registration missing navigationPreload without throwing, and still disables the others', async () => {
@@ -232,7 +232,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
         { navigationPreload: { disable } },
       ])
 
-      expect(() => evaluateWindow(createFakeWindow({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))).not.toThrow()
+      expect(() => evaluateWindow(createFakeSelf({ NavigationPreloadManager: createManagerCtor(), getRegistrations }))).not.toThrow()
 
       await flush()
 

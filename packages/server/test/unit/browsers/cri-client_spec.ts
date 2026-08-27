@@ -377,7 +377,11 @@ describe('lib/browsers/cri-client', function () {
         expect(resolved).to.be.true
       })
 
-      it('resolves even when the onChildTargetAttached hook rejects', async () => {
+      // "Handled" must mean interception is actually on, not merely that the
+      // hook ran: a worker whose session-scoped Fetch.enable failed must not
+      // be reported confirmed to a sibling connection deciding whether to
+      // release it (#34674 hold).
+      it('does not resolve when the onChildTargetAttached hook rejects', async () => {
         const enabled = Promise.withResolvers<void>()
         let resolved = false
 
@@ -400,6 +404,28 @@ describe('lib/browsers/cri-client', function () {
         enabled.reject(new Error('ProtocolError: Inspected target closed'))
         await drain()
 
+        expect(resolved).to.be.false
+
+        // still released via close(), same as any other stranded waiter
+        await client.close()
+
+        expect(resolved).to.be.true
+      })
+
+      it('commits a service worker target with no interception hook registered', async () => {
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
         expect(resolved).to.be.true
       })
 
@@ -407,6 +433,47 @@ describe('lib/browsers/cri-client', function () {
         await client.close()
 
         await expect(client.whenChildTargetHandled('anything')).to.be.fulfilled
+      })
+    })
+
+    // A terminal disconnect (see cdp-connection.ts) sets cdpConnection.terminated
+    // without going through close() - _closed can still read false. A waiter
+    // left registered against a connection that's never processing another
+    // Target.attachedToTarget would otherwise hang forever.
+    describe('#whenChildTargetHandled when the connection has terminally disconnected', () => {
+      const targetId = 'target-id'
+
+      // reconnection must be disabled for a disconnect to be terminal - see
+      // the "when reconnection is disabled (cypress-in-cypress)" context above
+      beforeEach(() => {
+        process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      })
+
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+      })
+
+      it('resolves immediately once the connection has terminated, even though close() was never called', async () => {
+        const client = await getClient()
+
+        await fireDisconnect()
+
+        expect(client.closed).to.be.false
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+      })
+
+      it('resolves a waiter already registered when the connection terminally disconnects', async () => {
+        const client = await getClient()
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await fireDisconnect()
+
+        expect(resolved).to.be.true
       })
     })
 
@@ -566,6 +633,200 @@ describe('lib/browsers/cri-client', function () {
         await drain()
 
         expect(resolved).to.be.true
+      })
+    })
+
+    // The browser connection's crash handler and this connection's own
+    // Inspector.targetReloadedAfterCrash handler race on independent
+    // websockets - nothing orders which one the browser sees first. Without
+    // this, the browser connection's hold can read a stale "handled" entry
+    // this connection hasn't evicted yet and release the worker on a false
+    // confirmation (#34674). invalidateChildTargetHandled lets the browser
+    // connection invalidate deterministically before it holds, rather than
+    // depending on this connection's own crash-reload handler winning the race.
+    describe('#invalidateChildTargetHandled', () => {
+      const targetId = 'target-id'
+      let client: CriClient
+
+      const drain = () => new Promise((resolve) => setImmediate(resolve))
+
+      beforeEach(async () => {
+        client = await getClient({ host: HOST, fullyManageTabs: true })
+        criStub.send.resolves()
+      })
+
+      it('removes a confirmed target from the handled set, so a fresh whenChildTargetHandled call waits again', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'page', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+
+        client.invalidateChildTargetHandled(targetId)
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+      })
+
+      it('does not resolve or evict an already-registered waiter', async () => {
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        client.invalidateChildTargetHandled(targetId)
+
+        await drain()
+
+        expect(resolved).to.be.false
+
+        // the pre-registered waiter is still intact - a subsequent commit
+        // for the same targetId resolves it, same as if invalidate had
+        // never been called
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'page', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
+      it('is a no-op for a target that was never handled', () => {
+        expect(() => client.invalidateChildTargetHandled(targetId)).not.to.throw()
+      })
+    })
+
+    describe('Inspector.targetReloadedAfterCrash (#34674 crash-and-reload re-arm)', () => {
+      const targetId = 'target-id'
+      const sessionId = 'sw-session'
+      let client: CriClient
+
+      const drain = () => new Promise((resolve) => setImmediate(resolve))
+
+      beforeEach(async () => {
+        client = await getClient({ host: HOST, fullyManageTabs: true })
+        criStub.send.resolves()
+      })
+
+      const attachServiceWorker = async () => {
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+      }
+
+      it('re-invokes the hook for a known service worker session, without releasing the debugger itself', async () => {
+        await attachServiceWorker()
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+
+        client.onChildTargetAttached = sinon.stub().resolves()
+        criStub.send.resetHistory()
+
+        fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+
+        await drain()
+
+        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
+
+        // releasing a crash-reloaded target from here is the browser
+        // connection's job, not this one's
+        expect(criStub.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('resolves a whenChildTargetHandled promise obtained after the crash event only once the re-run resolves', async () => {
+        await attachServiceWorker()
+
+        const reEnabled = Promise.withResolvers<void>()
+
+        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+
+        fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+
+        reEnabled.resolve()
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
+      it('leaves the target unhandled when the re-run hook rejects', async () => {
+        await attachServiceWorker()
+
+        const reEnabled = Promise.withResolvers<void>()
+
+        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+
+        fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        reEnabled.reject(new Error('ProtocolError: Inspected target closed'))
+        await drain()
+
+        expect(resolved).to.be.false
+      })
+
+      it('does nothing for an unknown session', async () => {
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, 'unknown-session')
+
+        await drain()
+
+        expect(client.onChildTargetAttached).not.to.have.been.called
+      })
+
+      // Target.detachedFromTarget always carries a sessionId, even on the
+      // (documented deprecated but still occasionally missing) events that
+      // omit targetId - a stale _sessionTargets entry surviving such a
+      // detach would let a later crash-reload on the reused session id
+      // re-invoke the hook for a target that already detached.
+      it('evicts the session mapping from a detach event that carries a sessionId but no targetId', async () => {
+        await attachServiceWorker()
+
+        fireCDPEvent('Target.detachedFromTarget', { sessionId })
+
+        await drain()
+
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+
+        await drain()
+
+        expect(client.onChildTargetAttached).not.to.have.been.called
       })
     })
 
@@ -833,6 +1094,88 @@ describe('lib/browsers/cri-client', function () {
       expect(criStub.send).to.be.calledOnce
       expect(criStub.send).to.be.calledWith('Fetch.enable', undefined, 'session-b')
       expect(criStub.send).not.to.be.calledWith('Fetch.enable', undefined, 'session-a')
+
+      await fireDisconnect()
+    })
+
+    // A crash-reload re-arm (#34674) re-sends Fetch.enable for a session
+    // that was already enabled once; without deduping, every re-arm over a
+    // connection's lifetime adds another entry that's replayed on every
+    // future reconnect.
+    it('replaces rather than duplicates an existing enable command for the same command + session', async () => {
+      const client = await getClient()
+
+      client.send('Fetch.enable', undefined, 'session-a')
+      client.send('Fetch.enable', undefined, 'session-a')
+
+      // clear out previous calls before reconnect
+      criStub.send.reset()
+
+      await fireDisconnect()
+
+      const reconnection = Promise.withResolvers()
+
+      onReconnect.callsFake(() => reconnection.resolve())
+      await reconnection.promise
+
+      expect(criStub.send).to.be.calledOnce
+      expect(criStub.send).to.be.calledWith('Fetch.enable', undefined, 'session-a')
+
+      await fireDisconnect()
+    })
+
+    // Runtime.addBinding is sent multiple times with DIFFERENT names and no
+    // sessionId (utils.ts registers 'cypressUtilityBinding'; cdp-socket.ts
+    // registers a distinct `cypressSendToServer-${namespace}` binding per
+    // namespace) - deduping on (command, sessionId) alone would collapse
+    // these into one, silently dropping the others on reconnect.
+    it('replays multiple Runtime.addBinding registrations with different params, not just the last one', async () => {
+      const client = await getClient()
+
+      client.send('Runtime.addBinding', { name: 'a' })
+      client.send('Runtime.addBinding', { name: 'b' })
+
+      // clear out previous calls before reconnect
+      criStub.send.reset()
+
+      await fireDisconnect()
+
+      const reconnection = Promise.withResolvers()
+
+      onReconnect.callsFake(() => reconnection.resolve())
+      await reconnection.promise
+
+      expect(criStub.send).to.be.calledTwice
+      expect(criStub.send).to.be.calledWith('Runtime.addBinding', { name: 'a' })
+      expect(criStub.send).to.be.calledWith('Runtime.addBinding', { name: 'b' })
+
+      await fireDisconnect()
+    })
+
+    // JSON.stringify's ARRAY-replacer form (Object.keys(p).sort()) acts as a
+    // key allowlist at every nesting level, not just the top one - a nested
+    // pattern object's own keys (requestStage) aren't in that top-level
+    // allowlist, so they'd be stripped entirely and two different pattern
+    // sets of the same shape would serialize identically and collide.
+    it('replays two Fetch.enable sends with different nested pattern params, not just the last one', async () => {
+      const client = await getClient()
+
+      client.send('Fetch.enable', { patterns: [{ requestStage: 'Request' }] }, 'session-a')
+      client.send('Fetch.enable', { patterns: [{ requestStage: 'Response' }] }, 'session-a')
+
+      // clear out previous calls before reconnect
+      criStub.send.reset()
+
+      await fireDisconnect()
+
+      const reconnection = Promise.withResolvers()
+
+      onReconnect.callsFake(() => reconnection.resolve())
+      await reconnection.promise
+
+      expect(criStub.send).to.be.calledTwice
+      expect(criStub.send).to.be.calledWith('Fetch.enable', { patterns: [{ requestStage: 'Request' }] }, 'session-a')
+      expect(criStub.send).to.be.calledWith('Fetch.enable', { patterns: [{ requestStage: 'Response' }] }, 'session-a')
 
       await fireDisconnect()
     })
