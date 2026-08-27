@@ -713,7 +713,27 @@ commands:
                   - run:
                       name: Install unzip
                       command: |
-                        apt-get update && apt-get install -y unzip
+                        set -euo pipefail
+
+                        if command -v unzip > /dev/null 2>&1; then
+                          exit 0
+                        fi
+
+                        # `apt-get update` exits non-zero when any single repository fails, and
+                        # installing Chrome adds google-chrome.list, whose CDN intermittently serves
+                        # a Packages index that disagrees with its signed Release file ("File has
+                        # unexpected size ... Mirror sync in progress?"). unzip comes from Debian
+                        # main, so retry a few times and let the install itself be the gate.
+                        for attempt in 1 2 3; do
+                          if apt-get update -o Acquire::Retries=3; then
+                            break
+                          fi
+
+                          echo "apt-get update failed (attempt ${attempt} of 3)"
+                          sleep 5
+                        done
+
+                        apt-get install -y unzip
                   - browser-tools/install_chrome_for_testing:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
