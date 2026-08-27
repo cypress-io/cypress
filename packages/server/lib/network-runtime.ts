@@ -124,6 +124,12 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     getCurrentBrowser: deps.getCurrentBrowser,
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
+    // Explicit, matching the createServeInternalRoutesMiddleware call just
+    // below: the MITM path never uses CDP Fetch, so it never needs
+    // disable-navigation-preload.ts's seam (#34652). Left undefined here
+    // would still behave the same downstream (falsy), but a general
+    // discriminator field should say what a path is, not leave it unset.
+    isBrowserNetworkMode: false,
   })
   const networkInterception = new HttpIntercept(networkProxy.codec)
 
@@ -193,9 +199,10 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     getCurrentBrowser: deps.getCurrentBrowser,
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
-    // See disable-navigation-preload.ts (#34652) for why only this runtime
-    // sets it; createProxyRuntime (MITM) does not.
-    disableServiceWorkerNavigationPreload: true,
+    // Only the CDP Fetch runtime (browser network interception mode) sets this;
+    // createProxyRuntime (MITM) does not. See
+    // packages/proxy/lib/http/util/disable-navigation-preload.ts (#34652).
+    isBrowserNetworkMode: true,
   })
 
   // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;

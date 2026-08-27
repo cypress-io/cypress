@@ -4,10 +4,10 @@ describe('framebusting protections', () => {
     // the document is served from Cypress's server-side resolve:url buffer,
     // and no service worker controls the client yet; the page installs a
     // service worker whose activate handler calls navigationPreload.enable()
-    // (a no-op on the browser network path — see swSource in
-    // proxy_disabled_framebusting_spec.ts) and then claims all clients. The
+    // (a no-op on the browser network path — see
+    // static/framebusting/sw.js) and then claims all clients. The
     // page script also makes its own window-realm navigationPreload.enable()
-    // call (also a no-op on that path — see pageSource in the same file),
+    // call (also a no-op on that path — see static/framebusting/index.html),
     // guarding the separate window-realm seam alongside the worker-realm one
     // above
     cy.visit('http://localhost:4466/')
@@ -17,9 +17,10 @@ describe('framebusting protections', () => {
 
     // sw-ready already implies both enable() calls settled and that
     // worker-originated fetches are observably intercepted (the /probe
-    // readiness check in pageSource), so this getState() call is a settled,
-    // deterministic readout of whether Cypress's two preload seams actually
-    // engaged - not a race against the worker's own timing
+    // readiness check in static/framebusting/index.html), so this
+    // getState() call is a settled, deterministic readout of whether
+    // Cypress's two preload seams actually engaged - not a race against the
+    // worker's own timing
     cy.env(['expectedNavigationPreloadEnabled']).then(({ expectedNavigationPreloadEnabled }) => {
       cy.window().then((win) => win.navigator.serviceWorker.ready)
       .then((reg) => reg.navigationPreload.getState())

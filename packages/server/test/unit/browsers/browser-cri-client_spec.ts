@@ -226,6 +226,23 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Target.getTargets')
     })
 
+    // The backfill is the one awaited send in this handler whose rejection
+    // would otherwise escape as an unhandled rejection on the _manageTabs
+    // listener, which has no catch of its own — hence its own try/catch.
+    it('does not throw or abort the attach when Target.getTargets rejects during url backfill', async () => {
+      // service_worker keeps this on the "not an extra target" branch, same
+      // as the sibling error-handling tests above - not exercising the
+      // separate extra-target connect path this test isn't about
+      options.event.targetInfo.type = 'service_worker'
+      options.event.targetInfo.url = ''
+      options.browserClient.send.withArgs('Target.getTargets').rejects(new Error('target closed'))
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await expect(BrowserCriClient._onAttachToTarget(options as any)).to.be.fulfilled
+
+      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
     it('is a noop sending Runtime.runIfWaitingForDebugger if resetting browser targets', async () => {
       options.browserCriClient.resettingBrowserTargets = true
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
@@ -516,6 +533,114 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserCriClient.sessionTargetInfo.get('session-id')).to.equal(options.event.targetInfo)
     })
 
+    // sessionTargetInfo is written with the event's TargetInfo before the url
+    // is resolved from Target.getTargets, so a target whose attach event
+    // carries url: '' must have that entry updated, or the crash-reload path
+    // can't recognize it as the extension worker and holds the full timeout
+    // on every idle-restart.
+    it('reflects the url backfilled from Target.getTargets in a crash-reload classification, not the attach event\'s empty one', async () => {
+      const browserClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+      const browserCriClient: any = {
+        sessionTargetInfo: new Map(),
+      }
+
+      await BrowserCriClient._manageTabs({
+        browserClient: browserClient as any,
+        browserCriClient,
+        browserName: 'Chrome',
+        host: 'localhost',
+        onAsynchronousError: sinon.stub(),
+        port: 1234,
+        childTargetInterceptionTimeoutMs: 5,
+      } as any)
+
+      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+
+      const sessionId = 'ext-session'
+      const targetId = 'ext-target-id'
+
+      browserClient.send.withArgs('Target.getTargets').resolves({
+        targetInfos: [{ targetId, url: 'chrome-extension://abc123/background.js' }],
+      })
+
+      await BrowserCriClient._onAttachToTarget({
+        browserClient,
+        browserCriClient,
+        event: {
+          sessionId,
+          targetInfo: { targetId, type: 'service_worker', url: '' } as Protocol.Target.TargetInfo,
+          waitingForDebugger: true,
+        },
+        host: 'localhost',
+        port: 1234,
+      } as any)
+
+      browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+      await crashHandler({}, sessionId)
+
+      // classified as the extension service worker from the backfilled url,
+      // so it's released immediately rather than holding the full timeout
+      expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
+    // Same as above but for a target that attaches already running
+    // (waitingForDebugger: false) - the backfill must still land before the
+    // early return just above it, or this target's sessionTargetInfo entry
+    // is stuck with the attach event's empty url forever (it's never a
+    // fresh attach again).
+    it('reflects the url backfilled from Target.getTargets even for a target attaching with waitingForDebugger: false', async () => {
+      const browserClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+      const browserCriClient: any = {
+        sessionTargetInfo: new Map(),
+      }
+
+      await BrowserCriClient._manageTabs({
+        browserClient: browserClient as any,
+        browserCriClient,
+        browserName: 'Chrome',
+        host: 'localhost',
+        onAsynchronousError: sinon.stub(),
+        port: 1234,
+        childTargetInterceptionTimeoutMs: 5,
+      } as any)
+
+      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+
+      const sessionId = 'ext-session'
+      const targetId = 'ext-target-id'
+
+      browserClient.send.withArgs('Target.getTargets').resolves({
+        targetInfos: [{ targetId, url: 'chrome-extension://abc123/background.js' }],
+      })
+
+      await BrowserCriClient._onAttachToTarget({
+        browserClient,
+        browserCriClient,
+        event: {
+          sessionId,
+          targetInfo: { targetId, type: 'service_worker', url: '' } as Protocol.Target.TargetInfo,
+          waitingForDebugger: false,
+        },
+        host: 'localhost',
+        port: 1234,
+      } as any)
+
+      browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+
+      await crashHandler({}, sessionId)
+
+      expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
     // #34674: a paused service worker attaches on both this (browser-level)
     // connection and the page connection. Releasing it here before the page
     // connection has enabled session-scoped Fetch interception lets the
@@ -744,6 +869,248 @@ describe('lib/browsers/browser-cri-client', function () {
 
         expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
+
+      // The page connection's own Inspector.targetReloadedAfterCrash handler
+      // (cri-client.ts) races this one on an independent websocket - nothing
+      // orders which fires first for a given crash. Invalidating here, ahead
+      // of the hold, means the hold can never read a stale "handled" entry
+      // the page connection hasn't gotten around to evicting itself and
+      // release on a false confirmation - the worst case becomes the 4s
+      // fail-open timeout instead of a silent early release (#34674).
+      describe('invalidateChildTargetInterception (#34674)', () => {
+        it('invalidates the page connection\'s view of the target before holding for it', async () => {
+          const { browserCriClient, crashHandler } = await setup()
+          const targetId = 'sw-target-id'
+          const sessionId = 'sw-session'
+
+          browserCriClient.sessionTargetInfo.set(sessionId, { targetId, type: 'service_worker', url: 'https://example.test/sw.js' })
+
+          const callOrder: string[] = []
+
+          browserCriClient.invalidateChildTargetInterception = sinon.stub().callsFake(() => {
+            callOrder.push('invalidate')
+          })
+
+          browserCriClient.waitForChildTargetInterception = sinon.stub().callsFake(() => {
+            callOrder.push('wait')
+
+            return Promise.resolve()
+          })
+
+          await crashHandler({}, sessionId)
+
+          expect(browserCriClient.invalidateChildTargetInterception).to.have.been.calledWith(targetId)
+          expect(callOrder).to.deep.equal(['invalidate', 'wait'])
+        })
+
+        it('does not invalidate when no interception waiter is registered', async () => {
+          const { browserCriClient, crashHandler } = await setup()
+          const sessionId = 'sw-session'
+
+          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+          browserCriClient.invalidateChildTargetInterception = sinon.stub()
+
+          await crashHandler({}, sessionId)
+
+          expect(browserCriClient.invalidateChildTargetInterception).not.to.have.been.called
+        })
+
+        it('does not invalidate for the extension service worker', async () => {
+          const { browserCriClient, crashHandler } = await setup()
+          const sessionId = 'ext-session'
+
+          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'ext-target', type: 'service_worker', url: 'chrome-extension://abc123/background.js' })
+          browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+          browserCriClient.invalidateChildTargetInterception = sinon.stub()
+
+          await crashHandler({}, sessionId)
+
+          expect(browserCriClient.invalidateChildTargetInterception).not.to.have.been.called
+        })
+
+        it('does not invalidate a non-service-worker session', async () => {
+          const { browserCriClient, crashHandler } = await setup()
+          const sessionId = 'page-session'
+
+          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'page-target', type: 'page', url: 'https://example.test/' })
+          browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+          browserCriClient.invalidateChildTargetInterception = sinon.stub()
+
+          await crashHandler({}, sessionId)
+
+          expect(browserCriClient.invalidateChildTargetInterception).not.to.have.been.called
+        })
+
+        it('does not throw when unset (MITM path parity)', async () => {
+          const { browserClient, browserCriClient, crashHandler } = await setup()
+          const sessionId = 'sw-session'
+
+          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+          browserCriClient.waitForChildTargetInterception = sinon.stub().resolves()
+
+          await crashHandler({}, sessionId)
+
+          expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        })
+      })
+    })
+  })
+
+  context('cross-connection interception hold with a real page CriClient (#34674)', function () {
+    // Exercises the hold through an actual page-side CriClient - built the
+    // same way cri-client_spec.ts builds one - wired as
+    // waitForChildTargetInterception, rather than a stub standing in for
+    // whatever that confirmation actually requires.
+    const DEBUGGER_URL = 'http://foo'
+    const sessionId = 'sw-session'
+    const targetId = 'sw-target-id'
+
+    let pageClient: CriClient
+    let pageCriStub: { on: sinon.SinonStub, off: sinon.SinonStub, send: sinon.SinonStub, close: sinon.SinonStub }
+
+    const firePageCDPEvent = (method: string, params: object, eventSessionId?: string) => {
+      pageCriStub.on.withArgs('event').args[0][1]({ method, params, sessionId: eventSessionId })
+    }
+
+    const drain = () => new Promise((resolve) => setImmediate(resolve))
+
+    beforeEach(async () => {
+      pageCriStub = {
+        on: sinon.stub(),
+        off: sinon.stub(),
+        send: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
+      }
+
+      const criImportForPage = sinon.stub()
+      .withArgs({ target: DEBUGGER_URL, local: true })
+      .resolves(pageCriStub)
+
+      const CDPConnectionRef = proxyquire('../lib/browsers/cdp-protocol/cdp-connection', {
+        'chrome-remote-interface': criImportForPage,
+      }).CDPConnection
+
+      const { CriClient: RealCriClient } = proxyquire('../lib/browsers/cdp-protocol/cri-client', {
+        './cdp-connection': { CDPConnection: CDPConnectionRef },
+      })
+
+      pageClient = await RealCriClient.create({
+        target: DEBUGGER_URL,
+        host: HOST,
+        fullyManageTabs: true,
+        onAsynchronousError: sinon.stub(),
+      })
+
+      pageClient.onChildTargetAttached = sinon.stub().resolves()
+
+      firePageCDPEvent('Target.attachedToTarget', {
+        waitingForDebugger: true,
+        sessionId,
+        targetInfo: { type: 'service_worker', targetId },
+      })
+
+      await drain()
+
+      await expect(pageClient.whenChildTargetHandled(targetId)).to.be.fulfilled
+    })
+
+    async function setupBrowserConnection (childTargetInterceptionTimeoutMs?: number) {
+      const browserClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+      const browserCriClient: any = {
+        sessionTargetInfo: new Map(),
+        waitForChildTargetInterception: (id: string) => pageClient.whenChildTargetHandled(id),
+        invalidateChildTargetInterception: (id: string) => pageClient.invalidateChildTargetHandled(id),
+      }
+
+      browserCriClient.sessionTargetInfo.set(sessionId, { targetId, type: 'service_worker', url: 'https://example.test/sw.js' })
+
+      await BrowserCriClient._manageTabs({
+        browserClient: browserClient as any,
+        browserCriClient,
+        browserName: 'Chrome',
+        host: 'localhost',
+        onAsynchronousError: sinon.stub(),
+        port: 1234,
+        ...(childTargetInterceptionTimeoutMs !== undefined ? { childTargetInterceptionTimeoutMs } : {}),
+      } as any)
+
+      const crashHandler = browserClient.on.withArgs('Inspector.targetReloadedAfterCrash').args[0][1]
+
+      return { browserClient, crashHandler }
+    }
+
+    it('releases the browser connection only after the page connection re-commits interception', async () => {
+      const { browserClient, crashHandler } = await setupBrowserConnection()
+
+      const reEnabled = Promise.withResolvers<void>()
+
+      pageClient.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+
+      // both connections observe the same crash-reload
+      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+      const released = crashHandler({}, sessionId)
+
+      await drain()
+
+      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+      reEnabled.resolve()
+      await released
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
+    it('releases via the timeout when the page connection never re-commits', async () => {
+      const { browserClient, crashHandler } = await setupBrowserConnection(5)
+
+      pageClient.onChildTargetAttached = sinon.stub().returns(new Promise(() => {}))
+
+      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+      await crashHandler({}, sessionId)
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
+    // Adverse dispatch order: the two connections' crash handlers arrive on
+    // independent websockets, so nothing guarantees the page connection
+    // evicts its stale "handled" entry before the browser connection's hold
+    // starts. Without invalidateChildTargetInterception wired, the hold
+    // would read that stale entry and release instantly on a false
+    // confirmation - the exact silent-release bug this fix closes.
+    it('does not resolve off a stale handled entry when the browser connection\'s hold starts before the page connection catches up', async () => {
+      // default (4000ms) timeout, not the short value the dedicated timeout
+      // test uses below - this test's assertions must hold because of the
+      // invalidate + re-commit mechanism, not because a short fail-open
+      // timer happened to not fire yet (that would flake on a loaded machine)
+      const { browserClient, crashHandler } = await setupBrowserConnection()
+
+      const reEnabled = Promise.withResolvers<void>()
+
+      pageClient.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+
+      // adverse order: the browser connection sees the crash (and, per fix
+      // 3, invalidates the page connection's stale entry) before the page
+      // connection's own handler has run at all
+      const released = crashHandler({}, sessionId)
+
+      await drain()
+
+      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+      // now the page connection catches up and starts its own re-arm
+      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+
+      await drain()
+
+      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+      reEnabled.resolve()
+      await released
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
   })
 

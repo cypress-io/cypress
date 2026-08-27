@@ -2,6 +2,7 @@ import debugModule from 'debug'
 import { CDPCommandQueue } from './cdp-command-queue'
 import { CDPConnection, CDPListener } from './cdp-connection'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
+import type { Protocol } from 'devtools-protocol'
 import type WebSocket from 'ws'
 import type { CypressError } from '@packages/errors'
 import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from './cdp_automation'
@@ -95,6 +96,17 @@ export interface ICriClient {
    * when the proxy is disabled.
    */
   onChildTargetAttached?: (sessionId: string) => Promise<void>
+  /**
+   * Deterministically removes targetId from this connection's confirmed-handled
+   * set without resolving or evicting any waiter registered for it - a
+   * sibling connection (the browser-level connection, for a crash-reloaded
+   * service worker) calls this before it holds, so it never reads a stale
+   * "handled" entry this connection hasn't gotten around to evicting itself
+   * (#34674 - the two connections' Inspector.targetReloadedAfterCrash
+   * handlers race on independent websockets, so this cannot be left to that
+   * race). See whenChildTargetHandled.
+   */
+  invalidateChildTargetHandled (targetId: string): void
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
@@ -129,22 +141,26 @@ export class CriClient implements ICriClient {
 
   public onChildTargetAttached?: (sessionId: string) => Promise<void>
 
-  // Targets this connection has finished processing in _onAttachedToTarget
-  // (the onChildTargetAttached hook included), and waiters registered for a
-  // targetId before that finished. See whenChildTargetHandled.
+  // Targets whose session-scoped interception this connection has confirmed
+  // in place, via a fresh attach or a crash-reload re-arm - see
+  // _commitChildTargetAttach.
   private _handledTargetIds: Set<string> = new Set()
   private _childTargetWaiters: Map<string, PromiseWithResolvers<void>> = new Map()
 
-  // Holds a unique token for each target currently attaching, present only
-  // while that attach is in flight (removed at commit, or on detach). Lets a
-  // stale attach - one that was suspended mid-flight (at Network.enable or
-  // onChildTargetAttached) when its target detached - recognize on resume
-  // that it is no longer current, so it does not mark itself handled for a
-  // target that is already gone. An object identity rather than a counter:
-  // deleting (rather than incrementing) bounds this map to only the targets
-  // currently in flight, and a fresh token can never collide with a stale
-  // one the way a reset-to-zero counter could.
+  // One token per in-flight attach, removed at commit or on detach. A stale
+  // attach — one suspended at an await when its target detached — sees its
+  // token gone on resume and skips marking the target handled. Tokens are
+  // object identities, not counters: deletion keeps the map bounded to
+  // in-flight attaches, and a fresh token can never collide with a stale one.
   private _inFlightAttaches: Map<string, object> = new Map()
+
+  // sessionId -> the target that session belongs to, recorded in
+  // _onAttachedToTarget and evicted alongside _inFlightAttaches /
+  // _handledTargetIds. Inspector.targetReloadedAfterCrash carries only a
+  // sessionId, not a TargetInfo, so this is how the crash-reload handler
+  // finds the target (and its type, to gate on service_worker/iframe) to
+  // re-run the commit-on-success flow for (#34674).
+  private _sessionTargets: Map<string, { targetId: string, type: Protocol.Target.TargetInfo['type'] }> = new Map()
 
   private constructor (
     public targetId: string,
@@ -189,6 +205,13 @@ export class CriClient implements ICriClient {
     this.cdpConnection.addConnectionEventListener('cdp-connection-closed', this._rejectEnqueuedCommands)
     this.cdpConnection.addConnectionEventListener('cdp-connection-reconnect-error', this._rejectEnqueuedCommands)
 
+    // A terminal disconnect never routes through close(), so without these a
+    // sibling connection's whenChildTargetHandled() waiter would hang on a
+    // client that will never process another Target.attachedToTarget, and
+    // this connection's own bookkeeping would go stale rather than empty.
+    this.cdpConnection.addConnectionEventListener('cdp-connection-closed', this._resolveChildTargetWaiters)
+    this.cdpConnection.addConnectionEventListener('cdp-connection-closed', this._clearChildTargetState)
+
     if (onCriConnectionClosed) {
       this.cdpConnection.addConnectionEventListener('cdp-connection-closed', onCriConnectionClosed)
     }
@@ -230,6 +253,7 @@ export class CriClient implements ICriClient {
         // target; evicting an id that was never recorded is a no-op.
         this.cdpConnection.on('Target.detachedFromTarget', this._onChildTargetDetached)
         this.cdpConnection.on('Target.targetDestroyed', this._onChildTargetDetached)
+        this.cdpConnection.on('Inspector.targetReloadedAfterCrash', this._onChildTargetReloadedAfterCrash)
       }
     }
   }
@@ -304,19 +328,24 @@ export class CriClient implements ICriClient {
   }
 
   /**
-   * Resolves once this connection's _onAttachedToTarget handling — the
-   * onChildTargetAttached hook included — has finished for targetId,
-   * whichever happens first relative to this call. A sibling connection that
-   * also auto-attaches the same targets (the browser-level connection, for
-   * service workers) uses this to defer releasing a paused target until this
-   * connection's session-scoped interception is confirmed in place (#34674).
+   * Resolves once session-scoped interception is confirmed in place for
+   * targetId on this connection - or was never needed for it (a non-SW/iframe
+   * target, or no onChildTargetAttached hook registered) - whichever happens
+   * first relative to this call. A failed interception hook leaves this
+   * pending rather than resolving it: see _commitChildTargetAttach. Its
+   * release paths are detach eviction, close(), a terminal disconnect, or the
+   * caller's own timeout - not this promise resolving on a failure. A
+   * crash-reloaded target re-arms this: see _onChildTargetReloadedAfterCrash.
+   * A sibling connection that also auto-attaches the same targets (the
+   * browser-level connection, for service workers) uses this to defer
+   * releasing a paused target until confirmed (#34674).
    */
   public whenChildTargetHandled = (targetId: string): Promise<void> => {
     // A waiter registered against a closed client would never resolve: this
     // connection will never process another Target.attachedToTarget. Reachable
     // via resetBrowserTargets swapping in a new page client before
     // attachListeners re-points the caller at it.
-    if (this._closed || this._handledTargetIds.has(targetId)) {
+    if (this._closed || this.cdpConnection.terminated || this._handledTargetIds.has(targetId)) {
       return Promise.resolve()
     }
 
@@ -330,7 +359,25 @@ export class CriClient implements ICriClient {
     return deferred.promise
   }
 
-  private _resolveChildTargetWaiters (): void {
+  // Only removes targetId from the handled set - does NOT touch
+  // _childTargetWaiters or _inFlightAttaches. Resolving or evicting a waiter
+  // here would be wrong: a waiter already registered when this is called
+  // represents a caller that is still going to wait for an upcoming commit
+  // (or the sibling's own timeout), and invalidating must not manufacture
+  // either a false confirmation or a false detach for it. Deleting an
+  // in-flight token would be wrong too, deliberately: when the page
+  // connection's own handler runs first, this runs while the page-side
+  // crash-reload re-arm (_onChildTargetReloadedAfterCrash) is already in
+  // flight with a fresh token of its own - deleting it here would make that
+  // re-arm's own commit look stale to itself, forcing every crash in that
+  // ordering through the full hold timeout instead of the fast path it
+  // re-arms for (see that handler's doc comment). See ICriClient's doc
+  // comment.
+  public invalidateChildTargetHandled = (targetId: string): void => {
+    this._handledTargetIds.delete(targetId)
+  }
+
+  private _resolveChildTargetWaiters = (): void => {
     for (const deferred of this._childTargetWaiters.values()) {
       deferred.resolve()
     }
@@ -338,9 +385,28 @@ export class CriClient implements ICriClient {
     this._childTargetWaiters.clear()
   }
 
-  // Target.detachedFromTarget's targetId is documented deprecated but still
-  // populated by Chromium; Target.targetDestroyed always carries one.
-  private _onChildTargetDetached = (event: { targetId?: string }): void => {
+  // This connection will never process another Target.attachedToTarget once
+  // closed or terminated, so none of its in-flight/handled/session bookkeeping
+  // can still become accurate - held onto, it would just be stale state a
+  // future lookup could act on. Waiter resolution is handled separately by
+  // _resolveChildTargetWaiters, called alongside this at both of its call sites.
+  private _clearChildTargetState = (): void => {
+    this._sessionTargets.clear()
+    this._inFlightAttaches.clear()
+    this._handledTargetIds.clear()
+  }
+
+  private _onChildTargetDetached = (event: { targetId?: string, sessionId?: string }): void => {
+    // Target.detachedFromTarget always carries a sessionId (its targetId is
+    // documented deprecated and can be absent); Target.targetDestroyed never
+    // carries a sessionId. Evicted here, ahead of the targetId guard below,
+    // so a detach that only identifies its session still evicts - a stale
+    // entry surviving here would let a later crash-reload on the reused
+    // session id re-invoke the hook for a target that already detached.
+    if (event.sessionId) {
+      this._sessionTargets.delete(event.sessionId)
+    }
+
     if (!event.targetId) {
       return
     }
@@ -356,6 +422,13 @@ export class CriClient implements ICriClient {
     this._handledTargetIds.delete(event.targetId)
     this._childTargetWaiters.get(event.targetId)?.resolve()
     this._childTargetWaiters.delete(event.targetId)
+
+    // Target.targetDestroyed carries no sessionId, so sweep by targetId.
+    for (const [sessionId, target] of this._sessionTargets) {
+      if (target.targetId === event.targetId) {
+        this._sessionTargets.delete(sessionId)
+      }
+    }
   }
 
   public connect = async () => {
@@ -401,7 +474,50 @@ export class CriClient implements ICriClient {
         obj.sessionId = sessionId
       }
 
-      this.enableCommands.push(obj)
+      // Replace rather than duplicate an existing entry for the same
+      // command + session + params - e.g. a crash-reload re-arm (#34674)
+      // re-sending Fetch.enable for a session already enabled once. An
+      // unbounded duplicate would be replayed again on every future
+      // reconnect. Params must be part of the key: Runtime.addBinding is
+      // legitimately sent multiple times with no sessionId but a different
+      // `name` each time (utils.ts's 'cypressUtilityBinding',
+      // cdp-socket.ts's per-namespace `cypressSendToServer-${namespace}`) -
+      // keying on (command, sessionId) alone would collapse those into one
+      // and silently drop the others on reconnect. Replay order doesn't
+      // matter here: _restoreState fires every entry via Promise.all.
+      // Sorted keys make the comparison insertion-order-proof: two calls
+      // with the same params but keys built in a different order would
+      // otherwise serialize differently and be (harmlessly) treated as
+      // distinct, leaving a stale duplicate behind instead of replacing it.
+      // Sorted at every nesting level, via a function replacer rather than
+      // JSON.stringify's array-replacer form - an array replacer acts as a
+      // key allowlist applied recursively at every level, not just the top
+      // one, so it would silently strip a nested object's own keys (e.g.
+      // Fetch.enable's `patterns[].requestStage`) and make different nested
+      // values collide on the same key.
+      const stringifyParams = (p?: object) => {
+        return JSON.stringify(p ?? null, (_key, value) => {
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            return Object.keys(value).sort().reduce((sorted, k) => {
+              sorted[k] = value[k]
+
+              return sorted
+            }, {})
+          }
+
+          return value
+        })
+      }
+      const paramsKey = stringifyParams(params)
+      const existingIndex = this.enableCommands.findIndex((entry) => {
+        return entry.command === command && entry.sessionId === sessionId && stringifyParams(entry.params) === paramsKey
+      })
+
+      if (existingIndex === -1) {
+        this.enableCommands.push(obj)
+      } else {
+        this.enableCommands[existingIndex] = obj
+      }
     }
 
     if (command.endsWith('.disable')) {
@@ -495,6 +611,7 @@ export class CriClient implements ICriClient {
     // Never leave a sibling connection's whenChildTargetHandled() waiting on
     // a client that is never going to finish attaching anything.
     this._resolveChildTargetWaiters()
+    this._clearChildTargetState()
 
     if (this._closed || this.cdpConnection?.terminated) {
       debug('not closing, cri client is already closed %o', { closed: this._closed, target: this.targetId, connection: this.cdpConnection })
@@ -548,6 +665,7 @@ export class CriClient implements ICriClient {
     const token = {}
 
     this._inFlightAttaches.set(targetId, token)
+    this._sessionTargets.set(event.sessionId, { targetId, type: event.targetInfo.type })
 
     try {
       // Service workers get attached at the page and browser level. We only want to handle them at the browser level
@@ -568,6 +686,8 @@ export class CriClient implements ICriClient {
     // runner-bundle fetch escapes to the real origin (real
     // accounts.google.com answers 404 and cy.origin waits forever on
     // bridge:ready).
+    let childTargetInterceptionFailed = false
+
     if ((event.targetInfo.type === 'service_worker' || event.targetInfo.type === 'iframe') && this.onChildTargetAttached) {
       try {
         // Must complete while the target is still paused — releasing the
@@ -575,28 +695,16 @@ export class CriClient implements ICriClient {
         // uninterceptable.
         await this.onChildTargetAttached(event.sessionId)
       } catch (error) {
+        childTargetInterceptionFailed = true
         debug('error enabling child-session interception: %o', { error, event })
       }
     }
 
-    // Recorded for every target this handler processes, not just SW/iframe —
-    // whenChildTargetHandled() resolves on this regardless of target type.
     // Marked here rather than after Runtime.runIfWaitingForDebugger below:
     // that command's own success or failure has no bearing on whether this
-    // connection's side of attaching (network enable, child-session
-    // interception) is done.
-    //
-    // Skipped if this attach's token is no longer the in-flight one for
-    // targetId - a detach (or a newer attach, for a reused id) already
-    // invalidated it while this handler was suspended above, so this stale
-    // completion must not mark the target handled or resolve a waiter meant
-    // for whatever comes next.
-    if (this._inFlightAttaches.get(targetId) === token) {
-      this._inFlightAttaches.delete(targetId)
-      this._handledTargetIds.add(targetId)
-      this._childTargetWaiters.get(targetId)?.resolve()
-      this._childTargetWaiters.delete(targetId)
-    }
+    // connection's side of attaching is done. See _commitChildTargetAttach
+    // for what "handled" means and why a stale or failed attach skips it.
+    this._commitChildTargetAttach(targetId, token, childTargetInterceptionFailed)
 
     if (event.waitingForDebugger) {
       try {
@@ -606,6 +714,97 @@ export class CriClient implements ICriClient {
         debug('error running Runtime.runIfWaitingForDebugger: %o', { error, event })
       }
     }
+  }
+
+  // Marks targetId handled and resolves its waiter, unless this attach's
+  // token is no longer the in-flight one for targetId (a detach, or a newer
+  // attach for a reused id, invalidated it while the caller was suspended
+  // awaiting the interception hook) or that hook failed. "Handled" means
+  // interception is actually in place, not merely that the hook ran: a
+  // target whose onChildTargetAttached rejected never got Fetch enabled on
+  // its session, so marking it handled would report a false confirmation to
+  // a sibling connection deciding whether to release it (#34674 hold). A
+  // failed hook still clears the token (detach eviction has nothing else to
+  // key off) but leaves the target unhandled - detach eviction, close(), or
+  // the sibling's own timeout are what eventually release it. Shared by a
+  // fresh attach (_onAttachedToTarget) and a crash-reload re-arm
+  // (_onChildTargetReloadedAfterCrash) so both commit identically.
+  private _commitChildTargetAttach (targetId: string, token: object, hookFailed: boolean): void {
+    if (this._inFlightAttaches.get(targetId) !== token) {
+      return
+    }
+
+    this._inFlightAttaches.delete(targetId)
+
+    if (hookFailed) {
+      return
+    }
+
+    this._handledTargetIds.add(targetId)
+    this._childTargetWaiters.get(targetId)?.resolve()
+    this._childTargetWaiters.delete(targetId)
+  }
+
+  // A crash-reloaded service worker is the same worker _onAttachedToTarget
+  // originally paused, not a fresh attach, so no Target.attachedToTarget
+  // fires here to re-run the interception hook. "Handled" is defined as
+  // this session's interception being (re-)enabled after the most recent
+  // start-or-reload, so a stale "handled" entry from the original attach is
+  // evicted and the hook re-run before this session can be reported
+  // confirmed again. Releasing the target (Runtime.runIfWaitingForDebugger)
+  // stays the browser connection's job - see browser-cri-client.ts.
+  //
+  // This is a fast path, not the correctness guarantee: whether
+  // Inspector.targetReloadedAfterCrash is delivered on this (page-level)
+  // connection for a given crash is not something this code verifies. The
+  // browser connection invalidates its view of this target as handled
+  // before it holds (BrowserCriClient.invalidateChildTargetInterception),
+  // so a miss here just means the hold fails open at its own timeout instead
+  // of confirming early - it never causes an instant, uninstrumented release.
+  //
+  // One residual window remains, by design rather than oversight: if the
+  // hook from a PRIOR attach is still stalled past the 4s fail-open (its
+  // target already released, running, and now crashing again), that stalled
+  // hook's commit can land after the browser-side invalidate, re-marking
+  // the target handled just ahead of the new hold. This re-arm closes it
+  // whenever its own event lands before the stalled hook resumes - the
+  // fresh token set below invalidates the stalled attach's token, so its
+  // late commit is recognized as stale and skipped (see
+  // _commitChildTargetAttach). What's left needs this event to be missed
+  // or to arrive after that stalled commit, AND a hook stalled past 4s -
+  // the same fail-open class as the timeout itself, not a new failure mode.
+  // Not eliminated by epoch-stamping invalidateChildTargetHandled, on
+  // purpose: when the page connection's own handler runs first, invalidating
+  // in-flight tokens there would wipe this very re-arm's own fresh token and
+  // force every crash in that ordering through the full 4s hold instead of
+  // the fast path.
+  private _onChildTargetReloadedAfterCrash = async (_event: unknown, sessionId?: string) => {
+    if (!sessionId || !this.onChildTargetAttached) {
+      return
+    }
+
+    const target = this._sessionTargets.get(sessionId)
+
+    if (!target || (target.type !== 'service_worker' && target.type !== 'iframe')) {
+      return
+    }
+
+    const { targetId } = target
+    const token = {}
+
+    this._handledTargetIds.delete(targetId)
+    this._inFlightAttaches.set(targetId, token)
+
+    let childTargetInterceptionFailed = false
+
+    try {
+      await this.onChildTargetAttached(sessionId)
+    } catch (error) {
+      childTargetInterceptionFailed = true
+      debug('error re-enabling child-session interception after crash reload: %o', { error, sessionId, targetId })
+    }
+
+    this._commitChildTargetAttach(targetId, token, childTargetInterceptionFailed)
   }
 
   private _enqueueCommand <TCmd extends CdpCommand> (
