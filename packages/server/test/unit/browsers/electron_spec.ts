@@ -41,6 +41,9 @@ describe('lib/browsers/electron', () => {
         isHeadless: false,
       },
       onError: () => {},
+      // Electron is deprecated as a test browser, so every launch resolves to the
+      // legacy proxy path.
+      useBrowserNetworkInterception: false,
     } as unknown as BrowserLaunchOpts & { some: string }
 
     this.automation = new Automation({
@@ -707,10 +710,6 @@ describe('lib/browsers/electron', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
-      afterEach(() => {
-        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-      })
-
       it('sends Fetch.enable only for Document ResourceType', async function () {
         await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
 
@@ -721,26 +720,20 @@ describe('lib/browsers/electron', () => {
         })
       })
 
-      it('delegates Fetch ownership to the CDP runtime when the proxy is disabled', async function () {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+      // Electron always resolves to the proxy path, so it keeps Fetch ownership for
+      // AUT header injection even if a launch asks for the browser-side path.
+      it('keeps Fetch ownership when the browser-side network path is requested', async function () {
         const onPageCriClientReady = sinon.stub().resolves()
 
         await electron._launch(this.win, this.url, this.automation, {
           ...this.options,
+          useBrowserNetworkInterception: true,
           onPageCriClientReady,
         }, undefined, undefined, { attachCDPClient: sinon.stub() })
 
-        expect(onPageCriClientReady).to.have.been.calledOnce
+        expect(onPageCriClientReady).not.to.have.been.called
 
-        // the runtime needs the isAUTFrame lookup and the protocol-neutral
-        // AUT-navigation subscription, same as the chrome launch paths
-        const [, isAUTFrame, onAUTFrameNavigated] = onPageCriClientReady.firstCall.args
-
-        expect(isAUTFrame).to.be.a('function')
-        expect(onAUTFrameNavigated).to.be.a('function')
-
-        expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable', {
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
           patterns: [{
             resourceType: 'Document',
           }],

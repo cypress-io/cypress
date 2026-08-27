@@ -43,15 +43,7 @@ describe('webpack-batteries-included-preprocessor features', () => {
     await runAndEval('mjs_spec.mjs')
   })
 
-  it('handles coffeescript', async () => {
-    await runAndEval('coffee_spec.coffee')
-  })
-
-  it('handles import default export in coffeescript', async () => {
-    await runAndEval('coffee_imports_spec.coffee')
-  })
-
-  it('handles importing .js, .json, .jsx, .mjs, and .coffee', async () => {
+  it('handles importing .js, .json, .jsx, and .mjs', async () => {
     await runAndEval('various_imports_spec.js')
   })
 

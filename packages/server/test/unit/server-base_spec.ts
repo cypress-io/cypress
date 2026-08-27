@@ -14,6 +14,10 @@ import * as ensureUrl from '../../lib/util/ensure-url'
 import { getCtx } from '@packages/data-context'
 import { GracefulExit } from '../../lib/util/graceful-exit'
 
+// index.js re-exports `create` through a non-configurable getter, so the
+// underlying module is the only stubbable seam.
+const httpsProxyModule = require('@packages/https-proxy/cjs/proxy')
+
 const morganFn = function () {}
 
 // Set by the morgan mock when `useMorgan` runs.
@@ -36,6 +40,34 @@ function getOpenOptions (overrides = {}) {
     shouldCorrelatePreRequests: () => false,
     ...overrides,
   }
+}
+
+function createCriClient () {
+  return {
+    send: sinon.stub().resolves({}),
+    on: sinon.stub(),
+    off: sinon.stub(),
+  }
+}
+
+// The browser (CDP) network path is only ever entered by installing the runtime
+// that serves it, so tests that need that mode install one against a stub CRI
+// client.
+function enterBrowserNetworkMode (server) {
+  server._socket = server._socket ?? {
+    toDriver: sinon.stub(),
+    close: sinon.stub(),
+    setProtocolManager: sinon.stub(),
+  }
+
+  server.getCurrentBrowser = server.getCurrentBrowser ?? (() => null)
+  server._netStubbingState = server._netStubbingState ?? {
+    routes: [],
+    requests: {},
+    reset: sinon.stub(),
+  }
+
+  return server.createCdpFetchNetworkRuntime(createCriClient())
 }
 
 describe('lib/server-base', () => {
@@ -203,9 +235,10 @@ describe('lib/server-base', () => {
       })
     })
 
-    it('does not create networkProxy when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-      _.extend(this.config, { port: 54321 })
+    // The browser is unknown at open, so the MITM runtime must always be built:
+    // a later Firefox/WebKit launch has nothing else to fall back to.
+    it('creates networkProxy regardless of forceHttp1', function () {
+      _.extend(this.config, { port: 54321, forceHttp1: false })
       const app = { use: sinon.stub() }
 
       sinon.stub(this.server, 'createExpressApp').returns(app)
@@ -213,24 +246,212 @@ describe('lib/server-base', () => {
 
       return this.server.open(this.config, getOpenOptions())
       .then(() => {
-        expect(this.server.createNetworkProxy).not.to.have.been.called
-        expect(this.server._networkProxy).to.be.undefined
+        expect(this.server.createNetworkProxy).to.have.been.called
+        expect(this.server._networkProxy).to.exist
         expect(this.server._netStubbingState).to.exist
       })
-      .finally(() => {
-        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
+    it('does not create the https proxy at open', function () {
+      _.extend(this.config, { port: 54321 })
+      const app = { use: sinon.stub() }
+
+      sinon.stub(this.server, 'createExpressApp').returns(app)
+
+      return this.server.open(this.config, getOpenOptions())
+      .then(() => {
+        expect(this.server._httpsProxy).to.be.undefined
       })
     })
   })
 
-  describe('#createCdpFetchNetworkRuntime', () => {
-    function createClient () {
-      return {
-        send: sinon.stub().resolves({}),
-        on: sinon.stub(),
-        off: sinon.stub(),
+  describe('#setNetworkMode', () => {
+    beforeEach(function () {
+      this.server._openConfig = this.config
+      this.server._proxyRuntime = {
+        networkProxy: { id: 'mitm' },
       }
-    }
+
+      this.netStubbingState = { id: 'owned-by-open' }
+      this.server._netStubbingState = this.netStubbingState
+
+      this.ensureHttpsProxy = sinon.stub(this.server, 'ensureHttpsProxy').resolves()
+    })
+
+    it('publishes the MITM path, and its https proxy, for a launch that needs the proxy', async function () {
+      await this.server.setNetworkMode(false)
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
+      expect(this.ensureHttpsProxy).to.have.been.called
+      expect(this.server._networkProxy).to.eq(this.server._proxyRuntime.networkProxy)
+    })
+
+    // The CDP runtime needs the page CRI client, which does not exist yet, so
+    // claiming the browser network mode here would point every request-time gate
+    // at a pipeline that cannot serve it.
+    it('does not claim the browser network mode before its runtime exists', async function () {
+      await this.server.setNetworkMode(false)
+      await this.server.setNetworkMode(true)
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
+      expect(this.server._networkProxy).to.eq(this.server._proxyRuntime.networkProxy)
+    })
+
+    it('leaves the https proxy alone for a browser network launch, so no root CA is generated', async function () {
+      await this.server.setNetworkMode(true)
+
+      expect(this.ensureHttpsProxy).not.to.have.been.called
+    })
+
+    // A browser switch in open mode relaunches against this same instance, and
+    // nothing else tears the CDP Fetch runtime down.
+    it('stops the CDP runtime and restores the proxy runtime when switching back', async function () {
+      const cdpNetworkProxy = { dispose: sinon.stub() }
+      const stop = sinon.stub().resolves()
+
+      this.server._cdpFetchRuntime = { networkProxy: cdpNetworkProxy, stop }
+      this.server._networkProxy = cdpNetworkProxy
+      this.server._networkMode = 'browser'
+
+      await this.server.setNetworkMode(false)
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
+      expect(stop).to.have.been.called
+      expect(this.server._cdpFetchRuntime).to.be.undefined
+      expect(this.server._networkProxy).to.eq(this.server._proxyRuntime.networkProxy)
+      // the server owns the netStubbingState, so a runtime handoff must not move it
+      expect(this.server._netStubbingState).to.eq(this.netStubbingState)
+    })
+
+    // The old browser stays alive until browsers.open kills it, so it issues
+    // requests across every awaited step of the switch. A step where the mode
+    // and the installed NetworkProxy disagree routes those into the pipeline
+    // that is not installed.
+    it('never publishes a mode the installed NetworkProxy cannot serve', async function () {
+      const cdpNetworkProxy = { dispose: sinon.stub() }
+      const samples: { cdp: boolean, proxy: unknown }[] = []
+      const sample = () => {
+        samples.push({ cdp: this.server.isBrowserNetworkMode(), proxy: this.server._networkProxy })
+      }
+
+      this.ensureHttpsProxy.callsFake(async () => sample())
+
+      this.server._cdpFetchRuntime = {
+        networkProxy: cdpNetworkProxy,
+        stop: sinon.stub().callsFake(async () => sample()),
+      }
+
+      this.server._networkProxy = cdpNetworkProxy
+      this.server._networkMode = 'browser'
+
+      sample()
+      await this.server.setNetworkMode(false)
+      sample()
+
+      expect(samples).to.have.length(4)
+      samples.forEach(({ cdp, proxy }, index) => {
+        expect(cdp, `sample ${index} reads CDP only while the CDP proxy is installed`).to.eq(proxy === cdpNetworkProxy)
+      })
+    })
+  })
+
+  describe('#ensureHttpsProxy', () => {
+    it('creates the https proxy once, on demand', async function () {
+      const app = this.server.createExpressApp({ morgan: false })
+
+      await this.server.createServer(app, {})
+
+      expect(this.server._httpsProxy).to.be.undefined
+
+      await this.server.ensureHttpsProxy()
+
+      const httpsProxy = this.server._httpsProxy
+
+      expect(httpsProxy).to.exist
+
+      await this.server.ensureHttpsProxy()
+
+      expect(this.server._httpsProxy).to.eq(httpsProxy)
+    })
+
+    // The proxy binds against this server's port; resolving without one would
+    // read as "already created" and defer CA generation into a TLS handshake.
+    it('rejects when the server is not listening yet', async function () {
+      let err
+
+      try {
+        await this.server.ensureHttpsProxy()
+      } catch (e) {
+        err = e
+      }
+
+      expect(err?.message).to.include('createServer must first be called')
+      expect(this.server._httpsProxy).to.be.undefined
+      expect(this.server._httpsProxyReady).to.be.undefined
+    })
+
+    // Memoizing the rejection would make one transient failure fatal for every
+    // later launch and CONNECT in the session.
+    it('does not memoize a failure, so a later launch retries', async function () {
+      const app = this.server.createExpressApp({ morgan: false })
+
+      await this.server.createServer(app, {})
+
+      const create = sinon.stub(httpsProxyModule, 'create')
+
+      create.onFirstCall().rejects(new Error('EACCES: cannot write the root CA'))
+      create.onSecondCall().resolves({ close: sinon.stub().resolves() })
+
+      let err
+
+      try {
+        await this.server.ensureHttpsProxy()
+      } catch (e) {
+        err = e
+      }
+
+      expect(err?.message).to.include('EACCES')
+      expect(this.server._httpsProxyReady).to.be.undefined
+
+      await this.server.ensureHttpsProxy()
+
+      expect(this.server._httpsProxy).to.exist
+      expect(create).to.have.been.calledTwice
+    })
+  })
+
+  describe('#closeHttpsProxy', () => {
+    // Closing mid-creation used to close nothing, then leave a fully listening
+    // SNI server with no owner holding its port.
+    it('closes an https proxy that finishes creating during close()', async function () {
+      const app = this.server.createExpressApp({ morgan: false })
+
+      await this.server.createServer(app, {})
+
+      const close = sinon.stub().resolves()
+      let finishCreation
+
+      sinon.stub(httpsProxyModule, 'create').returns(new Promise((resolve) => {
+        finishCreation = () => resolve({ close })
+      }))
+
+      const ready = this.server.ensureHttpsProxy()
+      const closing = this.server.close()
+
+      finishCreation()
+
+      await ready
+      await closing
+
+      expect(close).to.have.been.calledOnce
+      expect(this.server._httpsProxy).to.be.undefined
+      // a stale memo would hand out a proxy bound to a destroyed http server
+      expect(this.server._httpsProxyReady).to.be.undefined
+    })
+  })
+
+  describe('#createCdpFetchNetworkRuntime', () => {
+    const createClient = createCriClient
 
     beforeEach(function () {
       this.server._openConfig = this.config
@@ -264,20 +485,95 @@ describe('lib/server-base', () => {
       })
 
       expect(this.server._cdpFetchRuntime).to.exist
-      expect(this.server._networkProxy).to.exist
       expect(this.server._netStubbingState).to.exist
-      expect(this.server._networkPolicyRegistration).to.exist
-      expect(this.server._networkInterceptionCore).to.exist
+      // The request-time ctx reads its interception core off the installed
+      // NetworkProxy, so this observes the pointers production middleware
+      // observes.
+      expect(this.server._networkProxy).to.eq(this.server._cdpFetchRuntime.networkProxy)
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.eq(this.server._cdpFetchRuntime.networkInterceptionCore)
     })
 
-    it('reuses the existing netStubbingState when attaching NetworkProxy', async function () {
+    // Publishing the mode any earlier would point the request-time gates at a
+    // CDP pipeline that does not exist yet; any later would leave them on MITM
+    // semantics while the CDP NetworkProxy is already installed.
+    it('publishes the browser network mode together with the runtime that serves it', async function () {
       const client = createClient()
-      const existingState = this.server._netStubbingState
+      const modeDuringStart: boolean[] = []
+
+      // Fetch.enable is the last step of start()
+      client.send.withArgs('Fetch.enable').callsFake(async () => {
+        modeDuringStart.push(this.server.isBrowserNetworkMode())
+      })
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
 
       await this.server.createCdpFetchNetworkRuntime(client)
 
-      expect(this.server._netStubbingState).to.equal(existingState)
-      expect(this.server._networkProxy.http.netStubbingState).to.equal(existingState)
+      expect(this.server.isBrowserNetworkMode()).to.be.true
+      expect(this.server._networkProxy).to.eq(this.server._cdpFetchRuntime.networkProxy)
+      expect(modeDuringStart).to.deep.eq([true])
+    })
+
+    // DriverInterceptRegistrationAdapter binds to the state object created at open,
+    // so a launch that replaced it would leave every cy.intercept() registered
+    // against a state the installed runtime never matches.
+    it('keeps one netStubbingState across open, a browser-path launch, and the switch back', async function () {
+      _.extend(this.config, { port: 54321 })
+      sinon.stub(this.server, 'createExpressApp').returns({ use: sinon.stub() })
+      sinon.stub(this.server, 'createServer').resolves()
+      sinon.stub(this.server, 'ensureHttpsProxy').resolves()
+
+      await this.server.open(this.config, getOpenOptions())
+
+      const state = this.server._netStubbingState
+
+      expect(state).to.exist
+      expect(this.server._networkProxy.http.netStubbingState).to.equal(state)
+
+      await this.server.createCdpFetchNetworkRuntime(createClient())
+
+      expect(this.server.isBrowserNetworkMode()).to.be.true
+      expect(this.server._netStubbingState).to.equal(state)
+      expect(this.server._networkProxy.http.netStubbingState).to.equal(state)
+
+      await this.server.setNetworkMode(false)
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
+      expect(this.server._netStubbingState).to.equal(state)
+      expect(this.server._networkProxy.http.netStubbingState).to.equal(state)
+    })
+
+    // Each runtime constructs its interception core (and the policy
+    // registration inside it) into its own NetworkProxy, and the middleware
+    // ctx reads the core off whichever NetworkProxy is installed. So the
+    // handoff invariant — every shared runtime pointer moves with
+    // `_networkMode` in one synchronous step — is observable here: after each
+    // switch, the middleware-visible core must be the active runtime's, never
+    // the other one's.
+    it('hands the middleware-visible interception core over with the runtime, in both directions', async function () {
+      _.extend(this.config, { port: 54321 })
+      sinon.stub(this.server, 'createExpressApp').returns({ use: sinon.stub() })
+      sinon.stub(this.server, 'createServer').resolves()
+      sinon.stub(this.server, 'ensureHttpsProxy').resolves()
+
+      await this.server.open(this.config, getOpenOptions())
+
+      const mitmCore = this.server._proxyRuntime.networkInterceptionCore
+
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.equal(mitmCore)
+
+      await this.server.createCdpFetchNetworkRuntime(createClient())
+
+      const cdpCore = this.server._cdpFetchRuntime.networkInterceptionCore
+
+      expect(cdpCore).not.to.equal(mitmCore)
+      expect(this.server.isBrowserNetworkMode()).to.be.true
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.equal(cdpCore)
+
+      await this.server.setNetworkMode(false)
+
+      expect(this.server.isBrowserNetworkMode()).to.be.false
+      expect(this.server._networkProxy.http.networkInterceptionCore).to.equal(mitmCore)
     })
 
     it('applies a previously stored protocol manager to the late-bound CDP NetworkProxy', async function () {
@@ -307,7 +603,7 @@ describe('lib/server-base', () => {
         networkProxyDuringDispose = this.server._networkProxy
       })
 
-      await this.server['stopCdpFetchRuntime']()
+      await this.server['swapCdpFetchRuntime']()
 
       expect(networkProxyDuringDispose).to.be.undefined
       expect(this.server._networkProxy).to.be.undefined
@@ -330,6 +626,49 @@ describe('lib/server-base', () => {
       expect(this.server._networkProxy).to.not.equal(firstProxy)
     })
 
+    // A replacement (spec change, new tab, relaunch) leaves the browser on the
+    // native path throughout, so the mode must never transit 'proxy' while the
+    // outgoing runtime is stopping: the request-time gates would redirect the
+    // browser's path-only requests to the client route and hand them to a
+    // pipeline that expects absolute-form URLs.
+    it('never publishes the MITM path while a replaced CDP runtime is still stopping', async function () {
+      _.extend(this.config, { port: 54321 })
+      sinon.stub(this.server, 'createExpressApp').returns({ use: sinon.stub() })
+      sinon.stub(this.server, 'createServer').resolves()
+
+      await this.server.open(this.config, getOpenOptions())
+
+      const mitmProxy = this.server._networkProxy
+      const firstClient = createClient()
+      const secondClient = createClient()
+
+      await this.server.createCdpFetchNetworkRuntime(firstClient)
+
+      let releaseFetchDisable: (() => void) | undefined
+
+      firstClient.send.withArgs('Fetch.disable').callsFake(() => {
+        return new Promise<void>((resolve) => {
+          releaseFetchDisable = resolve
+        })
+      })
+
+      const replacing = this.server.createCdpFetchNetworkRuntime(secondClient)
+
+      expect(releaseFetchDisable, 'the outgoing runtime is mid-teardown').to.be.a('function')
+      expect(this.server.isBrowserNetworkMode(), 'network mode mid-swap').to.be.true
+      expect(this.server._networkProxy, 'installed proxy mid-swap').not.to.equal(mitmProxy)
+      // one session cannot have two Fetch owners, so the successor waits
+      expect(secondClient.send).not.to.have.been.calledWith('Fetch.enable')
+
+      releaseFetchDisable!()
+
+      await replacing
+
+      expect(this.server.isBrowserNetworkMode()).to.be.true
+      expect(this.server._networkProxy).to.equal(this.server._cdpFetchRuntime.networkProxy)
+      expect(secondClient.send).to.have.been.calledWith('Fetch.enable')
+    })
+
     it('disposes NetworkProxy only after Fetch.disable completes', async function () {
       const client = createClient()
 
@@ -343,7 +682,7 @@ describe('lib/server-base', () => {
         disposeDuringFetchDisable = disposeSpy.called
       })
 
-      await this.server['stopCdpFetchRuntime']()
+      await this.server['swapCdpFetchRuntime']()
 
       expect(disposeDuringFetchDisable).to.be.false
       expect(client.send).to.have.been.calledWith('Fetch.disable')
@@ -401,13 +740,7 @@ describe('lib/server-base', () => {
   })
 
   describe('#attachCdpFetchExtraTarget', () => {
-    function createClient () {
-      return {
-        send: sinon.stub().resolves({}),
-        on: sinon.stub(),
-        off: sinon.stub(),
-      }
-    }
+    const createClient = createCriClient
 
     beforeEach(function () {
       this.server._openConfig = this.config
@@ -488,19 +821,14 @@ describe('lib/server-base', () => {
         })
       })
 
-      it('establishes primary remote state after fileServer is ready and before httpsProxy is assigned', function () {
-        // At the moment `_remoteStates.set` runs:
-        //  - `_fileServer` must already exist (its port is read
-        //    synchronously by `_stateFromUrl('<root>')`).
-        //  - `_httpsProxy` must NOT yet be assigned — `set` runs in the
-        //    microtask after `await _listen`, before `await createHttpsProxy`.
+      it('establishes primary remote state after fileServer is ready', function () {
+        // `_fileServer` must already exist when `_remoteStates.set` runs — its
+        // port is read synchronously by `_stateFromUrl('<root>')`.
         let fileServerAtSetCall
-        let httpsProxyAtSetCall
 
         const realSet = this.server._remoteStates.set.bind(this.server._remoteStates)
         const setStub = sinon.stub(this.server._remoteStates, 'set').callsFake((...args) => {
           fileServerAtSetCall = this.server._fileServer
-          httpsProxyAtSetCall = this.server._httpsProxy
 
           return realSet(...args)
         })
@@ -509,33 +837,22 @@ describe('lib/server-base', () => {
         .then(() => {
           expect(setStub).to.have.been.calledOnceWithExactly('<root>')
           expect(fileServerAtSetCall, 'fileServer must be ready when set runs').to.exist
-          expect(httpsProxyAtSetCall, 'httpsProxy must not yet be assigned when set runs').to.be.undefined
-          // sanity: by the time createServer resolves, httpsProxy is up
-          expect(this.server._httpsProxy).to.exist
         })
       })
 
-      it('does not create httpsProxy when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+      // The https proxy is only needed on the MITM path, so it waits for a
+      // browser that needs it rather than generating a root CA at every open.
+      it('does not create httpsProxy', function () {
         return this.server.createServer(this.app, { port: this.port })
         .then(() => {
           expect(this.server._httpsProxy).to.be.undefined
         })
-        .finally(() => {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-        })
       })
 
-      it('registers connect listener when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+      it('registers connect listener', function () {
         return this.server.createServer(this.app, { port: this.port })
         .then(() => {
           expect(this.server.server.listenerCount('connect')).to.be.greaterThan(0)
-        })
-        .finally(() => {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
         })
       })
     })
@@ -600,7 +917,9 @@ describe('lib/server-base', () => {
       }
 
       return this.server.createServer(this.app, {})
-      .then(([port]) => {
+      .then(async ([port]) => {
+        await this.server.ensureHttpsProxy()
+
         return Promise.all([
           port,
           this.server._fileServer.port(),
@@ -713,20 +1032,22 @@ describe('lib/server-base', () => {
       })
     })
 
-    it('falls back to an empty rendered-HTML-origins map when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
+    // The CDP Fetch runtime swaps NetworkProxy at each launch, so the getter must
+    // read whichever instance is current rather than capture one.
+    it('reads the rendered-HTML-origins map off the current network proxy', function () {
       return this.server.open(this.config, getOpenOptions())
       .then(() => {
         const options: Record<string, any> = {}
 
         this.server.startWebsockets(1, 2, options)
 
-        expect(this.server._networkProxy).to.be.undefined
+        this.server._networkProxy.http.getRenderedHTMLOrigins()['http://example.com'] = true
+
+        expect(options.getRenderedHTMLOrigins()).to.deep.eq({ 'http://example.com': true })
+
+        this.server._networkProxy = undefined
+
         expect(options.getRenderedHTMLOrigins()).to.deep.eq({})
-      })
-      .finally(() => {
-        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
       })
     })
   })
@@ -805,6 +1126,21 @@ describe('lib/server-base', () => {
         expect(this.server._socket.close).to.be.calledOnce
       })
     })
+
+    // The standing MITM runtime outlives every launch, and a ServerBase is
+    // created per ProjectBase.open() — so without this its PreRequests sweep
+    // timer and the Http graph behind it accumulate per project open.
+    it('disposes the standing MITM NetworkProxy', async function () {
+      await this.server.open(this.config, getOpenOptions())
+
+      const dispose = sinon.spy(this.server._proxyRuntime.networkProxy, 'dispose')
+
+      await this.server.close()
+
+      expect(dispose).to.have.been.calledOnce
+      expect(this.server._networkProxy).to.be.undefined
+      expect(this.server._proxyRuntime).to.be.undefined
+    })
   })
 
   describe('#proxyWebsockets', () => {
@@ -833,6 +1169,42 @@ describe('lib/server-base', () => {
       const noop = this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(noop).to.be.undefined
+    })
+
+    // The CONNECT allow-list is a live registry of open proxy sockets, so a
+    // stretch on the browser (CDP) network path (which never CONNECTs) leaves it
+    // empty. A MITM browser repopulates it via onConnect before it upgrades, so
+    // nothing needs to clear it on a switch.
+    it('switches gates between loopback and the CONNECT allow-list', async function () {
+      this.server._openConfig = this.config
+
+      const remotePort = 12345
+      const req = {
+        url: '/foo/bar',
+        socket: { remotePort, remoteAddress: '127.0.0.1' },
+      }
+      const write = sinon.stub()
+
+      await enterBrowserNetworkMode(this.server)
+
+      this.server.proxyWebsockets(this.proxy, '/foo', req, { ...this.socket, write }, this.head)
+
+      expect(write, 'loopback is the only gate on the browser (CDP) network path').not.to.have.been.called
+      expect(this.server.socketAllowed.allowedLocalPorts).to.be.empty
+
+      sinon.stub(this.server, 'ensureHttpsProxy').resolves()
+      await this.server.setNetworkMode(false)
+
+      this.server.proxyWebsockets(this.proxy, '/foo', req, { ...this.socket, write }, this.head)
+
+      expect(write, 'an unregistered port is refused on the MITM path').to.have.been.called
+
+      write.resetHistory()
+      this.server.socketAllowed.add({ localPort: remotePort, once: _.noop })
+
+      this.server.proxyWebsockets(this.proxy, '/foo', req, { ...this.socket, write }, this.head)
+
+      expect(write, 'the CONNECT that precedes the upgrade re-registers the port').not.to.have.been.called
     })
 
     it('calls proxy.ws with hostname + port', function () {
@@ -894,7 +1266,8 @@ describe('lib/server-base', () => {
       const res = { redirect: sinon.spy() }
       const next = sinon.spy()
 
-      _forceProxyMiddleware(clientRoute)(req, res, next)
+      // these assert the HTTP/1 proxy path, where the force-proxy redirect applies
+      _forceProxyMiddleware(clientRoute, undefined, () => false)(req, res, next)
 
       return { res, next }
     }
@@ -966,22 +1339,65 @@ describe('lib/server-base', () => {
   })
 
   describe('#onConnect', () => {
-    afterEach(function () {
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-    })
+    const FORBIDDEN = 'HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n'
+    const BAD_GATEWAY = 'HTTP/1.1 502 Bad Gateway\r\n\r\nProxy is not ready\r\n'
 
-    it('responds 403 when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
-
-      const socket = {
+    beforeEach(function () {
+      this.server._openConfig = this.config
+      this.connectSocket = {
         write: sinon.stub(),
         end: sinon.stub(),
+        once: sinon.stub(),
       }
 
-      this.server.onConnect({ url: 'example.com:443' }, socket, null)
+      this.ensureHttpsProxy = sinon.stub(this.server, 'ensureHttpsProxy').resolves()
+    })
 
-      expect(socket.write).to.have.been.calledWith('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
-      expect(socket.end).to.have.been.called
+    // A leftover browser on this port, or a machine-level system proxy, can
+    // CONNECT before any launch resolves the path. Tunneling it would also
+    // generate a root CA a CDP-destined run never needs.
+    it('responds 403 before a launch has claimed the proxy', async function () {
+      await this.server.onConnect({ url: 'example.com:443' }, this.connectSocket, null)
+
+      expect(this.connectSocket.write).to.have.been.calledWith(FORBIDDEN)
+      expect(this.connectSocket.end).to.have.been.called
+      expect(this.ensureHttpsProxy).not.to.have.been.called
+    })
+
+    it('responds 403 on the browser (CDP) network path', async function () {
+      await enterBrowserNetworkMode(this.server)
+
+      await this.server.onConnect({ url: 'example.com:443' }, this.connectSocket, null)
+
+      expect(this.connectSocket.write).to.have.been.calledWith(FORBIDDEN)
+      expect(this.connectSocket.end).to.have.been.called
+    })
+
+    // Creation can fail (root CA write, SNI bind); a CONNECT retries it and
+    // answers 502 rather than tearing the socket down on an unhandled rejection.
+    it('responds 502 on the MITM path when the https proxy could not be created', async function () {
+      await this.server.setNetworkMode(false)
+
+      this.ensureHttpsProxy.rejects(new Error('EACCES: cannot write the root CA'))
+
+      expect(this.server._httpsProxy).to.be.undefined
+
+      await this.server.onConnect({ url: 'example.com:443' }, this.connectSocket, null)
+
+      expect(this.connectSocket.write).to.have.been.calledWith(BAD_GATEWAY)
+      expect(this.connectSocket.end).to.have.been.called
+    })
+
+    it('hands the CONNECT to the https proxy once it is up', async function () {
+      const connect = sinon.stub()
+
+      this.server._httpsProxy = { connect, close: sinon.stub() }
+
+      await this.server.setNetworkMode(false)
+      await this.server.onConnect({ url: 'example.com:443' }, this.connectSocket, null)
+
+      expect(connect).to.have.been.called
+      expect(this.connectSocket.write).not.to.have.been.called
     })
   })
 })

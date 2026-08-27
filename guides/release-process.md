@@ -185,17 +185,17 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     npm run do:comment -- --release-data <path_to_releaseData.json>
     ```
 
-22. Confirm there are no issues from the release with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left.
+20. Confirm there are no issues from the release with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left.
 
-23. Notify the team that `develop` is reopen, and post a message to the Releases Slack channel with a link to the changelog.
+21. Notify the team that `develop` is reopen. The release announcement to the [releases](https://cypressio.slack.com/archives/CQJB4V3QU) channel is automatically handled by the GitHub bot. If additional details are needed, they can posted as a reply to the release announcement.
 
-24. If utilizing the `SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES` to override and skip changelog validation for this release, change its value as needed or delete it from CircleCI so that subsequent releases and PRs will go through changelog validation.
+22. If utilizing the `SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES` to override and skip changelog validation for this release, change its value as needed or delete it from CircleCI so that subsequent releases and PRs will go through changelog validation.
 
-25. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+23. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
 
-26. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. If an npm token was created when logging in, please delete this token now.
+24. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. If an npm token was created when logging in, please delete this token now.
 
 Take a break, you deserve it! 👉😎👉
 

@@ -8,25 +8,25 @@ describe('getGraphQLWsUrl', () => {
     port: 2345,
   } as const
 
-  it('uses the page origin when the proxy is enabled', () => {
+  it('uses the page origin on the MITM proxy network path', () => {
     const url = getGraphQLWsUrl(appConfig, { protocol: 'http:', host: 'localhost:2345' }, false)
 
     expect(url).to.equal('ws://localhost:2345/__socket-graphql')
   })
 
-  it('uses wss when the page is served over https and the proxy is enabled', () => {
+  it('uses wss when the page is served over https on the MITM proxy network path', () => {
     const url = getGraphQLWsUrl(appConfig, { protocol: 'https:', host: 'app.foobar.com' }, false)
 
     expect(url).to.equal('wss://app.foobar.com/__socket-graphql')
   })
 
-  it('uses the Cypress server port when the proxy is disabled', () => {
+  it('uses the Cypress server port on the browser (CDP) network path', () => {
     const url = getGraphQLWsUrl(appConfig, { protocol: 'http:', host: 'localhost:2292' }, true)
 
     expect(url).to.equal('ws://localhost:2345/__socket-graphql')
   })
 
-  it('uses the Cypress server port when the proxy is disabled and the page is https', () => {
+  it('uses the Cypress server port on the browser (CDP) network path when the page is https', () => {
     const url = getGraphQLWsUrl(appConfig, { protocol: 'https:', host: 'app.foobar.com' }, true)
 
     expect(url).to.equal('ws://localhost:2345/__socket-graphql')
@@ -40,7 +40,7 @@ describe('getGraphQLWsUrl', () => {
     expect(url).to.equal('ws://localhost:2345/__socket-graphql')
   })
 
-  it('falls back to the page origin when the proxy is disabled and no port is served', () => {
+  it('falls back to the page origin on the browser (CDP) network path when no port is served', () => {
     const url = getGraphQLWsUrl({ ...appConfig, port: undefined }, { protocol: 'http:', host: 'localhost:2292' }, true)
 
     expect(url).to.equal('ws://localhost:2292/__socket-graphql')

@@ -266,6 +266,10 @@ export default {
         message: `\`Cypress.config()\` can never override \`{{invalidConfigKey}}\` because it is a read-only configuration option.`,
         docsUrl: 'https://on.cypress.io/config',
       },
+      suite_or_test_only: {
+        message: `\`Cypress.config()\` cannot override \`{{invalidConfigKey}}\` during test execution because it would affect the next test rather than the current one. Set \`{{invalidConfigKey}}\` in the test configuration of a \`describe\`/\`context\` or \`it\` block instead.{{additionalInfo}}`,
+        docsUrl: 'https://on.cypress.io/config',
+      },
     },
     invalid_mocha_config_override: {
       read_only: {
@@ -285,14 +289,13 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_test_override_with_allow_cypress_env: {
-      message: `overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.`,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
-    allow_cypress_env: {
-      message: `\`Cypress.env()\` does not work when \`allowCypressEnv\` is set to \`false\`. Please migrate to \`cy.env()\` or leverage other stateful methods to manage variables. The variable being accessed was: \`{{key}}\``,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
+    env_removed: stripIndent`\
+      Overriding the \`env\` configuration was removed in Cypress version 16.0.0.
+
+      Please update to use \`expose: { KEY: value }\` to make a value readable in the browser for a suite or test.
+
+      https://on.cypress.io/cypress-env-migration
+    `,
   },
 
   contains: {
@@ -469,6 +472,13 @@ export default {
     },
   },
 
+  end: {
+    removed: {
+      message: `${cmd('end')} was removed in Cypress version 16.0.0. A Cypress chain is already terminated when the next \`cy.<command>()\` starts a new chain, so \`.end()\` calls can be removed.`,
+      docsUrl: 'https://on.cypress.io/migration-guide',
+    },
+  },
+
   env: {
     docsUrl: 'https://on.cypress.io/api/env',
     invalid_argument: {
@@ -489,6 +499,22 @@ export default {
         ${cmd('env', '\'{{envVars}}\'')} failed with the following error:
 
         > "{{error}}"`,
+    },
+    removed ({ keys }: { keys: string[] }) {
+      const message = ['`Cypress.env()` was removed in Cypress version 16.0.0. Please update to use `Cypress.expose()` for non-sensitive values, or `cy.env()` for sensitive values.']
+
+      if (keys.length === 1) {
+        message.push(`The key being accessed was: \`${keys[0]}\``)
+      } else if (keys.length > 1) {
+        message.push(`The keys being accessed were: ${keys.map((key) => `\`${key}\``).join(', ')}`)
+      }
+
+      message.push('This call may come from a plugin. Update the plugin to a version that supports Cypress 16.')
+
+      return {
+        message: message.join('\n\n'),
+        docsUrl: 'https://on.cypress.io/cypress-env-migration',
+      }
     },
   },
 
@@ -615,6 +641,15 @@ export default {
     invalid_option_timeout: {
       message: `${cmd('get')} only accepts a \`number\` for its \`timeout\` option. You passed: \`{{timeout}}\``,
       docsUrl: 'https://on.cypress.io/get',
+    },
+  },
+
+  getAllStorage: {
+    timed_out (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
     },
   },
 
@@ -2269,20 +2304,7 @@ export default {
       docsUrl: 'https://on.cypress.io/cross-origin-script-error',
     },
     error_in_hook (obj) {
-      let msg
-
-      if (obj.unsupportedPlugin && obj.errMessage) {
-        msg = `${stripIndent`\
-          Cypress detected that the current version of \`${obj.unsupportedPlugin}\` is not supported. Update it to the latest version
-
-          The following error was caught:
-
-          > ${obj.errMessage}
-
-          Because this error occurred during a \`${obj.hookName}\` hook we are skipping` } `
-      } else {
-        msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
-      }
+      let msg = `Because this error occurred during a \`${obj.hookName}\` hook we are skipping `
 
       const t = obj.parentTitle
 

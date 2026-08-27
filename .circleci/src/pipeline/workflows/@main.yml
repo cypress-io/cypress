@@ -11,7 +11,6 @@ linux-x64:
           pattern: /^electron\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-      - equal: [ 'v8-snapshot-force-norewrite-all-bundles', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
@@ -82,6 +81,15 @@ linux-x64:
         context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
+    # Full-suite coverage of the deprecated forceHttp1 (HTTP/1 MITM proxy) path
+    # on Chrome. PRs run only the cheap *-force-http1-smoke subset; the whole
+    # suite runs here, post-merge, once per develop build.
+    - system-tests-chrome:
+        name: system-tests-chrome-force-http1
+        context: test-runner:performance-tracking
+        force-http1: true
+        requires:
+          - system-tests-node-modules-install
     - system-tests-firefox:
         context: test-runner:performance-tracking
         requires:
@@ -97,6 +105,12 @@ linux-x64:
           - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-chrome:
+        name: driver-integration-tests-chrome-force-http1
+        context: test-runner:cypress-record-key
+        force-http1: true
         requires:
           - build
     - driver-integration-tests-chrome-inject-document-domain:
@@ -146,6 +160,17 @@ linux-x64:
         percy: true
         requires:
           - build
+    - run-launchpad-integration-tests-chrome:
+        name: run-launchpad-integration-tests-chrome-force-http1
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
+        force-http1: true
+        requires:
+          - build
     - run-launchpad-component-tests-chrome:
         context:
           [
@@ -164,6 +189,17 @@ linux-x64:
             test-runner:percy
           ]
         percy: true
+        requires:
+          - build
+    - run-app-integration-tests-chrome:
+        name: run-app-integration-tests-chrome-force-http1
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
+        force-http1: true
         requires:
           - build
     - run-webpack-dev-server-integration-tests:
@@ -223,9 +259,6 @@ linux-x64:
     - npm-angular:
         requires:
           - build
-    - npm-angular-zoneless:
-        requires:
-          - build
     - npm-mount-utils:
         requires:
           - build
@@ -243,12 +276,10 @@ linux-x64:
           - system-tests-node-modules-install
 
     - ready-to-release:
-        # filters: *mainBuildFilters
         requires:
           - check-ts
           - health-check
           - npm-angular
-          - npm-angular-zoneless
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
@@ -278,6 +309,10 @@ linux-x64:
           - system-tests-firefox
           - system-tests-electron
           - system-tests-chrome
+          - system-tests-chrome-force-http1
+          - driver-integration-tests-chrome-force-http1
+          - run-app-integration-tests-chrome-force-http1
+          - run-launchpad-integration-tests-chrome-force-http1
           - system-tests-webkit
           - server-performance-tests
           - server-integration-tests

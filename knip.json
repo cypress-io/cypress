@@ -458,15 +458,6 @@
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/rewriter": {
-      "entry": [
-        "lib/threads/worker.ts"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}",
-        "*.{ts,tsx,js,jsx}"
-      ]
-    },
     "packages/*": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
@@ -517,7 +508,7 @@
     "npm/webpack-batteries-included-preprocessor": {
       "entry": [
         "index.ts",
-        "test/**/*.{ts,tsx,js,jsx,coffee,mjs,mts}"
+        "test/**/*.{ts,tsx,js,jsx,mjs,mts}"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",
@@ -926,9 +917,6 @@
       "types"
     ],
     "packages/telemetry/src/node.ts": [
-      "exports"
-    ],
-    "packages/proxy/lib/http/util/ast-rewriter.ts": [
       "exports"
     ],
     "packages/errors/src/errTemplate.ts": [

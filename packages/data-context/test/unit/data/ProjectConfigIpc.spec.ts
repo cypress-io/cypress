@@ -1,7 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import childProcess from 'child_process'
 import path from 'path'
-import semver from 'semver'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 
@@ -27,7 +26,6 @@ describe('ProjectConfigIpc', () => {
 
       projectConfigIpc = new ProjectConfigIpc(
         undefined,
-        undefined,
         projectPath,
         'cypress.config.js',
         false,
@@ -50,12 +48,6 @@ describe('ProjectConfigIpc', () => {
   })
 
   describe('forkChildProcess', () => {
-    // some of these node versions may not exist, but we want to verify
-    // the experimental flags are correctly disabled for future versions
-    const NODE_VERSIONS = ['20.5.1', '20.6.0', '20.19.1', '22.15.0']
-
-    const lastVersionWithDeprecatedLoaderOption = '20.5.1'
-
     let projectConfigIpc
 
     beforeEach(() => {
@@ -69,7 +61,6 @@ describe('ProjectConfigIpc', () => {
 
     describe('config module format detection', () => {
       const MOCK_NODE_PATH = '/Users/foo/.nvm/versions/node/v22.15.0/bin/node'
-      const MOCK_NODE_VERSION = '22.15.0'
 
       beforeEach(() => {
         // @ts-expect-error - mock
@@ -148,7 +139,6 @@ describe('ProjectConfigIpc', () => {
 
           projectConfigIpc = new ProjectConfigIpc(
             MOCK_NODE_PATH,
-            MOCK_NODE_VERSION,
             projectPath,
             configFilePath,
             false,
@@ -166,86 +156,81 @@ describe('ProjectConfigIpc', () => {
     })
 
     describe('typescript', () => {
-      [...NODE_VERSIONS].forEach((nodeVersion) => {
-        const MOCK_NODE_PATH = `/Users/foo/.nvm/versions/node/v${nodeVersion}/bin/node`
-        const MOCK_NODE_VERSION = nodeVersion
+      const PROJECTS = [
+        {
+          project: 'config-cjs-and-esm/config-with-ts-module',
+          configFile: 'cypress.config.ts',
+        },
+        {
+          project: 'config-cjs-and-esm/config-with-module-resolution-bundler',
+          configFile: 'cypress.config.js',
+        },
+        {
+          project: 'config-cjs-and-esm/config-with-js-module',
+          configFile: 'cypress.config.js',
+        },
+        {
+          project: 'config-cjs-and-esm/config-with-cjs',
+          configFile: 'cypress.config.cjs',
+        },
+      ]
 
-        describe(`node v${nodeVersion}`, () => {
-          const PROJECTS = [
-            {
-              project: 'config-cjs-and-esm/config-with-ts-module',
-              configFile: 'cypress.config.ts',
-            },
-            {
-              project: 'config-cjs-and-esm/config-with-module-resolution-bundler',
-              configFile: 'cypress.config.js',
-            },
-            {
-              project: 'config-cjs-and-esm/config-with-js-module',
-              configFile: 'cypress.config.js',
-            },
-            {
-              project: 'config-cjs-and-esm/config-with-cjs',
-              configFile: 'cypress.config.cjs',
-            },
-          ]
-
-          PROJECTS.forEach(({ project, configFile }) => {
-            it(`${project}: tsx generic loader (esm/commonjs/typescript)`, async () => {
-              const projectPath = await scaffoldProject(project)
-              const configFilePath = path.join(projectPath, configFile)
-
-              projectConfigIpc = new ProjectConfigIpc(
-                MOCK_NODE_PATH,
-                MOCK_NODE_VERSION,
-                projectPath,
-                configFilePath,
-                false,
-                (error) => {},
-                () => {},
-                () => {},
-              )
-
-              // make sure that we use tsx for every file, regardless of typescript, esm, or commonjs
-              if (semver.lte(nodeVersion, lastVersionWithDeprecatedLoaderOption)) {
-                // For node 20.5.1 and down, we need use the --loader flag
-                expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
-                  env: expect.objectContaining({
-                    NODE_OPTIONS: expect.stringMatching(/--loader ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"/),
-                  }),
-                }))
-              } else {
-                // For node 20.6.0 and up, we need use the --import flag
-                expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
-                  env: expect.objectContaining({
-                    NODE_OPTIONS: expect.stringMatching(/--import ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"/),
-                  }),
-                }))
-              }
-
-              // the marker require_async_child uses to strip the loader from NODE_OPTIONS
-              expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
-                expect.stringMatching(/^--tsxLoaderOptions=--(import|loader) ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"$/),
-              ]), expect.any(Object))
-
-              if (project.includes('config-with-ts-module') || project.includes('config-with-module-resolution-bundler')) {
-                // these projects have typescript installed and have a tsconfig, so the TSX_TSCONFIG_PATH should be set to the project path
-                expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
-                  env: expect.objectContaining({
-                    TSX_TSCONFIG_PATH: expect.stringMatching(`/cy-projects/${project}/tsconfig.json`),
-                  }),
-                }))
-              } else {
-                // non typescript projects that do NOT have a tsconfig, so the TSX_TSCONFIG_PATH should be undefined
-                expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
-                  env: expect.not.objectContaining({
-                    TSX_TSCONFIG_PATH: expect.any(String),
-                  }),
-                }))
-              }
-            }, 30000)
-          })
+      beforeEach(() => {
+        // @ts-expect-error - mock
+        childProcess.fork.mockImplementation(() => {
+          return {
+            on: jest.fn(),
+            once: jest.fn(),
+            emit: jest.fn(),
+            kill: jest.fn(),
+            removeAllListeners: jest.fn(),
+          }
         })
+      })
+
+      PROJECTS.forEach(({ project, configFile }) => {
+        it(`${project}: tsx generic loader (esm/commonjs/typescript)`, async () => {
+          const projectPath = await scaffoldProject(project)
+          const configFilePath = path.join(projectPath, configFile)
+
+          projectConfigIpc = new ProjectConfigIpc(
+            undefined,
+            projectPath,
+            configFilePath,
+            false,
+            (error) => {},
+            () => {},
+            () => {},
+          )
+
+          // For node 20.6.0 and up, we use the --import flag
+          expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+            env: expect.objectContaining({
+              NODE_OPTIONS: expect.stringMatching(/--import ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"/),
+            }),
+          }))
+
+          // the marker require_async_child uses to strip the loader from NODE_OPTIONS
+          expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
+            expect.stringMatching(/^--tsxLoaderOptions=--import ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"$/),
+          ]), expect.any(Object))
+
+          if (project.includes('config-with-ts-module') || project.includes('config-with-module-resolution-bundler')) {
+            // these projects have typescript installed and have a tsconfig, so the TSX_TSCONFIG_PATH should be set to the project path
+            expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+              env: expect.objectContaining({
+                TSX_TSCONFIG_PATH: expect.stringMatching(`/cy-projects/${project}/tsconfig.json`),
+              }),
+            }))
+          } else {
+            // non typescript projects that do NOT have a tsconfig, so the TSX_TSCONFIG_PATH should be undefined
+            expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
+              env: expect.not.objectContaining({
+                TSX_TSCONFIG_PATH: expect.any(String),
+              }),
+            }))
+          }
+        }, 30000)
       })
     })
   })

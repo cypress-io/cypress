@@ -161,6 +161,11 @@ export function createSyntheticProxyCodec (
       return {
         ...request,
         headers,
+        // This runs after the legacy request middleware chain (SetMatchingRoutes
+        // included), so ctx.req.matchingRoutes is the authoritative request-stage
+        // match — carried forward for the response pause's stream/materialize
+        // classification.
+        hadMatchingRoutes: !!ctx.req.matchingRoutes?.length,
       }
     },
 
@@ -172,6 +177,22 @@ export function createSyntheticProxyCodec (
 
       if (response.bodySkipped) {
         (ctx as unknown as ResponseInterceptionMiddlewareCtx).resBodySkipped = true
+      }
+
+      if (response.captureStream) {
+        const mwCtx = ctx as unknown as ResponseInterceptionMiddlewareCtx
+
+        mwCtx.resCaptureStream = response.captureStream
+
+        // The middleware chain can end before the capture-notification stage
+        // runs (an early res.end(), or an error routing to the error stage).
+        // The synthetic res always closes when the flow ends, however it
+        // ended — so drain any capture stream nobody consumed, or an endless
+        // body's pump would buffer until the transport resets. The
+        // notification clears resCaptureStream once Replay has the stream.
+        ctx.res.once('close', () => {
+          mwCtx.resCaptureStream?.resume()
+        })
       }
 
       return ctx

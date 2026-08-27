@@ -17,8 +17,7 @@ export type User = {
 @Component({
   selector: 'signals-complex-component',
   templateUrl: './signals-complex.component.html',
-  styleUrls: ['./signals-complex.component.scss'],
-  standalone: true,
+  styleUrls: ['./signals-complex.component.css'],
   imports: [NgFor, NgIf, AsyncPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

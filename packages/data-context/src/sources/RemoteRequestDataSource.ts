@@ -1,6 +1,7 @@
 import { CombinedError, stringifyVariables } from '@urql/core'
 import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableStatus } from '../gen/nxs.gen'
-import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
+import { visit, print, parseType, GraphQLObjectType } from 'graphql'
+import type { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, VariableNode } from 'graphql'
 import crypto from 'crypto'
 import _ from 'lodash'
 import type { DataContext } from '../DataContext'

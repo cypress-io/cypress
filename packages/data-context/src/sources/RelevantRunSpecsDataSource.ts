@@ -1,5 +1,7 @@
-import { gql, TypedDocumentNode } from '@urql/core'
-import { GraphQLOutputType, GraphQLResolveInfo, print, visit } from 'graphql'
+import { gql } from '@urql/core'
+import type { TypedDocumentNode } from '@urql/core'
+import { print, visit } from 'graphql'
+import type { GraphQLOutputType, GraphQLResolveInfo } from 'graphql'
 import debugLib from 'debug'
 
 import type { DataContext } from '../DataContext'

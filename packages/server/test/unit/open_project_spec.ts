@@ -213,6 +213,46 @@ describe('lib/open_project', () => {
         expect(browsers.open).to.have.been.calledOnce
       })
 
+      // The launch resolves the network path once and hands the answer down, so
+      // the launcher flags, the CDP wiring, and the server's request-time gates
+      // cannot disagree about it.
+      context('resolved network path', () => {
+        it('passes the browser network path to the launcher for a chromium browser', async function () {
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.true
+          expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.a('function')
+        })
+
+        it('passes the MITM path to the launcher when forceHttp1 is set', async function () {
+          this.config.forceHttp1 = true
+
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
+          expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.undefined
+        })
+
+        it('passes the MITM path to the launcher for a non-chromium browser', async function () {
+          await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
+        })
+
+        // Electron is deprecated as a test browser, so it stays on the legacy
+        // proxy even though it is chromium-family.
+        it('passes the MITM path to the launcher for electron', async function () {
+          await openProject.launch({ name: 'electron', family: 'chromium' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
+          expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.undefined
+          expect(browsers.open.lastCall.args[1]).to.include({
+            proxyServer: 'http://cy-proxy-server',
+            proxyBypassList: '<-loopback>',
+          })
+        })
+      })
+
       context('upstream proxy', () => {
         beforeEach(function () {
           this.proxyEnv = {
@@ -227,8 +267,6 @@ describe('lib/open_project', () => {
         })
 
         afterEach(function () {
-          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
-
           Object.entries(this.proxyEnv).forEach(([name, value]) => {
             if (value === undefined) {
               delete process.env[name]
@@ -238,21 +276,37 @@ describe('lib/open_project', () => {
           })
         })
 
-        it('proxies loopback through the cypress proxy, ignoring the upstream proxy', async function () {
-          process.env.HTTP_PROXY = 'http://proxy.example:8080'
-          process.env.NO_PROXY = 'example.com'
+        context('on the MITM path', () => {
+          it('proxies loopback through the cypress proxy when forceHttp1 is set', async function () {
+            this.config.forceHttp1 = true
+            process.env.HTTP_PROXY = 'http://proxy.example:8080'
+            process.env.NO_PROXY = 'example.com'
 
-          await openProject.launch(this.browser, this.spec)
+            await openProject.launch(this.browser, this.spec)
 
-          expect(browsers.open.lastCall.args[1]).to.include({
-            proxyServer: 'http://cy-proxy-server',
-            proxyBypassList: '<-loopback>',
+            expect(browsers.open.lastCall.args[1]).to.include({
+              proxyServer: 'http://cy-proxy-server',
+              proxyBypassList: '<-loopback>',
+            })
+          })
+
+          // Firefox and WebKit have no browser network path, so they fall back even
+          // with forceHttp1 unset.
+          it('proxies loopback through the cypress proxy for non-chromium browsers', async function () {
+            process.env.HTTP_PROXY = 'http://proxy.example:8080'
+            process.env.NO_PROXY = 'example.com'
+
+            await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+            expect(browsers.open.lastCall.args[1]).to.include({
+              proxyServer: 'http://cy-proxy-server',
+              proxyBypassList: '<-loopback>',
+            })
           })
         })
 
-        context('when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
+        context('on the browser network path', () => {
           beforeEach(function () {
-            process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
             delete this.config.proxyServer
           })
 
@@ -262,7 +316,7 @@ describe('lib/open_project', () => {
             expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
           })
 
-          it('passes the upstream proxy and bypass list to chromium browsers', async function () {
+          it('passes the upstream proxy and bypass list to the browser', async function () {
             process.env.HTTP_PROXY = 'http://proxy.example:8080'
             process.env.NO_PROXY = '<-loopback>,example.com'
             this.config.hosts = { 'foo.example': '127.0.0.1' }
@@ -273,16 +327,6 @@ describe('lib/open_project', () => {
               proxyServer: 'http://proxy.example:8080',
               proxyBypassList: 'example.com,foo.example',
             })
-          })
-
-          it('does not pass upstream proxy opts to non-chromium browsers', async function () {
-            process.env.HTTP_PROXY = 'http://proxy.example:8080'
-            process.env.NO_PROXY = 'example.com'
-
-            await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
-
-            expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
-            expect(browsers.open.lastCall.args[1].proxyBypassList).to.be.undefined
           })
         })
       })

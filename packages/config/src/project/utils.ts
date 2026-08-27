@@ -92,7 +92,6 @@ const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 
 const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
-  'CYPRESS_INTERNAL_DISABLE_PROXY',
 ]
 
 const CYPRESS_SPECIAL_ENV_VARS = [
@@ -462,14 +461,6 @@ export function mergeDefaults (
     ...config,
     ...config[testingType],
     additionalIgnorePattern,
-  }
-
-  // we want the allowCypressEnv option to be inherited by e2e/component config when evaluating
-  // breaking options in order to correctly hide the error that Cypress.env() is deprecated when allowCypressEnv is false
-  // unless the value is explicitly set
-  config.allowCypressEnv = config.allowCypressEnv ?? true
-  if (!_.has(config[testingType], 'allowCypressEnv') && _.isObject(config[testingType])) {
-    config[testingType].allowCypressEnv = config.allowCypressEnv
   }
 
   // split out our own app wide env from user env variables
