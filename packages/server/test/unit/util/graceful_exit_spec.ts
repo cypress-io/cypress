@@ -40,6 +40,24 @@ describe('lib/util/graceful-exit', () => {
     expect(GracefulExit.isShuttingDown).to.be.false
   })
 
+  it('isShuttingDown is true for a step that reads it before its first await', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+
+    let seenByStep: boolean | undefined
+
+    // exitGracefully starts the first step while it is still evaluating the Promise.race that assigns
+    // processTeardown, so anything a step reads before its first await sees no teardown in progress
+    GracefulExit.addStep(() => {
+      seenByStep = GracefulExit.isShuttingDown
+    }, 'reads-isShuttingDown-synchronously')
+
+    await GracefulExit.exitGracefully(0)
+
+    expect(seenByStep, 'a step cannot tell that the process is exiting').to.be.true
+
+    exitStub.restore()
+  })
+
   it('isShuttingDown is true while exitGracefully is in progress and false after teardown completes', async () => {
     const exitStub = sinon.stub(process, 'exit')
 
@@ -200,20 +218,154 @@ describe('lib/util/graceful-exit', () => {
     exitStub.restore()
   })
 
-  it('force exits with the requested code after teardown timeout when a step never completes', async function () {
+  it('force exits with the requested code and names the pending steps when the shared budget expires', async function () {
     this.timeout(5000)
 
     process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '50'
 
     const exitStub = sinon.stub(process, 'exit')
+    const logStub = sinon.stub(console, 'log')
 
-    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+    // a step timeout longer than the shared budget leaves the force-exit as the only way out
+    GracefulExit.addStep(() => new Promise(() => {}), 'hang', 10000)
 
     void GracefulExit.exitGracefully(0)
 
     await new Promise((r) => setTimeout(r, 200))
 
+    logStub.restore()
+
     expect(exitStub).to.have.been.calledWith(0)
+    expect(logStub.args.flat().join('\n')).to.contain('Still waiting on: hang')
+
+    exitStub.restore()
+  })
+
+  it('abandons a hung step on its own budget so the remaining steps still complete', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '1000'
+
+    const startedAt = Date.now()
+    let exitedAfter: number | undefined
+    const exitStub = sinon.stub(process, 'exit').callsFake(() => {
+      exitedAfter = exitedAfter ?? Date.now() - startedAt
+
+      return undefined as never
+    })
+    const logStub = sinon.stub(console, 'log')
+
+    let quickStepRan = false
+
+    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+    GracefulExit.addStep(async () => {
+      await new Promise((r) => setTimeout(r, 50))
+      quickStepRan = true
+    }, 'quick')
+
+    void GracefulExit.exitGracefully(0)
+
+    await new Promise((r) => setTimeout(r, 1200))
+
+    logStub.restore()
+
+    const logged = logStub.args.flat().join('\n')
+
+    expect(quickStepRan, 'the quick step is not cut off by the hung one').to.be.true
+    // 0.8 of the 1000ms budget, so teardown settles before the shared force-exit timer can fire
+    expect(exitedAfter).to.be.within(800, 999)
+    expect(exitStub).to.have.been.calledWith(0)
+    expect(logged).to.contain('The "hang" teardown step did not finish within 800ms')
+    expect(logged).not.to.contain('Failed to gracefully exit')
+
+    exitStub.restore()
+  })
+
+  it('a reset cancels the step bounds of an in-flight teardown', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '200'
+
+    const exitStub = sinon.stub(process, 'exit')
+    const logStub = sinon.stub(console, 'log')
+
+    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+
+    void GracefulExit.exitGracefully(0)
+
+    GracefulExit.resetForTesting()
+
+    await new Promise((r) => setTimeout(r, 400))
+
+    logStub.restore()
+
+    // a step timer that outlives the reset settles the abandoned flush, and its `finally` exits the
+    // process for real once a spec restores the stub, taking the rest of the suite with it
+    expect(exitStub, 'a cancelled teardown still exited the process').not.to.have.been.called
+
+    exitStub.restore()
+  })
+
+  it('does not leak an unhandled rejection when an abandoned step rejects later', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '100'
+
+    const exitStub = sinon.stub(process, 'exit')
+    const logStub = sinon.stub(console, 'log')
+    const unhandled: unknown[] = []
+    const onUnhandled = (reason: unknown) => unhandled.push(reason)
+
+    // lib/unhandled_exceptions exits the process with code 1 on an unhandled rejection, which would
+    // overwrite a passing run's exit code. Take the reports here instead, so a leak fails an
+    // assertion rather than killing the suite, and prepend so nothing else consumes them first.
+    process.prependListener('unhandledRejection', onUnhandled)
+
+    try {
+      // rejects after its own bound expires, when flushSteps is no longer awaiting it
+      GracefulExit.addStep(() => new Promise((_resolve, reject) => {
+        setTimeout(() => reject(new Error('late teardown failure')), 150)
+      }), 'rejects-after-its-bound')
+
+      await GracefulExit.exitGracefully(0)
+
+      await new Promise((r) => setTimeout(r, 300))
+    } finally {
+      process.removeListener('unhandledRejection', onUnhandled)
+      logStub.restore()
+      exitStub.restore()
+    }
+
+    expect(unhandled, 'an abandoned step leaked an unhandled rejection').to.be.empty
+    expect(exitStub).to.have.been.calledWith(0)
+    expect(exitStub).not.to.have.been.calledWith(1)
+  })
+
+  it('honors a step-specific timeout shorter than the shared budget', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '2000'
+
+    const startedAt = Date.now()
+    let exitedAfter: number | undefined
+    const exitStub = sinon.stub(process, 'exit').callsFake(() => {
+      exitedAfter = exitedAfter ?? Date.now() - startedAt
+
+      return undefined as never
+    })
+    const logStub = sinon.stub(console, 'log')
+
+    GracefulExit.addStep(() => new Promise(() => {}), 'best-effort', 100)
+
+    void GracefulExit.exitGracefully(0)
+
+    await new Promise((r) => setTimeout(r, 500))
+
+    logStub.restore()
+
+    expect(exitedAfter).to.be.within(100, 400)
+    expect(exitStub).to.have.been.calledWith(0)
+    expect(logStub.args.flat().join('\n')).to.contain('The "best-effort" teardown step did not finish within 100ms')
 
     exitStub.restore()
   })

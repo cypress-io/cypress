@@ -35,7 +35,9 @@ const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 // this budget; data-context cannot import from the server, so the default is mirrored here
 const DEFAULT_TEARDOWN_TIMEOUT_MS = 5000
 // the disconnect ack has to give up well before the teardown budget expires, or the force-exit cuts
-// off the rest of teardown instead; derived so lowering the budget cannot invert the two
+// off the rest of teardown instead; derived so lowering the budget cannot invert the two. Keep equal
+// to PEER_WAIT_BUDGET_FRACTION in @packages/server lib/util/graceful-exit.ts, which bounds the other
+// wait on a process we do not control
 const TEARDOWN_BUDGET_FRACTION = 0.4
 
 function mainProcessWillDisconnectTimeoutMs (): number {
