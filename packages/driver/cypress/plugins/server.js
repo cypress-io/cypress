@@ -65,6 +65,10 @@ const createApp = (port) => {
   })
 
   app.get('/status-code', (req, res) => {
+    if (req.query.message) {
+      res.statusMessage = req.query.message
+    }
+
     res.sendStatus(req.query.code || 200)
   })
 

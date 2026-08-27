@@ -29,7 +29,11 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'RENAMED_CONFIG_OPTION',
   'EXPERIMENTAL_STUDIO_REMOVED',
   'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
-  'CYPRESS_ENV_DEPRECATION',
+  'EXPERIMENTAL_SOURCE_REWRITING_REMOVED',
+  'ALLOW_CYPRESS_ENV_REMOVED',
+  'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
+  'VISIBILITY_STRATEGY_DEPRECATION',
+  'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
 ] as const
 
 type ValidationOptions = {
@@ -38,7 +42,22 @@ type ValidationOptions = {
 
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 
-export type OverrideLevel = 'any' | 'suite' | 'never'
+/**
+ * Where a configuration option is allowed to be overridden at test time:
+ * - `any`: suite-level overrides, test-level overrides, and at run-time via `Cypress.config()`.
+ * - `suiteOrTest`: suite-level and test-level overrides only. Cannot be set via `Cypress.config()`
+ *    while a test is executing.
+ * - `suite`: suite-level overrides only.
+ * - `never`: cannot be overridden at test time.
+ */
+export type OverrideLevel = 'any' | 'suiteOrTest' | 'suite' | 'never'
+
+/**
+ * The context in which a test-time config change is being applied: `suite`/`test` for
+ * `describe`/`it` config overrides, `runtime` for a `Cypress.config()` call while a test is
+ * executing, and `undefined` for anything else (support/spec file load or a `test:before:run` event).
+ */
+export type OverrideContext = 'suite' | 'test' | 'runtime' | undefined
 
 interface ConfigOption {
   name: string
@@ -89,10 +108,6 @@ export interface BreakingOption {
    * Whether to log the error message as a warning instead of throwing an error.
    */
   isWarning?: boolean
-  /**
-    * Whether to show the error message in the launchpad
-    */
-  showInLaunchpad?: boolean
   /**
    * Whether to display or throw the error message based on the configuration value present.
    */
@@ -154,7 +169,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'blockHosts',
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
     requireRestartOnChange: 'server',
   }, {
     name: 'chromeWebSecurity',
@@ -184,12 +199,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
-    name: 'allowCypressEnv',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    overrideLevel: 'never',
-    requireRestartOnChange: 'server',
-  }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
     validation: validate.isString,
@@ -206,7 +215,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'env',
     defaultValue: {},
     validation: validate.isPlainObject,
-    overrideLevel: 'any',
+    overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {
     name: 'expose',
@@ -236,11 +245,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalMemoryManagement',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -259,12 +263,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
-    name: 'experimentalSourceRewriting',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
     name: 'experimentalSingleTabRunMode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -277,10 +275,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalFastVisibility',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
+    name: 'visibilityStrategy',
+    defaultValue: 'modern',
+    validation: validate.isOneOf('legacy', 'modern'),
     overrideLevel: 'any',
   }, {
     name: 'fileServerFolder',
@@ -293,6 +290,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 'cypress/fixtures',
     validation: validate.isStringOrFalse,
     isFolder: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'forceHttp1',
+    defaultValue: false,
+    validation: validate.isBoolean,
     requireRestartOnChange: 'server',
   }, {
     name: 'excludeSpecPattern',
@@ -311,9 +313,13 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'keystrokeDelay',
-    defaultValue: 0,
+    defaultValue: null,
     validation: validate.isNumberOrFalse,
     overrideLevel: 'any',
+  }, {
+    name: 'manageBrowserMemory',
+    defaultValue: true,
+    validation: validate.isBoolean,
   }, {
     name: 'modifyObstructiveCode',
     defaultValue: true,
@@ -487,12 +493,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
   }, {
     name: 'viewportWidth',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
   }, {
     name: 'waitForAnimations',
     defaultValue: true,
@@ -670,10 +676,35 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     isWarning: true,
   },
   {
+    name: 'experimentalSourceRewriting',
+    errorKey: 'EXPERIMENTAL_SOURCE_REWRITING_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'allowCypressEnv',
-    errorKey: 'CYPRESS_ENV_DEPRECATION',
-    // Display this warning if the value is not present or is explicitly false
-    shouldDisplayOrThrow: (value: any) => value !== false,
+    errorKey: 'ALLOW_CYPRESS_ENV_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'experimentalFastVisibility',
+    errorKey: 'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
+    isWarning: true,
+  },
+  {
+    name: 'visibilityStrategy',
+    errorKey: 'VISIBILITY_STRATEGY_DEPRECATION',
+    shouldDisplayOrThrow: (value: any) => value === 'legacy',
+    isWarning: true,
+  },
+  {
+    name: 'experimentalMemoryManagement',
+    errorKey: 'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'forceHttp1',
+    errorKey: 'FORCE_HTTP1_DEPRECATION',
+    shouldDisplayOrThrow: (value: any) => value === true,
     isWarning: true,
   },
 ] as const

@@ -36,7 +36,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
-    "@types/node": "22.18.7",
+    "@types/node": "24.10.1",
     "@types/pngjs": "^6.0.5",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",

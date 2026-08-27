@@ -414,6 +414,37 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config.hideRunnerUi).to.be.true
       })
     })
+
+    describe('isInteractive', () => {
+      afterEach(function () {
+        delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+      })
+
+      it('returns true in open mode', function () {
+        this.project.cfg.isTextTerminal = false
+
+        const config = this.project.getConfig()
+
+        expect(config.isInteractive).to.be.true
+      })
+
+      it('returns false in run mode', function () {
+        this.project.cfg.isTextTerminal = true
+
+        const config = this.project.getConfig()
+
+        expect(config.isInteractive).to.be.false
+      })
+
+      it('returns true in run mode when CYPRESS_INTERNAL_SIMULATE_OPEN_MODE is set', function () {
+        this.project.cfg.isTextTerminal = true
+        process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE = '1'
+
+        const config = this.project.getConfig()
+
+        expect(config.isInteractive).to.be.true
+      })
+    })
   })
 
   describe('#open', () => {

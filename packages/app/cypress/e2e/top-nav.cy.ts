@@ -89,16 +89,20 @@ describe('App Top Nav Workflows', () => {
         .should('not.exist')
 
         cy.get('@browserItems').eq(2)
-        .should('contain', 'Electron')
-        .and('contain', 'Version 13')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('not.exist')
-
-        cy.get('@browserItems').eq(3)
         .should('contain', 'Firefox')
         .and('contain', 'Version 6')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
+
+        // Electron is deprecated, so it sorts after the supported, non-deprecated
+        // browsers and is tagged as deprecated in the dropdown.
+        cy.get('@browserItems').eq(3)
+        .should('contain', 'Electron')
+        .and('contain', 'Version 13')
+        .within(() => {
+          cy.findByTestId('deprecated-browser-badge').should('contain', 'Deprecated')
+          cy.findByTestId('top-nav-browser-list-selected-item').should('not.exist')
+        })
       })
 
       it('performs mutations to update and relaunch browser', () => {

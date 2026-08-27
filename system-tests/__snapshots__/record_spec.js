@@ -2590,7 +2590,6 @@ This can happen for a number of different reasons.
 
 If you're running lots of tests on a memory intense application.
   - Try increasing the CPU/memory on the machine you're running on.
-  - Try enabling experimentalMemoryManagement in your config file.
   - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
 
 You can learn more here:

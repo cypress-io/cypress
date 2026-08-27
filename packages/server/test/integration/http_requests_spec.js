@@ -171,6 +171,11 @@ describe('Routes', () => {
                   use: () => { },
                 }
 
+                // these requests arrive in absolute form, and CONNECT for https,
+                // like a proxied browser — which only happens on the MITM path,
+                // and the server refuses CONNECT until a launch resolves it
+                await this.server.setNetworkMode(false)
+
                 await this.server.startWebsockets(automationStub, config, {})
 
                 if (initialUrl) {
@@ -431,15 +436,17 @@ describe('Routes', () => {
     })
   })
 
-  context('when CYPRESS_INTERNAL_DISABLE_PROXY=1', () => {
-    beforeEach(function () {
-      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+  context('on the browser (CDP) network path', () => {
+    beforeEach(async function () {
+      await this.setup({ projectName: 'foobarbaz' })
 
-      return this.setup({ projectName: 'foobarbaz' })
-    })
-
-    afterEach(() => {
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      // the browser (CDP) network path is claimed by the runtime that serves it, so installing one
+      // against a stub CRI client is what puts the server on that path
+      await this.server.createCdpFetchNetworkRuntime({
+        send: sinon.stub().resolves({}),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      })
     })
 
     it('does not redirect non-proxied traffic to clientRoute', function () {
@@ -552,13 +559,13 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', async function () {
+      it('processes foo.js spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
-        expect(res.body).to.include('expect("foo.coffee")')
+        expect(res.body).to.include('foo.js')
       })
 
       it('processes dom.jsx spec', async function () {
@@ -584,7 +591,7 @@ describe('Routes', () => {
 
       it('serves error javascript file when the file is missing', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Module not found')
@@ -605,13 +612,13 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', async function () {
+      it('processes foo.js spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
-        expect(res.body).to.include('expect("foo.coffee")')
+        expect(res.body).to.include('foo.js')
       })
 
       it('processes dom.jsx spec', async function () {
@@ -625,7 +632,7 @@ describe('Routes', () => {
 
       it('serves error javascript file when the file is missing', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Cypress.action("spec:script:error", {')
