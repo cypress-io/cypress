@@ -40,6 +40,24 @@ describe('lib/util/graceful-exit', () => {
     expect(GracefulExit.isShuttingDown).to.be.false
   })
 
+  it('isShuttingDown is true for a step that reads it before its first await', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+
+    let seenByStep: boolean | undefined
+
+    // exitGracefully starts the first step while it is still evaluating the Promise.race that assigns
+    // processTeardown, so anything a step reads before its first await sees no teardown in progress
+    GracefulExit.addStep(() => {
+      seenByStep = GracefulExit.isShuttingDown
+    }, 'reads-isShuttingDown-synchronously')
+
+    await GracefulExit.exitGracefully(0)
+
+    expect(seenByStep, 'a step cannot tell that the process is exiting').to.be.true
+
+    exitStub.restore()
+  })
+
   it('isShuttingDown is true while exitGracefully is in progress and false after teardown completes', async () => {
     const exitStub = sinon.stub(process, 'exit')
 

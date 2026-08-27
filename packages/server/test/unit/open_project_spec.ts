@@ -6,6 +6,7 @@ import { openProject } from '../../lib/open_project'
 import preprocessor from '../../lib/plugins/preprocessor'
 import runEvents from '../../lib/plugins/run_events'
 import Fixtures from '@tooling/system-tests'
+import { GracefulExit } from '../../lib/util/graceful-exit'
 import delay from 'lodash/delay'
 
 const todosPath = Fixtures.projectPath('todos')
@@ -394,6 +395,37 @@ describe('lib/open_project', () => {
   })
 
   describe('#closeActiveProject', () => {
+    it('leaves the browser close unbounded when the process is not exiting', async function () {
+      sinon.stub(ProjectBase.prototype, 'close').resolves()
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
+
+      await openProject.closeActiveProject()
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(closeBrowserStub.firstCall.args[0].timeoutMs, 'a project switch has to wait for the browser to really be gone').to.be.undefined
+    })
+
+    it('bounds the browser close when the process is exiting', async function () {
+      sinon.stub(ProjectBase.prototype, 'close').resolves()
+      const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
+      const exitStub = sinon.stub(process, 'exit')
+
+      // exitGracefully flushes every registered step; drop the ones other specs left behind so this
+      // asserts on our own call
+      GracefulExit.resetForTesting()
+
+      // as a teardown step, the way it reaches this path in production (clearCtx -> ctx.destroy)
+      GracefulExit.addStep(() => openProject.closeActiveProject(), 'close project')
+
+      await GracefulExit.exitGracefully(0)
+
+      expect(closeBrowserStub).to.have.been.calledOnce
+      expect(closeBrowserStub.firstCall.args[0].timeoutMs, 'waiting on the browser unbounded spends the whole exit budget').to.be.a('number')
+
+      exitStub.restore()
+      GracefulExit.resetForTesting()
+    })
+
     it('awaits projectBase.close before resetting and closing the browser', async function () {
       let resolveClose
       const closePromise = new Promise((resolve) => {
