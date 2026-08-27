@@ -547,8 +547,6 @@ export class CdpFetchTransport {
             urlChanged: outbound.url !== event.request.url,
             methodChanged: outbound.method !== event.request.method,
             postDataChanged: outbound.postData !== event.request.postData,
-            // the send below also triggers on postDataBuffer alone, which the
-            // string comparison above cannot see
             postDataBufferSet: !!outbound.postDataBuffer,
             headersChanged: !!headers,
           })
