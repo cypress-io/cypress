@@ -16,6 +16,7 @@ import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
 import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
+import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 
 const debug = Debug('cypress:server:open_project')
@@ -226,8 +227,8 @@ export class OpenProject extends EventEmitter {
     return this.relaunchBrowser()
   }
 
-  closeBrowser () {
-    return browsers.close()
+  closeBrowser (timeoutMs?: number) {
+    return browsers.close({ timeoutMs })
   }
 
   async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
@@ -255,7 +256,10 @@ export class OpenProject extends EventEmitter {
 
     this.resetOpenProject()
 
-    return this.closeBrowser()
+    // The browser is signalled either way; this only decides how long we wait for its process to be
+    // gone. A browser with several renderers takes seconds to reap on a loaded machine, and on the way
+    // out that wait sits inside the exit budget every teardown step shares, so bound it there.
+    return this.closeBrowser(GracefulExit.isShuttingDown ? getPeerWaitTimeoutMs() : undefined)
   }
 
   close () {
