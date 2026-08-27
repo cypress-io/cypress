@@ -38,7 +38,8 @@
 
 **Bugfixes:**
 
-- Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead, naming the cleanup step that stalled. A single stalled cleanup step, such as waiting on a browser that is slow to close, no longer holds up the rest of shutdown. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
+- Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
+- Fixed an issue where a single cleanup step that stalled while Cypress shut down, such as waiting on a browser that was slow to close, could hold up the rest of shutdown. Each cleanup step is now given its own time limit, and `cypress run` names any step that runs out of it. Addressed in [#34699](https://github.com/cypress-io/cypress/pull/34699).
 
 **Dependency Updates:**
 
