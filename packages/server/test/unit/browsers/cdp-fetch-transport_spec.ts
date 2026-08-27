@@ -391,8 +391,6 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest).to.have.property('postData', 'added')
     })
 
-    // postData is a utf8 string, so a binary body arrives at the pause already
-    // mangled; postDataEntries carries the same body base64-encoded.
     it('decodes the body from postDataEntries so binary payloads keep their bytes', () => {
       const codec = createCdpFetchCodec()
       const body = Buffer.from([0x80, 0x81, 0x82, 0x83])
@@ -496,9 +494,6 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.postData).to.equal('chrome-lossy-view')
     })
 
-    // Chrome and Node disagree on how many replacement characters an invalid
-    // sequence collapses to, so the utf8 view cannot be trusted to tell an
-    // edited binary body from an untouched one — only the bytes can.
     it('encodes an edited binary body as bytes', () => {
       const codec = createCdpFetchCodec()
       const body = Buffer.from([0x80, 0x81, 0x82, 0x83])
@@ -519,8 +514,6 @@ describe('CdpFetchTransport', () => {
       expect(transportRequest.postDataBuffer).to.deep.equal(edited)
     })
 
-    // CDP may omit postData for a payload too long to inline, leaving the
-    // entries as the only record that the request had a body at all.
     it('encodes an emptied body when only the entries recorded the pause body', () => {
       const codec = createCdpFetchCodec()
       const body = Buffer.from([0x80, 0x81, 0x82, 0x83])
