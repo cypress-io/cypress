@@ -1741,6 +1741,20 @@ describe('network stubbing', { retries: 15 }, function () {
       .get('#result').should('have.text', modifiedUint8.join(', '))
     })
 
+    it('can modify a request body to bytes that are not valid utf8', function () {
+      // 0x9b is a continuation byte with no lead and 0xfe never appears in
+      // utf8, so a string round trip would replace both
+      const modified = new Uint8Array([0x9b, 0xfe, 0x41])
+
+      cy.intercept('/binary*', function (req) {
+        req.body = modified.buffer
+      }).as('post')
+      .visit('/fixtures/dump-binary.html')
+      .wait('@post')
+      // #result is what the origin echoed back, so this asserts the wire
+      .get('#result').should('have.text', modified.join(', '))
+    })
+
     it('can modify original request body and have it passed to next handler', function (done) {
       cy.intercept('/post-only', function (req) {
         expect(req.body).to.eq('quuz')
