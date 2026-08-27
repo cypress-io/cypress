@@ -64,7 +64,7 @@ const kill = (options: KillOptions = {}) => {
       resolve()
     })
 
-    if (options.timeoutMs) {
+    if (options.timeoutMs != null) {
       // Stop waiting, but leave the listeners attached: the process is still alive, so its later
       // `exit` and `error` events still need somewhere to go.
       timer = setTimeout(() => {

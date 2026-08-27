@@ -315,31 +315,30 @@ describe('lib/util/graceful-exit', () => {
     const logStub = sinon.stub(console, 'log')
     const unhandled: unknown[] = []
     const onUnhandled = (reason: unknown) => unhandled.push(reason)
+
     // lib/unhandled_exceptions exits the process with code 1 on an unhandled rejection, which would
-    // overwrite a passing run's exit code; capture instead so a leak fails an assertion
-    const foreignListeners = process.listeners('unhandledRejection').slice()
+    // overwrite a passing run's exit code. Take the reports here instead, so a leak fails an
+    // assertion rather than killing the suite, and prepend so nothing else consumes them first.
+    process.prependListener('unhandledRejection', onUnhandled)
 
-    process.removeAllListeners('unhandledRejection')
-    process.on('unhandledRejection', onUnhandled)
+    try {
+      // rejects after its own bound expires, when flushSteps is no longer awaiting it
+      GracefulExit.addStep(() => new Promise((_resolve, reject) => {
+        setTimeout(() => reject(new Error('late teardown failure')), 150)
+      }), 'rejects-after-its-bound')
 
-    // rejects after its own bound expires, when flushSteps is no longer awaiting it
-    GracefulExit.addStep(() => new Promise((_resolve, reject) => {
-      setTimeout(() => reject(new Error('late teardown failure')), 150)
-    }), 'rejects-after-its-bound')
+      await GracefulExit.exitGracefully(0)
 
-    await GracefulExit.exitGracefully(0)
-
-    await new Promise((r) => setTimeout(r, 300))
-
-    process.removeListener('unhandledRejection', onUnhandled)
-    foreignListeners.forEach((listener) => process.on('unhandledRejection', listener))
-    logStub.restore()
+      await new Promise((r) => setTimeout(r, 300))
+    } finally {
+      process.removeListener('unhandledRejection', onUnhandled)
+      logStub.restore()
+      exitStub.restore()
+    }
 
     expect(unhandled, 'an abandoned step leaked an unhandled rejection').to.be.empty
     expect(exitStub).to.have.been.calledWith(0)
     expect(exitStub).not.to.have.been.calledWith(1)
-
-    exitStub.restore()
   })
 
   it('honors a step-specific timeout shorter than the shared budget', async function () {

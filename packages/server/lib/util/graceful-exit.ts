@@ -25,12 +25,13 @@ function getDefaultStepTimeoutMs (): number {
   return Math.max(1, Math.floor(getTeardownTimeoutMs() * STEP_BUDGET_FRACTION))
 }
 
-/**
- * Bound for teardown work that waits on a process we do not control, so it settles well inside the
- * step that shares its budget with the others rather than consuming that step whole.
- */
+// Bound for teardown work that waits on a process we do not control, so it settles well inside the
+// step whose budget it shares. Kept equal to TEARDOWN_BUDGET_FRACTION in @packages/data-context
+// ProjectConfigManager, which bounds the other peer wait and cannot import from here.
+export const PEER_WAIT_BUDGET_FRACTION = 0.4
+
 export function getPeerWaitTimeoutMs (): number {
-  return Math.max(1, Math.floor(getDefaultStepTimeoutMs() / 2))
+  return Math.max(1, Math.floor(getTeardownTimeoutMs() * PEER_WAIT_BUDGET_FRACTION))
 }
 
 export interface ExitStep {
@@ -204,10 +205,7 @@ export class GracefulExit {
     }
   }
 
-  /**
-   * Cancels the bounds of steps still in flight. A step timer that outlives the teardown it belongs to
-   * settles that abandoned flush, whose `finally` then exits the process for real.
-   */
+  // A step timer outliving its teardown settles that abandoned flush, which then exits the process.
   private clearStepTimeouts (): void {
     for (const timer of this.stepTimeouts) {
       clearTimeout(timer)
@@ -254,6 +252,7 @@ export class GracefulExit {
             console.log('Error forcing exit: ', e)
           } finally {
             exit.clearForceExitTimeout()
+            exit.clearStepTimeouts()
             resolve()
             process.exit(code)
           }

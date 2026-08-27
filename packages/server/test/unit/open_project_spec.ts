@@ -399,6 +399,9 @@ describe('lib/open_project', () => {
       sinon.stub(ProjectBase.prototype, 'close').resolves()
       const closeBrowserStub = sinon.stub(browsers, 'close').resolves()
 
+      // an earlier spec that stubbed process.exit can leave teardown marked as started
+      GracefulExit.resetForTesting()
+
       await openProject.closeActiveProject()
 
       expect(closeBrowserStub).to.have.been.calledOnce

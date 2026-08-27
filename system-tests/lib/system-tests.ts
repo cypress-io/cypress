@@ -577,7 +577,7 @@ const processEnvCache = _.clone(process.env)
 const teardownBudget = { runs: 0, runsOverBudget: 0, notices: 0 }
 
 const recordTeardownBudget = (output: string) => {
-  const notices = output.match(teardownBudgetNoticeRe)
+  const notices = output.match(teardownBudgetNoticeRe())
 
   teardownBudget.runs++
 
@@ -1079,8 +1079,6 @@ const systemTests = {
     let stderr = ''
 
     const exit = function (code: number | null, signal: NodeJS.Signals | null | undefined) {
-      recordTeardownBudget(stdout)
-
       if (interruptRequested) {
         return {
           code,
@@ -1089,6 +1087,8 @@ const systemTests = {
           stderr,
         }
       }
+
+      recordTeardownBudget(stdout)
 
       const { expectedExitCode, skipExitSignalAssertion } = options
 
