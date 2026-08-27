@@ -29,6 +29,7 @@ function createDetector () {
     loadingFinished: handler('Network.loadingFinished') as (event: any, sessionId?: string) => void,
     attachedToTarget: handler('Target.attachedToTarget') as (event: any, sessionId?: string) => void,
     detachedFromTarget: handler('Target.detachedFromTarget') as (event: any, sessionId?: string) => void,
+    targetDestroyed: handler('Target.targetDestroyed') as (event: any, sessionId?: string) => void,
   }
 }
 
@@ -74,6 +75,7 @@ describe('InterceptionEscapeDetector', () => {
         'Network.loadingFailed',
         'Target.attachedToTarget',
         'Target.detachedFromTarget',
+        'Target.targetDestroyed',
       ])
 
       detector.stop()
@@ -87,11 +89,11 @@ describe('InterceptionEscapeDetector', () => {
 
       detector.start()
       detector.start()
-      expect(client.on.callCount).to.equal(7)
+      expect(client.on.callCount).to.equal(8)
 
       detector.stop()
       detector.stop()
-      expect(client.off.callCount).to.equal(7)
+      expect(client.off.callCount).to.equal(8)
     })
   })
 
@@ -158,6 +160,37 @@ describe('InterceptionEscapeDetector', () => {
       expect(onEscape).not.to.be.called
     })
 
+    it('does not let an earlier visit\'s pause vouch for a later escaped document of the same url', () => {
+      const { requestPaused, requestWillBeSent, responseReceived, onEscape } = createDetector()
+
+      // First visit: intercepted (pre-worker page-session document pause).
+      requestWillBeSent(documentRequest('1', 'https://app.test/dashboard'))
+      requestPaused({ request: { method: 'GET', url: 'https://app.test/dashboard' } })
+      responseReceived(documentResponse('1', 'https://app.test/dashboard', false))
+
+      // Return visit: worker cold-start, no pause anywhere.
+      requestWillBeSent(documentRequest('2', 'https://app.test/dashboard'))
+      responseReceived(documentResponse('2', 'https://app.test/dashboard', true))
+
+      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/dashboard', method: 'GET' })
+    })
+
+    it('does not count the response-stage pause of a hop as a second interception', () => {
+      const { requestPaused, requestWillBeSent, responseReceived, onEscape } = createDetector()
+
+      // One intercepted hop: request-stage and response-stage pauses.
+      requestWillBeSent(documentRequest('1', 'https://app.test/'))
+      requestPaused({ request: { method: 'GET', url: 'https://app.test/' } }, 'worker-session')
+      requestPaused({ request: { method: 'GET', url: 'https://app.test/' }, responseStatusCode: 200 }, 'worker-session')
+      responseReceived(documentResponse('1', 'https://app.test/', true))
+
+      // The escaped return visit must not be covered by that hop's leftover.
+      requestWillBeSent(documentRequest('2', 'https://app.test/'))
+      responseReceived(documentResponse('2', 'https://app.test/', true))
+
+      expect(onEscape).to.be.calledOnceWith({ url: 'https://app.test/', method: 'GET' })
+    })
+
     it('does not report while a worker session is attached (cache-served document)', () => {
       const { attachedToTarget, requestWillBeSent, responseReceived, onEscape } = createDetector()
 
@@ -181,7 +214,19 @@ describe('InterceptionEscapeDetector', () => {
       const { attachedToTarget, detachedFromTarget, responseReceived, onEscape } = createDetector()
 
       attachedToTarget(workerAttach('worker-1'))
-      detachedFromTarget({ targetId: 'worker-1' })
+      // Cleared by sessionId alone — detach's targetId is deprecated and may
+      // be absent.
+      detachedFromTarget({ sessionId: 'session-worker-1' })
+      responseReceived(documentResponse('1', 'https://app.test/', true))
+
+      expect(onEscape).to.be.calledOnce
+    })
+
+    it('reports again once every worker target has been destroyed', () => {
+      const { attachedToTarget, targetDestroyed, responseReceived, onEscape } = createDetector()
+
+      attachedToTarget(workerAttach('worker-1'))
+      targetDestroyed({ targetId: 'worker-1' })
       responseReceived(documentResponse('1', 'https://app.test/', true))
 
       expect(onEscape).to.be.calledOnce

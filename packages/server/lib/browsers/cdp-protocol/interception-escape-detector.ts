@@ -21,14 +21,6 @@ const requestKey = (method: string, url: string) => `${method} ${url}`
 
 const networkKey = (requestId: string, sessionId?: string) => `${sessionId ?? 'root'}:${requestId}`
 
-const addBounded = <T>(set: Set<T>, value: T, max: number) => {
-  if (set.size >= max) {
-    set.delete(set.values().next().value as T)
-  }
-
-  set.add(value)
-}
-
 /**
  * Observe-only tripwire for the browser network path: reports when a
  * service-worker-served document reached the renderer without passing through
@@ -46,27 +38,35 @@ const addBounded = <T>(set: Set<T>, value: T, max: number) => {
  * Detection: a page-session `Network.responseReceived` for a Document with
  * `fromServiceWorker: true` is an escape when
  *
- * - no `Fetch.requestPaused` with the same method+URL was seen — a covered
- *   worker's passthrough `fetch(e.request)` pauses under the document's own
- *   method and URL (its networkId differs from the document's, so ids cannot
- *   be joined), and
- * - no service worker target is attached on this connection — while one is,
+ * - no unconsumed `Fetch.requestPaused` with the same method+URL exists — a
+ *   covered worker's passthrough `fetch(e.request)` pauses under the
+ *   document's own method and URL (its networkId differs from the document's,
+ *   so ids cannot be joined). Only request-stage pauses are counted (the
+ *   response-stage pause re-announces the same hop), and every document
+ *   response consumes one credit for its key, service-worker-served or not —
+ *   otherwise a pause from an earlier visit of the same URL (the pre-worker
+ *   page-session document, or a previous intercepted passthrough) would
+ *   vouch for a later escaped one, and
+ *
+ * - no service worker session is attached on this connection — while one is,
  *   a document with no pause is the healthy cache-served case
  *   (`caches.match()` never makes a network request), not an escape.
  *
- * Worker attach state comes from this connection's Target events. An attach
- * with `waitingForDebugger: false` means the worker was already running
- * uncovered — logged as corroboration, since the escapes it explains were
- * reported seconds earlier.
+ * Worker attach state comes from this connection's Target events, keyed by
+ * sessionId — `Target.detachedFromTarget` always carries one, while its
+ * targetId is deprecated; `Target.targetDestroyed` covers a destroy delivered
+ * without a detach. An attach with `waitingForDebugger: false` means the
+ * worker was already running uncovered — logged as corroboration, since the
+ * escapes it explains were reported seconds earlier.
  *
  * Scope: documents on this connection only. Extra targets (popups) run their
  * network on their own connections and are not watched; subresource escapes
  * are deliberately out of scope (unmodified responses, page still works).
  */
 export class InterceptionEscapeDetector {
-  private readonly pausedKeys = new Set<string>()
+  private readonly pauseCredits = new Map<string, number>()
   private readonly documentRequests = new Map<string, { method: string, url: string }>()
-  private readonly workerTargets = new Map<string, string>()
+  private readonly workerSessions = new Map<string, string>()
   private isStarted = false
 
   constructor (
@@ -86,6 +86,7 @@ export class InterceptionEscapeDetector {
     this.client.on('Network.loadingFailed', this.onLoadingSettled)
     this.client.on('Target.attachedToTarget', this.onAttachedToTarget)
     this.client.on('Target.detachedFromTarget', this.onDetachedFromTarget)
+    this.client.on('Target.targetDestroyed', this.onTargetDestroyed)
     this.isStarted = true
   }
 
@@ -95,7 +96,7 @@ export class InterceptionEscapeDetector {
    * tests, and forgetting it would misreport its cache-served documents.
    */
   reset (): void {
-    this.pausedKeys.clear()
+    this.pauseCredits.clear()
     this.documentRequests.clear()
   }
 
@@ -111,13 +112,45 @@ export class InterceptionEscapeDetector {
     this.client.off('Network.loadingFailed', this.onLoadingSettled)
     this.client.off('Target.attachedToTarget', this.onAttachedToTarget)
     this.client.off('Target.detachedFromTarget', this.onDetachedFromTarget)
+    this.client.off('Target.targetDestroyed', this.onTargetDestroyed)
     this.reset()
-    this.workerTargets.clear()
+    this.workerSessions.clear()
     this.isStarted = false
   }
 
   private onRequestPaused = (event: Protocol.Fetch.RequestPausedEvent): void => {
-    addBounded(this.pausedKeys, requestKey(event.request.method, event.request.url), MAX_PAUSED_KEYS)
+    // The response-stage pause re-announces the same hop; counting it would
+    // credit one interception twice. Same stage test as the transport's.
+    if (event.responseErrorReason || typeof event.responseStatusCode === 'number') {
+      return
+    }
+
+    const key = requestKey(event.request.method, event.request.url)
+
+    if (this.pauseCredits.size >= MAX_PAUSED_KEYS && !this.pauseCredits.has(key)) {
+      this.pauseCredits.delete(this.pauseCredits.keys().next().value as string)
+    }
+
+    this.pauseCredits.set(key, (this.pauseCredits.get(key) ?? 0) + 1)
+  }
+
+  // One credit per document response, whether or not it was worker-served:
+  // a credit left behind by an earlier visit of the same URL must not vouch
+  // for a later escaped one.
+  private consumePauseCredit (key: string): boolean {
+    const credits = this.pauseCredits.get(key)
+
+    if (!credits) {
+      return false
+    }
+
+    if (credits === 1) {
+      this.pauseCredits.delete(key)
+    } else {
+      this.pauseCredits.set(key, credits - 1)
+    }
+
+    return true
   }
 
   private onRequestWillBeSent = (event: Protocol.Network.RequestWillBeSentEvent, sessionId?: string): void => {
@@ -146,18 +179,15 @@ export class InterceptionEscapeDetector {
 
     this.documentRequests.delete(networkKey(event.requestId, sessionId))
 
-    if (!event.response.fromServiceWorker) {
-      return
-    }
-
     const method = request?.method ?? 'GET'
     const url = request?.url ?? event.response.url
+    const hadPause = this.consumePauseCredit(requestKey(method, url))
 
-    if (this.pausedKeys.has(requestKey(method, url))) {
+    if (!event.response.fromServiceWorker || hadPause) {
       return
     }
 
-    if (this.workerTargets.size > 0) {
+    if (this.workerSessions.size > 0) {
       debug('service-worker-served document with no Fetch pause while a worker session is attached (cache-served): %s %s', method, url)
 
       return
@@ -181,12 +211,23 @@ export class InterceptionEscapeDetector {
       debug('worker target %s attached already running — service-worker-served documents before this attach escaped interception (#34674)', event.targetInfo.targetId)
     }
 
-    this.workerTargets.set(event.targetInfo.targetId, event.sessionId)
+    this.workerSessions.set(event.sessionId, event.targetInfo.targetId)
   }
 
   private onDetachedFromTarget = (event: Protocol.Target.DetachedFromTargetEvent): void => {
-    if (event.targetId && this.workerTargets.delete(event.targetId)) {
-      debug('worker target %s detached; its next start is the escape window until it re-attaches', event.targetId)
+    const targetId = this.workerSessions.get(event.sessionId)
+
+    if (this.workerSessions.delete(event.sessionId)) {
+      debug('worker target %s detached; its next start is the escape window until it re-attaches', targetId)
+    }
+  }
+
+  private onTargetDestroyed = (event: Protocol.Target.TargetDestroyedEvent): void => {
+    for (const [sessionId, targetId] of this.workerSessions) {
+      if (targetId === event.targetId) {
+        this.workerSessions.delete(sessionId)
+        debug('worker target %s destroyed; its next start is the escape window until it re-attaches', targetId)
+      }
     }
   }
 }
