@@ -558,7 +558,11 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     || (line.includes('at invokeOriginFn') && !line.includes('at eval'))
   }).join('\n')
 
-  return normalizeStackIndentation(nonCypressStackLines)
+  // Drop the Cypress-internal frames at and below the stack replacement marker (cy,
+  // mocha, runner, bluebird). Consumers already trim these on read (see
+  // getUserInvocationStack), so retaining them on every command's stored stack is
+  // browser memory spent on frames a user can never index back to their spec.
+  return stackPriorToReplacementMarker(normalizeStackIndentation(nonCypressStackLines))
 }
 
 const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, originUserInvocationStack: string) => {

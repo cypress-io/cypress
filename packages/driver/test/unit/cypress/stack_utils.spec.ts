@@ -257,6 +257,29 @@ describe('stack_utils', () => {
 
       expect(normalizedUserInvocationStack).toEqual(`    at eval (eval at invokeOriginFn (cypress:///../driver/src/cross-origin/origin_fn.ts), <anonymous>:2:16)`)
     })
+
+    it('drops the Cypress-internal frames at and below the stack replacement marker', () => {
+      const userInvocationStack = `    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/memory/dom-stress-test.cy.js:35:12)
+    at __stackReplacementMarker (cypress:///../driver/src/cypress/cy.ts:87:13)
+    at runnable.fn (cypress:///../driver/src/cypress/cy.ts:899:19)
+    at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:374:21)
+    at Runnable.run (cypress:///../driver/node_modules/mocha/lib/runnable.js:361:7)
+    at eval (cypress:///../driver/src/cypress/runner.ts:1565:30)
+    at PassThroughHandlerContext.finallyHandler (cypress:///../../node_modules/bluebird/js/release/finally.js:56:23)`
+
+      const normalizedUserInvocationStack = stack_utils.normalizedUserInvocationStack(userInvocationStack)
+
+      expect(normalizedUserInvocationStack).toEqual(`    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/memory/dom-stress-test.cy.js:35:12)`)
+    })
+
+    it('leaves the stack untouched when the replacement marker is absent', () => {
+      const userInvocationStack = `    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/memory/dom-stress-test.cy.js:35:12)
+    at someUserlandHelper (http://localhost:3500/__cypress/tests?p=cypress/support/e2e.js:10:1)`
+
+      const normalizedUserInvocationStack = stack_utils.normalizedUserInvocationStack(userInvocationStack)
+
+      expect(normalizedUserInvocationStack).toEqual(userInvocationStack)
+    })
   })
 
   describe('mergeCrossOriginUserInvocationStack', () => {
