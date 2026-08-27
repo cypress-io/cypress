@@ -315,4 +315,24 @@ describe('ProjectActions', () => {
       expect(ctx._apis.projectApi.routeToDebug).toHaveBeenCalled()
     })
   })
+
+  describe('clearCurrentProject', () => {
+    // `after:run` is dispatched from the project server's close and has to be answered by
+    // the plugins process the config manager owns, so the project must close first
+    it('closes the active project before tearing down the lifecycle', async () => {
+      const calls: string[] = []
+
+      ;(ctx._apis.projectApi.closeActiveProject as jest.Mock).mockImplementation(async () => {
+        calls.push('closeActiveProject')
+      })
+
+      jest.spyOn(ctx.lifecycleManager, 'clearCurrentProject').mockImplementation(async () => {
+        calls.push('lifecycleManager.clearCurrentProject')
+      })
+
+      await actions.clearCurrentProject()
+
+      expect(calls).toEqual(['closeActiveProject', 'lifecycleManager.clearCurrentProject'])
+    })
+  })
 })

@@ -125,9 +125,12 @@ export class ProjectActions {
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()
 
-    await this.ctx.lifecycleManager.clearCurrentProject()
-    resetIssuedWarnings()
+    // Close the project before tearing down the lifecycle: `after:run` is dispatched
+    // from the project server's close, and the config manager owns the plugins process
+    // that has to answer it.
     await this.api.closeActiveProject()
+    resetIssuedWarnings()
+    await this.ctx.lifecycleManager.clearCurrentProject()
   }
 
   private set projects (projects: ProjectShape[]) {
