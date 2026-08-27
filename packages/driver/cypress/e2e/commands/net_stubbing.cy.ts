@@ -1694,6 +1694,31 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    it('receives a binary request body in handler as bytes', function () {
+      const bytes = new Uint8Array(4096)
+
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = (i * 7 + 0x80) & 0xff
+      }
+
+      let seen
+
+      cy.intercept('POST', '/upload', (req) => {
+        seen = req.body
+      }).as('upload')
+
+      cy.window().then((win) => {
+        return win.fetch('/upload', { method: 'POST', body: new Blob([bytes]) })
+      })
+
+      cy.wait('@upload')
+
+      cy.then(() => {
+        expect(seen).to.be.an('ArrayBuffer')
+        expect(new Uint8Array(seen)).to.deep.eq(bytes)
+      })
+    })
+
     it('can modify an ArrayBuffer request body', function () {
       const modifiedUint8 = new Uint8Array(2)
 
@@ -1713,6 +1738,20 @@ describe('network stubbing', { retries: 15 }, function () {
       .visit('/fixtures/dump-binary.html')
       .wait('@post').its('response.body').should(assertBody)
       .get('#result').should('have.text', modifiedUint8.join(', '))
+    })
+
+    it('can modify a request body to bytes that are not valid utf8', function () {
+      // 0x9b is a continuation byte with no lead and 0xfe never appears in
+      // utf8, so a string round trip would replace both
+      const modified = new Uint8Array([0x9b, 0xfe, 0x41])
+
+      cy.intercept('/binary*', function (req) {
+        req.body = modified.buffer
+      }).as('post')
+      .visit('/fixtures/dump-binary.html')
+      .wait('@post')
+      // #result is what the origin echoed back, so this asserts the wire
+      .get('#result').should('have.text', modified.join(', '))
     })
 
     it('can modify original request body and have it passed to next handler', function (done) {
