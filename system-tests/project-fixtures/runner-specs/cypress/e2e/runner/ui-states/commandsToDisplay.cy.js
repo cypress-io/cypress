@@ -47,8 +47,6 @@ describe('Commands to display in UI', () => {
 
     cy.get('div').eq(0)
 
-    cy.exec('echo Jane Lane')
-
     cy.get('div')
     .filter('.container')
     .find('#navbar')

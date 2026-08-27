@@ -111,9 +111,9 @@ describe('config/src/index', () => {
 
   describe('.matchesConfigKey', () => {
     it('returns normalized key when config key has a default value', () => {
-      let normalizedKey = configUtil.matchesConfigKey('EXEC_TIMEOUT')
+      let normalizedKey = configUtil.matchesConfigKey('TASK_TIMEOUT')
 
-      expect(normalizedKey).toEqual('execTimeout')
+      expect(normalizedKey).toEqual('taskTimeout')
 
       normalizedKey = configUtil.matchesConfigKey('Base-url')
       expect(normalizedKey).toEqual('baseUrl')

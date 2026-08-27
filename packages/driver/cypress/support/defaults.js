@@ -42,7 +42,6 @@ beforeEach(function () {
 
     ranPrivilegedCommandsInBeforeEach = true
 
-    cy.exec('echo "hello"')
     cy.readFile('cypress/fixtures/app.json')
     cy.writeFile('cypress/_test-output/written.json', 'contents')
     cy.task('return:arg', 'arg')

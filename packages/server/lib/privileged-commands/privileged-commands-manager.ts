@@ -99,7 +99,7 @@ class PrivilegedCommandsManager {
       case 'env':
         return getUserDefinedEnvironmentVariables({ requestedKeys: options.envVars, userDefinedEnvironmentVariables: config.env || {} })
       case 'exec':
-        return exec.run(config.projectRoot, options)
+        return exec.run()
       case 'origin':
         // only need to verify that it's spec-originated above
         return
