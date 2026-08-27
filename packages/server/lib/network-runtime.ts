@@ -18,6 +18,8 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-clie
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
+import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -67,6 +69,12 @@ export type CreateCdpFetchRuntimeDeps = {
   // created at open(), so a second NetStubbingState here would leave every
   // cy.intercept() registered against a state this runtime never matches.
   netStubbingState: NetStubbingState
+  /**
+   * Called when a service-worker-served document reached the renderer without
+   * passing through CDP Fetch interception (#34674). Observe-only — by the
+   * time this fires the raw response was already consumed.
+   */
+  onInterceptionEscape?: (escape: InterceptionEscape) => void
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -271,6 +279,12 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     onRequestCanceled,
   })
 
+  // Observe-only (#34674): listens on the same connection as the transport and
+  // never sends CDP commands, so it cannot interfere with Fetch ownership.
+  const escapeDetector = new InterceptionEscapeDetector(deps.client, (escape) => {
+    deps.onInterceptionEscape?.(escape)
+  })
+
   // Extra-target transports share networkInterception so they cannot drift from
   // the main-target middleware onion. Tracked so reset()/stop() cover them.
   // request ids are namespaced inside each extra CdpFetchTransport so concurrent
@@ -357,10 +371,15 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         return fetchTransport.attachChildSession(sessionId)
       }
 
+      // Before the transport, so its pause ledger sees the first paused
+      // requests once Fetch comes up.
+      escapeDetector.start()
+
       try {
         await fetchTransport.start()
       } catch (err) {
         deps.client.onChildTargetAttached = undefined
+        escapeDetector.stop()
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
 
@@ -371,6 +390,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
     reset () {
       fetchTransport.reset()
+      escapeDetector.reset()
 
       for (const extraTransport of extraTargetTransports) {
         extraTransport.reset()
@@ -379,6 +399,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async stop () {
       stopped = true
       deps.client.onChildTargetAttached = undefined
+      escapeDetector.stop()
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 
