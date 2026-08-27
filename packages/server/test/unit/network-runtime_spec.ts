@@ -103,11 +103,14 @@ describe('lib/network-runtime', () => {
   })
 
   // See disable-navigation-preload.ts (#34652) for the mechanism; only the
-  // CDP Fetch runtime sets this flag.
+  // CDP Fetch runtime sets this flag. Explicitly false, not merely absent -
+  // ServerCtx.isBrowserNetworkMode is a general discriminator other
+  // consumers may branch on, so this path must say what it is, not leave it
+  // undefined.
   it('createProxyRuntime does not disable service worker navigation preload', () => {
     const runtime = createProxyRuntime(baseDeps())
 
-    expect(runtime.networkProxy.http.disableServiceWorkerNavigationPreload).to.not.exist
+    expect(runtime.networkProxy.http.isBrowserNetworkMode).to.be.false
   })
 
   it('createCdpFetchRuntime disables service worker navigation preload on its NetworkProxy', () => {
@@ -118,7 +121,7 @@ describe('lib/network-runtime', () => {
     }
     const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
 
-    expect(runtime.networkProxy.http.disableServiceWorkerNavigationPreload).to.be.true
+    expect(runtime.networkProxy.http.isBrowserNetworkMode).to.be.true
   })
 
   it('registers default configurator network policies at startup', () => {

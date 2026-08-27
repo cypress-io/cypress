@@ -665,11 +665,15 @@ export = {
       // and this page connection; the browser connection defers releasing a
       // paused one until this promise resolves, so it never starts serving
       // navigations before Fetch interception is enabled on its session
-      // here (#34674). Reassigned on every attachListeners call so it always
-      // points at the current page client - connectToNewSpec reuses the same
-      // pageCriClient across specs, but resetBrowserTargets can swap in a new
-      // one before this runs again.
+      // here (#34674). The browser connection also invalidates this page
+      // connection's view of a crash-reloaded target before it holds for
+      // one, so its hold can never read a stale confirmation racing its own
+      // crash-reload handling here. Both reassigned on every attachListeners
+      // call so they always point at the current page client -
+      // connectToNewSpec reuses the same pageCriClient across specs, but
+      // resetBrowserTargets can swap in a new one before this runs again.
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
+      browserCriClient.invalidateChildTargetInterception = (targetId) => pageCriClient.invalidateChildTargetHandled(targetId)
 
       await this._navigateUsingCRI(pageCriClient, url)
     } else {

@@ -440,12 +440,12 @@ describe('http', function () {
   })
 
   describe('createMiddlewareContext', function () {
-    function createHttpWithFlag (disableServiceWorkerNavigationPreload?: boolean) {
+    function createHttpWithFlag (isBrowserNetworkMode?: boolean) {
       return new Http({
         config: {} as CyServer.Config,
         middleware: {},
         request: { rp: vi.fn() },
-        ...(disableServiceWorkerNavigationPreload !== undefined ? { disableServiceWorkerNavigationPreload } : {}),
+        ...(isBrowserNetworkMode !== undefined ? { isBrowserNetworkMode } : {}),
       } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
     }
 
@@ -454,19 +454,19 @@ describe('http', function () {
     }
 
     // Pins the opts -> instance property -> ctx plumbing for
-    // disableServiceWorkerNavigationPreload (#34652) — MaybeInjectServiceWorker
-    // reads it off the middleware ctx (`this.disableServiceWorkerNavigationPreload`),
+    // isBrowserNetworkMode (#34652) — MaybeInjectServiceWorker
+    // reads it off the middleware ctx (`this.isBrowserNetworkMode`),
     // which only exists if createMiddlewareContext copies it from the Http instance.
-    it('carries disableServiceWorkerNavigationPreload from the constructor opts onto the ctx', function () {
+    it('carries isBrowserNetworkMode from the constructor opts onto the ctx', function () {
       const ctx = createCtx(createHttpWithFlag(true))
 
-      expect(ctx.disableServiceWorkerNavigationPreload).toBe(true)
+      expect(ctx.isBrowserNetworkMode).toBe(true)
     })
 
-    it('leaves disableServiceWorkerNavigationPreload undefined on the ctx when omitted from opts', function () {
+    it('leaves isBrowserNetworkMode undefined on the ctx when omitted from opts', function () {
       const ctx = createCtx(createHttpWithFlag())
 
-      expect(ctx.disableServiceWorkerNavigationPreload).toBeUndefined()
+      expect(ctx.isBrowserNetworkMode).toBeUndefined()
     })
   })
 

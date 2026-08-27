@@ -41,11 +41,6 @@ export default [
   'packages/server/lib/project-base.ts',
   'packages/server/lib/socket-ct.ts',
   'packages/server/lib/browsers/utils.ts',
-  // its exported expressions are Function.prototype.toString()-serialized and
-  // evaluated inside the browser (service worker / page realms), where
-  // snapshot rewrites like `get_window()` don't exist — the rewritten seam
-  // then dies in its own try/catch, silently (#34652)
-  'packages/proxy/lib/http/util/disable-navigation-preload.ts',
   'packages/server/lib/cloud/exception.ts',
   'packages/server/lib/errors.ts',
   'packages/server/lib/util/process_profiler.ts',

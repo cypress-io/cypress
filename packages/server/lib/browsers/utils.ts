@@ -444,17 +444,21 @@ const initializeCDP = async (criClient: CriClient, automation: Automation, useBr
     }
   })
 
-  // Window-realm half of #34652 (registration.navigationPreload called
-  // directly from the page; also sweeps registrations persisted from an
-  // earlier run, best-effort — see disable-navigation-preload.ts for the
-  // mechanism, its limits, and the worker-realm half, which this does not
-  // cover). Placed first in the bootstrap source below and self-contained
-  // (its own statements are try/caught, and it shares no bindings with the
-  // blocks after it), so nothing later in the script can prevent it from
-  // running. Gated on the launch-time browser-network flag (the caller's
-  // useBrowserNetworkInterception, resolved from isBrowserNetworkMode in
-  // network-mode.ts) rather than a process-global: only the browser network
-  // (CDP Fetch) path pauses requests, so only it needs this fallback.
+  // Window-realm half of the #34652 fix. The worker-realm half, the shared
+  // mechanism, and its limits are documented in disable-navigation-preload.ts.
+  //
+  // This neutralizes navigationPreload.enable() called from page JS, and
+  // best-effort disables preload on registrations persisted from an earlier
+  // run (whose scripts the worker-realm half never sees).
+  //
+  // It is placed first in the bootstrap source, try/caught, and shares no
+  // bindings with the blocks after it, so nothing later in the script can
+  // prevent it from running.
+  //
+  // Gated on useBrowserNetworkInterception (resolved from isBrowserNetworkMode
+  // at launch): navigation preload bypasses CDP Fetch, but the MITM path still
+  // intercepts it at the network layer, so only the browser network path needs
+  // this.
   const disableNavigationPreloadInWindow = useBrowserNetworkInterception
     ? `;${DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION};`
     : ''
