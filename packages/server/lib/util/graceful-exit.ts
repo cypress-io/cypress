@@ -9,8 +9,8 @@ const SIGNAL_DEDUP_MS = 200
 /**
  * Share of the teardown budget one step may spend. Steps wait on peers we are about to outlive anyway
  * (the config child over IPC, the browser over CDP and signals), so without a per-step bound the first
- * to stall spends the whole budget and the force-exit cuts off every other step — including the lockfile
- * unlock, whose side effect outlives us. Below 1 so a stalled step yields in time for the rest to finish.
+ * to stall spends the whole budget and the force-exit cuts off every other step. Below 1 so a stalled
+ * step yields in time for the rest to finish.
  */
 const STEP_BUDGET_FRACTION = 0.8
 
@@ -53,7 +53,6 @@ export class GracefulExit {
   private teardownStartedAt: number | null = null
   private forceExitTimeout: NodeJS.Timeout | undefined
   private steps: Map<string, ExitStep> = new Map()
-  /** Names of steps that have started but not settled, so a blown budget can say what it was waiting on. */
   private pendingSteps: Map<string, string> = new Map()
   private debug: Debug.Debugger
 
@@ -137,10 +136,6 @@ export class GracefulExit {
     GracefulExit.instance = null
   }
 
-  /**
-   * @param timeoutMs bound for this step alone, for work whose result is worth less than a prompt exit;
-   * defaults to `STEP_BUDGET_FRACTION` of the teardown budget.
-   */
   static addStep (teardownFn: ExitStep['fn'], stepName?: string, timeoutMs?: number): ExitStepKey {
     GracefulExit.singleton.debug('adding step to graceful exit: %s', stepName)
 
@@ -157,8 +152,6 @@ export class GracefulExit {
   }
 
   static get isShuttingDown (): boolean {
-    // read from teardownStartedAt, not processTeardown: the first steps run before exitGracefully has
-    // finished assigning that promise, and a step that skips work on the way out has to see this
     return GracefulExit.singleton.teardownStartedAt != null
   }
 

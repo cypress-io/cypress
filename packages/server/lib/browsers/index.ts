@@ -25,7 +25,6 @@ interface KillOptions {
   nullOut?: boolean
   unbind?: boolean
   isOrphanedBrowserProcess?: boolean
-  /** Stop waiting on the browser's `exit` event after this long; it has been signalled regardless. */
   timeoutMs?: number
 }
 

@@ -128,7 +128,7 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   })
 }
 
-/** Notices printed when a teardown step, or the whole teardown, outruns its budget. */
+// Notices printed when a teardown step, or the whole teardown, outruns its budget.
 export const teardownBudgetNoticeRe = /^(?:Failed to gracefully exit after|The ".*" teardown step did not finish within).*\n?/gm
 
 export const normalizeStdout = function (str: string, options: any = {}) {

@@ -58,8 +58,6 @@ if (isRunningElectron) {
 
   telemetry.startSpan({ name: 'cypress', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
 
-  // The OTLP flush bounds itself at 10s (exporter) to 30s (batch processor) across up to 5 retries, so a
-  // slow collector would otherwise spend the whole exit budget. Dropped spans cost less than a late exit.
   GracefulExit.addStep(async (code) => {
     try {
       const span = telemetry.getSpan('cypress')
