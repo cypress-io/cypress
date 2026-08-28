@@ -180,7 +180,12 @@ export class BidiAutomation {
       return Promise.resolve(this.autContextId)
     }
 
-    this.autContextDeferred ??= Promise.withResolvers<string>()
+    if (!this.autContextDeferred) {
+      this.autContextDeferred = Promise.withResolvers<string>()
+      // The rejection on top-level destroy must not crash the process when no
+      // request happens to be awaiting the promise at that moment.
+      this.autContextDeferred.promise.catch(() => {})
+    }
 
     return this.autContextDeferred.promise
   }
@@ -301,18 +306,18 @@ export class BidiAutomation {
       throw new Error(failureMessage)
     }
 
-    // One immediate recovery attempt heals events missed before this request;
-    // the interval below heals ones dropped while we wait.
-    const recovered = await this.recoverAutContextFromTree()
-
-    if (recovered) {
-      return recovered
-    }
+    // Subscribe before kicking off recovery so an identification that lands
+    // immediately still settles the race below.
+    const contextResolved = this.whenAutContextResolves()
 
     // Wait for the AUT context id to be regrabbed — either the contextCreated
-    // event path identifies it (settling whenAutContextResolves) or one of the
-    // interval's recovery attempts re-derives it from the live tree — for at
-    // most autContextResolveTimeoutMs. If neither lands in time, throw.
+    // event path identifies it or one of the recovery attempts re-derives it
+    // from the live tree (a successful recovery settles contextResolved via
+    // setAndResolveAutContextId) — for at most autContextResolveTimeoutMs. If
+    // nothing lands in time, or the top-level context is destroyed while
+    // waiting, throw. Recovery attempts are deliberately not awaited so a hung
+    // tree query cannot hold a request past the bound.
+    void this.recoverAutContextFromTree()
     const recoveryInterval = setInterval(() => {
       void this.recoverAutContextFromTree()
     }, this.autContextPollIntervalMs)
@@ -320,7 +325,7 @@ export class BidiAutomation {
 
     try {
       const contextId = await Promise.race([
-        this.whenAutContextResolves(),
+        contextResolved,
         new Promise<undefined>((resolve) => {
           timeout = setTimeout(() => resolve(undefined), this.autContextResolveTimeoutMs)
         }),
@@ -329,12 +334,14 @@ export class BidiAutomation {
       if (contextId) {
         return contextId
       }
-
-      throw new Error(failureMessage)
+    } catch (err) {
+      debug('stopped waiting for the AUT context: %o', err)
     } finally {
       clearInterval(recoveryInterval)
       clearTimeout(timeout)
     }
+
+    throw new Error(failureMessage)
   }
 
   private onBrowsingContextDestroyed = async (params: BrowsingContextInfo) => {
@@ -345,6 +352,11 @@ export class BidiAutomation {
       debug(`top level browsing context ${params.context} destroyed`)
       // if the top level context is destroyed, we can imply that the AUT context is destroyed along with it
       this.autContextId = undefined
+      // Fail any requests still waiting on an AUT context: the tab they belong
+      // to is gone, and the AUT of a subsequently created tab must not satisfy
+      // them.
+      this.autContextDeferred?.reject(new Error(`top-level browsing context ${params.context} was destroyed`))
+      this.autContextDeferred = undefined
       this.setTopLevelContextId(undefined)
       if (this.interceptId) {
         // since we either have:

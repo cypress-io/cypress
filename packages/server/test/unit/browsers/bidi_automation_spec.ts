@@ -2561,6 +2561,29 @@ describe('lib/browsers/bidi_automation', () => {
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
         })
 
+        it('stays bounded by the timeout when the tree query hangs', async () => {
+          mockWebdriverClient.browsingContextGetTree = sinon.stub().returns(new Promise(() => {}))
+
+          const start = Date.now()
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          expect(Date.now() - start).to.be.lessThan(1000)
+        })
+
+        it('fails a waiting request when the top-level context is destroyed instead of waiting out the timeout', async () => {
+          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
+
+          const start = Date.now()
+          const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
+
+          setTimeout(() => {
+            mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: 'top' })
+          }, 30)
+
+          await expect(request).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          expect(Date.now() - start).to.be.lessThan(400)
+        })
+
         it('fails immediately when there is no top-level context to recover from', async () => {
           bidiAutomationInstance.setTopLevelContextId(undefined)
 
