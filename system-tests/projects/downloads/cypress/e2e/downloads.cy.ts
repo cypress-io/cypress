@@ -1,5 +1,11 @@
 /// <reference types="cypress" />
 
+// A download the proxy fails to correlate arrives late rather than not at all, so a
+// wall-clock budget here would race the machine rather than assert on correlation.
+// system-tests/test/downloads_spec.ts asserts on the correlation itself, leaving these
+// waits to do nothing but outlast a slow container.
+const downloadTimeout = 10000
+
 describe('downloads', () => {
   beforeEach(() => {
     cy.visit('/cypress/fixtures/downloads.html')
@@ -7,23 +13,19 @@ describe('downloads', () => {
 
   it('handles csv file download', () => {
     cy.get('[data-cy=download-csv]').click()
-    cy
-    // Must stay under the 2000ms proxy correlation timeout, or a correlation bug passes unnoticed.
-    .readFile(`${Cypress.config('downloadsFolder')}/records.csv`, { timeout: 1500 })
+    cy.readFile(`${Cypress.config('downloadsFolder')}/records.csv`, { timeout: downloadTimeout })
     .should('contain', '"Joe","Smith"')
   })
 
   it('handles zip file download', () => {
     cy.get('[data-cy=download-zip]').click()
     // not worth adding a dependency to read contents, just ensure it's there
-    // Must stay under the 2000ms proxy correlation timeout, or a correlation bug passes unnoticed.
-    cy.readFile(`${Cypress.config('downloadsFolder')}/files.zip`, { timeout: 1500 })
+    cy.readFile(`${Cypress.config('downloadsFolder')}/files.zip`, { timeout: downloadTimeout })
   })
 
   it('handles xlsx file download', () => {
     cy.get('[data-cy=download-xlsx]').click()
     // not worth adding a dependency to read contents, just ensure it's there
-    // Must stay under the 2000ms proxy correlation timeout, or a correlation bug passes unnoticed.
-    cy.readFile(`${Cypress.config('downloadsFolder')}/people.xlsx`, { timeout: 1500 })
+    cy.readFile(`${Cypress.config('downloadsFolder')}/people.xlsx`, { timeout: downloadTimeout })
   })
 })

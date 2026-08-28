@@ -6,6 +6,24 @@ import { fs } from '@packages/server/lib/util/fs'
 
 const downloadsProject = Fixtures.projectPath('downloads')
 
+const downloadedFiles = ['records.csv', 'files.zip', 'people.xlsx']
+
+// A download link never produces a browser pre-request, so the proxy depends on the
+// browser reporting the click instead. When that report is missed the request is held
+// for the full `PreRequests` timeout before it is served, making a correlation
+// regression look like nothing worse than a slow download. Every line this namespace
+// logs outside of `cypress-verbose` is a request that failed to correlate, so one
+// naming a downloaded file is that regression.
+const preRequestsDebugNamespace = 'cypress:proxy:http:util:prerequests'
+
+const assertDownloadsWereCorrelated = (stderr: string) => {
+  const uncorrelated = stderr.split('\n').filter((line) => {
+    return line.includes(preRequestsDebugNamespace) && downloadedFiles.some((file) => line.includes(file))
+  })
+
+  expect(uncorrelated, `the proxy failed to correlate a download request:\n${uncorrelated.join('\n')}`).to.be.empty
+}
+
 describe('e2e downloads', () => {
   systemTests.setup({
     settings: {
@@ -18,6 +36,14 @@ describe('e2e downloads', () => {
   systemTests.it('handles various file downloads', {
     project: 'downloads',
     spec: 'downloads.cy.ts',
+    processEnv: {
+      DEBUG: [process.env.DEBUG, preRequestsDebugNamespace].filter(Boolean).join(','),
+    },
+    onRun: async (exec) => {
+      const { stderr } = await exec()
+
+      assertDownloadsWereCorrelated(stderr)
+    },
   })
 
   const fileExists = (fileName) => {
