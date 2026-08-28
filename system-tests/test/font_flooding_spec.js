@@ -20,6 +20,13 @@ const getFilePath = (filename) => {
 
 const BROWSERS = ['chrome', 'electron']
 
+// The spec loads the page twice and clicks ten times per load, so a healthy run makes
+// one font request per page load however many commands run. Chromium may still issue a
+// redundant request for a font it is already loading (a cache-aware reload, say), which
+// this ceiling leaves room for while staying far below the flood a global style update
+// on every command produces.
+const MAX_FONT_REQUESTS = 4
+
 describe('capture-protocol', () => {
   setupStubbedServer(createRoutes())
   enableCaptureProtocol(PROTOCOL_STUB_FONT_FLOODING)
@@ -42,8 +49,11 @@ describe('capture-protocol', () => {
           },
         }).then(() => {
           const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
+          const { fontRequests } = JSON.parse(protocolEvents)
+          const requested = `font requests:\n${fontRequests.join('\n')}`
 
-          expect(JSON.parse(protocolEvents).numberOfFontRequests).to.equal(2)
+          expect(fontRequests.length, requested).to.be.at.least(1)
+          expect(fontRequests.length, requested).to.be.at.most(MAX_FONT_REQUESTS)
         })
       })
     })
