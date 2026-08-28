@@ -1262,12 +1262,12 @@ describe('lib/server-base', () => {
       getCurrent.restore()
     })
 
-    const run = (req) => {
+    const run = (req, { clientRoute: route = clientRoute, namespace } = {}) => {
       const res = { redirect: sinon.spy() }
       const next = sinon.spy()
 
       // these assert the HTTP/1 proxy path, where the force-proxy redirect applies
-      _forceProxyMiddleware(clientRoute, undefined, () => false)(req, res, next)
+      _forceProxyMiddleware(route, namespace, () => false)(req, res, next)
 
       return { res, next }
     }
@@ -1332,16 +1332,12 @@ describe('lib/server-base', () => {
     it('lets a tap request through when the project overrides the namespace', () => {
       getCurrent.returns({ sessionId: 'abc' })
 
-      const res = { redirect: sinon.spy() }
-      const next = sinon.spy()
-
-      _forceProxyMiddleware('/__app/', '__cypress-app')(
+      const { res, next } = run(
         nonProxied('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' }),
-        res,
-        next,
+        { clientRoute: '/__app/', namespace: '__cypress-app' },
       )
 
-      expect(next).to.be.called
+      expect(next).to.be.calledOnce
       expect(res.redirect).not.to.be.called
     })
 
