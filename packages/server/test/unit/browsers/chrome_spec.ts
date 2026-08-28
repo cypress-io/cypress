@@ -1204,6 +1204,22 @@ describe('lib/browsers/chrome', () => {
         expect(disableFeatures).to.include('HttpsUpgrades')
       })
     })
+
+    context('service worker auto preload', () => {
+      it('disables ServiceWorkerAutoPreload on the browser (CDP) network path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: true })
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.include('ServiceWorkerAutoPreload')
+        expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
+      })
+
+      it('keeps it on the MITM path', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: false })
+
+        expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('ServiceWorkerAutoPreload')
+      })
+    })
   })
 
   describe('#_normalizeHostResolverRules', () => {

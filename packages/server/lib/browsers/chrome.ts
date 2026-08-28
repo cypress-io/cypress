@@ -442,10 +442,14 @@ export = {
     if (options.useBrowserNetworkInterception) {
       const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
 
+      // ServiceWorkerAutoPreload serves navigations that cold-start a service
+      // worker from a browser-issued request no CDP session can pause (#34709)
+      const features = 'WebFontsCacheAwareTimeoutAdaption,ServiceWorkerAutoPreload'
+
       if (disableFeaturesIndex === -1) {
-        args.push('--disable-features=WebFontsCacheAwareTimeoutAdaption')
+        args.push(`--disable-features=${features}`)
       } else {
-        args[disableFeaturesIndex] += ',WebFontsCacheAwareTimeoutAdaption'
+        args[disableFeaturesIndex] += `,${features}`
       }
     }
 
