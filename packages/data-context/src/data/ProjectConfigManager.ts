@@ -176,9 +176,7 @@ export class ProjectConfigManager {
       return loadConfigReply.initialConfig
     } catch (error) {
       debug(`catch %o`, error)
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       this._state = 'errored'
       await this.closeWatchers()
@@ -297,9 +295,7 @@ export class ProjectConfigManager {
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)
       this._state = 'errored'
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       await this.closeWatchers()
 
@@ -401,9 +397,7 @@ export class ProjectConfigManager {
   private loadConfig () {
     if (!this._loadConfigPromise) {
       // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       this._eventsIpc = new ProjectConfigIpc(
         this.options.ctx.coreData.app.nodePath,
@@ -706,10 +700,22 @@ export class ProjectConfigManager {
     this._pathToWatcherRecord = {}
   }
 
-  async destroy () {
+  /**
+   * Every registered handler resolves off a reply from the events ipc, and that reply has
+   * no timeout. Handlers must never outlive the ipc they are bound to, or a later
+   * `after:run`/`after:spec` awaits a reply that can never arrive.
+   */
+  private cleanupEventsIpc () {
     if (this._eventsIpc) {
       this._eventsIpc.cleanupIpc()
     }
+
+    this.options.eventRegistrar.reset()
+  }
+
+  async destroy () {
+    this.cleanupEventsIpc()
+    this._eventsIpc = undefined
 
     this._state = 'pending'
     this._cachedLoadConfig = undefined
