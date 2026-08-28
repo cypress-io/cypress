@@ -126,6 +126,15 @@ export class BidiAutomation {
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
+  private autContextDeferred: PromiseWithResolvers<string> | undefined = undefined
+  private autContextRecovery: Promise<string | undefined> | undefined = undefined
+  // AUT context identification needs a scriptEvaluate round trip, and reloads /
+  // navigations destroy and recreate the context, so an AUT-dependent automation
+  // request can legitimately arrive while no context is tracked. Requests wait
+  // up to this long for the context to (re)resolve before failing (#34705).
+  // Instance fields rather than constants so unit tests can shrink the wait.
+  private autContextResolveTimeoutMs = 4000
+  private autContextPollIntervalMs = 250
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
     debug('initializing bidi automation')
@@ -155,6 +164,31 @@ export class BidiAutomation {
       return
     }
 
+    await this.identifyAndSetAutContext(params.context, params.parent)
+  }
+
+  private setAndResolveAutContextId (contextId: string) {
+    this.autContextId = contextId
+    this.autContextDeferred?.resolve(contextId)
+    this.autContextDeferred = undefined
+  }
+
+  // A promise that settles when the AUT context is (re)identified, shared by
+  // every request waiting on it and re-armed after each resolution.
+  private whenAutContextResolves (): Promise<string> {
+    if (this.autContextId) {
+      return Promise.resolve(this.autContextId)
+    }
+
+    this.autContextDeferred ??= Promise.withResolvers<string>()
+
+    return this.autContextDeferred.promise
+  }
+
+  // Determines whether `contextId` is the AUT iframe and records it if so.
+  // Shared by the contextCreated event and the on-demand recovery path in
+  // ensureAutContextId. Returns true when the context was the AUT.
+  private identifyAndSetAutContext = async (contextId: string, parentContextId: string): Promise<boolean> => {
     // The top-level context has more than one direct child iframe — the AUT and
     // the reporter iframe — and their creation order is not guaranteed, so
     // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
@@ -165,42 +199,141 @@ export class BidiAutomation {
     try {
       contextName = (await this.webDriverClient.scriptEvaluate({
         expression: 'window.name',
-        target: { context: params.context },
+        target: { context: contextId },
         awaitPromise: false,
         // @ts-expect-error - result is not typed
       }))?.result?.value ?? ''
     } catch (err) {
-      debug(`could not read window.name for browsing context ${params.context}; skipping AUT identification for it: %o`, err)
+      debug(`could not read window.name for browsing context ${contextId}; skipping AUT identification for it: %o`, err)
 
-      return
+      return false
     }
 
     if (!contextName.startsWith(AUT_FRAME_NAME_IDENTIFIER)) {
-      debug(`browsing context ${params.context} (name: '${contextName}') is not the AUT; skipping.`)
+      debug(`browsing context ${contextId} (name: '${contextName}') is not the AUT; skipping.`)
 
-      return
+      return false
     }
 
-    debug(`new browsing context ${params.context} (name: '${contextName}' created within top-level parent context ${params.parent}.`)
-    debug(`setting browsing context ${params.context} as the AUT context.`)
+    // The event path and the on-demand recovery path can identify concurrently
+    // (the window.name read yields); the first one to finish wins.
+    if (this.autContextId) {
+      return this.autContextId === contextId
+    }
 
-    this.autContextId = params.context
+    debug(`browsing context ${contextId} (name: '${contextName}') identified within top-level parent context ${parentContextId}.`)
+    debug(`setting browsing context ${contextId} as the AUT context.`)
+
+    this.setAndResolveAutContextId(contextId)
 
     // in the case of top reloads for setting the url between specs, the AUT context gets destroyed but the top level context still exists.
     // in this case, we do NOT have to redefine the top level context intercept but instead update the autContextId to properly identify the
     // AUT in the request interceptor.
     if (!this.interceptId) {
-      debug(`no interceptor defined for top-level context ${params.parent}.`)
+      debug(`no interceptor defined for top-level context ${parentContextId}.`)
       debug(`creating interceptor to determine if a request belongs to the AUT.`)
       // BiDi can only intercept top level tab contexts (i.e., not iframes), so the intercept needs to be defined on the top level parent, which is the AUTs
       // direct parent in ALL cases. This gets cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
       // error looks something like: Error: WebDriver Bidi command "network.addIntercept" failed with error: invalid argument - Context with id 123456789 is not a top-level browsing context
-      const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [params.parent] })
+      const { intercept } = await this.webDriverClient.networkAddIntercept({ phases: ['beforeRequestSent'], contexts: [parentContextId] })
 
-      debug(`created network intercept ${intercept} for top-level browsing context ${params.parent}`)
+      debug(`created network intercept ${intercept} for top-level browsing context ${parentContextId}`)
 
       // save a reference to the intercept ID to be cleaned up in the 'reset:browser:tabs:for:next:spec' automation hook.
       this.interceptId = intercept
+    }
+
+    return true
+  }
+
+  // A contextCreated event can be missed for good: it can arrive before
+  // setTopLevelContextId records its parent, and its window.name read can fail
+  // while the frame is mid-navigation. Nothing replays those events, so
+  // re-derive the AUT from the live context tree instead. Concurrent callers
+  // share one in-flight recovery.
+  private recoverAutContextFromTree = (): Promise<string | undefined> => {
+    this.autContextRecovery ??= this.queryTreeForAutContext().finally(() => {
+      this.autContextRecovery = undefined
+    })
+
+    return this.autContextRecovery
+  }
+
+  // When a top-level context exists but no AUT context is tracked, the AUT
+  // iframe may well be live with its identification unobserved (see
+  // recoverAutContextFromTree) — so re-derive it: walk the top-level context's
+  // direct children in the live tree and identify the AUT by its window.name,
+  // exactly as the contextCreated event path would have.
+  private queryTreeForAutContext = async (): Promise<string | undefined> => {
+    const topLevelContextId = this.topLevelContextId
+
+    if (this.autContextId || !topLevelContextId) {
+      return this.autContextId
+    }
+
+    try {
+      const { contexts } = await this.webDriverClient.browsingContextGetTree({ root: topLevelContextId })
+      const children = contexts?.[0]?.children ?? []
+
+      for (const child of children) {
+        if (await this.identifyAndSetAutContext(child.context, topLevelContextId)) {
+          return this.autContextId
+        }
+      }
+    } catch (err) {
+      debug('could not recover the AUT context from the browsing context tree: %o', err)
+    }
+
+    return undefined
+  }
+
+  // Resolves the AUT context for an automation request, tolerating the windows
+  // where none is tracked: the identification round trip after contextCreated,
+  // the gap between a context being destroyed and recreated (reloads, top
+  // navigations, spec transitions), and missed contextCreated events.
+  private ensureAutContextId = async (failureMessage: string): Promise<string> => {
+    if (this.autContextId) {
+      return this.autContextId
+    }
+
+    // With no top-level context there is no tab to wait on or recover from.
+    if (!this.topLevelContextId) {
+      throw new Error(failureMessage)
+    }
+
+    // One immediate recovery attempt heals events missed before this request;
+    // the interval below heals ones dropped while we wait.
+    const recovered = await this.recoverAutContextFromTree()
+
+    if (recovered) {
+      return recovered
+    }
+
+    // Wait for the AUT context id to be regrabbed — either the contextCreated
+    // event path identifies it (settling whenAutContextResolves) or one of the
+    // interval's recovery attempts re-derives it from the live tree — for at
+    // most autContextResolveTimeoutMs. If neither lands in time, throw.
+    const recoveryInterval = setInterval(() => {
+      void this.recoverAutContextFromTree()
+    }, this.autContextPollIntervalMs)
+    let timeout!: NodeJS.Timeout
+
+    try {
+      const contextId = await Promise.race([
+        this.whenAutContextResolves(),
+        new Promise<undefined>((resolve) => {
+          timeout = setTimeout(() => resolve(undefined), this.autContextResolveTimeoutMs)
+        }),
+      ])
+
+      if (contextId) {
+        return contextId
+      }
+
+      throw new Error(failureMessage)
+    } finally {
+      clearInterval(recoveryInterval)
+      clearTimeout(timeout)
     }
   }
 
@@ -615,14 +748,14 @@ export class BidiAutomation {
 
           return
         case 'key:press':
-          if (this.autContextId) {
-            debug(`key:press %s`, data.key)
-            await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
-          } else {
-            throw new Error('Cannot emit key press: no AUT context initialized')
-          }
+        {
+          const autContextId = await this.ensureAutContextId('Cannot emit key press: no AUT context initialized')
+
+          debug(`key:press %s`, data.key)
+          await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, autContextId, this.topLevelContextId)
 
           return
+        }
         case 'perform:user:gesture':
           // Firefox 93+ requires a transient user activation before display capture is allowed,
           // which the driver needs in order to record video via getUserMedia. We grant it by
@@ -637,40 +770,32 @@ export class BidiAutomation {
           return
         case 'get:aut:url':
         {
-          if (this.autContextId) {
-            return bidiGetUrl(this.webDriverClient, this.autContextId)
-          }
+          const autContextId = await this.ensureAutContextId('Cannot get AUT url: no AUT context initialized')
 
-          throw new Error('Cannot get AUT url: no AUT context initialized')
+          return bidiGetUrl(this.webDriverClient, autContextId)
         }
 
         case 'reload:aut:frame':
         {
-          if (this.autContextId) {
-            await bidiReloadFrame(this.webDriverClient, this.autContextId, data.forceReload)
+          const autContextId = await this.ensureAutContextId('Cannot reload AUT frame: no AUT context initialized')
 
-            return
-          }
+          await bidiReloadFrame(this.webDriverClient, autContextId, data.forceReload)
 
-          throw new Error('Cannot reload AUT frame: no AUT context initialized')
+          return
         }
         case 'navigate:aut:history':
         {
-          if (this.autContextId) {
-            await bidiNavigateHistory(this.webDriverClient, this.autContextId, data.historyNumber)
+          const autContextId = await this.ensureAutContextId('Cannot navigate AUT frame history: no AUT context initialized')
 
-            return
-          }
+          await bidiNavigateHistory(this.webDriverClient, autContextId, data.historyNumber)
 
-          throw new Error('Cannot navigate AUT frame history: no AUT context initialized')
+          return
         }
         case 'get:aut:title':
         {
-          if (this.autContextId) {
-            return bidiGetFrameTitle(this.webDriverClient, this.autContextId)
-          }
+          const autContextId = await this.ensureAutContextId('Cannot get AUT title no AUT context initialized')
 
-          throw new Error('Cannot get AUT title no AUT context initialized')
+          return bidiGetFrameTitle(this.webDriverClient, autContextId)
         }
         default:
           debug('BiDi automation not implemented for message: %s', message)

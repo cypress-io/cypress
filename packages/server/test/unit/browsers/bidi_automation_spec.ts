@@ -2472,6 +2472,104 @@ describe('lib/browsers/bidi_automation', () => {
         // @ts-expect-error
         await expect(bidiAutomationInstance.automationMiddleware.onRequest('foo:bar:baz', {})).to.be.rejectedWith('Automation command \'foo:bar:baz\' not implemented by BiDiAutomation')
       })
+
+      describe('AUT context resolution', () => {
+        const AUT_NAME = `${AUT_FRAME_NAME_IDENTIFIER}-spec`
+
+        beforeEach(() => {
+          bidiAutomationInstance.setTopLevelContextId('top')
+          //@ts-expect-error
+          bidiAutomationInstance.autContextResolveTimeoutMs = 500
+          //@ts-expect-error
+          bidiAutomationInstance.autContextPollIntervalMs = 20
+        })
+
+        it('waits for the AUT context to be identified instead of failing during the identification window', async () => {
+          const getTree = sinon.stub()
+
+          getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [] }] })
+          getTree.withArgs({ root: 'aut' }).resolves({ contexts: [{ context: 'aut', url: 'http://localhost:3500/index.html' }] })
+          mockWebdriverClient.browsingContextGetTree = getTree
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({ result: { value: AUT_NAME } })
+          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+
+          const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
+
+          setTimeout(() => {
+            mockWebdriverClient.emit('browsingContext.contextCreated', { context: 'aut', parent: 'top' })
+          }, 50)
+
+          expect(await request).to.equal('http://localhost:3500/index.html')
+        })
+
+        it('heals a missed contextCreated by re-deriving the AUT from the browsing context tree', async () => {
+          const getTree = sinon.stub()
+
+          getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [{ context: 'reporter' }, { context: 'aut' }] }] })
+          getTree.withArgs({ root: 'aut' }).resolves({ contexts: [{ context: 'aut', url: 'http://localhost:3500/healed.html' }] })
+          mockWebdriverClient.browsingContextGetTree = getTree
+
+          const scriptEvaluate = sinon.stub()
+
+          scriptEvaluate.withArgs(sinon.match({ target: { context: 'reporter' } })).resolves({ result: { value: 'reporter-frame' } })
+          scriptEvaluate.withArgs(sinon.match({ target: { context: 'aut' } })).resolves({ result: { value: AUT_NAME } })
+          mockWebdriverClient.scriptEvaluate = scriptEvaluate
+          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+
+          const url = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
+
+          expect(url).to.equal('http://localhost:3500/healed.html')
+          // the healed AUT still needs the top-level request intercept
+          expect(mockWebdriverClient.networkAddIntercept).to.have.been.calledWith({ phases: ['beforeRequestSent'], contexts: ['top'] })
+        })
+
+        it('resolves a request issued in the gap between the AUT context being destroyed and recreated', async () => {
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = 'old-aut'
+
+          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
+
+          const scriptEvaluate = sinon.stub()
+
+          scriptEvaluate.withArgs(sinon.match({ expression: 'window.name' })).resolves({ result: { value: AUT_NAME } })
+          scriptEvaluate.withArgs(sinon.match({ expression: 'window.location.reload(false)' })).resolves()
+          mockWebdriverClient.scriptEvaluate = scriptEvaluate
+          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+
+          mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: 'old-aut', parent: 'top' })
+
+          const request = bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: false })
+
+          setTimeout(() => {
+            mockWebdriverClient.emit('browsingContext.contextCreated', { context: 'new-aut', parent: 'top' })
+          }, 50)
+
+          await request
+
+          expect(scriptEvaluate).to.have.been.calledWith({
+            expression: 'window.location.reload(false)',
+            target: {
+              context: 'new-aut',
+            },
+            awaitPromise: false,
+          })
+        })
+
+        it('fails with the original error when the AUT context never resolves within the bounded wait', async () => {
+          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+        })
+
+        it('fails immediately when there is no top-level context to recover from', async () => {
+          bidiAutomationInstance.setTopLevelContextId(undefined)
+
+          const start = Date.now()
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          expect(Date.now() - start).to.be.lessThan(100)
+        })
+      })
     })
   })
 })
