@@ -56,7 +56,6 @@ describe('Command Options and UI Display Tests', () => {
     cy.document({ timeout: 2005 })
 
     cy.get('input').eq(0, { timeout: 2006 })
-    cy.exec('ls', { env: { 'a': true } })
     cy.get('input').filter('#a', { timeout: 2007 })
     cy.get('form').find('#a', { timeout: 2008 })
     cy.get('input').first({ timeout: 2009 })

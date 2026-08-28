@@ -1,0 +1,8 @@
+[31mThe [33mexecTimeout[39m[31m configuration option was removed in Cypress version 16.0.0.[39m
+[31m[39m
+[31m[33mcy.exec()[39m[31m has been removed. Replace [33mcy.exec()[39m[31m calls with [33mcy.task()[39m[31m, and use [33mtaskTimeout[39m[31m to configure how long those tasks may run.[39m
+[31m[39m
+[31mYou can safely remove [33mexecTimeout[39m[31m from your configuration.[39m
+[31m[39m
+[31mLearn more: https://on.cypress.io/task[39m
+[31m[39m

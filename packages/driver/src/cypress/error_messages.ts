@@ -519,31 +519,9 @@ export default {
   },
 
   exec: {
-    failed: {
-      message: stripIndent`
-        ${cmd('exec', '\'{{cmd}}\'')} failed with the following error:
-
-        > "{{error}}"`,
-      docsUrl: 'https://on.cypress.io/exec',
-    },
-    invalid_argument: {
-      message: `${cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'.`,
-      docsUrl: 'https://on.cypress.io/exec',
-    },
-    non_zero_exit: {
-      message: stripIndent`\
-        ${cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
-
-        Pass \`{failOnNonZeroExit: false}\` to ignore exit code failures.
-
-        Information about the failure:
-        Code: {{code}}
-        {{output}}`,
-      docsUrl: 'https://on.cypress.io/exec',
-    },
-    timed_out: {
-      message: `${cmd('exec', '\'{{cmd}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
-      docsUrl: 'https://on.cypress.io/exec',
+    removed: {
+      message: `${cmd('exec')} was removed in Cypress version 16.0.0. Please update to use ${cmd('task')} instead, which runs in Node and does not depend on the operating system, shell, or terminal of the machine running Cypress.`,
+      docsUrl: 'https://on.cypress.io/task',
     },
   },
 

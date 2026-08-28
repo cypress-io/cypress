@@ -15,7 +15,7 @@ describe('basic auth download behavior', () => {
 
   // NOTE: webkit opens a new window and doesn't download the file
   it('downloads basic auth protected file that opens in a new tab', { browser: '!webkit' }, () => {
-    cy.exec(`rm -f ${Cypress.config('downloadsFolder')}/download-basic-auth.csv`)
+    cy.task('remove:file', `${Cypress.config('downloadsFolder')}/download-basic-auth.csv`)
     cy.readFile(`${Cypress.config('downloadsFolder')}/download-basic-auth.csv`).should('not.exist')
 
     cy.get('[data-cy=download-basic-auth]').click()
