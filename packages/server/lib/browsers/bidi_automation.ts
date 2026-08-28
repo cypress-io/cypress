@@ -220,6 +220,15 @@ export class BidiAutomation {
       return false
     }
 
+    // The window.name read yields; if the top-level context changed or was
+    // destroyed while it was in flight, this identification belongs to a dead
+    // tab and must not be recorded.
+    if (this.topLevelContextId !== parentContextId) {
+      debug(`browsing context ${contextId} was identified against a stale top-level context ${parentContextId}; discarding.`)
+
+      return false
+    }
+
     // The event path and the on-demand recovery path can identify concurrently
     // (the window.name read yields); the first one to finish wins.
     if (this.autContextId) {
