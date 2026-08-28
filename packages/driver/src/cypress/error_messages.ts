@@ -2490,10 +2490,6 @@ export default {
   },
 
   wait: {
-    alias_invalid: {
-      message: '`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`',
-      docsUrl: 'https://on.cypress.io/wait',
-    },
     invalid_1st_arg: {
       message: `${cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/wait',
