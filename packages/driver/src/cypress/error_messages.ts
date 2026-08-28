@@ -117,10 +117,6 @@ const cyStripIndent = (str, indentSize) => {
 }
 
 export default {
-  add: {
-    type_missing: '`Cypress.add(key, fn, type)` must include a type!',
-  },
-
   alias: {
     invalid: 'Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`.',
     not_registered_with_available: `${cmd('{{cmd}}')} could not find a registered alias for: \`@{{displayName}}\`.\nAvailable aliases are: \`{{availableAliases}}\`.`,
@@ -152,9 +148,6 @@ export default {
     },
     no_focused_element: {
       message: `${cmd('blur')} can only be called when there is a currently focused element.`,
-    },
-    timed_out: {
-      message: `${cmd('blur')} timed out because your browser did not receive any \`blur\` events. This is a known bug in Chrome when it is not the currently focused window.`,
     },
     wrong_focused_element: {
       message: `${cmd('blur')} can only be called on the focused element. Currently the focused element is a: \`{{node}}\``,
@@ -342,12 +335,6 @@ export default {
     invalid_domain (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
-      }
-    },
-    invalid_name (obj) {
-      return {
-        message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
@@ -599,10 +586,6 @@ export default {
     },
     multiple_elements: {
       message: `${cmd('focus')} can only be called on a single element. Your subject contained {{num}} elements.`,
-      docsUrl: 'https://on.cypress.io/focus',
-    },
-    timed_out: {
-      message: `${cmd('focus')} timed out because your browser did not receive any \`focus\` events. This is a known bug in Chrome when it is not the currently focused window.`,
       docsUrl: 'https://on.cypress.io/focus',
     },
   },
@@ -892,22 +875,6 @@ export default {
         docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-test',
       }
     },
-    dangling_commands: {
-      message: stripIndent`\
-        Oops, Cypress detected something wrong with your test code.
-
-        The test has finished but Cypress still has commands in its queue.
-        The {{numCommands}} queued commands that have not yet run are:
-
-        {{commands}}
-
-        In every situation we've seen, this has been caused by programmer error.
-
-        Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
-
-        For a much more thorough explanation including examples please review this error here:`,
-      docsUrl: 'https://on.cypress.io/command-queue-ended-early',
-    },
     invalid_command: {
       message: 'Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n',
       docsUrl: 'https://on.cypress.io/api',
@@ -1008,7 +975,6 @@ export default {
   mocha: {
     async_timed_out: 'Timed out after `{{ms}}ms`. The `done()` callback was never invoked!',
     invalid_interface: 'Invalid mocha interface `{{name}}`',
-    timed_out: 'Cypress command timeout of `{{ms}}ms` exceeded.',
     overspecified: {
       message: stripIndent`\
         Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
@@ -1233,10 +1199,6 @@ export default {
     },
   },
 
-  ng: {
-    no_global: `Angular global (\`window.angular\`) was not found in your window. You cannot use ${cmd('ng')} methods without angular.`,
-  },
-
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
     invalid_url_argument: {
@@ -1377,12 +1339,6 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/press',
     },
-    unsupported_browser_version: {
-      message: stripIndent`\
-        ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
-      `,
-      docsUrl: 'https://on.cypress.io/press',
-    },
     unsupported_browser: {
       message: stripIndent`\
       ${cmd('press')} is not supported in {{family}} browsers.
@@ -1425,18 +1381,6 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/proxy-configuration',
     },
-  },
-
-  proxy: {
-    js_rewriting_failed: stripIndent`\
-      An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress. Open an issue if you see this message.
-
-      JS URL: {{url}}
-
-      Original error:
-
-      {{errMessage}}
-      {{errStack}}`,
   },
 
   reload: {
@@ -1920,26 +1864,12 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
-      not_found: {
-        message: stripIndent`
-        No session is defined with the name
-          **{{id}}**
-        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
-
-        \`cy.session(id, setup)\`
-        `,
-        docsUrl: 'https://on.cypress.io/session',
-      },
     },
   },
 
   setCookie: {
     invalid_arguments: {
       message: `${cmd('setCookie')} must be passed two string arguments for \`name\` and \`value\`.`,
-      docsUrl: 'https://on.cypress.io/setcookie',
-    },
-    invalid_value: {
-      message: `${cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n\`{{value}}\``,
       docsUrl: 'https://on.cypress.io/setcookie',
     },
     invalid_samesite: ({ validValues, value }) => {
@@ -2008,20 +1938,6 @@ export default {
   },
 
   subject: {
-    not_dom (obj) {
-      return stripIndent`\
-        ${cmd(obj.name)} failed because it requires a valid DOM object.
-
-        The subject received was:
-
-          > \`${obj.subject}\`
-
-        The previous command that ran was:
-
-          > ${cmd(obj.previous)}
-
-        Cypress only considers the \`window\`, \`document\`, or any \`element\` to be valid DOM objects.`
-    },
     detached_during_actionability (obj) {
       return {
         message: stripIndent`\
@@ -2251,10 +2167,6 @@ export default {
           \`iframe\`
           \`[tabindex]\`
           \`[contenteditable]\``,
-      docsUrl: 'https://on.cypress.io/type',
-    },
-    readonly: {
-      message: `${cmd('type')} cannot type into an element with a \`readonly\` attribute. The element typed into was: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     tab: {
@@ -2558,11 +2470,5 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/wrap',
     },
-  },
-
-  xhr: {
-    aborted: 'This XHR was aborted by your code -- check this stack trace below.',
-    missing: '`XMLHttpRequest#xhr` is missing.',
-    network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
   },
 }
