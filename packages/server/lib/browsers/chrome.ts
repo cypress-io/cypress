@@ -439,11 +439,14 @@ export = {
     // which the CDP transport always enables (crbug.com/1196004). Web fonts do
     // not load at all on the browser (CDP) network path unless this flag stays —
     // do not remove it.
+    // These features are launch-time-only: connectToExisting attaches to an
+    // already-running browser and inherits the flags of whatever launched it.
     if (options.useBrowserNetworkInterception) {
       const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
 
       // ServiceWorkerAutoPreload serves navigations that cold-start a service
-      // worker from a browser-issued request no CDP session can pause (#34709)
+      // worker from a browser-issued request no CDP session can pause
+      // https://github.com/cypress-io/cypress/issues/34709
       const features = 'WebFontsCacheAwareTimeoutAdaption,ServiceWorkerAutoPreload'
 
       if (disableFeaturesIndex === -1) {

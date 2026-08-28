@@ -1217,6 +1217,7 @@ describe('lib/browsers/chrome', () => {
       it('keeps it on the MITM path', () => {
         const args = chrome._getArgs({}, { useBrowserNetworkInterception: false })
 
+        expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
         expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('ServiceWorkerAutoPreload')
       })
     })
