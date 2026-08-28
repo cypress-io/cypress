@@ -921,10 +921,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // don't do anything if we don't have a current runnable
     if (!runnable) return
 
-    // uncaught exceptions should be only be catchable in the AUT (app)
-    // or if in component testing mode, since then the spec frame and
-    // AUT frame are the same
-    if (frameType === 'app' || this.config('componentTesting')) {
+    // uncaught exceptions should only be catchable in the AUT (app); errors
+    // from the spec fail the test outright. Component testing runs the spec
+    // inside the AUT frame, so its errors already arrive here as 'app'.
+    if (frameType === 'app') {
       try {
         const results = this.Cypress.action('app:uncaught:exception', err, runnable, promise)
 
