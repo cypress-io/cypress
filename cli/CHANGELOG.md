@@ -1,9 +1,4 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.0.1
-
-**Bugfixes:**
-- Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
-  
 ## 16.0.0
 
 **Breaking Changes:**
@@ -45,6 +40,7 @@
 
 - Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
 - Fixed an issue where a single cleanup step that stalled while Cypress shut down, such as waiting on a browser that was slow to close, could hold up the rest of shutdown. Addressed in [#34699](https://github.com/cypress-io/cypress/pull/34699).
+- Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
 
 **Dependency Updates:**
 
