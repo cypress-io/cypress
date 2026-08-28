@@ -5,6 +5,8 @@ import {
   recordFileName,
   parseRecordPid,
   sessionProbePath,
+  tapGraphqlPath,
+  TAP_GRAPHQL_ROUTE_PREFIX,
   buildTapSchema,
   SESSIONS_ROUTE_PREFIX,
   SESSIONS_DIRNAME,
@@ -58,6 +60,13 @@ describe('cypress-sessions contract', () => {
     it('builds the probe path from the shared prefix', () => {
       expect(sessionProbePath('abc')).toBe(`${SESSIONS_ROUTE_PREFIX}abc`)
       expect(sessionProbePath('abc')).toBe('/__cypress/sessions/abc')
+    })
+  })
+
+  describe('tap graphql route', () => {
+    it('builds the operation path from the shared prefix', () => {
+      expect(tapGraphqlPath('TapSpecs')).toBe(`${TAP_GRAPHQL_ROUTE_PREFIX}TapSpecs`)
+      expect(tapGraphqlPath('TapSpecs')).toBe('/__cypress/tap/graphql/TapSpecs')
     })
   })
 

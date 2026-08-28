@@ -18,6 +18,15 @@ export const SESSIONS_ROUTE_PREFIX = '/__cypress/sessions/'
 
 export const SESSION_ID_HEADER = 'x-cypress-session-id'
 
+// Fixed rather than namespaced, as the sessions route is: the CLI has to find it
+// knowing only the port from the record.
+export const TAP_GRAPHQL_ROUTE_PREFIX = '/__cypress/tap/graphql/'
+
+// Where tap GraphQL lived before the fixed route, under the default `namespace`.
+// The CLI falls back to it to keep tapping sessions that predate the route, and it
+// can go once those are no longer supported.
+export const LEGACY_TAP_GRAPHQL_PATH = '/__cypress/graphql'
+
 export type SessionTestingType = 'e2e' | 'component' | null
 
 export interface CypressSession {
@@ -77,6 +86,10 @@ export const recordPath = (cacheRoot: string, pid: number): string => {
 
 export const sessionProbePath = (sessionId: string): string => {
   return `${SESSIONS_ROUTE_PREFIX}${sessionId}`
+}
+
+export const tapGraphqlPath = (operationName: string): string => {
+  return `${TAP_GRAPHQL_ROUTE_PREFIX}${operationName}`
 }
 
 const isValidTestingType = (value: any): value is SessionTestingType => {
