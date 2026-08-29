@@ -3,7 +3,7 @@ import React from 'react'
 import Tooltip from './tooltip'
 
 interface TagProps {
-  type?: 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status'
+  type?: 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status' | 'warned-status'
   content: React.ReactNode | string
   count?: number
   tooltipMessage?: React.ReactNode | string
