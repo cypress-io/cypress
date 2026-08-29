@@ -5,7 +5,6 @@ import fs from 'fs-extra'
 import { PassThrough } from 'stream'
 import { FoundBrowser } from '@packages/types'
 import * as darwinHelper from '../../lib/darwin'
-import * as linuxHelper from '../../lib/linux'
 import * as darwinUtil from '../../lib/darwin/util'
 import { launch } from '../../lib/browsers'
 import { knownBrowsers } from '../../lib/known-browsers'
@@ -104,10 +103,6 @@ describe('darwin browser detection', () => {
     expect(mappedBrowsers).toMatchSnapshot()
   })
 
-  it('getVersionString is re-exported from linuxHelper', () => {
-    expect(darwinHelper.getVersionString).toEqual(linuxHelper.getVersionString)
-  })
-
   describe('forces correct architecture', () => {
     beforeEach(() => {
       vi.unstubAllEnvs()
@@ -175,7 +170,7 @@ describe('darwin browser detection', () => {
       it('uses arch and ARCHPREFERENCE on arm64', async () => {
         vi.mocked(os.arch).mockReturnValue('arm64')
 
-        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true', env2: 'true' })
+        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', ['arg1'], { env1: 'true', env2: 'true' })
 
         expect(cp.spawn).toHaveBeenNthCalledWith(1, 'arch', ['chrome', 'url', 'arg1'], expect.objectContaining({
           env: expect.objectContaining({
@@ -190,7 +185,7 @@ describe('darwin browser detection', () => {
       it('does not use `arch` on x64', async () => {
         vi.mocked(os.arch).mockReturnValue('x64')
 
-        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true', env2: 'true' })
+        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', ['arg1'], { env1: 'true', env2: 'true' })
 
         expect(cp.spawn).toHaveBeenNthCalledWith(1, 'chrome', ['url', 'arg1'], expect.objectContaining({
           env: expect.objectContaining({

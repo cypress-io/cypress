@@ -12,7 +12,6 @@ exports[`windows browser detection > detects Chrome 64-bit install 1`] = `
   "family": "chromium",
   "name": "chrome",
   "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
-  "validator": [Function],
   "version": "4.4.4",
   "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
 }
@@ -149,7 +148,6 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "family": "chromium",
     "name": "chrome",
     "path": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "validator": [Function],
     "version": "1.2.3",
     "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
   },

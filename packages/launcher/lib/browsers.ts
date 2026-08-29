@@ -9,7 +9,6 @@ export const debug = Debug('cypress:launcher:browsers')
 export function launch (
   browser: FoundBrowser,
   url: string,
-  debuggingPort: number,
   args: string[] = [],
   browserEnv = {},
 ) {

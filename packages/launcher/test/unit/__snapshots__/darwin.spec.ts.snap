@@ -19,7 +19,6 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     },
     "name": "chrome",
     "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "validator": [Function],
     "version": "someVersion",
     "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
   },

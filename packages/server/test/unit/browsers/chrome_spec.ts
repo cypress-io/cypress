@@ -154,7 +154,7 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
-        expect(launch.launch).to.be.calledWith({ isHeadless: true }, 'about:blank', 50505, args)
+        expect(launch.launch).to.be.calledWith({ isHeadless: true }, 'about:blank', args)
       })
     })
 
@@ -163,7 +163,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[3]
+        const args = launch.launch.firstCall.args[2]
 
         expect(args).to.include.members([
           '--headless=new',
@@ -178,7 +178,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[3]
+        const args = launch.launch.firstCall.args[2]
 
         expect(args).to.include.members([
           '--headless=new',
@@ -209,7 +209,7 @@ describe('lib/browsers/chrome', () => {
         channel: 'stable',
       }, 'http://', openOpts, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[3]
+        const args = launch.launch.firstCall.args[2]
 
         expect(args).to.include.members([
           `--user-data-dir=${fullPath}`,
@@ -258,7 +258,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open({ isHeaded: true }, 'http://', openOpts, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[3]
+        const args = launch.launch.firstCall.args[2]
 
         expect(args).to.include.members([
           '--foo=bar',
@@ -280,7 +280,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open({ isHeaded: true }, 'http://', { onWarning, onError: () => {} }, this.automation)
       .then(() => {
-        const args = launch.launch.firstCall.args[3]
+        const args = launch.launch.firstCall.args[2]
 
         expect(args).to.include.members([
           '--foo=bar',

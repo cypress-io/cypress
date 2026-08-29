@@ -28,20 +28,6 @@ export const knownBrowsers: Browser[] = [
     displayName: 'Chrome',
     versionRegex: /Google Chrome(?! for Testing) (\S+)/m,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
-    validator: (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
-      // a validator method can be defined to mark a browser as unsupported
-      // the example below shows a previous method we defined, but is not currently used
-      // if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
-      //   return {
-      //     isSupported: false,
-      //     warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to a blocking bug in ${browser.displayName}. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
-      //   }
-      // }
-
-      return {
-        isSupported: true,
-      }
-    },
   },
   {
     name: 'chrome',

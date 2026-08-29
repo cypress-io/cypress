@@ -82,10 +82,6 @@ function lookup (
 ): Promise<DetectedBrowser> {
   const helper = getHelper(platform)
 
-  if (!helper) {
-    throw new Error(`Cannot lookup browser ${browser.name} on ${platform}`)
-  }
-
   return helper.detect(browser)
 }
 
@@ -111,7 +107,6 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
     'family',
     'channel',
     'displayName',
-    'type',
     'version',
     'path',
     'profilePath',

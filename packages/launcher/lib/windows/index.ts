@@ -190,14 +190,6 @@ export function getVersionString (path: string) {
 }
 
 export function getVersionNumber (version: string) {
-  if (version.indexOf('Version=') > -1) {
-    const split = version.split('=')
-
-    if (split[1]) {
-      return split[1]
-    }
-  }
-
   return version
 }
 
