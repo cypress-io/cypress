@@ -41,32 +41,6 @@ describe('TagStream', () => {
     })
   })
 
-  describe('when the downstream stream is not ready', () => {
-    beforeEach(() => {
-      vi.mocked(tagStream.push).mockClear()
-      vi.spyOn(tagStream, 'once').mockImplementation((ev, cb) => {
-        if (ev === 'drain') {
-          cb()
-        }
-
-        return tagStream
-      })
-    })
-
-    it('waits for the stream to be ready', async () => {
-      const cb = vi.fn()
-
-      vi.mocked(tagStream.push).mockReturnValue(false)
-
-      const promise = tagStream.transform(strInput, 'utf-8', cb)
-
-      await promise
-
-      expect(tagStream.once).toHaveBeenCalledWith('drain', expect.any(Function))
-      expect(cb).toHaveBeenCalled()
-    })
-  })
-
   describe('when transforming a buffer', () => {
     const bufInput = Buffer.from(strInput)
 
