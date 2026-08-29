@@ -11,11 +11,9 @@ const LONG_RUNNING_THRESHOLD = 1000
 type InterceptStatuses = 'req modified' | 'req + res modified' | 'res modified'
 type XHRStatuses = '---' | '(canceled)' | '(aborted)' | string // string = any xhr status
 
-export type CommandIndicator = 'successful' | 'pending' | 'aborted' | 'bad'
-
 export interface RenderProps {
   message?: string
-  indicator?: CommandIndicator
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
   interceptions?: Array<{
     command: 'intercept' | 'route'
     alias?: string
