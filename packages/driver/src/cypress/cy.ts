@@ -8,7 +8,6 @@ import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
 import { create as createChai, IChai } from '../cy/chai'
-import { create as createXhr, IXhr } from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
 import { create as createAliases, IAliases } from '../cy/aliases'
 import { extend as extendEvents } from './events'
@@ -150,7 +149,7 @@ interface ICySnapshots extends Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 > { }
 
-export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, ICySnapshots, ICyFocused {
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IAliases, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
   state: StateFunc
@@ -190,8 +189,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   pauseTimers: ITimer['pauseTimers']
 
   expect: IChai['expect']
-
-  getIndexedXhrByAlias: IXhr['getIndexedXhrByAlias']
 
   addAlias: IAliases['addAlias']
   getAlias: IAliases['getAlias']
@@ -317,10 +314,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const { expect } = createChai!(specWindow, state, this.assert)
 
     this.expect = expect
-
-    const xhr = createXhr(state)
-
-    this.getIndexedXhrByAlias = xhr.getIndexedXhrByAlias
 
     const aliases = createAliases(this)
 
