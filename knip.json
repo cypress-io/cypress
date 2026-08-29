@@ -120,7 +120,6 @@
         "lib/modes/**/*.ts",
         "lib/browsers/**/*.ts",
         "lib/capture.ts",
-        "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
         "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
