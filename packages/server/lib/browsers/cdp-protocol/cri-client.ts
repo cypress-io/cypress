@@ -393,9 +393,18 @@ export class CriClient implements ICriClient {
   }
 
   public off = <T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => {
-    this.subscriptions.splice(this.subscriptions.findIndex((sub) => {
+    // callers routinely `off` an event this client never subscribed to - e.g.
+    // resetBrowserTargets replays every page subscription against the browser
+    // client, which only ever received the `Network.*` ones. An unguarded
+    // splice(-1, 1) would evict an unrelated subscription, so that one is
+    // then never removed from the browser client when its own target closes.
+    const index = this.subscriptions.findIndex((sub) => {
       return sub.eventName === eventName && sub.cb === cb
-    }), 1)
+    })
+
+    if (index !== -1) {
+      this.subscriptions.splice(index, 1)
+    }
 
     this.cdpConnection!.off(eventName, cb)
     // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)

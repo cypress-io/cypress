@@ -616,6 +616,7 @@ describe('lib/browsers/chrome', () => {
       const browserCriClient = {
         attachToTargetUrl: sinon.stub().resolves(pageCriClient),
         resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
       }
       const cdpAutomation = {
         _listenForFrameTreeChanges: sinon.stub(),
@@ -656,6 +657,7 @@ describe('lib/browsers/chrome', () => {
       const browserCriClient = {
         attachToTargetUrl: sinon.stub().resolves(pageCriClient),
         resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
       }
       const cdpAutomation = {
         _listenForFrameTreeChanges: sinon.stub(),
@@ -680,6 +682,45 @@ describe('lib/browsers/chrome', () => {
 
       expect(cdpAutomation._listenForFrameTreeChanges).not.to.have.been.called
       expect(onPageCriClientReady).not.to.have.been.called
+    })
+
+    it('closes the previous browser cri client before connecting again', async function () {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const makeBrowserCriClient = () => ({
+        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+        resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
+      })
+      const first = makeBrowserCriClient()
+      const second = makeBrowserCriClient()
+      const automation = { use: sinon.stub() }
+
+      sinon.stub(BrowserCriClient, 'create')
+      .onFirstCall().resolves(first as any)
+      .onSecondCall().resolves(second as any)
+
+      sinon.stub(chrome, '_setAutomation').resolves({ _listenForFrameTreeChanges: sinon.stub(), isAUTFrame: sinon.stub() } as any)
+      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
+
+      const connect = () => chrome.connectToExisting(
+        { displayName: 'Chrome' } as any,
+        { ...mitmOpts, url: 'http://localhost:3000/__/' },
+        automation as any,
+      )
+
+      await connect()
+      expect(first.close).not.to.have.been.called
+
+      // each spec reconnects, and the client from the previous spec still holds
+      // an open websocket to the same browser
+      await connect()
+      expect(first.close).to.have.been.calledOnce
+      expect(second.close).not.to.have.been.called
+      expect(chrome._getBrowserCriClient()).to.equal(second)
     })
   })
 

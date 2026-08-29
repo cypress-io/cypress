@@ -457,6 +457,33 @@ describe('lib/browsers/cri-client', function () {
     })
   })
 
+  context('#off', () => {
+    const noop = () => {}
+
+    it('removes the subscription', async () => {
+      const client = await getClient()
+
+      client.on('Page.loadEventFired', noop)
+      client.off('Page.loadEventFired', noop)
+
+      expect(client.queue.subscriptions).to.be.empty
+    })
+
+    it('leaves other subscriptions in place when the callback was never registered', async () => {
+      const client = await getClient()
+
+      client.on('Network.requestWillBeSent', noop)
+
+      // resetBrowserTargets replays every page subscription against the browser
+      // client, which only holds the Network.* ones - the rest must be no-ops
+      client.off('Page.loadEventFired', noop)
+      client.off('Page.frameAttached', () => {})
+
+      expect(client.queue.subscriptions).to.have.length(1)
+      expect(client.queue.subscriptions[0].eventName).to.eq('Network.requestWillBeSent')
+    })
+  })
+
   context('clone', () => {
     it('returns a new CriClient with the same options', async () => {
       const client = await getClient()

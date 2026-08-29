@@ -160,11 +160,17 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 }
 
 type TargetId = string
+type SessionId = string
 
 interface ExtraTarget {
   client: CRI.Client
   targetInfo: Protocol.Target.TargetInfo
   detach?: ExtraTargetDetach
+}
+
+interface ServiceWorkerBinding {
+  eventName: 'Runtime.bindingCalled'
+  cb: (event: Protocol.Runtime.BindingCalledEvent) => void
 }
 
 export class BrowserCriClient {
@@ -192,6 +198,7 @@ export class BrowserCriClient {
   resettingBrowserTargets = false
   gracefulShutdown?: Boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
+  serviceWorkerBindings: Map<SessionId, ServiceWorkerBinding> = new Map()
   onClose: Function | null = null
 
   private constructor (options: BrowserCriClientOptions) {
@@ -292,6 +299,10 @@ export class BrowserCriClient {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
     })
 
+    browserClient.on('Target.detachedFromTarget', (event: Protocol.Target.DetachedFromTargetEvent) => {
+      browserCriClient.removeServiceWorkerBinding(event.sessionId)
+    })
+
     browserClient.on('Inspector.targetReloadedAfterCrash', async (event, sessionId) => {
       try {
         // Things like service workers will effectively crash in terms of CDP when the page is reloaded in the middle of things
@@ -330,7 +341,7 @@ export class BrowserCriClient {
     try {
       // attach a binding to the runtime so that we can listen for service worker events
       if (event.targetInfo.type === 'service_worker') {
-        browserClient.on(`Runtime.bindingCalled.${event.sessionId}` as 'Runtime.bindingCalled', serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
+        browserCriClient.addServiceWorkerBinding(event.sessionId)
         await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
       }
     } catch (error) {
@@ -756,6 +767,36 @@ export class BrowserCriClient {
 
   removeExtraTargetClient (targetId: TargetId) {
     this.extraTargetClients.delete(targetId)
+  }
+
+  /**
+   * Subscribes the browser client to a service worker session's binding events.
+   * The listener is keyed by session so `Target.detachedFromTarget` can take it
+   * back off again: the browser client outlives every spec in the run, and a
+   * worker's session is never reused, so a listener left behind here is one
+   * more entry on that client for every service worker the run ever attaches.
+   */
+  addServiceWorkerBinding (sessionId: SessionId) {
+    const binding: ServiceWorkerBinding = {
+      eventName: `Runtime.bindingCalled.${sessionId}` as 'Runtime.bindingCalled',
+      cb: serviceWorkerClientEventHandler(this.onServiceWorkerClientEvent),
+    }
+
+    this.serviceWorkerBindings.set(sessionId, binding)
+    this.browserClient.on(binding.eventName, binding.cb)
+  }
+
+  removeServiceWorkerBinding (sessionId: SessionId) {
+    const binding = this.serviceWorkerBindings.get(sessionId)
+
+    if (!binding) {
+      return
+    }
+
+    debug('Remove service worker binding (session: %s)', sessionId)
+
+    this.serviceWorkerBindings.delete(sessionId)
+    this.browserClient.off(binding.eventName, binding.cb)
   }
 
   // Detaching the Fetch transport is left to `Target.targetDestroyed`, which
