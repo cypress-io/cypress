@@ -15,11 +15,10 @@ function probe (inputFile: string): Promise<FfprobeData> {
   })
 }
 
-// The container duration spans every stream, and a compressed video also carries
-// a chapter track built from the run's wall clock. That clock starts before the
-// browser delivers its first frame, so the chapter track can outlast the video by
-// seconds — seeking relative to the container would land past the final frame,
-// where ffmpeg decodes nothing and still exits successfully.
+// ffmpeg reports the container duration as that of its longest stream, and a
+// compressed video carries a chapter track alongside the video. Chapter timestamps
+// come from the run's wall clock, which starts before the browser delivers its
+// first frame, so the chapter track can end seconds after the video does.
 async function videoStreamDuration (inputFile: string): Promise<number> {
   const metadata = await probe(inputFile)
   const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video')
@@ -44,8 +43,8 @@ function extractFrameAsJpg (inputFile: string, seekTo: string, outputFile: strin
   })
 }
 
-// asserts that the given video file is a real, seekable recording and not a
-// corrupt file or a single frozen frame
+// a corrupt recording is either undecodable or a single frozen frame, so a frame
+// decoded near the end proves the video is real and seekable
 // @see https://github.com/cypress-io/cypress/issues/9265
 export async function expectSeekableEndingFrame (videoFile: string) {
   const duration = await videoStreamDuration(videoFile)
