@@ -27,9 +27,11 @@ export type BrowserVideoController = {
    */
   endVideoCapture: (waitForMoreFrames: boolean) => Promise<void>
   /**
-   * Timestamp of when the video capture started - used for chapter timestamps.
+   * Timestamp that the zero point of the recording's timeline corresponds to - used to
+   * place chapter markers. Read once the spec is over, since a controller streaming
+   * frames only learns its zero point when the first frame arrives.
    */
-  startedVideoCapture: Date
+  getVideoStartedAt: () => Date
   postProcessFfmpegOptions?: Partial<ProcessOptions>
   /**
    * Used in single-tab mode to restart the video capture to a new file without relaunching the browser.

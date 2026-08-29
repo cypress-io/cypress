@@ -155,6 +155,7 @@ export function start (options: StartOptions) {
   }
 
   const lengths = {}
+  let firstFrameAt: Date | undefined
 
   const writeVideoFrame: WriteVideoFrame = function (data) {
     // make sure we haven't ended
@@ -193,6 +194,13 @@ export function start (options: StartOptions) {
     debugFrames('writing video frame')
 
     if (wantsWrite) {
+      // `-use_wallclock_as_timestamps` timestamps each frame as ffmpeg reads it and
+      // normalizes the first one to zero, so the recording's timeline starts here
+      // rather than when the process was spawned
+      if (!firstFrameAt) {
+        firstFrameAt = new Date()
+      }
+
       wantsWrite = pt.write(data)
       if (!wantsWrite) {
         // ffmpeg stream isn't accepting data, so drop frames until the stream is ready to accept data
@@ -280,7 +288,8 @@ export function start (options: StartOptions) {
       cmd,
       endVideoCapture,
       writeVideoFrame,
-      startedVideoCapture,
+      // a capture that never received a frame has no timeline of its own to anchor to
+      getVideoStartedAt: () => firstFrameAt ?? startedVideoCapture,
       restart: () => {
         throw new Error('restart cannot be called on a plain ffmpeg stream')
       },

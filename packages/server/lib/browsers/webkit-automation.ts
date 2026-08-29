@@ -109,7 +109,7 @@ export class WebKitAutomation {
     if (promises.length) await Promise.all(promises)
   }
 
-  private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
+  private recordVideo (videoApi: RunModeVideoApi, contextStarted: Date) {
     const _this = this
 
     videoApi.useVideoController({
@@ -143,7 +143,9 @@ export class WebKitAutomation {
         outputOptions: ['-vsync vfr'],
         videoFilters: 'mpdecimate',
       },
-      startedVideoCapture,
+      // Playwright starts recording as soon as the context is created, so that is where
+      // its video timeline begins
+      getVideoStartedAt: () => contextStarted,
     })
   }
 

@@ -678,7 +678,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
 
     if (tests && tests.length) {
       // always set the video timestamp on tests
-      Reporter.setVideoTimestamp(videoController.startedVideoCapture, attempts)
+      Reporter.setVideoTimestamp(videoController.getVideoStartedAt(), attempts)
     }
 
     try {
