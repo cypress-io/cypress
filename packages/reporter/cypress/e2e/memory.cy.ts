@@ -13,7 +13,7 @@ function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: b
 
   runner = new EventEmitter()
 
-  const runnerStore = new MobxRunnerStore('e2e')
+  const runnerStore = new MobxRunnerStore()
 
   runnerStore.setSpec({
     name: 'foo.js',
