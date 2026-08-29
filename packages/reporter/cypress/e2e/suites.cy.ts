@@ -1,4 +1,4 @@
-import { MobxRunnerStore } from '@packages/app/src/store'
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 

@@ -23,7 +23,9 @@ const Route = observer(({ model }: RouteProps) => (
         tooltipMessage={`Aliased this route as: '${model.alias}'`}
         type='route'
         customClassName='route-alias-name'
-        content={model.alias}
+        // a route's alias is always the string passed to cy.intercept, never
+        // one of the object/array shapes the shared Alias type also allows
+        content={model.alias as string}
       />
     </td>
     <td className='route-num-responses'>{model.numResponses || '-'}</td>

@@ -2,6 +2,7 @@ import { observable, makeObservable } from 'mobx'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import { determineTagType } from './utils'
 import type { SessionStatus } from './utils'
+import type { TagType } from '../lib/tag'
 
 export interface SessionProps extends InstrumentProps {
   name: string
@@ -22,7 +23,7 @@ export default class Session extends Instrument {
   // reporter is embedded into test-replay as a submodule.
   status: string
   isGlobalSession: boolean = false
-  tagType: string
+  tagType: TagType
 
   constructor (props: SessionProps) {
     super(props)
