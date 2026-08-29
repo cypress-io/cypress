@@ -561,7 +561,7 @@ declare namespace Cypress {
      * @example isBrowser(['firefox', 'edge']) will be true only for the browsers 'firefox' and 'edge'
      * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
      * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
-     * @param matcher browser name or matcher object to check.
+     * @param name browser name or matcher object to check.
      */
     isBrowser(name: IsBrowserMatcher): boolean
 
@@ -1055,7 +1055,7 @@ declare namespace Cypress {
       * to clear localStorage inside a single test. Yields `localStorage` object.
       *
       * @see https://on.cypress.io/clearlocalstorage
-      * @param {options} [object] - options object
+      * @param {object} [options] - options object
       * @example
        ```
        // Removes all local storage items, without logging
@@ -1071,7 +1071,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/clearlocalstorage
       * @param {string} [key] - name of a particular item to remove (optional).
-      * @param {options} [object] - options object
+      * @param {object} [options] - options object
       * @example
        ```
        // Removes item "todos" without logging
@@ -4029,14 +4029,14 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
-     * @param {AUTWindow} contentWindow the remote page's window object
+     * @param {AUTWindow} win the remote page's window object
      */
     onBeforeLoad(win: AUTWindow): void
 
     /**
      * Called once your page has fired its load event.
      *
-     * @param {AUTWindow} contentWindow the remote page's window object
+     * @param {AUTWindow} win the remote page's window object
      */
     onLoad(win: AUTWindow): void
 
