@@ -83,10 +83,6 @@ declare module 'plist' {
   export = plist
 }
 
-declare module 'proxy-from-env' {
-  const getProxyForUrl: (url: string) => string
-}
-
 declare module 'url' {
   interface UrlWithStringQuery {
     format(): string
