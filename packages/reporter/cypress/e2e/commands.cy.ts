@@ -1,7 +1,17 @@
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
+import type { CommandIndicator } from '../../src/commands/command-model'
 import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
+
+const runnerStore = new MobxRunnerStore('e2e')
+
+runnerStore.setSpec({
+  name: 'foo',
+  absolute: '/foo/bar',
+  relative: 'foo/bar',
+})
 
 describe('commands', { viewportHeight: 1000 }, () => {
   let runner: EventEmitter
@@ -18,13 +28,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        },
+        runnerStore,
       })
     })
 
@@ -150,7 +154,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       wallClockStartedAt: inProgressStartedAt,
     })
 
-    const indicators = ['successful', 'pending', 'aborted', 'bad']
+    const indicators: CommandIndicator[] = ['successful', 'pending', 'aborted', 'bad']
 
     indicators.forEach((indicator, index) => {
       addCommand(runner, {
@@ -300,7 +304,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
   })
 
   it('shows message indicator when specified', () => {
-    const indicators = ['successful', 'pending', 'aborted', 'bad']
+    const indicators: CommandIndicator[] = ['successful', 'pending', 'aborted', 'bad']
 
     indicators.forEach((indicator) => {
       addCommand(runner, {
@@ -323,7 +327,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
   })
 
   it('shows message indicator when specified and request went to origin', () => {
-    const indicators = ['successful', 'pending', 'aborted', 'bad']
+    const indicators: CommandIndicator[] = ['successful', 'pending', 'aborted', 'bad']
 
     indicators.forEach((indicator) => {
       addCommand(runner, {
@@ -1337,13 +1341,7 @@ describe('cy.prompt command buttons', { viewportHeight: 1000 }, () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        },
+        runnerStore,
       })
     })
 

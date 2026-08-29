@@ -78,7 +78,7 @@ describe('runnables', () => {
     start({ error })
 
     cy.contains(error.title)
-    cy.contains(error.callout)
+    cy.contains(error.callout!)
     cy.contains(error.message)
 
     cy.get('.error a').should('have.attr', 'href', error.link)
