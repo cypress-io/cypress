@@ -66,7 +66,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
           key={`studio-command-${model}`}
           content={
             <div className='flex items-center py-[8px] px-[8px]'>
-              <div><IconCypressStudio strokeColor="gray-500" className="mr-[10px]" /></div>
+              <div><IconCypressStudio className="mr-[10px]" /></div>
               <div className='text-sm text-gray-700'>Edit in Studio</div>
             </div>
           }

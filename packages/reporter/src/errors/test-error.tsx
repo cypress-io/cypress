@@ -54,7 +54,7 @@ const TriggerAction = ({ triggerAction }: { triggerAction: 'loginModal' | 'proje
 }
 
 interface TestErrorProps {
-  err: Err
+  err?: Err
   testId?: string
   commandId?: number
   // the command group level to nest the recovered in-test error

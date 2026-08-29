@@ -9,7 +9,7 @@
     "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
-    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
+    "check-ts": "tsc -p tsconfig.check.json",
     "clean": "rimraf cjs esm",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@packages/root": "0.0.0-development",
+    "@types/mocha": "8.0.3",
     "@types/node": "24.10.1",
     "axios": "^1.15.1",
     "better-sqlite3": "12.8.0",

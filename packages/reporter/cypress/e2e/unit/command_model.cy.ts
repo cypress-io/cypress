@@ -155,7 +155,7 @@ describe('Command model', () => {
       let command: CommandModel
 
       beforeEach(() => {
-        command = new CommandModel(commandProps({ state: null }))
+        command = new CommandModel(commandProps({ state: null } as unknown as Partial<CommandProps>))
         clock.tick(300)
         command.update({ state: 'pending' } as CommandProps)
       })
