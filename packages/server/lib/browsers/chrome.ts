@@ -567,9 +567,9 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    // this runs once per spec, so a client left over from the previous spec
-    // still holds an open websocket to the same browser. Nothing else closes
-    // it - reassigning below is what makes it unreachable.
+    // this runs once per spec, and the client from the previous spec still holds
+    // an open websocket to the same browser. Nothing else closes it, and the
+    // assignment below is what puts it out of reach.
     this.clearInstanceState({ gracefulShutdown: true })
 
     browserCriClient = await BrowserCriClient.create({

@@ -769,13 +769,10 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
-  /**
-   * Subscribes the browser client to a service worker session's binding events.
-   * The listener is keyed by session so `Target.detachedFromTarget` can take it
-   * back off again: the browser client outlives every spec in the run, and a
-   * worker's session is never reused, so a listener left behind here is one
-   * more entry on that client for every service worker the run ever attaches.
-   */
+  // The browser client outlives every spec in the run and a worker's session is
+  // never reused, so each binding is keyed by session for
+  // `Target.detachedFromTarget` to remove. Otherwise every service worker the
+  // run attaches leaves another listener behind on that client.
   addServiceWorkerBinding (sessionId: SessionId) {
     const binding: ServiceWorkerBinding = {
       eventName: `Runtime.bindingCalled.${sessionId}` as 'Runtime.bindingCalled',

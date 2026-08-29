@@ -393,11 +393,11 @@ export class CriClient implements ICriClient {
   }
 
   public off = <T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => {
-    // callers routinely `off` an event this client never subscribed to - e.g.
+    // an event this client never subscribed to is expected here:
     // resetBrowserTargets replays every page subscription against the browser
-    // client, which only ever received the `Network.*` ones. An unguarded
-    // splice(-1, 1) would evict an unrelated subscription, so that one is
-    // then never removed from the browser client when its own target closes.
+    // client, which only ever received the `Network.*` ones. A miss has to leave
+    // the list alone - splicing a -1 index drops an unrelated subscription,
+    // which then outlives the target that registered it.
     const index = this.subscriptions.findIndex((sub) => {
       return sub.eventName === eventName && sub.cb === cb
     })

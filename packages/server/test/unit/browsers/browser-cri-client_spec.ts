@@ -53,6 +53,7 @@ describe('lib/browsers/browser-cri-client', function () {
     send = sinon.stub()
     close = sinon.stub()
     onError = sinon.stub()
+    onServiceWorkerClientEvent = sinon.stub()
     // the browser-level client wraps onAsynchronousError and passes an
     // onCriConnectionClosed handler, so match loosely on the stable fields
     criClientCreateStub = sinon.stub(CriClient, 'create').withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager: undefined, fullyManageTabs: undefined })).resolves({
@@ -180,6 +181,19 @@ describe('lib/browsers/browser-cri-client', function () {
 
       expect(on).to.be.calledWith('Runtime.bindingCalled.session-1', sinon.match.func)
       expect(client.serviceWorkerBindings.has('session-1')).to.be.true
+    })
+
+    it('delivers the session binding events to the service worker event handler', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      client.addServiceWorkerBinding('session-1')
+
+      const cb = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+      const event = { type: 'hasFetchHandler', scope: 'http://localhost:8080/', payload: { hasFetchHandler: true } }
+
+      cb({ name: serviceWorkerClientEventHandlerName, payload: JSON.stringify(event) })
+
+      expect(onServiceWorkerClientEvent).to.be.calledWith(event)
     })
 
     it('unsubscribes the browser client when the session detaches', async function () {
