@@ -572,7 +572,7 @@ describe('src/cy/commands/files', () => {
       .writeFile('cypress/fixtures/foo.txt', '')
       .writeFile('cypress/fixtures/foo.txt', 'bar')
       .readFile('cypress/fixtures/foo.txt').should('equal', 'bar')
-      .exec('rm cypress/fixtures/foo.txt')
+      .task('remove:file', 'cypress/fixtures/foo.txt')
     })
 
     describe('.flag', () => {
@@ -601,7 +601,7 @@ describe('src/cy/commands/files', () => {
         .writeFile('cypress/fixtures/foo.txt', 'foo')
         .writeFile('cypress/fixtures/foo.txt', 'bar', { flag: 'a+' })
         .readFile('cypress/fixtures/foo.txt').should('equal', 'foobar')
-        .exec('rm cypress/fixtures/foo.txt')
+        .task('remove:file', 'cypress/fixtures/foo.txt')
       })
     })
 

@@ -30,7 +30,7 @@ import { SocketAllowed } from './util/socket_allowed'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
-import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
@@ -91,11 +91,11 @@ const _hasValidSessionIdHeader = (req): boolean => {
   return Boolean(current) && typeof provided === 'string' && provided === current
 }
 
-const _isTapRequest = (req, namespace: string): boolean => {
+const _isTapRequest = (req): boolean => {
   const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
   return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
-    (trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req))
+    (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && _hasValidSessionIdHeader(req))
 }
 
 // `isNativeBrowserNetwork`: on that path the browser intercepts its own
@@ -110,7 +110,7 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
   ]
 
   const isAllowedProxyBypass = (trimmedUrl: string, req) => {
-    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || _isTapRequest(req, namespace)
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || _isTapRequest(req)
   }
 
   // normalize clientRoute to help with comparison
@@ -595,7 +595,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(this.useMorgan(namespace))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -607,9 +607,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return app
   }
 
-  useMorgan (namespace = '__cypress') {
+  useMorgan () {
     return require('morgan')('dev', {
-      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req, namespace),
+      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req),
     })
   }
 

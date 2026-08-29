@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 import { action, observable, makeObservable } from 'mobx'
-import type { AutomationStatus } from '../store'
+import type { AutomationStatus } from './automation-status'
 
 const defaults = {
   url: '',

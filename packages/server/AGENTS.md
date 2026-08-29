@@ -37,7 +37,6 @@ yarn workspace @packages/server build-prod
 - `lib/video_capture.ts` — Video recording via ffmpeg
 - `lib/session.ts` — Session management for `cy.session()`
 - `lib/fixture.ts` — Fixture file loading
-- `lib/exec.ts` — `cy.exec()` subprocess handling
 - `lib/config.ts` — Server-side config resolution
 - `lib/makeDataContext.ts` — Data context factory for GraphQL layer
 

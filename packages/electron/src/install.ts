@@ -61,20 +61,25 @@ async function getFileHash (filePath: string): Promise<string> {
   return hash.digest('hex')
 }
 
-async function checkIconVersion () {
-  // TODO: this seems wrong, it's hard coding the check only for OSX and not windows or linux (!?)
+// `@electron/packager` only leaves a standalone icon file in the packaged app on
+// darwin. On win32 rcedit writes the icon into `Cypress.exe` and on linux none is
+// applied, so there is nothing to compare against there.
+async function checkIconVersion (platform: string) {
+  if (platform !== 'darwin') {
+    return
+  }
+
   const mainIconsPath = icons().getPathToIcon('cypress.icns')
-  const cachedIconsPath = path.join(
-    __dirname,
-    '../Cypress/Cypress.app/Contents/Resources/electron.icns',
-  )
+  const cachedIconsPath = getPathToResources('electron.icns')
 
   const [mainHash, cachedHash] = await Promise.all(
     [mainIconsPath, cachedIconsPath].map(getFileHash),
   )
 
   if (mainHash !== cachedHash) {
-    throw new Error('Icon mismatch')
+    throw new Error(
+      `cached icon '${cachedIconsPath}' does not match '${mainIconsPath}', binary needs rebuilding`,
+    )
   }
 }
 
@@ -205,7 +210,7 @@ async function pkgElectronApp (
   }
 }
 
-function ensure () {
+export function ensure () {
   const arch = os.arch()
   const platform = os.platform()
   const pathToExec = getPathToExec()
@@ -216,9 +221,7 @@ function ensure () {
     checkCurrentVersion(pathToVersion),
     // check if the dist folder exist and re-build if not
     fs.stat(pathToExec),
-    // Compare the icon in dist with the one in the icons
-    // package. If different, force the re-build.
-    checkIconVersion(),
+    checkIconVersion(platform),
   ]).then(() => {
     // check that the arch of the built binary matches our CPU
     return checkBinaryArchCpuArch(pathToExec, platform, arch)
@@ -228,7 +231,11 @@ function ensure () {
 }
 
 export function check () {
-  return ensure().catch((err) => {
-    packageAndExit()
+  return ensure().then(() => {
+    debug('existing electron binary is up to date, skipping rebuild')
+  }).catch((err) => {
+    debug('rebuilding electron binary: %s', (err as Error).message)
+
+    return packageAndExit()
   })
 }

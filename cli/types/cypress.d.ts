@@ -1347,16 +1347,6 @@ declare namespace Cypress {
     eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Execute a system command.
-     *
-     * @deprecated `cy.exec()` has been deprecated and will be removed in a future major release.
-     * Use {@linkcode Chainable.task cy.task()} instead, which runs in Node without depending on
-     * the operating system, shell, or terminal of the machine running Cypress.
-     * @see https://on.cypress.io/exec
-     */
-    exec(command: string, options?: Partial<ExecOptions>): Chainable<Exec>
-
-    /**
      * Get the DOM elements that match a specific selector. Opposite of `.not()`
      *
      * @see https://on.cypress.io/filter
@@ -3038,14 +3028,6 @@ declare namespace Cypress {
      */
     defaultCommandTimeout: number
     /**
-     * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
-     * @default 60000
-     * @deprecated `execTimeout` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
-     * removed in a future major release. Use {@linkcode ResolvedConfigOptions.taskTimeout taskTimeout} with
-     * {@linkcode Chainable.task cy.task()} instead.
-     */
-    execTimeout: number
-    /**
      * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
      * @default 60000
      */
@@ -3437,7 +3419,7 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'execTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3445,7 +3427,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'execTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3717,29 +3699,6 @@ declare namespace Cypress {
 
   interface DebugOptions {
     verbose: boolean
-  }
-
-  /**
-   * Options object to change the default behavior of cy.exec().
-   *
-   * @deprecated `ExecOptions` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
-   * removed in a future major release.
-   */
-  interface ExecOptions extends Loggable, Timeoutable {
-    /**
-     * Whether to fail if the command exits with a non-zero code
-     *
-     * @default true
-     */
-    failOnNonZeroExit: boolean
-    /**
-     * Object of environment variables to set before the command executes
-     * (e.g. {USERNAME: 'johndoe'}). Will be merged with existing
-     * system environment variables
-     *
-     * @default {}
-     */
-    env: object
   }
 
   /**
@@ -6590,18 +6549,6 @@ declare namespace Cypress {
     get(): EnqueuedCommandAttributes
     set<K extends keyof EnqueuedCommandAttributes>(key: K, value: EnqueuedCommandAttributes[K]): Log
     set(options: Partial<EnqueuedCommandAttributes>): Log
-  }
-
-  /**
-   * The result yielded by cy.exec().
-   *
-   * @deprecated `Exec` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
-   * removed in a future major release.
-   */
-  interface Exec {
-    exitCode: number
-    stdout: string
-    stderr: string
   }
 
   type TypedArray =

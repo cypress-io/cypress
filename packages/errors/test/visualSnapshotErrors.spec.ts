@@ -1178,6 +1178,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXEC_TIMEOUT_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
       return {
         default: [],

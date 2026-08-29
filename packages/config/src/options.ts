@@ -31,6 +31,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
   'EXPERIMENTAL_SOURCE_REWRITING_REMOVED',
   'ALLOW_CYPRESS_ENV_REMOVED',
+  'EXEC_TIMEOUT_REMOVED',
   'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
   'VISIBILITY_STRATEGY_DEPRECATION',
   'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
@@ -221,11 +222,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'expose',
     defaultValue: {},
     validation: validate.isPlainObject,
-    overrideLevel: 'any',
-  }, {
-    name: 'execTimeout',
-    defaultValue: 60000,
-    validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
     name: 'experimentalCspAllowList',
@@ -683,6 +679,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   {
     name: 'allowCypressEnv',
     errorKey: 'ALLOW_CYPRESS_ENV_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'execTimeout',
+    errorKey: 'EXEC_TIMEOUT_REMOVED',
     isWarning: true,
   },
   {

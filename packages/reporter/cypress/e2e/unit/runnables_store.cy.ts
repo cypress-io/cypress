@@ -202,7 +202,7 @@ describe('runnables store', () => {
     it('finishes the test with the given id', () => {
       instance.setRunnables({ tests: [createTest('1')], suites: [] })
       instance.runnableStarted({ id: '1' } as TestProps)
-      instance.runnableFinished({ id: '1' } as TestProps)
+      instance.runnableFinished({ id: '1' } as TestProps, false)
       expect((instance.runnables[0] as TestModel).isActive).to.be.false
     })
   })

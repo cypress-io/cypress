@@ -175,11 +175,6 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     const type = function () {
-      const isFirefoxBefore91 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 91
-      const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
-      const isFirefox106OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 106
-      const isFirefox129OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 129
-
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
 
@@ -237,14 +232,9 @@ export default function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        // Before Firefox 98, submit event is automatically fired
-        // when we send {Enter} KeyboardEvent to the input fields.
-        // Because of that, we don't have to click the submit buttons.
-        // Otherwise, we trigger submit events twice.
-        //
         // WebKit will send the submit with an Enter keypress event,
         // so we do need to click the default button in this case.
-        if (!isFirefoxBefore98 && !Cypress.isBrowser('webkit')) {
+        if (!Cypress.isBrowser('webkit')) {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
@@ -344,17 +334,11 @@ export default function (Commands, Cypress, cy, state, config) {
 
           if (
             (
-              // Before Firefox 91, it sends a click event automatically on the
-              // 'keyup' event for a Space key and we don't want to send it twice
               !Cypress.isBrowser('firefox') ||
-              // Starting with Firefox 91, click events are no longer sent
-              // automatically for <button> elements
+              // Firefox no longer sends click events automatically for <button>
+              // and <input> elements, so we have to send them ourselves.
               // event.target is null when the element is within the shadow DOM
-              (!isFirefoxBefore91 && event.target && $elements.isButton(event.target)) ||
-              // Starting with Firefox 98, click events are no longer sent
-              // automatically for <input> elements
-              // event.target is null when the element is within the shadow DOM
-              (!isFirefoxBefore98 && event.target && $elements.isInput(event.target))
+              (event.target && ($elements.isButton(event.target) || $elements.isInput(event.target)))
             ) &&
             // Click event is sent after keyup event with space key.
             event.type === 'keyup' && event.code === 'Space' &&
@@ -371,16 +355,6 @@ export default function (Commands, Cypress, cy, state, config) {
             fireClickEvent(event.target)
 
             keydownEvents = []
-
-            // After Firefox 98 and before 129
-            // Firefox doesn't update checkbox automatically even if the click event is sent.
-            if (Cypress.isBrowser('firefox') && !isFirefox129OrLater) {
-              if (event.target.type === 'checkbox') {
-                event.target.checked = !event.target.checked
-              } else if (event.target.type === 'radio') { // when checked is false, here cannot be reached because of the above condition
-                event.target.checked = true
-              }
-            }
           }
         },
 
@@ -434,16 +408,11 @@ export default function (Commands, Cypress, cy, state, config) {
           // Send click event on type('{enter}')
           if (sendClickEvent) {
             if (
-              // Before Firefox 98, it sends a click event automatically on
-              // simulated keypress events and we don't want to send it twice
               !Cypress.isBrowser('firefox') ||
-              // Starting with Firefox 98, click events are no longer sent
-              // automatically for <input> elements, but are still sent for
-              // other element types
-              (!isFirefoxBefore98 && $elements.isInput(el)) ||
-              // Starting with Firefox 106, click events are no longer sent
-              // automatically for <button> elements
-              (isFirefox106OrLater && $elements.isButton(el))
+              // Firefox no longer sends click events automatically for <input>
+              // and <button> elements, so we have to send them ourselves.
+              $elements.isInput(el) ||
+              $elements.isButton(el)
             ) {
               fireClickEvent(el)
             }

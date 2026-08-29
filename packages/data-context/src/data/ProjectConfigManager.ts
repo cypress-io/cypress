@@ -35,7 +35,9 @@ const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
 // this budget; data-context cannot import from the server, so the default is mirrored here
 const DEFAULT_TEARDOWN_TIMEOUT_MS = 5000
 // the disconnect ack has to give up well before the teardown budget expires, or the force-exit cuts
-// off the rest of teardown instead; derived so lowering the budget cannot invert the two
+// off the rest of teardown instead; derived so lowering the budget cannot invert the two. Keep equal
+// to PEER_WAIT_BUDGET_FRACTION in @packages/server lib/util/graceful-exit.ts, which bounds the other
+// wait on a process we do not control
 const TEARDOWN_BUDGET_FRACTION = 0.4
 
 function mainProcessWillDisconnectTimeoutMs (): number {
@@ -174,9 +176,7 @@ export class ProjectConfigManager {
       return loadConfigReply.initialConfig
     } catch (error) {
       debug(`catch %o`, error)
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       this._state = 'errored'
       await this.closeWatchers()
@@ -295,9 +295,7 @@ export class ProjectConfigManager {
     } catch (error) {
       debug(`catch setupNodeEvents %o`, error)
       this._state = 'errored'
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       await this.closeWatchers()
 
@@ -399,9 +397,7 @@ export class ProjectConfigManager {
   private loadConfig () {
     if (!this._loadConfigPromise) {
       // If there's already a dangling IPC from the previous switch of testing type, we want to clean this up
-      if (this._eventsIpc) {
-        this._eventsIpc.cleanupIpc()
-      }
+      this.cleanupEventsIpc()
 
       this._eventsIpc = new ProjectConfigIpc(
         this.options.ctx.coreData.app.nodePath,
@@ -704,10 +700,22 @@ export class ProjectConfigManager {
     this._pathToWatcherRecord = {}
   }
 
-  async destroy () {
+  /**
+   * Every registered handler resolves off a reply from the events ipc, and that reply has
+   * no timeout. Handlers must never outlive the ipc they are bound to, or a later
+   * `after:run`/`after:spec` awaits a reply that can never arrive.
+   */
+  private cleanupEventsIpc () {
     if (this._eventsIpc) {
       this._eventsIpc.cleanupIpc()
     }
+
+    this.options.eventRegistrar.reset()
+  }
+
+  async destroy () {
+    this.cleanupEventsIpc()
+    this._eventsIpc = undefined
 
     this._state = 'pending'
     this._cachedLoadConfig = undefined

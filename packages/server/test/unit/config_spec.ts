@@ -235,7 +235,7 @@ describe('lib/config', () => {
         it('passes if an object with valid properties', function () {
           this.setup({
             component: {
-              execTimeout: 10000,
+              taskTimeout: 10000,
             },
           })
 
@@ -266,7 +266,7 @@ describe('lib/config', () => {
           this.setup({
             e2e: {
               baseUrl: 'https://cypress.com',
-              execTimeout: 10000,
+              taskTimeout: 10000,
             },
           })
         })
@@ -327,20 +327,6 @@ describe('lib/config', () => {
           this.setup({ env: 'not an object that\'s for sure' })
 
           return this.expectValidationFails('a plain object')
-        })
-      })
-
-      describe('execTimeout', () => {
-        it('passes if a number', function () {
-          this.setup({ execTimeout: 10 })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if not a number', function () {
-          this.setup({ execTimeout: 'foo' })
-
-          return this.expectValidationFails('be a number')
         })
       })
 

@@ -5,7 +5,7 @@ import events from '../lib/events'
 
 describe('sessions instrument panel', { viewportWidth: 400 }, () => {
   it('renders null when no sessions have been added', () => {
-    cy.mount(<Sessions model={[]}/>)
+    cy.mount(<Sessions model={{}}/>)
 
     cy.get('.sessions-container').should('not.exist')
 
@@ -70,7 +70,7 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
     })
 
     beforeEach(() => {
-      cy.mount(<Sessions model={[specSession, globalSession, warnedSpecSession, failedSpecSession]}/>)
+      cy.mount(<Sessions model={{ specSession, globalSession, warnedSpecSession, failedSpecSession }}/>)
 
       cy.get('.sessions-container').should('exist')
       cy.get('.hook-header > .collapsible-header').as('header')

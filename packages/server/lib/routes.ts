@@ -23,7 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
-import { SESSIONS_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -240,6 +240,9 @@ export const createCommonRoutes = ({
         userId: ctx.coreData.user?.id ?? null,
       })
     })
+
+    // The tap CLI's mount; the app reaches GraphQL under `namespace` below.
+    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, graphQLHTTP)
   }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
