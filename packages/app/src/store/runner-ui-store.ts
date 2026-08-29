@@ -1,14 +1,9 @@
 import { defineStore } from 'pinia'
 import { runnerConstants } from '../runner/runner-constants'
+import { automation } from './automation-status'
+import type { AutomationStatus } from './automation-status'
 
-export const automation = {
-  CONNECTING: 'CONNECTING',
-  MISSING: 'MISSING',
-  CONNECTED: 'CONNECTED',
-  DISCONNECTED: 'DISCONNECTED',
-} as const
-
-export type AutomationStatus = keyof typeof automation
+export * from './automation-status'
 
 /**
  * Store for reactive properties used in the runner UI.
