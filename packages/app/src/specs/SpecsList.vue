@@ -209,6 +209,7 @@ import type { Specs_SpecsListFragment, SpecsListFragment } from '../generated/gr
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, useCollapsibleTree } from './tree/useCollapsibleTree'
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
+import { useTreeExpansionCache } from './tree/useTreeExpansionCache'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
@@ -384,10 +385,12 @@ const specs = computed(() => {
 
 // Maintain a cache of what tree directories are expanded/collapsed so the tree state is visually preserved
 // when specs list data is updated on scroll (e.g., latest-runs & average-duration data loading async)
-const treeExpansionCache = ref(new Map<string, boolean>())
-
-// When search value changes or when specs are added/removed, reset the tree expansion cache so that any collapsed directories re-expand
-watch([() => specFilterModel.value, () => specs.value.length], () => treeExpansionCache.value.clear())
+// and across page refreshes.
+const treeExpansionCache = useTreeExpansionCache(
+  props.gql.currentProject?.savedState?.specsListTreeExpansion ?? undefined,
+  () => debouncedSpecFilterModel?.value,
+  () => cachedSpecs.value,
+)
 
 const collapsible = computed(() => {
   return useCollapsibleTree(

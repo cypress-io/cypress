@@ -35,6 +35,7 @@
 
 - Cypress now supports HTTP/2 and HTTP/3 in Chrome, Chromium, and Edge. Your application is tested over the same protocol it uses in production, with multiplexed requests and no six-connection ceiling, so modern apps load faster under test and behave the way your users actually experience them. Cypress also stops terminating TLS for the application under test, so the browser validates your origin's real certificate instead of one Cypress generates. See [Native network interception](https://docs.cypress.io/app/guides/native-network-interception). Addresses [#3708](https://github.com/cypress-io/cypress/issues/3708).
 - `Angular` version 22 is now supported within component testing, including Launchpad project detection and the `@cypress/schematic` Angular CLI integration. Addresses [#33753](https://github.com/cypress-io/cypress/issues/33753).
+- Collapsed directories in the spec list now stay collapsed across reloads and between the spec list and the runner's spec sidebar. Because the state is remembered, a newly added spec inside a collapsed directory stays hidden until that directory is expanded again. Searching temporarily expands every directory so that all matches are visible, and clearing the search restores the collapsed directories. Addresses [#33964](https://github.com/cypress-io/cypress/issues/33964).
 
 **Bugfixes:**
 
