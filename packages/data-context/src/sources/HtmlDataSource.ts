@@ -52,7 +52,6 @@ export class HtmlDataSource {
       'proxyUrl',
       'remote',
       'testingType',
-      'componentTesting',
       'reporterUrl',
       'namespace',
       'socketIoRoute',
