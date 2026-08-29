@@ -29,7 +29,7 @@ const testStaticAssets = async (buildResourcePath) => {
       testAssetStrings: [
         [
           (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
-          'sourcemaps were detected, ensure `web-config/webpack.base.config.ts` does not have sourcemaps enabled in production',
+          'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
         ],
       ],
       minLineCount: 5000,
