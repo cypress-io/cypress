@@ -1,10 +1,8 @@
-import ffmpeg from 'fluent-ffmpeg'
-import path from 'path'
-import fs from 'fs-extra'
 import humanInterval from 'human-interval'
 import systemTests from '../lib/system-tests'
 import { globAsync as glob } from '@packages/server/lib/util/glob'
 import * as videoCapture from '@packages/server/lib/video_capture'
+import { expectSeekableEndingFrame } from '../lib/video'
 import Fixtures from '../lib/fixtures'
 
 import {
@@ -17,18 +15,6 @@ import {
 const NUM_TESTS = 40
 const MS_PER_TEST = 500
 const EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
-
-// ffmpeg command that extracts the final frame as a jpg
-function outputFinalFrameAsJpg (inputFile, outputFile) {
-  return new Promise((resolve, reject) => {
-    return ffmpeg(inputFile)
-    .inputOption('-sseof -3')
-    .outputOptions(['-vsync 2', '-update 1'])
-    .on('end', resolve)
-    .on('error', reject)
-    .save(outputFile)
-  })
-}
 
 describe('e2e video compression', () => {
   systemTests.setup()
@@ -72,14 +58,7 @@ describe('e2e video compression', () => {
 
         expect(files).to.have.length(1, `globbed for videos and found: ${files.length}. Expected to find 1 video. Search in videosPath: ${videosPath}.`)
 
-        const lastFrameFile = path.join(path.dirname(files[0]), 'lastFrame.jpg')
-
-        await outputFinalFrameAsJpg(files[0], lastFrameFile)
-        // https://github.com/cypress-io/cypress/issues/9265
-        // if video is seekable and not just one frozen frame, this file should exist
-        await fs.stat(lastFrameFile).catch((err) => {
-          throw new Error(`Expected video to have seekable ending frame, but it did not. The video may be corrupted.`)
-        })
+        await expectSeekableEndingFrame(files[0])
 
         const { duration } = await videoCapture.getCodecData(files[0])
         const durationMs = videoCapture.getMsFromDuration(duration)

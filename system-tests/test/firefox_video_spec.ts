@@ -1,38 +1,15 @@
-import path from 'path'
-import fs from 'fs-extra'
-import ffmpeg from 'fluent-ffmpeg'
 import systemTests from '../lib/system-tests'
 import { globAsync as glob } from '@packages/server/lib/util/glob'
 import * as videoCapture from '@packages/server/lib/video_capture'
+import { expectSeekableEndingFrame } from '../lib/video'
 import Fixtures from '../lib/fixtures'
 
 const NUM_TESTS = 4
 const MS_PER_TEST = 500
 
-// ffmpeg command that extracts the final frame as a jpg. If the video only
-// contains a single frozen frame (or no frames at all) this cannot produce a
-// seekable ending frame.
-function outputFinalFrameAsJpg (inputFile: string, outputFile: string): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    return ffmpeg(inputFile)
-    .inputOption('-sseof -3')
-    .outputOptions(['-vsync 2', '-update 1'])
-    .on('end', resolve)
-    .on('error', reject)
-    .save(outputFile)
-  })
-}
-
 // asserts that the given video file is a real, seekable, non-empty recording
 async function expectValidVideo (videoFile: string) {
-  const lastFrameFile = path.join(path.dirname(videoFile), `${path.basename(videoFile)}-lastFrame.jpg`)
-
-  await outputFinalFrameAsJpg(videoFile, lastFrameFile)
-  // https://github.com/cypress-io/cypress/issues/9265
-  // if video is seekable and not just one frozen frame, this file should exist
-  await fs.stat(lastFrameFile).catch(() => {
-    throw new Error(`Expected ${videoFile} to have a seekable ending frame, but it did not. The video may be corrupted or empty.`)
-  })
+  await expectSeekableEndingFrame(videoFile)
 
   const { duration } = await videoCapture.getCodecData(videoFile)
   const durationMs = videoCapture.getMsFromDuration(duration)
