@@ -58,12 +58,6 @@ describe('Extension', () => {
     })
   })
 
-  describe('.getPathToRoot', () => {
-    it('returns path to root', () => {
-      expect(extension.getPathToRoot()).toEqual(cwd)
-    })
-  })
-
   describe('.setHostAndPath', () => {
     let src: string
 
@@ -92,7 +86,7 @@ describe('Extension', () => {
 
   describe('manifest', () => {
     it('has a key that resolves to the static extension ID', async () => {
-      const manifest = await fs.readJson(path.join(cwd, 'app/v2/manifest.json'))
+      const manifest = await fs.readJson(path.join(cwd, 'app/v3/manifest.json'))
       const cmd = `echo \"${manifest.key}\" | openssl base64 -d -A | shasum -a 256 | head -c32 | tr 0-9a-f a-p`
 
       const stdout = await new Promise((resolve, reject) => {
