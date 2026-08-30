@@ -30,10 +30,8 @@ const isValidJSON = function (text: unknown) {
 
     return _.isObject(o)
   } catch (error) {
-    false
+    return false
   }
-
-  return false
 }
 
 export function parseContentType (response?: string) {
@@ -219,28 +217,6 @@ function wait (fn, ms) {
     setTimeout(() => {
       resolve(fn())
     }, ms)
-  })
-}
-
-export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
-  for (const k in before.headers) {
-    // a header was deleted from `after` but was present in `before`, delete it in `before` too.
-    // only treat `undefined` (deleted via `delete` or explicitly set to `undefined`) as removal -
-    // an empty string is a valid header value and must be preserved (#25767)
-    after.headers[k] === undefined && delete before.headers[k]
-  }
-}
-
-export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
-  // lodash merge converts Buffer into Array (by design)
-  // https://github.com/lodash/lodash/issues/2964
-  // @see https://github.com/cypress-io/cypress/issues/15898
-  _.mergeWith(before, after, (_a, b) => {
-    if (b instanceof Buffer) {
-      return b
-    }
-
-    return undefined
   })
 }
 
