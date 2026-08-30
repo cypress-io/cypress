@@ -141,13 +141,6 @@ export const isResponseStatusCode200 = (head: string) => {
 export const regenerateRequestHead = (req: http.ClientRequest) => {
   delete req._header
   req._implicitHeader()
-  if (req.output && req.output.length > 0) {
-    // the _header has already been queued to be written to the socket
-    const first = req.output[0]
-    const endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
-
-    req.output[0] = req._header + first.substring(endOfHeaders)
-  }
 }
 
 // this function has to be sync via callback because it is called by the Agent.addRequest method, which expect a sync function
@@ -220,13 +213,12 @@ export class CombinedAgent {
     // parse the URL and set the href, path, and port based on this path
     if (typeof options.path === 'string' && /^http(s)?:\/\//.test(options.path)) {
       const pathUrl = new URL(options.path)
-      const portToSet = pathUrl.port ?? options.port
 
       options.href = options.path
       options.path = pathUrl.pathname
 
-      if (portToSet) {
-        options.port = Number(portToSet)
+      if (pathUrl.port) {
+        options.port = Number(pathUrl.port)
       }
     }
 
