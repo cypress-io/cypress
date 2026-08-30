@@ -87,7 +87,7 @@ describe('remote states', () => {
         },
       })
 
-      originalState.auth = { username: 'u', password: 'p' }
+      originalState!.auth = { username: 'u', password: 'p' }
 
       const currentState = remoteStates.get('http://localhost:3500/foobar')
 
