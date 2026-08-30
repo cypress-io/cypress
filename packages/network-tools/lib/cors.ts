@@ -9,7 +9,7 @@ export type Policy = 'same-origin' | 'same-super-domain-origin' | 'schemeful-sam
 const debug = debugModule('cypress:network:cors')
 
 export function getSuperDomain (url: string) {
-  return getDomainNameFromParsedHost(parseUrlIntoHostProtocolDomainTldPort(url))
+  return getSuperDomainFromParsedHost(parseUrlIntoHostProtocolDomainTldPort(url))
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
@@ -74,7 +74,7 @@ export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
   return obj
 }
 
-export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
+export function getSuperDomainFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
