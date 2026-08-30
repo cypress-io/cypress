@@ -4,13 +4,9 @@ import Debug from 'debug'
 import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 import type { ResponseMiddleware } from '@packages/proxy'
-import { SERIALIZABLE_RES_PROPS } from '@packages/network-interception'
+import { mergeDeletedHeaders, mergeWithPreservedBuffers, SERIALIZABLE_RES_PROPS } from '@packages/network-interception'
 import type { CyHttpMessages } from '@packages/network-interception'
-import {
-  getBodyStream,
-  mergeDeletedHeaders,
-  mergeWithPreservedBuffers,
-} from './util'
+import { getBodyStream } from './util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
