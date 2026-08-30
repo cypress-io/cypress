@@ -4,7 +4,7 @@ import { itHandlesFileOpening } from '../support/utils'
 import Err from '../../src/errors/err-model'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo.js',
