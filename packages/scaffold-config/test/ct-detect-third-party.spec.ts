@@ -153,6 +153,43 @@ describe('detectThirdPartyCTFrameworks', () => {
     expect(thirdPartyFrameworks.frameworks[0].type).toEqual('cypress-ct-qwik')
   })
 
+  describe('repository root boundary', () => {
+    const TEMP_DIR = path.join(os.tmpdir(), 'ct-detect-third-party-boundary-tmp')
+    const repositoryRoot = path.join(TEMP_DIR, 'repo')
+    const projectRoot = path.join(repositoryRoot, 'packages', 'foo')
+
+    beforeEach(async () => {
+      const scaffolded = await scaffoldMigrationProject('ct-monorepo-unconfigured')
+
+      await fs.mkdirp(projectRoot)
+      await fs.writeJson(path.join(repositoryRoot, 'package.json'), {
+        name: 'boundary-repo',
+        private: true,
+        workspaces: ['packages/*'],
+      })
+
+      await fs.writeJson(path.join(projectRoot, 'package.json'), { name: 'foo' })
+
+      // The only copy of the module sits one directory above the repository root,
+      // where `require.resolve` from the project can still reach it
+      await fs.copy(
+        path.join(scaffolded, 'cypress-ct-qwik'),
+        path.join(TEMP_DIR, 'node_modules', 'cypress-ct-qwik'),
+      )
+    })
+
+    afterEach(async () => {
+      await fs.rm(TEMP_DIR, { recursive: true, force: true })
+    })
+
+    it('ignores third party frameworks installed above the repository root', async () => {
+      const { frameworks, erroredFrameworks } = await detectThirdPartyCTFrameworks(projectRoot)
+
+      expect(frameworks).toEqual([])
+      expect(erroredFrameworks).toEqual([])
+    })
+  })
+
   it('validates third party module', () => {
     expect(() => validateThirdPartyModule(solidJs)).not.toThrow()
 
