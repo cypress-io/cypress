@@ -6,7 +6,6 @@ import { getPathToDist } from '@packages/resolve-dist'
 import { domainPropsToHostname, toFileServerUrl } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
-import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
@@ -265,10 +264,6 @@ export const createCommonRoutes = ({
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(req, res)
-  })
-
-  router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
-    xhrs.handle(req, res, config, next)
   })
 
   router.get(`/${namespace}/iframes/*`, async (req, res) => {

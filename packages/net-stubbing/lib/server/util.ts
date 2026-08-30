@@ -30,10 +30,8 @@ const isValidJSON = function (text: unknown) {
 
     return _.isObject(o)
   } catch (error) {
-    false
+    return false
   }
-
-  return false
 }
 
 export function parseContentType (response?: string) {

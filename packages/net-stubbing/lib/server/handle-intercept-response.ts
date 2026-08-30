@@ -4,7 +4,11 @@ import Debug from 'debug'
 import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 import type { ResponseMiddleware } from '@packages/proxy'
-import { mergeDeletedHeaders, mergeWithPreservedBuffers, SERIALIZABLE_RES_PROPS } from '@packages/network-interception'
+import {
+  SERIALIZABLE_RES_PROPS,
+  mergeDeletedHeaders,
+  mergeWithPreservedBuffers,
+} from '@packages/network-interception'
 import type { CyHttpMessages } from '@packages/network-interception'
 import { getBodyStream } from './util'
 

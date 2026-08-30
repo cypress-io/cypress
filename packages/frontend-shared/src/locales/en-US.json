@@ -119,7 +119,6 @@
     }
   },
   "specPage": {
-    "pageTitle": "Specs",
     "newSpecButton": "New spec",
     "searchPlaceholder": "Search specs",
     "clearSearch": "Clear search field",
@@ -164,15 +163,6 @@
       "flakyRate": "{0}% flaky rate",
       "flakyRuns": "{flakyRuns} flaky runs / {totalRuns} total | {flakyRuns} flaky run / {totalRuns} total | {flakyRuns} flaky runs / {totalRuns} total",
       "lastFlaky": "Last run flaky | Last flaky {runsSinceLastFlake} run ago | Last flaky {runsSinceLastFlake} runs ago"
-    },
-    "hoverButton": {
-      "connect": "Connect",
-      "connectProject": "Connect project",
-      "connectProjectShort": "Connect",
-      "requestAccess": "Request access",
-      "requestAccessShort": "Request",
-      "requestSent": "Request sent",
-      "requestSentShort": "Sent"
     },
     "connectProjectButton": "Connect your project",
     "cloudLoginButton": "Log in to Cypress Cloud",
@@ -296,7 +286,6 @@
       "ariaLabel": "Pages"
     },
     "debug": {
-      "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
       "errored": "Relevant run had an error",
@@ -680,7 +669,6 @@
         },
         "selectProject": {
           "organization": "Organization",
-          "noOrganizationSelectedError": "required when creating a new project",
           "manageOrgs": "Manage organizations",
           "project": "Project",
           "projectName": "Project name",
@@ -819,14 +807,11 @@
     "foundMoreThan100Runs": "We found more than 100 runs.",
     "goToCypressCloud": "Go to Cypress Cloud to see all runs",
     "emptyStates": {
-      "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
-      "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
       "connectToCypressCloud": "Connect to Cypress Cloud",
       "connect": {
         "title": "Connect to debug your tests",
         "description": "Cypress Cloud is built for teams who need to do testing at scale."
       },
-      "noProjectTestMessage": "Connect a Cypress Cloud project to locally debug failed CI test runs",
       "noRuns": {
         "title": "Copy the command below to record your first run",
         "description": "Review the {0} to Cypress Cloud",
@@ -834,9 +819,6 @@
       },
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that Git is properly configured for your project.",
-      "learnAboutRecordingSrText": "about recording a run to Cypress Cloud",
-      "learnAboutDebuggingSrText": "about debugging CI failures in Cypress",
-      "learnAboutProjectSetupSrText": "about project setup in Cypress",
       "noRunsFoundForBranch": "No runs found for your branch",
       "noRunsForBranchMessage": "Cypress uses Git to show runs for your branch. Ensure that version control is properly configured and that you are sending Git information to Cypress Cloud.",
       "slideshow": {
@@ -961,7 +943,6 @@
     },
     "selectorPlayground": {
       "matches": "No matches | {n} match | {n} matches",
-      "playgroundTooltip": "Click an element to see a suggested selector",
       "copyTooltip": "Copy to clipboard",
       "copyTooltipAction": "Copied!",
       "printTooltip": "Print to console",

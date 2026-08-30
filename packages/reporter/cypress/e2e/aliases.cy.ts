@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import { RootRunnable } from './../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo',

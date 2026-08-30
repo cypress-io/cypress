@@ -18,7 +18,7 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest run",
     "test-watch": "yarn test-unit --watch",
-    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./dist/v2/background.js",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "yarn build && chokidar 'app/**/*.*' 'app/*.*' -c 'yarn build'"
   },
   "dependencies": {

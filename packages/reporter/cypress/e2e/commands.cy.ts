@@ -7,7 +7,7 @@ import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 type CommandIndicator = NonNullable<RenderProps['indicator']>
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo',
