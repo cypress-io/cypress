@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import type { IncomingMessage } from 'http'
-import type { HttpRequest, HttpResponse, TransportCodecPort } from '@packages/network-interception'
+import type { HttpRequest, HttpResponse, TransportCodecPort, TransportNext } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import { sendRequestOutgoing } from '../http/send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
@@ -111,33 +111,35 @@ export function createProxyHttpCodec (): TransportCodecPort<HttpInterceptCtx, Ht
 
 export const proxyHttpCodec = createProxyHttpCodec()
 
-export function createFetchOrigin (_mw: HttpInterceptCtx) {
-  return (outbound: HttpInterceptCtx): Promise<HttpInterceptCtx> => {
-    return new Promise((resolve, reject) => {
-      const originalOnResponse = outbound.onResponse
-      const originalOnError = outbound.onError
-      const callbacks = outbound as HttpInterceptCtx & {
-        onError: (error: Error) => void
-        onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
-      }
+/**
+ * MITM transport: send the request to the origin and settle once its response
+ * lands on the ctx, restoring the ctx callbacks either way.
+ */
+export const fetchOrigin: TransportNext<HttpInterceptCtx, HttpInterceptCtx> = (outbound) => {
+  return new Promise((resolve, reject) => {
+    const originalOnResponse = outbound.onResponse
+    const originalOnError = outbound.onError
+    const callbacks = outbound as HttpInterceptCtx & {
+      onError: (error: Error) => void
+      onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
+    }
 
-      callbacks.onError = (error: Error) => {
-        callbacks.onError = originalOnError
-        callbacks.onResponse = originalOnResponse
-        reject(error)
-      }
+    callbacks.onError = (error: Error) => {
+      callbacks.onError = originalOnError
+      callbacks.onResponse = originalOnResponse
+      reject(error)
+    }
 
-      callbacks.onResponse = (incomingRes, incomingResStream) => {
-        callbacks.onError = originalOnError
-        callbacks.onResponse = originalOnResponse
+    callbacks.onResponse = (incomingRes, incomingResStream) => {
+      callbacks.onError = originalOnError
+      callbacks.onResponse = originalOnResponse
 
-        outbound.httpInterceptIncomingRes = incomingRes
-        outbound.originBodyStream = incomingResStream
+      outbound.httpInterceptIncomingRes = incomingRes
+      outbound.originBodyStream = incomingResStream
 
-        resolve(outbound)
-      }
+      resolve(outbound)
+    }
 
-      sendRequestOutgoing(outbound)
-    })
-  }
+    sendRequestOutgoing(outbound)
+  })
 }

@@ -7,7 +7,7 @@ import { telemetry, Span } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin } from '../adapters/http-codec'
+import { fetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
@@ -564,7 +564,7 @@ export class Http {
       return onError(new Error('Network interception is not configured for the proxy runtime.'))
     }
 
-    return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
+    return this.networkInterception.handle(ctx, fetchOrigin)
     .catch((err) => {
       // The legacy pipeline may already have run error middleware for this ctx.
       if (ctx.error) {
