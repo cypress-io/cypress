@@ -1,6 +1,15 @@
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { TestFilter } from '@packages/types'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
+
+const runnerStore = new MobxRunnerStore()
+
+runnerStore.setSpec({
+  name: 'foo',
+  absolute: '/foo/bar',
+  relative: 'foo/bar',
+})
 
 const { _ } = Cypress
 
@@ -22,13 +31,7 @@ describe('header', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        },
+        runnerStore,
       })
     })
 

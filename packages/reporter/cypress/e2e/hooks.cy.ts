@@ -1,6 +1,15 @@
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { itHandlesFileOpening } from '../support/utils'
+
+const runnerStore = new MobxRunnerStore()
+
+runnerStore.setSpec({
+  name: 'foo.js',
+  relative: 'relative/path/to/foo.js',
+  absolute: '/absolute/path/to/foo.js',
+})
 
 describe('hooks', () => {
   let runner: EventEmitter
@@ -16,13 +25,7 @@ describe('hooks', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        },
+        runnerStore,
       })
     })
 
