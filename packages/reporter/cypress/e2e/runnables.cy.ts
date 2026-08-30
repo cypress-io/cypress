@@ -4,10 +4,10 @@ import { itHandlesFileOpening } from '../support/utils'
 import type { BaseReporterProps } from '../../src/main'
 import type { RunnablesErrorModel } from '../../src/runnables/runnable-error'
 import appState from '../../src/lib/app-state'
-import { MobxRunnerStore } from '@packages/app/src/store'
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import scroller from '../../src/lib/scroller'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo.js',
@@ -78,7 +78,7 @@ describe('runnables', () => {
     start({ error })
 
     cy.contains(error.title)
-    cy.contains(error.callout)
+    cy.contains(error.callout!)
     cy.contains(error.message)
 
     cy.get('.error a').should('have.attr', 'href', error.link)

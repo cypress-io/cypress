@@ -253,7 +253,7 @@ const Aliases: React.FC<AliasesProps> = observer(({ model }: AliasesProps) => {
 
         return (
           <Tag
-            key={alias}
+            key={String(alias)}
             content={aliases.join(', ')}
             type={model.aliasType}
             tooltipMessage={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`}
