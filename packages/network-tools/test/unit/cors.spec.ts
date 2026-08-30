@@ -5,7 +5,7 @@ import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
 describe('lib/cors', () => {
   describe('.parseUrlIntoHostProtocolDomainTldPort', () => {
-    const expectUrlToBeParsedCorrectly = (url, obj) => {
+    const expectUrlToBeParsedCorrectly = (url: string, obj: ParsedHostWithProtocolAndHost) => {
       expect(parseUrlIntoHostProtocolDomainTldPort(url)).toEqual(obj)
     }
 
@@ -500,7 +500,7 @@ describe('lib/cors', () => {
       expect(urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' did not match origin protection space '${origin}' when it should have`).toBe(true)
     }
 
-    const assertDoesNotMatchOriginProtectionSpace = (urlStr, origin) => {
+    const assertDoesNotMatchOriginProtectionSpace = (urlStr: string, origin: string) => {
       expect(urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' matched origin protection space '${origin}' when it should not have`).toBe(false)
     }
 
