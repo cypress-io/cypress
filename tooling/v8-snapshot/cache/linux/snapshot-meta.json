@@ -3914,7 +3914,6 @@
     "./packages/types/cjs/automation.js",
     "./packages/types/cjs/browser.js",
     "./packages/types/cjs/cache.js",
-    "./packages/types/cjs/cloud.js",
     "./packages/types/cjs/config.js",
     "./packages/types/cjs/constants.js",
     "./packages/types/cjs/cy-prompt/cy-prompt-server-types.js",
@@ -3934,9 +3933,7 @@
     "./packages/types/cjs/studio/index.js",
     "./packages/types/cjs/studio/studio-server-types.js",
     "./packages/types/cjs/types.js",
-    "./packages/types/cjs/util.js",
     "./packages/types/cjs/video.js",
-    "./packages/types/cjs/warning.js",
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
