@@ -10,7 +10,7 @@ describe('spec title', () => {
     runner = new EventEmitter()
 
     start = (spec: Cypress.Cypress['spec']) => {
-      const runnerStore = new MobxRunnerStore('e2e')
+      const runnerStore = new MobxRunnerStore()
 
       runnerStore.setSpec(spec)
 

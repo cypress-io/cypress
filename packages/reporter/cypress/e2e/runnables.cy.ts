@@ -7,7 +7,7 @@ import appState from '../../src/lib/app-state'
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import scroller from '../../src/lib/scroller'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo.js',
