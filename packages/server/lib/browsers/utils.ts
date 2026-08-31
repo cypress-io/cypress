@@ -14,6 +14,7 @@ import { telemetry } from '@packages/telemetry'
 import { fs } from '../util/fs'
 import * as extension from '@packages/extension'
 import getPort from 'get-port'
+import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
 
 declare global {
   interface Window {
@@ -415,7 +416,7 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
-const initializeCDP = async (criClient: CriClient, automation: Automation) => {
+const initializeCDP = async (criClient: CriClient, automation: Automation, useBrowserNetworkInterception: boolean) => {
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
     name: 'cypressUtilityBinding',
@@ -443,8 +444,28 @@ const initializeCDP = async (criClient: CriClient, automation: Automation) => {
     }
   })
 
+  // Window-realm half of the #34652 fix. The worker-realm half, the shared
+  // mechanism, and its limits are documented in disable-navigation-preload.ts.
+  //
+  // This neutralizes navigationPreload.enable() called from page JS, and
+  // best-effort disables preload on registrations persisted from an earlier
+  // run (whose scripts the worker-realm half never sees).
+  //
+  // It is placed first in the bootstrap source, try/caught, and shares no
+  // bindings with the blocks after it, so nothing later in the script can
+  // prevent it from running.
+  //
+  // Gated on useBrowserNetworkInterception (resolved from isBrowserNetworkMode
+  // at launch): navigation preload bypasses CDP Fetch, but the MITM path still
+  // intercepts it at the network layer, so only the browser network path needs
+  // this.
+  const disableNavigationPreloadInWindow = useBrowserNetworkInterception
+    ? `;${DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION};`
+    : ''
+
   await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `
+    ${disableNavigationPreloadInWindow}
     const binding = window['cypressUtilityBinding']
     delete window['cypressUtilityBinding']
     ;(${listenForDownload.toString()})(binding)

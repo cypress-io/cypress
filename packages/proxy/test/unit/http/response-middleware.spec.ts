@@ -11,9 +11,20 @@ import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../lib/http/util/disable-navigation-preload'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
+}
+
+async function streamToString (stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = []
+
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+
+  return Buffer.concat(chunks).toString('utf8')
 }
 
 describe('http/response-middleware', function () {
@@ -2669,7 +2680,48 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).toHaveBeenCalledOnce()
-      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo')
+
+      // toHaveBeenCalledWith/toEqual treat an `undefined`-valued property as
+      // equivalent to an absent key, so asserting the option key by name that
+      // way would pass even against a differently-named key. toStrictEqual
+      // does not make that elision, so it actually pins the key name.
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined }])
+    })
+
+    it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        useBrowserNetworkInterception: true,
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo', { disableServiceWorkerNavigationPreload: true })
+
+      const rewritten = await streamToString(ctx.incomingResStream)
+
+      expect(rewritten).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
+    })
+
+    it('does not prepend the navigation preload expression when useBrowserNetworkInterception is unset on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+      })
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      const rewritten = await streamToString(ctx.incomingResStream)
+
+      expect(rewritten).not.toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
     })
 
     function prepareContext (props) {

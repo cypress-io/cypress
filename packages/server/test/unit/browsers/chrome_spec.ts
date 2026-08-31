@@ -25,19 +25,21 @@ const mitmOpts = {
 }
 
 // Helper function to create consistent mock preferences for testing
-const createMockDefaultPreferences = () => ({
-  default: {
-    fake_preference: {
-      value: 'value',
+const createMockDefaultPreferences = () => {
+  return {
+    default: {
+      fake_preference: {
+        value: 'value',
+      },
     },
-  },
-  defaultSecure: {},
-  localState: {
-    fake_local_state: {
-      value: 'value',
+    defaultSecure: {},
+    localState: {
+      fake_local_state: {
+        value: 'value',
+      },
     },
-  },
-})
+  }
+}
 
 // Helper function to mock _getDefaultChromePreferences with consistent fake preferences
 const mockGetDefaultChromePreferences = () => {
@@ -55,6 +57,8 @@ describe('lib/browsers/chrome', () => {
         },
         close: sinon.stub().resolves(),
         on: sinon.stub(),
+        whenChildTargetHandled: sinon.stub().resolves(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
       }
 
       this.browserCriClient = {
@@ -123,7 +127,7 @@ describe('lib/browsers/chrome', () => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('ServiceWorker.enable')
 
-        expect(utils.initializeCDP).to.be.calledOnce
+        expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, false)
       })
     })
 
@@ -132,6 +136,71 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         expect(this.pageCriClient.send).not.to.have.been.calledWith('Fetch.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
+        expect(utils.initializeCDP).to.have.been.calledOnceWith(this.pageCriClient, this.automation, true)
+      })
+    })
+
+    // #34674: a service worker auto-attaches on both the browser and page
+    // connections; the browser connection defers releasing it until the page
+    // connection confirms session-scoped Fetch interception is in place.
+    it('wires waitForChildTargetInterception to the page client on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.waitForChildTargetInterception).to.be.a('function')
+
+        this.browserCriClient.waitForChildTargetInterception('target-id')
+
+        expect(this.pageCriClient.whenChildTargetHandled).to.have.been.calledWith('target-id')
+      })
+    })
+
+    // #34674: a paused service worker's browser-level attach handler consults
+    // this field - if it were only set after navigation started, an attach
+    // racing the navigation could read it as unset and skip the wait.
+    it('wires waitForChildTargetInterception before navigating', function () {
+      let wasSetBeforeNavigate = false
+      const self = this
+
+      this.pageCriClient.send = sinon.stub().callsFake((command) => {
+        if (command === 'Page.navigate' && typeof self.browserCriClient.waitForChildTargetInterception === 'function') {
+          wasSetBeforeNavigate = true
+        }
+
+        return Promise.resolve()
+      })
+
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(wasSetBeforeNavigate).to.be.true
+      })
+    })
+
+    it('does not wire waitForChildTargetInterception on the MITM path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.waitForChildTargetInterception).to.be.undefined
+      })
+    })
+
+    // #34674: a crash-reloaded target's confirmation can't be trusted as-is
+    // (no way to tell a stale one from a fresh one), so the browser
+    // connection asks the page connection to re-enable interception outright
+    // instead of merely reading whatever it has on file.
+    it('wires reenableChildTargetInterception to the page client on the browser (CDP) network path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.reenableChildTargetInterception).to.be.a('function')
+
+        this.browserCriClient.reenableChildTargetInterception('target-id')
+
+        expect(this.pageCriClient.reenableChildTargetInterception).to.have.been.calledWith('target-id')
+      })
+    })
+
+    it('does not wire reenableChildTargetInterception on the MITM path', function () {
+      return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
+      .then(() => {
+        expect(this.browserCriClient.reenableChildTargetInterception).to.be.undefined
       })
     })
 
