@@ -2,7 +2,8 @@ import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, 
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
-import crypto, { BinaryLike } from 'crypto'
+import type { BinaryLike } from 'crypto'
+import crypto from 'crypto'
 
 interface CyPromptServer { default: CyPromptServerDefaultShape }
 

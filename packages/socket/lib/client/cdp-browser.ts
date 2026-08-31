@@ -1,7 +1,8 @@
 /// <reference lib="dom" />
 import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from '../utils'
-import { Emitter, DefaultEventsMap } from '@socket.io/component-emitter'
+import type { DefaultEventsMap } from '@socket.io/component-emitter'
+import { Emitter } from '@socket.io/component-emitter'
 
 // Match the shape socket.io-client's `Socket` exposes (it also extends this Emitter), so
 // `client()` and `createWebsocket()` can return either a real Socket or a CDPBrowserSocket.

@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals'
-import { FullConfig } from '@packages/types'
+import type { FullConfig } from '@packages/types'
 import { createTestDataContext } from '../helper'
 import { userBrowser, foundBrowserChrome } from '../../fixtures/browsers'
 

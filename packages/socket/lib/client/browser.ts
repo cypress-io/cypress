@@ -1,4 +1,5 @@
-import io, { ManagerOptions, SocketOptions } from 'socket.io-client'
+import type { ManagerOptions, SocketOptions } from 'socket.io-client'
+import io from 'socket.io-client'
 import { cypressParser } from '../utils'
 import { CDPBrowserSocket } from './cdp-browser'
 import type { SocketShape } from './cdp-browser'

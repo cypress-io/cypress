@@ -1,6 +1,6 @@
 import React from 'react'
 import { useScrollIntoView } from './useScrollIntoView'
-import { AppState } from './app-state'
+import type { AppState } from './app-state'
 import scroller from './scroller'
 
 // Test component to render the hook

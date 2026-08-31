@@ -1,4 +1,5 @@
-import _, { DebouncedFunc } from 'lodash'
+import type { DebouncedFunc } from 'lodash'
+import _ from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 

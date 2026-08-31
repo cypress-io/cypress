@@ -23,8 +23,3 @@ export interface StudioLifecycleManagerShape {
   getIsCertError: () => boolean
   retry: () => void
 }
-
-export type StudioErrorReport = {
-  studioHash?: string | null
-  errors: Error[]
-}

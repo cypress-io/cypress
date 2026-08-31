@@ -1,7 +1,8 @@
 import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import * as enc from '../../encryption'
 import { PUBLIC_KEY_VERSION } from '../../constants'
-import crypto, { KeyObject } from 'crypto'
+import type { KeyObject } from 'crypto'
+import crypto from 'crypto'
 import { DecryptionError } from '../cloud_request_errors'
 import axios from 'axios'
 

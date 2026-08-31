@@ -1,4 +1,5 @@
-import systemTests, { ItOptions } from '../lib/system-tests'
+import type { ItOptions } from '../lib/system-tests'
+import systemTests from '../lib/system-tests'
 
 function smokeTestDockerImage (title: string, dockerImage: string, expectedExitCode: number, onRun?: ItOptions['onRun']) {
   systemTests.it(title, {
