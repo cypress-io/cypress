@@ -32,6 +32,10 @@
 - Added the [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) configuration option, which routes every browser through the legacy network path. It is deprecated at introduction and prints a warning when set: it exists to give suites time to migrate to the native browser network, and will be removed once that path is supported long term in both Chrome and Firefox. Addresses [#33847](https://github.com/cypress-io/cypress/issues/33847).
 - Deprecated the Electron browser as a test browser. The Electron browser will be removed in a future major version of Cypress; switch to Chrome or another installed browser to avoid a breaking change when you upgrade. See [Migrating away from the Electron browser](https://docs.cypress.io/app/references/migration-guide#Migrating-away-from-the-Electron-browser). Addresses [#33560](https://github.com/cypress-io/cypress/issues/33560). Addressed in [#34074](https://github.com/cypress-io/cypress/pull/34074).
 
+**Performance:**
+
+- Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
+
 **Features:**
 
 - Cypress now supports HTTP/2 and HTTP/3 in Chrome, Chromium, and Edge. Your application is tested over the same protocol it uses in production, with multiplexed requests and no six-connection ceiling, so modern apps load faster under test and behave the way your users actually experience them. Cypress also stops terminating TLS for the application under test, so the browser validates your origin's real certificate instead of one Cypress generates. See [Native network interception](https://docs.cypress.io/app/guides/native-network-interception). Addresses [#3708](https://github.com/cypress-io/cypress/issues/3708).
@@ -43,7 +47,6 @@
 - Fixed an issue where the [`after:run`](https://on.cypress.io/after-run-api) event handler would not run when a project was closed in `cypress open` mode and [`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/configuration#Experiments) was set. Addressed in [#34700](https://github.com/cypress-io/cypress/pull/34700).
 - Fixed an issue where a single cleanup step that stalled while Cypress shut down, such as waiting on a browser that was slow to close, could hold up the rest of shutdown. Addressed in [#34699](https://github.com/cypress-io/cypress/pull/34699).
 - Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
-- Fixed an issue in Chrome, Chromium, Edge, and Electron where the memory Cypress used climbed steadily over the course of a run against an application that registers service workers. Every service worker the application started left behind state that was only released when the browser closed, so the longer the run, the more memory Cypress held. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
 **Dependency Updates:**
 
