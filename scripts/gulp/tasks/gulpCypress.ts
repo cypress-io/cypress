@@ -96,7 +96,6 @@ async function spawnCypressWithMode (
   const finalEnv: Record<string, string | undefined> = {
     ...process.env,
     ...env,
-    TS_NODE_COMPILER: 'typescript-cached-transpile',
   }
 
   return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {
