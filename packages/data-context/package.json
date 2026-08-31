@@ -35,7 +35,7 @@
     "common-path-prefix": "3.0.0",
     "cors": "2.8.5",
     "cross-fetch": "^4.1.0",
-    "dataloader": "^2.0.0",
+    "dataloader": "^2.2.3",
     "dayjs": "^1.9.3",
     "debug": "^4.4.0",
     "dedent": "^0.7.0",
