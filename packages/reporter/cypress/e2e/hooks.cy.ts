@@ -1,6 +1,6 @@
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 import { itHandlesFileOpening } from '../support/utils'
 
 const runnerStore = new MobxRunnerStore()

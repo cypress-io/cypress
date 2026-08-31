@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
 let runner: EventEmitter

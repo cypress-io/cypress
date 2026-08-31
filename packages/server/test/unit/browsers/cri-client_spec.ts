@@ -1,6 +1,6 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import EventEmitter from 'events'
-import { ProtocolManagerShape } from '@packages/types'
+import type { ProtocolManagerShape } from '@packages/types'
 import type { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
 import type Protocol from 'devtools-protocol'
 import { fireDisconnect as fireDisconnectListeners } from '../../support/helpers/cdp-disconnect'

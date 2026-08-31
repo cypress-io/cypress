@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 import { itHandlesFileOpening } from '../support/utils'
 import type { BaseReporterProps } from '../../src/main'
 import type { RunnablesErrorModel } from '../../src/runnables/runnable-error'

@@ -8,7 +8,8 @@ import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
 import { clientCertificateStoreSingleton } from './client-certificates'
-import { CaOptions, getCaOptions } from './ca'
+import type { CaOptions } from './ca'
+import { getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
