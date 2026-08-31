@@ -24,9 +24,6 @@ beforeEach(() => {
 export const createEventManager = () => {
   return new EventManager(
     null, // packages/driver, not needed for CT tests
-    // @ts-ignore
-    null, // MobX, also not needed in Vue CT tests,
-    null, // selectorPlaygroundModel,
     StubWebsocket,
   )
 }

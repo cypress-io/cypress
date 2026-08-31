@@ -41,7 +41,9 @@
 
 - Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
+- Fixed an issue where the [`after:run`](https://on.cypress.io/after-run-api) event handler would not run when a project was closed in `cypress open` mode and [`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/configuration#Experiments) was set. Addressed in [#34700](https://github.com/cypress-io/cypress/pull/34700).
 - Fixed an issue where a single cleanup step that stalled while Cypress shut down, such as waiting on a browser that was slow to close, could hold up the rest of shutdown. Addressed in [#34699](https://github.com/cypress-io/cypress/pull/34699).
+- Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
 
 **Dependency Updates:**
 

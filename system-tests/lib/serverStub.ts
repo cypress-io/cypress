@@ -5,7 +5,8 @@ import bodyParser from 'body-parser'
 import Debug from 'debug'
 import type { RequestHandler } from 'express'
 
-import { getExample, assertSchema, RecordSchemaVersions } from './validations/cloudValidations'
+import type { RecordSchemaVersions } from './validations/cloudValidations'
+import { getExample, assertSchema } from './validations/cloudValidations'
 
 import * as jose from 'jose'
 import base64Url from 'base64url'

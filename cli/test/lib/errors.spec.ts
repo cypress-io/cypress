@@ -1,7 +1,8 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import util from '../../lib/util'
 import { errors, getError, formErrorText } from '../../lib/errors'
 

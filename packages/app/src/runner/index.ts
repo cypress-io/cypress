@@ -61,8 +61,6 @@ function initializeEventManager (UnifiedRunner: any) {
 
   _eventManager = new EventManager(
     UnifiedRunner.CypressDriver,
-    UnifiedRunner.MobX,
-    UnifiedRunner.selectorPlaygroundModel,
     window.ws,
   )
 }
@@ -365,20 +363,13 @@ async function initialize () {
 
   studioStore.reset()
 
-  // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
-  // once it is more practical to do so
-  // find out if we need to continue managing viewportWidth/viewportHeight in MobX at all.
   autStore.updateDimensions(config.viewportWidth, config.viewportHeight)
 
   // window.UnifiedRunner exists now, since the Webpack bundle with
   // the UnifiedRunner namespace was injected by `injectBundle`.
   initializeEventManager(window.UnifiedRunner)
 
-  window.UnifiedRunner.MobX.runInAction(() => {
-    const store = initializeMobxStore(window.__CYPRESS_TESTING_TYPE__)
-
-    store.updateDimensions(config.viewportWidth, config.viewportHeight)
-  })
+  initializeMobxStore()
 
   window.UnifiedRunner.MobX.runInAction(() => setupRunner())
 }

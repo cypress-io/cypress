@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals
 import debugLib from 'debug'
 import { GraphQLInt, GraphQLString, print } from 'graphql'
 
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunSpecsDataSource } from '../../../src/sources'
 import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'

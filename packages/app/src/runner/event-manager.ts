@@ -2,7 +2,6 @@
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '../store/mobx-runner-store'
-import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
@@ -59,7 +58,6 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: SocketShape
@@ -72,13 +70,8 @@ export class EventManager {
   constructor (
     // import '@packages/driver'
     private $CypressDriver: any,
-    // import * as MobX
-    private Mobx: typeof MobX,
-    // selectorPlaygroundModel singleton
-    selectorPlaygroundModel: any,
     ws: SocketShape,
   ) {
-    this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
@@ -122,19 +115,6 @@ export class EventManager {
     this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
       const connected = isConnected ? automation.CONNECTED : automation.MISSING
 
-      // legacy MobX integration
-      // TODO: UNIFY-1318 - can we delete this, or does the driver depend on this somehow?
-      this.Mobx.runInAction(() => {
-        state.automation = connected
-      })
-
-      this.ws.on('automation:disconnected', () => {
-        this.Mobx.runInAction(() => {
-          state.automation = automation.DISCONNECTED
-        })
-      })
-
-      // unified integration
       this.ws.on('automation:disconnected', () => {
         runnerUiStore.setAutomationStatus('DISCONNECTED')
       })
@@ -953,8 +933,6 @@ export class EventManager {
     if (!Cypress) {
       return
     }
-
-    state.setIsLoading(true)
 
     if (!isRerun) {
       // only clear test state when a new spec is selected

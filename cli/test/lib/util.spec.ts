@@ -3,7 +3,7 @@ import assert from 'assert'
 import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
-import { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
 
 describe('util', () => {
   beforeEach(() => {

@@ -1,4 +1,5 @@
-import { describe, expect, beforeEach, afterEach, it, vi, Mock, MockInstance } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
+import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import zlib from 'zlib'
 import ResponseMiddleware from '../../../lib/http/response-middleware'

@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { ProjectActions } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
-import { SpecWithRelativeRoot, TestingType } from '@packages/types'
+import type { SpecWithRelativeRoot, TestingType } from '@packages/types'
 
 describe('ProjectActions', () => {
   let ctx: DataContext
@@ -313,6 +313,34 @@ describe('ProjectActions', () => {
 
       expect(ctx.relevantRuns.moveToRun).toHaveBeenCalledWith(123, [])
       expect(ctx._apis.projectApi.routeToDebug).toHaveBeenCalled()
+    })
+  })
+
+  describe('clearCurrentProject', () => {
+    // `after:run` is dispatched from the project server's close and has to be answered by
+    // the plugins process the config manager owns, so the project must close first
+    it('closes the active project before tearing down the lifecycle', async () => {
+      const calls: string[] = []
+
+      // closeActiveProject yields before resolving, so running the two concurrently would
+      // interleave the markers rather than just reordering them
+      ;(ctx._apis.projectApi.closeActiveProject as jest.Mock).mockImplementation(async () => {
+        calls.push('closeActiveProject:start')
+        await new Promise((resolve) => setImmediate(resolve))
+        calls.push('closeActiveProject:end')
+      })
+
+      jest.spyOn(ctx.lifecycleManager, 'clearCurrentProject').mockImplementation(async () => {
+        calls.push('clearCurrentProject:start')
+      })
+
+      await actions.clearCurrentProject()
+
+      expect(calls).toEqual([
+        'closeActiveProject:start',
+        'closeActiveProject:end',
+        'clearCurrentProject:start',
+      ])
     })
   })
 })

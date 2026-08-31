@@ -5,7 +5,7 @@ import os from 'os'
 
 import { scaffoldProject, removeProject, createTestDataContext } from '../helper'
 import * as FileDataSourceModule from '../../../src/sources/FileDataSource'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import * as fileUtil from '../../../src/util/file'
 
 const FileDataSource = FileDataSourceModule.FileDataSource

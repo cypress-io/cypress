@@ -1,5 +1,6 @@
 import js from '@eslint/js'
-import { InfiniteDepthConfigWithExtends, configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
+import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
+import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 
 import cy from 'eslint-plugin-cypress'
 
@@ -271,12 +272,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // v8 snapshot bundling fails on mixed inline type + value imports
+  // v8 snapshot bundling fails on mixed inline type + value imports.
+  // Globs are package-relative: lint runs per package, not from the repo root.
   {
     files: [
-      'packages/**/lib/**/*.{js,ts,tsx}',
-      'packages/**/src/**/*.{js,ts,tsx}',
-      'packages/server/**/*.{js,ts,tsx}',
+      'lib/**/*.{js,ts,tsx}',
+      'src/**/*.{js,ts,tsx}',
     ],
     ignores: [
       '**/test/**',
@@ -286,6 +287,20 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     ],
     rules: {
       'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+    },
+  },
+
+  {
+    files: ['**/*.{js,ts,tsx,vue}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', {
+        prefer: 'type-imports',
+        // the fixer must not emit the inline specifiers
+        // `consistent-type-specifier-style` forbids
+        fixStyle: 'separate-type-imports',
+        // inline `import()` type annotations are erased on emit regardless
+        disallowTypeAnnotations: false,
+      }],
     },
   },
 ]

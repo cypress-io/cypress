@@ -4,31 +4,44 @@ import Promise from 'bluebird'
 import debugFn from 'debug'
 
 import $utils from './utils'
-import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
+import type { ErrorFromProjectRejectionEvent } from './error_utils'
+import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
-import { create as createChai, IChai } from '../cy/chai'
-import { create as createXhr, IXhr } from '../cy/xhrs'
-import { create as createJQuery, IJQuery } from '../cy/jquery'
-import { create as createAliases, IAliases } from '../cy/aliases'
+import type { IChai } from '../cy/chai'
+import { create as createChai } from '../cy/chai'
+import type { IJQuery } from '../cy/jquery'
+import { create as createJQuery } from '../cy/jquery'
+import type { IAliases } from '../cy/aliases'
+import { create as createAliases } from '../cy/aliases'
 import { extend as extendEvents } from './events'
-import { create as createFocused, IFocused } from '../cy/focused'
-import { create as createMouse, Mouse } from '../cy/mouse'
+import type { IFocused } from '../cy/focused'
+import { create as createFocused } from '../cy/focused'
+import type { Mouse } from '../cy/mouse'
+import { create as createMouse } from '../cy/mouse'
 import { Keyboard } from '../cy/keyboard'
-import { create as createLocation, ILocation } from '../cy/location'
-import { create as createAssertions, IAssertions } from '../cy/assertions'
+import type { ILocation } from '../cy/location'
+import { create as createLocation } from '../cy/location'
+import type { IAssertions } from '../cy/assertions'
+import { create as createAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
 import { $Chainer } from './chainer'
-import { create as createTimer, ITimer } from '../cy/timers'
-import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
-import { create as createRetries, IRetries } from '../cy/retries'
-import { create as createStability, IStability } from '../cy/stability'
-import { create as createSnapshots, ISnapshots } from '../cy/snapshots'
+import type { ITimer } from '../cy/timers'
+import { create as createTimer } from '../cy/timers'
+import type { ITimeouts } from '../cy/timeouts'
+import { create as createTimeouts } from '../cy/timeouts'
+import type { IRetries } from '../cy/retries'
+import { create as createRetries } from '../cy/retries'
+import type { IStability } from '../cy/stability'
+import { create as createStability } from '../cy/stability'
+import type { ISnapshots } from '../cy/snapshots'
+import { create as createSnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
-import { create as createOverrides, IOverrides } from '../cy/overrides'
+import type { IOverrides } from '../cy/overrides'
+import { create as createOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
@@ -150,7 +163,7 @@ interface ICySnapshots extends Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 > { }
 
-export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, ICySnapshots, ICyFocused {
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IAliases, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
   state: StateFunc
@@ -190,8 +203,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   pauseTimers: ITimer['pauseTimers']
 
   expect: IChai['expect']
-
-  getIndexedXhrByAlias: IXhr['getIndexedXhrByAlias']
 
   addAlias: IAliases['addAlias']
   getAlias: IAliases['getAlias']
@@ -317,10 +328,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const { expect } = createChai!(specWindow, state, this.assert)
 
     this.expect = expect
-
-    const xhr = createXhr(state)
-
-    this.getIndexedXhrByAlias = xhr.getIndexedXhrByAlias
 
     const aliases = createAliases(this)
 
@@ -921,10 +928,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // don't do anything if we don't have a current runnable
     if (!runnable) return
 
-    // uncaught exceptions should be only be catchable in the AUT (app)
-    // or if in component testing mode, since then the spec frame and
-    // AUT frame are the same
-    if (frameType === 'app' || this.config('componentTesting')) {
+    // uncaught exceptions should only be catchable in the AUT (app); errors
+    // from the spec fail the test outright. Component testing runs the spec
+    // inside the AUT frame, so its errors already arrive here as 'app'.
+    if (frameType === 'app') {
       try {
         const results = this.Cypress.action('app:uncaught:exception', err, runnable, promise)
 
