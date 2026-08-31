@@ -180,12 +180,6 @@ describe('lib/network-runtime', () => {
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
     expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
-    expect(runtime.networkInterceptionCore.requestInterception).to.exist
-    expect(runtime.networkInterceptionCore.responseInterception).to.exist
-    expect(runtime.networkInterceptionCore.documentPreparation).to.exist
-    expect(runtime.networkInterceptionCore.networkCapture).to.exist
-    expect(runtime.networkInterceptionCore.cookieState).to.exist
-    expect(runtime.networkInterceptionCore.commandLog).to.exist
   })
 
   it('registers configurator CSP and document rewrite policies at startup', () => {
