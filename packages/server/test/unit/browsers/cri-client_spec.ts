@@ -1286,6 +1286,16 @@ describe('lib/browsers/cri-client', function () {
         { command: 'Target.setDiscoverTargets', params: { discover: true } },
       ])
     })
+
+    it('leaves the browser-level enablements alone when given no session', async () => {
+      const client = await getClient()
+
+      await client.send('Target.setDiscoverTargets', { discover: true })
+
+      client.removeSessionEnablements(undefined as any)
+
+      expect(client.queue.enableCommands).to.have.length(1)
+    })
   })
 
   context('clone', () => {

@@ -201,6 +201,19 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(onServiceWorkerClientEvent).to.be.calledWith(event)
     })
 
+    it('replaces an existing binding without stranding its listener', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      client.addServiceWorkerBinding('session-1')
+
+      const firstListener = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+
+      client.addServiceWorkerBinding('session-1')
+
+      expect(off).to.be.calledOnceWith('Runtime.bindingCalled.session-1', firstListener)
+      expect(client.serviceWorkerBindings.size).to.eq(1)
+    })
+
     it('unsubscribes the browser client when the session detaches', async function () {
       const client = await getClient({ fullyManageTabs: true })
 

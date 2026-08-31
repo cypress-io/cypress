@@ -753,64 +753,21 @@ describe('lib/browsers/chrome', () => {
       expect(onPageCriClientReady).not.to.have.been.called
     })
 
-    it('closes the previous browser cri client before connecting again', async function () {
+    // connectToExisting runs once per spec against a browser that already has a
+    // client attached, so both of these drive it twice
+    function setupReconnect (firstClose: sinon.SinonStub = sinon.stub().resolves()) {
       const pageCriClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
         off: sinon.stub(),
       }
-      const makeBrowserCriClient = () => ({
+      const makeBrowserCriClient = (close: sinon.SinonStub) => ({
         attachToTargetUrl: sinon.stub().resolves(pageCriClient),
         resetBrowserTargets: sinon.stub().resolves(),
-        close: sinon.stub().resolves(),
+        close,
       })
-      const first = makeBrowserCriClient()
-      const second = makeBrowserCriClient()
-      const automation = { use: sinon.stub() }
-
-      sinon.stub(BrowserCriClient, 'create')
-      .onFirstCall().resolves(first as any)
-      .onSecondCall().resolves(second as any)
-
-      sinon.stub(chrome, '_setAutomation').resolves({ _listenForFrameTreeChanges: sinon.stub(), isAUTFrame: sinon.stub() } as any)
-      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
-
-      const connect = () => chrome.connectToExisting(
-        { displayName: 'Chrome' } as any,
-        { ...mitmOpts, url: 'http://localhost:3000/__/' },
-        automation as any,
-      )
-
-      await connect()
-      expect(first.close).not.to.have.been.called
-
-      // each spec reconnects, and the client from the previous spec still holds
-      // an open websocket to the same browser
-      await connect()
-      expect(first.close).to.have.been.calledOnce
-      expect(second.close).not.to.have.been.called
-      expect(chrome._getBrowserCriClient()).to.equal(second)
-    })
-
-    // a close still in flight can clear the CDP url after the new connection sets it
-    it('waits for the previous client to close before connecting again', async function () {
-      const pageCriClient = {
-        send: sinon.stub().resolves(),
-        on: sinon.stub(),
-        off: sinon.stub(),
-      }
-      const closing = (Promise as any).withResolvers()
-      const first = {
-        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
-        resetBrowserTargets: sinon.stub().resolves(),
-        close: sinon.stub().returns(closing.promise),
-      }
-      const second = {
-        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
-        resetBrowserTargets: sinon.stub().resolves(),
-        close: sinon.stub().resolves(),
-      }
-      const automation = { use: sinon.stub() }
+      const first = makeBrowserCriClient(firstClose)
+      const second = makeBrowserCriClient(sinon.stub().resolves())
       const create = sinon.stub(BrowserCriClient, 'create')
       .onFirstCall().resolves(first as any)
       .onSecondCall().resolves(second as any)
@@ -821,14 +778,37 @@ describe('lib/browsers/chrome', () => {
       const connect = () => chrome.connectToExisting(
         { displayName: 'Chrome' } as any,
         { ...mitmOpts, url: 'http://localhost:3000/__/' },
-        automation as any,
+        { use: sinon.stub() } as any,
       )
+
+      return { first, second, create, connect }
+    }
+
+    it('closes the previous browser cri client before connecting again', async function () {
+      const { first, second, connect } = setupReconnect()
+
+      await connect()
+      expect(first.close).not.to.have.been.called
+
+      await connect()
+      expect(first.close).to.have.been.calledOnce
+      expect(second.close).not.to.have.been.called
+      expect(chrome._getBrowserCriClient()).to.equal(second)
+    })
+
+    // a close still in flight can clear the CDP url after the new connection sets it
+    it('waits for the previous client to close before connecting again', async function () {
+      const closing = Promise.withResolvers<void>()
+      const { first, create, connect } = setupReconnect(sinon.stub().returns(closing.promise))
 
       await connect()
 
       const reconnecting = connect()
 
-      await Promise.resolve()
+      await new Promise((resolve) => setImmediate(resolve))
+      // asserted first: without it, the one below would also hold while the
+      // reconnect was merely somewhere earlier than the close
+      expect(first.close, 'never reached the close').to.have.been.calledOnce
       expect(create, 'connected again while the previous close was still pending').to.have.been.calledOnce
 
       closing.resolve()

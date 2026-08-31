@@ -179,9 +179,12 @@ interface ExtraTarget {
   detach?: ExtraTargetDetach
 }
 
-interface ServiceWorkerBinding {
-  eventName: 'Runtime.bindingCalled'
-  cb: (event: Protocol.Runtime.BindingCalledEvent) => void
+type ServiceWorkerBindingListener = (event: Protocol.Runtime.BindingCalledEvent) => void
+
+// CDPConnection rebroadcasts every event under `${method}.${sessionId}` as well
+// as its bare name, and the per-session form is not in ProtocolMapping.
+const serviceWorkerBindingEvent = (sessionId: SessionId) => {
+  return `Runtime.bindingCalled.${sessionId}` as 'Runtime.bindingCalled'
 }
 
 export class BrowserCriClient {
@@ -209,7 +212,7 @@ export class BrowserCriClient {
   resettingBrowserTargets = false
   gracefulShutdown?: Boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
-  serviceWorkerBindings: Map<SessionId, ServiceWorkerBinding> = new Map()
+  serviceWorkerBindings: Map<SessionId, ServiceWorkerBindingListener> = new Map()
   onClose: Function | null = null
   /**
    * Cross-connection hold closing #34674's interception gap:
@@ -686,9 +689,8 @@ export class BrowserCriClient {
     // - sweep for any session(s) recorded against this targetId instead
     // (there's normally exactly one, but nothing guarantees that) so no
     // per-session state is retained for a target that's gone (#34674).
-    // Deleting mid-iteration is safe here: the
-    // loop only ever deletes the entry it's currently positioned on, which Map
-    // iterators tolerate.
+    // Deleting mid-iteration is safe here: the loop only ever deletes the entry
+    // it's currently positioned on, which Map iterators tolerate.
     for (const [sessionId, targetInfo] of browserCriClient.sessionTargetInfo) {
       if (targetInfo.targetId === targetId) {
         browserCriClient.sessionTargetInfo.delete(sessionId)
@@ -976,26 +978,26 @@ export class BrowserCriClient {
   // `Target.detachedFromTarget` to remove. Otherwise every service worker the
   // run attaches leaves another listener behind on that client.
   addServiceWorkerBinding (sessionId: SessionId) {
-    const binding: ServiceWorkerBinding = {
-      eventName: `Runtime.bindingCalled.${sessionId}` as 'Runtime.bindingCalled',
-      cb: serviceWorkerClientEventHandler(this.onServiceWorkerClientEvent),
-    }
+    // replacing the map entry alone would strand the listener it displaced
+    this.removeServiceWorkerBinding(sessionId)
 
-    this.serviceWorkerBindings.set(sessionId, binding)
-    this.browserClient.on(binding.eventName, binding.cb)
+    const listener = serviceWorkerClientEventHandler(this.onServiceWorkerClientEvent)
+
+    this.serviceWorkerBindings.set(sessionId, listener)
+    this.browserClient.on(serviceWorkerBindingEvent(sessionId), listener)
   }
 
   removeServiceWorkerBinding (sessionId: SessionId) {
-    const binding = this.serviceWorkerBindings.get(sessionId)
+    const listener = this.serviceWorkerBindings.get(sessionId)
 
-    if (!binding) {
+    if (!listener) {
       return
     }
 
     debug('Remove service worker binding (session: %s)', sessionId)
 
     this.serviceWorkerBindings.delete(sessionId)
-    this.browserClient.off(binding.eventName, binding.cb)
+    this.browserClient.off(serviceWorkerBindingEvent(sessionId), listener)
   }
 
   // Detaching the Fetch transport is left to `Target.targetDestroyed`, which

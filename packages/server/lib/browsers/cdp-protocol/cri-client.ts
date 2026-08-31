@@ -723,6 +723,12 @@ export class CriClient implements ICriClient {
    * again.
    */
   public removeSessionEnablements = (sessionId: string) => {
+    // browser-level entries carry no sessionId, so a missing one would match
+    // all of them and silently empty the replay set
+    if (!sessionId) {
+      return
+    }
+
     this.enableCommands = this.enableCommands.filter((entry) => entry.sessionId !== sessionId)
   }
 
