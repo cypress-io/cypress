@@ -81,6 +81,18 @@ module.exports = {
       },
     },
     {
+      // Sample user apps compiled by their own toolchains. Angular resolves a
+      // constructor parameter's type to a DI token at runtime, so a type-only
+      // import erases the token and the app fails to compile (NG2003).
+      files: [
+        'system-tests/project-fixtures/**',
+        'system-tests/projects/**',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'off',
+      },
+    },
+    {
       // `eslint-plugin-graphql` pays its per-file cost on every linted file, not
       // just the ones holding a `gql` template, and that cost dominates lint time.
       // Scope it to the packages that actually use `gql` — add a package here if

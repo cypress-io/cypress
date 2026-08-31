@@ -1,5 +1,4 @@
-import type { SuperHero } from './control-flow.component'
-import { ControlFlowComponent } from './control-flow.component'
+import { ControlFlowComponent, SuperHero } from './control-flow.component'
 import type { ModelSignal } from '@angular/core'
 
 // @see https://angular.dev/guide/templates/control-flow

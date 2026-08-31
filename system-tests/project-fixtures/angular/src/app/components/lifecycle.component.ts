@@ -1,5 +1,4 @@
-import type { OnInit, OnChanges, SimpleChanges } from '@angular/core'
-import { Component, input } from '@angular/core'
+import { Component, input, OnInit, OnChanges, SimpleChanges } from '@angular/core'
 
 @Component({
   selector: 'app-lifecycle',

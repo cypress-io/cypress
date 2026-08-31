@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core'
-import type { ChildProvidersService } from './child-providers.service'
+import { ChildProvidersService } from './child-providers.service'
 
 @Component({
   selector: 'app-child-providers',
