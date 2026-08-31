@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi, MockInstance } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import os from 'os'
 import path from 'path'
 import fs from 'fs/promises'

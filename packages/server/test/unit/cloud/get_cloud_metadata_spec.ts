@@ -1,5 +1,5 @@
 import { sinon } from '../../spec_helper'
-import { CloudDataSource } from '@packages/data-context/src/sources'
+import type { CloudDataSource } from '@packages/data-context/src/sources'
 import { getCloudMetadata } from '../../../lib/cloud/get_cloud_metadata'
 
 describe('getCloudMetadata', () => {

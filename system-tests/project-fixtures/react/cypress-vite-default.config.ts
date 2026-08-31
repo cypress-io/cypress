@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
 
-import * as vite from 'vite'
+import type * as vite from 'vite'
 
 declare global {
   namespace Cypress {

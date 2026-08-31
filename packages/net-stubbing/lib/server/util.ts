@@ -7,7 +7,8 @@ import type {
   BackendStaticResponse,
   GetFixtureFn, CyHttpMessages } from '@packages/network-interception'
 
-import { Readable, PassThrough } from 'stream'
+import type { Readable } from 'stream'
+import { PassThrough } from 'stream'
 import { Socket } from 'net'
 import ThrottleStream from 'throttle'
 import type { CypressIncomingRequest } from '@packages/proxy'

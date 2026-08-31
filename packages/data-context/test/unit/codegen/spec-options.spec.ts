@@ -3,7 +3,7 @@ import { defaultSpecPattern } from '@packages/config'
 import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import fs from 'fs-extra'
 import path from 'path'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { SpecOptions, expectedSpecExtensions } from '../../../src/codegen/spec-options'
 import { createTestDataContext } from '../helper'
 

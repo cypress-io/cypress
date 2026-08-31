@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { parseUrlIntoHostProtocolDomainTldPort, urlOriginsMatch, urlSameSiteMatch, urlMatchesPolicyProps, urlMatchesOriginProtectionSpace, getSuperDomainOrigin, policyFromConfig } from '../../lib'
-import { Policy } from '../../lib/cors'
+import type { Policy } from '../../lib/cors'
 import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
 describe('lib/cors', () => {

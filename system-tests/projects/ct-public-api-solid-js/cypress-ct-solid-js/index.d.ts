@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 /// <reference types="cypress" />
-import { render } from 'solid-js/web'
+import type { render } from 'solid-js/web'
 
 interface MountingOptions {
   log?: boolean

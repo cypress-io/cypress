@@ -1,10 +1,11 @@
-import {
-  Rule, Tree, SchematicsException, chain, mergeWith,
+import type {
+  Rule, Tree } from '@angular-devkit/schematics'
+import { SchematicsException, chain, mergeWith,
 } from '@angular-devkit/schematics'
 
 import { virtualFs, workspaces } from '@angular-devkit/core'
 
-import { Schema } from './schema'
+import type { Schema } from './schema'
 
 import { createTemplate } from '../../utils'
 

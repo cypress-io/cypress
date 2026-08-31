@@ -105,6 +105,13 @@ module.exports = {
   rules: {
     'no-duplicate-imports': 'off',
     'import/no-duplicates': 'error',
+    '@typescript-eslint/consistent-type-imports': ['error', {
+      prefer: 'type-imports',
+      // inline `{ type X }` specifiers break v8 snapshot bundling
+      fixStyle: 'separate-type-imports',
+      // inline `import()` type annotations are erased on emit regardless
+      disallowTypeAnnotations: false,
+    }],
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',

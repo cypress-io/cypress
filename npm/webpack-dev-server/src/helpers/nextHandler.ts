@@ -5,7 +5,8 @@ import * as fs from 'fs'
 import * as path from 'path'
 import semver from 'semver'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
-import { getMajorVersion, ModuleClass, SourcedDependency, SourcedWebpack, sourceFramework, sourceHtmlWebpackPlugin, sourceWebpackDevServer } from './sourceRelativeWebpackModules'
+import type { ModuleClass, SourcedDependency, SourcedWebpack } from './sourceRelativeWebpackModules'
+import { getMajorVersion, sourceFramework, sourceHtmlWebpackPlugin, sourceWebpackDevServer } from './sourceRelativeWebpackModules'
 
 const debug = debugLib('cypress:webpack-dev-server-fresh:nextHandler')
 

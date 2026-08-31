@@ -22,7 +22,8 @@ import {
   shouldProxyForUrl,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
-import { AsyncServer, Servers } from '../support/servers'
+import type { AsyncServer } from '../support/servers'
+import { Servers } from '../support/servers'
 import { clientCertificateStoreSingleton, UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
 import { execFileSync } from 'child_process'
 import fetch from 'cross-fetch'

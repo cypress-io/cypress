@@ -1,9 +1,6 @@
 import _ from 'lodash'
 
-import {
-  PLAIN_FIELDS,
-  STRING_MATCHER_FIELDS,
-  DICT_STRING_MATCHER_FIELDS,
+import type {
   RouteHandler,
   RouteMatcherOptions,
   RouteMatcher,
@@ -16,6 +13,11 @@ import {
   NumberMatcher,
   BackendStaticResponseWithArrayBuffer,
   StaticResponseWithOptions,
+} from '@packages/network-interception'
+import {
+  PLAIN_FIELDS,
+  STRING_MATCHER_FIELDS,
+  DICT_STRING_MATCHER_FIELDS,
 } from '@packages/network-interception'
 import {
   validateStaticResponse,
