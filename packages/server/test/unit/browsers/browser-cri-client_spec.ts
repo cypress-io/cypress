@@ -421,6 +421,24 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
+    // a detach that lands while an await here is pending can only release a
+    // binding that is already tracked, so registering after one would strand
+    // the listener on the browser client for the rest of the run
+    it('adds the service worker fetch event binding before awaiting anything', async () => {
+      options.event.targetInfo.type = 'service_worker'
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      // the first send is the first place this can yield, so comparing against
+      // it (rather than the stub as a whole, which compares against its *last*
+      // call) is what actually pins the ordering
+      const registered = options.browserCriClient.addServiceWorkerBinding.getCall(0)
+      const firstSend = options.browserClient.send.getCall(0)
+
+      expect(firstSend, 'expected a CDP command to have been sent').not.to.be.null
+      expect(registered.calledBefore(firstSend)).to.be.true
+    })
+
     it('does not add the service worker fetch event binding for non-service_worker targets', async () => {
       options.event.targetInfo.type = 'other'
 
@@ -610,6 +628,7 @@ describe('lib/browsers/browser-cri-client', function () {
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
+        addServiceWorkerBinding: sinon.stub(),
         removeServiceWorkerBinding: sinon.stub(),
       }
 
@@ -666,6 +685,7 @@ describe('lib/browsers/browser-cri-client', function () {
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
+        addServiceWorkerBinding: sinon.stub(),
         removeServiceWorkerBinding: sinon.stub(),
       }
 
@@ -815,6 +835,7 @@ describe('lib/browsers/browser-cri-client', function () {
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
+        addServiceWorkerBinding: sinon.stub(),
         removeServiceWorkerBinding: sinon.stub(),
       }
 
@@ -1242,11 +1263,22 @@ describe('lib/browsers/browser-cri-client', function () {
             },
             resettingBrowserTargets: false,
             sessionTargetInfo: new Map(),
+            removeServiceWorkerBinding: sinon.stub(),
           },
           event: {
             targetId: 'target-id',
           },
         }
+      })
+
+      it('releases the service worker bindings of the destroyed target', () => {
+        options.browserCriClient.hasExtraTargetClient.returns(false)
+        options.browserCriClient.sessionTargetInfo.set('sw-session', { targetId: 'target-id', type: 'service_worker' })
+        options.browserCriClient.sessionTargetInfo.set('other-session', { targetId: 'other-target-id', type: 'service_worker' })
+
+        BrowserCriClient._onTargetDestroyed(options as any)
+
+        expect(options.browserCriClient.removeServiceWorkerBinding).to.be.calledOnceWith('sw-session')
       })
 
       it('is noop if target is not currently tracked', () => {

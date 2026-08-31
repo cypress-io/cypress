@@ -465,6 +465,14 @@ export class BrowserCriClient {
     // sessionTargetInfo's own doc comment for why (#34674).
     browserCriClient.sessionTargetInfo.set(sessionId, targetInfo)
 
+    // Registered before the first await below, for the same reason
+    // sessionTargetInfo is: Target.detachedFromTarget can land while one is
+    // pending, and it can only release a binding already tracked. One added
+    // afterwards has no detach left to release it.
+    if (targetInfo.type === 'service_worker') {
+      browserCriClient.addServiceWorkerBinding(sessionId)
+    }
+
     try {
       // The basic approach here is we attach to targets and enable network traffic
       // We must attach in a paused state so that we can enable network traffic before the target starts running.
@@ -479,9 +487,9 @@ export class BrowserCriClient {
     }
 
     try {
-      // attach a binding to the runtime so that we can listen for service worker events
+      // attach a binding to the runtime so that the worker's client events
+      // reach the listener registered above
       if (event.targetInfo.type === 'service_worker') {
-        browserCriClient.addServiceWorkerBinding(event.sessionId)
         await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
       }
     } catch (error) {
@@ -683,6 +691,7 @@ export class BrowserCriClient {
     for (const [sessionId, targetInfo] of browserCriClient.sessionTargetInfo) {
       if (targetInfo.targetId === targetId) {
         browserCriClient.sessionTargetInfo.delete(sessionId)
+        browserCriClient.removeServiceWorkerBinding(sessionId)
       }
     }
 
