@@ -806,8 +806,8 @@ describe('lib/browsers/chrome', () => {
       const reconnecting = connect()
 
       await new Promise((resolve) => setImmediate(resolve))
-      // asserted first: without it, the one below would also hold while the
-      // reconnect was merely somewhere earlier than the close
+      // proves the reconnect is parked on the close - the assertion below would
+      // otherwise also hold before it ever got there
       expect(first.close, 'never reached the close').to.have.been.calledOnce
       expect(create, 'connected again while the previous close was still pending').to.have.been.calledOnce
 

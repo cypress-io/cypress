@@ -973,10 +973,8 @@ export class BrowserCriClient {
     this.extraTargetClients.delete(targetId)
   }
 
-  // The browser client outlives every spec in the run and a worker's session is
-  // never reused, so each binding is keyed by session for
-  // `Target.detachedFromTarget` to remove. Otherwise every service worker the
-  // run attaches leaves another listener behind on that client.
+  // The browser client outlives every spec in the run, so each binding is keyed
+  // by session for `Target.detachedFromTarget` to remove.
   addServiceWorkerBinding (sessionId: SessionId) {
     // replacing the map entry alone would strand the listener it displaced
     this.removeServiceWorkerBinding(sessionId)
