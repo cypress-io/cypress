@@ -465,10 +465,9 @@ export class BrowserCriClient {
     // sessionTargetInfo's own doc comment for why (#34674).
     browserCriClient.sessionTargetInfo.set(sessionId, targetInfo)
 
-    // Registered before the first await below, for the same reason
-    // sessionTargetInfo is: Target.detachedFromTarget can land while one is
-    // pending, and it can only release a binding already tracked. One added
-    // afterwards has no detach left to release it.
+    // Registered synchronously, for the same reason sessionTargetInfo is:
+    // Target.detachedFromTarget can land while an await below is pending, and
+    // it only releases bindings already tracked.
     if (targetInfo.type === 'service_worker') {
       browserCriClient.addServiceWorkerBinding(sessionId)
     }
@@ -683,11 +682,11 @@ export class BrowserCriClient {
 
     // Target.targetDestroyed carries no sessionId, unlike detachedFromTarget
     // - sweep for any session(s) recorded against this targetId instead
-    // (there's normally exactly one, but nothing guarantees that) so
-    // sessionTargetInfo doesn't retain an entry for a target that's gone
-    // (#34674). Deleting mid-iteration is safe here: the loop only ever
-    // deletes the entry it's currently positioned on, which Map iterators
-    // tolerate.
+    // (there's normally exactly one, but nothing guarantees that) so neither
+    // sessionTargetInfo nor the service worker bindings retain an entry for a
+    // target that's gone (#34674). Deleting mid-iteration is safe here: the
+    // loop only ever deletes the entry it's currently positioned on, which Map
+    // iterators tolerate.
     for (const [sessionId, targetInfo] of browserCriClient.sessionTargetInfo) {
       if (targetInfo.targetId === targetId) {
         browserCriClient.sessionTargetInfo.delete(sessionId)

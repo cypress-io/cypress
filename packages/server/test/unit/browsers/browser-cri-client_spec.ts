@@ -421,17 +421,15 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
-    // a detach that lands while an await here is pending can only release a
-    // binding that is already tracked, so registering after one would strand
-    // the listener on the browser client for the rest of the run
+    // a detach landing mid-attach only releases bindings already tracked
     it('adds the service worker fetch event binding before awaiting anything', async () => {
       options.event.targetInfo.type = 'service_worker'
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      // the first send is the first place this can yield, so comparing against
-      // it (rather than the stub as a whole, which compares against its *last*
-      // call) is what actually pins the ordering
+      // stub-level calledBefore compares against the stub's *last* call, and
+      // send is called several times here, so the ordering only holds if it is
+      // pinned to the first send - the first point this can yield
       const registered = options.browserCriClient.addServiceWorkerBinding.getCall(0)
       const firstSend = options.browserClient.send.getCall(0)
 
