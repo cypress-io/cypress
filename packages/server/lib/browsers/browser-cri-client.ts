@@ -355,11 +355,13 @@ export class BrowserCriClient {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
     })
 
-    // Keeps sessionTargetInfo bounded to sessions that are actually still
-    // attached (#34674) - detachedFromTarget carries a sessionId directly.
+    // Keeps the per-session state on this long-lived client bounded to
+    // sessions that are actually still attached (#34674) - detachedFromTarget
+    // carries a sessionId directly.
     browserClient.on('Target.detachedFromTarget', (event: Protocol.Target.DetachedFromTargetEvent) => {
       browserCriClient.sessionTargetInfo.delete(event.sessionId)
       browserCriClient.removeServiceWorkerBinding(event.sessionId)
+      browserClient.removeSessionEnablements(event.sessionId)
     })
 
     browserClient.on('Inspector.targetReloadedAfterCrash', async (event, sessionId) => {
@@ -682,15 +684,16 @@ export class BrowserCriClient {
 
     // Target.targetDestroyed carries no sessionId, unlike detachedFromTarget
     // - sweep for any session(s) recorded against this targetId instead
-    // (there's normally exactly one, but nothing guarantees that) so neither
-    // sessionTargetInfo nor the service worker bindings retain an entry for a
-    // target that's gone (#34674). Deleting mid-iteration is safe here: the
+    // (there's normally exactly one, but nothing guarantees that) so no
+    // per-session state is retained for a target that's gone (#34674).
+    // Deleting mid-iteration is safe here: the
     // loop only ever deletes the entry it's currently positioned on, which Map
     // iterators tolerate.
     for (const [sessionId, targetInfo] of browserCriClient.sessionTargetInfo) {
       if (targetInfo.targetId === targetId) {
         browserCriClient.sessionTargetInfo.delete(sessionId)
         browserCriClient.removeServiceWorkerBinding(sessionId)
+        browserClient.removeSessionEnablements(sessionId)
       }
     }
 

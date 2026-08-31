@@ -791,6 +791,52 @@ describe('lib/browsers/chrome', () => {
       expect(second.close).not.to.have.been.called
       expect(chrome._getBrowserCriClient()).to.equal(second)
     })
+
+    // the old client clears the session's CDP url as it closes, so a close
+    // still in flight can land after the new connection has set its own
+    it('waits for the previous client to close before connecting again', async function () {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+      const closing = (Promise as any).withResolvers()
+      const first = {
+        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+        resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().returns(closing.promise),
+      }
+      const second = {
+        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+        resetBrowserTargets: sinon.stub().resolves(),
+        close: sinon.stub().resolves(),
+      }
+      const automation = { use: sinon.stub() }
+      const create = sinon.stub(BrowserCriClient, 'create')
+      .onFirstCall().resolves(first as any)
+      .onSecondCall().resolves(second as any)
+
+      sinon.stub(chrome, '_setAutomation').resolves({ _listenForFrameTreeChanges: sinon.stub(), isAUTFrame: sinon.stub() } as any)
+      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
+
+      const connect = () => chrome.connectToExisting(
+        { displayName: 'Chrome' } as any,
+        { ...mitmOpts, url: 'http://localhost:3000/__/' },
+        automation as any,
+      )
+
+      await connect()
+
+      const reconnecting = connect()
+
+      await Promise.resolve()
+      expect(create, 'connected again while the previous close was still pending').to.have.been.calledOnce
+
+      closing.resolve()
+      await reconnecting
+
+      expect(create).to.have.been.calledTwice
+    })
   })
 
   describe('#connectToNewSpec', () => {
