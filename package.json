@@ -93,7 +93,7 @@
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/utils": "8.2.3",
     "@graphql-tools/wrap": "8.1.1",
-    "@npmcli/arborist": "8.0.1",
+    "@npmcli/arborist": "9.9.1",
     "@octokit/auth-app": "6.0.3",
     "@octokit/core": "5.0.2",
     "@percy/cli": "1.31.14",
