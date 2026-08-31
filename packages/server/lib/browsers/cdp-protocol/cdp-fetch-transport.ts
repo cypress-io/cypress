@@ -393,6 +393,18 @@ export class CdpFetchTransport {
 
     debug('stopping CDP Fetch transport (%d in-flight request(s))', this.inFlightRequests.size)
 
+    // Set here, before Fetch.disable is even sent - not in the finally
+    // below. A parked attachChildSession call may be awaiting startPromise
+    // and wake the moment the start it was waiting on settles, which can
+    // happen while this method's own Fetch.disable is still in flight (well
+    // before the finally runs). isStarted has to already read false by
+    // then, or that wake finds a transport that still looks started, enables
+    // Fetch on the child session, and gets its request-paused handlers torn
+    // out from under it the instant Fetch.disable actually resolves - an
+    // intercepting session left with no handlers, committed as handled anyway.
+    this.isStarted = false
+    this.startPromise = undefined
+
     try {
       await this.client.send('Fetch.disable')
     } finally {
@@ -402,11 +414,6 @@ export class CdpFetchTransport {
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
       this.bodyCapture.stop()
-      this.isStarted = false
-      // A parked attachChildSession call may still be awaiting this - once
-      // it settles, isStarted (now false) is what tells that caller stop()
-      // beat it here, not whatever this promise resolves to.
-      this.startPromise = undefined
       debug('CDP Fetch transport stopped')
     }
   }

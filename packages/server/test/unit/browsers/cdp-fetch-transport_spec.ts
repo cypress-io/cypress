@@ -977,6 +977,48 @@ describe('CdpFetchTransport', () => {
       expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
     })
 
+    // Narrower window than the one above: stop()'s own Fetch.disable can
+    // still be in flight (not yet in the finally block) when the parked
+    // attach wakes up. isStarted must already read false by then, or the
+    // attach enables Fetch on a session whose requestPaused handlers are
+    // about to be torn down the moment Fetch.disable resolves - an
+    // intercepting session with no handlers, committed as handled anyway.
+    it('rejects a parked attach that wakes while stop()\'s own Fetch.disable is still pending', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      const ownEnable = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+
+      const starting = transport.start()
+      const attaching = transport.attachChildSession('sw-session')
+
+      await tick()
+
+      const fetchDisable = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.disable').returns(fetchDisable.promise)
+
+      const stopping = transport.stop()
+
+      await tick()
+
+      // stop()'s own Fetch.disable is still unresolved here - isStarted must
+      // already be false before the parked attach below wakes and re-checks it
+      ownEnable.resolve({})
+
+      await starting
+      await tick()
+
+      await expect(attaching).to.be.rejected
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+
+      fetchDisable.resolve({})
+      await stopping
+    })
+
     it('rejects when a service worker session cannot be enabled so the caller can report it', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
