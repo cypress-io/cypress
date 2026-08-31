@@ -2594,6 +2594,44 @@ describe('lib/browsers/bidi_automation', () => {
           expect(mockWebdriverClient.networkAddIntercept).not.to.have.been.called
         })
 
+        it('discards an identification whose candidate frame was destroyed during the window.name read and identifies the recreated frame', async () => {
+          let resolveName!: (value: unknown) => void
+
+          const getTree = sinon.stub()
+
+          getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [{ context: 'aut' }] }] })
+          getTree.withArgs({ root: 'new-aut' }).resolves({ contexts: [{ context: 'new-aut', url: 'http://localhost:3500/recreated.html' }] })
+          mockWebdriverClient.browsingContextGetTree = getTree
+
+          const scriptEvaluate = sinon.stub()
+
+          scriptEvaluate.withArgs(sinon.match({ target: { context: 'aut' } })).returns(new Promise((res) => {
+            resolveName = res
+          }))
+
+          scriptEvaluate.withArgs(sinon.match({ target: { context: 'new-aut' } })).resolves({ result: { value: AUT_NAME } })
+          mockWebdriverClient.scriptEvaluate = scriptEvaluate
+          mockWebdriverClient.networkAddIntercept = sinon.stub().resolves({ intercept: 'intercept-1' })
+
+          const request = bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
+
+          setTimeout(() => {
+            // the frame is torn down while its window.name read is in flight;
+            // the read still resolving with the AUT name must not record it
+            mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: 'aut', parent: 'top' })
+            getTree.withArgs({ root: 'top' }).resolves({ contexts: [{ context: 'top', children: [] }] })
+            resolveName({ result: { value: AUT_NAME } })
+          }, 30)
+
+          setTimeout(() => {
+            mockWebdriverClient.emit('browsingContext.contextCreated', { context: 'new-aut', parent: 'top' })
+          }, 60)
+
+          expect(await request).to.equal('http://localhost:3500/recreated.html')
+          //@ts-expect-error
+          expect(bidiAutomationInstance.autContextId).to.equal('new-aut')
+        })
+
         it('fails a waiting request when the top-level context is destroyed instead of waiting out the timeout', async () => {
           mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({ contexts: [{ context: 'top', children: [] }] })
 

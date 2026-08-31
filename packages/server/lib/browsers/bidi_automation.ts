@@ -128,6 +128,11 @@ export class BidiAutomation {
   private interceptId: string | undefined = undefined
   private autContextDeferred: PromiseWithResolvers<string> | undefined = undefined
   private autContextRecovery: Promise<string | undefined> | undefined = undefined
+  // autContextId is unset while an identification's window.name read is in
+  // flight, so the match-based clear in onBrowsingContextDestroyed cannot catch
+  // a destroy of the candidate frame itself; these entries let the destroy mark
+  // the identification stale so a dead frame is never recorded.
+  private inFlightIdentifications = new Set<{ contextId: string, destroyed: boolean }>()
   // AUT context identification needs a scriptEvaluate round trip, and reloads /
   // navigations destroy and recreate the context, so an AUT-dependent automation
   // request can legitimately arrive while no context is tracked. Requests wait
@@ -201,6 +206,10 @@ export class BidiAutomation {
     // created.
     let contextName = ''
 
+    const identification = { contextId, destroyed: false }
+
+    this.inFlightIdentifications.add(identification)
+
     try {
       contextName = (await this.webDriverClient.scriptEvaluate({
         expression: 'window.name',
@@ -212,6 +221,8 @@ export class BidiAutomation {
       debug(`could not read window.name for browsing context ${contextId}; skipping AUT identification for it: %o`, err)
 
       return false
+    } finally {
+      this.inFlightIdentifications.delete(identification)
     }
 
     if (!contextName.startsWith(AUT_FRAME_NAME_IDENTIFIER)) {
@@ -220,9 +231,17 @@ export class BidiAutomation {
       return false
     }
 
-    // The window.name read yields; if the top-level context changed or was
-    // destroyed while it was in flight, this identification belongs to a dead
-    // tab and must not be recorded.
+    // The window.name read yields; if the frame itself was destroyed while it
+    // was in flight, this identification is for a dead frame and must not be
+    // recorded.
+    if (identification.destroyed) {
+      debug(`browsing context ${contextId} was destroyed while being identified; discarding.`)
+
+      return false
+    }
+
+    // Likewise if the top-level context changed or was destroyed during the
+    // read, this identification belongs to a dead tab.
     if (this.topLevelContextId !== parentContextId) {
       debug(`browsing context ${contextId} was identified against a stale top-level context ${parentContextId}; discarding.`)
 
@@ -355,6 +374,14 @@ export class BidiAutomation {
 
   private onBrowsingContextDestroyed = async (params: BrowsingContextInfo) => {
     debugVerbose('received browsingContext.contextDestroyed %o', params)
+
+    // A frame with an identification round trip in flight has no autContextId
+    // to match against below, so mark the identification stale directly.
+    for (const identification of this.inFlightIdentifications) {
+      if (identification.contextId === params.context) {
+        identification.destroyed = true
+      }
+    }
 
     // if the top level context gets destroyed, we need to clear the AUT context and destroy the interceptor as it is no longer applicable
     if (params.context === this.topLevelContextId) {
