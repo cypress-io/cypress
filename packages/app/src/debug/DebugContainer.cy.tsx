@@ -139,6 +139,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
             const test = result.currentProject.cloudProject.runByNumber!
             const other = CloudRunStubs[runName] as typeof test
 
@@ -258,6 +259,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
             const test = result.currentProject.cloudProject.runByNumber!
 
             result.currentProject.cloudProject.runByNumber = {
@@ -291,6 +293,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
             const test = result.currentProject.cloudProject.runByNumber
 
             result.currentProject.cloudProject.runByNumber = {
@@ -319,6 +322,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
             const test = result.currentProject.cloudProject.runByNumber
 
             //creating copy to prevent mutation later on in this test
@@ -442,6 +446,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
             const test = result.currentProject.cloudProject.runByNumber
 
             result.currentProject.cloudProject.runByNumber = {
@@ -463,6 +468,7 @@ describe('<DebugContainer />', () => {
         variables: defaultVariables,
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
             const test = result.currentProject.cloudProject.runByNumber
 
             result.currentProject.cloudProject.runByNumber = {
@@ -484,6 +490,7 @@ describe('<DebugContainer />', () => {
           variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
               const test = result.currentProject.cloudProject.runByNumber
 
               const failingWithTests = CloudRunStubs.failingWithTests
@@ -492,6 +499,7 @@ describe('<DebugContainer />', () => {
                 ...failingWithTests,
               } as typeof test
 
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
               const allRuns = result.currentProject.cloudProject.allRuns!
 
               const currentRun = failingWithTests! as NonNullable<typeof allRuns[number]>
@@ -520,6 +528,7 @@ describe('<DebugContainer />', () => {
           variables: defaultVariables,
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
               const test = result.currentProject.cloudProject.runByNumber
 
               const failingWithTests = CloudRunStubs.failingWithTests
@@ -528,6 +537,7 @@ describe('<DebugContainer />', () => {
                 ...failingWithTests,
               } as typeof test
 
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars -- binds the narrowed result type for the casts below
               const allRuns = result.currentProject.cloudProject.allRuns!
 
               const nextRunning = CloudRunStubs.running as NonNullable<typeof allRuns[number]>

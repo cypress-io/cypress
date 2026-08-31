@@ -3,9 +3,7 @@ import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
 
-const mochaOverrideLevel = ['restoring', 'suite', 'test'] as const
-
-export type MochaOverrideLevel = typeof mochaOverrideLevel[number]
+export type MochaOverrideLevel = 'restoring' | 'suite' | 'test'
 
 type ResolvedTestConfigOverride = {
   /**

@@ -15,8 +15,8 @@ describe('<RunsError />', () => {
               buttonText="Request Access"
               buttonIcon={PaperAirplaneIcon}
             >
-            The request timed out when trying to retrieve the recorded runs from Cypress Cloud. <br/>
-            Please refresh the page to try again and visit our Status Page if this behavior continues.
+              The request timed out when trying to retrieve the recorded runs from Cypress Cloud. <br/>
+              Please refresh the page to try again and visit our Status Page if this behavior continues.
             </RunsError>
           </div>
         )
@@ -35,8 +35,8 @@ describe('<RunsError />', () => {
             buttonText="Request Access"
             buttonIcon={PaperAirplaneIcon}
           >
-          This is a private project that you do not currently have access to. <br/>
-          Please request access from the project owner in order to view the list of runs.
+            This is a private project that you do not currently have access to. <br/>
+            Please request access from the project owner in order to view the list of runs.
           </RunsError>
         </div>)
       },

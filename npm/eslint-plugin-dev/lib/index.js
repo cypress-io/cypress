@@ -247,6 +247,7 @@ module.exports = {
           parser: '@typescript-eslint/parser',
           plugins: [
             '@typescript-eslint',
+            '@stylistic',
             'import',
           ],
           rules: {
@@ -262,13 +263,16 @@ module.exports = {
                 'args': 'none',
                 'ignoreRestSiblings': true,
                 'argsIgnorePattern': '^_',
+                // `catch` bindings went from unchecked to checked in
+                // @typescript-eslint v8; keep them unchecked
+                'caughtErrors': 'none',
               },
             ],
-            '@typescript-eslint/type-annotation-spacing': 'error',
+            '@stylistic/type-annotation-spacing': 'error',
             '@typescript-eslint/no-useless-constructor': [
               'error',
             ],
-            '@typescript-eslint/member-delimiter-style': [
+            '@stylistic/member-delimiter-style': [
               'error',
               {
                 'multiline': {
@@ -279,7 +283,7 @@ module.exports = {
                 },
               },
             ],
-            '@typescript-eslint/indent': [
+            '@stylistic/indent': [
               'error',
               2,
               {

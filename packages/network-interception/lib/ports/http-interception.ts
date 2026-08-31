@@ -64,6 +64,6 @@ export interface ForHttpIntercept<TRequest, TResponse> {
 }
 
 export type ForNetworkInterception<TRequest, TResponse> = Pick<
-ForHttpIntercept<TRequest, TResponse>,
-'handle'
+  ForHttpIntercept<TRequest, TResponse>,
+  'handle'
 >

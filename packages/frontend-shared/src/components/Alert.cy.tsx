@@ -233,7 +233,7 @@ describe('<Alert />', () => {
       return (
         <div class="space-y-2 text-center p-4">
           <Alert status="success" collapsible icon={CoffeeIcon} title="Coffee, please">
-          Delicious. Yum.
+            Delicious. Yum.
             <button class="bg-white rounded ml-2 px-2">Focusable</button>
           </Alert>
           <Alert status="info" collapsible title="An info alert">Just letting you know what's up.</Alert>
@@ -242,7 +242,7 @@ describe('<Alert />', () => {
             icon={ErrorOutlineIcon}
             icon-classes="icon-dark-orange-400 w-[16px] h-[16px]"
           >
-              Nothing good is happening here!</Alert>
+            Nothing good is happening here!</Alert>
           <Alert icon={CoffeeIcon}
             dismissible
             status="error"

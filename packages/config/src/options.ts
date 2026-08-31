@@ -17,31 +17,11 @@ import * as validate from './validation'
  * - add name and description copy to `/packages/frontend-shared/src/locales/en-US.json`
  */
 
-const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
-  'CONFIG_FILE_INVALID_ROOT_CONFIG',
-  'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
-  'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
-  'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
-  'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
-  'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
-  'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
-  'VIDEO_UPLOAD_ON_PASSES_REMOVED',
-  'RENAMED_CONFIG_OPTION',
-  'EXPERIMENTAL_STUDIO_REMOVED',
-  'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
-  'EXPERIMENTAL_SOURCE_REWRITING_REMOVED',
-  'ALLOW_CYPRESS_ENV_REMOVED',
-  'EXEC_TIMEOUT_REMOVED',
-  'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
-  'VISIBILITY_STRATEGY_DEPRECATION',
-  'EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED',
-] as const
-
 type ValidationOptions = {
   testingType: TestingType | null
 }
 
-export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
+export type BreakingOptionErrorKey = AllCypressErrorNames
 
 /**
  * Where a configuration option is allowed to be overridden at test time:

@@ -9,9 +9,12 @@ import type { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 
 const debug = debugLib('cypress:data-context:test:unit:sources:RelevantRunsDataSource')
 
-const _PROJECTS = [FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING] as const
-
-type TestProject = typeof _PROJECTS[number]
+type TestProject =
+  | typeof FAKE_PROJECT_MULTIPLE_COMPLETED
+  | typeof FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING
+  | typeof FAKE_PROJECT_NO_RUNS
+  | typeof FAKE_PROJECT_ONE_RUNNING_RUN
+  | typeof FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING
 
 function formatRun (project: TestProject, index: number) {
   const run = project.data.cloudProjectBySlug.runsByCommitShas?.[index]

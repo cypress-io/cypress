@@ -43,14 +43,13 @@ const isStudioMode = () => {
   }
 }
 
-const RUNNER_EVENTS = [
-  TEST_BEFORE_RUN_ASYNC_EVENT,
-  TEST_BEFORE_RUN_EVENT,
-  TEST_BEFORE_AFTER_RUN_ASYNC_EVENT,
-  TEST_AFTER_RUN_ASYNC_EVENT,
-  TEST_AFTER_RUN_EVENT,
-  RUNNABLE_AFTER_RUN_ASYNC_EVENT,
-] as const
+type RunnerEvent =
+  | typeof TEST_BEFORE_RUN_ASYNC_EVENT
+  | typeof TEST_BEFORE_RUN_EVENT
+  | typeof TEST_BEFORE_AFTER_RUN_ASYNC_EVENT
+  | typeof TEST_AFTER_RUN_ASYNC_EVENT
+  | typeof TEST_AFTER_RUN_EVENT
+  | typeof RUNNABLE_AFTER_RUN_ASYNC_EVENT
 
 export type HandlerType = 'error' | 'unhandledrejection'
 
@@ -58,7 +57,7 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) => {
+const fire = (event: RunnerEvent, runnable, Cypress, ...args) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -74,7 +73,7 @@ const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) =
   return Cypress.action(event, wrap(runnable), runnable, ...args)
 }
 
-const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
+const fired = (event: RunnerEvent, runnable) => {
   return !!(runnable._fired && runnable._fired[event])
 }
 

@@ -196,7 +196,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
             />
           </div>
           <span className="runnable-popover-item-description">
-              Automatically scroll the command log while the tests are running.
+            Automatically scroll the command log while the tests are running.
           </span>
         </div>
 
