@@ -575,11 +575,10 @@ export = {
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
     // this runs once per spec, and the client from the previous spec still holds
-    // an open websocket to the same browser. Nothing else closes it. Awaited
-    // because its close clears the session's CDP url once the socket is gone,
-    // which would otherwise land after the new connection has set its own; the
-    // reference stays put until the new client replaces it, so the getter sees
-    // the previous client rather than undefined while connecting.
+    // an open websocket to the same browser. Nothing else closes it. Awaited so
+    // its close, which clears the session's CDP url, can't land after the new
+    // connection sets its own; the reference is left in place until the new
+    // client replaces it so the getter doesn't see undefined mid-connect.
     if (browserCriClient) {
       try {
         await browserCriClient.close(true)

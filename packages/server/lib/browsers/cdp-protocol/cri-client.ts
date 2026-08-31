@@ -717,12 +717,10 @@ export class CriClient implements ICriClient {
   }
 
   /**
-   * Drops the enablements recorded for a session that has detached. Only a
-   * matching `*.disable` evicts an entry otherwise, and none is ever sent for
-   * a child session, so on the browser client - which outlives every session
-   * attached to it - they would accumulate for the life of the browser and be
-   * replayed against dead sessions on every reconnect. Session ids are never
-   * reused, so a detached session's entries can never apply again.
+   * No `*.disable` is ever sent for a child session, so nothing else evicts its
+   * enablements from this client, which outlives every session attached to it.
+   * Session ids are never reused, so a detached session's entries cannot apply
+   * again.
    */
   public removeSessionEnablements = (sessionId: string) => {
     this.enableCommands = this.enableCommands.filter((entry) => entry.sessionId !== sessionId)

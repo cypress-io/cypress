@@ -792,8 +792,7 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._getBrowserCriClient()).to.equal(second)
     })
 
-    // the old client clears the session's CDP url as it closes, so a close
-    // still in flight can land after the new connection has set its own
+    // a close still in flight can clear the CDP url after the new connection sets it
     it('waits for the previous client to close before connecting again', async function () {
       const pageCriClient = {
         send: sinon.stub().resolves(),
