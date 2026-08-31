@@ -244,7 +244,7 @@ index f1cc841..0000000
 -
 -For more information on WebdriverIO see the [homepage](https://webdriver.io).
 diff --git a/node_modules/geckodriver/dist/index.js b/node_modules/geckodriver/dist/index.js
-index 2edc6d2..a24617e 100644
+index 41319bd..a2f2437 100644
 --- a/node_modules/geckodriver/dist/index.js
 +++ b/node_modules/geckodriver/dist/index.js
 @@ -1,10 +1,14 @@
@@ -259,14 +259,14 @@ index 2edc6d2..a24617e 100644
 +    // wrap in cypress debugger statement to avoid extraneous messages to the console
 +    log.setLevel(debugModule.enabled('cypress-verbose:server:browsers:geckodriver') ? 'info' : 'silent')
 +
-     const { cacheDir, customGeckoDriverPath, spawnOpts, ...startArgs } = params;
+     const { cacheDir, customGeckoDriverPath, spawnOpts, geckoDriverVersion, ...startArgs } = params;
      let geckoDriverPath = (customGeckoDriverPath ||
          process.env.GECKODRIVER_PATH ||
 diff --git a/node_modules/geckodriver/dist/install.js b/node_modules/geckodriver/dist/install.js
-index 6c7e67a..1345615 100644
+index 5c8ba94..9c5d4e1 100644
 --- a/node_modules/geckodriver/dist/install.js
 +++ b/node_modules/geckodriver/dist/install.js
-@@ -72,6 +72,8 @@ const installJsPath = path.join('dist', 'install.js');
+@@ -128,6 +128,8 @@ const installJsPath = path.join('dist', 'install.js');
  if (process.argv[1] &&
      path.normalize(process.argv[1]).endsWith(path.sep + installJsPath) &&
      process.env.GECKODRIVER_AUTO_INSTALL) {
