@@ -15067,10 +15067,10 @@ detect-node@^2.0.4:
   resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
   integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
 
-devtools-protocol@0.0.1159816, devtools-protocol@0.0.1575685, devtools-protocol@0.0.927104:
-  version "0.0.1575685"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1575685.tgz#8ae6db509c572d3a64b62e2f2a486aa3ea1fcd4c"
-  integrity sha512-5dS9wazW8h5VoY3wx8GkZH1EJMv4y90WISi5OnYi6aWzSoC8kwXlxcnnETz95KdlPjNbOuL9TWBE7xDUVYTOew==
+devtools-protocol@0.0.1159816, devtools-protocol@0.0.1687809, devtools-protocol@0.0.927104:
+  version "0.0.1687809"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1687809.tgz#871dac8265503b23ddf55b74128ffe0361b55d03"
+  integrity sha512-t7kSb+UKYdyxcmqy98U2P86ne6rCve3DIJ4+lp54i/hhClgFuG35JrLj23rO14Jw3sWDsp7i+22QhNU0+/qk8g==
 
 didyoumean@^1.2.2:
   version "1.2.2"
