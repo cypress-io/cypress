@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { NotificationActions } from '../../../src/actions/NotificationActions'
-import { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
+import type { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 import { createTestDataContext, createRelevantRun } from '../helper'
 
 describe('NotificationActions', () => {

@@ -141,7 +141,7 @@ describe('lib/server-base', () => {
     })
 
     it('passes dev format and skip that mirrors GracefulExit.isShuttingDown', async function () {
-      this.server.useMorgan('__cypress')
+      this.server.useMorgan()
 
       const req = { proxiedUrl: '/__cypress/iframes/foo', headers: {} }
 
@@ -171,7 +171,7 @@ describe('lib/server-base', () => {
 
       beforeEach(function () {
         getCurrent = sinon.stub(cypressSessions, 'getCurrent').returns({ sessionId: 'abc' })
-        this.server.useMorgan('__cypress')
+        this.server.useMorgan()
       })
 
       afterEach(() => {
@@ -186,12 +186,12 @@ describe('lib/server-base', () => {
         expect(skip('/__cypress/sessions/abc')).to.be.true
       })
 
-      it('skips a non-proxied graphql request carrying the current session id', () => {
-        expect(skip('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' })).to.be.true
+      it('skips a non-proxied tap graphql request carrying the current session id', () => {
+        expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' })).to.be.true
       })
 
-      it('logs a graphql request whose session id header does not match', () => {
-        expect(skip('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).to.be.false
+      it('logs a tap graphql request whose session id header does not match', () => {
+        expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).to.be.false
       })
 
       it('logs a graphql request from the app, which sends no session id header', () => {
@@ -1262,12 +1262,12 @@ describe('lib/server-base', () => {
       getCurrent.restore()
     })
 
-    const run = (req) => {
+    const run = (req, { clientRoute: route = clientRoute, namespace } = {}) => {
       const res = { redirect: sinon.spy() }
       const next = sinon.spy()
 
       // these assert the HTTP/1 proxy path, where the force-proxy redirect applies
-      _forceProxyMiddleware(clientRoute, undefined, () => false)(req, res, next)
+      _forceProxyMiddleware(route, namespace, () => false)(req, res, next)
 
       return { res, next }
     }
@@ -1277,7 +1277,7 @@ describe('lib/server-base', () => {
     it('lets a non-proxied graphql request through when the session id header matches', () => {
       getCurrent.returns({ sessionId: 'abc' })
 
-      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' }))
+      const { res, next } = run(nonProxied('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' }))
 
       expect(next).to.be.calledOnce
       expect(res.redirect).not.to.be.called
@@ -1286,7 +1286,7 @@ describe('lib/server-base', () => {
     it('redirects a non-proxied graphql request whose session id header is missing', () => {
       getCurrent.returns({ sessionId: 'abc' })
 
-      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs'))
+      const { res, next } = run(nonProxied('/__cypress/tap/graphql/TapSpecs'))
 
       expect(res.redirect).to.be.calledWith(clientRoute)
       expect(next).not.to.be.called
@@ -1295,7 +1295,7 @@ describe('lib/server-base', () => {
     it('redirects when the session id header does not match the current session', () => {
       getCurrent.returns({ sessionId: 'abc' })
 
-      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' }))
+      const { res, next } = run(nonProxied('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' }))
 
       expect(res.redirect).to.be.calledWith(clientRoute)
       expect(next).not.to.be.called
@@ -1304,7 +1304,7 @@ describe('lib/server-base', () => {
     it('redirects when the session id header is duplicated (array-valued)', () => {
       getCurrent.returns({ sessionId: 'abc' })
 
-      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': ['abc', 'abc'] }))
+      const { res, next } = run(nonProxied('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': ['abc', 'abc'] }))
 
       expect(res.redirect).to.be.calledWith(clientRoute)
       expect(next).not.to.be.called
@@ -1313,7 +1313,7 @@ describe('lib/server-base', () => {
     it('redirects a graphql request when no session is running', () => {
       getCurrent.returns(null)
 
-      const { res, next } = run(nonProxied('/__cypress/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' }))
+      const { res, next } = run(nonProxied('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' }))
 
       expect(res.redirect).to.be.calledWith(clientRoute)
       expect(next).not.to.be.called
@@ -1322,7 +1322,20 @@ describe('lib/server-base', () => {
     it('lets a proxied graphql request through without a session id header', () => {
       getCurrent.returns({ sessionId: 'abc' })
 
-      const { res, next } = run({ proxiedUrl: 'http://localhost:2020/__cypress/graphql/TapSpecs', headers: {} })
+      const { res, next } = run({ proxiedUrl: 'http://localhost:2020/__cypress/tap/graphql/TapSpecs', headers: {} })
+
+      expect(next).to.be.calledOnce
+      expect(res.redirect).not.to.be.called
+    })
+
+    // packages/app's Cypress-in-Cypress config overrides `namespace` this way.
+    it('lets a tap request through when the project overrides the namespace', () => {
+      getCurrent.returns({ sessionId: 'abc' })
+
+      const { res, next } = run(
+        nonProxied('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'abc' }),
+        { clientRoute: '/__app/', namespace: '__cypress-app' },
+      )
 
       expect(next).to.be.calledOnce
       expect(res.redirect).not.to.be.called

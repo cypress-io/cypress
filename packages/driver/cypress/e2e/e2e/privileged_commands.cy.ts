@@ -3,7 +3,6 @@ import { runImportedPrivilegedCommands } from '../../support/utils'
 const isWebkit = Cypress.isBrowser({ family: 'webkit' })
 
 function runSpecFunctionCommands () {
-  cy.exec('echo "hello"')
   cy.readFile('cypress/fixtures/app.json')
   cy.writeFile('cypress/_test-output/written.json', 'contents')
   cy.task('return:arg', 'arg')
@@ -29,7 +28,6 @@ describe('privileged commands', () => {
       ranInBeforeEach = true
 
       // ensures these run properly in hooks, but only run it once per spec run
-      cy.exec('echo "hello"')
       cy.readFile('cypress/fixtures/app.json')
       cy.writeFile('cypress/_test-output/written.json', 'contents')
       cy.task('return:arg', 'arg')
@@ -40,7 +38,6 @@ describe('privileged commands', () => {
     })
 
     it('passes in test body', () => {
-      cy.exec('echo "hello"')
       cy.readFile('cypress/fixtures/app.json')
       cy.writeFile('cypress/_test-output/written.json', 'contents')
       cy.task('return:arg', 'arg')
@@ -90,8 +87,6 @@ describe('privileged commands', () => {
     })
 
     it('handles extra, unexpected arguments', () => {
-      // @ts-expect-error
-      cy.exec('echo "hey-o"', { log: true }, { should: 'be ignored' })
       // @ts-expect-error
       cy.readFile('cypress/fixtures/app.json', 'utf-8', { log: true }, { should: 'be ignored' })
       // @ts-expect-error
@@ -164,7 +159,6 @@ describe('privileged commands', () => {
 
     it('passes in test body .then() callback', () => {
       cy.then(() => {
-        cy.exec('echo "hello"')
         cy.readFile('cypress/fixtures/app.json')
         cy.writeFile('cypress/_test-output/written.json', 'contents')
         cy.task('return:arg', 'arg')
@@ -198,7 +192,6 @@ describe('privileged commands', () => {
     // cy.origin() doesn't currently have webkit support
     it('passes in .origin() callback', { browser: '!webkit' }, () => {
       cy.origin('http://foobar.com:3500', () => {
-        cy.exec('echo "hello"')
         cy.readFile('cypress/fixtures/app.json')
         cy.writeFile('cypress/_test-output/written.json', 'contents')
         cy.task('return:arg', 'arg')
@@ -213,7 +206,7 @@ describe('privileged commands', () => {
 
   describe('in AUT', () => {
     const strategies = ['inline', 'then', 'eval', 'function']
-    const commands = ['exec', 'readFile', 'writeFile', 'selectFile', 'task']
+    const commands = ['readFile', 'writeFile', 'selectFile', 'task']
 
     // cy.origin() doesn't currently have webkit support
     if (!Cypress.isBrowser({ family: 'webkit' })) {

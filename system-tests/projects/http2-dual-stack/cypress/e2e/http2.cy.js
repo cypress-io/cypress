@@ -33,4 +33,20 @@ describe('dual-stack h2 origin', () => {
     // commands to h1.1 on purpose
     cy.request('/api/data').its('body.protocol').should('eq', '1.1')
   })
+
+  it('reports res.statusMessage as the wire reason phrase, empty under h2', () => {
+    const expectedStatusMessage = expectedBrowserProtocol === '2.0' ? '' : 'OK'
+
+    let seen
+
+    cy.intercept('/api/data*', (req) => {
+      req.on('response', (res) => {
+        seen = res.statusMessage
+      })
+    }).as('apiData')
+
+    cy.visit('/')
+    cy.wait('@apiData')
+    cy.then(() => expect(seen).to.eq(expectedStatusMessage))
+  })
 })

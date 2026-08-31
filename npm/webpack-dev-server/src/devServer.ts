@@ -6,7 +6,8 @@ import type { Compiler, Configuration } from 'webpack'
 import { createWebpackDevServer } from './createWebpackDevServer'
 import debugLib from 'debug'
 import { nextHandler } from './helpers/nextHandler'
-import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
+import { sourceDefaultWebpackDependencies } from './helpers/sourceRelativeWebpackModules'
 import { angularHandler } from './helpers/angularHandler'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')

@@ -47,6 +47,33 @@ context('cy.end', () => {
   })
 })
 
+context('cy.exec', () => {
+  const removalMessage = '`cy.exec()` was removed in Cypress version 16.0.0. Please update to use `cy.task()` instead, which runs in Node and does not depend on the operating system, shell, or terminal of the machine running Cypress.'
+
+  it('throws error on use of cy.exec', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.equal(removalMessage)
+      expect(err.docsUrl).to.equal('https://on.cypress.io/task')
+
+      done()
+    })
+
+    cy.exec('ls')
+  })
+
+  it('throws error inside a cy.origin() callback', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.include(removalMessage)
+
+      done()
+    })
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.exec('ls')
+    })
+  })
+})
+
 context('Cypress.server.defaults', () => {
   it('throws error on use of Cypress.Server.defaults', (done) => {
     cy.on('fail', (err) => {

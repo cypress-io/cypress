@@ -1,6 +1,8 @@
 import Debug from 'debug'
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
+import type { Protocol } from 'devtools-protocol'
+import type { BrowserPreRequest } from '@packages/proxy'
+import { NetworkProxy, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
 import type { NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
@@ -20,6 +22,7 @@ import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
 import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
 import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
+import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -206,6 +209,33 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     useBrowserNetworkInterception: true,
   })
 
+  // Shared by the main transport and every extra-target transport so a popup
+  // can never classify or gate capture differently than the page that opened
+  // it.
+  //
+  // hasMatchingRoute is threaded in from the response pause's own
+  // request-stage result (see cdp-fetch-transport.ts) rather than re-matched
+  // here: the request-stage middleware (SetMatchingRoutes) is the
+  // authoritative match — it already did the `times` counting, saw the
+  // request before any handler mutated its URL or headers, and already
+  // excludes the dev server and disabled routes. Re-matching at response time
+  // would disagree with that: it would wrongly revive a `times`-exhausted
+  // route for a *later* request (which can wedge on an endless body), and
+  // handler-mutated requests would never re-match what the browser actually
+  // sent.
+  const shouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent, { hasMatchingRoute }: { hasMatchingRoute: boolean }): boolean => {
+    return shouldStreamResponseBody(event, {
+      modifyObstructiveCode: deps.config.modifyObstructiveCode,
+      experimentalModifyObstructiveThirdPartyCode: deps.config.experimentalModifyObstructiveThirdPartyCode,
+      hasMatchingRoute: () => hasMatchingRoute,
+    })
+  }
+
+  // server-base applies the protocol manager to networkProxy.http after this
+  // factory returns (and may clear it later), so this must read the field
+  // fresh on every call rather than capturing today's value.
+  const shouldCaptureBody = (): boolean => networkProxy.http.protocolManager?.isProtocolEnabled ?? false
+
   // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;
   // CDP Fetch needs its own codec. Share middleware stages, keep intercepts distinct.
   const serveInternalRoutes = createServeInternalRoutesMiddleware({
@@ -285,6 +315,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
     onRequestCanceled,
+    shouldStreamBody,
+    shouldCaptureBody,
   })
 
   // Observe-only (#34674): listens on the same connection as the transport and
@@ -329,6 +361,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         isFromExtraTarget: true,
         resolveOriginRedirect,
         onRequestCanceled,
+        shouldStreamBody,
+        shouldCaptureBody,
       })
 
       await extraTransport.start()

@@ -2,8 +2,8 @@
 import { getError } from '@packages/errors'
 import type { CypressError } from '@packages/errors'
 import type { DebugData, FullConfig, TestingType } from '@packages/types'
-import { ChildProcess, fork, spawn } from 'child_process'
-import type { ForkOptions } from 'child_process'
+import { fork, spawn } from 'child_process'
+import type { ForkOptions, ChildProcess } from 'child_process'
 import EventEmitter from 'events'
 import fs from 'fs'
 import path from 'path'
@@ -118,7 +118,7 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
   send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
   send(event: 'loadConfig'): boolean
-  send(event: 'main:process:will:disconnect'): void
+  send(event: 'main:process:will:disconnect'): boolean
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
       debug('not sending %s message to child process. Killed? %s, Connected? %s', event, this._childProcess.killed, this._childProcess.connected)

@@ -3,13 +3,15 @@ import chalk from 'chalk'
 import Debug from 'debug'
 import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
-import { telemetry, Span } from '@packages/telemetry'
+import type { Span } from '@packages/telemetry'
+import { telemetry } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin } from '../adapters/http-codec'
+import { fetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+import type { GetPreRequestCb, PendingRequest } from './util/prerequests'
+import { PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
@@ -32,6 +34,7 @@ import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
+import { serviceWorkerHeaderIsScript } from '@packages/network-interception'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -39,8 +42,12 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
+// Pure predicate shared with should-stream-response-body.ts (packages/server/lib/browsers/cdp-protocol),
+// which does its own case-insensitive header-name lookup and needs only the
+// value check.
+
 export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
-  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
+  return serviceWorkerHeaderIsScript(headers?.['service-worker']) || serviceWorkerHeaderIsScript(headers?.['Service-Worker'])
 }
 
 export const isVerboseTelemetry = true
@@ -569,7 +576,7 @@ export class Http {
       return onError(new Error('Network interception is not configured for the proxy runtime.'))
     }
 
-    return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
+    return this.networkInterception.handle(ctx, fetchOrigin)
     .catch((err) => {
       // The legacy pipeline may already have run error middleware for this ctx.
       if (ctx.error) {

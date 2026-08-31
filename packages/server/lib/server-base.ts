@@ -4,7 +4,8 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import * as ensureUrl from './util/ensure-url'
-import express, { Express } from 'express'
+import type { Express } from 'express'
+import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -14,7 +15,8 @@ import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest } from '@packages/network-interception'
-import { DriverInterceptRegistrationAdapter, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import type { NetStubbingState } from '@packages/net-stubbing'
+import { DriverInterceptRegistrationAdapter, netStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
@@ -25,17 +27,20 @@ import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
 import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
-import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
+import type { DestroyableHttpServer } from './util/server_destroy'
+import { allowDestroy } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
-import { InitializeRoutes, createCommonRoutes } from './routes'
-import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import type { InitializeRoutes } from './routes'
+import { createCommonRoutes } from './routes'
+import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
-import { cookieJar, SerializableAutomationCookie } from './automation/cookie/jar'
+import type { SerializableAutomationCookie } from './automation/cookie/jar'
+import { cookieJar } from './automation/cookie/jar'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
 import * as appData from './util/app_data'
@@ -91,11 +96,11 @@ const _hasValidSessionIdHeader = (req): boolean => {
   return Boolean(current) && typeof provided === 'string' && provided === current
 }
 
-const _isTapRequest = (req, namespace: string): boolean => {
+const _isTapRequest = (req): boolean => {
   const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
   return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
-    (trimmedUrl.startsWith(`/${namespace}/graphql/`) && _hasValidSessionIdHeader(req))
+    (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && _hasValidSessionIdHeader(req))
 }
 
 // `isNativeBrowserNetwork`: on that path the browser intercepts its own
@@ -110,7 +115,7 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
   ]
 
   const isAllowedProxyBypass = (trimmedUrl: string, req) => {
-    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || _isTapRequest(req, namespace)
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || _isTapRequest(req)
   }
 
   // normalize clientRoute to help with comparison
@@ -595,7 +600,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(this.useMorgan(namespace))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -607,9 +612,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return app
   }
 
-  useMorgan (namespace = '__cypress') {
+  useMorgan () {
     return require('morgan')('dev', {
-      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req, namespace),
+      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req),
     })
   }
 

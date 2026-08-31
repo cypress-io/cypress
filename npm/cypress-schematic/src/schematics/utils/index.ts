@@ -1,9 +1,10 @@
 import { readdirSync } from 'fs'
 import { resolve } from 'path'
 import { getSystemPath, normalize, strings } from '@angular-devkit/core'
-import { Tree, apply, url, applyTemplates, move, Rule } from '@angular-devkit/schematics'
+import type { Tree, Rule } from '@angular-devkit/schematics'
+import { apply, url, applyTemplates, move } from '@angular-devkit/schematics'
 import { get } from 'https'
-import { Schema } from '../ng-generate/cypress-test/schema'
+import type { Schema } from '../ng-generate/cypress-test/schema'
 
 import { JSONFile } from './jsonFile'
 

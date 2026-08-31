@@ -1,12 +1,12 @@
 import httpProxy from 'http-proxy'
 import Debug from 'debug'
-import { ErrorRequestHandler, Request, Router } from 'express'
+import type { ErrorRequestHandler, Request } from 'express'
+import { Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import { domainPropsToHostname, toFileServerUrl } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
-import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
@@ -23,7 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
-import { SESSIONS_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -240,6 +240,9 @@ export const createCommonRoutes = ({
         userId: ctx.coreData.user?.id ?? null,
       })
     })
+
+    // The tap CLI's mount; the app reaches GraphQL under `namespace` below.
+    router.use(`${TAP_GRAPHQL_ROUTE_PREFIX}*`, graphQLHTTP)
   }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -262,10 +265,6 @@ export const createCommonRoutes = ({
 
   router.get(`/${namespace}/runner/*`, (req, res) => {
     runner.handle(req, res)
-  })
-
-  router.all(`/${namespace}/xhrs/*`, (req, res, next) => {
-    xhrs.handle(req, res, config, next)
   })
 
   router.get(`/${namespace}/iframes/*`, async (req, res) => {

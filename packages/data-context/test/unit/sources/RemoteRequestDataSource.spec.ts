@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
 import crypto from 'crypto'
 
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { RemoteRequestDataSource } from '../../../src/sources'
 import { createTestDataContext } from '../helper'
 

@@ -1,8 +1,9 @@
-import { ChildProcess,
-  ChildProcessWithoutNullStreams,
-  exec, ExecOptions,
-  fork, ForkOptions,
-  spawn, SpawnOptions,
+import type { ChildProcess,
+  ChildProcessWithoutNullStreams, ExecOptions, ForkOptions, SpawnOptions } from 'child_process'
+import {
+  exec,
+  fork,
+  spawn,
 } from 'child_process'
 import through2 from 'through2'
 import util from 'util'

@@ -714,10 +714,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/cloud`
   },
-  // TODO: make this relative path, not absolute
-  NO_PROJECT_ID: (configFilePath: string) => {
-    return errTemplate`Can't find ${fmt.highlight(`projectId`)} in the config file: ${fmt.path(configFilePath || '')}`
-  },
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
     return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
   },
@@ -1391,6 +1387,17 @@ export const AllCypressErrors = {
       You can safely remove ${fmt.highlight('allowCypressEnv')} from your configuration.
 
       Learn more: https://on.cypress.io/cypress-env-migration
+    `
+  },
+  EXEC_TIMEOUT_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('execTimeout')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}.
+
+      ${fmt.highlight('cy.exec()')} has been removed. Replace ${fmt.highlight('cy.exec()')} calls with ${fmt.highlight('cy.task()')}, and use ${fmt.highlight('taskTimeout')} to configure how long those tasks may run.
+
+      You can safely remove ${fmt.highlight('execTimeout')} from your configuration.
+
+      Learn more: https://on.cypress.io/task
     `
   },
   FORCE_HTTP1_DEPRECATION: () => {

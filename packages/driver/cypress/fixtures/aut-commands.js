@@ -37,9 +37,6 @@
 
   const run = () => {
     switch (command) {
-      case 'exec':
-        cy.exec('echo "Goodbye"')
-        break
       case 'readFile':
         cy.readFile('cypress/fixtures/example.json')
         break

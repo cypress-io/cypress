@@ -13,7 +13,8 @@ import _ from 'lodash'
 import $dom from '../dom'
 import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
-import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
+import type { StackAndCodeFrameIndex } from './stack_utils'
+import $stackUtils from './stack_utils'
 import $utils from './utils'
 import type { HandlerType } from './runner'
 
@@ -734,24 +735,6 @@ const toLoggableError = (maybeError: unknown): LoggableError => {
   }
 }
 
-const getUnsupportedPlugin = (runnable) => {
-  if (!(runnable.invocationDetails && runnable.invocationDetails.originalFile && runnable.err && runnable.err.message)) {
-    return null
-  }
-
-  const pluginsErrors = {
-    '@cypress/code-coverage': 'glob pattern string required',
-  }
-
-  const unsupportedPluginFound = Object.keys(pluginsErrors).find((plugin) => runnable.invocationDetails.originalFile.includes(plugin))
-
-  if (unsupportedPluginFound && pluginsErrors[unsupportedPluginFound] && runnable.err.message.includes(pluginsErrors[unsupportedPluginFound])) {
-    return unsupportedPluginFound
-  }
-
-  return null
-}
-
 const extendErrorMessages = (errorMessages: any) => {
   allErrorMessages = {
     ...allErrorMessages,
@@ -768,7 +751,6 @@ export default {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
-  getUnsupportedPlugin,
   getUserInvocationStack,
   isAssertionErr,
   isChaiValidationErr,

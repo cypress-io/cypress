@@ -1,7 +1,9 @@
 import _ from 'lodash'
 
-import {
+import type {
   CyHttpMessages,
+} from '@packages/network-interception'
+import {
   SERIALIZABLE_RES_PROPS,
 } from '@packages/network-interception'
 import {

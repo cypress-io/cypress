@@ -128,6 +128,10 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   })
 }
 
+// Notices printed when a teardown step, or the whole teardown, outruns its budget. A fresh regex per
+// call so the `g` flag's lastIndex is never shared between callers.
+export const teardownBudgetNoticeRe = () => /^(?:Failed to gracefully exit after|The ".*" teardown step did not finish within).*\n?/gm
+
 export const normalizeStdout = function (str: string, options: any = {}) {
   const { normalizeStdoutAvailableBrowsers } = options
 
@@ -185,6 +189,10 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Teardown exceeding its budget is a property of the machine, not the run, so these lines come
+  // and go with CI load. The exit code the harness asserts is what matters here. `system-tests.ts`
+  // tallies them so the trend stays visible without being able to fail a snapshot.
+  .replace(teardownBudgetNoticeRe(), '')
   // Strip the Electron deprecation warning so run-mode snapshots don't need to capture it
   .replace(electronDeprecationWarningRe, '')
   // Strip the forceHttp1 deprecation warning so run-mode snapshots don't need to capture it

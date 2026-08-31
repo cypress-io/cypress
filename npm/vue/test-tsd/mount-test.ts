@@ -1,5 +1,6 @@
 import { expectType } from './index'
-import { mount, VueTestUtils } from '../dist'
+import type { VueTestUtils } from '../dist'
+import { mount } from '../dist'
 import * as VTU from '@vue/test-utils'
 import { defineComponent } from 'vue'
 

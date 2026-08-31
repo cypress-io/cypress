@@ -7,7 +7,8 @@ import { cypressSessions } from '../cypress-sessions'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, isDeprecatedBrowser } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, isDeprecatedBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
@@ -25,6 +26,7 @@ interface KillOptions {
   nullOut?: boolean
   unbind?: boolean
   isOrphanedBrowserProcess?: boolean
+  timeoutMs?: number
 }
 
 const kill = (options: KillOptions = {}) => {
@@ -49,7 +51,11 @@ const kill = (options: KillOptions = {}) => {
   }
 
   return new Promise<void>((resolve) => {
+    let timer: NodeJS.Timeout | undefined
+
     instanceToKill.once('exit', () => {
+      clearTimeout(timer)
+
       if (options.unbind) {
         instanceToKill.removeAllListeners()
       }
@@ -58,6 +64,15 @@ const kill = (options: KillOptions = {}) => {
 
       resolve()
     })
+
+    if (options.timeoutMs != null) {
+      // Stop waiting, but leave the listeners attached: the process is still alive, so its later
+      // `exit` and `error` events still need somewhere to go.
+      timer = setTimeout(() => {
+        debug('browser process did not exit within %dms, leaving the rest to the OS', options.timeoutMs)
+        resolve()
+      }, options.timeoutMs)
+    }
 
     debug('killing browser process')
 

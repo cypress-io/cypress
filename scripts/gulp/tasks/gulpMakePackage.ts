@@ -102,7 +102,6 @@ export async function makePackage () {
             'noImplicitAny': true,
             'resolveJsonModule': true,
             'noUncheckedIndexedAccess': true,
-            'importsNotUsedAsValues': 'error',
             'types': [],
           },
         },

@@ -47,7 +47,7 @@ const PORT = 12345
 describe('app/background', () => {
   let httpSrv: http.Server
   let server: http.Server
-  let connectWrapper: (options?: Record<string, unknown>) => Promise<SocketShape>
+  let connectWrapper: () => Promise<SocketShape>
 
   beforeEach(async () => {
     vi.resetAllMocks()
@@ -69,12 +69,12 @@ describe('app/background', () => {
 
     browser.runtime.getBrowserInfo = vi.fn().mockResolvedValue({ name: 'Firefox' })
 
-    connectWrapper = async (options = {}) => {
+    connectWrapper = async () => {
       const ws = automation.connect(`http://localhost:${PORT}`, '/__socket.io')
 
       // skip 'connect' and 'automation:client:connected' and trigger
       // the handler that kicks everything off
-      ws.emit('automation:config', options)
+      ws.emit('automation:config')
 
       await new Promise<void>((resolve) => setTimeout(resolve, 1))
 

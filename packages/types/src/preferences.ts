@@ -32,6 +32,10 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'reporterWidth',
   'specListWidth',
   'studioWidth',
+  // Written by Cypress 9 / early 10 and never pruned from state.json. They have
+  // no reader left, but `setPreferences` read-merges the whole on-disk state
+  // back through `normalizeAndAllowSet`, so dropping them here would warn on
+  // every preference save for anyone still carrying them.
   'showedNewProjectBanner',
   'firstOpenedCypress',
   'showedStudioModal',

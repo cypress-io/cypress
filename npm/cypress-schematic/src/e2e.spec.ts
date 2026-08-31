@@ -1,5 +1,6 @@
 import { describe, it } from 'vitest'
-import Fixtures, { ProjectFixtureDir } from '@tooling/system-tests'
+import type { ProjectFixtureDir } from '@tooling/system-tests'
+import Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import execa from 'execa'
 import path from 'path'
