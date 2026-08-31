@@ -673,6 +673,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   ) {
     const config = this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config']
 
+    // Once per runtime — one per spec/tab — so a worker that escapes on every
+    // navigation warns once instead of flooding stdout. Every escape is still
+    // visible under DEBUG=cypress:server:browsers:interception-escape-detector.
+    let warnedInterceptionEscape = false
+
     const runtime = createCdpFetchRuntime({
       client,
       isAUTFrame,
@@ -689,6 +694,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         throw new Error('getCurrentBrowser is not available')
       }),
       netStubbingState: this.netStubbingState,
+      onInterceptionEscape: ({ url }) => {
+        if (warnedInterceptionEscape) {
+          return
+        }
+
+        warnedInterceptionEscape = true
+        errors.warning('BROWSER_NETWORK_INTERCEPTION_ESCAPE', url)
+      },
     })
 
     // Publishing the mode here — rather than in setNetworkMode — is what keeps
