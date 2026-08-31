@@ -223,19 +223,24 @@ export class BrowserCriClient {
    */
   waitForChildTargetInterception?: (targetId: string) => Promise<void>
   /**
-   * Set alongside waitForChildTargetInterception, on the same launch path.
-   * The two connections' Inspector.targetReloadedAfterCrash handlers arrive
-   * on independent websockets - nothing orders which one this browser
-   * connection's crash handler sees relative to the page connection's own.
-   * Called immediately before the crash-reload hold only — a fresh attach
-   * needs no invalidation, and invalidating there would wipe a confirmation
-   * the page connection may already have committed for that same attach.
-   * This deterministically invalidates the page connection's view of the
-   * target as handled, so the hold can never read a stale confirmation left
-   * over from before the crash and release on a false positive - worst case
-   * it just fails open at the timeout instead (#34674).
+   * Set alongside waitForChildTargetInterception, on the same launch path -
+   * used for the crash-reload hold instead of it. A fresh attach's hold can
+   * simply wait on the page connection's existing confirmation
+   * (waitForChildTargetInterception), because nothing has invalidated it
+   * yet. A crash-reload hold cannot: there is no way to tell, from a stale
+   * "confirmed" flag alone, whether it predates the crash or already
+   * accounts for it - the two connections' Inspector.targetReloadedAfterCrash
+   * handlers arrive on independent websockets, with no ordering between
+   * them and no shared counter that can't itself skew. So the crash-reload
+   * hold asks the page connection to re-enable interception outright and
+   * waits on THAT call instead: the returned promise can only settle from a
+   * re-run that starts after this is invoked, so it can never be satisfied
+   * by a confirmation - fresh or stale - that predates the crash. Race
+   * against a timeout either way; a rejection (unknown target, or the hook
+   * itself failing) releases immediately, same as a wait that never
+   * resolves eventually does (#34674).
    */
-  invalidateChildTargetInterception?: (targetId: string) => void
+  reenableChildTargetInterception?: (targetId: string) => Promise<void>
   /**
    * sessionId -> the target's full TargetInfo, captured in _onAttachToTarget
    * (the only place a TargetInfo is available) and evicted on
@@ -373,18 +378,18 @@ export class BrowserCriClient {
           debug('crash-release-skipped: session %s is a %s target (not a service worker), releasing immediately', sessionId, targetInfo.type)
         } else if (targetInfo.url.includes('chrome-extension://')) {
           debug('crash-release-skipped-extension: session %s is the extension service worker %s, releasing immediately', sessionId, targetInfo.targetId)
-        } else if (!browserCriClient.waitForChildTargetInterception) {
-          debug('crash-release-no-waiter: session %s is service worker %s but no interception waiter is registered, releasing immediately', sessionId, targetInfo.targetId)
+        } else if (!browserCriClient.reenableChildTargetInterception) {
+          debug('crash-release-no-reenable: session %s is service worker %s but no re-enable hook is registered, releasing immediately', sessionId, targetInfo.targetId)
         } else {
-          debug('crash-release-held: session %s (service worker %s) holding for confirmed interception coverage before release', sessionId, targetInfo.targetId)
+          debug('crash-release-held: session %s (service worker %s) holding for re-enabled interception before release', sessionId, targetInfo.targetId)
 
-          // Deterministic, not a race against the page connection's own
-          // Inspector.targetReloadedAfterCrash handler: without this, the
-          // hold below could read a "handled" entry left over from before
-          // the crash and release on a false confirmation (#34674).
-          browserCriClient.invalidateChildTargetInterception?.(targetInfo.targetId)
+          // See reenableChildTargetInterception's doc comment for why this
+          // is asked to re-run interception rather than merely awaited for
+          // a confirmation that may already be stale, or already fresh, by
+          // the time this runs (#34674).
+          const targetId = targetInfo.targetId
 
-          await this._holdForChildTargetInterception(browserCriClient, { targetId: targetInfo.targetId, timeoutMs: childTargetInterceptionTimeoutMs })
+          await this._holdForChildTargetInterception(targetId, childTargetInterceptionTimeoutMs, () => browserCriClient.reenableChildTargetInterception!(targetId))
         }
       } catch (error) {
         debug('error deciding whether to hold session %s for interception coverage: %s', sessionId, error)
@@ -401,36 +406,38 @@ export class BrowserCriClient {
     await Promise.all(promises)
   }
 
-  // Races waitForChildTargetInterception against timeoutMs and returns either
-  // way; the caller is what actually releases the target - see
-  // waitForChildTargetInterception's doc comment for the full timeline (#34674).
-  private static async _holdForChildTargetInterception (browserCriClient: BrowserCriClient, { targetId, timeoutMs }: { targetId: string, timeoutMs: number }): Promise<void> {
-    if (!browserCriClient.waitForChildTargetInterception) {
-      return
-    }
-
+  // Races getOutcome() against timeoutMs and returns either way; the caller
+  // is what actually releases the target. Shared by both hold sites - a
+  // fresh attach races waitForChildTargetInterception (waiting on a
+  // confirmation nothing has had reason to invalidate yet), a crash-reload
+  // races reenableChildTargetInterception (asking for a fresh one outright,
+  // since a stale confirmation can't be told apart from a current one - see
+  // that field's doc comment). Callers check their respective field is set
+  // before calling; this only knows how to race and log, not what it's
+  // racing.
+  private static async _holdForChildTargetInterception (targetId: string, timeoutMs: number, getOutcome: () => Promise<unknown>): Promise<void> {
     const timedOut = Symbol('childTargetInterceptionTimedOut')
     let timeoutHandle: NodeJS.Timeout | undefined
     const startedAt = Date.now()
 
     try {
       const outcome = await Promise.race([
-        browserCriClient.waitForChildTargetInterception(targetId),
+        getOutcome(),
         new Promise((resolve) => {
           timeoutHandle = setTimeout(() => resolve(timedOut), timeoutMs)
         }),
       ])
 
       if (outcome === timedOut) {
-        debug('released-after-timeout: service worker %s released without confirmed interception coverage after %dms', targetId, timeoutMs)
+        debug('released-after-timeout: service worker %s released without interception coverage after %dms', targetId, timeoutMs)
       } else {
-        debug('held-until-confirmed: service worker %s released after confirmed interception coverage (%dms elapsed)', targetId, Date.now() - startedAt)
+        debug('held-until-covered: service worker %s released after interception coverage (%dms elapsed)', targetId, Date.now() - startedAt)
       }
     } catch (error) {
-      debug('service worker %s released without confirmed interception coverage: wait rejected: %s', targetId, error)
+      debug('service worker %s released without interception coverage: hold rejected: %s', targetId, error)
     } finally {
       // The winning side of the race leaves the other timer/promise
-      // outstanding - clear it so a won-by-confirmation race doesn't leave a
+      // outstanding - clear it so a won-by-coverage race doesn't leave a
       // live timer for the full timeout duration.
       if (timeoutHandle) {
         clearTimeout(timeoutHandle)
@@ -555,7 +562,7 @@ export class BrowserCriClient {
         // extension's own automation.
         debug('skipped-extension: service worker %s is the extension service worker, releasing without a hold', targetId)
       } else if (targetInfo.type === 'service_worker' && browserCriClient.waitForChildTargetInterception) {
-        await this._holdForChildTargetInterception(browserCriClient, { targetId, timeoutMs: childTargetInterceptionTimeoutMs })
+        await this._holdForChildTargetInterception(targetId, childTargetInterceptionTimeoutMs, () => browserCriClient.waitForChildTargetInterception!(targetId))
       }
 
       // in these cases, we don't want to track the targets as extras.

@@ -533,6 +533,50 @@ describe('lib/browsers/cri-client', function () {
         expect(resolved).to.be.true
       })
 
+      // A detach event is not guaranteed to arrive before a reused targetId's
+      // next attach - _onChildTargetDetached already evicts on an observed
+      // detach, but the plain attach path must not depend on that having
+      // happened: it needs to evict the stale entry itself, symmetric with
+      // the crash-reload re-arm (which already does this before it re-runs
+      // the hook).
+      it('does not resolve off a stale handled entry when a targetId re-attaches without an observed detach', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+
+        // no detach observed in between - a new instance simply attaches
+        // under the same targetId
+        const enabled = Promise.withResolvers<void>()
+
+        client.onChildTargetAttached = sinon.stub().returns(enabled.promise)
+
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+
+        enabled.resolve()
+        await drain()
+
+        expect(resolved).to.be.true
+      })
+
       it('does not retain a stale "handled" entry for a target that detached without re-attaching', async () => {
         fireCDPEvent('Target.attachedToTarget', {
           waitingForDebugger: false,
@@ -636,16 +680,16 @@ describe('lib/browsers/cri-client', function () {
       })
     })
 
-    // The browser connection's crash handler and this connection's own
-    // Inspector.targetReloadedAfterCrash handler race on independent
-    // websockets - nothing orders which one the browser sees first. Without
-    // this, the browser connection's hold can read a stale "handled" entry
-    // this connection hasn't evicted yet and release the worker on a false
-    // confirmation (#34674). invalidateChildTargetHandled lets the browser
-    // connection invalidate deterministically before it holds, rather than
-    // depending on this connection's own crash-reload handler winning the race.
-    describe('#invalidateChildTargetHandled', () => {
+    // The browser connection's crash-reload hold calls this directly instead
+    // of reading whatever this connection's own crash handler happened to
+    // commit (#34674). Because the returned promise can only settle from a
+    // re-run that STARTS after this is called, it can never be satisfied by
+    // a confirmation that predates the call - no counter, generation, or
+    // snapshot needed to tell them apart, in any ordering between this
+    // connection's own crash-reload handling and the caller's.
+    describe('#reenableChildTargetInterception', () => {
       const targetId = 'target-id'
+      const sessionId = 'sw-session'
       let client: CriClient
 
       const drain = () => new Promise((resolve) => setImmediate(resolve))
@@ -655,18 +699,31 @@ describe('lib/browsers/cri-client', function () {
         criStub.send.resolves()
       })
 
-      it('removes a confirmed target from the handled set, so a fresh whenChildTargetHandled call waits again', async () => {
+      const attachServiceWorker = async () => {
+        client.onChildTargetAttached = sinon.stub().resolves()
+
         fireCDPEvent('Target.attachedToTarget', {
-          waitingForDebugger: false,
-          targetInfo: { type: 'page', targetId } as Protocol.Target.TargetInfo,
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
         })
 
         await drain()
+      }
+
+      it('evicts the stale handled entry, re-runs the hook against the session on file, and commits on success', async () => {
+        await attachServiceWorker()
 
         await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
 
-        client.invalidateChildTargetHandled(targetId)
+        const reEnabled = Promise.withResolvers<void>()
 
+        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+
+        const reenabled = client.reenableChildTargetInterception(targetId)
+
+        // evicted synchronously - a waiter registered right after the call
+        // stays pending, not resolved off the stale pre-call entry
         let resolved = false
 
         client.whenChildTargetHandled(targetId).then(() => {
@@ -676,36 +733,227 @@ describe('lib/browsers/cri-client', function () {
         await drain()
 
         expect(resolved).to.be.false
-      })
+        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
 
-      it('does not resolve or evict an already-registered waiter', async () => {
-        let resolved = false
+        reEnabled.resolve()
 
-        client.whenChildTargetHandled(targetId).then(() => {
-          resolved = true
-        })
-
-        client.invalidateChildTargetHandled(targetId)
-
-        await drain()
-
-        expect(resolved).to.be.false
-
-        // the pre-registered waiter is still intact - a subsequent commit
-        // for the same targetId resolves it, same as if invalidate had
-        // never been called
-        fireCDPEvent('Target.attachedToTarget', {
-          waitingForDebugger: false,
-          targetInfo: { type: 'page', targetId } as Protocol.Target.TargetInfo,
-        })
-
+        await expect(reenabled).to.be.fulfilled
         await drain()
 
         expect(resolved).to.be.true
       })
 
-      it('is a no-op for a target that was never handled', () => {
-        expect(() => client.invalidateChildTargetHandled(targetId)).not.to.throw()
+      // A target that has never been seen at all (no session, no handled
+      // entry) has nothing stale to confuse a wait with - a crash event can
+      // race ahead of the initial Target.attachedToTarget event actually
+      // being processed by this connection yet, so this behaves like the
+      // fresh-attach hold: wait, and let the caller's own timeout cover it.
+      it('waits via whenChildTargetHandled for a target that has never been seen', async () => {
+        // a hook must be registered, or the earlier no-hook check would
+        // reject before ever reaching the never-seen-target branch below
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        let resolved = false
+        let rejected = false
+
+        client.reenableChildTargetInterception('never-seen-target').then(
+          () => {
+            resolved = true
+          },
+          () => {
+            rejected = true
+          },
+        )
+
+        await drain()
+
+        expect(resolved).to.be.false
+        expect(rejected).to.be.false
+
+        // a concurrent attach for that same targetId eventually commits
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: false,
+          targetInfo: { type: 'page', targetId: 'never-seen-target' } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        expect(resolved).to.be.true
+        expect(rejected).to.be.false
+      })
+
+      // Unlike a never-seen target, a stale handled entry means this target
+      // WAS confirmed before - waiting here would resolve immediately off
+      // that stale entry and hand the caller a false confirmation for a
+      // target whose session has since gone away.
+      it('rejects when the target has no session on file but still has a stale handled entry', async () => {
+        await attachServiceWorker()
+
+        await expect(client.whenChildTargetHandled(targetId)).to.be.fulfilled
+
+        // a late detach carrying only the session (no targetId) evicts
+        // _targetSessions but leaves the stale handled entry behind
+        fireCDPEvent('Target.detachedFromTarget', { sessionId })
+
+        await drain()
+
+        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+      })
+
+      it('rejects when no interception hook is registered', async () => {
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+      })
+
+      it('rejects when the hook rejects, and does not mark the target handled', async () => {
+        await attachServiceWorker()
+
+        client.onChildTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+
+        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
+      })
+
+      it('rejects once the connection has closed', async () => {
+        await attachServiceWorker()
+
+        await client.close()
+
+        await expect(client.reenableChildTargetInterception(targetId)).to.be.rejected
+      })
+
+      // The exact missed-detach scenario the fresh-attach eviction (item 1)
+      // exists for: a re-attach under a new session preceded the old
+      // session's late detach. That late detach must only evict
+      // _targetSessions if it still points at the detaching session -
+      // otherwise it wipes the LIVE mapping to the new session, and a later
+      // re-enable finds no session on file at all.
+      it('keeps the live session mapping when a late detach arrives for a session superseded under the same targetId', async () => {
+        const sessionOne = 'sw-session-1'
+        const sessionTwo = 'sw-session-2'
+
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        // S1 attaches under targetId
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId: sessionOne,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        // S2 re-attaches under the SAME targetId before S1's own detach arrives
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId: sessionTwo,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        // S1's detach arrives late, after S2 has already taken over targetId -
+        // no targetId on this event (documented deprecated, can be absent),
+        // so only the session-keyed eviction branch runs
+        fireCDPEvent('Target.detachedFromTarget', { sessionId: sessionOne })
+
+        await drain()
+
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        await expect(client.reenableChildTargetInterception(targetId)).to.be.fulfilled
+
+        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionTwo)
+      })
+
+      // Same scenario, but the late detach DOES carry a targetId - the
+      // common case in practice (Chromium still populates the deprecated
+      // field). The targetId-keyed branch must not clobber the live S2
+      // mapping the session-keyed branch just protected.
+      it('keeps the live session mapping when a late, targetId-carrying detach arrives for a session superseded under the same targetId', async () => {
+        const sessionOne = 'sw-session-1'
+        const sessionTwo = 'sw-session-2'
+
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        // S1 attaches under targetId
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId: sessionOne,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        // S2 re-attaches under the SAME targetId before S1's own detach arrives
+        fireCDPEvent('Target.attachedToTarget', {
+          waitingForDebugger: true,
+          sessionId: sessionTwo,
+          targetInfo: { type: 'service_worker', targetId } as Protocol.Target.TargetInfo,
+        })
+
+        await drain()
+
+        // S1's detach arrives late, carrying targetId this time
+        fireCDPEvent('Target.detachedFromTarget', { sessionId: sessionOne, targetId })
+
+        await drain()
+
+        client.onChildTargetAttached = sinon.stub().resolves()
+
+        await expect(client.reenableChildTargetInterception(targetId)).to.be.fulfilled
+
+        expect(client.onChildTargetAttached).to.have.been.calledOnceWith(sessionTwo)
+      })
+
+      // A detach arriving while the re-run is suspended mid-flight
+      // invalidates its token the same way it would for a fresh attach or
+      // crash re-arm - the resumed commit becomes a no-op rather than
+      // marking a detached target handled, even though the hook itself
+      // still resolved (so reenableChildTargetInterception's own promise
+      // still fulfills - the caller asked for interception, and it did run).
+      it('does not mark the target handled if it detaches while the re-run is in flight', async () => {
+        await attachServiceWorker()
+
+        const reEnabled = Promise.withResolvers<void>()
+
+        client.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
+
+        const reenabled = client.reenableChildTargetInterception(targetId)
+
+        fireCDPEvent('Target.detachedFromTarget', { sessionId, targetId })
+
+        await drain()
+
+        reEnabled.resolve()
+
+        await expect(reenabled).to.be.fulfilled
+
+        let resolved = false
+
+        client.whenChildTargetHandled(targetId).then(() => {
+          resolved = true
+        })
+
+        await drain()
+
+        expect(resolved).to.be.false
       })
     })
 
@@ -1178,6 +1426,18 @@ describe('lib/browsers/cri-client', function () {
       expect(criStub.send).to.be.calledWith('Fetch.enable', { patterns: [{ requestStage: 'Response' }] }, 'session-a')
 
       await fireDisconnect()
+    })
+
+    // JSON.stringify throws on a circular reference (or a BigInt) - params
+    // built from live CDP objects aren't guaranteed serializable, and a send()
+    // that throws here would break every caller, not just the dedupe logic.
+    it('does not throw when params are not JSON-serializable', async () => {
+      const client = await getClient()
+      const circular: any = { name: 'a' }
+
+      circular.self = circular
+
+      expect(() => client.send('Runtime.addBinding', circular)).not.to.throw()
     })
 
     it('errors if reconnecting fails', async () => {

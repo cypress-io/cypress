@@ -2687,7 +2687,7 @@ describe('http/response-middleware', function () {
       expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined }])
     })
 
-    it('prepends the navigation preload expression when isBrowserNetworkMode is set on ctx', async function () {
+    it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
@@ -2695,7 +2695,7 @@ describe('http/response-middleware', function () {
             'service-worker': 'script',
           },
         },
-        isBrowserNetworkMode: true,
+        useBrowserNetworkInterception: true,
       })
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
@@ -2706,7 +2706,7 @@ describe('http/response-middleware', function () {
       expect(rewritten).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
     })
 
-    it('does not prepend the navigation preload expression when isBrowserNetworkMode is unset on ctx', async function () {
+    it('does not prepend the navigation preload expression when useBrowserNetworkInterception is unset on ctx', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',

@@ -440,12 +440,12 @@ describe('http', function () {
   })
 
   describe('createMiddlewareContext', function () {
-    function createHttpWithFlag (isBrowserNetworkMode?: boolean) {
+    function createHttpWithFlag (useBrowserNetworkInterception?: boolean) {
       return new Http({
         config: {} as CyServer.Config,
         middleware: {},
         request: { rp: vi.fn() },
-        ...(isBrowserNetworkMode !== undefined ? { isBrowserNetworkMode } : {}),
+        ...(useBrowserNetworkInterception !== undefined ? { useBrowserNetworkInterception } : {}),
       } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
     }
 
@@ -454,19 +454,19 @@ describe('http', function () {
     }
 
     // Pins the opts -> instance property -> ctx plumbing for
-    // isBrowserNetworkMode (#34652) — MaybeInjectServiceWorker
-    // reads it off the middleware ctx (`this.isBrowserNetworkMode`),
+    // useBrowserNetworkInterception (#34652) — MaybeInjectServiceWorker
+    // reads it off the middleware ctx (`this.useBrowserNetworkInterception`),
     // which only exists if createMiddlewareContext copies it from the Http instance.
-    it('carries isBrowserNetworkMode from the constructor opts onto the ctx', function () {
+    it('carries useBrowserNetworkInterception from the constructor opts onto the ctx', function () {
       const ctx = createCtx(createHttpWithFlag(true))
 
-      expect(ctx.isBrowserNetworkMode).toBe(true)
+      expect(ctx.useBrowserNetworkInterception).toBe(true)
     })
 
-    it('leaves isBrowserNetworkMode undefined on the ctx when omitted from opts', function () {
+    it('leaves useBrowserNetworkInterception undefined on the ctx when omitted from opts', function () {
       const ctx = createCtx(createHttpWithFlag())
 
-      expect(ctx.isBrowserNetworkMode).toBeUndefined()
+      expect(ctx.useBrowserNetworkInterception).toBeUndefined()
     })
   })
 

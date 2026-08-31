@@ -58,7 +58,7 @@ describe('lib/browsers/chrome', () => {
         close: sinon.stub().resolves(),
         on: sinon.stub(),
         whenChildTargetHandled: sinon.stub().resolves(),
-        invalidateChildTargetHandled: sinon.stub(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
       }
 
       this.browserCriClient = {
@@ -182,26 +182,25 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    // #34674: the two connections' Inspector.targetReloadedAfterCrash
-    // handlers race on independent websockets - the browser connection
-    // invalidates its view of a crash-reloaded target deterministically
-    // before it holds, rather than depending on this connection's own
-    // crash-reload handler winning that race.
-    it('wires invalidateChildTargetInterception to the page client on the browser (CDP) network path', function () {
+    // #34674: a crash-reloaded target's confirmation can't be trusted as-is
+    // (no way to tell a stale one from a fresh one), so the browser
+    // connection asks the page connection to re-enable interception outright
+    // instead of merely reading whatever it has on file.
+    it('wires reenableChildTargetInterception to the page client on the browser (CDP) network path', function () {
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
-        expect(this.browserCriClient.invalidateChildTargetInterception).to.be.a('function')
+        expect(this.browserCriClient.reenableChildTargetInterception).to.be.a('function')
 
-        this.browserCriClient.invalidateChildTargetInterception('target-id')
+        this.browserCriClient.reenableChildTargetInterception('target-id')
 
-        expect(this.pageCriClient.invalidateChildTargetHandled).to.have.been.calledWith('target-id')
+        expect(this.pageCriClient.reenableChildTargetInterception).to.have.been.calledWith('target-id')
       })
     })
 
-    it('does not wire invalidateChildTargetInterception on the MITM path', function () {
+    it('does not wire reenableChildTargetInterception on the MITM path', function () {
       return chrome.open({ isHeadless: true }, 'http://', mitmOpts, this.automation)
       .then(() => {
-        expect(this.browserCriClient.invalidateChildTargetInterception).to.be.undefined
+        expect(this.browserCriClient.reenableChildTargetInterception).to.be.undefined
       })
     })
 

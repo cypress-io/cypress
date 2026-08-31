@@ -676,13 +676,101 @@ describe('CdpFetchTransport', () => {
       expect(enableCalls[1].args[1]).to.deep.equal(FETCH_PATTERNS)
     })
 
-    it('does not enable a service worker session before the transport has started', async () => {
+    // The caller (CriClient) wires onChildTargetAttached before awaiting
+    // transport.start() (network-runtime.ts), so a service worker/iframe
+    // attach can land in that window. Resolving here instead of rejecting
+    // would let the caller commit a confirmation with no Fetch.enable behind
+    // it - the caller already treats a rejected hook as no-commit, so
+    // rejecting is what actually surfaces this as a failure rather than a
+    // silent, unearned success.
+    it('rejects, without enabling Fetch, when attached before the transport has started', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
 
-      await transport.attachChildSession('sw-session')
+      await expect(transport.attachChildSession('sw-session')).to.be.rejected
 
       expect(client.send).not.to.have.been.calledWith('Fetch.enable')
+    })
+
+    // The window above isn't the only shape this race takes: start() can
+    // already be running (not merely never begun) when the attach lands.
+    // Rejecting outright here would treat that window as a hard failure when
+    // it's really just early - awaiting the in-flight start instead lets the
+    // attach succeed once it resolves.
+    it('awaits an in-flight start() before enabling Fetch on a child session', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      const ownEnable = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+
+      const starting = transport.start()
+      const attaching = transport.attachChildSession('sw-session')
+
+      await tick()
+
+      // start() hasn't resolved yet - the child session's own enable must
+      // not jump ahead of it
+      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+
+      ownEnable.resolve({})
+
+      await starting
+      await attaching
+
+      expect(client.send).to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+    })
+
+    it('rejects an attach that was waiting on an in-flight start() that then fails', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      const ownEnable = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+
+      const starting = transport.start()
+      const attaching = transport.attachChildSession('sw-session')
+
+      await tick()
+
+      ownEnable.reject(new Error('ProtocolError: Inspected target closed'))
+
+      await expect(starting).to.be.rejected
+      await expect(attaching).to.be.rejected
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
+    })
+
+    // stop() checks isStarted, which start() already flipped true before its
+    // own enable resolves - so stop() can run and tear the transport back
+    // down while an attach is still parked awaiting that same start. Without
+    // re-checking isStarted after the wait, the parked attach would fall
+    // through to enableFetch on a transport with no request-pause handlers
+    // registered - a session that pauses requests forever.
+    it('rejects a parked attach when stop() runs while its awaited start is still in flight', async () => {
+      const client = createClient()
+      const { transport } = createTransport(client)
+
+      const ownEnable = Promise.withResolvers<any>()
+
+      client.send.withArgs('Fetch.enable', sinon.match.any, undefined).returns(ownEnable.promise)
+
+      const starting = transport.start()
+      const attaching = transport.attachChildSession('sw-session')
+
+      await tick()
+
+      await transport.stop()
+
+      ownEnable.resolve({})
+
+      await starting
+
+      await expect(attaching).to.be.rejected
+
+      expect(client.send).not.to.have.been.calledWith('Fetch.enable', sinon.match.any, 'sw-session')
     })
 
     it('rejects when a service worker session cannot be enabled so the caller can report it', async () => {

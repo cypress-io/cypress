@@ -178,6 +178,12 @@ export class CdpFetchTransport {
 
   private isStarted = false
 
+  // Set for the duration of an in-flight start(), cleared once it settles
+  // either way. attachChildSession awaits this instead of rejecting outright
+  // when a child session attaches in the window before start() resolves -
+  // see attachChildSession's own comment for why that window is real.
+  private startPromise?: Promise<void>
+
   constructor (
     private readonly client: CdpFetchClient,
     private readonly httpIntercept: ForHttpIntercept<CdpFetchTransportRequest, CdpFetchTransportResponse> = new HttpIntercept(createCdpFetchCodec()),
@@ -241,13 +247,19 @@ export class CdpFetchTransport {
     // Set-Cookie never appears on Fetch response pauses — the raw cookie
     // headers only arrive on the Network extraInfo events tracked here.
     this.networkExtraInfo.start()
+    // Set ahead of the own-session enable below settling, not after - the
+    // listeners just registered are live regardless, and this also lets a
+    // reentrant start() call above bail out immediately rather than kick off
+    // a second attempt. attachChildSession accounts for this by checking
+    // startPromise first: this being true does not by itself mean the
+    // transport's own Fetch.enable has resolved yet.
     this.isStarted = true
 
-    try {
-      await this.enableFetch()
-
+    const startPromise = this.enableFetch()
+    .then(() => {
       debug('CDP Fetch transport started')
-    } catch (err) {
+    })
+    .catch((err) => {
       this.client.off('Fetch.requestPaused', this.interceptRequest)
       this.client.off('Fetch.requestPaused', this.resolveResponse)
       this.client.off('Network.loadingFailed', this.onLoadingFailed)
@@ -255,6 +267,19 @@ export class CdpFetchTransport {
       this.isStarted = false
 
       throw err
+    })
+
+    // Recorded so attachChildSession can await this exact attempt, then
+    // cleared regardless of outcome - once settled, isStarted alone (true or
+    // still false) is what future callers should key off of.
+    this.startPromise = startPromise
+
+    try {
+      await startPromise
+    } finally {
+      if (this.startPromise === startPromise) {
+        this.startPromise = undefined
+      }
     }
   }
 
@@ -274,10 +299,32 @@ export class CdpFetchTransport {
    * connection's job.
    */
   async attachChildSession (sessionId: string): Promise<void> {
-    if (!this.isStarted) {
-      debug('attachChildSession skipped (transport not started)')
+    if (this.startPromise) {
+      // network-runtime.ts assigns CriClient.onChildTargetAttached to call
+      // this before awaiting this transport's own start(), so a service
+      // worker/iframe attach can legitimately land while start() is still
+      // in flight - checked ahead of isStarted below, since start() flips
+      // that to true before its own session's enable actually resolves (see
+      // start()'s own comment). Awaiting the in-flight attempt here, rather
+      // than treating this window as failure, also keeps this child
+      // session's enable from racing ahead of the transport's own.
+      await this.startPromise
+    }
 
-      return
+    // Re-checked rather than an else-if on the branch above: isStarted can
+    // have gone true-then-false-again while this was waiting - stop() reads
+    // isStarted too (already true before the transport's own enable
+    // resolves) and can tear the transport back down mid-wait. Falling
+    // through to enableFetch on a stopped transport would enable a session
+    // with no Fetch.requestPaused handlers registered, pausing its requests
+    // forever.
+    if (!this.isStarted) {
+      // No start was ever begun, the one that was already settled and
+      // failed, or stop() ran while this was waiting on an in-flight start -
+      // either way there is nothing left to wait for.
+      debug('attachChildSession rejected (transport not started): %s', sessionId)
+
+      throw new Error('CDP Fetch transport not started; cannot attach child session')
     }
 
     // Network.enable must never be added here — it does not respond on a
@@ -317,6 +364,10 @@ export class CdpFetchTransport {
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
       this.isStarted = false
+      // A parked attachChildSession call may still be awaiting this - once
+      // it settles, isStarted (now false) is what tells that caller stop()
+      // beat it here, not whatever this promise resolves to.
+      this.startPromise = undefined
       debug('CDP Fetch transport stopped')
     }
   }

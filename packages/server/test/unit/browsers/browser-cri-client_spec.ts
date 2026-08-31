@@ -786,25 +786,29 @@ describe('lib/browsers/browser-cri-client', function () {
     // navigation (and any that follow) with zero pauses, the same escape
     // #34674 closes on the ordinary attach path.
     describe('Inspector.targetReloadedAfterCrash', () => {
-      it('awaits confirmed interception before releasing a crashed, mapped, non-extension service worker', async () => {
+      // See reenableChildTargetInterception's own doc comment for why this
+      // asks for a fresh re-enable rather than merely awaiting whatever
+      // confirmation the page connection already has on file - a stale one
+      // can't be told apart from a fresh one, so nothing here trusts either.
+      it('holds for a re-enabled interception before releasing a crashed, mapped, non-extension service worker', async () => {
         const { browserClient, browserCriClient, crashHandler } = await setup()
         const targetId = 'sw-target-id'
         const sessionId = 'sw-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId, type: 'service_worker', url: 'https://example.test/sw.js' })
 
-        const interceptionConfirmed = Promise.withResolvers<void>()
+        const interceptionReenabled = Promise.withResolvers<void>()
 
-        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(interceptionConfirmed.promise)
+        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(interceptionReenabled.promise)
 
         const released = crashHandler({}, sessionId)
 
         await new Promise((resolve) => setImmediate(resolve))
 
-        expect(browserCriClient.waitForChildTargetInterception).to.have.been.calledWith(targetId)
+        expect(browserCriClient.reenableChildTargetInterception).to.have.been.calledWith(targetId)
         expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
 
-        interceptionConfirmed.resolve()
+        interceptionReenabled.resolve()
         await released
 
         expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
@@ -823,18 +827,18 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'ext-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'ext-target', type: 'service_worker', url: 'chrome-extension://abc123/background.js' })
-        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
 
         await crashHandler({}, sessionId)
 
-        expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(browserCriClient.reenableChildTargetInterception).not.to.have.been.called
         expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
-      // MITM parity: on that path nothing ever sets waitForChildTargetInterception,
+      // MITM parity: on that path nothing ever sets reenableChildTargetInterception,
       // so a mapped, non-extension service worker session must still release
       // immediately rather than hold against a field that will never appear.
-      it('releases immediately for a mapped, non-extension service worker when waitForChildTargetInterception is unset', async () => {
+      it('releases immediately for a mapped, non-extension service worker when reenableChildTargetInterception is unset', async () => {
         const { browserClient, browserCriClient, crashHandler } = await setup()
         const sessionId = 'sw-session'
 
@@ -850,11 +854,11 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'page-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'page-target', type: 'page', url: 'https://example.test/' })
-        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
 
         await crashHandler({}, sessionId)
 
-        expect(browserCriClient.waitForChildTargetInterception).not.to.have.been.called
+        expect(browserCriClient.reenableChildTargetInterception).not.to.have.been.called
         expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
@@ -863,95 +867,23 @@ describe('lib/browsers/browser-cri-client', function () {
         const sessionId = 'sw-session'
 
         browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
-        browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
+        browserCriClient.reenableChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
 
         await crashHandler({}, sessionId)
 
         expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
-      // The page connection's own Inspector.targetReloadedAfterCrash handler
-      // (cri-client.ts) races this one on an independent websocket - nothing
-      // orders which fires first for a given crash. Invalidating here, ahead
-      // of the hold, means the hold can never read a stale "handled" entry
-      // the page connection hasn't gotten around to evicting itself and
-      // release on a false confirmation - the worst case becomes the 4s
-      // fail-open timeout instead of a silent early release (#34674).
-      describe('invalidateChildTargetInterception (#34674)', () => {
-        it('invalidates the page connection\'s view of the target before holding for it', async () => {
-          const { browserCriClient, crashHandler } = await setup()
-          const targetId = 'sw-target-id'
-          const sessionId = 'sw-session'
+      it('releases immediately when the re-enable call rejects', async () => {
+        const { browserClient, browserCriClient, crashHandler } = await setup()
+        const sessionId = 'sw-session'
 
-          browserCriClient.sessionTargetInfo.set(sessionId, { targetId, type: 'service_worker', url: 'https://example.test/sw.js' })
+        browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
+        browserCriClient.reenableChildTargetInterception = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
 
-          const callOrder: string[] = []
+        await crashHandler({}, sessionId)
 
-          browserCriClient.invalidateChildTargetInterception = sinon.stub().callsFake(() => {
-            callOrder.push('invalidate')
-          })
-
-          browserCriClient.waitForChildTargetInterception = sinon.stub().callsFake(() => {
-            callOrder.push('wait')
-
-            return Promise.resolve()
-          })
-
-          await crashHandler({}, sessionId)
-
-          expect(browserCriClient.invalidateChildTargetInterception).to.have.been.calledWith(targetId)
-          expect(callOrder).to.deep.equal(['invalidate', 'wait'])
-        })
-
-        it('does not invalidate when no interception waiter is registered', async () => {
-          const { browserCriClient, crashHandler } = await setup()
-          const sessionId = 'sw-session'
-
-          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
-          browserCriClient.invalidateChildTargetInterception = sinon.stub()
-
-          await crashHandler({}, sessionId)
-
-          expect(browserCriClient.invalidateChildTargetInterception).not.to.have.been.called
-        })
-
-        it('does not invalidate for the extension service worker', async () => {
-          const { browserCriClient, crashHandler } = await setup()
-          const sessionId = 'ext-session'
-
-          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'ext-target', type: 'service_worker', url: 'chrome-extension://abc123/background.js' })
-          browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
-          browserCriClient.invalidateChildTargetInterception = sinon.stub()
-
-          await crashHandler({}, sessionId)
-
-          expect(browserCriClient.invalidateChildTargetInterception).not.to.have.been.called
-        })
-
-        it('does not invalidate a non-service-worker session', async () => {
-          const { browserCriClient, crashHandler } = await setup()
-          const sessionId = 'page-session'
-
-          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'page-target', type: 'page', url: 'https://example.test/' })
-          browserCriClient.waitForChildTargetInterception = sinon.stub().returns(new Promise(() => {}))
-          browserCriClient.invalidateChildTargetInterception = sinon.stub()
-
-          await crashHandler({}, sessionId)
-
-          expect(browserCriClient.invalidateChildTargetInterception).not.to.have.been.called
-        })
-
-        it('does not throw when unset (MITM path parity)', async () => {
-          const { browserClient, browserCriClient, crashHandler } = await setup()
-          const sessionId = 'sw-session'
-
-          browserCriClient.sessionTargetInfo.set(sessionId, { targetId: 'sw-target-id', type: 'service_worker', url: 'https://example.test/sw.js' })
-          browserCriClient.waitForChildTargetInterception = sinon.stub().resolves()
-
-          await crashHandler({}, sessionId)
-
-          expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
-        })
+        expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
     })
   })
@@ -959,8 +891,8 @@ describe('lib/browsers/browser-cri-client', function () {
   context('cross-connection interception hold with a real page CriClient (#34674)', function () {
     // Exercises the hold through an actual page-side CriClient - built the
     // same way cri-client_spec.ts builds one - wired as
-    // waitForChildTargetInterception, rather than a stub standing in for
-    // whatever that confirmation actually requires.
+    // waitForChildTargetInterception and reenableChildTargetInterception,
+    // rather than stubs standing in for what those calls actually require.
     const DEBUGGER_URL = 'http://foo'
     const sessionId = 'sw-session'
     const targetId = 'sw-target-id'
@@ -1022,7 +954,7 @@ describe('lib/browsers/browser-cri-client', function () {
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
         waitForChildTargetInterception: (id: string) => pageClient.whenChildTargetHandled(id),
-        invalidateChildTargetInterception: (id: string) => pageClient.invalidateChildTargetHandled(id),
+        reenableChildTargetInterception: (id: string) => pageClient.reenableChildTargetInterception(id),
       }
 
       browserCriClient.sessionTargetInfo.set(sessionId, { targetId, type: 'service_worker', url: 'https://example.test/sw.js' })
@@ -1042,15 +974,43 @@ describe('lib/browsers/browser-cri-client', function () {
       return { browserClient, crashHandler }
     }
 
-    it('releases the browser connection only after the page connection re-commits interception', async () => {
+    // Case (a): page-first, with the page connection's OWN
+    // Inspector.targetReloadedAfterCrash handling already completed (it
+    // independently re-ran and committed) before the browser connection's
+    // crash handler does anything. The browser connection asks for a fresh
+    // re-enable anyway - re-running Fetch.enable a second time is harmless
+    // - so this resolves quickly rather than waiting out a timeout.
+    it('resolves via re-enable without the timeout when the page connection already completed its own re-arm for this crash', async () => {
+      // a large timeout - if this test finishes quickly, the hold resolved
+      // off the re-enable call, not by waiting out even a sliver of this
+      const { browserClient, crashHandler } = await setupBrowserConnection(1_000_000)
+
+      pageClient.onChildTargetAttached = sinon.stub().resolves()
+
+      // the page connection's own crash-reload handling completes first,
+      // independent of anything the browser connection does
+      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+      await drain()
+
+      await crashHandler({}, sessionId)
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      // once from the page connection's own crash handling, once from the
+      // browser connection's re-enable call
+      expect(pageClient.onChildTargetAttached).to.have.been.calledTwice
+    })
+
+    // Case (b): browser-first - nothing has happened on the page
+    // connection's own crash-reload handling yet. The browser connection's
+    // reenableChildTargetInterception call evicts and re-runs the hook
+    // directly, so the hold resolves once THAT re-run completes.
+    it('resolves once the re-enable hook completes, browser-first', async () => {
       const { browserClient, crashHandler } = await setupBrowserConnection()
 
       const reEnabled = Promise.withResolvers<void>()
 
       pageClient.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
 
-      // both connections observe the same crash-reload
-      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
       const released = crashHandler({}, sessionId)
 
       await drain()
@@ -1063,51 +1023,126 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
-    it('releases via the timeout when the page connection never re-commits', async () => {
-      const { browserClient, crashHandler } = await setupBrowserConnection(5)
+    // Case (c): a second crash triggers its own fresh re-enable and resolves
+    // on that one, not on anything left over from the first.
+    it('triggers a fresh re-enable for a second crash and resolves on that crash\'s own hook', async () => {
+      const { browserClient, crashHandler } = await setupBrowserConnection()
 
-      pageClient.onChildTargetAttached = sinon.stub().returns(new Promise(() => {}))
+      pageClient.onChildTargetAttached = sinon.stub().resolves()
 
-      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
       await crashHandler({}, sessionId)
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      expect(pageClient.onChildTargetAttached).to.have.been.calledOnce
+
+      browserClient.send.resetHistory()
+
+      const secondReEnabled = Promise.withResolvers<void>()
+
+      pageClient.onChildTargetAttached = sinon.stub().returns(secondReEnabled.promise)
+
+      const released = crashHandler({}, sessionId)
+
+      await drain()
+
+      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+      expect(pageClient.onChildTargetAttached).to.have.been.calledOnce
+
+      secondReEnabled.resolve()
+      await released
 
       expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
     })
 
-    // Adverse dispatch order: the two connections' crash handlers arrive on
-    // independent websockets, so nothing guarantees the page connection
-    // evicts its stale "handled" entry before the browser connection's hold
-    // starts. Without invalidateChildTargetInterception wired, the hold
-    // would read that stale entry and release instantly on a false
-    // confirmation - the exact silent-release bug this fix closes.
-    it('does not resolve off a stale handled entry when the browser connection\'s hold starts before the page connection catches up', async () => {
-      // default (4000ms) timeout, not the short value the dedicated timeout
-      // test uses below - this test's assertions must hold because of the
-      // invalidate + re-commit mechanism, not because a short fail-open
-      // timer happened to not fire yet (that would flake on a loaded machine)
+    // Case (d): the page connection's own Inspector.targetReloadedAfterCrash
+    // handler never fires at all for this crash (event missed, or simply
+    // never delivered on that connection) - correctness no longer depends
+    // on it. The browser-driven re-enable covers the target regardless.
+    it('resolves via the browser-driven re-enable even when the page connection never receives its own crash event', async () => {
       const { browserClient, crashHandler } = await setupBrowserConnection()
 
       const reEnabled = Promise.withResolvers<void>()
 
       pageClient.onChildTargetAttached = sinon.stub().returns(reEnabled.promise)
 
-      // adverse order: the browser connection sees the crash (and, per fix
-      // 3, invalidates the page connection's stale entry) before the page
-      // connection's own handler has run at all
+      // firePageCDPEvent('Inspector.targetReloadedAfterCrash', ...) is
+      // deliberately never called here
       const released = crashHandler({}, sessionId)
 
       await drain()
 
+      expect(pageClient.onChildTargetAttached).to.have.been.calledOnceWith(sessionId)
       expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
 
-      // now the page connection catches up and starts its own re-arm
-      firePageCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+      reEnabled.resolve()
+      await released
 
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
+    // Case (e): the re-enable call itself rejects - unknown target, or the
+    // interception hook failing. Fails open immediately, same as any other
+    // wait-rejected path, rather than hanging or waiting out the timeout.
+    it('releases immediately when the re-enable call rejects', async () => {
+      // a large timeout - if this test finishes quickly, the hold resolved
+      // off the rejection, not by waiting out even a sliver of this
+      const { browserClient, crashHandler } = await setupBrowserConnection(1_000_000)
+
+      pageClient.onChildTargetAttached = sinon.stub().rejects(new Error('ProtocolError: Inspected target closed'))
+
+      await crashHandler({}, sessionId)
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
+    it('releases via the timeout when the re-enable hook never resolves', async () => {
+      const { browserClient, crashHandler } = await setupBrowserConnection(5)
+
+      pageClient.onChildTargetAttached = sinon.stub().returns(new Promise(() => {}))
+
+      await crashHandler({}, sessionId)
+
+      expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    })
+
+    // Case (f): #34674's residual window, closed. A hook invocation already
+    // in flight before this crash (a stalled fresh-attach hook, or an
+    // overlapping re-enable from an earlier crash) settling while this
+    // crash's own hold is pending must not be what releases it - each
+    // reenableChildTargetInterception call awaits its OWN hook invocation,
+    // never one that merely happens to settle around the same time.
+    it('does not resolve the crash hold off a stalled hook invocation that predates this crash', async () => {
+      const { browserClient, crashHandler } = await setupBrowserConnection()
+
+      const staleInvocation = Promise.withResolvers<void>()
+      const crashInvocation = Promise.withResolvers<void>()
+
+      const onChildTargetAttached = sinon.stub()
+
+      onChildTargetAttached.onCall(0).returns(staleInvocation.promise)
+      onChildTargetAttached.onCall(1).returns(crashInvocation.promise)
+
+      pageClient.onChildTargetAttached = onChildTargetAttached
+
+      // a hook invocation already stalled before this crash - only its
+      // effect on the crash hold below matters to this test
+      pageClient.reenableChildTargetInterception(targetId).catch(() => {})
+
+      const released = crashHandler({}, sessionId)
+
+      await drain()
+
+      expect(onChildTargetAttached).to.have.been.calledTwice
+      expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
+
+      // resolving the stale, pre-crash invocation must not satisfy this
+      // crash's own hold
+      staleInvocation.resolve()
       await drain()
 
       expect(browserClient.send).not.to.have.been.calledWith('Runtime.runIfWaitingForDebugger')
 
-      reEnabled.resolve()
+      crashInvocation.resolve()
       await released
 
       expect(browserClient.send).to.have.been.calledWith('Runtime.runIfWaitingForDebugger', undefined, sessionId)
