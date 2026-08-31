@@ -250,9 +250,8 @@ describe('Choose a browser page', () => {
 
       cy.visitLaunchpad()
 
-      // `visitLaunchpad` resolves before the browser list has rendered, and the list only
-      // learns about later status changes through the subscription it opens once mounted.
-      // Wait for the closed-browser state to be on screen so the change has a subscriber.
+      // `visitLaunchpad` resolves before the browser list mounts, and the list only learns
+      // about status changes through the subscription it opens on mount.
       cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
 
       cy.withCtx((ctx) => {
