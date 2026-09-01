@@ -10,6 +10,7 @@ import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
 import { cypressSessions } from '../../lib/cypress-sessions'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as fileServer from '../../lib/file_server'
+import * as serverErrors from '../../lib/errors'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { getCtx } from '@packages/data-context'
 import { GracefulExit } from '../../lib/util/graceful-exit'
@@ -736,6 +737,48 @@ describe('lib/server-base', () => {
       expect(client.send).to.have.been.calledWith('Fetch.disable')
       expect(this.server._cdpFetchRuntime).to.be.undefined
       expect(this.server._networkProxy).to.be.undefined
+    })
+
+    // The runner document and an AUT document escape the same way but need
+    // different remedies, so the warning has to tell them apart.
+    context('interception escape warning', () => {
+      async function escape (server, url: string) {
+        const client = createClient()
+
+        await server.createCdpFetchNetworkRuntime(client)
+
+        // the transport listens for this event alongside the escape detector,
+        // so deliver it to every listener the way the connection would
+        client.on.withArgs('Network.responseReceived').getCalls().forEach(({ args: [, listener] }) => {
+          listener({
+            requestId: '1',
+            type: 'Document',
+            response: { url, fromServiceWorker: true },
+          })
+        })
+      }
+
+      beforeEach(function () {
+        sinon.stub(serverErrors, 'warning')
+      })
+
+      it('reports an escaped runner document as one', async function () {
+        await escape(this.server, 'https://example.com/__/#/specs/runner?file=cypress/e2e/spec.cy.js')
+
+        expect(serverErrors.warning).to.have.been.calledOnceWith('BROWSER_NETWORK_INTERCEPTION_ESCAPE', sinon.match.string, true)
+      })
+
+      it('reports an escaped AUT document as one', async function () {
+        await escape(this.server, 'https://example.com/dashboard')
+
+        expect(serverErrors.warning).to.have.been.calledOnceWith('BROWSER_NETWORK_INTERCEPTION_ESCAPE', sinon.match.string, false)
+      })
+
+      it('falls back to the generic variant when the escaped url cannot be parsed', async function () {
+        await escape(this.server, 'http://')
+
+        expect(serverErrors.warning).to.have.been.calledOnceWith('BROWSER_NETWORK_INTERCEPTION_ESCAPE', sinon.match.string, false)
+      })
     })
   })
 

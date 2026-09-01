@@ -696,6 +696,19 @@ export = {
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
 
+      // The runner document is served on the AUT's origin, so a root-scoped
+      // worker the origin registered in an earlier session is entitled to
+      // answer for it — and in a persistent open-mode profile it survives to
+      // do so before interception can attach. The storage types are kept
+      // narrow deliberately: clearing cookies or local storage here would log
+      // that profile out of every site it has visited.
+      if (options.shouldClearPersistedServiceWorkers) {
+        await pageCriClient.send('Storage.clearDataForOrigin', {
+          origin: '*',
+          storageTypes: 'service_workers,cache_storage',
+        })
+      }
+
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
       await this._navigateUsingCRI(pageCriClient, url)

@@ -878,6 +878,73 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
+  describe('#attachListeners', () => {
+    const clearParams = { origin: '*', storageTypes: 'service_workers,cache_storage' }
+
+    function setup (options: object) {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        targetId: '1234',
+        whenChildTargetHandled: sinon.stub().resolves(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      const cdpAutomation = {
+        _listenForFrameTreeChanges: sinon.stub(),
+        _handlePausedRequests: sinon.stub().resolves(),
+        isAUTFrame: sinon.stub().resolves(false),
+        onAUTFrameNavigated: sinon.stub(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient as any)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation as any)
+      sinon.stub(chrome, '_handleDownloads').resolves()
+      sinon.stub(chrome, '_navigateUsingCRI').resolves()
+      sinon.stub(utils, 'initializeCDP').resolves()
+
+      const attach = () => chrome.attachListeners(
+        'https://example.com/__/#/specs/runner',
+        pageCriClient as any,
+        { use: sinon.stub() } as any,
+        { ...options } as any,
+        { displayName: 'Chrome' } as any,
+      )
+
+      return { pageCriClient, attach }
+    }
+
+    it('clears persisted service worker state before the runner navigation', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', clearParams)
+      expect(pageCriClient.send.withArgs('Storage.clearDataForOrigin')).to.have.been.calledBefore(chrome._navigateUsingCRI as any)
+    })
+
+    it('does not clear persisted service worker state on the MITM path', async function () {
+      const { pageCriClient, attach } = setup({ ...mitmOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      expect(pageCriClient.send).not.to.have.been.calledWith('Storage.clearDataForOrigin')
+    })
+
+    it('does not clear persisted service worker state when testIsolation is disabled', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: false })
+
+      await attach()
+
+      expect(pageCriClient.send).not.to.have.been.calledWith('Storage.clearDataForOrigin')
+    })
+  })
+
   describe('#connectProtocolToBrowser', () => {
     it('connects to the browser cri client', async function () {
       const protocolManager = {

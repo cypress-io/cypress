@@ -116,6 +116,13 @@ export type BrowserLaunchOpts = {
    * consumer reads this rather than re-deriving it.
    */
   useBrowserNetworkInterception: boolean
+  /**
+   * Whether to drop every origin's persisted service worker and cache storage
+   * before the runner document is loaded on the browser network path. Resolved
+   * at launch from project-level `testIsolation`, because this runs before any
+   * spec code and so no suite-level override can be known yet.
+   */
+  shouldClearPersistedServiceWorkers?: boolean
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

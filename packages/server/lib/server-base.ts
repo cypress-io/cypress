@@ -676,7 +676,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     isAUTFrame?: (frameId: string) => Promise<boolean>,
     onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
   ) {
-    const config = this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config']
+    const openConfig = this.ensureProp(this._openConfig, 'open')
+    const config = openConfig as unknown as CreateProxyRuntimeDeps['config']
 
     // Once per runtime — one per spec/tab — so a worker that escapes on every
     // navigation warns once instead of flooding stdout. Every escape is still
@@ -705,7 +706,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         }
 
         warnedInterceptionEscape = true
-        errors.warning('BROWSER_NETWORK_INTERCEPTION_ESCAPE', url)
+
+        // Cypress's runner is served on the AUT's origin under clientRoute, so
+        // an escape there means the origin's worker answered for Cypress's own
+        // document — a different problem, with a different remedy, than an
+        // escaped AUT document. This runs synchronously off a CDP event with
+        // no catch above it, so an unparseable url reports the generic
+        // variant rather than throwing out of the listener.
+        let isRunnerDocument = false
+
+        try {
+          isRunnerDocument = new URL(url).pathname.startsWith(openConfig.clientRoute ?? '/__/')
+        } catch {
+          debug('could not parse escaped url %s', url)
+        }
+
+        errors.warning('BROWSER_NETWORK_INTERCEPTION_ESCAPE', url, isRunnerDocument)
       },
     })
 
