@@ -88,6 +88,7 @@
     "@types/jquery": "3.3.31",
     "@types/lodash": "4.17.21",
     "@types/minimatch": "3.0.5",
+    "@types/mocha": "8.0.3",
     "@types/shelljs": "^0.10.0",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.12",
