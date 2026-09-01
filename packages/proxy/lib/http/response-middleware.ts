@@ -623,7 +623,10 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body, { disableServiceWorkerNavigationPreload: this.useBrowserNetworkInterception })
+    const updatedBody = injectIntoServiceWorker(body, {
+      disableServiceWorkerNavigationPreload: this.useBrowserNetworkInterception,
+      runnerNamespaceExemption: this.useBrowserNetworkInterception ? { clientRoute: this.config.clientRoute, namespace: this.config.namespace } : undefined,
+    })
 
     const pt = new PassThrough
 

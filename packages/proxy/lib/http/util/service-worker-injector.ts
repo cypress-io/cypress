@@ -39,6 +39,11 @@ type FetchListener = (this: ServiceWorkerGlobalScope, ev: FetchEvent) => any
 
 type ServiceWorkerClientEventWithoutScope = Omit<ServiceWorkerClientEvent, 'scope'>
 
+interface RunnerNamespaceExemption {
+  clientRoute: string
+  namespace: string
+}
+
 declare let self: ServiceWorkerGlobalScope
 
 /**
@@ -47,10 +52,13 @@ declare let self: ServiceWorkerGlobalScope
  * @param options.disableServiceWorkerNavigationPreload when true, prepends the
  * navigation-preload disabling expression ahead of everything else in the script, so
  * it runs before any user code. See disable-navigation-preload.ts (#34652) for why.
+ * @param options.runnerNamespaceExemption when set, the wrapped fetch listeners decline requests
+ * for the Cypress runner document, its assets, and the cloud-delivered studio and cy-prompt
+ * bundles rather than letting the application handle them.
  * @returns the updated service worker
  */
-export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceWorkerNavigationPreload?: boolean } = {}) => {
-  function __cypressInjectIntoServiceWorker () {
+export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceWorkerNavigationPreload?: boolean, runnerNamespaceExemption?: RunnerNamespaceExemption } = {}) => {
+  function __cypressInjectIntoServiceWorker (runnerNamespaceExemption: RunnerNamespaceExemption | null) {
     let listenerCount = 0
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
@@ -96,8 +104,32 @@ export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceW
       return typeof options === 'boolean' ? options : options?.capture
     }
 
+    // Cypress reserves the client route and the namespace path on every origin under test,
+    // so a request for either belongs to the runner and never to the application. The studio
+    // and cy-prompt bundles sit outside both prefixes; packages/server/lib/adapters/internal-routes.ts
+    // is the source of truth for them and matches them bare, without a trailing slash.
+    const isRunnerNamespaceRequest = (url: string) => {
+      if (!runnerNamespaceExemption) {
+        return false
+      }
+
+      const { pathname } = new URL(url)
+
+      return pathname.startsWith(runnerNamespaceExemption.clientRoute) ||
+        pathname.startsWith(`/${runnerNamespaceExemption.namespace}/`) ||
+        pathname.startsWith('/__cypress-studio') ||
+        pathname.startsWith('/__cypress-cy-prompt')
+    }
+
     function wrapListener (listener: FetchListener): FetchListener {
       return async (event) => {
+        // declining lets the request fall through to the network, where Cypress intercepts it
+        if (isRunnerNamespaceRequest(event.request.url)) {
+          sendFetchRequest({ url: event.request.url, isControlled: false })
+
+          return
+        }
+
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
         const oldRespondWith = event.respondWith
@@ -307,7 +339,7 @@ export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceW
   const updatedBody = `
 ${disableNavigationPreload}
 let __cypressIsScriptEvaluated = false;
-(${__cypressInjectIntoServiceWorker})();
+(${__cypressInjectIntoServiceWorker})(${JSON.stringify(options.runnerNamespaceExemption ?? null)});
 ${body};
 __cypressIsScriptEvaluated = true;`
 
