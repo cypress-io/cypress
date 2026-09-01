@@ -457,7 +457,9 @@ describe('lib/network-runtime', () => {
       expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: true })
     })
 
-    it('clears an armed bypass on stop, so a reused page client never inherits it', async () => {
+    // A send on a client whose renderer crashed is enqueued, not rejected, and
+    // stop() runs ahead of HTTP server teardown.
+    it('drops an armed bypass on stop without waiting on the browser', async () => {
       const client = createCdpClient()
       const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
 
@@ -467,7 +469,27 @@ describe('lib/network-runtime', () => {
 
       await runtime.stop()
 
-      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+      expect(client.send).not.to.have.been.calledWith('Network.setBypassServiceWorker')
+      expect(client.off).to.have.been.calledWith('Page.frameNavigated')
+    })
+
+    it('does not hang stop() when the browser never answers the bypass', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+
+      client.send.withArgs('Network.setBypassServiceWorker').returns(new Promise(() => {}))
+
+      // left outstanding on purpose: the arm registers its listener before it
+      // sends, so stop() has a bypass to drop while the browser stays silent
+      const arming = runtime.bypassServiceWorkerForTopNavigation()
+
+      await flush()
+      await runtime.stop()
+
+      expect(client.off).to.have.been.calledWith('Page.frameNavigated')
+      expect(arming).to.be.a('promise')
     })
 
     it('does not arm on a stopped runtime', async () => {

@@ -823,6 +823,24 @@ describe('lib/socket', () => {
         expect(bypassServiceWorkerForTopNavigation).to.be.calledOnce
       })
 
+      // The driver blocks on this ack before it navigates, and a CDP send is
+      // enqueued rather than rejected while the connection is reconnecting.
+      it('still acknowledges when the browser never answers the bypass', async function () {
+        this.timeout(10000)
+
+        this.server['_cdpFetchRuntime'] = {
+          bypassServiceWorkerForTopNavigation: sinon.stub().returns(new Promise(() => {})),
+          stop: sinon.stub().resolves(),
+          networkProxy: { dispose: sinon.stub() },
+        } as any
+
+        const response = await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test' }, resolve)
+        })
+
+        expect(response).to.have.property('response', null)
+      })
+
       it('still acknowledges when there is no CDP Fetch runtime', async function () {
         this.server['_cdpFetchRuntime'] = undefined
 

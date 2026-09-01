@@ -63,6 +63,12 @@ import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, g
 
 const debug = Debug('cypress:server:server-base')
 
+// How long to wait for the browser to acknowledge the service worker bypass
+// before navigating anyway. A CDP send is enqueued rather than rejected while
+// the connection is reconnecting, and the driver blocks on this before it
+// navigates, so a stuck send must not be able to hang the visit.
+const SERVICE_WORKER_BYPASS_TIMEOUT_MS = 2000
+
 const fullyQualifiedRe = /^https?:\/\//
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
@@ -737,13 +743,34 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   /**
    * Hides the next top-level navigation from the AUT origin's service worker.
-   * No-op on the MITM path, where the proxy sees worker traffic.
+   * No-op on the MITM path, where the proxy sees worker traffic. Fails open:
+   * an unprotected navigation is a bad page load, a stuck one is a hung run.
    */
   async bypassServiceWorkerForTopNavigation () {
+    if (!this._cdpFetchRuntime) {
+      return
+    }
+
+    const timedOut = Symbol('serviceWorkerBypassTimedOut')
+    let timeout: NodeJS.Timeout | undefined
+
     try {
-      await this._cdpFetchRuntime?.bypassServiceWorkerForTopNavigation()
+      const outcome = await Promise.race([
+        this._cdpFetchRuntime.bypassServiceWorkerForTopNavigation(),
+        new Promise((resolve) => {
+          timeout = setTimeout(() => resolve(timedOut), SERVICE_WORKER_BYPASS_TIMEOUT_MS)
+        }),
+      ])
+
+      if (outcome === timedOut) {
+        debug('the service worker bypass was not acknowledged within %dms; navigating anyway', SERVICE_WORKER_BYPASS_TIMEOUT_MS)
+      }
     } catch (err) {
       debug('arming the service worker bypass failed: %s', err?.stack || err)
+    } finally {
+      if (timeout) {
+        clearTimeout(timeout)
+      }
     }
   }
 

@@ -361,13 +361,21 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // cleared and keeps its worker.
   let serviceWorkerBypassed = false
 
-  const clearServiceWorkerBypass = async () => {
+  const disarmServiceWorkerBypass = () => {
     if (!serviceWorkerBypassed) {
-      return
+      return false
     }
 
     serviceWorkerBypassed = false
     deps.client.off('Page.frameNavigated', onFrameNavigatedForBypass)
+
+    return true
+  }
+
+  const clearServiceWorkerBypass = async () => {
+    if (!disarmServiceWorkerBypass()) {
+      return
+    }
 
     try {
       await deps.client.send('Network.setBypassServiceWorker', { bypass: false })
@@ -504,9 +512,11 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 
-      // The next spec can reuse this page client, so don't leave a bypass
-      // behind for someone else's navigation to clear.
-      await clearServiceWorkerBypass()
+      // State only: a send here would be enqueued rather than rejected while
+      // the client is reconnecting, and stop() must not be able to hang
+      // teardown. The next runtime arms before its own navigation, so the
+      // browser-side flag corrects itself.
+      disarmServiceWorkerBypass()
 
       // Not awaited, for the same reason _onTargetDestroyed and
       // closeExtraTargets do not await detach: a dead extra-target socket may
