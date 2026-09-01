@@ -93,6 +93,12 @@ export type CdpFetchNetworkRuntime = {
    * extra-target marker. Returns detach() to stop that transport.
    */
   attachExtraTarget (client: Pick<ICriClient, 'send' | 'on' | 'off'>): Promise<ExtraTargetDetach>
+  /**
+   * Hides the next top-level navigation from the AUT origin's service worker so
+   * it cannot serve Cypress's own runner document. Stays armed until that
+   * navigation commits.
+   */
+  bypassServiceWorkerForTopNavigation (): Promise<void>
   start (): Promise<void>
   reset (): void
   stop (): Promise<void>
@@ -345,6 +351,58 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
   let unsubscribeAUTFrameNavigated: (() => void) | undefined
 
+  // Cypress serves its runner document from the AUT's own origin
+  // (resolveOriginRedirect above), so an app service worker scoped at / serves
+  // it too. If that worker is not running yet, it serves the document from the
+  // app's real origin, and no CDP session can pause that first navigation.
+  // This covers the runner's own document only: nested documents match the
+  // worker's scope by their own URL, so a spec frame loaded later still goes
+  // through the app's worker. The AUT frame navigates after the bypass is
+  // cleared and keeps its worker.
+  let serviceWorkerBypassed = false
+
+  const clearServiceWorkerBypass = async () => {
+    if (!serviceWorkerBypassed) {
+      return
+    }
+
+    serviceWorkerBypassed = false
+    deps.client.off('Page.frameNavigated', onFrameNavigatedForBypass)
+
+    try {
+      await deps.client.send('Network.setBypassServiceWorker', { bypass: false })
+    } catch (err) {
+      debug('clearing the service worker bypass failed: %s', (err as Error)?.message)
+    }
+  }
+
+  function onFrameNavigatedForBypass (params: Protocol.Page.FrameNavigatedEvent) {
+    // Subframe commits are the AUT; only the runner's own commit ends this.
+    if (params.frame.parentId) {
+      return
+    }
+
+    clearServiceWorkerBypass().catch(() => {})
+  }
+
+  const bypassServiceWorkerForTopNavigation = async () => {
+    if (stopped || serviceWorkerBypassed) {
+      return
+    }
+
+    serviceWorkerBypassed = true
+    deps.client.on('Page.frameNavigated', onFrameNavigatedForBypass)
+
+    try {
+      await deps.client.send('Network.setBypassServiceWorker', { bypass: true })
+      debug('service worker bypassed for the next top-level navigation')
+    } catch (err) {
+      debug('arming the service worker bypass failed: %s', (err as Error)?.message)
+      serviceWorkerBypassed = false
+      deps.client.off('Page.frameNavigated', onFrameNavigatedForBypass)
+    }
+  }
+
   return {
     networkProxy,
     netStubbingState: stubbingState,
@@ -352,6 +410,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     networkInterceptionCore,
     networkInterception,
     fetchTransport,
+    bypassServiceWorkerForTopNavigation,
     async attachExtraTarget (client) {
       if (stopped) {
         throw new Error(RUNTIME_STOPPED_ERROR)
@@ -444,6 +503,10 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       escapeDetector.stop()
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
+
+      // The next spec can reuse this page client, so don't leave a bypass
+      // behind for someone else's navigation to clear.
+      await clearServiceWorkerBypass()
 
       // Not awaited, for the same reason _onTargetDestroyed and
       // closeExtraTargets do not await detach: a dead extra-target socket may

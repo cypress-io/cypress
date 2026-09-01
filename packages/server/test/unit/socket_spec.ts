@@ -803,6 +803,37 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('on(backend:request, preserve:run:state)', () => {
+      // The driver navigates the top frame to a new superdomain right after
+      // this, onto an origin whose service worker could serve our runner.
+      it('bypasses the service worker before acknowledging', async function () {
+        const bypassServiceWorkerForTopNavigation = sinon.stub().resolves()
+
+        // stop/networkProxy are what the server's close path reaches for
+        this.server['_cdpFetchRuntime'] = {
+          bypassServiceWorkerForTopNavigation,
+          stop: sinon.stub().resolves(),
+          networkProxy: { dispose: sinon.stub() },
+        } as any
+
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test' }, resolve)
+        })
+
+        expect(bypassServiceWorkerForTopNavigation).to.be.calledOnce
+      })
+
+      it('still acknowledges when there is no CDP Fetch runtime', async function () {
+        this.server['_cdpFetchRuntime'] = undefined
+
+        const response = await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'test' }, resolve)
+        })
+
+        expect(response).to.have.property('response', null)
+      })
+    })
+
     describe('on(get:cached:test:state)', () => {
       it('returns cached test state', async function () {
         await new Promise((resolve) => {

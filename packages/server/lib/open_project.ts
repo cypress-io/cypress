@@ -120,6 +120,9 @@ export class OpenProject extends EventEmitter {
         onExtraTargetCriClientReady: (client) => {
           return this.projectBase!.server.attachCdpFetchExtraTarget(client)
         },
+        onBeforeRunnerNavigation: () => {
+          return this.projectBase!.server.bypassServiceWorkerForTopNavigation()
+        },
       } : {
         proxyServer: ensureProxyServer(cfg),
         // the AUT is served over loopback by our own proxy, so subtract Chromium's

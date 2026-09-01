@@ -735,6 +735,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._cdpFetchRuntime?.attachExtraTarget(client)
   }
 
+  /**
+   * Hides the next top-level navigation from the AUT origin's service worker.
+   * No-op on the MITM path, where the proxy sees worker traffic.
+   */
+  async bypassServiceWorkerForTopNavigation () {
+    try {
+      await this._cdpFetchRuntime?.bypassServiceWorkerForTopNavigation()
+    } catch (err) {
+      debug('arming the service worker bypass failed: %s', err?.stack || err)
+    }
+  }
+
   private resetCdpFetchRuntime () {
     try {
       this._cdpFetchRuntime?.reset()
@@ -795,6 +807,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
+    options.onPreserveRunState = this.bypassServiceWorkerForTopNavigation.bind(this)
     options.interceptRegistration = new DriverInterceptRegistrationAdapter({
       state: this.netStubbingState,
       socket: this.socket,

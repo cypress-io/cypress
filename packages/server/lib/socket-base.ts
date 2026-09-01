@@ -156,6 +156,7 @@ export class SocketBase implements SocketBroadcaster {
       onConnect () {},
       onRequest () {},
       onResolveUrl () {},
+      onPreserveRunState: async () => {},
       onFocusTests () {},
       onSpecChanged () {},
       onChromiumRun () {},
@@ -516,7 +517,9 @@ export class SocketBase implements SocketBroadcaster {
               case 'preserve:run:state':
                 runState = args[0]
 
-                return null
+                // The driver navigates the top frame to the new superdomain
+                // right after this, so await the bypass first.
+                return options.onPreserveRunState().then(() => null)
               case 'resolve:url': {
                 const [url, resolveOpts] = args
 

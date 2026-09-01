@@ -812,6 +812,67 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
+  describe('#attachListeners service worker bypass', () => {
+    const attachOptions = (overrides: Record<string, any> = {}) => {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+        targetId: '1234',
+        whenChildTargetHandled: sinon.stub().resolves(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        host: 'http://localhost',
+        port: 1234,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+      sinon.stub(chrome, '_navigateUsingCRI').resolves()
+      sinon.stub(chrome, '_handleDownloads').resolves()
+
+      return {
+        pageCriClient,
+        options: {
+          ...openOpts,
+          url: 'https://www.google.com/__/',
+          downloadsFolder: '/tmp/folder',
+          browser: {},
+          ...overrides,
+        },
+      }
+    }
+
+    // baseUrl alone puts the runner URL on the AUT's own origin, so the launch
+    // navigation needs the bypass too, not just a cy.visit() superdomain switch.
+    it('arms the bypass before navigating to the runner url', async function () {
+      const onBeforeRunnerNavigation = sinon.stub().resolves()
+      const { pageCriClient, options } = attachOptions({
+        useBrowserNetworkInterception: true,
+        onBeforeRunnerNavigation,
+      })
+
+      await chrome.attachListeners(options.url, pageCriClient, { use: sinon.stub() } as any, options, { majorVersion: 354 } as any)
+
+      expect(onBeforeRunnerNavigation).to.have.been.calledOnce
+      expect(onBeforeRunnerNavigation).to.have.been.calledBefore(chrome._navigateUsingCRI as any)
+    })
+
+    it('does not arm the bypass on the HTTP/1 proxy path', async function () {
+      const onBeforeRunnerNavigation = sinon.stub().resolves()
+      const { pageCriClient, options } = attachOptions({
+        useBrowserNetworkInterception: false,
+        onBeforeRunnerNavigation,
+      })
+
+      await chrome.attachListeners(options.url, pageCriClient, { use: sinon.stub() } as any, options, { majorVersion: 354 } as any)
+
+      expect(onBeforeRunnerNavigation).not.to.have.been.called
+    })
+  })
+
   describe('#connectProtocolToBrowser', () => {
     it('connects to the browser cri client', async function () {
       const protocolManager = {

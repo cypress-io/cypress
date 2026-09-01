@@ -683,6 +683,10 @@ export = {
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
 
+      // With a baseUrl on the AUT's own superdomain, this runner URL is served
+      // from that origin, so the app's service worker would serve it.
+      await options.onBeforeRunnerNavigation?.()
+
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
       await this._navigateUsingCRI(pageCriClient, url)

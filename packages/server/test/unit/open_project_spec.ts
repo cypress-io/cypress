@@ -223,6 +223,7 @@ describe('lib/open_project', () => {
 
           expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.true
           expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.a('function')
+          expect(browsers.open.lastCall.args[1].onBeforeRunnerNavigation).to.be.a('function')
         })
 
         it('passes the MITM path to the launcher when forceHttp1 is set', async function () {
@@ -232,6 +233,7 @@ describe('lib/open_project', () => {
 
           expect(browsers.open.lastCall.args[1].useBrowserNetworkInterception).to.be.false
           expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.undefined
+          expect(browsers.open.lastCall.args[1].onBeforeRunnerNavigation).to.be.undefined
         })
 
         it('passes the MITM path to the launcher for a non-chromium browser', async function () {

@@ -390,6 +390,100 @@ describe('lib/network-runtime', () => {
     expect(client.send).to.have.been.calledWith('Fetch.disable')
   })
 
+  describe('service worker bypass for the top-level navigation', () => {
+    const frameNavigated = (client: { on: sinon.SinonStub }, frame: { id: string, parentId?: string }) => {
+      client.on.withArgs('Page.frameNavigated').getCalls().forEach((call) => {
+        call.args[1]({ frame } as Protocol.Page.FrameNavigatedEvent)
+      })
+    }
+
+    it('bypasses the service worker until the top-level navigation commits', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+      client.send.resetHistory()
+
+      await runtime.bypassServiceWorkerForTopNavigation()
+
+      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: true })
+
+      client.send.resetHistory()
+      // Subframe commits are the AUT; only the runner's own commit ends this.
+      frameNavigated(client, { id: 'aut', parentId: 'runner' })
+
+      await flush()
+
+      expect(client.send).not.to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+
+      frameNavigated(client, { id: 'runner' })
+
+      await flush()
+
+      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+      expect(client.off).to.have.been.calledWith('Page.frameNavigated')
+    })
+
+    it('arms once while a bypass is already outstanding', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+      client.send.resetHistory()
+
+      await runtime.bypassServiceWorkerForTopNavigation()
+      await runtime.bypassServiceWorkerForTopNavigation()
+
+      expect(client.send.withArgs('Network.setBypassServiceWorker', { bypass: true })).to.have.been.calledOnce
+    })
+
+    it('leaves nothing subscribed when the browser refuses the bypass', async () => {
+      const client = createCdpClient()
+
+      client.send.withArgs('Network.setBypassServiceWorker').rejects(new Error('nope'))
+
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+
+      await runtime.bypassServiceWorkerForTopNavigation()
+
+      expect(client.off).to.have.been.calledWith('Page.frameNavigated')
+
+      // A failed arm must not latch: the next navigation gets another attempt.
+      client.send.resetHistory()
+      await runtime.bypassServiceWorkerForTopNavigation()
+
+      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: true })
+    })
+
+    it('clears an armed bypass on stop, so a reused page client never inherits it', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+      await runtime.bypassServiceWorkerForTopNavigation()
+      client.send.resetHistory()
+
+      await runtime.stop()
+
+      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+    })
+
+    it('does not arm on a stopped runtime', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+      await runtime.stop()
+      client.send.resetHistory()
+
+      await runtime.bypassServiceWorkerForTopNavigation()
+
+      expect(client.send).not.to.have.been.calledWith('Network.setBypassServiceWorker')
+    })
+  })
+
   it('createCdpFetchRuntime records the AUT URL when the automation layer reports an AUT navigation commit', async () => {
     const client = {
       send: sinon.stub().resolves({}),

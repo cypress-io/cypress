@@ -100,6 +100,12 @@ export type BrowserLaunchOpts = {
   protocolManager?: ProtocolManagerShape
   onPageCriClientReady?: (client: CdpClientShape, isAUTFrame?: (frameId: string) => Promise<boolean>, onAUTFrameNavigated?: (listener: (url: string) => void) => () => void) => Promise<void>
   /**
+   * Called just before the main frame is pointed at a Cypress runner URL, which
+   * `baseUrl` alone can put on the AUT's own origin. Only set on the browser
+   * (CDP) network path.
+   */
+  onBeforeRunnerNavigation?: () => Promise<void>
+  /**
    * When the MITM proxy is disabled, called for each extra-target (popup /
    * `_blank`) CDP session so the CDP Fetch runtime can attach shared request
    * middleware. Returns an optional detach callback invoked when the target
