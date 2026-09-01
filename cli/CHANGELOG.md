@@ -49,6 +49,10 @@
 - Fixed an issue where a single cleanup step that stalled while Cypress shut down, such as waiting on a browser that was slow to close, could hold up the rest of shutdown. Addressed in [#34699](https://github.com/cypress-io/cypress/pull/34699).
 - Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
 
+**Misc:**
+
+- When a Test Replay recording fails to initialize during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
