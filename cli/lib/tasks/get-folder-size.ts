@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import { join } from 'path'
-import Bluebird from 'bluebird'
 
 /**
  * Get the size of a folder or a file.
@@ -16,18 +15,16 @@ async function getSize (path: string): Promise<number> {
 
   if (stat.isDirectory()) {
     const list = await fs.readdir(path)
+    let total = 0
 
-    return Bluebird.resolve(list).reduce(async (prev: number, curr: string) => {
-      const currPath = join(path, curr)
+    for (const entry of list) {
+      const entryPath = join(path, entry)
+      const entryStat = await fs.lstat(entryPath)
 
-      const s = await fs.lstat(currPath)
+      total += entryStat.isDirectory() ? await getSize(entryPath) : entryStat.size
+    }
 
-      if (s.isDirectory()) {
-        return prev + await getSize(currPath)
-      }
-
-      return prev + s.size
-    }, 0)
+    return total
   }
 
   return stat.size

@@ -33,7 +33,6 @@
     "@types/tmp": "^0.2.3",
     "arch": "^3.0.0",
     "blob-util": "^2.0.2",
-    "bluebird": "^3.7.2",
     "buffer": "^5.7.1",
     "cachedir": "^2.4.0",
     "chalk": "^4.1.0",

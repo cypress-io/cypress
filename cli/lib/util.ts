@@ -10,7 +10,6 @@ import { isCI as isCi } from 'ci-info'
 import execa from 'execa'
 import si from 'systeminformation'
 import chalk from 'chalk'
-import Bluebird from 'bluebird'
 import cachedir from 'cachedir'
 import logSymbols from 'log-symbols'
 import executable from 'executable'
@@ -444,7 +443,7 @@ const util = {
   },
 
   async getPlatformInfo (): Promise<string> {
-    const [version, osArch] = await Bluebird.all([
+    const [version, osArch] = await Promise.all([
       this.getOsVersionAsync(),
       this.getRealArch(),
     ])

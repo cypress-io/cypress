@@ -4,7 +4,6 @@ import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import request from '@cypress/request'
-import Bluebird from 'bluebird'
 import requestProgress from 'request-progress'
 import { stripIndent } from 'common-tags'
 import { getProxyForUrl } from 'proxy-from-env'
@@ -117,32 +116,31 @@ const verifyDownloadedFile = async (filename: string, expectedSize?: number, exp
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
 
-    return Bluebird.join(
+    const [checksum, filesize] = await Promise.all([
       util.getFileChecksum(filename),
       util.getFileSize(filename),
-      (checksum: string, filesize: number) => {
-        if (checksum === expectedChecksum && filesize === expectedSize) {
-          debug('downloaded file has the expected checksum and size ✅')
+    ])
 
-          return
-        }
+    if (checksum === expectedChecksum && filesize === expectedSize) {
+      debug('downloaded file has the expected checksum and size ✅')
 
-        debug('raising error: checksum or file size mismatch')
-        const text = stripIndent`
-          Corrupted download
+      return
+    }
 
-          Expected downloaded file to have checksum: ${expectedChecksum}
-          Computed checksum: ${checksum}
+    debug('raising error: checksum or file size mismatch')
+    const text = stripIndent`
+      Corrupted download
 
-          Expected downloaded file to have size: ${expectedSize}
-          Computed size: ${filesize}
-        `
+      Expected downloaded file to have checksum: ${expectedChecksum}
+      Computed checksum: ${checksum}
 
-        debug(text)
+      Expected downloaded file to have size: ${expectedSize}
+      Computed size: ${filesize}
+    `
 
-        throw new Error(text)
-      },
-    )
+    debug(text)
+
+    throw new Error(text)
   }
 
   if (expectedChecksum) {
@@ -210,7 +208,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
     ))
   }
 
-  return new Bluebird((resolve: any, reject: any) => {
+  return new Promise<any>((resolve, reject) => {
     const proxy = getProxyForUrlWithNpmConfig(url)
 
     debug('Downloading package', {
@@ -292,9 +290,9 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         // and handle the completion with verify and resolve
         // there was a possible race condition between end of request and close of writeStream
         // that is made ordered with this Promise.all
-        Bluebird.all([new Bluebird((r: any) => {
+        Promise.all([new Promise<void>((r) => {
           return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
-        }), new Bluebird((r: any) => response.on('end', r))])
+        }), new Promise<void>((r) => response.on('end', r))])
         .then(() => {
           debug('downloading finished')
           verifyDownloadedFile(downloadDestination, expectedSize,

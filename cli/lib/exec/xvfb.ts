@@ -1,5 +1,5 @@
 import os from 'os'
-import Bluebird from 'bluebird'
+import { promisify } from 'util'
 import Xvfb from '@cypress/xvfb'
 import { stripIndent } from 'common-tags'
 import Debug from 'debug'
@@ -24,7 +24,12 @@ const xvfbOptions: any = {
   },
 }
 
-const xvfb: any = Bluebird.promisifyAll(new Xvfb(xvfbOptions))
+const xvfb: any = new Xvfb(xvfbOptions)
+
+// resolved off the instance on each call rather than promisified once at module
+// load, so a `start`/`stop` swapped in on the Xvfb prototype is the one that runs
+const startXvfb = (): Promise<void> => promisify(xvfb.start.bind(xvfb))()
+const stopXvfb = (): Promise<void> => promisify(xvfb.stop.bind(xvfb))()
 
 export const _debugXvfb = debugXvfb
 
@@ -36,7 +41,7 @@ export async function start (): Promise<any> {
   debug('Starting Xvfb')
 
   try {
-    await xvfb.startAsync()
+    await startXvfb()
 
     return null
   } catch (e: any) {
@@ -60,7 +65,7 @@ export async function stop (): Promise<null> {
   debug('Stopping Xvfb')
 
   try {
-    await xvfb.stopAsync()
+    await stopXvfb()
 
     return null
   } catch (e) {
@@ -107,7 +112,7 @@ export function isNeeded (): boolean {
   // async method, resolved with Boolean
 export async function verify (): Promise<boolean> {
   try {
-    await xvfb.startAsync()
+    await startXvfb()
 
     return true
   } catch (err: any) {
@@ -115,7 +120,7 @@ export async function verify (): Promise<boolean> {
 
     return false
   } finally {
-    await xvfb.stopAsync()
+    await stopXvfb()
   }
 }
 

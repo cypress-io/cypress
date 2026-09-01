@@ -19,6 +19,7 @@ vi.mock(import('@cypress/xvfb'), async () => {
   const XVFB_MOCK = vi.fn()
 
   XVFB_MOCK.prototype.start = vi.fn()
+  XVFB_MOCK.prototype.stop = vi.fn()
 
   return {
     default: XVFB_MOCK,
@@ -72,6 +73,52 @@ describe('lib/exec/xvfb', function () {
         message: expect.stringContaining('Xvfb exited with a non zero exit code.'),
         known: true,
       }))
+    })
+  })
+
+  describe('#stop', function () {
+    it('passes', async () => {
+      vi.spyOn(_xvfb.prototype, 'stop').mockImplementation((cb) => {
+        cb()
+      })
+
+      await expect(xvfb.stop()).resolves.toBeNull()
+    })
+
+    it('swallows errors', async () => {
+      vi.spyOn(_xvfb.prototype, 'stop').mockImplementation((cb) => {
+        cb(new Error('nope'))
+      })
+
+      await expect(xvfb.stop()).resolves.toBeNull()
+    })
+  })
+
+  describe('#verify', function () {
+    it('resolves true and stops xvfb when it starts', async () => {
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        cb()
+      })
+
+      const stop = vi.spyOn(_xvfb.prototype, 'stop').mockImplementation((cb) => {
+        cb()
+      })
+
+      await expect(xvfb.verify()).resolves.toBe(true)
+      expect(stop).toHaveBeenCalledTimes(1)
+    })
+
+    it('resolves false and stops xvfb when it fails to start', async () => {
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        cb(new Error('nope'))
+      })
+
+      const stop = vi.spyOn(_xvfb.prototype, 'stop').mockImplementation((cb) => {
+        cb()
+      })
+
+      await expect(xvfb.verify()).resolves.toBe(false)
+      expect(stop).toHaveBeenCalledTimes(1)
     })
   })
 
