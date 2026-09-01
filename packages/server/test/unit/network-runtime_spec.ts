@@ -397,12 +397,6 @@ describe('lib/network-runtime', () => {
       })
     }
 
-    const navigatedWithinDocument = (client: { on: sinon.SinonStub }, frameId: string) => {
-      client.on.withArgs('Page.navigatedWithinDocument').getCalls().forEach((call) => {
-        call.args[1]({ frameId } as Protocol.Page.NavigatedWithinDocumentEvent)
-      })
-    }
-
     it('bypasses the service worker until the top-level navigation commits', async () => {
       const client = createCdpClient()
       const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
@@ -428,48 +422,6 @@ describe('lib/network-runtime', () => {
 
       expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
       expect(client.off).to.have.been.calledWith('Page.frameNavigated')
-    })
-
-    // experimentalSingleTabRunMode reuses the runner tab, so the next spec's
-    // navigation differs only by hash and fires no frameNavigated.
-    it('ends the bypass on a same-document runner navigation', async () => {
-      const client = createCdpClient()
-      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-
-      await runtime.start()
-      await runtime.bypassServiceWorkerForTopNavigation()
-      client.send.resetHistory()
-
-      navigatedWithinDocument(client, 'runner')
-
-      await flush()
-
-      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
-    })
-
-    // The AUT is live during a superdomain switch and can change its own hash.
-    it('ignores a same-document navigation in the AUT', async () => {
-      const client = createCdpClient()
-      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
-
-      await runtime.start()
-      // the runner's own commit is what teaches the runtime which frame is the
-      // main one
-      frameNavigated(client, { id: 'runner' })
-      await runtime.bypassServiceWorkerForTopNavigation()
-      client.send.resetHistory()
-
-      navigatedWithinDocument(client, 'aut')
-
-      await flush()
-
-      expect(client.send).not.to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
-
-      navigatedWithinDocument(client, 'runner')
-
-      await flush()
-
-      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
     })
 
     it('arms once while a bypass is already outstanding', async () => {
@@ -538,6 +490,32 @@ describe('lib/network-runtime', () => {
 
       expect(client.off).to.have.been.calledWith('Page.frameNavigated')
       expect(arming).to.be.a('promise')
+    })
+
+    // Some navigations never commit: an aborted one, or the hash-only
+    // navigation experimentalSingleTabRunMode makes between specs. Without an
+    // upper bound the bypass would keep the app's worker out of the AUT for the
+    // rest of the run.
+    it('ends a bypass whose navigation never commits', async () => {
+      const clock = sinon.useFakeTimers({ shouldAdvanceTime: true })
+
+      try {
+        const client = createCdpClient()
+        const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+        await runtime.start()
+        await runtime.bypassServiceWorkerForTopNavigation()
+        client.send.resetHistory()
+
+        clock.tick(10000)
+
+        await flush()
+
+        expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+        expect(client.off).to.have.been.calledWith('Page.frameNavigated')
+      } finally {
+        clock.restore()
+      }
     })
 
     it('does not arm on a stopped runtime', async () => {

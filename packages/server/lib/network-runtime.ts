@@ -28,6 +28,14 @@ import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADE
 
 const debug = Debug('cypress:server:network-runtime')
 
+// An armed service worker bypass ends when the runner document commits, which
+// some navigations never do: an aborted one, or the hash-only navigation
+// experimentalSingleTabRunMode makes between specs. Cypress serves the runner
+// document itself, so a real commit lands in milliseconds - this only bounds
+// how long a bypass nothing will clear can keep the app's service worker out
+// of the AUT.
+const SERVICE_WORKER_BYPASS_MAX_MS = 10000
+
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
@@ -360,15 +368,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // through the app's worker. The AUT frame navigates after the bypass is
   // cleared and keeps its worker.
   let serviceWorkerBypassed = false
-  // The main frame keeps its id across navigations, so one commit is enough to
-  // recognize the runner's own frame for the rest of this runtime.
-  let mainFrameId: string | undefined
-
-  const recordMainFrame = (params: Protocol.Page.FrameNavigatedEvent) => {
-    if (!params.frame.parentId) {
-      mainFrameId = params.frame.id
-    }
-  }
+  let serviceWorkerBypassExpiry: NodeJS.Timeout | undefined
 
   const disarmServiceWorkerBypass = () => {
     if (!serviceWorkerBypassed) {
@@ -376,8 +376,9 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     }
 
     serviceWorkerBypassed = false
+    clearTimeout(serviceWorkerBypassExpiry)
+    serviceWorkerBypassExpiry = undefined
     deps.client.off('Page.frameNavigated', onFrameNavigatedForBypass)
-    deps.client.off('Page.navigatedWithinDocument', onNavigatedWithinDocumentForBypass)
 
     return true
   }
@@ -403,29 +404,20 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     clearServiceWorkerBypass().catch(() => {})
   }
 
-  // experimentalSingleTabRunMode keeps the runner tab between specs, so the
-  // next spec's navigation differs only by hash - it fetches nothing and fires
-  // no frameNavigated. Without this the bypass would never be cleared and
-  // every later AUT load would skip the app's worker.
-  function onNavigatedWithinDocumentForBypass (params: Protocol.Page.NavigatedWithinDocumentEvent) {
-    // The AUT is live during a superdomain switch and can change its own hash,
-    // which must not end the runner's bypass. Before the first commit there is
-    // no AUT yet, so an unknown main frame is the runner.
-    if (mainFrameId && params.frameId !== mainFrameId) {
-      return
-    }
-
-    clearServiceWorkerBypass().catch(() => {})
-  }
-
   const bypassServiceWorkerForTopNavigation = async () => {
     if (stopped || serviceWorkerBypassed) {
       return
     }
 
     serviceWorkerBypassed = true
+    serviceWorkerBypassExpiry = setTimeout(() => {
+      debug('no navigation committed within %dms; ending the service worker bypass', SERVICE_WORKER_BYPASS_MAX_MS)
+      clearServiceWorkerBypass().catch(() => {})
+    }, SERVICE_WORKER_BYPASS_MAX_MS)
+
+    serviceWorkerBypassExpiry.unref?.()
+
     deps.client.on('Page.frameNavigated', onFrameNavigatedForBypass)
-    deps.client.on('Page.navigatedWithinDocument', onNavigatedWithinDocumentForBypass)
 
     try {
       await deps.client.send('Network.setBypassServiceWorker', { bypass: true })
@@ -495,7 +487,6 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     },
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
-      deps.client.on('Page.frameNavigated', recordMainFrame)
 
       // Service workers and out-of-process iframes have their own CDP
       // session — without enabling Fetch there, a worker's script fetch and an
@@ -517,7 +508,6 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         escapeDetector.stop()
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
-        deps.client.off('Page.frameNavigated', recordMainFrame)
 
         throw err
       }
@@ -538,7 +528,6 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       escapeDetector.stop()
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
-      deps.client.off('Page.frameNavigated', recordMainFrame)
 
       // State only: a send here would be enqueued rather than rejected while
       // the client is reconnecting, and stop() must not be able to hang
