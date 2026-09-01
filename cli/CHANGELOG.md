@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.0.1
+
+**Performance:**
+
+- Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
+
 ## 16.0.0
 
 **Breaking Changes:**
@@ -31,10 +37,6 @@
 
 - Deprecated the Electron browser as a test browser. The Electron browser will be removed in a future major version of Cypress; switch to Chrome or another installed browser to avoid a breaking change when you upgrade. See [Migrating away from the Electron browser](https://docs.cypress.io/app/references/migration-guide#Migrating-away-from-the-Electron-browser). Addresses [#33560](https://github.com/cypress-io/cypress/issues/33560). Addressed in [#34074](https://github.com/cypress-io/cypress/pull/34074).
 - Added the [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) configuration option, which routes every browser through the legacy network path. It is deprecated at introduction and prints a warning when set: it exists to give suites time to migrate to the native browser network, and will be removed once that path is supported long term in both Chrome and Firefox. Addresses [#33847](https://github.com/cypress-io/cypress/issues/33847).
-
-**Performance:**
-
-- Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
 **Features:**
 
