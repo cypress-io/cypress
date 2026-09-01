@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.0.1
+
+**Performance:**
+
+- Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
+
 ## 16.0.0
 
 **Breaking Changes:**

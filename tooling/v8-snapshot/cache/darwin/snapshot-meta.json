@@ -3548,6 +3548,7 @@
     "./packages/proxy/lib/http/util/buffers.ts",
     "./packages/proxy/lib/http/util/cookies.ts",
     "./packages/proxy/lib/http/util/csp-header.ts",
+    "./packages/proxy/lib/http/util/disable-navigation-preload.ts",
     "./packages/proxy/lib/http/util/document-preparation.ts",
     "./packages/proxy/lib/http/util/inject.ts",
     "./packages/proxy/lib/http/util/protocol-capture.ts",
@@ -3619,6 +3620,7 @@
     "./packages/server/lib/browsers/cdp-protocol/cri-client.ts",
     "./packages/server/lib/browsers/cdp-protocol/cri-errors.ts",
     "./packages/server/lib/browsers/cdp-protocol/debug-cdp-connection.ts",
+    "./packages/server/lib/browsers/cdp-protocol/interception-escape-detector.ts",
     "./packages/server/lib/browsers/cdp-protocol/normalize-resource-type.ts",
     "./packages/server/lib/browsers/cdp-protocol/should-stream-response-body.ts",
     "./packages/server/lib/browsers/constants.ts",
@@ -3932,5 +3934,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8d1e4ed028f6000d718b13743250aefefd33b4b0ef73b2924c54843a9949b8cb"
+  "deferredHash": "5294c23b7e3dbfb033b1e62507383734f8a556565179c2d4169d87b9f894c2d0"
 }

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import os from 'os'
@@ -36,7 +37,7 @@ const normalize = (str: string): string => {
     .map((str) => str.replace(/\s+$/g, ''))
     .join('\n')
     // replace download query with normalized platform and arch
-    .replace(/(\?platform=(darwin|linux|win32)&arch=x64)/, '?platform=OS&arch=ARCH'),
+    .replace(/(\?platform=(darwin|linux|win32)&arch=[\w-]+)/, '?platform=OS&arch=ARCH'),
   )
 }
 
@@ -66,6 +67,10 @@ vi.mock('os', async (importActual) => {
     },
   }
 })
+
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
@@ -293,7 +298,7 @@ describe('lib/tasks/download', function () {
   describe('verify downloaded file', function () {
     let expectedChecksum: string
     let expectedFileSize: number
-    let onProgress: vi.Mock
+    let onProgress: Mock
 
     beforeEach(function () {
       expectedChecksum = hasha.fromFileSync(examplePath)
@@ -566,7 +571,7 @@ describe('lib/tasks/download', function () {
     try {
       await download.start(options)
       throw new Error('should have caught')
-    } catch (error) {
+    } catch (error: any) {
       expect(error).to.be.instanceof(Error)
       expect(error.message).to.contain('redirect loop')
     }
@@ -718,7 +723,7 @@ describe('lib/tasks/download', function () {
     try {
       await download.start(options)
       throw new Error('should have caught')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).not.toEqual('should have caught')
       logger.error(error)
 

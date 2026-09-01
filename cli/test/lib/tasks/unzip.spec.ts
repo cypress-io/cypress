@@ -50,6 +50,10 @@ vi.mock('os', async (importActual) => {
   }
 })
 
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
+
 vi.mock('../../../lib/util', async (importActual) => {
   const actual = await importActual()
 
