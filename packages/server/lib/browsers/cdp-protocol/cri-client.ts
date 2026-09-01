@@ -716,10 +716,35 @@ export class CriClient implements ICriClient {
     }
   }
 
+  /**
+   * No `*.disable` is ever sent for a child session, so nothing else evicts its
+   * enablements from this client, which outlives every session attached to it.
+   * Session ids are never reused, so a detached session's entries cannot apply
+   * again.
+   */
+  public removeSessionEnablements = (sessionId: string) => {
+    // browser-level entries carry no sessionId, so a missing one would match
+    // all of them and silently empty the replay set
+    if (!sessionId) {
+      return
+    }
+
+    this.enableCommands = this.enableCommands.filter((entry) => entry.sessionId !== sessionId)
+  }
+
   public off = <T extends keyof ProtocolMapping.Events> (eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => {
-    this.subscriptions.splice(this.subscriptions.findIndex((sub) => {
+    // an event this client never subscribed to is expected here:
+    // resetBrowserTargets replays every page subscription against the browser
+    // client, which only ever received the `Network.*` ones. A miss has to leave
+    // the list alone - splicing a -1 index drops an unrelated subscription,
+    // which then outlives the target that registered it.
+    const index = this.subscriptions.findIndex((sub) => {
       return sub.eventName === eventName && sub.cb === cb
-    }), 1)
+    })
+
+    if (index !== -1) {
+      this.subscriptions.splice(index, 1)
+    }
 
     this.cdpConnection!.off(eventName, cb)
     // This ensures that we are notified about the browser's network events that have been registered (e.g. service workers)

@@ -171,11 +171,20 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 }
 
 type TargetId = string
+type SessionId = string
 
 interface ExtraTarget {
   client: CRI.Client
   targetInfo: Protocol.Target.TargetInfo
   detach?: ExtraTargetDetach
+}
+
+type ServiceWorkerBindingListener = (event: Protocol.Runtime.BindingCalledEvent) => void
+
+// CDPConnection rebroadcasts every event under `${method}.${sessionId}` as well
+// as its bare name, and the per-session form is not in ProtocolMapping.
+const serviceWorkerBindingEvent = (sessionId: SessionId) => {
+  return `Runtime.bindingCalled.${sessionId}` as 'Runtime.bindingCalled'
 }
 
 export class BrowserCriClient {
@@ -203,6 +212,7 @@ export class BrowserCriClient {
   resettingBrowserTargets = false
   gracefulShutdown?: Boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
+  serviceWorkerBindings: Map<SessionId, ServiceWorkerBindingListener> = new Map()
   onClose: Function | null = null
   /**
    * Cross-connection hold closing #34674's interception gap:
@@ -348,10 +358,13 @@ export class BrowserCriClient {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
     })
 
-    // Keeps sessionTargetInfo bounded to sessions that are actually still
-    // attached (#34674) - detachedFromTarget carries a sessionId directly.
+    // Keeps the per-session state on this long-lived client bounded to
+    // sessions that are actually still attached (#34674) - detachedFromTarget
+    // carries a sessionId directly.
     browserClient.on('Target.detachedFromTarget', (event: Protocol.Target.DetachedFromTargetEvent) => {
       browserCriClient.sessionTargetInfo.delete(event.sessionId)
+      browserCriClient.removeServiceWorkerBinding(event.sessionId)
+      browserClient.removeSessionEnablements(event.sessionId)
     })
 
     browserClient.on('Inspector.targetReloadedAfterCrash', async (event, sessionId) => {
@@ -457,6 +470,13 @@ export class BrowserCriClient {
     // sessionTargetInfo's own doc comment for why (#34674).
     browserCriClient.sessionTargetInfo.set(sessionId, targetInfo)
 
+    // Registered synchronously, for the same reason sessionTargetInfo is:
+    // Target.detachedFromTarget can land while an await below is pending, and
+    // it only releases bindings already tracked.
+    if (targetInfo.type === 'service_worker') {
+      browserCriClient.addServiceWorkerBinding(sessionId)
+    }
+
     try {
       // The basic approach here is we attach to targets and enable network traffic
       // We must attach in a paused state so that we can enable network traffic before the target starts running.
@@ -471,9 +491,9 @@ export class BrowserCriClient {
     }
 
     try {
-      // attach a binding to the runtime so that we can listen for service worker events
+      // attach a binding to the runtime so that the worker's client events
+      // reach the listener registered above
       if (event.targetInfo.type === 'service_worker') {
-        browserClient.on(`Runtime.bindingCalled.${event.sessionId}` as 'Runtime.bindingCalled', serviceWorkerClientEventHandler(browserCriClient.onServiceWorkerClientEvent))
         await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
       }
     } catch (error) {
@@ -667,14 +687,15 @@ export class BrowserCriClient {
 
     // Target.targetDestroyed carries no sessionId, unlike detachedFromTarget
     // - sweep for any session(s) recorded against this targetId instead
-    // (there's normally exactly one, but nothing guarantees that) so
-    // sessionTargetInfo doesn't retain an entry for a target that's gone
-    // (#34674). Deleting mid-iteration is safe here: the loop only ever
-    // deletes the entry it's currently positioned on, which Map iterators
-    // tolerate.
+    // (there's normally exactly one, but nothing guarantees that) so no
+    // per-session state is retained for a target that's gone (#34674).
+    // Deleting mid-iteration is safe here: the loop only ever deletes the entry
+    // it's currently positioned on, which Map iterators tolerate.
     for (const [sessionId, targetInfo] of browserCriClient.sessionTargetInfo) {
       if (targetInfo.targetId === targetId) {
         browserCriClient.sessionTargetInfo.delete(sessionId)
+        browserCriClient.removeServiceWorkerBinding(sessionId)
+        browserClient.removeSessionEnablements(sessionId)
       }
     }
 
@@ -950,6 +971,31 @@ export class BrowserCriClient {
 
   removeExtraTargetClient (targetId: TargetId) {
     this.extraTargetClients.delete(targetId)
+  }
+
+  // The browser client outlives every spec in the run, so each binding is keyed
+  // by session for `Target.detachedFromTarget` to remove.
+  addServiceWorkerBinding (sessionId: SessionId) {
+    // replacing the map entry alone would strand the listener it displaced
+    this.removeServiceWorkerBinding(sessionId)
+
+    const listener = serviceWorkerClientEventHandler(this.onServiceWorkerClientEvent)
+
+    this.serviceWorkerBindings.set(sessionId, listener)
+    this.browserClient.on(serviceWorkerBindingEvent(sessionId), listener)
+  }
+
+  removeServiceWorkerBinding (sessionId: SessionId) {
+    const listener = this.serviceWorkerBindings.get(sessionId)
+
+    if (!listener) {
+      return
+    }
+
+    debug('Remove service worker binding (session: %s)', sessionId)
+
+    this.serviceWorkerBindings.delete(sessionId)
+    this.browserClient.off(serviceWorkerBindingEvent(sessionId), listener)
   }
 
   // Detaching the Fetch transport is left to `Target.targetDestroyed`, which
