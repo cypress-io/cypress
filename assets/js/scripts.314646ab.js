@@ -75,11 +75,6 @@ $(() => {
   // hide this div so we can invoke show later
   $('.connectors-div').hide()
 
-  // listen to click on misc-table
-  $('.misc-table tr').on('click', (e) => {
-    $(e.currentTarget).addClass('info')
-  })
-
   // listen to click on button in .as-table
   $('.as-table .btn').on('click', (e) => {
     e.preventDefault()
