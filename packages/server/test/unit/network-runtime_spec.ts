@@ -424,6 +424,23 @@ describe('lib/network-runtime', () => {
       expect(client.off).to.have.been.calledWith('Page.frameNavigated')
     })
 
+    // experimentalSingleTabRunMode reuses the runner tab, so the next spec's
+    // navigation differs only by hash and fires no frameNavigated.
+    it('ends the bypass on a same-document runner navigation', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+      await runtime.bypassServiceWorkerForTopNavigation()
+      client.send.resetHistory()
+
+      client.on.withArgs('Page.navigatedWithinDocument').getCalls().forEach((call) => call.args[1]({ frameId: 'runner' }))
+
+      await flush()
+
+      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+    })
+
     it('arms once while a bypass is already outstanding', async () => {
       const client = createCdpClient()
       const runtime = createCdpFetchRuntime({ ...baseDeps(), client })

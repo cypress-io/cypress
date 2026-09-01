@@ -368,6 +368,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
     serviceWorkerBypassed = false
     deps.client.off('Page.frameNavigated', onFrameNavigatedForBypass)
+    deps.client.off('Page.navigatedWithinDocument', onNavigatedWithinDocumentForBypass)
 
     return true
   }
@@ -393,6 +394,14 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     clearServiceWorkerBypass().catch(() => {})
   }
 
+  // experimentalSingleTabRunMode keeps the runner tab between specs, so the
+  // next spec's navigation differs only by hash - it fetches nothing and fires
+  // no frameNavigated. Without this the bypass would never be cleared and
+  // every later AUT load would skip the app's worker.
+  function onNavigatedWithinDocumentForBypass () {
+    clearServiceWorkerBypass().catch(() => {})
+  }
+
   const bypassServiceWorkerForTopNavigation = async () => {
     if (stopped || serviceWorkerBypassed) {
       return
@@ -400,14 +409,14 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
 
     serviceWorkerBypassed = true
     deps.client.on('Page.frameNavigated', onFrameNavigatedForBypass)
+    deps.client.on('Page.navigatedWithinDocument', onNavigatedWithinDocumentForBypass)
 
     try {
       await deps.client.send('Network.setBypassServiceWorker', { bypass: true })
       debug('service worker bypassed for the next top-level navigation')
     } catch (err) {
       debug('arming the service worker bypass failed: %s', (err as Error)?.message)
-      serviceWorkerBypassed = false
-      deps.client.off('Page.frameNavigated', onFrameNavigatedForBypass)
+      disarmServiceWorkerBypass()
     }
   }
 
