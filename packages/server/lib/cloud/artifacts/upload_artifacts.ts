@@ -191,7 +191,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (postArtifactExtractionFatalError.captureMethod === 'protocolUploadUrl') {
       errors.warning('CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT', postArtifactExtractionFatalError.error)
     } else if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
-      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
+      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error, postArtifactExtractionFatalError.captureMethod)
     } else {
       errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
     }
