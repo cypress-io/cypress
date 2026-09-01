@@ -51,7 +51,7 @@
     "compression": "1.8.0",
     "cookie-parser": "1.4.5",
     "cors": "2.8.5",
-    "dayjs": "^1.9.3",
+    "dayjs": "^1.11.23",
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "dockerode": "4.0.9",

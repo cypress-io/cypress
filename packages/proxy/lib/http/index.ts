@@ -125,6 +125,13 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // See disable-navigation-preload.ts (#34652). Named to match the launch
+  // option (BrowserLaunchOpts.useBrowserNetworkInterception), not
+  // network-mode.ts's isBrowserNetworkMode() - same concept, but that name
+  // is already an established function/method elsewhere in this codebase
+  // (network-mode.ts, ServerBase), and a plain boolean field of the same
+  // name here would read as callable.
+  useBrowserNetworkInterception?: boolean
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -345,6 +352,7 @@ export class Http {
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
+  useBrowserNetworkInterception?: boolean
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -361,6 +369,7 @@ export class Http {
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -545,6 +554,7 @@ export class Http {
       },
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
+      useBrowserNetworkInterception: this.useBrowserNetworkInterception,
     }
 
     return ctx
