@@ -1,0 +1,9 @@
+{
+  // `test/` is not type-checked yet: the specs predate strict typings and
+  // still carry type errors. Add "test/**/*.ts" here once they are resolved.
+  "extends": "./tsconfig.json",
+  "include": [
+    "lib/**/*.ts",
+    "*.ts"
+  ]
+}

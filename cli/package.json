@@ -9,6 +9,7 @@
     "postbuild": "yarn make-bin-executable && yarn sync-build-dist && yarn prepare-package-json && yarn bundle-ct-frameworks",
     "build-cli": "rollup -c && yarn postbuild",
     "bundle-ct-frameworks": "tsx ./scripts/bundle-ct-frameworks.ts",
+    "check-ts": "tsc -p tsconfig.check.json --noEmit",
     "clean-cli-build": "rimraf build dist \"types/[!tests]*/\" types/net-stubbing.d.ts --glob",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && tsx ./scripts/sync-typedefs.ts",
