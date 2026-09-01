@@ -7,6 +7,7 @@ import type { UserConfig } from 'vite-8'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
+// Add frameworks here as we implement
 type AllFrameworks = 'react' | 'vue'
 
 type ConfigHandler = UserConfig | (() => UserConfig | Promise<UserConfig>)
@@ -16,7 +17,7 @@ export type ViteDevServerConfig = {
   devServerEvents: NodeJS.EventEmitter
   onConfigNotFound?: (devServer: 'vite', cwd: string, lookedIn: string[]) => void
 } & {
-  framework?: AllFrameworks // Add frameworks here as we implement
+  framework?: AllFrameworks
   viteConfig?: ConfigHandler // Derived from the user's vite config
 }
 

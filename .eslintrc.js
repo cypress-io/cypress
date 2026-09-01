@@ -85,8 +85,8 @@ module.exports = {
       },
     },
     {
-      // The rule needs parser services, so it throws on files handled by
-      // `@babel/eslint-parser`. It can only ever fire on TypeScript anyway.
+      // `consistent-type-imports` needs parser services, so it throws on the
+      // files `@babel/eslint-parser` handles. It only fires on TypeScript anyway.
       files: ['*.ts', '*.tsx', '*.vue'],
       rules: {
         '@typescript-eslint/consistent-type-imports': ['error', {

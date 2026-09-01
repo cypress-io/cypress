@@ -263,8 +263,6 @@ module.exports = {
                 'args': 'none',
                 'ignoreRestSiblings': true,
                 'argsIgnorePattern': '^_',
-                // `catch` bindings went from unchecked to checked in
-                // @typescript-eslint v8; keep them unchecked
                 'caughtErrors': 'none',
               },
             ],
