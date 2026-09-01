@@ -7,7 +7,7 @@
 
 **Misc:**
 
-- When a Test Replay recording fails to initialize during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- When a Test Replay recording fails to initialize during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
 
 ## 16.0.0
 
