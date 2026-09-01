@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
-import { execute } from 'graphql'
+import { execute, parse } from 'graphql'
+import type { OperationDefinitionNode } from 'graphql'
 import { Response } from 'cross-fetch'
 
 import { DataContext } from '../../../src/DataContext'
@@ -378,6 +379,106 @@ describe('CloudDataSource', () => {
       })
 
       expect(fetchStub).toHaveBeenCalledWith('https://cloud.cypress.io/test-runner-graphql', expect.anything())
+    })
+  })
+
+  describe('batched execution', () => {
+    // Each caller sends a distinct alias so the requests cannot collapse via the
+    // pending-promise dedupe in #maybeQueueDeferredExecute, leaving batching as
+    // the only thing that can reduce the number of requests.
+    const batchableQuery = (idx: number) => {
+      return parse(`{ user${idx}: cloudViewer { __typename id fullName email } }`)
+    }
+
+    const loadBatched = (idx: number) => {
+      return cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
+        operationDoc: batchableQuery(idx),
+        operationVariables: {},
+        operationType: 'query',
+        shouldBatch: true,
+      })
+    }
+
+    const sentQueries = () => {
+      return fetchStub.mock.calls.map((call) => JSON.parse(String((call[1] as RequestInit).body)).query as string)
+    }
+
+    beforeEach(() => {
+      // Answer whatever aliases the outgoing document asks for. The batch executor
+      // rewrites each merged selection to `_<n>_<alias>`, so the response has to be
+      // derived from the request rather than fixed up front.
+      fetchStub.mockImplementation(((_uri: string, init: RequestInit) => {
+        const { query } = JSON.parse(String(init.body))
+        const operation = parse(query).definitions[0] as OperationDefinitionNode
+        const data: Record<string, unknown> = {}
+
+        operation.selectionSet.selections.forEach((selection) => {
+          if (selection.kind === 'Field') {
+            data[selection.alias?.value ?? selection.name.value] = {
+              __typename: 'CloudUser',
+              id: '1',
+              fullName: 'test',
+              email: 'test@example.com',
+            }
+          }
+        })
+
+        return Promise.resolve(new Response(JSON.stringify({ data }), { status: 200 }))
+      }) as any)
+    })
+
+    it('merges concurrently batched queries into a single request', async () => {
+      const results = await Promise.all([0, 1, 2].map(loadBatched))
+
+      expect(fetchStub).toHaveBeenCalledTimes(1)
+      expect(sentQueries()[0]).toContain('batchTestRunnerExecutionQuery')
+
+      results.forEach((result, idx) => {
+        expect(result.data?.[`user${idx}`]).toMatchObject({ __typename: 'CloudUser', id: '1' })
+      })
+    })
+
+    it('issues one request per query when batching is not requested', async () => {
+      await Promise.all([0, 1, 2].map((idx) => {
+        return cloudDataSource.executeRemoteGraphQL({
+          fieldName: 'cloudViewer',
+          operationDoc: batchableQuery(idx),
+          operationVariables: {},
+          operationType: 'query',
+        })
+      }))
+
+      expect(fetchStub).toHaveBeenCalledTimes(3)
+      sentQueries().forEach((query) => expect(query).not.toContain('batchTestRunnerExecutionQuery'))
+    })
+
+    it('splits a batch that exceeds maxBatchSize across requests', async () => {
+      const results = await Promise.all(Array.from({ length: 21 }, (_, idx) => idx).map(loadBatched))
+
+      expect(fetchStub).toHaveBeenCalledTimes(2)
+
+      results.forEach((result, idx) => {
+        expect(result.data?.[`user${idx}`]).toMatchObject({ __typename: 'CloudUser', id: '1' })
+      })
+    })
+
+    // A failed request settles every caller sharing the batch, rather than leaving
+    // them pending on a dispatch that will never resolve.
+    //
+    // NOTE: the resolved value is currently empty rather than carrying the failure:
+    // #formatWithErrors reads `error.graphQLErrors` off an urql OperationResult, but
+    // the batched path resolves with a graphql-tools ExecutionResult whose `errors`
+    // the spread then overwrites with undefined. Asserted as-is so the loss is
+    // visible here if that is ever fixed.
+    it('settles every batched query from a single dispatch when the request fails', async () => {
+      fetchStub.mockRejectedValue(new Error('network down') as never)
+
+      const results = await Promise.all([0, 1, 2].map(loadBatched))
+
+      expect(fetchStub).toHaveBeenCalledTimes(1)
+      expect(results).toHaveLength(3)
+      results.forEach((result) => expect(result).toEqual({ data: undefined, errors: undefined }))
     })
   })
 })
