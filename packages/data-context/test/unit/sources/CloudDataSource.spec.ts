@@ -255,13 +255,20 @@ describe('CloudDataSource', () => {
       })
     })
 
+    // Cypress Cloud rejects an expired token in middleware, before any resolver
+    // runs, so the whole merged request comes back as a plain-text 401 rather
+    // than a GraphQL error payload - every query in the batch fails together.
     it('logout user on 401 response', async () => {
-      fetchStub.mockResolvedValue(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
+      fetchStub.mockResolvedValue(new Response('Unauthorized', { status: 401 }))
 
-      const resolved = await executeBatched(FAKE_USER_QUERY)
+      const results = await Promise.all(BATCHED_QUERIES.map(executeBatched))
 
-      expect(resolved.data).toBeUndefined()
-      expect(resolved.errors?.[0]?.message).toContain('Unauthorized')
+      expect(fetchStub).toHaveBeenCalledTimes(1)
+
+      results.forEach((result) => {
+        expect(result.data).toBeUndefined()
+        expect(result.errors?.[0]?.message).toContain('Unauthorized')
+      })
 
       expect(logoutStub).toHaveBeenCalledTimes(1)
     })
