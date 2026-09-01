@@ -120,6 +120,7 @@ describe('errors', function () {
         solution: 42,
       }
 
+      // @ts-expect-error - the invalid solution type is what this asserts on
       await expect(formErrorText(error)).rejects.toThrow()
     })
 

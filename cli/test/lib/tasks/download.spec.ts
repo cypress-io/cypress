@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import os from 'os'
@@ -293,7 +294,7 @@ describe('lib/tasks/download', function () {
   describe('verify downloaded file', function () {
     let expectedChecksum: string
     let expectedFileSize: number
-    let onProgress: vi.Mock
+    let onProgress: Mock
 
     beforeEach(function () {
       expectedChecksum = hasha.fromFileSync(examplePath)
@@ -566,7 +567,7 @@ describe('lib/tasks/download', function () {
     try {
       await download.start(options)
       throw new Error('should have caught')
-    } catch (error) {
+    } catch (error: any) {
       expect(error).to.be.instanceof(Error)
       expect(error.message).to.contain('redirect loop')
     }
@@ -718,7 +719,7 @@ describe('lib/tasks/download', function () {
     try {
       await download.start(options)
       throw new Error('should have caught')
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).not.toEqual('should have caught')
       logger.error(error)
 
