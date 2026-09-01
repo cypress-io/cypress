@@ -927,6 +927,11 @@ describe('visual error templates', () => {
         default: [1, 'chrome', 62],
       }
     },
+    BROWSER_NETWORK_INTERCEPTION_ESCAPE: () => {
+      return {
+        default: ['https://www.example.com/dashboard'],
+      }
+    },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
       return {
         default: ['chrome'],

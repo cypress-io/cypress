@@ -164,6 +164,28 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy.http.netStubbingState).to.equal(deps.netStubbingState)
   })
 
+  // See disable-navigation-preload.ts (#34652) for the mechanism; only the
+  // CDP Fetch runtime sets this flag. Explicitly false, not merely absent -
+  // ServerCtx.useBrowserNetworkInterception is a general discriminator other
+  // consumers may branch on, so this path must say what it is, not leave it
+  // undefined.
+  it('createProxyRuntime does not disable service worker navigation preload', () => {
+    const runtime = createProxyRuntime(baseDeps())
+
+    expect(runtime.networkProxy.http.useBrowserNetworkInterception).to.be.false
+  })
+
+  it('createCdpFetchRuntime disables service worker navigation preload on its NetworkProxy', () => {
+    const client = {
+      send: sinon.stub(),
+      on: sinon.stub(),
+      off: sinon.stub(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+    expect(runtime.networkProxy.http.useBrowserNetworkInterception).to.be.true
+  })
+
   it('registers default configurator network policies at startup', () => {
     const runtime = createProxyRuntime({
       ...baseDeps(),

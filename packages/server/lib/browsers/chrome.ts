@@ -439,13 +439,20 @@ export = {
     // which the CDP transport always enables (crbug.com/1196004). Web fonts do
     // not load at all on the browser (CDP) network path unless this flag stays —
     // do not remove it.
+    // These features are launch-time-only: connectToExisting attaches to an
+    // already-running browser and inherits the flags of whatever launched it.
     if (options.useBrowserNetworkInterception) {
       const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
 
+      // ServiceWorkerAutoPreload serves navigations that cold-start a service
+      // worker from a browser-issued request no CDP session can pause
+      // https://github.com/cypress-io/cypress/issues/34709
+      const features = 'WebFontsCacheAwareTimeoutAdaption,ServiceWorkerAutoPreload'
+
       if (disableFeaturesIndex === -1) {
-        args.push('--disable-features=WebFontsCacheAwareTimeoutAdaption')
+        args.push(`--disable-features=${features}`)
       } else {
-        args[disableFeaturesIndex] += ',WebFontsCacheAwareTimeoutAdaption'
+        args[disableFeaturesIndex] += `,${features}`
       }
     }
 
@@ -654,12 +661,27 @@ export = {
       pageCriClient.send('ServiceWorker.enable'),
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
-      utils.initializeCDP(pageCriClient, automation),
+      utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
     ])
 
     if (options.useBrowserNetworkInterception) {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
+
+      // A service worker auto-attaches on both the browser-level connection
+      // and this page connection; the browser connection defers releasing a
+      // paused one until this promise resolves, so it never starts serving
+      // navigations before Fetch interception is enabled on its session
+      // here (#34674). For a crash-reloaded target, the browser connection
+      // instead asks this page connection to re-enable interception outright
+      // and holds on that call - a stale confirmation can't be told apart
+      // from a fresh one, so this never trusts one that was already on file.
+      // Both reassigned on every attachListeners call so they always point
+      // at the current page client - connectToNewSpec reuses the same
+      // pageCriClient across specs, but resetBrowserTargets can swap in a
+      // new one before this runs again.
+      browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
+      browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
 
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
