@@ -1,7 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import { vi, describe, it, expect, beforeEach, MockedObject } from 'vitest'
+import type { MockedObject } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { getTitleQueryCommand } from '../../../../src/cy/commands/window'
 import { getTitleFromAutomation } from '../../../../src/cy/commands/helpers/window'
 

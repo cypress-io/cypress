@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CorrelationInformation, PreRequests } from '@packages/proxy/lib/http/util/prerequests'
-import { BrowserPreRequest, CypressIncomingRequest } from '@packages/proxy'
+import type { CorrelationInformation } from '@packages/proxy/lib/http/util/prerequests'
+import { PreRequests } from '@packages/proxy/lib/http/util/prerequests'
+import type { BrowserPreRequest, CypressIncomingRequest } from '@packages/proxy'
 import { performance } from 'perf_hooks'
-import { ProtocolManagerShape } from '@packages/types'
+import type { ProtocolManagerShape } from '@packages/types'
 
 describe('http/util/prerequests', () => {
   let preRequests: PreRequests

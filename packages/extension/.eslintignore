@@ -1,6 +1,6 @@
-**/dist
+/app-dist
+/lib-dist
 **/*.d.ts
 **/package-lock.json
 **/tsconfig.json
-**/cypress/fixtures
 /test/helpers/background.js

@@ -1,6 +1,8 @@
-import sinon, { SinonFakeTimers } from 'sinon'
+import type { SinonFakeTimers } from 'sinon'
+import sinon from 'sinon'
 
-import CommandModel, { CommandProps } from '../../../src/commands/command-model'
+import type { CommandProps } from '../../../src/commands/command-model'
+import CommandModel from '../../../src/commands/command-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 

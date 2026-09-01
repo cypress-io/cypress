@@ -17,7 +17,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
     "test": "echo 'ok'",
-    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./src/router/router.ts, *.gen.ts",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1"
   },
   "dependencies": {},
@@ -58,7 +58,7 @@
     "cross-env": "7.0.3",
     "cypress-plugin-tab": "1.0.5",
     "cypress-real-events": "1.15.0",
-    "dayjs": "^1.9.3",
+    "dayjs": "^1.11.23",
     "debug": "^4.3.4",
     "disparity": "^3.2.0",
     "fs-extra": "9.1.0",

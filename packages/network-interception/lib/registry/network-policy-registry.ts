@@ -11,8 +11,6 @@ export type RunPoliciesResult = {
 export type RunPoliciesOptions = {
   phase: PolicyPhase
   exchange: NetworkExchange
-  onContinue?: () => void
-  onEnd?: () => void
 }
 
 /**
@@ -36,7 +34,7 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
    * Run registered policies for a phase. First matching policy that calls `end()` stops the chain.
    */
   async runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult> {
-    const { phase, exchange, onContinue, onEnd } = options
+    const { phase, exchange } = options
     let ended = false
     const state: Record<string, unknown> = {}
 
@@ -48,16 +46,10 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       state,
       continue () {
         // Intentional no-op: chain advancement is implicit via the loop below.
-        // Policies call continue() for API symmetry with end(); onContinue fires
-        // only when every matching policy completes without ending the chain.
+        // Policies call continue() for API symmetry with end().
       },
       end () {
-        if (ended) {
-          return
-        }
-
         ended = true
-        onEnd?.()
       },
     }
 
@@ -88,7 +80,6 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
 
     if (!ended) {
       debug.policies('policy chain completed without ending')
-      onContinue?.()
     }
 
     return { ended, state }

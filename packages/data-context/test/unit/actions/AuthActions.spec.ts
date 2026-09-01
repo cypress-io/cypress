@@ -5,7 +5,7 @@ import { AuthActions } from '../../../src/actions/AuthActions'
 import type { AuthenticatedUserShape } from '../../../src/data'
 import { createTestDataContext } from '../helper'
 import { graphqlSchema } from '../../../graphql/schema'
-import { FoundBrowser } from '@packages/types'
+import type { FoundBrowser } from '@packages/types'
 
 describe('AuthActions', () => {
   describe('.login', () => {

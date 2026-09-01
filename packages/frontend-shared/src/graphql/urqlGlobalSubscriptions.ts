@@ -1,4 +1,5 @@
-import { Client, gql } from '@urql/core'
+import type { Client } from '@urql/core'
+import { gql } from '@urql/core'
 import { pipe, subscribe } from 'wonka'
 import { GlobalSubscriptions_ErrorWarningChangeDocument, GlobalSubscriptions_PushFragmentDocument } from '../generated/graphql'
 
