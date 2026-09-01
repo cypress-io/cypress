@@ -37,7 +37,7 @@ const normalize = (str: string): string => {
     .map((str) => str.replace(/\s+$/g, ''))
     .join('\n')
     // replace download query with normalized platform and arch
-    .replace(/(\?platform=(darwin|linux|win32)&arch=x64)/, '?platform=OS&arch=ARCH'),
+    .replace(/(\?platform=(darwin|linux|win32)&arch=[\w-]+)/, '?platform=OS&arch=ARCH'),
   )
 }
 
@@ -67,6 +67,10 @@ vi.mock('os', async (importActual) => {
     },
   }
 })
+
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
