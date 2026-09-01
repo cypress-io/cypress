@@ -574,8 +574,9 @@ export const AllCypressErrors = {
         ${fmt.highlightSecondary(apiErr)}`
   },
   CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error, captureMethod?: ProtocolCaptureMethod) => {
-    // `beforeSpec` opens the recording's SQLite database beneath the temporary directory. The
-    // other initialization steps never touch the filesystem, so the advice would only mislead.
+    // `beforeSpec` is where the recording's SQLite database is opened and the capture script
+    // first writes beneath the temporary directory. The other initialization steps never touch
+    // the filesystem, so the advice would only mislead.
     const recommendation = captureMethod === 'beforeSpec' ? testReplayDirectoryRecommendation() : null
 
     return errTemplate`\
