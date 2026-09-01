@@ -360,6 +360,15 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // through the app's worker. The AUT frame navigates after the bypass is
   // cleared and keeps its worker.
   let serviceWorkerBypassed = false
+  // The main frame keeps its id across navigations, so one commit is enough to
+  // recognize the runner's own frame for the rest of this runtime.
+  let mainFrameId: string | undefined
+
+  const recordMainFrame = (params: Protocol.Page.FrameNavigatedEvent) => {
+    if (!params.frame.parentId) {
+      mainFrameId = params.frame.id
+    }
+  }
 
   const disarmServiceWorkerBypass = () => {
     if (!serviceWorkerBypassed) {
@@ -398,7 +407,14 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
   // next spec's navigation differs only by hash - it fetches nothing and fires
   // no frameNavigated. Without this the bypass would never be cleared and
   // every later AUT load would skip the app's worker.
-  function onNavigatedWithinDocumentForBypass () {
+  function onNavigatedWithinDocumentForBypass (params: Protocol.Page.NavigatedWithinDocumentEvent) {
+    // The AUT is live during a superdomain switch and can change its own hash,
+    // which must not end the runner's bypass. Before the first commit there is
+    // no AUT yet, so an unknown main frame is the runner.
+    if (mainFrameId && params.frameId !== mainFrameId) {
+      return
+    }
+
     clearServiceWorkerBypass().catch(() => {})
   }
 
@@ -479,6 +495,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     },
     async start () {
       unsubscribeAUTFrameNavigated = deps.onAUTFrameNavigated?.(onAUTFrameNavigated)
+      deps.client.on('Page.frameNavigated', recordMainFrame)
 
       // Service workers and out-of-process iframes have their own CDP
       // session — without enabling Fetch there, a worker's script fetch and an
@@ -500,6 +517,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         escapeDetector.stop()
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
+        deps.client.off('Page.frameNavigated', recordMainFrame)
 
         throw err
       }
@@ -520,6 +538,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
       escapeDetector.stop()
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
+      deps.client.off('Page.frameNavigated', recordMainFrame)
 
       // State only: a send here would be enqueued rather than rejected while
       // the client is reconnecting, and stop() must not be able to hang

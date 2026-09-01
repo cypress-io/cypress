@@ -397,6 +397,12 @@ describe('lib/network-runtime', () => {
       })
     }
 
+    const navigatedWithinDocument = (client: { on: sinon.SinonStub }, frameId: string) => {
+      client.on.withArgs('Page.navigatedWithinDocument').getCalls().forEach((call) => {
+        call.args[1]({ frameId } as Protocol.Page.NavigatedWithinDocumentEvent)
+      })
+    }
+
     it('bypasses the service worker until the top-level navigation commits', async () => {
       const client = createCdpClient()
       const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
@@ -434,7 +440,32 @@ describe('lib/network-runtime', () => {
       await runtime.bypassServiceWorkerForTopNavigation()
       client.send.resetHistory()
 
-      client.on.withArgs('Page.navigatedWithinDocument').getCalls().forEach((call) => call.args[1]({ frameId: 'runner' }))
+      navigatedWithinDocument(client, 'runner')
+
+      await flush()
+
+      expect(client.send).to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+    })
+
+    // The AUT is live during a superdomain switch and can change its own hash.
+    it('ignores a same-document navigation in the AUT', async () => {
+      const client = createCdpClient()
+      const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+
+      await runtime.start()
+      // the runner's own commit is what teaches the runtime which frame is the
+      // main one
+      frameNavigated(client, { id: 'runner' })
+      await runtime.bypassServiceWorkerForTopNavigation()
+      client.send.resetHistory()
+
+      navigatedWithinDocument(client, 'aut')
+
+      await flush()
+
+      expect(client.send).not.to.have.been.calledWith('Network.setBypassServiceWorker', { bypass: false })
+
+      navigatedWithinDocument(client, 'runner')
 
       await flush()
 
