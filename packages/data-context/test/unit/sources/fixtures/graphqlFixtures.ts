@@ -59,6 +59,19 @@ export const FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE = {
   },
 }
 
+/**
+ * How the cloud responds to the three queries above once `batch-execute` has
+ * merged them into a single request - each top-level field is aliased with the
+ * index of the query it came from.
+ */
+export const BATCHED_USER_RESPONSE = {
+  data: {
+    _0_cloudViewer: FAKE_USER_RESPONSE.data.cloudViewer,
+    _1_cloudViewer: FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data.cloudViewer,
+    _2_cloudViewer: FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE.data.cloudViewer,
+  },
+}
+
 export const CLOUD_PROJECT_QUERY = parse(
   `{ currentProject { id cloudProject { __typename  ... on CloudProject { id } } } }`,
 )

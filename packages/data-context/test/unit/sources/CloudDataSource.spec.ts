@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { execute } from 'graphql'
+import type { DocumentNode } from 'graphql'
 import { Response } from 'cross-fetch'
 
 import type { DataContext } from '../../../src/DataContext'
@@ -8,6 +9,7 @@ import { CloudDataSource } from '../../../src/sources'
 import { createTestDataContext, scaffoldProject } from '../helper'
 import type { ExecutionResult } from '@urql/core'
 import {
+  BATCHED_USER_RESPONSE,
   CLOUD_PROJECT_QUERY,
   CLOUD_PROJECT_RESPONSE,
   FAKE_USER_QUERY,
@@ -205,6 +207,61 @@ describe('CloudDataSource', () => {
       expect(resolved.data).toEqual(undefined)
       expect(resolved.errors).toBeDefined()
       expect(resolved.error?.networkError?.message).toEqual('Unauthorized')
+
+      expect(logoutStub).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('batched queries', () => {
+    const executeBatched = (operationDoc: DocumentNode) => {
+      return cloudDataSource.executeRemoteGraphQL({
+        fieldName: 'cloudViewer',
+        operationDoc,
+        operationVariables: {},
+        operationType: 'query',
+        shouldBatch: true,
+      })
+    }
+
+    const BATCHED_QUERIES = [FAKE_USER_QUERY, FAKE_USER_WITH_OPTIONAL_MISSING, FAKE_USER_WITH_REQUIRED_MISSING]
+
+    it('resolves every batched query from a single dispatch', async () => {
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(BATCHED_USER_RESPONSE), { status: 200 }))
+
+      const results = await Promise.all(BATCHED_QUERIES.map(executeBatched))
+
+      expect(fetchStub).toHaveBeenCalledTimes(1)
+
+      expect(results.map((result) => result.data)).toEqual([
+        FAKE_USER_RESPONSE.data,
+        FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data,
+        FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE.data,
+      ])
+
+      results.forEach((result) => expect(result.errors).toBeUndefined())
+    })
+
+    it('settles every batched query from a single dispatch when the request fails', async () => {
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
+
+      const results = await Promise.all(BATCHED_QUERIES.map(executeBatched))
+
+      expect(fetchStub).toHaveBeenCalledTimes(1)
+
+      results.forEach((result) => {
+        expect(result.data).toBeUndefined()
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors?.[0]?.message).toContain('No Content')
+      })
+    })
+
+    it('logout user on 401 response', async () => {
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
+
+      const resolved = await executeBatched(FAKE_USER_QUERY)
+
+      expect(resolved.data).toBeUndefined()
+      expect(resolved.errors?.[0]?.message).toContain('Unauthorized')
 
       expect(logoutStub).toHaveBeenCalledTimes(1)
     })

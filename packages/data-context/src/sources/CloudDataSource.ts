@@ -10,7 +10,7 @@ import { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
-import { print, visit } from 'graphql'
+import { GraphQLError, print, visit } from 'graphql'
 import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
@@ -92,12 +92,19 @@ export class CloudDataSource {
   #cloudUrqlClient: Client
   #lastCache?: string
   #batchExecutor: ReturnType<typeof createBatchingExecutor>
-  #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
+  #batchExecutorBatcher: DataLoader<CloudExecuteRemote, ExecutionResult>
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
-    this.#batchExecutor = createBatchingExecutor((config) => {
-      return this.#executeQuery(namedExecutionDocument(config.document), config.variables)
+    this.#batchExecutor = createBatchingExecutor(async (config) => {
+      const result = await this.#formatWithErrors(
+        await this.#executeQuery(namedExecutionDocument(config.document), config.variables),
+      )
+
+      // `batch-execute` splits `errors` back out to the requests it merged, but
+      // knows nothing about urql's `error`, so a failure has to be reported
+      // there for the individual batched callers to ever see it.
+      return { data: result.data, errors: toExecutionErrors(result) }
     }, { maxBatchSize: 20 })
 
     this.#batchExecutorBatcher = this.#makeBatchExecutionBatcher()
@@ -189,7 +196,7 @@ export class CloudDataSource {
     return `${info.operation.name?.value ?? 'Anonymous'}_${pathToArray(info.path).map((p) => typeof p === 'number' ? 'idx' : p).join('_')}`
   }
 
-  #pendingPromises = new Map<string, Promise<OperationResult>>()
+  #pendingPromises = new Map<string, Promise<CloudDataResponse>>()
 
   #hashRemoteRequest (config: CloudExecuteQuery) {
     const operation = print(config.operationDoc)
@@ -201,19 +208,26 @@ export class CloudDataSource {
     return crypto.createHash('sha1').update(str).digest('hex')
   }
 
-  #formatWithErrors = async (data: OperationResult<any, any>) => {
+  /**
+   * Normalizes the two shapes a cloud response arrives in: urql resolves with an
+   * `OperationResult`, which reports failures on `error`, while a batched query
+   * resolves with a graphql-tools `ExecutionResult`, which reports them in `errors`.
+   */
+  #formatWithErrors = async (data: CloudDataResponse) => {
+    const errors = data.errors ?? data.error?.graphQLErrors
+
     // If we receive a 401 from Cypress Cloud, we need to logout the user
     if (data.error?.response?.status === 401) {
       await this.params.logout()
     }
 
-    if (data.error && data.operation.kind === 'mutation') {
+    if ((data.error || errors?.length) && data.operation?.kind === 'mutation') {
       await this.invalidate({ __typename: 'Query' })
     }
 
     return {
       ...data,
-      errors: data.error?.graphQLErrors,
+      errors,
     }
   }
 
@@ -226,7 +240,7 @@ export class CloudDataSource {
       return loading
     }
 
-    const query = config.shouldBatch
+    const query: Promise<CloudDataResponse> = config.shouldBatch
       ? this.#batchExecutorBatcher.load(config)
       : this.#executeQuery(config.operationDoc, config.operationVariables)
 
@@ -393,6 +407,19 @@ export class CloudDataSource {
   #ensureError (val: any): Error {
     return val instanceof Error ? val : new Error(val)
   }
+}
+
+/**
+ * A network-level failure has no `graphQLErrors` to report, so surface the
+ * combined error's message instead - otherwise the batch splits into results
+ * that look successful but empty.
+ */
+function toExecutionErrors (result: CloudDataResponse): readonly GraphQLError[] | undefined {
+  if (result.errors?.length || !result.error) {
+    return result.errors
+  }
+
+  return [new GraphQLError(result.error.message)]
 }
 
 /**
