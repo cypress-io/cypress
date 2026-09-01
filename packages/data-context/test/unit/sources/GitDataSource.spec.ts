@@ -21,15 +21,15 @@ describe('GitDataSource', () => {
     e2eFolder = path.join(projectPath, 'cypress', 'e2e')
     const allSpecs = await fs.readdir(e2eFolder)
 
-    if (process.env.CI) {
-      // need to set a user on CI
-      // run sequentially: concurrent writes to ~/.gitconfig race on the
-      // .gitconfig.lock file and intermittently fail with "could not lock"
-      await git.addConfig('user.name', 'Test User', true, 'global')
-      await git.addConfig('user.email', 'test-user@example.com', true, 'global')
-    }
-
     await git.init()
+
+    // scope the identity to this throwaway repo. Writing it to the global
+    // gitconfig would leave the machine committing as `Test User` afterwards,
+    // and signing is irrelevant here but fails without the machine's key
+    await git.addConfig('user.name', 'Test User')
+    await git.addConfig('user.email', 'test-user@example.com')
+    await git.addConfig('commit.gpgsign', 'false')
+
     await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
     await git.commit('add all specs')
   })
