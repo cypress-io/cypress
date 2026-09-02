@@ -1,3 +1,6 @@
+// Must precede the imports below: `app_data.path()` runs at module load, reached
+// through server-base and socket-e2e, and bakes CYPRESS_INTERNAL_ENV into the app
+// data folder — assigning after the imports would put this suite under `cy/test`.
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 import { expect, nock } from '../spec_helper'
@@ -18,7 +21,6 @@ import performance from '@tooling/system-tests/lib/performance'
 import { CA } from '@packages/https-proxy'
 import { setupFullConfigWithDefaults } from '@packages/config'
 import { getCtx, setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
-import { createRoutes } from '../../lib/routes'
 import { ServerBase } from '../../lib/server-base'
 import { SocketE2E } from '../../lib/socket-e2e'
 import chrome from '../../lib/browsers/chrome'
@@ -752,7 +754,6 @@ describe('Proxy Performance', function () {
 
             return cyServer.open(config, {
               SocketCtor: SocketE2E,
-              createRoutes,
               testingType: 'e2e',
               getCurrentBrowser: () => null,
             })
@@ -788,7 +789,6 @@ describe('Proxy Performance', function () {
             // the capture preHook below, not at open
             return Promise.resolve(proxyDisabledServer.open(config, {
               SocketCtor: SocketE2E,
-              createRoutes,
               testingType: 'e2e',
               getCurrentBrowser: () => null,
             }))
