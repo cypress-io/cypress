@@ -52,7 +52,7 @@ const showWarningForInvalidConfig = (options: any) => {
     }
 
     return invalid
-  }, [])
+  }, [] as string[])
 
   if (invalidConfigOptions.length && options.invokedFromCli) {
     return errorsWarning('INVALID_CONFIG_OPTION', invalidConfigOptions)
