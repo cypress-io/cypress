@@ -1,4 +1,5 @@
-import { vi, describe, it, beforeEach, afterEach, expect, MockInstance } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import path from 'path'
 import chalk from 'chalk'
 import _ from 'lodash'
@@ -8,7 +9,8 @@ import mockfs from 'mock-fs'
 import { geteuid } from 'process'
 import { Console } from 'console'
 import fs from 'fs-extra'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import { Listr } from 'listr2'
@@ -84,6 +86,10 @@ vi.mock('os', async (importActual) => {
     },
   }
 })
+
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
 
 vi.mock('../../../lib/exec/xvfb', async (importActual) => {
   const actual = await importActual()

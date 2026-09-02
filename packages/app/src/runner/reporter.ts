@@ -1,5 +1,6 @@
 import { REPORTER_FRAME_NAME } from '@packages/types'
-import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
+import type { MobxRunnerStore } from '../store'
+import { getMobxRunnerStore, useSpecStore } from '../store'
 import { getReporterElement, REPORTER_ID } from './utils'
 import { getEventManager } from '.'
 import type { EventManager } from './event-manager'
@@ -150,7 +151,7 @@ function renderReporter (
 
   const revealTimeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
 
-  Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
+  void Promise.race([Promise.all(pendingStylesheets), revealTimeout]).then(() => {
     frame.style.visibility = ''
   })
 }

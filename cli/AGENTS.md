@@ -47,6 +47,19 @@ cd cli/react && yarn build
 cd cli/mount-utils && yarn build
 ```
 
+## Unit Tests
+
+The `unit-tests` CI job runs only on `linux-x64` and `windows` — there is no arm64 executor — so **a spec coupled to the host machine passes CI and still fails for contributors**, most often on Apple Silicon. Keep specs host-independent.
+
+- **Pin the architecture at both layers.** `util.getRealArch()` consults `os.arch()` only for its early returns; otherwise it falls through to the `arch` package, which reports the real machine. A spec asserting on output that carries an arch — `Platform:` lines, download URLs, `?arch=` query params, CDN build URLs — needs a file-scoped `vi.mock('arch', () => ({ default: () => 'x64' }))` alongside `vi.mocked(os.arch).mockReturnValue('x64')`. Mock it per file rather than globally through `setupFiles`: some specs exercise real-machine detection deliberately, and a shared mock hides the dependency from the file that relies on it.
+- **Keep test helpers generic.** Normalizers that scrub output before snapshotting must match the shape of a host value, not the value itself — `&arch=[\w-]+`, never `&arch=x64` — so the helper cannot re-couple a snapshot to the host.
+- **Never run `vitest -u` to clear a host-dependent failure.** Committed snapshots encode the canonical values; regenerating them on a different machine buries the coupling and breaks everyone else. Fix the mock instead.
+- **Treat other host facts the same way** — `os.platform()`, `os.release()`, `os.tmpdir()`, `os.homedir()`, cache directories, path separators. Assert against mocked values, never whatever the machine reports.
+
+Verify an arch or platform mock is load-bearing rather than decorative: flip its factory to the other value, run that spec, and confirm the expected tests fail. A mock wired to nothing is worse than no mock, because it reads as coverage.
+
+`util._cachedArch` is a module-level singleton. A file-scoped `vi.mock('arch')` is in place before the first call, so the cached value is already the mocked one; reset it (`util._cachedArch = undefined`) only in specs that vary the arch between tests.
+
 ## Notes
 
 - The main CLI build uses Rollup (configured in `rollup.config.mjs`). Entry points are `lib/index.ts`, `lib/cli.ts`, `lib/cypress.ts`, `lib/exec/xvfb.ts`, `lib/exec/spawn.ts`, and `lib/bin/cypress.ts`. Output goes to `dist/` and is copied to `build/` via `sync-build-dist.ts`.

@@ -1,14 +1,18 @@
-import sinon, { SinonSpy } from 'sinon'
+import type { SinonSpy } from 'sinon'
+import sinon from 'sinon'
 
-import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../../../src/runnables/runnables-store'
-import SuiteModel, { SuiteProps } from '../../../src/runnables/suite-model'
-import { AppState } from '../../../src/lib/app-state'
-import { Scroller } from '../../../src/lib/scroller'
-import TestModel, { TestProps } from '../../../src/test/test-model'
-import { AgentProps } from '../../../src/agents/agent-model'
-import { CommandProps } from '../../../src/commands/command-model'
-import { RouteProps } from '../../../src/routes/route-model'
-import { HookProps } from '../../../src/hooks/hook-model'
+import type { RootRunnable, LogProps } from '../../../src/runnables/runnables-store'
+import runnablesStore, { RunnablesStore } from '../../../src/runnables/runnables-store'
+import type { SuiteProps } from '../../../src/runnables/suite-model'
+import type SuiteModel from '../../../src/runnables/suite-model'
+import type { AppState } from '../../../src/lib/app-state'
+import type { Scroller } from '../../../src/lib/scroller'
+import type { TestProps } from '../../../src/test/test-model'
+import type TestModel from '../../../src/test/test-model'
+import type { AgentProps } from '../../../src/agents/agent-model'
+import type { CommandProps } from '../../../src/commands/command-model'
+import type { RouteProps } from '../../../src/routes/route-model'
+import type { HookProps } from '../../../src/hooks/hook-model'
 
 const appStateStub = () => {
   return {
@@ -202,7 +206,7 @@ describe('runnables store', () => {
     it('finishes the test with the given id', () => {
       instance.setRunnables({ tests: [createTest('1')], suites: [] })
       instance.runnableStarted({ id: '1' } as TestProps)
-      instance.runnableFinished({ id: '1' } as TestProps)
+      instance.runnableFinished({ id: '1' } as TestProps, false)
       expect((instance.runnables[0] as TestModel).isActive).to.be.false
     })
   })

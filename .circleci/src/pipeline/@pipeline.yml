@@ -1229,8 +1229,11 @@ commands:
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
 
             cd ~/cypress/..
-            # install some deps for get-next-version
-            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12 minimist@1.2.5
+            # get-next-version runs before the workspace dependencies are
+            # unpacked, so install what it needs at the versions
+            # cypress/package.json pins.
+            NEXT_VERSION_DEPS=$(node -p "const deps = require('./cypress/package.json').devDependencies; ['semver', 'conventional-recommended-bump', 'minimist'].map((name) => name + '@' + deps[name]).join(' ')")
+            npm i $NEXT_VERSION_DEPS
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 

@@ -3,7 +3,8 @@ import { allowTsModuleStubbing } from '../../support/helpers'
 allowTsModuleStubbing()
 
 import $stackUtils from '../../../src/cypress/stack_utils'
-import $errUtils, { CypressError } from '../../../src/cypress/error_utils'
+import type { CypressError } from '../../../src/cypress/error_utils'
+import $errUtils from '../../../src/cypress/error_utils'
 import $errorMessages from '../../../src/cypress/error_messages'
 
 const { sinon } = Cypress

@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import { createTestDataContext } from '../helper'
-import { FoundBrowser, FullConfig } from '@packages/types'
+import type { FoundBrowser, FullConfig } from '@packages/types'
 
 const browsers = [
   { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron', path: '', version: '' },

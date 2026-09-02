@@ -7,7 +7,8 @@ import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '
 import type { UpdateInstanceArtifactsPayload, ArtifactMetadata, ProtocolMetadata } from '../api'
 import * as errors from '../../errors'
 import exception from '../exception'
-import { IArtifact, ArtifactUploadResult, ArtifactKinds } from './artifact'
+import type { IArtifact, ArtifactUploadResult } from './artifact'
+import { ArtifactKinds } from './artifact'
 import { createScreenshotArtifactBatch } from './screenshot_artifact'
 import { createVideoArtifact } from './video_artifact'
 import { createProtocolArtifact, composeProtocolErrorReportFromOptions } from './protocol_artifact'
@@ -190,7 +191,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     if (postArtifactExtractionFatalError.captureMethod === 'protocolUploadUrl') {
       errors.warning('CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT', postArtifactExtractionFatalError.error)
     } else if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
-      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
+      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error, postArtifactExtractionFatalError.captureMethod)
     } else {
       errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
     }
