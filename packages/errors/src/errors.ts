@@ -5,7 +5,7 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import type { BreakingErrResult, TestingType } from '@packages/types'
+import type { BreakingErrResult, ProtocolCaptureMethod, TestingType } from '@packages/types'
 import { logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
@@ -43,6 +43,15 @@ It also looks like you also passed in an explicit ${fmt.flag('--ci-build-id')} f
 This is only necessary if you are NOT running in one of our supported CI providers.
 
 This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.\
+`
+}
+
+const testReplayDirectoryRecommendation = (): ReturnType<typeof errPartial> => {
+  return errPartial`\
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.\
 `
 }
 
@@ -564,11 +573,18 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
+  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error, captureMethod?: ProtocolCaptureMethod) => {
+    // `beforeSpec` is where the recording's SQLite database is opened and the capture script
+    // first writes beneath the temporary directory. The other initialization steps never touch
+    // the filesystem, so the advice would only mislead.
+    const recommendation = captureMethod === 'beforeSpec' ? testReplayDirectoryRecommendation() : null
+
     return errTemplate`\
         Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
         These results will not display Test Replay recordings.
+
+        ${recommendation}
 
         This error will not affect or change the exit code.
 
@@ -580,10 +596,7 @@ export const AllCypressErrors = {
 
         These results will not display Test Replay recordings.
 
-        This can happen for many reasons. If this problem persists:
-
-        - Try increasing the available disk space.
-        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
+        ${testReplayDirectoryRecommendation()}
 
         This error will not affect or change the exit code.
 

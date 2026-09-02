@@ -515,6 +515,7 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+        beforeSpec: [err, 'beforeSpec'],
       }
     },
     CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
