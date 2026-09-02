@@ -12,7 +12,7 @@ import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import { toObject, toArray } from './util/args'
 import { telemetry } from '@packages/telemetry'
-import { logException, warning as errorsWarning } from './errors'
+import * as errors from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import chalk from 'chalk'
@@ -55,7 +55,7 @@ const showWarningForInvalidConfig = (options: any) => {
   }, [] as string[])
 
   if (invalidConfigOptions.length && options.invokedFromCli) {
-    return errorsWarning('INVALID_CONFIG_OPTION', invalidConfigOptions)
+    return errors.warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
   }
 
   return undefined
@@ -71,7 +71,9 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
   // and exit with 1
   debug('exiting with err', err)
 
-  await logException(err)
+  // `logException` reads `this.log`, so it has to stay a property call on the
+  // module rather than a destructured reference
+  await errors.logException(err)
 
   if (isCypressError(err)) {
     if (
@@ -104,7 +106,7 @@ export = {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
-          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
+          errors.warning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
         debug('running Electron currently')
