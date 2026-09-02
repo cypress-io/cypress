@@ -277,6 +277,7 @@ describe('install', () => {
         electronVersion: ELECTRON_VERSION,
         platform: 'linux',
         arch: 'x64',
+        icon: getPathToIcon('cypress'),
       }))
 
       expect(exit).toHaveBeenCalled()
