@@ -107,6 +107,30 @@ describe('lib/server-base', () => {
 
       expect(useMorganStub).to.have.been.calledOnce
     })
+
+    // errorhandler only sees throws from the middleware registered ahead of it,
+    // and `_middleware` is the one such hook a test can drive
+    it('renders a middleware error through errorhandler', function () {
+      // supertest binds its ephemeral server to 127.0.0.1, which spec_helper's
+      // nock setup does not allow by name
+      nock.enableNetConnect(/(localhost|127\.0\.0\.1)/)
+      sinon.stub(console, 'error')
+      this.server._middleware = () => {
+        throw new Error('boom from middleware')
+      }
+
+      const app = this.server.createExpressApp({ morgan: false })
+
+      return supertest(app)
+      .get('/')
+      .expect(500)
+      .then((res) => {
+        expect(res.text).to.include('boom from middleware')
+        // errorhandler's own template; express's default handler renders the
+        // same 500 and stack without it
+        expect(res.text).to.include('id="stacktrace"')
+      })
+    })
   })
 
   describe('#useMorgan', () => {
