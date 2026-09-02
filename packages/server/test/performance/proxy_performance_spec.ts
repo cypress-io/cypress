@@ -1,30 +1,48 @@
-require('../spec_helper')
-
-const { getCtx, setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
-
-const cp = require('child_process')
-const fse = require('fs-extra')
-const http2 = require('http2')
-const os = require('os')
-const fs = require('fs')
-const path = require('path')
-const _ = require('lodash')
-const { expect } = require('chai')
-const debug = require('debug')('test:proxy-performance')
-const DebuggingProxy = require('@cypress/debugging-proxy')
-const HarCapturer = require('chrome-har-capturer')
-const performance = require('@tooling/system-tests/lib/performance')
-const Promise = require('bluebird')
-const sanitizeFilename = require('sanitize-filename')
-const { createRoutes } = require(`../../lib/routes`)
-
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
-const { CA } = require('@packages/https-proxy')
-const { setupFullConfigWithDefaults } = require('@packages/config')
-const { ServerBase } = require('../../lib/server-base')
-const { SocketE2E } = require('../../lib/socket-e2e')
-const { _getArgs } = require('../../lib/browsers/chrome')
+import { expect, nock } from '../spec_helper'
+
+import cp from 'child_process'
+import Debug from 'debug'
+import fse from 'fs-extra'
+import fs from 'fs'
+import http2 from 'http2'
+import os from 'os'
+import path from 'path'
+import _ from 'lodash'
+import Promise from 'bluebird'
+import sanitizeFilename from 'sanitize-filename'
+import DebuggingProxy from '@cypress/debugging-proxy'
+import HarCapturer from 'chrome-har-capturer'
+import performance from '@tooling/system-tests/lib/performance'
+import { CA } from '@packages/https-proxy'
+import { setupFullConfigWithDefaults } from '@packages/config'
+import { getCtx, setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
+import { createRoutes } from '../../lib/routes'
+import { ServerBase } from '../../lib/server-base'
+import { SocketE2E } from '../../lib/socket-e2e'
+import chrome from '../../lib/browsers/chrome'
+import type { Browser } from '../../lib/browsers/types'
+import type { BrowserLaunchOpts } from '@packages/types'
+
+const debug = Debug('test:proxy-performance')
+
+interface TestCase {
+  name: string
+  disableHttp2: boolean
+  upstreamProxy: boolean
+  httpsUpstreamProxy: boolean
+  cyProxy: boolean
+  cyIntercept: boolean
+  http2Control: boolean
+  proxyDisabled: boolean
+  [result: string]: string | number | boolean
+}
+
+interface WireEvidence {
+  responses: number
+  http1_1StatusLines: number
+}
 
 /**
  * Resolves an absolute or PATH-resolvable Chrome/Chromium binary for `cp.spawn`.
@@ -97,7 +115,7 @@ const URLS_UNDER_TEST = [
   'http://test-page-speed.cypress.io/index1000.html',
 ]
 
-const start = (new Date()) / 1000
+const start = Number(new Date()) / 1000
 
 const PROXY_PORT = process.env.PROXY_PORT || 45678
 const HTTPS_PROXY_PORT = process.env.HTTPS_PROXY_PORT || 45681
@@ -136,7 +154,7 @@ Object.entries(FIXED_PORTS).forEach(([name, port]) => {
   }
 })
 
-const TEST_CASES = [
+const TEST_CASES: TestCase[] = [
   // these first 4 cases don't involve Cypress, don't need to run every time
   // {
   //   name: 'Chrome w/o HTTP/2',
@@ -225,7 +243,7 @@ const TEST_CASES = [
   return makeTestCase(v)
 })
 
-function makeTestCase (v) {
+function makeTestCase (v: Partial<TestCase> & { name: string }): TestCase {
   return _.defaults(v, {
     disableHttp2: false,
     upstreamProxy: false,
@@ -234,10 +252,10 @@ function makeTestCase (v) {
     cyIntercept: false,
     http2Control: false,
     proxyDisabled: false,
-  })
+  }) as TestCase
 }
 
-const startLatencyOrigin = (cert, key) => {
+const startLatencyOrigin = (cert: string, key: string) => {
   // mirrors the hosted test-page-speed page: 1000 unique image fetches.
   // Lives in support/fixtures because the runner's `test/performance/**` glob
   // would otherwise hand the .html file to mocha as a spec
@@ -280,11 +298,11 @@ const startLatencyOrigin = (cert, key) => {
     res.end(html)
   })
 
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     // explicit loopback bind + loud failure: a soft conflict (another
     // process on the IPv4 side) would otherwise misroute every request
     server.on('error', reject)
-    server.listen(HTTP2_LATENCY_ORIGIN_PORT, '127.0.0.1', resolve)
+    server.listen(HTTP2_LATENCY_ORIGIN_PORT, '127.0.0.1', () => resolve())
   })
 }
 
@@ -316,10 +334,10 @@ const REPORTED_URL_COUNT = 5
 const BAD_PAGE_GRACE_MS = 1000
 
 const createHarCaptureHooks = (captureTimeoutMs = CAPTURE_TIMEOUT_MS) => {
-  const started = new Set()
-  const finished = new Set()
-  const failed = new Set()
-  const startedUrls = []
+  const started = new Set<string>()
+  const finished = new Set<string>()
+  const failed = new Set<string>()
+  const startedUrls: string[] = []
   let onTargetReached = _.noop
 
   const onCdpEvent = ({ method, params }) => {
@@ -376,7 +394,7 @@ const createHarCaptureHooks = (captureTimeoutMs = CAPTURE_TIMEOUT_MS) => {
         })
       })
       .then(() => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
           if (finished.size >= EXPECTED_IMAGE_COUNT) return resolve()
 
           const timeout = setTimeout(() => {
@@ -395,20 +413,20 @@ const createHarCaptureHooks = (captureTimeoutMs = CAPTURE_TIMEOUT_MS) => {
   }
 }
 
-const average = (arr) => {
+const average = (arr: number[]) => {
   return _.sum(arr) / arr.length
 }
 
-const percentile = (sortedArr, p) => {
+const percentile = (sortedArr: number[], p: number) => {
   const i = Math.floor(p / 100 * (sortedArr.length - 1))
 
   return Math.round(sortedArr[i])
 }
 
-const getResultsFromHar = (har) => {
+const getResultsFromHar = (har): Record<string, number> => {
   // HAR 1.2 Spec: http://www.softwareishard.com/blog/har-12-spec/
   const { entries } = har.log
-  const results = {}
+  const results: Record<string, number> = {}
 
   const requestsStarted = _.get(har, 'log.pages[0]._user.requestsStarted')
   const diagnosis = requestsStarted >= EXPECTED_IMAGE_COUNT
@@ -426,10 +444,10 @@ const getResultsFromHar = (har) => {
 
   results['Total'] = Math.round(elapsed)
 
-  let mins = {}
-  let maxes = {}
+  const mins: Record<string, number> = {}
+  const maxes: Record<string, number> = {}
 
-  const timings = {
+  const timings: Record<string, number[]> = {
     'receive': [],
     'wait': [],
     'send': [],
@@ -477,18 +495,24 @@ const getResultsFromHar = (har) => {
   return results
 }
 
-const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutMs } = {}) => {
+interface RunBrowserTestOptions {
+  onHar?: (har) => void
+  onWire?: (wire: WireEvidence) => void
+  captureTimeoutMs?: number
+}
+
+const runBrowserTest = (urlUnderTest: string, testCase: TestCase, { onHar, onWire, captureTimeoutMs }: RunBrowserTestOptions = {}) => {
   const cdpPort = CDP_PORT_RANGE_START + Math.floor(Math.random() * CDP_PORT_RANGE_SIZE)
 
   const browser = {
     isHeadless: true,
-  }
+  } as Browser
 
   const options = {
     useBrowserNetworkInterception: testCase.proxyDisabled,
-  }
+  } as BrowserLaunchOpts
 
-  const args = _getArgs(browser, options, cdpPort).concat([
+  const args = chrome._getArgs(browser, options, String(cdpPort)).concat([
     // additionally...
     '--disable-background-networking',
     '--no-sandbox', // allows us to run as root, for CI
@@ -570,7 +594,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutM
     // response, so it still describes the real wire exchange: raw `headersText`
     // only exists for HTTP/1.1 responses (CDP cannot provide it for HTTP/2 or
     // HTTP/3).
-    const wire = {
+    const wire: WireEvidence = {
       responses: 0,
       http1_1StatusLines: 0,
     }
@@ -587,7 +611,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutM
         port: cdpPort,
         // disable SSL verification on older Chrome versions, copied from the HAR CLI
         // https://github.com/cyrus-and/chrome-har-capturer/blob/587550508bddc23b7f4b4328c158322be4749298/bin/cli.js#L60
-        preHook: (_, cdp) => {
+        preHook: (_url, cdp) => {
           const { Security } = cdp
 
           captureHooks.trackNetworkActivity(cdp)
@@ -635,7 +659,7 @@ const runBrowserTest = (urlUnderTest, testCase, { onHar, onWire, captureTimeoutM
       })
 
       return new Promise((resolve, reject) => {
-        harCapturer.on('fail', (_, err) => {
+        harCapturer.on('fail', (_url, err) => {
           return reject(err)
         })
 
@@ -691,7 +715,7 @@ describe('Proxy Performance', function () {
   })
 
   before(function () {
-    // When this file runs after other specs (e.g. cy_visit_performance_spec.js loads first
+    // When this file runs after other specs (e.g. cy_visit_performance_spec.ts loads first
     // alphabetically), the prior test's spec_helper `afterEach` has already run `clearCtx`.
     // Nested suite `before` runs before the next test's root `beforeEach`, so the global
     // DataContext is still unset here unless we call `setCtx` again.
@@ -824,7 +848,7 @@ describe('Proxy Performance', function () {
           // same stale baseline. Scoped locally so it doesn't leak to sibling tests.
           // Inside `it`, the running test is `this.test` (not `this.currentTest`,
           // which is only defined in hooks).
-          const baselineForAttempt = this.test.currentRetry() === 0
+          const baselineForAttempt = this.test!.currentRetry() === 0
             ? Promise.resolve(baseline)
             : runBrowserTest(urlUnderTest, testCases[0]).then((runtime) => {
               debug('re-measured baseline runtime is: ', runtime)
@@ -842,7 +866,7 @@ describe('Proxy Performance', function () {
 
       if (urlUnderTest.startsWith('https:')) {
         it('Chrome w/o Cypress (HTTP/2 control) negotiates HTTP/2 for 1000 images', async function () {
-          const testCase = testCases.find((currentCase) => currentCase.http2Control)
+          const testCase = testCases.find((currentCase) => currentCase.http2Control)!
 
           let har
 
@@ -858,15 +882,15 @@ describe('Proxy Performance', function () {
         })
 
         it('With proxy disabled, Intercepted (CDP) preserves HTTP/2 and loads 1000 images within 2x of MITM interception', async function () {
-          const proxyDisabledCase = testCases.find((testCase) => testCase.proxyDisabled && !testCase.disableHttp2)
+          const proxyDisabledCase = testCases.find((testCase) => testCase.proxyDisabled && !testCase.disableHttp2)!
           // clone so the generic MITM case's table row and .har artifact aren't clobbered
           const mitmCase = _.assign(
-            _.cloneDeep(TEST_CASES.find((testCase) => testCase.name === 'With Cypress proxy, Intercepted')),
+            _.cloneDeep(TEST_CASES.find((testCase) => testCase.name === 'With Cypress proxy, Intercepted')!),
             { name: 'With Cypress proxy, Intercepted (paired re-measure)' },
           )
 
-          let mitmWire
-          let proxyDisabledWire
+          let mitmWire!: WireEvidence
+          let proxyDisabledWire!: WireEvidence
 
           // paired and time-adjacent: both sides re-measured on every retry so
           // machine-load drift can't skew the ratio
@@ -902,17 +926,17 @@ describe('Proxy Performance', function () {
         })
 
         it('With proxy disabled, Intercepted (CDP) w/o HTTP/2 loads 1000 images less than 3x as slowly as Chrome', async function () {
-          const testCase = testCases.find((currentCase) => currentCase.proxyDisabled && currentCase.disableHttp2)
+          const testCase = testCases.find((currentCase) => currentCase.proxyDisabled && currentCase.disableHttp2)!
           // measured ~0.85x the baseline locally, so 3x (the suite's generic
           // multiplier) leaves ample headroom against CI noise while still
           // catching a real multiplied regression in the CDP HTTP/1.1 path
           const multiplier = 3
 
-          const currentBaseline = this.test.currentRetry() === 0
+          const currentBaseline = this.test!.currentRetry() === 0
             ? baseline
             : await runBrowserTest(urlUnderTest, testCases[0])
 
-          let wireEvidence
+          let wireEvidence!: WireEvidence
 
           const results = await runBrowserTest(urlUnderTest, testCase, { onWire: (wire) => {
             wireEvidence = wire
@@ -924,7 +948,7 @@ describe('Proxy Performance', function () {
       }
 
       after(() => {
-        debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
+        debug(`Done in ${Math.round((Number(new Date()) / 1000) - start)}s`)
         process.stdout.write('Note: All times are in milliseconds.\n')
 
         // eslint-disable-next-line no-console
@@ -962,8 +986,8 @@ describe('Proxy Performance', function () {
     })
 
     it('With proxy disabled, Intercepted (CDP) preserves HTTP/2 and loads 1000 delayed images faster than MITM interception', async function () {
-      let mitmWire
-      let proxyDisabledWire
+      let mitmWire!: WireEvidence
+      let proxyDisabledWire!: WireEvidence
 
       // paired and time-adjacent: both sides re-measured on every retry
       const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, mitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
@@ -989,7 +1013,7 @@ describe('Proxy Performance', function () {
     it('With proxy disabled, Intercepted (CDP) w/o HTTP/2 loads 1000 delayed images within 2x of MITM interception', async function () {
       const pairedMitmCase = _.assign(_.cloneDeep(mitmCase), { name: 'With Cypress proxy, Intercepted (paired re-measure)' })
 
-      let wireEvidence
+      let wireEvidence!: WireEvidence
 
       const mitmResults = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, pairedMitmCase, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS })
       const results = await runBrowserTest(HTTP2_LATENCY_ORIGIN_URL, proxyDisabledNoH2Case, { captureTimeoutMs: HTTP2_LATENCY_CAPTURE_TIMEOUT_MS, onWire: (wire) => {
