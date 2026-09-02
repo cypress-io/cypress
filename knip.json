@@ -321,11 +321,13 @@
     },
     "packages/data-context": {
       "entry": [
+        "scripts/**/*.{ts,js}",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
+        "scripts/**/*.{ts,js}",
         "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
