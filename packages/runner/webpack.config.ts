@@ -82,7 +82,7 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 export default async function () {
   await waitUntilIconsBuilt()
 
-  const cyIcons = require('@packages/icons')
+  const cyIcons = await import('@packages/icons')
 
   mainConfig.plugins = [
     // @ts-ignore
