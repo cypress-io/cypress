@@ -17,7 +17,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
     "test": "echo 'ok'",
-    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./src/router/router.ts, *.gen.ts",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1"
   },
   "dependencies": {},

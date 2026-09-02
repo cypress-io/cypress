@@ -574,6 +574,19 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
+    // this runs once per spec, and the client from the previous spec still holds
+    // an open websocket to the same browser. Nothing else closes it. Awaited so
+    // its close, which clears the session's CDP url, can't land after the new
+    // connection sets its own; the reference is left in place until the new
+    // client replaces it so the getter doesn't see undefined mid-connect.
+    if (browserCriClient) {
+      try {
+        await browserCriClient.close(true)
+      } catch (e) {
+        debug('error closing the previous browser cri client: %o', e)
+      }
+    }
+
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,

@@ -132,7 +132,14 @@ export const testIsolationBlankPage = () => {
     `${blankPageSubtext}<br>All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.`)
 }
 
-export const visitFailure = (props) => {
+export interface VisitFailureProps {
+  url: string
+  status?: number
+  statusText?: string
+  contentType?: string
+}
+
+export const visitFailure = (props: VisitFailureProps) => {
   const { status, statusText, contentType } = props
 
   const getContentType = () => {

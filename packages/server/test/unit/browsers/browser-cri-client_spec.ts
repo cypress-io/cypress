@@ -27,7 +27,9 @@ describe('lib/browsers/browser-cri-client', function () {
   }
   let send: sinon.SinonStub
   let on: sinon.SinonStub
+  let off: sinon.SinonStub
   let close: sinon.SinonStub
+  let removeSessionEnablements: sinon.SinonStub
   let criClientCreateStub: sinon.SinonStub
   let criImport: sinon.SinonStub & {
     Version: sinon.SinonStub
@@ -49,15 +51,20 @@ describe('lib/browsers/browser-cri-client', function () {
     .onThirdCall().resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
 
     on = sinon.stub()
+    off = sinon.stub()
     send = sinon.stub()
     close = sinon.stub()
+    removeSessionEnablements = sinon.stub()
     onError = sinon.stub()
+    onServiceWorkerClientEvent = sinon.stub()
     // the browser-level client wraps onAsynchronousError and passes an
     // onCriConnectionClosed handler, so match loosely on the stable fields
     criClientCreateStub = sinon.stub(CriClient, 'create').withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager: undefined, fullyManageTabs: undefined })).resolves({
       send,
       on,
+      off,
       close,
+      removeSessionEnablements,
     })
 
     browserCriClient = proxyquire('../lib/browsers/browser-cri-client', {
@@ -68,7 +75,9 @@ describe('lib/browsers/browser-cri-client', function () {
       criClientCreateStub = criClientCreateStub.withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager, fullyManageTabs })).resolves({
         send,
         on,
+        off,
         close,
+        removeSessionEnablements,
       })
 
       return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs, onServiceWorkerClientEvent })
@@ -169,6 +178,77 @@ describe('lib/browsers/browser-cri-client', function () {
     })
   })
 
+  context('service worker bindings', function () {
+    it('subscribes the browser client to the session binding', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      client.addServiceWorkerBinding('session-1')
+
+      expect(on).to.be.calledWith('Runtime.bindingCalled.session-1', sinon.match.func)
+      expect(client.serviceWorkerBindings.has('session-1')).to.be.true
+    })
+
+    it('delivers the session binding events to the service worker event handler', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      client.addServiceWorkerBinding('session-1')
+
+      const cb = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+      const event = { type: 'hasFetchHandler', scope: 'http://localhost:8080/', payload: { hasFetchHandler: true } }
+
+      cb({ name: serviceWorkerClientEventHandlerName, payload: JSON.stringify(event) })
+
+      expect(onServiceWorkerClientEvent).to.be.calledWith(event)
+    })
+
+    it('replaces an existing binding without stranding its listener', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      client.addServiceWorkerBinding('session-1')
+
+      const firstListener = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+
+      client.addServiceWorkerBinding('session-1')
+
+      expect(off).to.be.calledOnceWith('Runtime.bindingCalled.session-1', firstListener)
+      expect(client.serviceWorkerBindings.size).to.eq(1)
+    })
+
+    it('unsubscribes the browser client when the session detaches', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      client.addServiceWorkerBinding('session-1')
+
+      const cb = on.withArgs('Runtime.bindingCalled.session-1').args[0][1]
+
+      await on.withArgs('Target.detachedFromTarget').args[0][1]({ sessionId: 'session-1' })
+
+      expect(off).to.be.calledWith('Runtime.bindingCalled.session-1', cb)
+      expect(client.serviceWorkerBindings.has('session-1')).to.be.false
+    })
+
+    it('does not accumulate bindings across attach/detach cycles', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+      const detach = on.withArgs('Target.detachedFromTarget').args[0][1]
+
+      for (let i = 0; i < 10; i++) {
+        client.addServiceWorkerBinding(`session-${i}`)
+        await detach({ sessionId: `session-${i}` })
+      }
+
+      expect(client.serviceWorkerBindings.size).to.eq(0)
+      expect(off).to.have.callCount(10)
+    })
+
+    it('ignores a detach for a session with no binding', async function () {
+      const client = await getClient({ fullyManageTabs: true })
+
+      await on.withArgs('Target.detachedFromTarget').args[0][1]({ sessionId: 'never-attached' })
+
+      expect(off).not.to.be.called
+    })
+  })
+
   context('._onAttachToTarget', () => {
     let options: any
 
@@ -180,6 +260,7 @@ describe('lib/browsers/browser-cri-client', function () {
         },
         browserCriClient: {
           addExtraTargetClient: sinon.stub(),
+          addServiceWorkerBinding: sinon.stub(),
           getExtraTargetClient: sinon.stub().returns(undefined),
           currentlyAttachedTarget: {
             targetId: 'main-target-id',
@@ -353,8 +434,24 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.on).to.be.calledWith('Runtime.bindingCalled.session-id', sinon.match.func)
+      expect(options.browserCriClient.addServiceWorkerBinding).to.be.calledWith(options.event.sessionId)
       expect(options.browserClient.send).to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
+    })
+
+    // a detach landing mid-attach only releases bindings already tracked
+    it('adds the service worker fetch event binding before awaiting anything', async () => {
+      options.event.targetInfo.type = 'service_worker'
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      // stub-level calledBefore compares against the stub's *last* call, and
+      // send is called several times here, so the ordering only holds if it is
+      // pinned to the first send - the first point this can yield
+      const registered = options.browserCriClient.addServiceWorkerBinding.getCall(0)
+      const firstSend = options.browserClient.send.getCall(0)
+
+      expect(firstSend, 'expected a CDP command to have been sent').not.to.be.null
+      expect(registered.calledBefore(firstSend)).to.be.true
     })
 
     it('does not add the service worker fetch event binding for non-service_worker targets', async () => {
@@ -362,7 +459,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      expect(options.browserClient.on).not.to.be.calledWith('Runtime.bindingCalled.session-id', sinon.match.func)
+      expect(options.browserCriClient.addServiceWorkerBinding).not.to.be.called
       expect(options.browserClient.send).not.to.be.calledWith('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, options.event.sessionId)
     })
 
@@ -543,9 +640,12 @@ describe('lib/browsers/browser-cri-client', function () {
       const browserClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        removeSessionEnablements: sinon.stub(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
+        addServiceWorkerBinding: sinon.stub(),
+        removeServiceWorkerBinding: sinon.stub(),
       }
 
       await BrowserCriClient._manageTabs({
@@ -598,9 +698,12 @@ describe('lib/browsers/browser-cri-client', function () {
       const browserClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        removeSessionEnablements: sinon.stub(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
+        addServiceWorkerBinding: sinon.stub(),
+        removeServiceWorkerBinding: sinon.stub(),
       }
 
       await BrowserCriClient._manageTabs({
@@ -746,9 +849,12 @@ describe('lib/browsers/browser-cri-client', function () {
       const browserClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        removeSessionEnablements: sinon.stub(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
+        addServiceWorkerBinding: sinon.stub(),
+        removeServiceWorkerBinding: sinon.stub(),
       }
 
       await BrowserCriClient._manageTabs({
@@ -777,6 +883,14 @@ describe('lib/browsers/browser-cri-client', function () {
         detachHandler({ sessionId, targetId: 'sw-target-id' })
 
         expect(browserCriClient.sessionTargetInfo.has(sessionId)).to.be.false
+      })
+
+      it('releases the enablements recorded for the session', async () => {
+        const { browserClient, detachHandler } = await setup()
+
+        detachHandler({ sessionId: 'sw-session', targetId: 'sw-target-id' })
+
+        expect(browserClient.removeSessionEnablements).to.be.calledOnceWith('sw-session')
       })
     })
 
@@ -951,6 +1065,7 @@ describe('lib/browsers/browser-cri-client', function () {
       const browserClient = {
         send: sinon.stub().resolves(),
         on: sinon.stub(),
+        removeSessionEnablements: sinon.stub(),
       }
       const browserCriClient: any = {
         sessionTargetInfo: new Map(),
@@ -1175,11 +1290,26 @@ describe('lib/browsers/browser-cri-client', function () {
             },
             resettingBrowserTargets: false,
             sessionTargetInfo: new Map(),
+            removeServiceWorkerBinding: sinon.stub(),
+          },
+          browserClient: {
+            removeSessionEnablements: sinon.stub(),
           },
           event: {
             targetId: 'target-id',
           },
         }
+      })
+
+      it('releases the per-session state of the destroyed target', () => {
+        options.browserCriClient.hasExtraTargetClient.returns(false)
+        options.browserCriClient.sessionTargetInfo.set('sw-session', { targetId: 'target-id', type: 'service_worker' })
+        options.browserCriClient.sessionTargetInfo.set('other-session', { targetId: 'other-target-id', type: 'service_worker' })
+
+        BrowserCriClient._onTargetDestroyed(options as any)
+
+        expect(options.browserCriClient.removeServiceWorkerBinding).to.be.calledOnceWith('sw-session')
+        expect(options.browserClient.removeSessionEnablements).to.be.calledOnceWith('sw-session')
       })
 
       it('is noop if target is not currently tracked', () => {
@@ -1301,7 +1431,7 @@ describe('lib/browsers/browser-cri-client', function () {
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
@@ -1323,7 +1453,7 @@ describe('lib/browsers/browser-cri-client', function () {
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.setDiscoverTargets', { discover: true })
       on.withArgs('Target.targetDestroyed', sinon.match.func)
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
@@ -1349,7 +1479,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
 
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
@@ -1377,7 +1507,7 @@ describe('lib/browsers/browser-cri-client', function () {
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
@@ -1396,7 +1526,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, send, close } }).resolves(mockPageClient)
+      criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
 
       const browserClient = await getClient()
 

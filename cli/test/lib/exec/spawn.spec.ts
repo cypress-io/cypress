@@ -50,6 +50,10 @@ vi.mock('os', async (importActual) => {
   }
 })
 
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
+
 vi.mock('readline', async (importActual) => {
   const actual = await importActual()
 
@@ -69,6 +73,7 @@ vi.mock('process', async (importActual) => {
     // @ts-expect-error
     ...actual,
     stdin: {
+      // @ts-expect-error
       ...actual.stdin,
       on: vi.fn(),
       emit: vi.fn(),
@@ -238,13 +243,15 @@ describe('lib/exec/spawn', function () {
     vi.mocked(readline.createInterface).mockReturnValue(mockReadlineEventEmitter)
     vi.mocked(cp.spawn).mockReturnValue(spawnedProcess)
     vi.mocked(xvfb.start).mockResolvedValue(undefined)
-    vi.mocked(xvfb.stop).mockResolvedValue(undefined)
+    vi.mocked(xvfb.stop).mockResolvedValue(null)
     vi.mocked(xvfb.isNeeded).mockReturnValue(false)
     vi.mocked(state.getBinaryDir).mockReturnValue(defaultBinaryDir)
-    vi.mocked(state.getPathToExecutable).mockImplementation((args) => {
-      if (args === '/default/binary/dir') {
+    vi.mocked(state.getPathToExecutable).mockImplementation((binaryDir) => {
+      if (binaryDir === defaultBinaryDir) {
         return '/path/to/cypress'
       }
+
+      return path.join(binaryDir, 'cypress')
     })
 
     // Default: pass-through so tests that assert on stderr.write still see data; filtering behavior lives in @packages/stderr-filtering
@@ -274,7 +281,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(needsSandbox).mockReturnValue(false)
 
       // start the process
-      const startPromise = start('--foo', { foo: 'bar' })
+      const startPromise = start('--foo')
 
       await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
 
@@ -302,7 +309,7 @@ describe('lib/exec/spawn', function () {
     it('uses --no-sandbox when needed', async function () {
       vi.mocked(needsSandbox).mockReturnValue(true)
 
-      const startPromise = start('--foo', { foo: 'bar' })
+      const startPromise = start('--foo')
 
       await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
@@ -334,7 +341,7 @@ describe('lib/exec/spawn', function () {
     it('uses npm command when running in dev mode', async () => {
       vi.mocked(needsSandbox).mockReturnValue(false)
 
-      const startPromise = start('--foo', { dev: true, foo: 'bar' })
+      const startPromise = start('--foo', { dev: true })
 
       await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
@@ -363,7 +370,7 @@ describe('lib/exec/spawn', function () {
     it('does not pass --no-sandbox when running in dev mode', async function () {
       vi.mocked(needsSandbox).mockReturnValue(true)
 
-      const startPromise = start('--foo', { dev: true, foo: 'bar' })
+      const startPromise = start('--foo', { dev: true })
 
       await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
@@ -577,7 +584,7 @@ describe('lib/exec/spawn', function () {
       })
 
       it('waits for ready sentinel before unreffing and resolving', async () => {
-        const startPromise = start(null, { detached: true })
+        const startPromise = start([], { detached: true })
 
         await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
 
@@ -593,7 +600,7 @@ describe('lib/exec/spawn', function () {
       })
 
       it('resolves with exit code if process exits before ready message', async () => {
-        const startPromise = start(null, { detached: true })
+        const startPromise = start([], { detached: true })
 
         await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
         spawnedProcess.emit('close', 1)
@@ -605,7 +612,7 @@ describe('lib/exec/spawn', function () {
       })
 
       it('uses piped stdio when detached so startup errors are visible', async () => {
-        const startPromise = start(null, { detached: true })
+        const startPromise = start([], { detached: true })
 
         await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
         stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
@@ -618,7 +625,7 @@ describe('lib/exec/spawn', function () {
       })
 
       it('passes --emit-when-ready to the Cypress process', async () => {
-        const startPromise = start(null, { detached: true })
+        const startPromise = start([], { detached: true })
 
         await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
 
@@ -947,9 +954,7 @@ describe('lib/exec/spawn', function () {
         vi.mocked(stdin.emit).mockImplementation((event, ...args) => {
           console.log('spied emit')
 
-          stdinEmitter.emit(event, ...args)
-
-          return stdin
+          return stdinEmitter.emit(event, ...args)
         })
       })
 

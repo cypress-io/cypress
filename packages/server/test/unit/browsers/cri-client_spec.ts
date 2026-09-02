@@ -1243,6 +1243,61 @@ describe('lib/browsers/cri-client', function () {
     })
   })
 
+  context('#off', () => {
+    const noop = () => {}
+
+    it('removes the subscription', async () => {
+      const client = await getClient()
+
+      client.on('Page.loadEventFired', noop)
+      client.off('Page.loadEventFired', noop)
+
+      expect(client.queue.subscriptions).to.be.empty
+    })
+
+    it('leaves other subscriptions in place when the callback was never registered', async () => {
+      const client = await getClient()
+
+      client.on('Network.requestWillBeSent', noop)
+
+      // resetBrowserTargets replays every page subscription against the browser
+      // client, which only holds the Network.* ones - the rest must be no-ops
+      client.off('Page.loadEventFired', noop)
+      client.off('Page.frameAttached', () => {})
+
+      expect(client.queue.subscriptions).to.have.length(1)
+      expect(client.queue.subscriptions[0].eventName).to.eq('Network.requestWillBeSent')
+    })
+  })
+
+  context('#removeSessionEnablements', () => {
+    it('drops only the detached session\'s enablements', async () => {
+      const client = await getClient()
+
+      await client.send('Network.enable', undefined, 'session-1')
+      await client.send('Runtime.addBinding', { name: 'binding' }, 'session-1')
+      await client.send('Network.enable', undefined, 'session-2')
+      await client.send('Target.setDiscoverTargets', { discover: true })
+
+      client.removeSessionEnablements('session-1')
+
+      expect(client.queue.enableCommands).to.deep.equal([
+        { command: 'Network.enable', sessionId: 'session-2' },
+        { command: 'Target.setDiscoverTargets', params: { discover: true } },
+      ])
+    })
+
+    it('leaves the browser-level enablements alone when given no session', async () => {
+      const client = await getClient()
+
+      await client.send('Target.setDiscoverTargets', { discover: true })
+
+      client.removeSessionEnablements(undefined as any)
+
+      expect(client.queue.enableCommands).to.have.length(1)
+    })
+  })
+
   context('clone', () => {
     it('returns a new CriClient with the same options', async () => {
       const client = await getClient()
