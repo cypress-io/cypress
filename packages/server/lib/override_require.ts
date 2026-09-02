@@ -1,6 +1,6 @@
 import Module from 'module'
 
-// `Module._load` is Node internals, so it is absent from the public typings.
+// `Module._load` is Node internals, absent from the public typings
 const InternalModule = Module as unknown as { _load: (...args: any[]) => any }
 
 export const overrideRequire = (requireOverride) => {

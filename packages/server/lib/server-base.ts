@@ -610,7 +610,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       app.use(this.useMorgan())
     }
 
-    // errorhandler
     app.use(errorHandler())
 
     // remove the express powered-by header

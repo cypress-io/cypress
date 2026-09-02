@@ -46,7 +46,7 @@ describe('lib/util/performance_benchmark', () => {
 
   context('.debugElapsedTime', () => {
     // start-cypress.js adds this return value back onto cypressServerStartTime
-    // to close the v8 snapshot telemetry span, so it has to stay a delta
+    // to close the v8 snapshot telemetry span, so it must be a delta
     it('returns the time elapsed since the server start time', () => {
       sinon.stub(performance, 'now').returns(1500)
       global.cypressServerStartTime = 400

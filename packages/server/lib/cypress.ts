@@ -71,8 +71,8 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
   // and exit with 1
   debug('exiting with err', err)
 
-  // `logException` reads `this.log`, so it has to stay a property call on the
-  // module rather than a destructured reference
+  // `logException` reads `this.log`, so it must be called as a property of the
+  // module rather than destructured
   await errors.logException(err)
 
   if (isCypressError(err)) {

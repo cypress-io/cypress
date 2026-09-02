@@ -145,8 +145,8 @@ export const _renameBrowserGroup = (processes: Process[]) => {
     }
 
     if (proc.group === 'browser') {
-      // the profiler table names the browser rather than the generic group, so
-      // the display name is deliberately written outside `Group`
+      // the profiler table names the browser itself, so the display name is
+      // intentionally stored outside the `Group` union
       proc.group = displayName as Group
     }
   })
