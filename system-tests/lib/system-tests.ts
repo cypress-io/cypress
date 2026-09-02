@@ -22,13 +22,12 @@ const isCi = require('ci-info').isCI
 require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
-let cp = require('child_process')
+const cp = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
-const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const treeKill = require('tree-kill')
 const { once } = require('events')
@@ -567,8 +566,6 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
 
-cp = Bluebird.promisifyAll(cp)
-
 const processEnvCache = _.clone(process.env)
 
 // The budget notices are stripped from snapshots (see normalizeStdout) because whether teardown fits in
@@ -594,10 +591,6 @@ process.on('exit', () => {
 
   // eslint-disable-next-line no-console
   console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
-})
-
-Bluebird.config({
-  longStackTraces: true,
 })
 
 // extract the 'Difference' section from a snap-shot-it error message
@@ -699,7 +692,7 @@ const startServer = function (obj) {
     app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
   }
 
-  return new Bluebird((resolve) => {
+  return new Promise((resolve) => {
     return srv.listen(port, () => {
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
@@ -725,7 +718,11 @@ const copy = function (projectPath: string) {
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
     const copy = (src, dest) => {
-      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+      return fs.copy(src, dest, { overwrite: true }).catch((err) => {
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      })
     }
 
     // copy each of the screenshots and videos
@@ -905,7 +902,7 @@ const systemTests = {
       if (options.servers) {
         const optsServers = [].concat(options.servers)
 
-        const servers = await Bluebird.map(optsServers, startServer)
+        const servers = await Promise.all(optsServers.map((server) => startServer(server)))
 
         this.servers = servers
       } else {
@@ -922,7 +919,7 @@ const systemTests = {
 
       if (s) {
         try {
-          await Bluebird.map(s, stopServer)
+          await Promise.all(s.map((srv) => stopServer(srv)))
         } catch (err) {
           console.error('Error stopping server', err)
           throw err
