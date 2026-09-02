@@ -1,10 +1,12 @@
 import { telemetry } from '@packages/telemetry'
-import { Http, ServerCtx } from './http'
+import type { ServerCtx } from './http'
+import { Http } from './http'
 import type { BrowserPreRequest } from './types'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
-import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
+import type { ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
+import { resourceTypeAndCredentialManager } from './resourceTypeAndCredentialManager'
 import { proxyHttpCodec } from './adapters/http-codec'
 
 export class NetworkProxy {

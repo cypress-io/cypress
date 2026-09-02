@@ -1,13 +1,13 @@
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 import type { RenderProps } from '../../src/commands/command-model'
 import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 type CommandIndicator = NonNullable<RenderProps['indicator']>
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo',

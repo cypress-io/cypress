@@ -2,10 +2,11 @@ import { describe, expect, it, jest } from '@jest/globals'
 import { execute } from 'graphql'
 import { Response } from 'cross-fetch'
 
-import { DataContext } from '../../../src/DataContext'
-import { CloudDataResponse, CloudDataSource } from '../../../src/sources'
+import type { DataContext } from '../../../src/DataContext'
+import type { CloudDataResponse } from '../../../src/sources'
+import { CloudDataSource } from '../../../src/sources'
 import { createTestDataContext, scaffoldProject } from '../helper'
-import { ExecutionResult } from '@urql/core'
+import type { ExecutionResult } from '@urql/core'
 import {
   CLOUD_PROJECT_QUERY,
   CLOUD_PROJECT_RESPONSE,

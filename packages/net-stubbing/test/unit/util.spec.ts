@@ -1,6 +1,6 @@
 import { afterEach, describe, it, expect, vi } from 'vitest'
 import { getBodyEncoding, getBodyStream, parseContentType } from '../../lib/server/util'
-import { Readable } from 'stream'
+import type { Readable } from 'stream'
 import { join } from 'path'
 import { readFileSync } from 'fs'
 

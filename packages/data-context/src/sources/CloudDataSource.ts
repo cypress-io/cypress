@@ -5,7 +5,8 @@ import DataLoader from 'dataloader'
 import { createBatchingExecutor } from '@graphql-tools/batch-execute'
 import { cacheExchange } from '@urql/exchange-graphcache'
 import type { Cache } from '@urql/exchange-graphcache'
-import fetch, { Response } from 'cross-fetch'
+import type fetch from 'cross-fetch'
+import { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
@@ -15,10 +16,9 @@ import {
   createClient,
   dedupExchange,
   fetchExchange,
-  Client,
   stringifyVariables,
 } from '@urql/core'
-import type { OperationResult, RequestPolicy } from '@urql/core'
+import type { OperationResult, RequestPolicy, Client } from '@urql/core'
 import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'

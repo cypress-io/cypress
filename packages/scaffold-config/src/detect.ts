@@ -1,4 +1,5 @@
-import { isDependencyInstalled, WizardBundler } from './frameworks'
+import type { WizardBundler } from './frameworks'
+import { isDependencyInstalled } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs'

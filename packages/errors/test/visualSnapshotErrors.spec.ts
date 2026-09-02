@@ -515,6 +515,7 @@ describe('visual error templates', () => {
 
       return {
         default: [err],
+        beforeSpec: [err, 'beforeSpec'],
       }
     },
     CLOUD_PROTOCOL_CAPTURE_FAILURE: () => {
@@ -925,6 +926,11 @@ describe('visual error templates', () => {
     CDP_RETRYING_CONNECTION: () => {
       return {
         default: [1, 'chrome', 62],
+      }
+    },
+    BROWSER_NETWORK_INTERCEPTION_ESCAPE: () => {
+      return {
+        default: ['https://www.example.com/dashboard'],
       }
     },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {

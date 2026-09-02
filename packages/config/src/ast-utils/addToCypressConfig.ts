@@ -7,7 +7,8 @@ import debugLib from 'debug'
 import { parse, print } from 'recast'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
-import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
+import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
+import { addComponentDefinition, addE2EDefinition } from './astConfigHelpers'
 
 const debug = debugLib('cypress:config:addToCypressConfig')
 

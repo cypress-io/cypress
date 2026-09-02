@@ -1,6 +1,11 @@
 # @packages/extension
 
-The WebExtension loaded by Chrome and Firefox during Cypress test runs. It automates the browser at the extension level — handling new-tab interception and communicating back to the Cypress server via `socket.io`. Supports both Manifest V2 (`app/v2/`) and Manifest V3 (`app/v3/`).
+The WebExtension loaded by Chrome and Firefox during Cypress test runs. It automates the browser at the extension level, reaching APIs that CDP and BiDi don't cover.
+
+The two bundles are not two builds of the same thing — each is loaded by exactly one browser and does a different job:
+
+- **`app/v2/` (Manifest V2) — Firefox only**, loaded via `utils.writeExtension` from `@packages/server`'s `firefox.ts`. Connects back to the Cypress server over `socket.io`, pushes cookie and download events, and handles `reset:browser:state` (which BiDi deliberately delegates here).
+- **`app/v3/` (Manifest V3) — Chrome only**, loaded via `getPathToV3Extension` from `@packages/server`'s `chrome.ts`. Tracks the main Cypress tab's URL and re-activates that tab, used by `@cypress/puppeteer`. No socket connection.
 
 ## Key Commands
 
@@ -22,13 +27,13 @@ yarn workspace @packages/extension check-ts
 
 ```
 app/
-  v2/
-    background.ts       MV2 background page: socket connection, tab management
-    client.ts           Content script injected into pages
-    init.ts             Extension initialisation logic
+  v2/                   Firefox
+    background.ts       MV2 background page: cookie/download events, reset:browser:state
+    client.ts           socket.io connection wrapper used by the background page
+    init.ts             Connects the background page to the server on load
     manifest.json       MV2 manifest
-  v3/
-    content.ts          Content script for MV3
+  v3/                   Chrome
+    content.ts          Content script bridging the Cypress page and the service worker
     service-worker.ts   MV3 service worker replacing the background page
     manifest.json       MV3 manifest
   newtab.html / popup.html   Extension UI pages

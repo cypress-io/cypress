@@ -1,8 +1,9 @@
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
-import sinon, { SinonStub, SinonSpy } from 'sinon'
-import { EventEmitter } from 'events'
+import type { SinonStub, SinonSpy } from 'sinon'
+import sinon from 'sinon'
+import type { EventEmitter } from 'events'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo.js',

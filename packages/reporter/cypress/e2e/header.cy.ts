@@ -1,9 +1,9 @@
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
-import { TestFilter } from '@packages/types'
+import type { TestFilter } from '@packages/types'
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo',
