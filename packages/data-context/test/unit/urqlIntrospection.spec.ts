@@ -1,49 +1,31 @@
 import { describe, expect, it } from '@jest/globals'
+import fs from 'fs-extra'
+import path from 'path'
+import { buildSchema, introspectionFromSchema } from 'graphql'
+import { minifyIntrospectionQuery } from '@urql/introspection'
 import { urqlSchema } from '../../src/gen/urql-introspection.gen'
 
-/**
- * The exact set of keys `minifyIntrospectionQuery` drops; if the library's
- * output changes, this list has to change with it.
- */
-const STRIPPED_BY_MINIFY = [
-  'defaultValue',
-  'deprecationReason',
-  'description',
-  'enumValues',
-  'inputFields',
-  'isDeprecated',
-  'isRepeatable',
-  'locations',
-  'specifiedByUrl',
-]
-
-function walk (value: unknown, seen = { keys: new Set<string>(), kinds: new Set<string>() }) {
+function collectKeys (value: unknown, keys = new Set<string>()) {
   if (Array.isArray(value)) {
-    value.forEach((entry) => walk(entry, seen))
+    value.forEach((entry) => collectKeys(entry, keys))
   } else if (value && typeof value === 'object') {
     for (const [key, nested] of Object.entries(value)) {
-      seen.keys.add(key)
-
-      if (key === 'kind' && typeof nested === 'string') {
-        seen.kinds.add(nested)
-      }
-
-      walk(nested, seen)
+      keys.add(key)
+      collectKeys(nested, keys)
     }
   }
 
-  return seen
+  return [...keys].sort()
 }
 
 describe('urql-introspection.gen', () => {
-  const { keys, kinds } = walk(urqlSchema)
+  it('is minified before it is written', async () => {
+    const sdl = await fs.promises.readFile(path.join(__dirname, '../../schemas/schema.graphql'), 'utf8')
+    const minified = minifyIntrospectionQuery(introspectionFromSchema(buildSchema(sdl, { assumeValid: true })))
 
-  it('is minified before it is written', () => {
-    expect(STRIPPED_BY_MINIFY.filter((key) => keys.has(key))).toEqual([])
-  })
-
-  it('keeps the type shape and nullability the GraphCache reads', () => {
-    expect(urqlSchema.__schema.types.length).toBeGreaterThan(0)
-    expect([...kinds]).toContain('NON_NULL')
+    // Minification's whole effect is dropping keys, so comparing key sets pins
+    // it against whatever the library strips today, and fails as a short list
+    // rather than a diff of the whole artifact.
+    expect(collectKeys(urqlSchema)).toEqual(collectKeys(minified))
   })
 })
