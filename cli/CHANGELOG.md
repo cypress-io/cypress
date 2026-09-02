@@ -9,6 +9,10 @@
 
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
 
+**Bugfixes:**
+
+- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
+
 ## 16.0.0
 
 **Breaking Changes:**
@@ -49,7 +53,6 @@
 
 **Bugfixes:**
 
-- Fixed an intermittent failure in component testing with webpack just-in-time compile where rerunning a recreated spec could leave the reporter showing `--` pass counts instead of the completed test results. The runner now waits for webpack to finish recompiling after a spec update before loading the spec in the AUT. Fixed in [#34120](https://github.com/cypress-io/cypress/pull/34120).
 - Fixed an issue where Firefox tests could intermittently fail with errors like `Cannot get AUT url: no AUT context initialized` when a command ran while Cypress was still identifying the application frame — for example right after a reload, a navigation, or moving to the next spec. Cypress now waits for the frame to be identified, and re-derives it if the browser event announcing it was missed. Fixes [#34705](https://github.com/cypress-io/cypress/issues/34705).
 - Fixed an issue where a run in which every test passed could still exit with code `1`, indistinguishable from a single failing test. Cleanup that fails or takes too long while Cypress shuts down no longer changes the exit code, and is reported in the run output instead. Fixed in [#34686](https://github.com/cypress-io/cypress/pull/34686).
 - Fixed an issue where the [`after:run`](https://on.cypress.io/after-run-api) event handler would not run when a project was closed in `cypress open` mode and [`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/configuration#Experiments) was set. Addressed in [#34700](https://github.com/cypress-io/cypress/pull/34700).
