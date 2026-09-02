@@ -6,7 +6,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { BreakingErrResult, TestingType } from '@packages/types'
-import { logError, parseResolvedPattern, pluralize } from './errorUtils'
+import { logError, parseResolvedPattern } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
@@ -153,7 +153,7 @@ export const AllCypressErrors = {
   CLOUD_API_RESPONSE_FAILED_RETRYING: (
     arg1: { tries: number, delay: string, response: Error },
   ) => {
-    const time = pluralize('time', arg1.tries)
+    const time = arg1.tries === 1 ? 'time' : 'times'
     const { delay } = arg1
     const message = normalizeNetworkErrorMessage(arg1.response)
 
