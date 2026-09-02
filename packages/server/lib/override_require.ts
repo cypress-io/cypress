@@ -1,9 +1,12 @@
-const Module = require('module')
+import Module from 'module'
+
+// `Module._load` is Node internals, so it is absent from the public typings.
+const InternalModule = Module as unknown as { _load: (...args: any[]) => any }
 
 export const overrideRequire = (requireOverride) => {
-  const _load = Module._load
+  const _load = InternalModule._load
 
-  Module._load = function (...args: any[]) {
+  InternalModule._load = function (...args: any[]) {
     const pkg = args
 
     if (requireOverride) {

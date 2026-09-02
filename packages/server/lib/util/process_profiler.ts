@@ -2,10 +2,10 @@ import Debug from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
 import si from 'systeminformation'
+import { inspect } from 'util'
 import { concatStream } from '@packages/network'
-
-const browsers = require('../browsers').default
-const plugins = require('../plugins')
+import browsers from '../browsers'
+import * as plugins from '../plugins'
 
 type Group = 'browser' | 'cypress' | 'launchpad' | 'plugin' | 'ffmpeg' | 'electron-shared' | 'other'
 export type Process = si.Systeminformation.ProcessesProcessData & {
@@ -153,7 +153,7 @@ export const _renameBrowserGroup = (processes: Process[]) => {
 }
 
 export const _aggregateGroups = (processes: Process[]) => {
-  debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
+  debugVerbose('all Cypress-launched processes: %s', inspect(processes))
 
   const groupTotals = _.chain(processes)
   .groupBy('group')

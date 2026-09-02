@@ -3,10 +3,9 @@ import mockery from 'mockery'
 import { enable as enableMockery, mockElectron } from '../mockery_helper'
 import _ from 'lodash'
 import os from 'os'
-import express from 'express'
 import { connect } from '@packages/network'
 import { setupFullConfigWithDefaults } from '@packages/config'
-import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { ServerBase, _forceProxyMiddleware, _morganSkip } from '../../lib/server-base'
 import { cypressSessions } from '../../lib/cypress-sessions'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as fileServer from '../../lib/file_server'
@@ -19,15 +18,6 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 const httpsProxyModule = require('@packages/https-proxy/cjs/proxy')
 
 const morganFn = function () {}
-
-// Set by the morgan mock when `useMorgan` runs.
-let lastMorganFactoryArgs
-
-function morganMockFactory (format, options) {
-  lastMorganFactoryArgs = { format, options }
-
-  return morganFn
-}
 
 function getOpenOptions (overrides = {}) {
   return {
@@ -72,11 +62,10 @@ function enterBrowserNetworkMode (server) {
 
 describe('lib/server-base', () => {
   beforeEach(function () {
-    // put_protocol_artifact_spec and others call mockery.deregisterAll(); re-enable and
-    // re-register per test so require('morgan') is always our mock.
+    // put_protocol_artifact_spec and others call mockery.deregisterAll(); re-enable
+    // and re-register the electron mock per test.
     enableMockery(mockery)
     mockElectron(mockery)
-    mockery.registerMock('morgan', morganMockFactory)
 
     this.fileServer = {
       close () {},
@@ -102,16 +91,13 @@ describe('lib/server-base', () => {
   })
 
   describe('#createExpressApp', () => {
-    beforeEach(function () {
-      this.use = sinon.spy(express.application, 'use')
-    })
-
     it('instantiates express instance without morgan', function () {
+      const useMorganStub = sinon.stub(this.server, 'useMorgan').returns(morganFn)
       const app = this.server.createExpressApp({ morgan: false })
 
       expect(app.get('view engine')).to.eq('html')
 
-      expect(this.use).not.to.be.calledWith(morganFn)
+      expect(useMorganStub).not.to.have.been.called
     })
 
     it('requires morgan if true', function () {
@@ -127,7 +113,6 @@ describe('lib/server-base', () => {
     beforeEach(function () {
       GracefulExit.resetForTesting()
       sinon.stub(process, 'exit')
-      lastMorganFactoryArgs = undefined
       // CI or other specs may set a low timeout; if the race timer wins before
       // flushAndExit clears processTeardown, skip() still mirrors isShuttingDown
       // and the post-await assertion flakes (see graceful_exit_spec teardown test).
@@ -140,13 +125,14 @@ describe('lib/server-base', () => {
       process.exit.restore()
     })
 
-    it('passes dev format and skip that mirrors GracefulExit.isShuttingDown', async function () {
-      this.server.useMorgan()
+    it('builds middleware from the morgan logger', function () {
+      expect(this.server.useMorgan()).to.be.a('function')
+    })
 
+    it('skips in a way that mirrors GracefulExit.isShuttingDown', async function () {
       const req = { proxiedUrl: '/__cypress/iframes/foo', headers: {} }
 
-      expect(lastMorganFactoryArgs.format).to.eq('dev')
-      expect(lastMorganFactoryArgs.options.skip(req)).to.be.false
+      expect(_morganSkip(req)).to.be.false
 
       let resolveStep
       const stepPromise = new Promise((resolve) => {
@@ -157,13 +143,13 @@ describe('lib/server-base', () => {
 
       const exitPromise = GracefulExit.exitGracefully(0)
 
-      expect(lastMorganFactoryArgs.options.skip(req)).to.be.true
+      expect(_morganSkip(req)).to.be.true
 
       resolveStep()
 
       await exitPromise
 
-      expect(lastMorganFactoryArgs.options.skip(req)).to.be.false
+      expect(_morganSkip(req)).to.be.false
     })
 
     describe('tap request logging', () => {
@@ -171,7 +157,6 @@ describe('lib/server-base', () => {
 
       beforeEach(function () {
         getCurrent = sinon.stub(cypressSessions, 'getCurrent').returns({ sessionId: 'abc' })
-        this.server.useMorgan()
       })
 
       afterEach(() => {
@@ -179,7 +164,7 @@ describe('lib/server-base', () => {
       })
 
       const skip = (proxiedUrl, headers = {}) => {
-        return lastMorganFactoryArgs.options.skip({ proxiedUrl, headers })
+        return _morganSkip({ proxiedUrl, headers })
       }
 
       it('skips the non-proxied session probe', () => {

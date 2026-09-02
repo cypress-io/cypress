@@ -12,10 +12,11 @@ import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import { toObject, toArray } from './util/args'
 import { telemetry } from '@packages/telemetry'
-import { warning as errorsWarning } from './errors'
+import { logException, warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
-import { toNumber } from 'lodash'
+import chalk from 'chalk'
+import { keys, toNumber } from 'lodash'
 import { GracefulExit } from './util/graceful-exit'
 import type { BrowserWindow } from 'electron'
 import type { CypressRunResult } from './modes/results'
@@ -45,7 +46,7 @@ function isMinimalRunResult (result: any): result is MinimalRunResult {
 
 const showWarningForInvalidConfig = (options: any) => {
   const publicConfigKeys = getPublicConfigKeys()
-  const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
+  const invalidConfigOptions = keys(options.config).reduce((invalid, option) => {
     if (!publicConfigKeys.find((configKey) => configKey === option)) {
       invalid.push(option)
     }
@@ -70,7 +71,7 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
   // and exit with 1
   debug('exiting with err', err)
 
-  await require('./errors').logException(err)
+  await logException(err)
 
   if (isCypressError(err)) {
     if (
@@ -115,7 +116,7 @@ export = {
         debug('starting Electron')
         const cypressElectron = require('@packages/electron')
 
-        const args = require('./util/args').toArray(options)
+        const args = toArray(options)
 
         debug('electron open arguments %o', args)
 
@@ -266,7 +267,7 @@ export = {
             (results.runs.filter((run) => run.skippedSpec).length)
           ) {
               // eslint-disable-next-line no-console
-              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
               return GracefulExit.exitGracefully(1)
           }

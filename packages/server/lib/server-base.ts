@@ -1,8 +1,11 @@
 import Bluebird from 'bluebird'
 import compression from 'compression'
+import cookieParser from 'cookie-parser'
 import Debug from 'debug'
+import errorHandler from 'errorhandler'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
+import morganLogger from 'morgan'
 import * as ensureUrl from './util/ensure-url'
 import type { Express } from 'express'
 import express from 'express'
@@ -101,6 +104,10 @@ const _isTapRequest = (req): boolean => {
 
   return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
     (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && _hasValidSessionIdHeader(req))
+}
+
+export const _morganSkip = (req): boolean => {
+  return GracefulExit.isShuttingDown || _isTapRequest(req)
 }
 
 // `isNativeBrowserNetwork`: on that path the browser intercepts its own
@@ -597,14 +604,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(_forceProxyMiddleware(clientRoute, namespace, this.isBrowserNetworkMode))
 
-    app.use(require('cookie-parser')())
+    app.use(cookieParser())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
       app.use(this.useMorgan())
     }
 
     // errorhandler
-    app.use(require('errorhandler')())
+    app.use(errorHandler())
 
     // remove the express powered-by header
     app.disable('x-powered-by')
@@ -613,9 +620,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   useMorgan () {
-    return require('morgan')('dev', {
-      skip: (req) => GracefulExit.isShuttingDown || _isTapRequest(req),
-    })
+    return morganLogger('dev', { skip: _morganSkip })
   }
 
   getHttpServer () {

@@ -1,5 +1,8 @@
+import Debug from 'debug'
 import { performance } from 'perf_hooks'
 import { isRunning } from './electron-app'
+
+const debug = Debug('cypress:server:performance-benchmark')
 
 function threeDecimals (n: number): number {
   return Math.round(n * 1000) / 1000
@@ -21,9 +24,6 @@ export const initializeStartTime = (): void => {
 }
 
 export const debugElapsedTime = (event: string): number => {
-  const Debug = require('debug')
-  const debug = Debug('cypress:server:performance-benchmark')
-
   const now = performance.now()
   const serverStart = global.cypressServerStartTime
   // Match legacy JS when uninitialized: `now - undefined` is `NaN`.
