@@ -1,8 +1,8 @@
-import path from 'path'
+import { join } from 'path'
 
 const example = {
   getPathToE2E (): string {
-    return path.join(__dirname, '..', 'cypress', 'e2e')
+    return join(__dirname, '..', 'cypress', 'e2e')
   },
 }
 

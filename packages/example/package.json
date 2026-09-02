@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsx ./bin/build.ts && gulp build",
+    "build-prod": "tsc -p tsconfig.prod.json",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "predeploy": "yarn build",
