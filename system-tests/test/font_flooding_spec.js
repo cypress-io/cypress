@@ -20,6 +20,13 @@ const getFilePath = (filename) => {
 
 const BROWSERS = ['chrome', 'electron']
 
+// Chrome's browser network path disables ServiceWorkerAutoPreload (#34709), which
+// issues two Font network requests per navigation instead of one.
+const EXPECTED_FONT_REQUESTS_BY_BROWSER = {
+  chrome: 4,
+  electron: 2,
+}
+
 describe('capture-protocol', () => {
   setupStubbedServer(createRoutes())
   enableCaptureProtocol(PROTOCOL_STUB_FONT_FLOODING)
@@ -43,7 +50,7 @@ describe('capture-protocol', () => {
         }).then(() => {
           const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
-          expect(JSON.parse(protocolEvents).numberOfFontRequests).to.equal(2)
+          expect(JSON.parse(protocolEvents).numberOfFontRequests).to.equal(EXPECTED_FONT_REQUESTS_BY_BROWSER[browser])
         })
       })
     })
