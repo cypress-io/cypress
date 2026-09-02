@@ -105,7 +105,7 @@ vi.mock('@electron/fuses', () => {
   }
 })
 
-import { check, ensure } from '../src/install'
+import { check, ensure, icons } from '../src/install'
 
 describe('install', () => {
   // the only paths `getFileHash` can read, mapped to their contents
@@ -146,6 +146,20 @@ describe('install', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  describe('icons', () => {
+    it('hands callers the path helpers from the icons package', () => {
+      expect(icons()).toEqual(expect.objectContaining({
+        getPathToIcon: expect.any(Function),
+        getPathToFavicon: expect.any(Function),
+        getPathToLogo: expect.any(Function),
+      }))
+    })
+
+    it('resolves icon paths to the same location as the icons package', () => {
+      expect(icons().getPathToIcon('cypress.icns')).toBe(getPathToIcon('cypress.icns'))
+    })
   })
 
   describe('ensure', () => {
