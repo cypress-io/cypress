@@ -20,9 +20,6 @@ export async function nexusCodegen () {
   })
 }
 
-/**
- * Watches & regenerates the
- */
 export async function nexusCodegenWatch () {
   return watchNexusTypegen({
     cwd: monorepoPaths.pkgDataContext,
@@ -104,7 +101,9 @@ export async function syncRemoteGraphQL () {
 }
 
 /**
- * Generates the schema so the urql GraphCache is
+ * Regenerates both artifacts derived from the committed SDL, which live in
+ * different packages: the test-extended introspection `mountFragment` queries
+ * against, and the introspection the urql GraphCache reads.
  */
 export async function generateFrontendSchema () {
   const schemaContents = await fs.promises.readFile(path.join(monorepoPaths.pkgDataContext, 'schemas/schema.graphql'), 'utf8')
@@ -119,10 +118,8 @@ export async function generateFrontendSchema () {
 }
 
 /**
- * Adds two fields to the GraphQL types specific to testing
- *
- * @param schema
- * @returns
+ * Extends Query with two fields the component tests use to mount a fragment
+ * against any object type, via a union spanning all of them.
  */
 function generateTestExtensions (schema: GraphQLSchema) {
   const objects: string[] = []
