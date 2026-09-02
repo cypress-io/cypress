@@ -211,8 +211,7 @@
     },
     "packages/web-config": {
       "entry": [
-        "webpack.config.base.ts",
-        "node-register.js"
+        "webpack.config.base.ts"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",

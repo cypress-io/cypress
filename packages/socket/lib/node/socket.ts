@@ -2,10 +2,10 @@ import buffer from 'buffer'
 import type http from 'http'
 import type { ServerOptions } from 'socket.io'
 import { Server as SocketIOBaseServer } from 'socket.io'
+import { version } from 'socket.io-client/package.json'
 import { cypressParser } from '../utils'
 
 // TODO: this will need to be updated to use an ESM version of the package
-const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
 
 export class SocketIOServer extends SocketIOBaseServer {
