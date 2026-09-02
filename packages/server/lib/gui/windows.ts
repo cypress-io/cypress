@@ -131,11 +131,17 @@ export function defaults (options = {}) {
   })
 }
 
-export function create (projectRoot, _options: WindowOptions, newBrowserWindow = _newBrowserWindow) {
+export function browserWindowOptions (_options: WindowOptions) {
   const options = defaults(_options)
 
   if (options.show === false) {
     options.frame = false
+    // On Windows, a frameless window with a thick frame reserves part of its
+    // client area for resize hit targets, which shrinks the web contents by
+    // 16x8 DIP and with it every screenshot and video frame. A hidden window
+    // is never resized by hand, so it has no use for that frame.
+    // @see https://github.com/cypress-io/cypress/issues/34771
+    options.thickFrame = false
   }
 
   options.webPreferences.webSecurity = !!options.chromeWebSecurity
@@ -143,6 +149,12 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
   if (options.partition) {
     options.webPreferences.partition = options.partition
   }
+
+  return options
+}
+
+export function create (projectRoot, _options: WindowOptions, newBrowserWindow = _newBrowserWindow) {
+  const options = browserWindowOptions(_options)
 
   const win = newBrowserWindow(options)
 

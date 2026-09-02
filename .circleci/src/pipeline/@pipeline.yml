@@ -2199,6 +2199,34 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
+  # launches a real Electron window, so the size the operating system hands back
+  # has to be verified per platform - Windows in particular sizes frameless
+  # windows differently. @see https://github.com/cypress-io/cypress/issues/34771
+  server-electron-window-tests:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium.gen2
+    resource_class: << parameters.resource_class >>
+    parallelism: 1
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
+      - restore_cached_workspace
+      # this is a temporary work around while we wait for circle to resolve issues with packages
+      # with an @ character in windows during save_cache.
+      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
+      - when:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - windows_reinstall_deps
+      - run: yarn workspace @packages/server test-integration electron_window_spec.ts
+      - sanitize-verify-and-store-mocha-results:
+          expectedResultCount: 1
+
   server-integration-tests:
     <<: *defaults
     parallelism: 1

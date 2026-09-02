@@ -61,6 +61,26 @@ describe('lib/gui/windows', () => {
     })
   })
 
+  context('.browserWindowOptions', () => {
+    // a thick frame costs a hidden window 16x8 DIP of its web contents on Windows
+    // @see https://github.com/cypress-io/cypress/issues/34771
+    it('removes the frame and the thick frame when the window is hidden', () => {
+      const options = Windows.browserWindowOptions({ show: false })
+
+      expect(options).to.include({
+        frame: false,
+        thickFrame: false,
+      })
+    })
+
+    it('keeps the frame when the window is shown', () => {
+      const options = Windows.browserWindowOptions({ show: true })
+
+      expect(options).to.include({ frame: true })
+      expect(options).not.to.have.property('thickFrame')
+    })
+  })
+
   context('.create', () => {
     it('opens dev tools if saved state is open', function () {
       Windows.create('/foo/', { devTools: true }, () => this.win)
