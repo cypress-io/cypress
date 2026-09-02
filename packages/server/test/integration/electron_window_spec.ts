@@ -12,10 +12,11 @@ import type { BrowserLaunchOpts } from '@packages/types'
 
 // The `electron` module is substituted with a stub inside the test process, so
 // the executable is resolved the way the electron package's own entrypoint does.
-const getElectronExecPath = () => {
+const getElectronExecPath = async () => {
   const pkgRoot = path.dirname(require.resolve('electron/package.json'))
+  const execPath = await fs.readFile(path.join(pkgRoot, 'path.txt'), 'utf8')
 
-  return path.join(pkgRoot, fs.readFileSync(path.join(pkgRoot, 'path.txt'), 'utf8').trim())
+  return path.join(pkgRoot, 'dist', execPath.trim())
 }
 
 const MAIN_JS = `
@@ -54,7 +55,7 @@ describe('lib/gui/windows - run mode window', () => {
   })
 
   const getContentSize = async (options: object) => {
-    const { stdout } = await execa(getElectronExecPath(), [path.join(tmpDir, 'main.js'), '--no-sandbox'], {
+    const { stdout } = await execa(await getElectronExecPath(), [path.join(tmpDir, 'main.js'), '--no-sandbox'], {
       env: {
         BROWSER_WINDOW_OPTIONS: JSON.stringify(options),
       },
