@@ -2,9 +2,8 @@ import { describe, expect, it } from '@jest/globals'
 import { urqlSchema } from '../../src/gen/urql-introspection.gen'
 
 /**
- * Keys a full introspection carries that `minifyIntrospectionQuery` drops. The
- * GraphCache resolves partial results from type shape and nullability alone, so
- * none of these should reach the generated artifact.
+ * The exact set of keys `minifyIntrospectionQuery` drops; if the library's
+ * output changes, this list has to change with it.
  */
 const STRIPPED_BY_MINIFY = [
   'defaultValue',
