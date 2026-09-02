@@ -13,7 +13,8 @@ yarn workspace @packages/example deploy
 **Architecture**
 
 - `cypress/` — Example e2e spec files copied from `cypress-example-kitchensink` (do not edit here)
-- `lib/` — Supporting JS for the build/copy process
+- `lib/` — Supporting TypeScript for the build/copy process
+- `bin/` — TypeScript build scripts, run with `tsx`
 - `gulpfile.js` — Gulp tasks that drive the copy and asset-revision steps
 - `cypress.config.js` — Cypress config for running the example specs
 

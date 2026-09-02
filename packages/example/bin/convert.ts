@@ -1,18 +1,18 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 /* eslint-disable quotes */
 
-const fs = require('fs')
-const path = require('path')
-const glob = require('glob')
+import fs from 'fs'
+import path from 'path'
+import glob from 'glob'
 
 const eslintRe = /\/. eslint.+\s+/g
 
-function replaceStringsIn (file) {
+function replaceStringsIn (file: string) {
   fs.readFile(file, 'utf8', function (err, str) {
     if (err) throw err
 
-    const replace = function (source, dest) {
+    const replace = function (source: string | RegExp, dest: string) {
       str = str.split(source).join(dest)
     }
 

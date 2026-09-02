@@ -168,7 +168,7 @@
     "packages/example": {
       "entry": [
         "gulpfile.js",
-        "lib/example.d.ts"
+        "lib/example.ts"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
@@ -733,7 +733,7 @@
     "packages/frontend-shared/src/utils/isRunMode.ts",
     "packages/frontend-shared/src/utils/isWindows.ts",
     "packages/frontend-shared/src/utils/time.ts",
-    "packages/example/bin/convert.js",
+    "packages/example/bin/convert.ts",
     "packages/extension/app/v3/content.ts",
     "packages/extension/app/v3/service-worker.ts",
     "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
