@@ -7,6 +7,7 @@
     "build": "tsx ./bin/build.ts && gulp build",
     "build-prod": "tsc -p tsconfig.prod.json",
     "check-ts": "tsc --noEmit",
+    "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build -b gh-pages",
