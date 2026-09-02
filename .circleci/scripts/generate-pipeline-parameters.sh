@@ -344,7 +344,12 @@ while IFS= read -r file; do
       npm_schematic_tests=true
       system_tests=true
       ;;
-    packages/eslint-config/*|packages/example/*|npm/xpath/*)
+    packages/example/*)
+      # `lib/` is compiled into the binary and consumed by data-context's
+      # codegen, which is what the unit tests cover.
+      unit_tests=true
+      ;;
+    packages/eslint-config/*|npm/xpath/*)
       # No CI jobs are associated with these packages — no tests to run
       ;;
     *)

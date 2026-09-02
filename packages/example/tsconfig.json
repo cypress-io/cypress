@@ -3,6 +3,8 @@
   "include": [
     "index.d.ts",
     "bin/*.ts",
-    "lib/*.ts"
+    "lib/*.ts",
+    "test/*.ts",
+    "vitest.config.ts"
   ]
 }
