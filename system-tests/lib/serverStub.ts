@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import _ from 'lodash'
-import Bluebird from 'bluebird'
+import { setTimeout as delay } from 'node:timers/promises'
 import bodyParser from 'body-parser'
 import Debug from 'debug'
 import type { RequestHandler } from 'express'
@@ -225,11 +225,10 @@ export const routeHandlers: Record<string, RouteHandler> = {
   putScreenshots: {
     method: 'put',
     url: '/screenshots/:name',
-    res (req, res) {
-      return Bluebird.delay(300)
-      .then(() => {
-        return res.sendStatus(200)
-      })
+    async res (req, res) {
+      await delay(300)
+
+      return res.sendStatus(200)
     },
   },
   getCaptureScript: {
