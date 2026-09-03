@@ -40,6 +40,9 @@ type ChromePreferences = {
   localState: object
 }
 
+// Chrome's ContentSetting enum value for an allowed permission.
+const CONTENT_SETTING_ALLOW = 1
+
 const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
@@ -56,6 +59,19 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
       // Chrome 138+ gates the "Translate this page?" bubble on this pref alone.
       translate: {
         enabled: false,
+      },
+      profile: {
+        default_content_setting_values: {
+          // Granting Local Network Access in the profile holds even where the
+          // `LocalNetworkAccessChecks` flag in chromium_flags does not, and
+          // Chromium intends to retire that flag. Chrome asks under
+          // `local-network-access`, or under `local-network` and
+          // `loopback-network` where it splits the two address spaces.
+          // https://github.com/cypress-io/cypress/issues/34775
+          local_network_access: CONTENT_SETTING_ALLOW,
+          local_network: CONTENT_SETTING_ALLOW,
+          loopback_network: CONTENT_SETTING_ALLOW,
+        },
       },
     },
     defaultSecure: {},
@@ -746,12 +762,16 @@ export = {
         options,
       ),
       _removeRootExtension(),
-      _disableRestorePagesPrompt(userDir),
       // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
       fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
       // Write the final merged preferences BEFORE launching the browser
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
+
+    // Reads and rewrites the same file as the preferences write above, so it
+    // must follow it: a read overlapping that write tears and is silently
+    // discarded, leaving the prompt enabled.
+    await _disableRestorePagesPrompt(userDir)
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own, and merge any
     // user-supplied --host-resolver-rules with the ones derived from `hosts`
