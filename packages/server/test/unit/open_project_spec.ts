@@ -225,6 +225,26 @@ describe('lib/open_project', () => {
           expect(browsers.open.lastCall.args[1].onPageCriClientReady).to.be.a('function')
         })
 
+        it('asks the launcher to clear persisted service workers on the browser network path', async function () {
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].shouldClearPersistedServiceWorkers).to.be.true
+        })
+
+        it('leaves persisted service workers alone when testIsolation is disabled', async function () {
+          this.config.testIsolation = false
+
+          await openProject.launch(this.browser, this.spec)
+
+          expect(browsers.open.lastCall.args[1].shouldClearPersistedServiceWorkers).to.be.false
+        })
+
+        it('does not ask the launcher to clear persisted service workers on the MITM path', async function () {
+          await openProject.launch({ name: 'firefox', family: 'firefox' }, this.spec)
+
+          expect(browsers.open.lastCall.args[1].shouldClearPersistedServiceWorkers).to.be.undefined
+        })
+
         it('passes the MITM path to the launcher when forceHttp1 is set', async function () {
           this.config.forceHttp1 = true
 
