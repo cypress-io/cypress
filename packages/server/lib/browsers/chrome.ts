@@ -400,7 +400,7 @@ export = {
   },
 
   _getArgs (browser: Browser, options: BrowserLaunchOpts, port: string) {
-    const args = ([] as string[]).concat(DEFAULT_CHROME_FLAGS)
+    let args = ([] as string[]).concat(DEFAULT_CHROME_FLAGS)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
@@ -442,6 +442,18 @@ export = {
     // These features are launch-time-only: connectToExisting attaches to an
     // already-running browser and inherits the flags of whatever launched it.
     if (options.useBrowserNetworkInterception) {
+      // On the browser (CDP) network path the browser makes origin fetches itself, so the
+      // blanket `--ignore-certificate-errors` would silently accept invalid certs. Drop it
+      // and, when the user has trusted specific certs, narrow trust to those via their SPKI
+      // fingerprints. The MITM path keeps the blanket flag since our proxy terminates TLS.
+      args = args.filter((arg) => arg !== '--ignore-certificate-errors')
+
+      const fingerprints = options.trustedCertificateFingerprints ?? []
+
+      if (fingerprints.length) {
+        args.push(`--ignore-certificate-errors-spki-list=${fingerprints.join(',')}`)
+      }
+
       const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
 
       // ServiceWorkerAutoPreload serves navigations that cold-start a service

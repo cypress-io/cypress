@@ -116,6 +116,12 @@ export type BrowserLaunchOpts = {
    * consumer reads this rather than re-deriving it.
    */
   useBrowserNetworkInterception: boolean
+  /**
+   * Base64 SHA-256 SPKI fingerprints of the user's `trustedCertificates`, resolved once
+   * per launch. On the browser (CDP) network path these narrow the browser's cert trust
+   * via `--ignore-certificate-errors-spki-list` in place of the blanket ignore flag.
+   */
+  trustedCertificateFingerprints?: string[]
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

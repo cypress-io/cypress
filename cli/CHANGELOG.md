@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.0.1
 
+**Bugfixes:**
+
+- On the native browser network path (Chrome, Chromium, and Edge), Cypress no longer forces the browser to ignore all TLS certificate errors. Previously this silently accepted invalid, expired, or self-signed certificates and, as a side effect, prevented the browser from caching static assets across navigations, so asset-heavy specs re-downloaded every asset on each `cy.visit`. The browser now validates certificates as it does in production. If your application under test uses a certificate the browser does not already trust — such as a self-signed development certificate or an internal certificate authority — declare it with the new [`trustedCertificates`](https://docs.cypress.io/app/references/configuration#trustedCertificates) configuration option. Firefox, WebKit, Electron, and [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) runs are unaffected. Addresses [#34760](https://github.com/cypress-io/cypress/issues/34760).
+
 **Performance:**
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).

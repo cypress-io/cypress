@@ -2941,6 +2941,17 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
+  /**
+   * A certificate the browser's own network stack should trust when it would
+   * otherwise reject it (e.g. a self-signed cert). Supply exactly one of a
+   * relative path to a PEM file, an inline PEM string, or a precomputed base64
+   * SHA-256 SPKI fingerprint.
+   */
+  type TrustedCertificate =
+    | { filePath: string }
+    | { pem: string }
+    | { spki: string }
+
   type RetryStrategyWithModeSpecs = RetryStrategy & {
     openMode: boolean // defaults to false
     runMode: boolean // defaults to true
@@ -3318,6 +3329,14 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+    /**
+     * Certificates the browser's own network stack should trust when it would otherwise
+     * reject them (e.g. self-signed certs). Each entry supplies exactly one of a relative
+     * path to a PEM file, an inline PEM string, or a base64 SHA-256 SPKI fingerprint.
+     * @default []
+     */
+    trustedCertificates: TrustedCertificate[]
 
     /**
      * Handle Cypress plugins

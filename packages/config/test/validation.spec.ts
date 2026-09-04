@@ -81,6 +81,80 @@ describe('config/src/validation', () => {
     })
   })
 
+  describe('.isValidTrustedCertificates', () => {
+    const validSpki = 'FATqPodQyOdF/d9ZiS7za/C4uyu1X3a+xiWhG3DF0RY='
+
+    it('accepts an empty array', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [])).toBe(true)
+    })
+
+    it('accepts a filePath entry with a relative path', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: 'certs/leaf.pem' }])).toBe(true)
+    })
+
+    it('accepts a pem entry', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ pem: '-----BEGIN CERTIFICATE-----' }])).toBe(true)
+    })
+
+    it('accepts a well-formed spki entry', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki }])).toBe(true)
+    })
+
+    it('rejects a non-array value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, { filePath: 'leaf.pem' })
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a non-object entry', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, ['leaf.pem'])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with zero keys', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{}])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with more than one key', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: 'leaf.pem', pem: 'x' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with an unknown key', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ url: 'https://a.com' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an empty string value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: '' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a non-string value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ pem: 123 }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an absolute filePath', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: '/etc/certs/leaf.pem' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a malformed spki', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ spki: 'not-a-fingerprint' }])
+
+      expect(result).not.toBe(true)
+    })
+  })
+
   describe('.isValidBrowser', () => {
     it('passes valid browsers and forms error messages for invalid ones', () => {
       const browsers = [

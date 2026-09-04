@@ -1287,6 +1287,35 @@ describe('lib/browsers/chrome', () => {
         expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('ServiceWorkerAutoPreload')
       })
     })
+
+    context('certificate errors', () => {
+      it('drops the blanket ignore flag on the browser (CDP) network path without trusted certs', () => {
+        const args = chrome._getArgs({}, { useBrowserNetworkInterception: true })
+
+        expect(args).not.to.include('--ignore-certificate-errors')
+        expect(args.find((arg) => arg.startsWith('--ignore-certificate-errors-spki-list'))).to.be.undefined
+      })
+
+      it('replaces the blanket ignore flag with an spki-list on the browser (CDP) network path when trusted certs are present', () => {
+        const args = chrome._getArgs({}, {
+          useBrowserNetworkInterception: true,
+          trustedCertificateFingerprints: ['AAAA', 'BBBB'],
+        })
+
+        expect(args).not.to.include('--ignore-certificate-errors')
+        expect(args).to.include('--ignore-certificate-errors-spki-list=AAAA,BBBB')
+      })
+
+      it('keeps the blanket ignore flag on the MITM path', () => {
+        const args = chrome._getArgs({}, {
+          useBrowserNetworkInterception: false,
+          trustedCertificateFingerprints: ['AAAA'],
+        })
+
+        expect(args).to.include('--ignore-certificate-errors')
+        expect(args.find((arg) => arg.startsWith('--ignore-certificate-errors-spki-list'))).to.be.undefined
+      })
+    })
   })
 
   describe('#_normalizeHostResolverRules', () => {
