@@ -65,6 +65,7 @@
 
 **Bugfixes:**
 
+- Running `cypress verify` with debug logging no longer displays a warning that Cypress was launched directly. Fixes [#6101](https://github.com/cypress-io/cypress/issues/6101).
 - Fixed an issue where Chrome and Firefox offered to translate the application under test, showing a translation prompt during the run. Fixes [#34662](https://github.com/cypress-io/cypress/issues/34662).
 - Fixed an issue where every `cypress tap` command printed HTTP request lines, such as `GET /__cypress/sessions/<id>`, to the terminal of the `cypress open` session it attached to, burying that session's own output. Fixes [#34668](https://github.com/cypress-io/cypress/issues/34668).
 
