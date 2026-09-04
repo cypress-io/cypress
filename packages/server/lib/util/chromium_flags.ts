@@ -24,15 +24,18 @@ const disabledFeatures = [
 
   // Disable Chrome's Local Network Access (LNA) checks, which began rolling out
   // in Chrome 141. LNA gates requests from a page to local/private/loopback
-  // addresses behind a `local-network-access` permission prompt. In an automated
-  // browser the prompt cannot be answered, so cross-origin requests to local dev
-  // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
-  // worked in Chrome 140. Cypress fully controls the browser under test, so it's
-  // safe to opt out of these checks entirely.
+  // addresses behind a permission prompt. In an automated browser the prompt
+  // cannot be answered, so cross-origin requests to local dev servers (e.g.
+  // login/redirect/OAuth flows) are blocked, breaking tests that worked in
+  // Chrome 140. Cypress fully controls the browser under test, so it's safe to
+  // opt out of these checks entirely. The WebSocket and WebTransport checks
+  // read their own features, so the parent does not cover them.
   // https://github.com/cypress-io/cypress/issues/32708
   // https://developer.chrome.com/blog/local-network-access
   'LocalNetworkAccessChecks',
   'LocalNetworkAccessChecksWebRTC',
+  'LocalNetworkAccessChecksWebSockets',
+  'LocalNetworkAccessChecksWebTransport',
 
   // Avoid the startup dialog for _Do you want the application 'Chromium.app' to accept incoming network connections?_.
   // Also disables the Chrome Media Router https://chromium.googlesource.com/chromium/src/+/HEAD/docs/media/media_router.md

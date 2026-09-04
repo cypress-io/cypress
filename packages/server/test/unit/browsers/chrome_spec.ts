@@ -1511,6 +1511,17 @@ describe('lib/browsers/chrome', () => {
       expect(defaultPrefs).to.have.property('defaultSecure')
       expect(defaultPrefs).to.have.property('localState')
     })
+
+    it('allows local network access so Chrome never prompts for it', () => {
+      const defaultPrefs = chrome._getDefaultChromePreferences()
+
+      expect(defaultPrefs.default).to.have.nested.property('profile.default_content_setting_values')
+      .that.deep.equals({
+        local_network_access: 1,
+        local_network: 1,
+        loopback_network: 1,
+      })
+    })
   })
 
   describe('#_getChromePreferencesWithDefaults', () => {

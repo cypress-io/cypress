@@ -5,6 +5,10 @@
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
+**Bugfixes:**
+
+- Fixed an issue where Chrome, Chromium, and Edge could interrupt a test with a permission prompt asking to access other apps and services on this device, or other devices on your local network. Fixes [#34775](https://github.com/cypress-io/cypress/issues/34775).
+
 **Misc:**
 
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).

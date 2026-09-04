@@ -33,6 +33,18 @@ describe('lib/util/chromium_flags', () => {
 
       expect(disableFeatures).to.include('HttpsUpgrades')
     })
+
+    it('disables every Local Network Access check', () => {
+      const disableFeatures = DEFAULT_CHROME_FLAGS.find((flag) => flag.startsWith('--disable-features='))
+      const features = disableFeatures?.split('=')[1].split(',')
+
+      expect(features).to.include.members([
+        'LocalNetworkAccessChecks',
+        'LocalNetworkAccessChecksWebRTC',
+        'LocalNetworkAccessChecksWebSockets',
+        'LocalNetworkAccessChecksWebTransport',
+      ])
+    })
   })
 
   describe('DEFAULT_ELECTRON_FLAGS', () => {
