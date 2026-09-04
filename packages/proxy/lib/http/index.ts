@@ -419,9 +419,10 @@ export class Http {
 
         await _runStage(HttpStages.IncomingRequest, ctx, onError)
 
-        // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-        // In this case we don't want to run the response middleware and should just exit.
-        if (ctx.res.destroyed) {
+        // Skip the response middleware only when the browser canceled: destroyed before finishing.
+        // The synthetic response auto-destroys after end(), so a middleware that finished it
+        // (blocked-host 503, unload redirect) also reads as destroyed.
+        if (ctx.res.destroyed && !ctx.res.writableFinished) {
           const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
 
           // forceNetworkError destroys the res itself; carry its tag through

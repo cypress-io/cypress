@@ -5,6 +5,10 @@
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
+**Bugfixes:**
+
+- Fixed a regression in [16.0.0](#16-0-0) where [`blockHosts`](https://on.cypress.io/configuration#blockHosts) was not enforced in Chrome, Chromium, and Edge. Requests to a blocked host reached the network instead of failing with a `503` status. Scripts and other resources from those hosts still loaded. Fixes [#34785](https://github.com/cypress-io/cypress/issues/34785).
+
 **Misc:**
 
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
