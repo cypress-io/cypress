@@ -19,6 +19,7 @@ import type { BrowserInstance, Browser } from './browsers/types'
 import { isBrowserNetworkMode, ensureProxyServer } from './util/network-mode'
 import { GracefulExit, getPeerWaitTimeoutMs } from './util/graceful-exit'
 import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
+import { trustedCertificateFingerprints } from './util/spki'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -112,6 +113,10 @@ export class OpenProject extends EventEmitter {
       ...(useBrowserNetworkInterception ? {
         proxyServer: undefined,
         proxyBypassList: undefined,
+        // The browser (CDP) path makes origin fetches itself, so certs the user has marked
+        // trusted must be handed to the browser as SPKI fingerprints. A bad entry throws a
+        // clear, actionable error naming the offending `trustedCertificates` entry.
+        trustedCertificateFingerprints: trustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
         ...translateEgressPolicyToLaunchOpts(cfg.hosts),
         hosts: cfg.hosts,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {

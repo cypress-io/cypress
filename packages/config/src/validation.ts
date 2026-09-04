@@ -464,6 +464,52 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
   return true
 }
 
+const TRUSTED_CERTIFICATE_KEYS = ['filePath', 'pem', 'spki']
+// Chrome's --ignore-certificate-errors-spki-list format: base64 SHA-256 (32 bytes → 43 chars + '=').
+const SPKI_FINGERPRINT = /^[A-Za-z0-9+/]{43}=$/
+
+/**
+ * Validates the `trustedCertificates` list. Each entry must be an object with
+ * exactly one of `filePath`, `pem`, or `spki` set to a non-empty string.
+ * @returns {string|true} Returns `true` if the list is valid. Returns an error message if it is not.
+ */
+export const isValidTrustedCertificates = (key: string, value: any): ErrResult | true => {
+  if (!Array.isArray(value)) {
+    return errMsg(key, value, 'an array of trusted certificate objects')
+  }
+
+  for (let i = 0; i < value.length; i++) {
+    const entry = value[i]
+
+    if (!_.isPlainObject(entry)) {
+      return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
+    }
+
+    const keys = Object.keys(entry)
+
+    if (keys.length !== 1 || !TRUSTED_CERTIFICATE_KEYS.includes(keys[0]!)) {
+      return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
+    }
+
+    const [entryKey] = keys
+    const entryValue = entry[entryKey!]
+
+    if (!_.isString(entryValue) || _.isEmpty(entryValue)) {
+      return errMsg(`${key}[${i}].${entryKey}`, entryValue, 'a non-empty string')
+    }
+
+    if (entryKey === 'filePath' && path.isAbsolute(entryValue)) {
+      return errMsg(`${key}[${i}].filePath`, entryValue, 'a relative filepath')
+    }
+
+    if (entryKey === 'spki' && !SPKI_FINGERPRINT.test(entryValue)) {
+      return errMsg(`${key}[${i}].spki`, entryValue, 'a base64-encoded SHA-256 SPKI fingerprint')
+    }
+  }
+
+  return true
+}
+
 export const isPlainObject = (key: string, value: any) => {
   if (value == null || _.isPlainObject(value)) {
     return true
