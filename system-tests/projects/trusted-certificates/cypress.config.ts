@@ -9,7 +9,7 @@
 // `--ignore-certificate-errors-spki-list` value against certs in the chain the
 // server actually presents; that server sends only the leaf (no CA, no chain
 // bundle), so the LEAF — not the signing CA — is what must be trusted.
-module.exports = {
+export default {
   e2e: {
     supportFile: false,
     baseUrl: 'https://localhost:3232',

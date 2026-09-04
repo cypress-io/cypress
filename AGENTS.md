@@ -187,6 +187,7 @@ yarn clean-deps && yarn
 
 ## Code Conventions
 
+- **TypeScript for all new code** — New source, specs, and test fixtures must be TypeScript, not JavaScript. This includes system-test project fixtures: use `cypress.config.ts` and `.cy.ts` specs (lightweight fixtures without their own `node_modules` should `export default { ... }` a plain object rather than importing `defineConfig` from `cypress`).
 - **No Prettier** — Formatting is enforced entirely through ESLint. The `.prettierignore` excludes all files.
 - **Single quotes** — `'single'` quote style required for all JS/TS.
 - **No semicolons** — Enforced via ESLint (`semi: 'never'`).

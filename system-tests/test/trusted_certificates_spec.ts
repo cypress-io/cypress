@@ -46,7 +46,7 @@ describe('e2e trusted certificates', () => {
   })
 
   systemTests.it('loads a self-signed origin whose certificate is declared trusted', {
-    spec: 'trusted_certificates.cy.js',
+    spec: 'trusted_certificates.cy.ts',
     browser: 'chrome',
     project: 'trusted-certificates',
     expectedExitCode: 0,
