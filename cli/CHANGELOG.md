@@ -54,6 +54,7 @@
 - Fixed an issue where the [`after:run`](https://on.cypress.io/after-run-api) event handler would not run when a project was closed in `cypress open` mode and [`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/configuration#Experiments) was set. Addressed in [#34700](https://github.com/cypress-io/cypress/pull/34700).
 - Fixed an issue where a single cleanup step that stalled while Cypress shut down, such as waiting on a browser that was slow to close, could hold up the rest of shutdown. Addressed in [#34699](https://github.com/cypress-io/cypress/pull/34699).
 - Fixed an issue where `cypress tap specs` and `cypress tap run` failed against a Cypress session whose project sets the internal `namespace` configuration option, reporting that the session was older than the CLI when it was not. Addresses [#34660](https://github.com/cypress-io/cypress/pull/34660).
+- The Command Log no longer drops the path separator from the logged file path of a downloaded file on Windows when the file name begins with a punctuation character, such as `(results).csv`. Fixes [#19647](https://github.com/cypress-io/cypress/issues/19647).
 
 **Dependency Updates:**
 
