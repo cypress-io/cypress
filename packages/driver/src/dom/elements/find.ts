@@ -241,36 +241,44 @@ export const getElements = ($el) => {
  * `getContainsSelector` below.
  */
 
+// matches any [type='submit'][value] element, tag-agnostic like the
+// [value~=...] selector branch this replaces (see #34305)
+function isSubmit (elem: Element): boolean {
+  return (elem as HTMLInputElement).type === 'submit' && (elem as HTMLInputElement).hasAttribute('value')
+}
+
+// the strings an element is matched against: its text content, plus its value
+// for submit elements. values are collapsed the same way as text content, so
+// value="click\nme" still matches cy.contains('click me')
+const getContainsTestTexts = (elem: Element): string[] => {
+  const texts = [normalizeWhitespaces(elem)]
+
+  if (isSubmit(elem)) {
+    texts.push((elem as HTMLInputElement).value.replace(/\s+/g, ' '))
+  }
+
+  return texts
+}
+
 // Example:
 // button:cy-contains("Login")
 $.expr.pseudos['cy-contains'] = $.expr.createPseudo((text) => {
   text = JSON.parse(`"${ text }"`)
 
   return function (elem) {
-    let testText = normalizeWhitespaces(elem)
-
-    return testText.includes(text)
+    return getContainsTestTexts(elem).some((testText) => testText.includes(text))
   }
 })
 
 // Example:
 // .login-button:cy-contains-insensitive("login")
 $.expr.pseudos['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
-  text = JSON.parse(`"${ text }"`)
+  text = JSON.parse(`"${ text }"`).toLowerCase()
 
   return function (elem) {
-    let testText = normalizeWhitespaces(elem)
-
-    testText = testText.toLowerCase()
-    text = text.toLowerCase()
-
-    return testText.includes(text)
+    return getContainsTestTexts(elem).some((testText) => testText.toLowerCase().includes(text))
   }
 })
-
-function isSubmit (elem: Element): elem is HTMLInputElement {
-  return elem.tagName === 'INPUT' && (elem as HTMLInputElement).type === 'submit'
-}
 
 // Example:
 // #login>li:first:cy-contains-regex('/asdf 1/i')
@@ -280,13 +288,11 @@ $.expr.pseudos['cy-contains-regex'] = $.expr.createPseudo((text) => {
 
   // taken from jquery's normal contains method
   return function (elem) {
-    if (isSubmit(elem)) {
-      return regex.test(elem.value)
-    }
+    return getContainsTestTexts(elem).some((testText) => {
+      regex.lastIndex = 0
 
-    const testText = normalizeWhitespaces(elem)
-
-    return regex.test(testText)
+      return regex.test(testText)
+    })
   }
 })
 
@@ -308,12 +314,12 @@ export const getContainsSelector = (text, filter = '', options: {
 
   const selectors = _.map(filters, (filter) => {
     // https://github.com/cypress-io/cypress/issues/8626
-    // Sizzle cannot parse when \' is used inside [attribute~='value'] selector.
+    // Sizzle cannot parse when \' is used inside a pseudo-selector call.
     // We need to use other type of quote characters.
     const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
 
     // use custom cy-contains selector that is registered above
-    return `${filter}:${expr}(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
+    return `${filter}:${expr}(${textToFind})`
   })
 
   return selectors.join()
