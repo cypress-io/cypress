@@ -59,7 +59,7 @@ import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -684,6 +684,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // visible under DEBUG=cypress:server:browsers:interception-escape-detector.
     let warnedInterceptionEscape = false
 
+    const reservedPathPrefixes = getCypressReservedPathPrefixes(openConfig)
+
     const runtime = createCdpFetchRuntime({
       client,
       isAUTFrame,
@@ -707,16 +709,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         warnedInterceptionEscape = true
 
-        // Cypress's runner is served on the AUT's origin under clientRoute, so
-        // an escape there means the origin's worker answered for Cypress's own
-        // document — a different problem, with a different remedy, than an
-        // escaped AUT document. This runs synchronously off a CDP event with
-        // no catch above it, so an unparseable url reports the generic
-        // variant rather than throwing out of the listener.
+        // Cypress's runner is served on the AUT's origin under paths Cypress
+        // reserves, so an escape there means the origin's worker answered for
+        // Cypress's own document — a different problem, with a different
+        // remedy, than an escaped AUT document. This runs synchronously off a
+        // CDP event with no catch above it, so an unparseable url reports the
+        // generic variant rather than throwing out of the listener.
         let isRunnerDocument = false
 
         try {
-          isRunnerDocument = new URL(url).pathname.startsWith(openConfig.clientRoute ?? '/__/')
+          const { pathname } = new URL(url)
+
+          isRunnerDocument = reservedPathPrefixes.some((prefix) => pathname.startsWith(prefix))
         } catch {
           debug('could not parse escaped url %s', url)
         }

@@ -2685,10 +2685,10 @@ describe('http/response-middleware', function () {
       // equivalent to an absent key, so asserting the option key by name that
       // way would pass even against a differently-named key. toStrictEqual
       // does not make that elision, so it actually pins the key name.
-      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined, runnerNamespaceExemption: undefined }])
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined }])
     })
 
-    it('exempts the runner namespace when useBrowserNetworkInterception is set on ctx', async function () {
+    it('passes the reserved path prefixes when useBrowserNetworkInterception is set on ctx', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
@@ -2696,10 +2696,7 @@ describe('http/response-middleware', function () {
             'service-worker': 'script',
           },
         },
-        config: {
-          clientRoute: '/__/',
-          namespace: '__cypress',
-        },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
         useBrowserNetworkInterception: true,
       })
 
@@ -2707,11 +2704,11 @@ describe('http/response-middleware', function () {
 
       expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', {
         disableServiceWorkerNavigationPreload: true,
-        runnerNamespaceExemption: { clientRoute: '/__/', namespace: '__cypress' },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
       }])
     })
 
-    it('does not exempt the runner namespace when useBrowserNetworkInterception is unset on ctx', async function () {
+    it('does not pass the reserved path prefixes when useBrowserNetworkInterception is unset on ctx', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
@@ -2719,15 +2716,12 @@ describe('http/response-middleware', function () {
             'service-worker': 'script',
           },
         },
-        config: {
-          clientRoute: '/__/',
-          namespace: '__cypress',
-        },
+        reservedPathPrefixes: ['/__/', '/__cypress/'],
       })
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
 
-      expect(injectIntoServiceWorkerStub.mock.calls[0][1]).toStrictEqual({ disableServiceWorkerNavigationPreload: undefined, runnerNamespaceExemption: undefined })
+      expect(injectIntoServiceWorkerStub.mock.calls[0][1]).toStrictEqual({ disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined })
     })
 
     it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {

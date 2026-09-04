@@ -625,7 +625,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.pipe(concatStream(async (body) => {
     const updatedBody = injectIntoServiceWorker(body, {
       disableServiceWorkerNavigationPreload: this.useBrowserNetworkInterception,
-      runnerNamespaceExemption: this.useBrowserNetworkInterception ? { clientRoute: this.config.clientRoute, namespace: this.config.namespace } : undefined,
+      reservedPathPrefixes: this.useBrowserNetworkInterception ? this.reservedPathPrefixes : undefined,
     })
 
     const pt = new PassThrough

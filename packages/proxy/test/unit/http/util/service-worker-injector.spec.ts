@@ -73,7 +73,7 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
   }
 }
 
-const runnerNamespaceExemption = { clientRoute: '/__/', namespace: '__cypress' }
+const reservedPathPrefixes = ['/__/', '/__cypress/', '/__cypress-studio', '/__cypress-cy-prompt']
 
 describe('lib/http/util/service-worker-injector', () => {
   describe('injectIntoServiceWorker', () => {
@@ -119,9 +119,9 @@ describe('lib/http/util/service-worker-injector', () => {
     })
   })
 
-  describe('runner namespace exemption', () => {
+  describe('reserved path prefixes', () => {
     it('declines the runner document without invoking the application listener', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
 
       const { respondWith } = await sw.dispatchFetch('https://example.com/__/anything')
 
@@ -133,7 +133,7 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('declines runner assets without invoking the application listener', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
 
       const { respondWith } = await sw.dispatchFetch('https://example.com/__cypress/runner/x.js')
 
@@ -145,7 +145,7 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('lets the application listener handle application requests', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
 
       const { respondWith } = await sw.dispatchFetch('https://example.com/app/page')
 
@@ -157,12 +157,12 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('declines the cloud-delivered studio and cy-prompt bundles', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
 
       const studio = await sw.dispatchFetch('https://example.com/__cypress-studio/app-studio.js')
       const cyPrompt = await sw.dispatchFetch('https://example.com/__cypress-cy-prompt/driver/cy-prompt.js')
       // sibling namespaces like /__cypress-studio-ai only match because the
-      // prefixes are bare - this pins that a trailing slash is never added
+      // cloud bundle prefixes are bare - this pins that no trailing slash is added
       const studioAi = await sw.dispatchFetch('https://example.com/__cypress-studio-ai/generate')
 
       expect(sw.appFetchCalls()).toEqual([])
@@ -177,7 +177,7 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('declines runner requests assigned through the onfetch property', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
       const handler = vi.fn()
 
       sw.fakeSelf.onfetch = handler
@@ -192,7 +192,7 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('respects a custom client route', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption: { clientRoute: '/custom-route/', namespace: '__cypress' } })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes: ['/custom-route/', '/__cypress/'] })
 
       await sw.dispatchFetch('https://example.com/custom-route/index.html')
       await sw.dispatchFetch('https://example.com/__/anything')
@@ -201,7 +201,7 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('respects a custom namespace', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption: { clientRoute: '/__/', namespace: 'custom-ns' } })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes: ['/__/', '/custom-ns/'] })
 
       await sw.dispatchFetch('https://example.com/custom-ns/x')
       await sw.dispatchFetch('https://example.com/__cypress/x')
@@ -209,7 +209,7 @@ describe('lib/http/util/service-worker-injector', () => {
       expect(sw.appFetchCalls()).toEqual(['https://example.com/__cypress/x'])
     })
 
-    it('does not decline runner paths when the exemption is not supplied', async () => {
+    it('does not decline runner paths when the prefixes are not supplied', async () => {
       const sw = runInjectedServiceWorker()
 
       const { respondWith } = await sw.dispatchFetch('https://example.com/__/anything')
@@ -222,7 +222,7 @@ describe('lib/http/util/service-worker-injector', () => {
     })
 
     it('declines runner paths on a cross-origin url', async () => {
-      const sw = runInjectedServiceWorker({ runnerNamespaceExemption })
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
 
       const { respondWith } = await sw.dispatchFetch('https://other.example/__cypress/x')
 

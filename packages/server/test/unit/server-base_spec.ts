@@ -768,6 +768,12 @@ describe('lib/server-base', () => {
         expect(serverErrors.warning).to.have.been.calledOnceWith('BROWSER_NETWORK_INTERCEPTION_ESCAPE', sinon.match.string, true)
       })
 
+      it('reports an escaped runner asset as a runner document', async function () {
+        await escape(this.server, 'https://example.com/__cypress/iframes/integration/spec.cy.js')
+
+        expect(serverErrors.warning).to.have.been.calledOnceWith('BROWSER_NETWORK_INTERCEPTION_ESCAPE', sinon.match.string, true)
+      })
+
       it('reports an escaped AUT document as one', async function () {
         await escape(this.server, 'https://example.com/dashboard')
 
