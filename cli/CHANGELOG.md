@@ -5,6 +5,10 @@
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
+**Bugfixes:**
+
+- Fixed a regression in [16.0.0](#16-0-0) where the headless Electron browser window was sized smaller than requested on Windows during `cypress run`, so failure screenshots and recorded videos were smaller than the expected 1280x720. Setting `preferences.width` and `preferences.height` in [`before:browser:launch`](https://on.cypress.io/before-browser-launch) had no effect on the result. Fixes [#34771](https://github.com/cypress-io/cypress/issues/34771).
+
 **Misc:**
 
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
