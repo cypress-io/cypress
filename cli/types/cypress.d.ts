@@ -3331,9 +3331,11 @@ declare namespace Cypress {
     clientCertificates: ClientCertificate[]
 
     /**
-     * Certificates the browser's own network stack should trust when it would otherwise
-     * reject them (e.g. self-signed certs). Each entry supplies exactly one of a relative
-     * path to a PEM file, an inline PEM string, or a base64 SHA-256 SPKI fingerprint.
+     * Certificates the browser should treat as genuinely trusted rather than merely
+     * tolerating their errors (e.g. a self-signed development cert). On the native browser
+     * network path this lets the browser cache the origin's assets across navigations.
+     * Each entry supplies exactly one of a relative path to a PEM file, an inline PEM
+     * string, or a base64 SHA-256 SPKI fingerprint.
      * @default []
      */
     trustedCertificates: TrustedCertificate[]

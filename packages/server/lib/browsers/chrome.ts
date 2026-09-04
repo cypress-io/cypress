@@ -442,12 +442,12 @@ export = {
     // These features are launch-time-only: connectToExisting attaches to an
     // already-running browser and inherits the flags of whatever launched it.
     if (options.useBrowserNetworkInterception) {
-      // On the browser (CDP) network path the browser makes origin fetches itself, so the
-      // blanket `--ignore-certificate-errors` would silently accept invalid certs. Drop it
-      // and, when the user has trusted specific certs, narrow trust to those via their SPKI
-      // fingerprints. The MITM path keeps the blanket flag since our proxy terminates TLS.
-      args = args.filter((arg) => arg !== '--ignore-certificate-errors')
-
+      // On the browser (CDP) network path the browser makes origin fetches itself. The
+      // blanket `--ignore-certificate-errors` stays so an untrusted cert still loads, but
+      // Chrome treats such a connection as a clicked-through warning and never disk-caches
+      // from it. Declaring a cert in `trustedCertificates` adds its SPKI fingerprint here,
+      // which Chrome honors over the blanket flag: the connection is genuinely trusted, so
+      // the origin's assets cache normally.
       const fingerprints = options.trustedCertificateFingerprints ?? []
 
       if (fingerprints.length) {

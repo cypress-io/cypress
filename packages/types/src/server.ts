@@ -118,8 +118,10 @@ export type BrowserLaunchOpts = {
   useBrowserNetworkInterception: boolean
   /**
    * Base64 SHA-256 SPKI fingerprints of the user's `trustedCertificates`, resolved once
-   * per launch. On the browser (CDP) network path these narrow the browser's cert trust
-   * via `--ignore-certificate-errors-spki-list` in place of the blanket ignore flag.
+   * per launch. On the browser (CDP) network path these are passed via
+   * `--ignore-certificate-errors-spki-list` alongside the blanket ignore flag, so a
+   * declared cert's origin is genuinely trusted (and therefore cacheable) rather than
+   * merely tolerated.
    */
   trustedCertificateFingerprints?: string[]
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts

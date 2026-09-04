@@ -2,10 +2,10 @@ import systemTests from '../lib/system-tests'
 
 // The `trusted-certificates` project points `trustedCertificates` at the exact
 // leaf certificate this self-signed HTTPS origin presents. This exercises the
-// end-to-end plumbing on the browser (CDP) network path (Chrome/Chromium/Edge),
-// where Cypress no longer passes the blanket `--ignore-certificate-errors`:
+// end-to-end plumbing on the browser (CDP) network path (Chrome/Chromium/Edge):
 // the config is validated, each entry's SPKI fingerprint is computed, and the
-// `--ignore-certificate-errors-spki-list` flag reaches Chrome so the origin loads.
+// `--ignore-certificate-errors-spki-list` flag reaches Chrome alongside the
+// blanket `--ignore-certificate-errors`, so the origin is genuinely trusted.
 //
 // NOTE: this does NOT assert the disk-cache behavior the feature restores. That
 // is unobservable from a Cypress system test — Cypress's `--test-type` /
