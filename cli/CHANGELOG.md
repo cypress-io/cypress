@@ -17,6 +17,7 @@
 - Fixed a regression in [16.0.0](#16-0-0) where, in `cypress open` on Chrome, Chromium, and Edge, testing a site that registers an origin-wide service worker could render the site's own content — such as its 404 page — in place of the Cypress app after clicking a spec or reloading the browser tab. A service worker registered by the site under test can no longer answer for Cypress's own pages and assets. Fixes [#34789](https://github.com/cypress-io/cypress/issues/34789). Addressed in [#34762](https://github.com/cypress-io/cypress/pull/34762).
 - Fixed an issue where a variant of A/B tested content in the Cypress app that was weighted never to be shown could become the only variant shown. Fixes [#34814](https://github.com/cypress-io/cypress/issues/34814).
 - Fixed a regression in [12.0.0](#12-0-0) where an assertion on a [`cy.contains()`](https://on.cypress.io/contains) command that matched no element did not say what was searched for, reporting `expected undefined not to exist in the DOM` in the Command Log. The searched content is now shown, such as `expected Saving not to exist in the DOM`. Fixes [#25962](https://github.com/cypress-io/cypress/issues/25962).
+- Fixed a regression in [16.0.0](#16-0-0) where [`blockHosts`](https://on.cypress.io/configuration#blockHosts) was not enforced in Chrome, Chromium, and Edge. Requests to a blocked host reached the network instead of failing with a `503` status. Scripts and other resources from those hosts still loaded. Fixes [#34785](https://github.com/cypress-io/cypress/issues/34785).
 
 **Misc:**
 
