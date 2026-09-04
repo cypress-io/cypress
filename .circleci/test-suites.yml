@@ -1,0 +1,6 @@
+---
+name: unit tests
+discover: yarn vitest list --filesOnly
+run: yarn vitest run --reporter=junit --outputFile.junit=<< outputs.junit >> << test.atoms >>
+outputs:
+  junit: test-reports/vitest-junit.xml
