@@ -7,14 +7,14 @@ exports['e2e issue 6619 / can reload during spec run'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (reload-spec.spec.js)                                                      │
-  │ Searched:   cypress/e2e/reload-spec.spec.js                                                    │
+  │ Specs:      1 found (reload.spec.js)                                                           │
+  │ Searched:   cypress/e2e/reload.spec.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  reload-spec.spec.js                                                             (1 of 1)
+  Running:  reload.spec.js                                                                  (1 of 1)
 
 
   runner reload
@@ -40,9 +40,9 @@ exports['e2e issue 6619 / can reload during spec run'] = `
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     reload-spec.spec.js                                                              │
+  │ Spec Ran:     reload.spec.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -53,7 +53,7 @@ exports['e2e issue 6619 / can reload during spec run'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  reload-spec.spec.js                      XX:XX        3        2        -        1        - │
+  │ ✔  reload.spec.js                           XX:XX        3        2        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        2        -        1        -  
 
