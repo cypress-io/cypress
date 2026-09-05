@@ -9182,7 +9182,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@16.9.1", "@types/node@24.10.1", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@^12.12.29", "@types/node@^12.12.7", "@types/node@^20.1.0", "@types/node@^22.18.7", "@types/node@^24.10.1", "@types/node@^24.9.0", "@types/node@^8.0.7":
+"@types/node@*", "@types/node@16.9.1", "@types/node@24.10.1", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@^12.12.29", "@types/node@^20.1.0", "@types/node@^22.18.7", "@types/node@^24.10.1", "@types/node@^24.9.0", "@types/node@^8.0.7":
   version "24.10.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.1.tgz#91e92182c93db8bd6224fca031e2370cef9a8f01"
   integrity sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==
@@ -31197,7 +31197,7 @@ tslib@2.3.1, tslib@~2.3.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
   integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
 
-tslib@^1.0.0, tslib@^1.10.0, tslib@^1.11.1, tslib@^1.13.0, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
+tslib@^1.0.0, tslib@^1.11.1, tslib@^1.13.0, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
@@ -31477,15 +31477,6 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
-
-typescript-cached-transpile@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/typescript-cached-transpile/-/typescript-cached-transpile-0.0.6.tgz#1d1f0620ebb29cf8d8c11e5353c2b4f43dfafc01"
-  integrity sha512-bfPc7YUW0PrVkQHU0xN0ANRuxdPgoYYXtZEW6PNkH5a97/AOM+kPPxSTMZbpWA3BG1do22JUkfC60KoCKJ9VZQ==
-  dependencies:
-    "@types/node" "^12.12.7"
-    fs-extra "^8.1.0"
-    tslib "^1.10.0"
 
 typescript-eslint@^8.37.0:
   version "8.37.0"
