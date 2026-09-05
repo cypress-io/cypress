@@ -141,6 +141,35 @@ interface PkgElectronAppOptions {
   overwrite: boolean
   electronVersion: string
   icon: string
+  electronZipDir?: string
+}
+
+// @electron/packager would fetch this through @electron/get, which never
+// retries and re-fetches SHASUMS256.txt even on cache hits. Calling it here
+// lets us retry; electronZipDir then points the packager at the result.
+async function downloadElectronZipWithRetries (options: { version: string, platform: string, arch: string }): Promise<string> {
+  // required dynamically for the same mksnapshot reason as @electron/packager below
+  const e = 'electron'
+  const { downloadArtifact } = require(`@${e}/get`)
+  const retryDelaysMs = [2000, 4000, 8000, 16000, 32000]
+
+  // same env var the `electron` package's own installer honors, so CI can point
+  // both at one cacheable directory. Undefined falls back to the platform default.
+  const cacheRoot = process.env.electron_config_cache
+
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await downloadArtifact({ artifactName: 'electron', cacheRoot, ...options })
+    } catch (err) {
+      const delayMs = retryDelaysMs[attempt]
+
+      if (delayMs === undefined) throw err
+
+      debug('electron zip download failed %o', { attempt, err })
+      console.log(`Electron download failed (${(err as Error).message}), retrying in ${delayMs / 1000}s (attempt ${attempt + 1} of ${retryDelaysMs.length})`)
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
 }
 
 async function pkgElectronApp (
@@ -184,6 +213,14 @@ async function pkgElectronApp (
     icon: iconPath,
     ...options,
   }
+
+  const zipPath = await downloadElectronZipWithRetries({
+    version: resolvedOptions.electronVersion,
+    platform: resolvedOptions.platform,
+    arch: resolvedOptions.arch,
+  })
+
+  resolvedOptions.electronZipDir = path.dirname(zipPath)
 
   debug('packager options %j', resolvedOptions)
   const [appPath] = await pkgr(resolvedOptions)
