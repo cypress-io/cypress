@@ -29,6 +29,8 @@ export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
   private compilation: Compilation | null = null
+  private jitRecompileGeneration = 0
+  private pendingJitRecompileGenerations: number[] = []
   private webpack: Function
   private indexHtmlFile: string
 
@@ -91,10 +93,28 @@ export class CypressCTWebpackPlugin {
    * See https://github.com/cypress-io/cypress/issues/24398
    */
   private onSpecsChange = async ({ specs, options }: { specs: Cypress.Cypress['spec'][], options?: { neededForJustInTimeCompile: boolean}}) => {
-    if (!this.compilation || _.isEqual(specs, this.files)) {
+    const neededForJustInTimeCompile = !!options?.neededForJustInTimeCompile
+
+    if (_.isEqual(specs, this.files)) {
+      this.devServerEvents.emit('dev-server:specs:unchanged', { neededForJustInTimeCompile })
+
       return
     }
 
+    if (!this.compilation) {
+      this.files = specs
+      const generation = ++this.jitRecompileGeneration
+
+      this.pendingJitRecompileGenerations.push(generation)
+      this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile })
+
+      return
+    }
+
+    const generation = ++this.jitRecompileGeneration
+
+    this.pendingJitRecompileGenerations.push(generation)
+    this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation, neededForJustInTimeCompile })
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
@@ -128,8 +148,20 @@ export class CypressCTWebpackPlugin {
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation))
-    _compiler.hooks.done.tap('CypressCTPlugin', () => {
-      this.devServerEvents.emit('dev-server:compile:success')
+    _compiler.hooks.done.tap('CypressCTWebpackPlugin', () => {
+      if (!this.pendingJitRecompileGenerations.length) {
+        this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: false })
+
+        return
+      }
+
+      // Webpack may batch rapid spec updates into one recompile. Signal every
+      // queued generation so no waitForDevServerSpecUpdate call hangs.
+      const generations = this.pendingJitRecompileGenerations.splice(0)
+
+      for (const generation of generations) {
+        this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: generation })
+      }
     })
   }
 }

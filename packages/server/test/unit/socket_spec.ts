@@ -1290,59 +1290,87 @@ describe('lib/socket', () => {
         })
       })
 
-      describe('#onCloudTestFileChange', () => {
-        it('calls #onCloudTestFileChange', function () {
-          devServer.emitter.off.reset()
-          sinon.stub(this.socket, 'toRunner')
-
-          this.socket.onCloudTestFileChange({ specFile: 'foo/bar.js' })
-
-          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', { specFile: 'foo/bar.js' })
-          expect(devServer.emitter.off).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
+      describe('dev-server events', () => {
+        it('always listens for dev-server:compile:success regardless of watchForFileChanges', function () {
+          expect(devServer.emitter.on).to.be.calledWith('dev-server:compile:success')
+          expect(devServer.emitter.on).to.be.calledWith('dev-server:specs:unchanged')
         })
-      })
 
-      describe('#onBeforeSave', () => {
-        it('calls #onTestFileChange and listens for dev-server:compile:success when config.watchForFileChanges is false', function () {
-          devServer.emitter.on.reset()
+        it('forwards dev-server:compile:success to the runner', function () {
+          const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+          const handler = compileSuccessCall.args[1]
 
+          sinon.stub(this.socket, 'toRunner')
+          handler({ specFile: 'foo/bar.js', jitRecompile: true })
+
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+            specFile: 'foo/bar.js',
+            jitRecompile: true,
+            studioCompileRerun: false,
+          }))
+        })
+
+        it('does not consume the studio rerun flag for JIT recompiles', function () {
           this.cfg.watchForFileChanges = false
 
           this.socket.onBeforeSave(this.cfg)
 
-          expect(devServer.emitter.on).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
-        })
-      })
+          const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+          const handler = compileSuccessCall.args[1]
 
-      describe('#onAfterSave', () => {
-        it('removes listener for dev-server:compile:success when there is an error and config.watchForFileChanges is false', function () {
-          devServer.emitter.off.reset()
+          sinon.stub(this.socket, 'toRunner')
+          handler({ jitRecompile: true, jitRecompileGeneration: 1 })
 
-          this.cfg.watchForFileChanges = false
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+            jitRecompile: true,
+            studioCompileRerun: false,
+          }))
 
-          this.socket.onAfterSave(this.cfg, new Error('test error'))
+          handler({ specFile: 'foo/bar.js' })
 
-          expect(devServer.emitter.off).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
-        })
-
-        it('does not remove listener for dev-server:compile:success when there is an error and config.watchForFileChanges is true', function () {
-          devServer.emitter.off.reset()
-
-          this.cfg.watchForFileChanges = true
-
-          this.socket.onAfterSave(this.cfg, new Error('test error'))
-
-          expect(devServer.emitter.off).not.to.be.called
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+            specFile: 'foo/bar.js',
+            studioCompileRerun: true,
+          }))
         })
 
-        it('does not remove listener for dev-server:compile:success when there is no error', function () {
-          devServer.emitter.off.reset()
+        describe('#onBeforeSave', () => {
+          it('marks the next compile success for rerun when config.watchForFileChanges is false', function () {
+            this.cfg.watchForFileChanges = false
 
-          this.cfg.watchForFileChanges = false
+            this.socket.onBeforeSave(this.cfg)
 
-          this.socket.onAfterSave(this.cfg)
+            const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+            const handler = compileSuccessCall.args[1]
 
-          expect(devServer.emitter.off).not.to.be.called
+            sinon.stub(this.socket, 'toRunner')
+            handler({ specFile: 'foo/bar.js' })
+
+            expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+              specFile: 'foo/bar.js',
+              studioCompileRerun: true,
+            }))
+          })
+        })
+
+        describe('#onAfterSave', () => {
+          it('clears the studio rerun flag when there is an error and config.watchForFileChanges is false', function () {
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onBeforeSave(this.cfg)
+            this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+            const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+            const handler = compileSuccessCall.args[1]
+
+            sinon.stub(this.socket, 'toRunner')
+            handler({ specFile: 'foo/bar.js' })
+
+            expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+              specFile: 'foo/bar.js',
+              studioCompileRerun: false,
+            }))
+          })
         })
       })
     })
