@@ -752,10 +752,10 @@ export = {
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
 
-    // Reads and rewrites the same file as the preferences write above, so it must
-    // follow it: a read overlapping that write tears and is silently discarded,
-    // leaving the restore-pages prompt enabled. It also has to be the later write —
-    // `finalPreferences` carries the stale exit status from the pre-launch read.
+    // Runs after the preferences write above because both rewrite the same file:
+    // a read overlapping that write fails, and the failure is only debug-logged.
+    // It also has to be the later write, since `finalPreferences` still carries
+    // the exit status read before launch.
     await _disableRestorePagesPrompt(userDir)
 
     // normalize the --load-extensions argument by

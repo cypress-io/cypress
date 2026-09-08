@@ -423,8 +423,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
-        // the merged preferences still carry the stale exit status, since they
-        // derive from the pre-launch read
+        // the merged preferences still carry the exit status read before launch
         const prefsWrite = fs.outputJson.getCalls().find((call) => {
           return call.args[0] === prefsPath && call.args[1].profile.exit_type === 'Crashed'
         })
