@@ -24,6 +24,7 @@ yarn workspace @packages/example deploy
 - Running `deploy` publishes directly to the GitHub Pages production site; verify the `./build` directory first.
 - The `cypress/` and `app/` directories are outputs of the build step and must be committed after a kitchensink version bump.
 - To update the example content: bump `cypress-example-kitchensink` in `package.json`, run `yarn` and `yarn workspace @packages/example build`, then open a PR.
+- `lib/` is pulled into the `vue-tsc` type-check of `app`, `launchpad` and `frontend-shared` (via `data-context`'s codegen templates), which target ES modules. `export =` there fails those jobs with TS1203 even though this package's own `check-ts` passes — use `export default`, and run the root `yarn check-ts` rather than only this workspace's.
 
 **Auto-Generated Files**
 

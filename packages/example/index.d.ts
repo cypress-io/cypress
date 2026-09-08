@@ -1,3 +1,1 @@
-import example = require('./lib/example')
-
-export = example
+export { default } from './lib/example'
