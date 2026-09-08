@@ -4,7 +4,7 @@
   "description": "Common ESLint rules shared by Cypress development-only packages",
   "main": "./lib",
   "scripts": {
-    "lint": "eslint --ext .js,json,.eslintrc .",
+    "lint": "eslint --ext .js,.ts,json,.eslintrc .",
     "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
     "test": "vitest"
