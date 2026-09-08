@@ -746,12 +746,18 @@ export = {
         options,
       ),
       _removeRootExtension(),
-      _disableRestorePagesPrompt(userDir),
       // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
       fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
       // Write the final merged preferences BEFORE launching the browser
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
+
+    // Reads and rewrites the same file as the preferences write above, so it must
+    // follow it: a read overlapping that write tears and is silently discarded,
+    // leaving the restore-pages prompt enabled. It also has to be the later write —
+    // `finalPreferences` carries the stale exit status from the pre-launch read.
+    await _disableRestorePagesPrompt(userDir)
+
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own, and merge any
     // user-supplied --host-resolver-rules with the ones derived from `hosts`

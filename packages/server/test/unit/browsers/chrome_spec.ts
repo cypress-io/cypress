@@ -409,6 +409,38 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    it('cleans up the exit status only after the merged preferences are written', function () {
+      const prefsPath = '/profile/dir/Default/Preferences'
+
+      this.readJson.withArgs(prefsPath).resolves({
+        profile: {
+          exit_type: 'Crashed',
+          exited_cleanly: false,
+        },
+      })
+
+      fs.outputJson.resolves()
+
+      return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
+      .then(() => {
+        // the merged preferences still carry the stale exit status, since they
+        // derive from the pre-launch read
+        const prefsWrite = fs.outputJson.getCalls().find((call) => {
+          return call.args[0] === prefsPath && call.args[1].profile.exit_type === 'Crashed'
+        })
+        const exitStatusRead = this.readJson.getCalls().filter((call) => call.args[0] === prefsPath).pop()
+
+        expect(prefsWrite, 'merged preferences were written').to.exist
+        expect(exitStatusRead.calledAfter(prefsWrite)).to.be.true
+        expect(fs.outputJson).to.be.calledWith(prefsPath, {
+          profile: {
+            exit_type: 'Normal',
+            exited_cleanly: true,
+          },
+        })
+      })
+    })
+
     it('calls cri client close on kill', function () {
       // need a reference here since the stub will be monkey-patched
       const {
