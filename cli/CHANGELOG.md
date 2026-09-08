@@ -7,6 +7,7 @@
 
 **Misc:**
 
+- Fixed an issue where setting [`keystrokeDelay`](https://docs.cypress.io/app/references/configuration#Keyboard) in a TypeScript configuration file failed to compile with `'keystrokeDelay' does not exist in type 'ConfigOptions'`, even though Cypress read and validated the option at runtime. Fixes [#34796](https://github.com/cypress-io/cypress/issues/34796).
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
 
 ## 16.0.0
