@@ -2932,6 +2932,11 @@ Warning: We encountered an error while initializing the Test Replay recording fo
 
 These results will not display Test Replay recordings.
 
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that /os/tmpdir/cypress/protocol is both readable and writable.
+
 This error will not affect or change the exit code.
 
 Error: Error in beforeSpec
