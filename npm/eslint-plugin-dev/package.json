@@ -5,16 +5,11 @@
   "main": "./lib",
   "scripts": {
     "lint": "eslint --ext .js,json,.eslintrc .",
-    "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
     "test": "vitest"
   },
   "dependencies": {
-    "bluebird": "3.5.5",
-    "chalk": "^2.4.2",
-    "eslint-rule-composer": "^0.3.0",
-    "lodash": "^4.17.15",
-    "shelljs": "0.8.5"
+    "eslint-rule-composer": "^0.3.0"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
@@ -22,6 +17,7 @@
     "eslint-plugin-json-format": "^2.0.1",
     "eslint-plugin-mocha": "^8.2.0",
     "eslint-plugin-promise": "^7.2.1",
+    "lodash": "^4.17.15",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
@@ -33,10 +29,6 @@
     "eslint-plugin-json-format": ">= 2.0.1",
     "eslint-plugin-mocha": " >= 8.0.0",
     "eslint-plugin-react": ">= 7.22.0"
-  },
-  "bin": {
-    "lint-changed": "./lib/scripts/lint-changed.js",
-    "lint-pre-commit": "./lib/scripts/lint-pre-commit.js"
   },
   "license": "MIT",
   "repository": {

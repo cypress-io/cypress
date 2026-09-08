@@ -6,7 +6,6 @@
 
 ```sh
 yarn lint           # ESLint on this package itself
-yarn lint-changed   # lint only files changed since the last commit
 yarn lint-fix       # ESLint with --fix
 yarn test -- <path-to-spec>                     # run a specific vitest spec file
 yarn test -- "<glob-pattern>"                   # run vitest specs matching a glob
@@ -16,12 +15,9 @@ yarn test -- "<glob-pattern>"                   # run vitest specs matching a gl
 
 - `lib/index.js` — main entry point; exports the ESLint plugin (rules and configs)
 - `lib/custom-rules/` — custom ESLint rules authored for Cypress internals
-- `lib/scripts/` — CLI scripts:
-  - `lint-changed.js` (also exposed as `lint-changed` binary) — lints only changed files
-  - `lint-pre-commit.js` (also exposed as `lint-pre-commit` binary) — pre-commit hook linting
 
 ## Gotchas / Notes
 
 - This is an internal development tool only. Do not recommend it to Cypress end users; they should use `eslint-plugin-cypress` instead.
-- The package exposes two CLI binaries (`lint-changed` and `lint-pre-commit`) which are used in git hooks and CI tooling across the monorepo.
+- The custom rules exist because stock ESLint has no equivalent. `arrow-body-multiline-braces` wraps `arrow-body-style` to report only on multiline arrows, and `skip-comment` requires an explanation on `.skip` rather than banning it the way `mocha/no-pending-tests` does. Exclusive tests are covered by `mocha/no-exclusive-tests`, so there is no custom rule for them.
 - Peer dependencies cover ESLint 8.x only (`eslint: "^= 8.0.0"`); not compatible with ESLint 9 flat config in its consumer role.

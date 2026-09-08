@@ -71,18 +71,7 @@ eslint-plugin-react
 
 4) (optional) Install and configure your text editor's ESLint Plugin Extension to lint and auto-fix files using ESLint, [detailed below](#editors)
 
-5) (optional) Install [`husky`](https://github.com/typicode/husky) and enable the lint `pre-commit` hook:
-
-`package.json`:
-```json
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-pre-commit"
-    }
-  },
-```
-> Note: the `lint-pre-commit` hook will automatically lint your staged files, and only `--fix` and `git add` them if there are no unstaged changes existing in that file (this protects partially staged files from being added in the hook).  
-To auto-fix all staged & unstaged files, run `./node_modules/.bin/lint-changed --fix`
+5) (optional) Lint staged files on commit with [`husky`](https://github.com/typicode/husky) and [`lint-staged`](https://github.com/lint-staged/lint-staged).
 
 ## Presets
 
@@ -150,7 +139,6 @@ name | description | options | example
 -|-|-|-
 `@cypress/dev/arrow-body-multiline-braces` | Enforces braces in arrow functions ONLY IN multiline function definitions | [`[always|never] always set this to 'always'`] | `'@cypress/dev/arrow-body-multiline-braces': ['error', 'always']`
 `@cypress/dev/skip-comment` | Enforces a comment (`// NOTE:`) explaining a `.skip` added to `it`, `describe`, or `context` test blocks | { commentTokens: `[array] tokens that indicate .skip explanation (default: ['NOTE:', 'TODO:', 'FIXME:']`)} | `'@cypress/dev/skip-comment': ['error', { commentTokens: ['TODO:'] }]`
-`@cypress/dev/no-return-before` | Disallows `return` statements before certain configurable tokens | { tokens: `[array] tokens that cannot be preceded by 'return' (default: ['it', 'describe', 'context', 'expect']`)} | `'@cypress/dev/no-return-before': ['error', { tokens: ['myfn'] }]`
 
 ## <a name="editors"></a>Editors
 

@@ -735,8 +735,6 @@
     "packages/example/bin/convert.js",
     "packages/extension/app/v3/content.ts",
     "packages/extension/app/v3/service-worker.ts",
-    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
-    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",
