@@ -1,0 +1,19 @@
+{
+  "include": [
+    "lib/**/*.ts"
+  ],
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    // rules are required straight from source through Node's type stripping, so
+    // an emit would only leave a stale .js copy of each rule beside it
+    "noEmit": true
+  }
+}

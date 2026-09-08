@@ -1,4 +1,5 @@
 !.*
 **/package-lock.json
+**/tsconfig.json
 test/fixtures
 node_modules

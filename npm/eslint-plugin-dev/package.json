@@ -4,6 +4,7 @@
   "description": "Common ESLint rules shared by Cypress development-only packages",
   "main": "./lib",
   "scripts": {
+    "check-ts": "tsc --noEmit",
     "lint": "eslint --ext .js,.ts,json,.eslintrc .",
     "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
@@ -17,11 +18,14 @@
     "shelljs": "0.8.5"
   },
   "devDependencies": {
+    "@types/eslint": "^8.56.0",
+    "@types/node": "^24.10.1",
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-json-format": "^2.0.1",
     "eslint-plugin-mocha": "^8.2.0",
     "eslint-plugin-promise": "^7.2.1",
+    "typescript": "~5.4.5",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
