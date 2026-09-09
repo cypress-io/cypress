@@ -11,7 +11,7 @@
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
@@ -26,5 +26,8 @@
   "types": "./cjs/index.d.ts",
   "license": "MIT",
   "module": "esm/index.js",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  },
   "nx": {}
 }

@@ -7,7 +7,7 @@ import type { Request } from '@cypress/request'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const debug = null
 
 export type ErrorMiddleware = HttpMiddleware<{

@@ -15,7 +15,7 @@ const debug = debugFn('cypress:driver:mouse')
 
 export type ForceEl = false | HTMLElement
 
-export type MouseCoords = { x?: number, y?: number}
+export type MouseCoords = { x?: number, y?: number }
 
 /**
  * @typedef Coords

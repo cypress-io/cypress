@@ -33,7 +33,7 @@ interface GetFileResult {
   error?: string
 }
 
-const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
+const rehydrateRunnable = (data: serializedRunnable): Runnable | Test => {
   let runnable
 
   if (data.type === 'test') {

@@ -8,7 +8,7 @@
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-watch": "vitest watch",
@@ -29,6 +29,8 @@
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.22.0",
     "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@packages/errors": "0.0.0-development",
@@ -58,5 +60,8 @@
       "devtools-protocol"
     ]
   },
-  "nx": {}
+  "nx": {},
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  }
 }

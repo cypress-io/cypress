@@ -682,8 +682,8 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(text).to.have.value('foo')
 
           done()
-        }
-        , 50)
+        },
+         50)
       })
 
       cy.get(':text:first').type('foo{enter}bar{leftarrow}', { delay: 10 })
@@ -2857,8 +2857,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.$$('input:first').keyup(function () {
         _.delay(() => {
           $(this).addClass('typed')
-        }
-        , 100)
+        },
+         100)
       })
 
       cy.get('input:first').type('f').should('have.class', 'typed').then(function () {

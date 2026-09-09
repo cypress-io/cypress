@@ -40,7 +40,7 @@ export function replaceStream (patterns: RegExp | RegExp[], replacements: string
 
       tail = tail.replace(pattern, function replacer (match) {
         // ugly, but necessary due to bizarre function signature of String#replace
-        const offset = arguments[arguments.length - 2] // eslint-disable-line prefer-rest-params
+        const offset = arguments[arguments.length - 2]
 
         if (offset + replacement.length > replacementEndIndex) {
           replacementEndIndex = offset + replacement.length

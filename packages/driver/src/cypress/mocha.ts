@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import type { CypressError } from './error_utils'
 import $errUtils from './error_utils'
@@ -452,7 +451,7 @@ function getNormalizedRetriesConfig (Cypress: Cypress.Cypress): NormalizedRetrie
     }
   }
 
-  const enablementKey: 'openMode'|'runMode' = isInOpenMode ? 'openMode' : 'runMode'
+  const enablementKey: 'openMode' | 'runMode' = isInOpenMode ? 'openMode' : 'runMode'
   const enablementValue = retriesConfig[enablementKey]
 
   // if retries are explicitly disabled, return an empty object

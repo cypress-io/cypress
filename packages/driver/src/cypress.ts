@@ -197,6 +197,7 @@ class $Cypress {
       })
     },
   }
+
   utils = $utils
   _ = _
   Blob = blobUtil

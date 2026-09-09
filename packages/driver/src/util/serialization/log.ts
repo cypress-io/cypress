@@ -419,7 +419,7 @@ export const preprocessLogForSerialization = (logAttrs) => {
  * @returns a reified version of what a log is supposed to look like in Cypress
  */
 export const reifyLogFromSerialization = (logAttrs) => {
-  let { snapshots, ... logAttrsRest } = logAttrs
+  let { snapshots, ...logAttrsRest } = logAttrs
 
   // if the protocol is enabled, we don't need to reify the snapshot since the snapshot was serializable coming into the primary instance of Cypress.
   // also make sure numTestsKeptInMemory is 0, otherwise we will want to preprocess the snapshot

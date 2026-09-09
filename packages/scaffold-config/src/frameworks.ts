@@ -14,7 +14,7 @@ export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = Cypress.ResolvedComponentFrameworkDefinition['codeGenFramework']
 
-export async function isDependencyInstalledByName (packageName: string, projectPath: string): Promise<{dependency: string, detectedVersion: string | null}> {
+export async function isDependencyInstalledByName (packageName: string, projectPath: string): Promise<{ dependency: string, detectedVersion: string | null }> {
   let detectedVersion: string | null = null
 
   try {

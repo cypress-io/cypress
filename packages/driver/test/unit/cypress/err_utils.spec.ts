@@ -5,7 +5,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 // source_map_utils must be included in order for vite to mock it, even
 // if it isn't referenced.
-// eslint-disable-next-line
+
 import source_map_utils from '../../../src/cypress/source_map_utils'
 import errUtils from '../../../src/cypress/error_utils'
 import stackFrameFixture from './__fixtures__/getUserInvocationStack_stackFrames.json'

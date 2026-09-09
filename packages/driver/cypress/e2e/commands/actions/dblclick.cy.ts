@@ -120,8 +120,8 @@ describe('src/cy/commands/actions/dblclick', () => {
           expect(timeout.callCount).to.eq(0)
 
           done()
-        }
-        , 200)
+        },
+         200)
       })
 
       cy.get('#sequential-clicks a').dblclick()

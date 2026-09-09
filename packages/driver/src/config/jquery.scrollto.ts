@@ -104,7 +104,7 @@ export function scrollTo (target, duration, settings) {
     let offset = isFunction(settings.offset) && settings.offset(elem, targ) || settings.offset
 
     $.each(settings.axis.split(''), function (i, axis) {
-      let Pos	= axis === 'x' ? 'Left' : 'Top'
+      let Pos = axis === 'x' ? 'Left' : 'Top'
       let pos = Pos.toLowerCase()
       let key = `scroll${ Pos}`
       let prev = $elem[key]()

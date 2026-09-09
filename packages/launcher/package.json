@@ -8,7 +8,7 @@
     "clean": "rimraf --glob 'lib/*.js' && rimraf --glob 'lib/**/*.js' || true",
     "clean-deps": "rimraf node_modules",
     "clean-js": "yarn clean",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
@@ -26,6 +26,8 @@
     "win-version-info": "^6.0.1"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.22.0",
     "@packages/data-context": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
@@ -44,5 +46,8 @@
     "implicitDependencies": [
       "@packages/data-context"
     ]
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }
 }

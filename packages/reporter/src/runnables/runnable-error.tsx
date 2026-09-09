@@ -25,8 +25,7 @@ export const RunnablesError = observer(({ error }: RunnablesErrorProps) => (
       {error.link &&
         <a href={error.link} target='_blank' rel='noopener noreferrer'>
           <QuestionMarkIcon />
-        </a>
-      }
+        </a>}
     </h2>
     {error.callout && <pre>{error.callout}</pre>}
     <div className='error-message' dangerouslySetInnerHTML={{ __html: md.render(error.message) }} />

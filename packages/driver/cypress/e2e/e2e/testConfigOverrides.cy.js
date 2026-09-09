@@ -1,5 +1,3 @@
-/* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
-
 describe('per-test config', () => {
   const testState = {
     ranFirefox: false,

@@ -627,8 +627,8 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         }
 
         return memo
-      }
-      , {})
+      },
+       {})
       .extend({
         knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
         knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,

@@ -7,7 +7,7 @@ import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import $dom from '../dom'
 import $document from '../dom/document'
 import $elements from '../dom/elements'
-// eslint-disable-next-line no-duplicate-imports
+
 import type { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
 import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
@@ -302,7 +302,7 @@ const parseCharsBetweenCurlyBraces = (chars: string) => {
 
 const shouldIgnoreEvent = <
   T extends KeyEventType,
-  K extends { [key in T]?: boolean }
+  K extends { [key in T]?: boolean },
 >(
   eventName: T,
   options: K,

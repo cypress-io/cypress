@@ -41,8 +41,7 @@ const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = def
                 appState.toggleSpecList()
                 events.emit('save:state')
               })()
-            }
-            }>
+            }}>
             <MenuExpandRightIcon style={{ transform: appState.isSpecsListOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
           </Button>
         </div>

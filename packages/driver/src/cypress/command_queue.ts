@@ -300,8 +300,6 @@ export class CommandQueue extends Queue<$Command> {
           command.set('queryFn', ret)
           ret = retryQuery(command, ret, this.cy)
         }
-      } catch (err) {
-        throw err
       } finally {
         // always remove this listener
         Cypress.removeListener('command:enqueued', commandEnqueued)

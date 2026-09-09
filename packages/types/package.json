@@ -11,7 +11,7 @@
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "check-ts": "tsc -p tsconfig.check.json",
     "clean": "rimraf cjs esm",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "vitest run",
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
@@ -19,6 +19,8 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.22.0",
     "@packages/root": "0.0.0-development",
     "@types/mocha": "8.0.3",
     "@types/node": "24.10.1",
@@ -43,5 +45,8 @@
       "devtools-protocol"
     ]
   },
-  "nx": {}
+  "nx": {},
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  }
 }

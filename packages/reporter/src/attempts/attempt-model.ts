@@ -31,7 +31,7 @@ export default class Attempt {
   _testOuterStatus?: TestState = undefined
   _invocationCount: number = 0
   invocationDetails?: FileDetails
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   hookCount: { [name in HookName]: number } = {
     'before all': 0,
     'before each': 0,
@@ -40,7 +40,8 @@ export default class Attempt {
     'test body': 0,
     'studio commands': 0,
   }
-  _isOpen: boolean|null = null
+
+  _isOpen: boolean | null = null
 
   isOpenWhenLast: boolean | null = null
   _callbackAfterUpdate: Function | null = null
@@ -49,7 +50,7 @@ export default class Attempt {
   id: number
   test: Test
 
-  _logs: {[key: string]: Log} = {}
+  _logs: { [key: string]: Log } = {}
 
   constructor (props: TestProps, test: Test) {
     makeObservable(this, {

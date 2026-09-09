@@ -1,7 +1,7 @@
 describe('cy.origin', { browser: '!webkit' }, () => {
   it('window:before:load event', () => {
     cy.visit('/fixtures/primary-origin.html')
-    cy.on('window:before:load', (win: {testPrimaryOriginBeforeLoad: boolean}) => {
+    cy.on('window:before:load', (win: { testPrimaryOriginBeforeLoad: boolean }) => {
       win.testPrimaryOriginBeforeLoad = true
     })
 
@@ -9,7 +9,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
 
     // Needs to be declared before the visit
     cy.origin('http://www.foobar.com:3500', () => {
-      cy.on('window:before:load', (win: {testSecondaryWindowBeforeLoad: boolean}) => {
+      cy.on('window:before:load', (win: { testSecondaryWindowBeforeLoad: boolean }) => {
         win.testSecondaryWindowBeforeLoad = true
       })
     })

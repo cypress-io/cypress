@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
     "test": "tsx ./scripts/test-webpack-5.ts",
@@ -24,6 +24,8 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.22.0",
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.26.0",
     "@types/mocha": "9.0.0",
@@ -71,5 +73,8 @@
         ]
       }
     }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }
 }

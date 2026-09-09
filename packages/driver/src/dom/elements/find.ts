@@ -294,7 +294,7 @@ export const getContainsSelector = (text, filter = '', options: {
   matchCase?: boolean
 } = {}) => {
   if (_.isRegExp(text) && options.matchCase === false && !text.flags.includes('i')) {
-    text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+    text = new RegExp(text.source, text.flags + 'i')
   }
 
   const escapedText = _.isString(text) ? JSON.stringify(text).slice(1, -1) : text.toString()

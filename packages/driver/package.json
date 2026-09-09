@@ -9,7 +9,7 @@
     "cypress:run": "node ../../scripts/cypress run --config-file ./cypress.config.ts",
     "cypress:run:inject-document-domain": "node ../../scripts/cypress run --config-file ./cypress.config-injectDocumentDomain.ts",
     "postinstall": "patch-package",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
     "test": "vitest run",
     "test:watch": "vitest watch",
@@ -17,6 +17,8 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.22.0",
     "@babel/code-frame": "7.27.1",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/unique-selector": "2.1.3",
@@ -107,5 +109,8 @@
       "*"
     ]
   },
-  "nx": {}
+  "nx": {},
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  }
 }
