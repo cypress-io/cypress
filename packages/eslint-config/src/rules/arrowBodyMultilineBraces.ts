@@ -3,9 +3,8 @@ import { builtinRules } from 'eslint/use-at-your-own-risk'
 
 const arrowBodyStyle = builtinRules.get('arrow-body-style') as Rule.RuleModule
 
-// `//---` above a report opts that arrow out, matching the token pattern the
-// rule has honored since it lived in @cypress/eslint-plugin-dev.
-const optOutComment = /^-{2,}$/u
+// `fixable` is dropped along with the fixes themselves — see the note on `create`.
+const { fixable: _fixable, ...arrowBodyStyleMeta } = arrowBodyStyle.meta ?? {}
 
 /**
  * `arrow-body-style` has no multiline-only mode, so wrap it and drop reports on
@@ -16,7 +15,7 @@ const optOutComment = /^-{2,}$/u
  */
 export const arrowBodyMultilineBraces: Rule.RuleModule = {
   meta: {
-    ...arrowBodyStyle.meta,
+    ...arrowBodyStyleMeta,
     docs: {
       description: 'Enforce braces in arrow function bodies only when the arrow spans multiple lines',
     },
@@ -24,25 +23,19 @@ export const arrowBodyMultilineBraces: Rule.RuleModule = {
   create (context) {
     const filteringContext = Object.create(context, {
       report: {
-        value (descriptor: Rule.ReportDescriptor) {
+        // The upstream fixer inserts `{ return … }` without reindenting, and
+        // `@stylistic/indent` is off in this config, so nothing tidies up after
+        // it — an autofix lands the body at column 0. Severity is no protection
+        // either: `--fix` rewrites warnings too, and lint-staged runs it on every
+        // staged file. So the fix is dropped and the author reindents by hand.
+        value ({ fix, ...descriptor }: Rule.ReportDescriptor) {
           const node = (descriptor as { node?: Rule.Node }).node
 
-          if (node && node.loc && node.loc.start.line === node.loc.end.line) {
+          if (node?.loc && node.loc.start.line === node.loc.end.line) {
             return
           }
 
-          const loc = (descriptor as { loc?: { start: { line: number, column: number } } }).loc ?? node?.loc
-
-          if (loc) {
-            const index = context.sourceCode.getIndexFromLoc(loc.start)
-            const token = context.sourceCode.getTokenByRangeStart(index, { includeComments: true })
-
-            if (token && token.type === 'Line' && optOutComment.test(token.value)) {
-              return
-            }
-          }
-
-          context.report(descriptor)
+          context.report(descriptor as Rule.ReportDescriptor)
         },
       },
     })
