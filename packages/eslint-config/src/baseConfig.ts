@@ -12,6 +12,8 @@ import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
+import { cypressDevPlugin } from './rules'
+
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
   ...tsConfigs.recommended,
@@ -85,6 +87,38 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@stylistic/jsx-max-props-per-line': 'off',
       '@stylistic/jsx-curly-brace-presence': 'off',
       '@stylistic/jsx-quotes': 'off',
+    },
+  },
+
+  // Cypress-authored rules, kept under the `@cypress/dev` namespace they had in
+  // @cypress/eslint-plugin-dev so existing eslint-disable comments still resolve.
+  {
+    plugins: {
+      '@cypress/dev': cypressDevPlugin,
+    },
+    rules: {
+      // A warning rather than an error: 30 sites in packages already on this
+      // config predate the rule. Autofixing them is not enough on its own —
+      // `@stylistic/indent` is off, so the fixer's output lands mis-indented and
+      // has to be corrected by hand. Fix those sites, then raise this to 'error'.
+      '@cypress/dev/arrow-body-multiline-braces': ['warn', 'always'],
+    },
+  },
+  {
+    files: ['**/*.{jsx,tsx}'],
+    rules: {
+      '@cypress/dev/arrow-body-multiline-braces': 'off',
+    },
+  },
+  {
+    files: [
+      '**/test/**/*.{js,jsx,ts,tsx}',
+      '**/cypress/**/*.{js,jsx,ts,tsx}',
+      '**/*.spec.{js,jsx,ts,tsx}',
+      '**/*.cy.{js,jsx,ts,tsx}',
+    ],
+    rules: {
+      '@cypress/dev/skip-comment': 'error',
     },
   },
 
