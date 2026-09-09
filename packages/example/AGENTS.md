@@ -25,6 +25,7 @@ yarn workspace @packages/example deploy
 - The `cypress/` and `app/` directories are outputs of the build step and must be committed after a kitchensink version bump.
 - To update the example content: bump `cypress-example-kitchensink` in `package.json`, run `yarn` and `yarn workspace @packages/example build`, then open a PR.
 - `lib/` is pulled into the `vue-tsc` type-check of `app`, `launchpad` and `frontend-shared` (via `data-context`'s codegen templates), which target ES modules. `export =` there fails those jobs with TS1203 even though this package's own `check-ts` passes — use `export default`, and run the root `yarn check-ts` rather than only this workspace's.
+- That default export is why `index.js` unwraps `.default`. The two go together: without the unwrap, `require('@packages/example')` yields `{ default: … }` and `getPathToE2E` is undefined for any CommonJS consumer. Keeping `module.exports` the plain object is what makes the package resolve identically under `ts-node`, `tsc` output, and the esbuild snapshot bundle.
 
 **Auto-Generated Files**
 
