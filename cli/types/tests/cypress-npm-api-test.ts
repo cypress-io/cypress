@@ -47,7 +47,16 @@ cypress.run().then(results => {
 })
 
 const config = defineConfig({
-  modifyObstructiveCode: true
+  modifyObstructiveCode: true,
+  keystrokeDelay: 10
+})
+
+const configWithUnsetKeystrokeDelay = defineConfig({
+  keystrokeDelay: null
+})
+
+const configWithInvalidKeystrokeDelay = defineConfig({
+  keystrokeDelay: false // $ExpectError
 })
 
 const solid = {

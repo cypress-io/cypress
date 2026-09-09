@@ -3196,6 +3196,12 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
+     * Time, in milliseconds, between each keystroke when typing with [cy.type()](https://on.cypress.io/type).
+     * When `null`, the value set with [Cypress.Keyboard.defaults()](https://on.cypress.io/keyboard-api) is used, falling back to `0`.
+     * @default null
+     */
+    keystrokeDelay: number | null
+    /**
      * Indicates whether Cypress should allow CSP header directives from the application under test.
      * - When this option is set to `false`, Cypress will strip the entire CSP header.
      * - When this option is set to `true`, Cypress will only to strip directives that would interfere
