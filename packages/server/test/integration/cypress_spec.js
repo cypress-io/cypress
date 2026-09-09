@@ -916,27 +916,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    const renamedConfigs = [
-      {
-        old: 'blacklistHosts',
-        new: 'blockHosts',
-      },
-    ]
-
-    renamedConfigs.forEach(function (config) {
-      // TODO: remove this skip once we have a renamed config option - there are none active now
-      it.skip(`logs error and exits when using an old configuration option: ${config.old}`, function () {
-        return cypress.start([
-          `--run-project=${this.todosPath}`,
-          `--config=${config.old}=''`,
-        ])
-        .then(() => {
-          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
-          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.new)
-        })
-      })
-    })
-
     // TODO: make sure we have integration tests around this
     // for headed projects!
     // also make sure we test the rest of the integration functionality

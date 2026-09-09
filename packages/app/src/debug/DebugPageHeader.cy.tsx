@@ -153,7 +153,7 @@ describe('<DebugPageHeader />', {
     cy.mountFragment(DebugPageHeaderFragmentDoc, {
       onResult (result) {
         if (result) {
-          result.totalDuration = 3602000000
+          result.totalDuration = 3602000
         }
       },
       render: (gqlVal) => {
@@ -164,7 +164,7 @@ describe('<DebugPageHeader />', {
     })
 
     cy.findByTestId('debug-header-createdAt')
-    .should('have.text', 'Run Total Duration: 16h 33m 20s (an hour ago) ')
+    .should('have.text', 'Run Total Duration: 01h 00m 02s (an hour ago) ')
   })
 
   it('renders count up duration for running', () => {

@@ -1,10 +1,10 @@
 import '../../spec_helper'
 
 import { expect } from 'chai'
-import { Request } from 'express'
+import type { Request } from 'express'
 import { SocketAllowed } from '../../../lib/util/socket_allowed'
 import { EventEmitter } from 'events'
-import { Socket } from 'net'
+import type { Socket } from 'net'
 
 describe('lib/util/socket_allowed', function () {
   let sw: SocketAllowed

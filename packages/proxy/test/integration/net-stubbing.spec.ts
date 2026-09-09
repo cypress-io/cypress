@@ -1,8 +1,10 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import { NetworkProxy, createSyntheticProxyCodec } from '../../'
+import type {
+  NetStubbingState,
+} from '@packages/net-stubbing'
 import {
   netStubbingState as _netStubbingState,
-  NetStubbingState,
   onNetStubbingEvent,
 } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'

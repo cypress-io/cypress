@@ -210,8 +210,7 @@
     },
     "packages/web-config": {
       "entry": [
-        "webpack.config.base.ts",
-        "node-register.js"
+        "webpack.config.base.ts"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",
@@ -865,9 +864,6 @@
     ],
     "packages/network-interception/lib/exchange/network-exchange.ts": [
       "types"
-    ],
-    "packages/network-interception/lib/core/route-matching.ts": [
-      "duplicates"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"

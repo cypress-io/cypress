@@ -3,7 +3,7 @@ import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 import { nextHandler, allCssTests } from '../../src/helpers/nextHandler'
 import type { Configuration, RuleSetRule } from 'webpack'
 import * as path from 'path'
-import { WebpackDevServerConfig } from '../../src/devServer'
+import type { WebpackDevServerConfig } from '../../src/devServer'
 
 const expectWatchOverrides = (webpackConfig: Configuration) => {
   expect((webpackConfig.watchOptions?.ignored as RegExp)?.test('**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**')).toBe(true)

@@ -249,6 +249,11 @@ describe('Choose a browser page', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
+
+      // `visitLaunchpad` resolves before the browser list mounts, and the list only learns
+      // about status changes through the subscription it opens on mount.
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
+
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
@@ -260,16 +265,18 @@ describe('Choose a browser page', () => {
       cy.wait('@closeBrowser')
     })
 
-    it('performs mutation to focus open browser when focus button is pressed', { retries: 15 }, () => {
+    it('performs mutation to focus open browser when focus button is pressed', () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
 
+      cy.get('h1').should('contain', 'Choose a browser')
+
+      cy.contains('button', 'Start E2E Testing in Chrome').should('be.visible')
+
       cy.withCtx((ctx) => {
         ctx.actions.app.setBrowserStatus('open')
       })
-
-      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.contains('button', 'Running Chrome').as('launchButton')
 

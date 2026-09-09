@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
-import systemTests, { expect, BrowserName } from '../lib/system-tests'
+import type { BrowserName } from '../lib/system-tests'
+import systemTests, { expect } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 const e2ePath = Fixtures.projectPath('e2e')

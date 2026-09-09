@@ -1,9 +1,9 @@
 import { resolveLiveSession } from '../../cypress-sessions'
-import { LiveSessionState, TAP_TARGET, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-sessions'
+import { TAP_TARGET, TapSpecsOperation, tapRunSpecOperation } from '@packages/cypress-sessions'
 import { querySessionGraphql } from '../session-gql'
 import { renderOutcome, renderTapFailure } from '../output'
 import { defineNativeCommand } from './definition'
-import type { TapErrorCode } from '@packages/cypress-sessions'
+import type { TapErrorCode, LiveSessionState } from '@packages/cypress-sessions'
 import type { TapCliOptions } from '../types'
 import { posixify } from '../../util'
 

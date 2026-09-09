@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { HttpMiddlewareThis } from '../../../../lib/http'
+import type { HttpMiddlewareThis } from '../../../../lib/http'
 import { doesTopNeedToBeSimulated } from '../../../../lib/http/util/top-simulation'
 
 describe('.doesTopNeedToBeSimulated', () => {

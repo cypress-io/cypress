@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { isIP } from 'net'
-import { PassThrough, Readable } from 'stream'
+import type { Readable } from 'stream'
+import { PassThrough } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -622,7 +623,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body)
+    const updatedBody = injectIntoServiceWorker(body, { disableServiceWorkerNavigationPreload: this.useBrowserNetworkInterception })
 
     const pt = new PassThrough
 

@@ -23,7 +23,7 @@ import {
 } from '../../src/project/utils'
 import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
-import { Config } from '../../src/project/types'
+import type { Config } from '../../src/project/types'
 import fs from 'fs-extra'
 
 const debug = Debug('test')

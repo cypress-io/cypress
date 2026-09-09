@@ -12,10 +12,12 @@ import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
-import { openFile, OpenFileDetails } from './util/file-opener'
+import type { OpenFileDetails } from './util/file-opener'
+import { openFile } from './util/file-opener'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './automation/cookie/jar'
+import type { SameSiteContext, SerializableAutomationCookie } from './automation/cookie/jar'
+import { cookieJar, automationCookieToToughCookie } from './automation/cookie/jar'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
@@ -583,8 +585,16 @@ export class SocketBase implements SocketBroadcaster {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
-              case 'wait:for:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+              case 'wait:for:prompt:ready': {
+                const cyPromptLifecycleManager = getCtx().coreData.cyPromptLifecycleManager
+
+                // The manager is not initialized when cy.prompt cannot possibly
+                // run, so report it as unavailable rather than returning nothing.
+                if (!cyPromptLifecycleManager) {
+                  return { success: false }
+                }
+
+                return cyPromptLifecycleManager.getCyPrompt().then(async (cyPrompt) => {
                   if (cyPrompt.cyPromptManager) {
                     await options.onCyPromptReady(cyPrompt.cyPromptManager)
                   }
@@ -594,6 +604,7 @@ export class SocketBase implements SocketBroadcaster {
                     error: cyPrompt.error ? errors.cloneErr(cyPrompt.error) : undefined,
                   }
                 })
+              }
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }

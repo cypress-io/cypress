@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 
 import type { ServiceWorkerClientEvent } from './service-worker-manager'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from './disable-navigation-preload'
 
 // structural stand-in for the webworker lib's WorkerGlobalScope — the real lib can't be
 // referenced because lib="webworker" conflicts with the dom lib program-wide
@@ -43,9 +44,12 @@ declare let self: ServiceWorkerGlobalScope
 /**
  * Injects code into the service worker to overwrite the fetch events to determine if the service worker handled the request.
  * @param body the body of the service worker
+ * @param options.disableServiceWorkerNavigationPreload when true, prepends the
+ * navigation-preload disabling expression ahead of everything else in the script, so
+ * it runs before any user code. See disable-navigation-preload.ts (#34652) for why.
  * @returns the updated service worker
  */
-export const injectIntoServiceWorker = (body: Buffer) => {
+export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceWorkerNavigationPreload?: boolean } = {}) => {
   function __cypressInjectIntoServiceWorker () {
     let listenerCount = 0
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
@@ -294,7 +298,14 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     })
   }
 
+  // Prepended ahead of everything else, including the IIFE below, so it runs
+  // before any user code has a chance to call navigationPreload.enable().
+  const disableNavigationPreload = options.disableServiceWorkerNavigationPreload
+    ? `${DISABLE_NAVIGATION_PRELOAD_EXPRESSION};`
+    : ''
+
   const updatedBody = `
+${disableNavigationPreload}
 let __cypressIsScriptEvaluated = false;
 (${__cypressInjectIntoServiceWorker})();
 ${body};

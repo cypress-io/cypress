@@ -1,28 +1,34 @@
-import { getSystemPath, JsonObject, JsonValue, normalize, strings } from '@angular-devkit/core'
+import type { JsonObject, JsonValue } from '@angular-devkit/core'
+import { getSystemPath, normalize, strings } from '@angular-devkit/core'
+import type {
+  Rule,
+  SchematicContext,
+  Tree,
+} from '@angular-devkit/schematics'
 import {
   apply,
   chain,
   mergeWith,
   move,
-  Rule,
-  SchematicContext,
   SchematicsException,
   applyTemplates,
-  Tree,
   url,
 } from '@angular-devkit/schematics'
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks'
 import { of } from 'rxjs'
 import { concatMap, map } from 'rxjs/operators'
 import { addPackageJsonDependency, NodeDependencyType } from '../utils/dependencies'
+import type {
+  NodePackage,
+} from '../utils'
 import {
   getAngularJsonValue,
   getLatestNodeVersion,
-  NodePackage,
   getDirectoriesAndCreateSpecs,
 } from '../utils'
 import { relative, resolve } from 'path'
-import { JSONFile, JSONPath } from '../utils/jsonFile'
+import type { JSONPath } from '../utils/jsonFile'
+import { JSONFile } from '../utils/jsonFile'
 
 type HandleFilesType = {
   projects: any

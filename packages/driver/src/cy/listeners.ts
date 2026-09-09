@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import { handleInvalidEventTarget, handleInvalidAnchorTarget, GuardedEvent, GuardedAnchorEvent } from './top_attr_guards'
+import type { GuardedEvent, GuardedAnchorEvent } from './top_attr_guards'
+import { handleInvalidEventTarget, handleInvalidAnchorTarget } from './top_attr_guards'
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 const HISTORY_NAV_ATTRS = 'go back forward'.split(' ')

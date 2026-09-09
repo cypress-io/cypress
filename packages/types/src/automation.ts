@@ -2,8 +2,6 @@
 
 export type AutomationElementId = `${string}-string`
 
-const invalidKeyErrorKind = 'InvalidKeyError'
-
 export type SupportedNamedKey = Cypress.SupportedNamedKey
 
 export const SpaceKey = 'Space'
@@ -75,13 +73,9 @@ export function isSupportedKey (key: string | number): key is SupportedKey {
  * Error thrown when an unsupported key is used with cy.press().
  * Provides information about which keys are supported.
  */
-export class InvalidKeyError extends Error {
-  kind = invalidKeyErrorKind
+class InvalidKeyError extends Error {
   constructor (key: string) {
     super(`${key} is not supported by 'cy.press()'. Single-character keys are supported, as well as a selection of utility keys: ${NamedKeys.join(', ')}`)
-  }
-  static isInvalidKeyError (e: any): e is InvalidKeyError {
-    return e.kind === invalidKeyErrorKind
   }
 }
 

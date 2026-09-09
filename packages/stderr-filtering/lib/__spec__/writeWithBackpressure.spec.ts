@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, MockedObject } from 'vitest'
+import type { MockedObject } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { writeWithBackpressure } from '../writeWithBackpressure'
-import { Writable } from 'stream'
+import type { Writable } from 'stream'
 
 describe('writeWithBackpressure', () => {
   let output: MockedObject<Writable>

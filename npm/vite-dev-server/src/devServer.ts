@@ -1,5 +1,6 @@
 import debugFn from 'debug'
-import { getVite, Vite } from './getVite.js'
+import type { Vite } from './getVite.js'
+import { getVite } from './getVite.js'
 import { createViteDevServerConfig } from './resolveConfig.js'
 import { getSpecRelativeUrl, getSupportFileRelativeUrl } from './urlPaths.js'
 import type { UserConfig } from 'vite-8'

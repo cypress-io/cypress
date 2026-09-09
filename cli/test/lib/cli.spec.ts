@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest'
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import os from 'os'
 import Debug from 'debug'
@@ -142,7 +143,7 @@ const flushPromises = () => {
 describe('cli', () => {
   const binaryDir = '/binary/dir'
   let exec: (args: string) => Promise<any>
-  let processExitSpy: ReturnType<typeof vi.spyOn>
+  let processExitSpy: MockInstance<typeof process.exit>
 
   beforeEach(() => {
     vi.unstubAllEnvs()

@@ -12,7 +12,6 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
-    "importsNotUsedAsValues": "remove",
     "verbatimModuleSyntax": true,
     // needed for mobx
     "useDefineForClassFields": true,

@@ -1,5 +1,15 @@
-import sinon, { SinonStub, SinonSpy } from 'sinon'
-import { EventEmitter } from 'events'
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import type { SinonStub, SinonSpy } from 'sinon'
+import sinon from 'sinon'
+import type { EventEmitter } from 'events'
+
+const runnerStore = new MobxRunnerStore()
+
+runnerStore.setSpec({
+  name: 'foo.js',
+  relative: 'relative/path/to/foo.js',
+  absolute: '/absolute/path/to/foo.js',
+})
 
 type EventEmitterStub = EventEmitter & Stub
 
@@ -26,13 +36,7 @@ describe('shortcuts', function () {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        runnerStore: {
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        },
+        runnerStore,
       })
     })
 

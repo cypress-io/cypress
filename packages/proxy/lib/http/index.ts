@@ -3,13 +3,15 @@ import chalk from 'chalk'
 import Debug from 'debug'
 import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
-import { telemetry, Span } from '@packages/telemetry'
+import type { Span } from '@packages/telemetry'
+import { telemetry } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin } from '../adapters/http-codec'
+import { fetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+import type { GetPreRequestCb, PendingRequest } from './util/prerequests'
+import { PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
@@ -123,6 +125,13 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // See disable-navigation-preload.ts (#34652). Named to match the launch
+  // option (BrowserLaunchOpts.useBrowserNetworkInterception), not
+  // network-mode.ts's isBrowserNetworkMode() - same concept, but that name
+  // is already an established function/method elsewhere in this codebase
+  // (network-mode.ts, ServerBase), and a plain boolean field of the same
+  // name here would read as callable.
+  useBrowserNetworkInterception?: boolean
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -343,6 +352,7 @@ export class Http {
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
+  useBrowserNetworkInterception?: boolean
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -359,6 +369,7 @@ export class Http {
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -543,6 +554,7 @@ export class Http {
       },
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
+      useBrowserNetworkInterception: this.useBrowserNetworkInterception,
     }
 
     return ctx
@@ -564,7 +576,7 @@ export class Http {
       return onError(new Error('Network interception is not configured for the proxy runtime.'))
     }
 
-    return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
+    return this.networkInterception.handle(ctx, fetchOrigin)
     .catch((err) => {
       // The legacy pipeline may already have run error middleware for this ctx.
       if (ctx.error) {
