@@ -125,7 +125,7 @@ function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDepend
       paths: [searchRoot],
     })
   } catch (e) {
-    if ((e as { code?: string }).code !== 'MODULE_NOT_FOUND') {
+    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
       debug('Webpack: Failed to source webpack - %s', e)
       throw e
     }
@@ -189,7 +189,7 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackM
       paths: [searchRoot],
     })
   } catch (e) {
-    if ((e as { code?: string }).code !== 'MODULE_NOT_FOUND') {
+    if ((e as {code?: string}).code !== 'MODULE_NOT_FOUND') {
       debug('WebpackDevServer: Failed to source webpack-dev-server - %s', e)
       throw e
     }
@@ -233,7 +233,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     // we shouldn't be concerned with using our own copy if they've shipped w/ an earlier version
     htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [5])
   } catch (e) {
-    const err = e as Error & { code?: string }
+    const err = e as Error & {code?: string}
 
     if (err.code !== 'MODULE_NOT_FOUND' && !err.message.includes('Unexpected major version')) {
       debug('HtmlWebpackPlugin: Failed to source html-webpack-plugin - %s', e)
@@ -276,7 +276,7 @@ export function sourceDefaultWebpackDependencies (config: WebpackDevServerConfig
   }
 }
 
-export function getMajorVersion<T extends number> (json: PackageJson, acceptedVersions: T[]): T {
+export function getMajorVersion <T extends number> (json: PackageJson, acceptedVersions: T[]): T {
   const major = Number(json.version.split('.')[0])
 
   if (!acceptedVersions.includes(major as T)) {

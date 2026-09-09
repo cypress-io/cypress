@@ -344,7 +344,8 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
     {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon data-cy='failed-icon-indicator' aria-hidden state={model.state} iconSize='12' />}
     {model.referencesAlias ?
       <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-      : <Message model={model} />}
+      : <Message model={model} />
+    }
   </span>
 ))
 

@@ -81,7 +81,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
 
     const checkForXhr = async function (
       alias: string,
-      type: 'request' | 'response',
+      type: 'request'|'response',
       num: string,
       options: waitOptions,
     ) {

@@ -5,7 +5,7 @@
   "scripts": {
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
     "test-unit": "node test",
     "test-watch": "echo 'no watching of tests'"
@@ -22,8 +22,5 @@
     "registerDir.js"
   ],
   "license": "MIT",
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
-  },
   "nx": {}
 }

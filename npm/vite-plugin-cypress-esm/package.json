@@ -7,7 +7,7 @@
     "check-ts": "tsc --noEmit",
     "cypress:open": "node ../../scripts/cypress open --project . --component",
     "cypress:run": "node ../../scripts/cypress run --project . --component",
-    "lint": "eslint",
+    "lint": "eslint --ext .js,.ts,.json, .",
     "test": "npm run cypress:run",
     "watch": "tsc -w"
   },
@@ -16,8 +16,6 @@
     "picomatch": "2.3.0"
   },
   "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.22.0",
     "@tanstack/react-query": "4.36.1",
     "@types/picomatch": "2.3.0",
     "@vitejs/plugin-react": "4.6.0",
@@ -52,8 +50,5 @@
         ]
       }
     }
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }
 }

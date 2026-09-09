@@ -726,8 +726,8 @@ describe('src/cy/commands/actions/click', () => {
           expect(timeout.callCount).to.eq(0)
 
           done()
-        },
-         100)
+        }
+        , 100)
       })
 
       cy.get('#sequential-clicks a').click({ multiple: true })
@@ -1692,8 +1692,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('button:first').click(function () {
           _.delay(() => {
             $(this).addClass('clicked')
-          },
-           50)
+          }
+          , 50)
 
           return false
         })
@@ -1712,8 +1712,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('button').click(function () {
           _.delay(() => {
             $(this).addClass('clicked')
-          },
-           50)
+          }
+          , 50)
 
           return false
         })

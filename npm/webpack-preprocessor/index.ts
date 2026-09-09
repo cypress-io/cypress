@@ -87,7 +87,7 @@ interface BundleObject {
 }
 
 // bundle promises from input spec filename to output bundled file paths
-let bundles: { [key: string]: BundleObject } = {}
+let bundles: {[key: string]: BundleObject} = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration

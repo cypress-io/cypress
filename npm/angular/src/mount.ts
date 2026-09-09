@@ -49,7 +49,7 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   // allow InputSignals to be type primitive and WritableSignal for type compliance
-  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P] }>
+  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P]}>
 }
 
 let activeFixture: ComponentFixture<any> | null = null
@@ -97,7 +97,7 @@ export type MountResponse<T> = {
    * @see https://angular.io/api/core/testing/ComponentFixture#componentInstance
    */
   component: T
-}
+};
 
 @Injectable()
 class CypressAngularErrorHandler implements ErrorHandler {
@@ -416,7 +416,7 @@ function setupComponent<T> (
       acc[key] = new SimpleChange(null, value, true)
 
       return acc
-    }, {} as { [key: string]: SimpleChange })
+    }, {} as {[key: string]: SimpleChange})
 
     if (Object.keys(componentProperties).length > 0) {
       component.ngOnChanges(simpleChanges)

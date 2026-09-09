@@ -156,7 +156,7 @@ type OutputExtension = '.ts' | '.mjs' | '.js'
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string }) {
+function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string}) {
   if (defineConfigAvailable(projectRoot)) {
     if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
       return dedent`

@@ -144,8 +144,8 @@ const Runnable: React.FC<RunnableComponentProps> = observer(({ model, studioEnab
       {model.type === 'test'
         ? <Test model={model as TestModel} studioEnabled={studioEnabled} spec={spec}/>
         : <Suite model={model as SuiteModel}
-            studioEnabled={studioEnabled}
-            spec={spec}
+          studioEnabled={studioEnabled}
+          spec={spec}
         />}
     </li>
     {shouldShowConnectingDots && <div className='runnable-dotted-line' />}

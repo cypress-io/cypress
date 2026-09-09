@@ -129,7 +129,7 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
                 <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
                   {getParentTitlesListElements(parentTitles)}
                 </ul>}
-                  wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
+                wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
                   'studio-tooltip cy-tooltip',
                 )}>
                   {testTitle}

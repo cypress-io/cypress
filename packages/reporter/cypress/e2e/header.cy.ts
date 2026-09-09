@@ -17,7 +17,7 @@ describe('header', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 
-  function setupReporter (opts?: { testFilter: TestFilter, totalUnfilteredTests: number, skipRunnableCreation?: boolean }) {
+  function setupReporter (opts?: { testFilter: TestFilter, totalUnfilteredTests: number, skipRunnableCreation?: boolean}) {
     if (opts?.skipRunnableCreation) {
       runnables = {}
     } else {

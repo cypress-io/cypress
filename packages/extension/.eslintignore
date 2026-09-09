@@ -1,0 +1,6 @@
+/app-dist
+/lib-dist
+**/*.d.ts
+**/package-lock.json
+**/tsconfig.json
+/test/helpers/background.js

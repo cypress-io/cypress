@@ -72,7 +72,7 @@ const sharedPromiseSetup = ({
  * @extends EventEmitter
  */
 export class PrimaryOriginCommunicator extends EventEmitter {
-  private crossOriginDriverWindows: { [key: string]: Window } = {}
+  private crossOriginDriverWindows: {[key: string]: Window} = {}
   userInvocationStack?: string
 
   /**
@@ -344,7 +344,6 @@ export class SpecBridgeCommunicator extends EventEmitter {
       }, '*')
     })
   }
-
   /**
    * Promisified event sent to the primary communicator that expects the same event reflected back with the response.
    * @param {string} event - the name of the event to be sent.
@@ -361,7 +360,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
   }: {
     event: string
     data?: Cypress.ObjectLike
-    options?: { syncGlobals: boolean }
+    options?: {syncGlobals: boolean}
     timeout: number
   }) {
     return new Promise<T>((resolve, reject) => {

@@ -226,8 +226,8 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.$$('input:first').keyup(function () {
         _.delay(() => {
           $(this).addClass('cleared')
-        },
-         100)
+        }
+        , 100)
       })
 
       cy.get('input:first').clear().should('have.class', 'cleared').then(function () {
@@ -244,8 +244,8 @@ describe('src/cy/commands/actions/type - #clear', () => {
       cy.$$('input').keyup(function () {
         _.delay(() => {
           $(this).addClass('cleared')
-        },
-         100)
+        }
+        , 100)
       })
 
       cy.get('input').invoke('slice', 0, 2).clear().should('have.class', 'cleared')

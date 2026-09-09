@@ -66,7 +66,7 @@ export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const debug = null
 
 // https://github.com/cypress-io/cypress/issues/1756

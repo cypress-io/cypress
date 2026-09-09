@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
+  "env": {
+    "cypress/globals": true
+  }
+}

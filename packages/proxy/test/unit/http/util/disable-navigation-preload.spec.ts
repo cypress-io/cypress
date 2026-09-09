@@ -5,6 +5,7 @@ import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION, DISABLE_NAVIGATION_PRELOAD_WINDO
 // script body / addScriptToEvaluateOnNewDocument does: as a standalone
 // script with a single free variable naming its realm.
 function evaluate (expression: string, freeVariableName: string, value: unknown) {
+  // eslint-disable-next-line no-new-func
   return new Function(freeVariableName, expression)(value)
 }
 

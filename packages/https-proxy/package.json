@@ -10,7 +10,7 @@
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "regenerate:certs": "cd ./test/helpers/certs && ./regenerate-certs.sh",
     "test": "yarn test-unit",
     "test-debug": "vitest --inspect-brk --test-timeout=0 --hook-timeout=0",
@@ -25,8 +25,6 @@
     "semaphore": "1.1.0"
   },
   "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.22.0",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
@@ -42,8 +40,5 @@
   "types": "cjs/index.d.ts",
   "license": "MIT",
   "module": "esm/index.js",
-  "nx": {},
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
-  }
+  "nx": {}
 }

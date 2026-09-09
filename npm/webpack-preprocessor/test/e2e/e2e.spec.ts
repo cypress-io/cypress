@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, prefer-rest-params */
 
 import { describe, it, expect } from 'vitest'
 import globby from 'globby'

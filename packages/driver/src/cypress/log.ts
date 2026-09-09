@@ -348,7 +348,7 @@ export const LogUtils = {
     return _
     .chain(tests)
     .flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
-    .flatMap<{ id: string }>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
+    .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
     .compact()
     .union([{ id: '0' }])
     // id is a string in the form of 'log-origin-#', grab the number off the end.

@@ -19,7 +19,7 @@ const getViteDevServerConfig = (projectRoot: string) => {
     framework: 'react',
   } as unknown as ViteDevServerConfig
 }
-const MAJOR_VERSIONS: ({ version: 8, vite: typeof vite8 })[] = [
+const MAJOR_VERSIONS: ({version: 8, vite: typeof vite8})[] = [
   {
     version: 8,
     vite: vite8,

@@ -83,7 +83,7 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
         </>
       )}
       <hr />
-      <p>Need help? Learn how to <a className='help-link' href='https://on.cypress.io/intro' target='_blank' rel="noreferrer">test your application</a> with Cypress</p>
+      <p>Need help? Learn how to <a className='help-link' href='https://on.cypress.io/intro' target='_blank'>test your application</a> with Cypress</p>
     </div>
   )
 }

@@ -372,6 +372,7 @@ export default function (Commands, Cypress, cy, state) {
 
   Commands.addAll({ prevSubject: 'optional' }, {
     then (subject, userOptions, fn) {
+      // eslint-disable-next-line prefer-rest-params
       return thenFn.apply(this, [subject, userOptions, fn])
     },
   })

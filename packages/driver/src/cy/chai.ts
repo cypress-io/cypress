@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 // tests in driver/cypress/integration/commands/assertions_spec.js
 
 import _ from 'lodash'

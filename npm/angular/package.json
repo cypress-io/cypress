@@ -9,12 +9,10 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
     "dev": "rollup -c rollup.config.mjs -w",
-    "lint": "eslint"
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.22.0",
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/platform-browser": "^21.0.0",
@@ -80,8 +78,5 @@
       "cy",
       "expect"
     ]
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }
 }

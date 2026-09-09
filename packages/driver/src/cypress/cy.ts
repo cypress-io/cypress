@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
@@ -174,7 +175,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     keyboard: Keyboard
     mouse: Mouse
   }
-
   queue: CommandQueue
 
   timeout: ITimeouts['timeout']

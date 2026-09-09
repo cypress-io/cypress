@@ -365,7 +365,6 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
           get name () {
             return this._name
           }
-
           set name (name: string) {
             this._name = name
           }
@@ -402,7 +401,6 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
           get metasyntaticList (): string[] {
             return this._metasyntaticList
           }
-
           set metasyntaticList (itemsToAdd: string[]) {
             this._metasyntaticList = this._metasyntaticList.concat(itemsToAdd)
           }

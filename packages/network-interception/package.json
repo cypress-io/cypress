@@ -11,7 +11,7 @@
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
-    "lint": "eslint",
+    "lint": "eslint --ext .ts,.json, .",
     "test": "vitest",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-watch": "vitest watch",
@@ -24,8 +24,6 @@
     "minimatch": "^3.1.2"
   },
   "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.22.0",
     "@types/minimatch": "^3.0.3",
     "rimraf": "6.1.1",
     "vitest": "^3.2.4"
@@ -37,8 +35,5 @@
   "types": "cjs/index.d.ts",
   "license": "MIT",
   "module": "esm/index.js",
-  "nx": {},
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
-  }
+  "nx": {}
 }

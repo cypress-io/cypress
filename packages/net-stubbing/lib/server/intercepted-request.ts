@@ -23,7 +23,6 @@ export class InterceptedRequest {
     immediateStaticResponse?: BackendStaticResponse
     subscriptions: Subscription[]
   }> = []
-
   includeBodyInAfterResponse: boolean = false
   responseSent: boolean = false
   lastEvent?: string

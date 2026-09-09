@@ -234,13 +234,13 @@ describe('src/cy/commands/assertions', () => {
       it('logs two assertions', () => {
         _.delay(() => {
           cy.$$('body').addClass('foo')
-        },
-         Math.random() * 300)
+        }
+        , Math.random() * 300)
 
         _.delay(() => {
           cy.$$('body').prop('id', 'bar')
-        },
-         Math.random() * 300)
+        }
+        , Math.random() * 300)
 
         cy
         .get('body').should(($body) => {
@@ -263,13 +263,13 @@ describe('src/cy/commands/assertions', () => {
       it('logs assertions as children even if subject is different', () => {
         _.delay(() => {
           cy.$$('body').addClass('foo')
-        },
-         Math.random() * 300)
+        }
+        , Math.random() * 300)
 
         _.delay(() => {
           cy.$$('body').prop('id', 'bar')
-        },
-         Math.random() * 300)
+        }
+        , Math.random() * 300)
 
         cy
         .get('body').should(($body) => {
@@ -1412,7 +1412,7 @@ describe('src/cy/commands/assertions', () => {
     describe('#contain', () => {
       it('can find input type submit by value', function () {
         // $input creates an HTML element to be tested.
-
+        // eslint-disable-next-line no-unused-vars
         const $input = cy.$$('<input type=\'submit\' value=\'click me\' />').appendTo(this.$body)
 
         cy.get('input[type=submit]').should('contain', 'click me')

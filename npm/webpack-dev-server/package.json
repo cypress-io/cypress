@@ -12,7 +12,7 @@
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "dev": "tsc --watch",
-    "lint": "eslint",
+    "lint": "eslint --ext .js,.ts,.json, .",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"
   },
@@ -29,8 +29,6 @@
     "webpack-merge": "^5.4.0"
   },
   "devDependencies": {
-    "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.22.0",
     "@types/node": "24.10.1",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "cross-env": "7.0.3",
@@ -62,8 +60,5 @@
         ]
       }
     }
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }
 }

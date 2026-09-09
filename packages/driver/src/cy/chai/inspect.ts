@@ -215,6 +215,7 @@ export function create (chai) {
       return formatError(value)
     }
 
+    // eslint-disable-next-line eqeqeq
     if (keys.length === 0 && (!array || value.length == 0)) {
       return braces[0] + base + braces[1]
     }

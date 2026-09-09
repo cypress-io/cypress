@@ -6,7 +6,7 @@ import type { SocketShape } from './cdp-browser'
 
 declare global {
   interface Window {
-    cypressSockets: { [key: string]: CDPBrowserSocket }
+    cypressSockets: {[key: string]: CDPBrowserSocket}
   }
 }
 
@@ -36,7 +36,7 @@ export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptio
   return io(uri, { parser: cypressParser, ...opts })
 }
 
-export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string }): SocketShape {
+export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string}): SocketShape {
   if (browserFamily === 'chromium' || browserFamily === 'webkit') {
     usesAutomationSocket = true
 

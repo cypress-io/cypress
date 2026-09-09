@@ -46,7 +46,7 @@ export const Cypress = (
   // eslint-disable-next-line no-restricted-syntax
   let loader = fs.readFileSync(INIT_FILEPATH, 'utf8')
 
-  devServerEvents.on('dev-server:specs:changed', ({ specs, options }: { specs: Spec[], options?: { neededForJustInTimeCompile: boolean } }) => {
+  devServerEvents.on('dev-server:specs:changed', ({ specs, options }: { specs: Spec[], options?: { neededForJustInTimeCompile: boolean }}) => {
     if (options?.neededForJustInTimeCompile) {
       // if an option is needed for just in time compile, no-op as this isn't supported in vite
       return

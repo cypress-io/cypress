@@ -30,8 +30,8 @@ describe('src/cy/commands/querying', () => {
     it('eventually resolves', () => {
       _.delay(() => {
         cy.$$('html').addClass('foo').addClass('bar')
-      },
-       100)
+      }
+      , 100)
 
       cy.root().should('have.class', 'foo').and('have.class', 'bar')
     })

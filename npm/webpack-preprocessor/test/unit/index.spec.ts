@@ -509,7 +509,8 @@ describe('webpack preprocessor', function () {
         }))
       })
 
-      const TS_LOADER_NAMES = ['ts-loader', 'ts-loader', 'foo/ts-loader/dist/index.js']
+      // eslint-disable-next-line quotes
+      const TS_LOADER_NAMES = ['ts-loader', "ts-loader", 'foo/ts-loader/dist/index.js']
 
       const runTsLoaderOverrideSuite = (versionLabel: string, tsBehavior: TypeScriptVersionBehavior) => {
         describe(`when ${versionLabel}`, function () {

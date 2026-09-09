@@ -52,7 +52,7 @@ export class Servers {
   lastRequestHeaders: any
 
   async start (httpPort: number, httpsPort: number) {
-    const [app, { serverCertificateKeys, caCertificatePath }]: [Express.Application, { serverCertificateKeys: string[], caCertificatePath: string }] = await Promise.all([
+    const [app, { serverCertificateKeys, caCertificatePath }]: [Express.Application, {serverCertificateKeys: string[], caCertificatePath: string}] = await Promise.all([
       createExpressApp((req) => this.lastRequestHeaders = req.headers),
       getCAInformation(),
     ])

@@ -51,7 +51,7 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
     }
 
     try {
-      const command = 'key:press' as const
+      const command: 'key:press' = 'key:press'
       const args: AutomationCommands[typeof command]['dataType'] = {
         key,
       }
