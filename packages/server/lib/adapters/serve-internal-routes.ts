@@ -54,6 +54,15 @@ function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): 
   return `http://127.0.0.1:${config.port}${url.pathname}${url.search}`
 }
 
+// The shared keep-alive agent can hand us a socket our own Express already
+// closed at Node's 5s keepAliveTimeout, which surfaces as ECONNRESET. A fresh
+// connection succeeds immediately, so retry hard rather than slow.
+const LOOPBACK_RETRY_INTERVALS = [0, 100]
+
+// Only replay a loopback the server cannot already have acted on. A reset while
+// a mutating response was in flight would double-apply it.
+const REPLAYABLE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
 function shouldSendBody (request: HttpRequest): boolean {
   return typeof request.body !== 'undefined' && !['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
 }
@@ -156,48 +165,67 @@ export function createServeInternalRoutesMiddleware ({
     // spec-bridge iframe controller) derive the request origin from
     // req.proxiedUrl, so carry the browser's original absolute URL in the
     // loopback header for setProxiedUrl to restore.
-    const response = await serverRequest.create({
-      url: toLoopbackUrl(request.url, config),
-      method: request.method ?? 'GET',
-      headers: {
-        ...filterHeaders(request.headers),
-        // In Cypress-in-Cypress runs this loopback takes a second hop, and
-        // that hop gzips the response:
-        //
-        //   1. The child project's app (the AUT, http://localhost:4455) asks
-        //      for /__cypress-studio/app-studio.js on its own origin.
-        //   2. The parent Cypress's CDP interception pauses the request, and
-        //      this middleware (the parent's instance) loops it back to the
-        //      parent's own Express server.
-        //   3. The parent has no studio routes of its own — its cy-in-cy
-        //      passthrough (routes.ts) re-enters the proxy pipeline to
-        //      forward the request to the child at 4455, where the real
-        //      cloud-bundle routes live.
-        //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
-        //      rewrites a MISSING accept-encoding (filterHeaders strips it
-        //      above) to 'gzip,identity', so the child's studio route
-        //      responds gzipped.
-        //
-        // Fetch.fulfillRequest bodies are identity-only — the browser runs no
-        // decoders on fulfilled responses — so a gzipped body reaches the
-        // page as unparseable bytes. An explicit 'identity' survives the
-        // rewrite (only br/gzip tokens are kept, with 'identity' as the
-        // fallback), so every hop in the chain serves an unencoded body.
-        // Single-hop loopbacks (real users) already serve identity for an
-        // absent header, so this is only needed where the second hop exists.
-        ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
-          ? { 'accept-encoding': 'identity' }
-          : {}),
-        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
-        [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
-      },
-      ...(shouldSendBody(request) ? { body: request.body } : {}),
-      encoding: null,
-      followRedirect: false,
-      gzip: false,
-      resolveWithFullResponse: true,
-      simple: false,
-    }, true)
+    const method = (request.method ?? 'GET').toUpperCase()
+
+    let response
+
+    // Never throw for a route we claimed: the CDP Fetch transport releases a
+    // throwing pause with a bare Fetch.continueRequest, which fetches this
+    // Cypress URL from the site under test. That 404s, so the runner document
+    // or one of its chunks silently never loads and the run stalls forever.
+    try {
+      response = await serverRequest.create({
+        url: toLoopbackUrl(request.url, config),
+        method,
+        retryIntervals: REPLAYABLE_METHODS.has(method) ? LOOPBACK_RETRY_INTERVALS : [],
+        headers: {
+          ...filterHeaders(request.headers),
+          // In Cypress-in-Cypress runs this loopback takes a second hop, and
+          // that hop gzips the response:
+          //
+          //   1. The child project's app (the AUT, http://localhost:4455) asks
+          //      for /__cypress-studio/app-studio.js on its own origin.
+          //   2. The parent Cypress's CDP interception pauses the request, and
+          //      this middleware (the parent's instance) loops it back to the
+          //      parent's own Express server.
+          //   3. The parent has no studio routes of its own — its cy-in-cy
+          //      passthrough (routes.ts) re-enters the proxy pipeline to
+          //      forward the request to the child at 4455, where the real
+          //      cloud-bundle routes live.
+          //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
+          //      rewrites a MISSING accept-encoding (filterHeaders strips it
+          //      above) to 'gzip,identity', so the child's studio route
+          //      responds gzipped.
+          //
+          // Fetch.fulfillRequest bodies are identity-only — the browser runs no
+          // decoders on fulfilled responses — so a gzipped body reaches the
+          // page as unparseable bytes. An explicit 'identity' survives the
+          // rewrite (only br/gzip tokens are kept, with 'identity' as the
+          // fallback), so every hop in the chain serves an unencoded body.
+          // Single-hop loopbacks (real users) already serve identity for an
+          // absent header, so this is only needed where the second hop exists.
+          ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+            ? { 'accept-encoding': 'identity' }
+            : {}),
+          [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+        },
+        ...(shouldSendBody(request) ? { body: request.body } : {}),
+        encoding: null,
+        followRedirect: false,
+        gzip: false,
+        resolveWithFullResponse: true,
+        simple: false,
+      }, true)
+    } catch (err) {
+      return {
+        id: request.id,
+        url: request.url,
+        statusCode: 502,
+        headers: { 'content-type': 'text/plain' },
+        body: `Cypress could not serve ${url.pathname}: ${(err as Error).message}`,
+      }
+    }
 
     // Fetch.fulfillRequest bodies are identity-only — the browser runs no
     // content-encoding decoders on fulfilled responses. A hop past the loopback

@@ -585,4 +585,54 @@ describe('lib/adapters/serve-internal-routes', () => {
       expect(serverRequest.create).to.have.been.calledOnce
     })
   })
+
+  describe('loopback failures', () => {
+    it('answers locally instead of throwing so the request cannot escape to the origin', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      serverRequest.create.rejects(Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' }))
+
+      const response = await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__/',
+        method: 'GET',
+      }, next)
+
+      expect(next).not.to.have.been.called
+      expect(response.statusCode).to.equal(502)
+      expect(response.body).to.contain('read ECONNRESET')
+    })
+
+    it('retries a replayable loopback', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__/',
+        method: 'GET',
+      }, next)
+
+      const { retryIntervals } = serverRequest.create.firstCall.args[0]
+
+      expect(retryIntervals).not.to.be.empty
+    })
+
+    it('does not retry a loopback the server may already have acted on', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__cypress/process-origin-callback',
+        method: 'POST',
+        body: '{}',
+      }, next)
+
+      const { retryIntervals } = serverRequest.create.firstCall.args[0]
+
+      expect(retryIntervals).to.be.empty
+    })
+  })
 })
