@@ -1,8 +1,11 @@
+import Debug from 'debug'
 import { toIdentityResponse } from '@packages/proxy'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleNamespace, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
+
+const debug = Debug('cypress:server:serve-internal-routes')
 
 type ServeInternalRoutesConfig = InternalRouteConfig
 
@@ -218,12 +221,16 @@ export function createServeInternalRoutesMiddleware ({
         simple: false,
       }, true)
     } catch (err) {
+      // The body is served on the AUT's origin, where page content can read it,
+      // so keep the detail here rather than in the response.
+      debug('internal route loopback failed for %s: %s', url.pathname, (err as Error).message)
+
       return {
         id: request.id,
         url: request.url,
         statusCode: 502,
         headers: { 'content-type': 'text/plain' },
-        body: `Cypress could not serve ${url.pathname}: ${(err as Error).message}`,
+        body: 'Bad Gateway',
       }
     }
 

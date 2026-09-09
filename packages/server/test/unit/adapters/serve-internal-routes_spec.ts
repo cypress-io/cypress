@@ -601,7 +601,8 @@ describe('lib/adapters/serve-internal-routes', () => {
 
       expect(next).not.to.have.been.called
       expect(response.statusCode).to.equal(502)
-      expect(response.body).to.contain('read ECONNRESET')
+      expect(response.body).to.equal('Bad Gateway')
+      expect(response.body).not.to.contain('ECONNRESET')
     })
 
     it('retries a replayable loopback', async () => {
@@ -616,7 +617,9 @@ describe('lib/adapters/serve-internal-routes', () => {
 
       const { retryIntervals } = serverRequest.create.firstCall.args[0]
 
-      expect(retryIntervals).not.to.be.empty
+      // A stale-socket reset is instant and a fresh connection succeeds
+      // immediately, so a slow schedule here would stall the runner boot.
+      expect(retryIntervals).to.deep.equal([0, 100])
     })
 
     it('does not retry a loopback the server may already have acted on', async () => {
