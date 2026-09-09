@@ -696,6 +696,23 @@ export = {
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
 
+      // The runner document is served on the AUT's origin, so a root-scoped
+      // worker the origin registered in an earlier session is entitled to
+      // answer for it — and in a persistent open-mode profile it survives to
+      // do so before interception can attach. Redundant with
+      // reset:browser:state on the connectToNewSpec path, and harmless there.
+      // cache_storage goes along because clearing service_workers drops the
+      // registration but leaves its caches, which a re-registered worker would
+      // serve last session's responses from. Cookies and local storage stay
+      // untouched: clearing those would log the profile out of every site it
+      // has visited.
+      if (options.shouldClearPersistedServiceWorkers) {
+        await pageCriClient.send('Storage.clearDataForOrigin', {
+          origin: '*',
+          storageTypes: 'service_workers,cache_storage',
+        })
+      }
+
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
       await this._navigateUsingCRI(pageCriClient, url)
