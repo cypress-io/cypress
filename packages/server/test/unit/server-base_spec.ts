@@ -123,6 +123,15 @@ describe('lib/server-base', () => {
     })
   })
 
+  describe('#_createHttpServer', () => {
+    it('outlasts Node\'s 5s keep-alive default so our own loopback pool is not closed mid-run', function () {
+      const svr = this.server._createHttpServer(express())
+
+      expect(svr.keepAliveTimeout).to.be.greaterThan(5000)
+      svr.close()
+    })
+  })
+
   describe('#useMorgan', () => {
     beforeEach(function () {
       GracefulExit.resetForTesting()

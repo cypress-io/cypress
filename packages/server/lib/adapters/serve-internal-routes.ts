@@ -58,9 +58,11 @@ function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): 
 }
 
 // The shared keep-alive agent can hand us a socket our own Express already
-// closed at Node's 5s keepAliveTimeout, which surfaces as ECONNRESET. A fresh
-// connection succeeds immediately, so retry hard rather than slow.
-const LOOPBACK_RETRY_INTERVALS = [0, 100]
+// closed, which surfaces as ECONNRESET. The server closes a whole idle batch at
+// once and a runner boot fires these by the dozen, so one retry can land on
+// another dead socket from the same batch. A fresh connection succeeds
+// immediately, so spend the attempts quickly rather than slowly.
+const LOOPBACK_RETRY_INTERVALS = [0, 50, 250]
 
 // Only replay a loopback the server cannot already have acted on. A reset while
 // a mutating response was in flight would double-apply it.

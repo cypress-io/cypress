@@ -619,7 +619,7 @@ describe('lib/adapters/serve-internal-routes', () => {
 
       // A stale-socket reset is instant and a fresh connection succeeds
       // immediately, so a slow schedule here would stall the runner boot.
-      expect(retryIntervals).to.deep.equal([0, 100])
+      expect(retryIntervals).to.deep.equal([0, 50, 250])
     })
 
     it('does not retry a loopback the server may already have acted on', async () => {
