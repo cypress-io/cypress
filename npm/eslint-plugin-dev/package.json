@@ -2,6 +2,7 @@
   "name": "@cypress/eslint-plugin-dev",
   "version": "0.0.0-development",
   "description": "Common ESLint rules shared by Cypress development-only packages",
+  "private": true,
   "main": "./lib",
   "scripts": {
     "lint": "eslint --ext .js,json,.eslintrc .",
