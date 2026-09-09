@@ -44,6 +44,7 @@ namespace CypressConfigTests {
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
+  Cypress.config('keystrokeDelay') // $ExpectType number | null
 }
 
 namespace CypressEnvTests {

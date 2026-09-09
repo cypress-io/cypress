@@ -8,9 +8,11 @@
 **Bugfixes:**
 
 - Fixed a regression in [16.0.0](#16-0-0) where a run in Chrome, Chromium, or Edge could stop producing output partway through and hang indefinitely, with no error, no failing test, and no timeout, until the CI job was killed for exceeding its no-output limit. Fixes [#34778](https://github.com/cypress-io/cypress/issues/34778).
+- Fixed a regression in [16.0.0](#16-0-0) where, in `cypress open` on Chrome, Chromium, and Edge, testing a site that registers an origin-wide service worker could render the site's own content — such as its 404 page — in place of the Cypress app after clicking a spec or reloading the browser tab. A service worker registered by the site under test can no longer answer for Cypress's own pages and assets. Fixes [#34789](https://github.com/cypress-io/cypress/issues/34789). Addressed in [#34762](https://github.com/cypress-io/cypress/pull/34762).
 
 **Misc:**
 
+- Fixed an issue where setting [`keystrokeDelay`](https://docs.cypress.io/app/references/configuration#Keyboard) in a TypeScript configuration file failed to compile with `'keystrokeDelay' does not exist in type 'ConfigOptions'`, even though Cypress read and validated the option at runtime. Fixes [#34796](https://github.com/cypress-io/cypress/issues/34796). Addressed in [#34798](https://github.com/cypress-io/cypress/pull/34798).
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
 
 ## 16.0.0
