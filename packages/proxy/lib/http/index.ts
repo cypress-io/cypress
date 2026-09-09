@@ -132,6 +132,10 @@ export type ServerCtx = Readonly<{
   // (network-mode.ts, ServerBase), and a plain boolean field of the same
   // name here would read as callable.
   useBrowserNetworkInterception?: boolean
+  // Path prefixes Cypress reserves on every origin under test. This package
+  // cannot import from @packages/server, which owns the routes, so the server
+  // supplies the list (adapters/internal-routes.ts) at construction time.
+  reservedPathPrefixes?: string[]
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -353,6 +357,7 @@ export class Http {
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
   useBrowserNetworkInterception?: boolean
+  reservedPathPrefixes?: string[]
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -370,6 +375,7 @@ export class Http {
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
     this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
+    this.reservedPathPrefixes = opts.reservedPathPrefixes
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -555,6 +561,7 @@ export class Http {
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
       useBrowserNetworkInterception: this.useBrowserNetworkInterception,
+      reservedPathPrefixes: this.reservedPathPrefixes,
     }
 
     return ctx
