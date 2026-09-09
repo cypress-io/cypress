@@ -62,6 +62,21 @@ describe('lib/gui/windows', () => {
   })
 
   context('.create', () => {
+    it('builds a hidden window without a frame or a thick frame', function () {
+      let options
+
+      Windows.create('/foo/', { show: false }, (opts) => {
+        options = opts
+
+        return this.win
+      })
+
+      expect(options).to.include({
+        frame: false,
+        thickFrame: false,
+      })
+    })
+
     it('opens dev tools if saved state is open', function () {
       Windows.create('/foo/', { devTools: true }, () => this.win)
       expect(this.win.webContents.openDevTools).to.be.called
