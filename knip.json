@@ -259,8 +259,8 @@
       "entry": [
         "src/main.ts",
         "src/cypress/commands.ts",
-        "cypress/plugins/server.js",
-        "cypress/plugins/index.js",
+        "cypress/plugins/server.ts",
+        "cypress/plugins/index.ts",
         "cypress.config.ts",
         "cypress/**/*.{ts,tsx,js,jsx}"
       ],
