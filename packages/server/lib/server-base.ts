@@ -64,6 +64,7 @@ import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, g
 const debug = Debug('cypress:server:server-base')
 
 const fullyQualifiedRe = /^https?:\/\//
+const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
@@ -896,6 +897,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   _createHttpServer (app): DestroyableHttpServer {
     const svr = http.createServer(httpUtils.lenientOptions, app)
+
+    // Our own internal-route loopback pools sockets against this server on an
+    // agent that never idles them out, so anything we close first comes back as
+    // an ECONNRESET on reuse. That pool only sees traffic when a spec's runner
+    // boots, so it sits idle for however long the previous spec ran — far past
+    // Node's 5s default. Outlast that rather than race it; the loopback's own
+    // retry covers a gap longer than this.
+    svr.keepAliveTimeout = KEEP_ALIVE_TIMEOUT
 
     allowDestroy(svr)
 
