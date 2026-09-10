@@ -773,5 +773,7 @@ startup-comparison:
         name: windows-startup-comparison-artifacts
         executor: windows
         resource_class: windows.large
+        context:
+          - test-runner:sign-windows-binary
         requires:
           - windows-sc-build

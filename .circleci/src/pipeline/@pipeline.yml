@@ -1734,6 +1734,7 @@ commands:
           no_output_timeout: "45m"
           environment:
             DISABLE_SNAPSHOT_REQUIRE: << parameters.disable-snapshot-require >>
+            SKIP_NOTARIZATION: "1"
           command: |
             source ./scripts/ensure-node.sh
             node --version
