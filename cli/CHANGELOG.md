@@ -9,8 +9,14 @@
 
 - Added the [`trustedCertificates`](https://docs.cypress.io/app/references/configuration#trustedCertificates) configuration option. On the native browser network path (Chrome, Chromium, and Edge), declare a certificate your application under test presents — a self-signed development certificate, an internal certificate authority, or a precomputed SPKI fingerprint — and Chrome treats connections to that origin as genuinely trusted rather than merely tolerating its certificate errors. Static assets from the origin are then cached across navigations as they are in production; previously nothing from an untrusted-certificate origin was ever written to the browser's disk cache, so asset-heavy specs re-downloaded every asset on each `cy.visit`. Origins you do not declare continue to load exactly as before. Firefox, WebKit, Electron, and [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) runs are unaffected. Addresses [#34760](https://github.com/cypress-io/cypress/issues/34760).
 
+**Bugfixes:**
+
+- Fixed an issue where adding a `--disable-features` argument in [`before:browser:launch`](https://docs.cypress.io/api/node-events/browser-launch-api) silently dropped every feature Cypress disables in Chrome, Chromium, and Edge, because the browser honors only the last occurrence of that argument. Cypress now merges its own values with yours. Fixes [#34775](https://github.com/cypress-io/cypress/issues/34775).
+- Fixed a regression in [16.0.0](#16-0-0) where, in `cypress open` on Chrome, Chromium, and Edge, testing a site that registers an origin-wide service worker could render the site's own content — such as its 404 page — in place of the Cypress app after clicking a spec or reloading the browser tab. A service worker registered by the site under test can no longer answer for Cypress's own pages and assets. Fixes [#34789](https://github.com/cypress-io/cypress/issues/34789). Addressed in [#34762](https://github.com/cypress-io/cypress/pull/34762).
+
 **Misc:**
 
+- Fixed an issue where setting [`keystrokeDelay`](https://docs.cypress.io/app/references/configuration#Keyboard) in a TypeScript configuration file failed to compile with `'keystrokeDelay' does not exist in type 'ConfigOptions'`, even though Cypress read and validated the option at runtime. Fixes [#34796](https://github.com/cypress-io/cypress/issues/34796). Addressed in [#34798](https://github.com/cypress-io/cypress/pull/34798).
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
 
 ## 16.0.0

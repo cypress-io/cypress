@@ -119,6 +119,7 @@ export class OpenProject extends EventEmitter {
         trustedCertificateFingerprints: trustedCertificateFingerprints(cfg.trustedCertificates ?? [], cfg.projectRoot),
         ...translateEgressPolicyToLaunchOpts(cfg.hosts),
         hosts: cfg.hosts,
+        shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
