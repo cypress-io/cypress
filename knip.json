@@ -120,7 +120,6 @@
         "lib/modes/**/*.ts",
         "lib/browsers/**/*.ts",
         "lib/capture.ts",
-        "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
         "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
@@ -260,8 +259,8 @@
       "entry": [
         "src/main.ts",
         "src/cypress/commands.ts",
-        "cypress/plugins/server.js",
-        "cypress/plugins/index.js",
+        "cypress/plugins/server.ts",
+        "cypress/plugins/index.ts",
         "cypress.config.ts",
         "cypress/**/*.{ts,tsx,js,jsx}"
       ],
@@ -735,8 +734,6 @@
     "packages/example/bin/convert.js",
     "packages/extension/app/v3/content.ts",
     "packages/extension/app/v3/service-worker.ts",
-    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
-    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",

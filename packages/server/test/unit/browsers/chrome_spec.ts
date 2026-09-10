@@ -259,6 +259,61 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    it('merges a --disable-features arg added in before:browser:launch with its own', function () {
+      sinon.stub(plugins, 'has').returns(true)
+      plugins.execute.resolves(null)
+      plugins.execute.withArgs('before:browser:launch').callsFake((event, browser, launchOptions) => {
+        launchOptions.args.push('--disable-features=OptimizationGuideModelDownloading')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+        const disableFeatures = args.filter((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.have.length(1)
+
+        const features = disableFeatures[0].slice('--disable-features='.length).split(',')
+
+        expect(features).to.include.members([
+          'OptimizationGuideModelDownloading',
+          'LocalNetworkAccessChecks',
+          'HttpsUpgrades',
+          'Translate',
+        ])
+      })
+    })
+
+    it('merges a --host-resolver-rules arg added in before:browser:launch with the rules derived from hosts', function () {
+      sinon.stub(plugins, 'has').returns(true)
+      plugins.execute.resolves(null)
+      plugins.execute.withArgs('before:browser:launch').callsFake((event, browser, launchOptions) => {
+        launchOptions.args.push('--host-resolver-rules=MAP example.com 10.0.0.1')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      const options = { ...openOpts, hosts: { 'foobar.com': '127.0.0.1' } }
+
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', options, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+        const hostResolverRules = args.filter((arg) => arg.startsWith('--host-resolver-rules='))
+
+        expect(hostResolverRules).to.have.length(1)
+
+        const rules = hostResolverRules[0].slice('--host-resolver-rules='.length).split(',')
+
+        // user-supplied rules come first so they win over the ones from `hosts`
+        expect(rules).to.deep.eq([
+          'MAP example.com 10.0.0.1',
+          'MAP foobar.com 127.0.0.1',
+        ])
+      })
+    })
+
     it('uses a custom profilePath if supplied', function () {
       chrome._writeExtension.restore()
       utils.getProfileDir.restore()
@@ -1353,6 +1408,65 @@ describe('lib/browsers/chrome', () => {
         expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
         expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('ServiceWorkerAutoPreload')
       })
+    })
+  })
+
+  describe('#_normalizeDisableFeatures', () => {
+    it('returns args unchanged when no disable features args are present', () => {
+      const args = ['--foo', '--bar=baz']
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(args)
+    })
+
+    it('returns args unchanged when a single disable features arg is present', () => {
+      const args = ['--foo', '--disable-features=Translate,HttpsUpgrades']
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(args)
+    })
+
+    it('keeps Cypress features when a user arg from before:browser:launch is appended', () => {
+      const args = [
+        '--disable-features=Translate,LocalNetworkAccessChecks',
+        '--foo',
+        '--disable-features=OptimizationGuideModelDownloading',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--foo',
+        '--disable-features=Translate,LocalNetworkAccessChecks,OptimizationGuideModelDownloading',
+      ])
+    })
+
+    it('deduplicates features present in more than one arg', () => {
+      const args = [
+        '--disable-features=Translate,HttpsUpgrades',
+        '--disable-features=HttpsUpgrades,MediaRouter',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--disable-features=Translate,HttpsUpgrades,MediaRouter',
+      ])
+    })
+
+    it('does not let a trailing empty arg clobber the merged features', () => {
+      const args = [
+        '--disable-features=Translate',
+        '--disable-features=',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--disable-features=Translate',
+      ])
+    })
+
+    it('drops the switch entirely when every value is empty', () => {
+      const args = [
+        '--foo',
+        '--disable-features=',
+        '--disable-features=',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(['--foo'])
     })
   })
 
