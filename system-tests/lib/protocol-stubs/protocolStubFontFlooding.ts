@@ -15,7 +15,7 @@ const getFilePath = (filename) => {
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   private filename: string
   private events = {
-    numberOfFontRequests: 0,
+    fontRequests: [] as string[],
   }
   private cdpClient: any
 
@@ -37,10 +37,10 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
     await this.cdpClient.send('Network.enable')
     this.cdpClient.on('Network.requestWillBeSent', (params) => {
-      // For the font flooding test, we want to count the number of font requests.
-      // There should only be 2 requests. One for each test in the spec.
-      if (params.type === 'Font') {
-        this.events.numberOfFontRequests += 1
+      // This session is the Cypress runner page, which loads web fonts of its own,
+      // so the count has to be scoped to the fixture's font.
+      if (params.type === 'Font' && params.request.url.includes('font-flooding')) {
+        this.events.fontRequests.push(params.request.url)
       }
     })
   }
