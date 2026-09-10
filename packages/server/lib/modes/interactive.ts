@@ -8,6 +8,7 @@ import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { GracefulExit } from '../util/graceful-exit'
+import { debugElapsedTime } from '../util/performance_benchmark'
 import { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
@@ -194,6 +195,7 @@ export = {
     })
 
     telemetry.getSpan('startup:time')?.end()
+    debugElapsedTime('open mode ready')
 
     const win = await this.ready(options, port)
 

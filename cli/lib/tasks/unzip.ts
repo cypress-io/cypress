@@ -33,6 +33,7 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
 
   const startTime = Date.now()
   let yauzlDoneTime = 0
+  let entryCount = 0
 
   await fs.ensureDir(installDir)
 
@@ -50,6 +51,8 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
       }
 
       const total = zipFile.entryCount
+
+      entryCount = total
 
       debug('zipFile entries count', total)
 
@@ -191,8 +194,10 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
   })
 
   debug('unzip completed %o', {
+    entryCount,
     yauzlMs: yauzlDoneTime - startTime,
     unzipMs: Date.now() - yauzlDoneTime,
+    totalMs: Date.now() - startTime,
   })
 }
 

@@ -33,6 +33,7 @@ import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
 import { isRunningAsElectronProcess } from '../util/electron-app'
+import { debugElapsedTime } from '../util/performance_benchmark'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -1310,6 +1311,7 @@ export async function run (options, loading: Promise<void>) {
     })
 
     telemetry.getSpan('binary:startup')?.end()
+    debugElapsedTime('run mode ready')
 
     await app.whenReady()
   }
