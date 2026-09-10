@@ -361,6 +361,16 @@ describe('lib/socket', () => {
           return done()
         })
       })
+
+      it('returns false if the cy prompt lifecycle manager was never initialized', function (done) {
+        ctx.coreData.cyPromptLifecycleManager = undefined
+
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
+          expect(resp.response).to.deep.eq({ success: false })
+
+          return done()
+        })
+      })
     })
 
     describe('on(get:app:state)', () => {
