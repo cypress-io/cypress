@@ -59,12 +59,19 @@ declare namespace Cypress {
     isCrossOriginSpecBridge: boolean
     originalConfig: Cypress.ObjectLike
     cy: $Cy
+    Chainer: typeof import('../src/cypress/chainer').$Chainer
     Location: {
       create: (url: string) => ({ domain: string, superDomain: string })
     }
     $Cypress: {
       $: JQueryStatic
     }
+  }
+
+  interface Chainable {
+    // Invokes a command by name rather than by property access, so that specs can
+    // exercise commands whose names are not valid identifiers or not yet registered.
+    command(name: string, ...args: any[]): Chainable<any>
   }
 
   interface CypressUtils {

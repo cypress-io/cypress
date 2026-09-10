@@ -1,5 +1,6 @@
-const { _ } = Cypress
 import { assertLogLength } from '../../support/utils'
+
+const { _ } = Cypress
 
 describe('src/cy/commands/commands', () => {
   beforeEach(() => {
@@ -40,13 +41,15 @@ describe('src/cy/commands/commands', () => {
 
   context('custom commands', () => {
     beforeEach(() => {
+      // @ts-expect-error - custom command names are not part of the Chainable types
       Cypress.Commands.add('dashboard.selectWindows', () => {
         cy
         .get('[contenteditable]')
         .first()
       })
 
-      Cypress.Commands.add('login', { prevSubject: true }, (subject, email, log = true) => {
+      // @ts-expect-error
+      Cypress.Commands.add('login', { prevSubject: true }, (subject: JQuery, email: string, log = true) => {
         cy
         .wrap(subject.find('input:first'), { log })
         .type(email, { log })
@@ -67,7 +70,7 @@ describe('src/cy/commands/commands', () => {
 
     it('we capture logs from custom commands', () => {
       cy.state('isProtocolEnabled', true)
-      const logs = []
+      const logs: Cypress.Log[] = []
       const addLogs = (attrs, log) => {
         logs.push(log)
       }
@@ -129,6 +132,7 @@ describe('src/cy/commands/commands', () => {
         done()
       })
 
+      // @ts-expect-error - a query must return a function, but this one is only ever rejected by name
       Cypress.Commands.addQuery('get', () => {
         cy
         .get('[contenteditable]')
@@ -139,15 +143,19 @@ describe('src/cy/commands/commands', () => {
     it('allows calling .add with hover / mount', () => {
       let calls = 0
 
+      // @ts-expect-error - `hover` and `mount` are reserved for the CT adapters, so they are not part of the Chainable types
       Cypress.Commands.add('hover', () => {
         calls++
       })
 
+      // @ts-expect-error
       Cypress.Commands.add('mount', () => {
         calls++
       })
 
+      // @ts-expect-error
       cy.mount()
+      // @ts-expect-error
       cy.hover()
       cy.then(() => {
         expect(calls).to.eq(2)
@@ -162,6 +170,7 @@ describe('src/cy/commands/commands', () => {
         done()
       })
 
+      // @ts-expect-error - `addCommand` is reserved internally, so it is not part of the Chainable types
       Cypress.Commands.add('addCommand', () => {
         cy
         .get('[contenteditable]')
@@ -177,6 +186,7 @@ describe('src/cy/commands/commands', () => {
         done()
       })
 
+      // @ts-expect-error
       Cypress.Commands.addQuery('addCommand', () => {
         cy
         .get('[contenteditable]')
