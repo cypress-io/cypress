@@ -84,5 +84,11 @@ describe('weightedChoice', () => {
     it('should return an even split when weights are equal', () => {
       expect(tally(WEIGHTED_EVEN(['A', 'B']), ['A', 'B'])).toEqual({ A: 500, B: 500 })
     })
+
+    it('should never return a value weighted zero', () => {
+      expect(tally(WEIGHTED([0, 1]), ['A', 'B'])).toEqual({ A: 0, B: 1000 })
+      expect(tally(WEIGHTED([50, 0, 50]), ['A', 'B', 'C'])).toEqual({ A: 500, B: 0, C: 500 })
+      expect(tally(WEIGHTED([0, 0, 1]), ['A', 'B', 'C'])).toEqual({ A: 0, B: 0, C: 1000 })
+    })
   })
 })
