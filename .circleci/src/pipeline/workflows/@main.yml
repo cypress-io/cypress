@@ -701,3 +701,77 @@ windows:
         resource_class: windows.medium
         requires:
           - windows-build
+
+startup-comparison:
+  when:
+    equal: [ 'mschile/startup-time-metrics', << pipeline.git.branch >> ]
+  jobs:
+    - node_modules_install:
+        name: linux-x64-sc-node-modules-install
+        build-better-sqlite3: true
+    - build:
+        name: linux-x64-sc-build
+        context: test-runner:env-canary
+        requires:
+          - linux-x64-sc-node-modules-install
+    - startup-comparison-artifacts:
+        name: linux-x64-startup-comparison-artifacts
+        requires:
+          - linux-x64-sc-build
+
+    - node_modules_install:
+        name: darwin-x64-sc-node-modules-install
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
+        only-cache-for-root-user: true
+    - build:
+        name: darwin-x64-sc-build
+        context: test-runner:env-canary
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
+        requires:
+          - darwin-x64-sc-node-modules-install
+    - startup-comparison-artifacts:
+        name: darwin-x64-startup-comparison-artifacts
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
+        requires:
+          - darwin-x64-sc-build
+
+    - node_modules_install:
+        name: darwin-arm64-sc-node-modules-install
+        executor: darwin-arm64
+        resource_class: cypress-io/m1-macstadium
+        only-cache-for-root-user: true
+    - build:
+        name: darwin-arm64-sc-build
+        context: test-runner:env-canary
+        executor: darwin-arm64
+        resource_class: cypress-io/m1-macstadium
+        requires:
+          - darwin-arm64-sc-node-modules-install
+    - startup-comparison-artifacts:
+        name: darwin-arm64-startup-comparison-artifacts
+        executor: darwin-arm64
+        resource_class: cypress-io/m1-macstadium
+        requires:
+          - darwin-arm64-sc-build
+
+    - node_modules_install:
+        name: windows-sc-node-modules-install
+        executor: windows
+        resource_class: windows.medium
+        only-cache-for-root-user: true
+    - build:
+        name: windows-sc-build
+        context: test-runner:env-canary
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-sc-node-modules-install
+    - startup-comparison-artifacts:
+        name: windows-startup-comparison-artifacts
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-sc-build

@@ -1711,6 +1711,60 @@ commands:
           paths:
             - cypress/cypress.tgz
 
+  # Builds and zips the binary once, tagged by << parameters.label >>, for the
+  # startup-time comparison.
+  build-startup-comparison-binary:
+    parameters:
+      label:
+        type: string
+      disable-snapshot-require:
+        type: string
+        default: "0"
+    steps:
+      - run:
+          name: "<< parameters.label >>: reset files mutated by a previous binary build"
+          # binary-build rewrites the root package.json version and strips the
+          # staging/test keys out of packages/server/lib/cloud. Left in place, a
+          # second build in the same job fails to type-check.
+          command: |
+            git checkout -- package.json packages/server/lib/cloud/ tooling/v8-snapshot/cache/ || true
+            git status --short
+      - run:
+          name: "<< parameters.label >>: build and package the binary"
+          no_output_timeout: "45m"
+          environment:
+            DISABLE_SNAPSHOT_REQUIRE: << parameters.disable-snapshot-require >>
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            VERSION=$(node ./scripts/get-next-version.js)
+            yarn binary-build --version "$VERSION"
+            yarn binary-package --version "$VERSION" --skipSigning
+      - run:
+          name: "<< parameters.label >>: smoke test the binary"
+          environment:
+            DISABLE_SNAPSHOT_REQUIRE: << parameters.disable-snapshot-require >>
+          command: |
+            source ./scripts/ensure-node.sh
+            VERSION=$(node ./scripts/get-next-version.js)
+            # The smoke test launches the binary directly rather than through the
+            # CLI, so nothing starts Xvfb for it on Linux.
+            if [[ $PLATFORM == 'linux' ]] && command -v xvfb-run > /dev/null; then
+              xvfb-run -a yarn binary-smoke-test --version "$VERSION"
+            else
+              yarn binary-smoke-test --version "$VERSION"
+            fi
+      - run:
+          name: "<< parameters.label >>: zip and collect"
+          environment:
+            DISABLE_SNAPSHOT_REQUIRE: << parameters.disable-snapshot-require >>
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn binary-zip
+            mkdir -p /tmp/startup-comparison
+            mv cypress.zip "/tmp/startup-comparison/cypress-$(node ./scripts/get-platform-key.js)-<< parameters.label >>.zip"
+            ls -l /tmp/startup-comparison
+
   upload-build-artifacts:
     steps:
       - run: ls -l
@@ -3009,6 +3063,62 @@ jobs:
       - verify_should_persist_artifacts
       - upload-build-artifacts
       - post-install-comment
+
+  startup-comparison-artifacts:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: xlarge.gen2
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      # Same workaround create-build-artifacts needs: packages with an @ in the name
+      # do not survive save_cache on Windows.
+      # @see https://github.com/cypress-io/cypress/issues/30343
+      - when:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - windows_reinstall_deps
+      - run:
+          name: Install Linux packages needed to build, zip and launch the binary
+          # Installed one at a time and tolerantly: the base image already carries
+          # most of these, and some names differ or no longer exist on Debian trixie.
+          command: |
+            if [[ $PLATFORM != 'linux' ]]; then
+              echo "not Linux, nothing to install"
+              exit 0
+            fi
+            if [[ `whoami` == 'root' ]]; then SUDO=""; else SUDO="sudo"; fi
+            $SUDO apt-get update || true
+            $SUDO apt-get install -y build-essential
+            npm install -g node-gyp
+            for pkg in zip xvfb xauth libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libxtst6 libasound2; do
+              $SUDO apt-get install -y "$pkg" || echo "skipping unavailable package $pkg"
+            done
+      - build-startup-comparison-binary:
+          label: snapshot-on
+      - build-startup-comparison-binary:
+          label: snapshot-off
+          disable-snapshot-require: "1"
+      - run:
+          name: How to run these binaries
+          command: |
+            echo "Both zips are unsigned (--skipSigning), so before running:"
+            echo ""
+            echo "  macOS    unzip, then: xattr -dr com.apple.quarantine /path/to/Cypress.app"
+            echo "           Without it the app is SIGKILLed on launch - exit 137, no output."
+            echo "  Windows  unzip, then Unblock-File the zip, or SmartScreen > More info > Run anyway."
+            echo "  Linux    no extra step."
+            echo ""
+            echo "Time each from spawn to the 'Cypress is ready' line:"
+            echo "  <Cypress binary> --project=<dir> --emit-when-ready"
+            echo "Compare snapshot-on against snapshot-off from THIS job only - cross-run"
+            echo "and cross-machine drift is the same order as the effect being measured."
+      - store_artifacts:
+          path: /tmp/startup-comparison
 
   create-and-trigger-packaging-artifacts:
     <<: *defaults

@@ -16,6 +16,8 @@ when:
     - not:
         equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
+        equal: [ 'mschile/startup-time-metrics', << pipeline.git.branch >> ]
+    - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
