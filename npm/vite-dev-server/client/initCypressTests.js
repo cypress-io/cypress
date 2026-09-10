@@ -5,6 +5,15 @@ const CypressInstance = window.Cypress = parent.Cypress
 
 const importsToLoad = []
 
+const createViteImport = (relativeUrl) => {
+  const load = () => import(relativeUrl)
+
+  // The driver uses this marker to recover only Vite's native module imports.
+  load.isViteDevServerImport = true
+
+  return load
+}
+
 /* Support file import logic, this should be removed once we
  * are able to return relative paths from the supportFile
  * Jira #UNIFY-1260
@@ -40,7 +49,7 @@ if (supportFile) {
   const relativeUrl = `${devServerPublicPathBase}${supportRelativeToProjectRoot}`
 
   importsToLoad.push({
-    load: () => import(relativeUrl),
+    load: createViteImport(relativeUrl),
     absolute: supportFile,
     relative: supportRelativeToProjectRoot,
     relativeUrl,
@@ -62,7 +71,7 @@ if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
       const specRoute = `${devServerPublicPathBase}/@fs/${normalizedPath}`
 
       importsToLoad.push({
-        load: () => import(specRoute),
+        load: createViteImport(specRoute),
         absolute: specObj.absolute,
         relative: specObj.relative,
         relativeUrl: specRoute,
@@ -78,7 +87,7 @@ if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
 
   // We need a slash before /src/my-spec.js, this does not happen by default.
   importsToLoad.push({
-    load: () => import(testFileAbsolutePathRoute),
+    load: createViteImport(testFileAbsolutePathRoute),
     absolute: CypressInstance.spec.absolute,
     relative: CypressInstance.spec.relative,
     relativeUrl: testFileAbsolutePathRoute,
