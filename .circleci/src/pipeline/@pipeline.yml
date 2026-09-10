@@ -42,8 +42,9 @@ parameters:
   run-windows-workflow:
     type: boolean
     default: false
-  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
-  # Default true so develop/release branches run everything without explicit params.
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PR
+  # branches and on webhook pushes to develop. Default true so that any pipeline
+  # whose continuation omits them runs everything.
   run-driver-tests:
     type: boolean
     default: true
@@ -1748,7 +1749,7 @@ commands:
             ssh-keyscan github.com >> ~/.ssh/known_hosts
 
   # Halts a job immediately if its guard parameter is false.
-  # Used to skip jobs that are not relevant to the changed files in a PR.
+  # Used to skip jobs that are not relevant to the changed files.
   # The job still exits with "success" so downstream jobs and all-jobs-passed
   # are not blocked.
   halt-if-skipped:
@@ -2125,6 +2126,11 @@ jobs:
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 3
 
+  # Unguarded: a release gate rather than a test group, and the only check on
+  # either release train. `test-npm-package-release-script` is the dry run of
+  # the @cypress/* publish that `npm-release` performs for real later in this
+  # same pipeline; `validate-binary-changelog.js` validates cli/CHANGELOG.md
+  # for the binary release. Neither depends on which paths changed.
   verify-release-readiness:
     <<: *defaults
     resource_class: medium.gen2
@@ -2132,8 +2138,6 @@ jobs:
     environment:
       GITHUB_TOKEN: $GH_TOKEN
     steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
