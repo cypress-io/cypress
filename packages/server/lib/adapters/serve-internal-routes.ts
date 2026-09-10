@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import { toIdentityResponse } from '@packages/proxy'
+import { asyncRetry } from '../util/async_retry'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleNamespace, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
@@ -62,11 +63,30 @@ function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): 
 // once and a runner boot fires these by the dozen, so one retry can land on
 // another dead socket from the same batch. A fresh connection succeeds
 // immediately, so spend the attempts quickly rather than slowly.
-const LOOPBACK_RETRY_INTERVALS = [0, 50, 250]
+const LOOPBACK_RETRY_DELAYS = [0, 50, 250]
+
+// A dead pooled socket, or the server not yet accepting. Any other failure
+// fails the same way on a replay.
+const RETRIABLE_LOOPBACK_CODES = new Set(['ECONNRESET', 'ECONNREFUSED', 'EPIPE'])
 
 // Only replay a loopback the server cannot already have acted on. A reset while
 // a mutating response was in flight would double-apply it.
 const REPLAYABLE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+// @cypress/request reports network failures wrapped in a RequestError.
+function loopbackErrorCode (err: unknown): string | undefined {
+  const wrapped = err as { code?: string, error?: { code?: string } } | undefined
+
+  return wrapped?.error?.code ?? wrapped?.code
+}
+
+function describeLoopbackError (err: unknown): string {
+  if (err instanceof AggregateError) {
+    return err.errors.map((e: Error) => e.message).join('; ')
+  }
+
+  return (err as Error).message
+}
 
 function shouldSendBody (request: HttpRequest): boolean {
   return typeof request.body !== 'undefined' && !['GET', 'HEAD'].includes((request.method ?? 'GET').toUpperCase())
@@ -172,6 +192,49 @@ export function createServeInternalRoutesMiddleware ({
     // loopback header for setProxiedUrl to restore.
     const method = (request.method ?? 'GET').toUpperCase()
 
+    const sendLoopback = () => serverRequest.create({
+      url: toLoopbackUrl(request.url, config),
+      method,
+      headers: {
+        ...filterHeaders(request.headers),
+        // In Cypress-in-Cypress runs this loopback takes a second hop, and
+        // that hop gzips the response:
+        //
+        //   1. The child project's app (the AUT, http://localhost:4455) asks
+        //      for /__cypress-studio/app-studio.js on its own origin.
+        //   2. The parent Cypress's CDP interception pauses the request, and
+        //      this middleware (the parent's instance) loops it back to the
+        //      parent's own Express server.
+        //   3. The parent has no studio routes of its own — its cy-in-cy
+        //      passthrough (routes.ts) re-enters the proxy pipeline to
+        //      forward the request to the child at 4455, where the real
+        //      cloud-bundle routes live.
+        //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
+        //      rewrites a MISSING accept-encoding (filterHeaders strips it
+        //      above) to 'gzip,identity', so the child's studio route
+        //      responds gzipped.
+        //
+        // Fetch.fulfillRequest bodies are identity-only — the browser runs no
+        // decoders on fulfilled responses — so a gzipped body reaches the
+        // page as unparseable bytes. An explicit 'identity' survives the
+        // rewrite (only br/gzip tokens are kept, with 'identity' as the
+        // fallback), so every hop in the chain serves an unencoded body.
+        // Single-hop loopbacks (real users) already serve identity for an
+        // absent header, so this is only needed where the second hop exists.
+        ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+          ? { 'accept-encoding': 'identity' }
+          : {}),
+        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
+        [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+      },
+      ...(shouldSendBody(request) ? { body: request.body } : {}),
+      encoding: null,
+      followRedirect: false,
+      gzip: false,
+      resolveWithFullResponse: true,
+      simple: false,
+    }, true)
+
     let response
 
     // Never throw for a route we claimed: the CDP Fetch transport releases a
@@ -179,53 +242,16 @@ export function createServeInternalRoutesMiddleware ({
     // Cypress URL from the site under test. That 404s, so the runner document
     // or one of its chunks silently never loads and the run stalls forever.
     try {
-      response = await serverRequest.create({
-        url: toLoopbackUrl(request.url, config),
-        method,
-        retryIntervals: REPLAYABLE_METHODS.has(method) ? LOOPBACK_RETRY_INTERVALS : [],
-        headers: {
-          ...filterHeaders(request.headers),
-          // In Cypress-in-Cypress runs this loopback takes a second hop, and
-          // that hop gzips the response:
-          //
-          //   1. The child project's app (the AUT, http://localhost:4455) asks
-          //      for /__cypress-studio/app-studio.js on its own origin.
-          //   2. The parent Cypress's CDP interception pauses the request, and
-          //      this middleware (the parent's instance) loops it back to the
-          //      parent's own Express server.
-          //   3. The parent has no studio routes of its own — its cy-in-cy
-          //      passthrough (routes.ts) re-enters the proxy pipeline to
-          //      forward the request to the child at 4455, where the real
-          //      cloud-bundle routes live.
-          //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
-          //      rewrites a MISSING accept-encoding (filterHeaders strips it
-          //      above) to 'gzip,identity', so the child's studio route
-          //      responds gzipped.
-          //
-          // Fetch.fulfillRequest bodies are identity-only — the browser runs no
-          // decoders on fulfilled responses — so a gzipped body reaches the
-          // page as unparseable bytes. An explicit 'identity' survives the
-          // rewrite (only br/gzip tokens are kept, with 'identity' as the
-          // fallback), so every hop in the chain serves an unencoded body.
-          // Single-hop loopbacks (real users) already serve identity for an
-          // absent header, so this is only needed where the second hop exists.
-          ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
-            ? { 'accept-encoding': 'identity' }
-            : {}),
-          [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
-          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
-        },
-        ...(shouldSendBody(request) ? { body: request.body } : {}),
-        encoding: null,
-        followRedirect: false,
-        gzip: false,
-        resolveWithFullResponse: true,
-        simple: false,
-      }, true)
+      response = await asyncRetry(sendLoopback, {
+        maxAttempts: LOOPBACK_RETRY_DELAYS.length + 1,
+        retryDelay: (attempt) => LOOPBACK_RETRY_DELAYS[attempt - 1] ?? 0,
+        shouldRetry: (err) => REPLAYABLE_METHODS.has(method) && RETRIABLE_LOOPBACK_CODES.has(loopbackErrorCode(err) ?? ''),
+        onRetry: (delay, err) => debug('retrying internal route loopback for %s in %dms: %s', url.pathname, delay, loopbackErrorCode(err)),
+      })()
     } catch (err) {
       // The body is served on the AUT's origin, where page content can read it,
       // so keep the detail here rather than in the response.
-      debug('internal route loopback failed for %s: %s', url.pathname, (err as Error).message)
+      debug('internal route loopback failed for %s: %s', url.pathname, describeLoopbackError(err))
 
       return {
         id: request.id,
