@@ -1,6 +1,11 @@
 import { $Location } from '../../../src/cypress/location'
 import $SetterGetter from '../../../src/cypress/setter_getter'
 import { bothUrlsMatchAndOneHasHash, historyNavigationTriggeredHashChange } from '../../../src/cy/navigation'
+import type { StateFunc } from '../../../src/cypress/state'
+
+const createState = (state: Record<string, any> = {}): StateFunc => {
+  return $SetterGetter.create(state) as unknown as StateFunc
+}
 
 describe('cy/navigation', () => {
   describe('.bothUrlsMatchAndOneHasHash', () => {
@@ -119,7 +124,7 @@ describe('cy/navigation', () => {
 
   describe('.historyNavigationTriggeredHashChange', () => {
     it('when no navHistoryDelta in state', () => {
-      const state = $SetterGetter.create({ })
+      const state = createState()
 
       const triggeredHashChange = historyNavigationTriggeredHashChange(state)
 
@@ -127,7 +132,7 @@ describe('cy/navigation', () => {
     })
 
     it('when navHistoryDelta is 0', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: 0,
       })
 
@@ -137,7 +142,7 @@ describe('cy/navigation', () => {
     })
 
     it('when navHistoryDelta is null', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: null,
       })
 
@@ -147,7 +152,7 @@ describe('cy/navigation', () => {
     })
 
     it('when no urls or urlPosition in state', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: 1,
       })
 
@@ -157,7 +162,7 @@ describe('cy/navigation', () => {
     })
 
     it('when no urlPosition in state', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: 1,
         url: 'https://my_url.com/',
         urls: ['https://my_url.com/', 'https://my_url.com/home'],
@@ -169,7 +174,7 @@ describe('cy/navigation', () => {
     })
 
     it('when neither url has a hash', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: 1,
         urlPosition: 0,
         url: 'https://my_url.com/',
@@ -182,7 +187,7 @@ describe('cy/navigation', () => {
     })
 
     it('when one url has a hash and navigation moves forward in history', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: 1,
         urlPosition: 0,
         url: 'https://my_url.com/home',
@@ -196,7 +201,7 @@ describe('cy/navigation', () => {
     })
 
     it('when one url has a hash and navigation moves back in history', () => {
-      const state = $SetterGetter.create({
+      const state = createState({
         navHistoryDelta: -1,
         urlPosition: 1,
         url: 'https://my_url.com/home#hash',
