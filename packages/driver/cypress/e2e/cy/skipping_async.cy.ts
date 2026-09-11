@@ -6,7 +6,7 @@ let failedEventFired = false
 
 Cypress.on('fail', (error) => {
   failedEventFired = true
-  throw new Error(`${error}`)
+  throw error
 })
 
 let screenshotTaken = false
@@ -28,9 +28,8 @@ Cypress.on('test:after:run', (test) => {
 
 beforeEach(() => {
   // Set isInteractive to false to ensure that screenshots will be
-  // triggered in both run and open mode. It is not a test override, so the
-  // types reject it even though the driver applies it at runtime.
-  // @ts-expect-error
+  // triggered in both run and open mode
+  // @ts-expect-error - isInteractive is not a test override, but the driver applies it at runtime
   Cypress.config('isInteractive', false)
 })
 
