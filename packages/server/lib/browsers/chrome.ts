@@ -434,7 +434,7 @@ export = {
   },
 
   _getArgs (browser: Browser, options: BrowserLaunchOpts, port: string) {
-    let args = ([] as string[]).concat(DEFAULT_CHROME_FLAGS)
+    const args = ([] as string[]).concat(DEFAULT_CHROME_FLAGS)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')

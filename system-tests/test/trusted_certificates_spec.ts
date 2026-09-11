@@ -1,4 +1,8 @@
+import path from 'path'
+import fs from 'fs-extra'
+
 import systemTests from '../lib/system-tests'
+import Fixtures from '../lib/fixtures'
 
 // The `trusted-certificates` project points `trustedCertificates` at the exact
 // leaf certificate this self-signed HTTPS origin presents. This exercises the
@@ -39,6 +43,17 @@ const onServer = function (app) {
 }
 
 describe('e2e trusted certificates', () => {
+  // The fixture cert must stay a byte copy of the cert the system-test HTTPS
+  // server presents. If the https-proxy cert is regenerated, the fixture's
+  // hardcoded SPKI keeps satisfying its own launch hook, so this is the only
+  // thing that catches the drift.
+  before(async () => {
+    const fixtureCert = await fs.readFile(path.join(Fixtures.projects, 'trusted-certificates', 'certs', 'server.crt.pem'), 'utf8')
+    const servedCert = await fs.readFile(path.join(__dirname, '..', '..', 'packages', 'https-proxy', 'test', 'helpers', 'certs', 'server', 'my-server.crt.pem'), 'utf8')
+
+    expect(fixtureCert).to.eq(servedCert, 'trusted-certificates fixture cert has drifted from the https-proxy server cert')
+  })
+
   systemTests.setup({
     servers: {
       port: PORT,
