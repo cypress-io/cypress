@@ -10,29 +10,29 @@ const NOT_CHROMIUM = { family: '!chromium' } as unknown as Partial<Cypress.Brows
 
 describe('src/cypress/browser', () => {
   context('.browser', () => {
-    it('returns the current browser', () => {
+    it('returns the current browser', function () {
       expect(commands().browser).to.eql({ name: 'chrome', family: 'chromium', isHeadless: false })
     })
   })
 
   context('.isBrowser', () => {
-    it('returns true if it\'s a match', () => {
+    it('returns true if it\'s a match', function () {
       expect(commands().isBrowser('chrome')).to.be.true
       expect(commands().isBrowser({ family: 'chromium' })).to.be.true
       expect(commands().isBrowser({ isHeadless: false })).to.be.true
     })
 
-    it('returns false if it\'s not a match', () => {
+    it('returns false if it\'s not a match', function () {
       expect(commands().isBrowser('firefox')).to.be.false
       expect(commands().isBrowser({ isHeadless: true })).to.be.false
     })
 
-    it('is case-insensitive', () => {
+    it('is case-insensitive', function () {
       expect(commands().isBrowser('Chrome')).to.be.true
     })
 
     // https://github.com/cypress-io/cypress/issues/7168
-    it('can match with exclusives', () => {
+    it('can match with exclusives', function () {
       expect(commands().isBrowser(['!firefox'])).to.be['true']
       expect(commands().isBrowser({
         family: 'chromium',
@@ -48,12 +48,16 @@ describe('src/cypress/browser', () => {
       })).to.be['false']
     })
 
-    it('can accept an array of matchers', () => {
+    it('can accept an array of matchers', function () {
       expect(commands().isBrowser(['firefox', 'chrome'])).to.be['true']
       expect(commands().isBrowser(['chrome', '!firefox'])).to.be['true']
-      expect(commands().isBrowser([NOT_CHROMIUM, '!firefox', 'chrome'])).to.be['true']
+      expect(commands().isBrowser([
+        NOT_CHROMIUM, '!firefox', 'chrome',
+      ])).to.be['true']
 
-      expect(commands().isBrowser([NOT_CHROMIUM, '!firefox'])).to.be['false']
+      expect(commands().isBrowser([
+        NOT_CHROMIUM, '!firefox',
+      ])).to.be['false']
 
       expect(commands().isBrowser(['!chrome', '!firefox'])).to.be['false']
       expect(commands().isBrowser(['!chrome', '!firefox'])).to.be['false']
@@ -62,14 +66,14 @@ describe('src/cypress/browser', () => {
       expect(commands().isBrowser([])).to.be['false']
     })
 
-    it('throws if arg is not a string or object', () => {
+    it('throws if arg is not a string or object', function () {
       expect(() => {
         commands().isBrowser(true as unknown as Cypress.IsBrowserMatcher)
       })
       .to.throw('`Cypress.isBrowser()` must be passed a string, object, or an array. You passed: `true`')
     })
 
-    it('returns true if it\'s a match or a \'parent\' browser', () => {
+    it('returns true if it\'s a match or a \'parent\' browser', function () {
       expect(commands().isBrowser('chrome')).to.be.true
       expect(commands({ name: 'electron' }).isBrowser('chrome')).to.be.false
       expect(commands({ name: 'chromium' }).isBrowser('chrome')).to.be.false
@@ -78,7 +82,7 @@ describe('src/cypress/browser', () => {
       expect(commands({ name: 'ie' }).isBrowser('ie')).to.be.true
     })
 
-    it('matches on name if has unknown family', () => {
+    it('matches on name if has unknown family', function () {
       expect(commands({ name: 'customFoo' }).isBrowser('customfoo')).to.be.true
     })
   })
