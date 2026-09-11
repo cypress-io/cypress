@@ -201,11 +201,10 @@ const getUserInvocationStack = (err, state) => {
 }
 
 // `DOMException`, which browsers throw for cross-origin access and CSP
-// violations, inherits `message` as a getter-only accessor, so plain
-// assignment throws. Shadow the accessor with an own property instead, and if
-// even that is refused (a frozen error), leave the error untouched so the
-// original one still reaches the user rather than being replaced by this
-// failure.
+// violations, inherits `message` as a getter-only accessor, so a plain
+// assignment throws. Decorating is best effort: an error we could not
+// annotate is better than one replaced by the failure to annotate it.
+// https://github.com/cypress-io/cypress/issues/34818
 const setErrProp = (err, prop: string, value: any): boolean => {
   try {
     err[prop] = value

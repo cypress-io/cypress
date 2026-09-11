@@ -258,8 +258,6 @@ describe('err_utils', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/34818
-    // `DOMException` inherits `message` as a getter-only accessor, so assigning
-    // to it throws and replaces the real error with an internal one.
     it('appends to the message of a DOMException', () => {
       const err = new DOMException('Permission denied to access property "document" on cross-origin object', 'SecurityError')
 
