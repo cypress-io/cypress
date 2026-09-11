@@ -1,5 +1,11 @@
 const { $ } = Cypress
 
+// the fixture defines these on `window` so the tests can stub them
+type CustomElementsWindow = Window & {
+  customElementConstructor: () => void
+  customElementAttributeChanged: () => void
+}
+
 describe('driver/src/cy/snapshots', () => {
   context('invalid snapshot html', () => {
     beforeEach(() => {
@@ -13,9 +19,9 @@ describe('driver/src/cy/snapshots', () => {
     })
 
     it('does not err on snapshot', () => {
-      const { htmlAttrs } = cy.createSnapshot()
+      const { htmlAttrs } = cy.createSnapshot()!
 
-      const doc = cy.state('document')
+      const doc = cy.state('document')!
 
       doc.write('')
 
@@ -37,7 +43,7 @@ describe('driver/src/cy/snapshots', () => {
     it('does not clone scripts', function () {
       $('<script type=\'text/javascript\' />').appendTo(cy.$$('body'))
 
-      const { body } = cy.createSnapshot(null, this.$el)
+      const { body } = cy.createSnapshot(null, this.$el)!
 
       expect(body.get().find('script')).not.to.exist
     })
@@ -45,7 +51,7 @@ describe('driver/src/cy/snapshots', () => {
     it('does not clone css stylesheets', function () {
       $('<link rel=\'stylesheet\' />').appendTo(cy.$$('body'))
 
-      const { body } = cy.createSnapshot(null, this.$el)
+      const { body } = cy.createSnapshot(null, this.$el)!
 
       expect(body.get().find('link')).not.to.exist
     })
@@ -53,7 +59,7 @@ describe('driver/src/cy/snapshots', () => {
     it('does not clone style tags', function () {
       $('<style>.foo { color: blue }</style>').appendTo(cy.$$('body'))
 
-      const { body } = cy.createSnapshot(null, this.$el)
+      const { body } = cy.createSnapshot(null, this.$el)!
 
       expect(body.get().find('style')).not.to.exist
     })
@@ -65,7 +71,7 @@ describe('driver/src/cy/snapshots', () => {
       $html[0].id = 'baz'
       $html.css('margin', '10px')
 
-      const { htmlAttrs } = cy.createSnapshot(null, this.$el)
+      const { htmlAttrs } = cy.createSnapshot(null, this.$el)!
 
       expect(htmlAttrs).to.eql({
         class: 'foo bar',
@@ -120,7 +126,7 @@ describe('driver/src/cy/snapshots', () => {
         // e.g. cy.get('iframe').toMatchScreenshot()
 
         // For now we parse the src attr and assert on base64 encoded content
-        const { body } = cy.createSnapshot(null, this.$el)
+        const { body } = cy.createSnapshot(null, this.$el)!
 
         expect(body.get().find('iframe').length).to.equal(1)
         expect(body.get().find('iframe')[0].src).to.include(';base64')
@@ -130,7 +136,7 @@ describe('driver/src/cy/snapshots', () => {
       it('placeholders have same id', function () {
         $('<iframe id=\'foo-bar\' />').appendTo(cy.$$('body'))
 
-        const { body } = cy.createSnapshot(null, this.$el)
+        const { body } = cy.createSnapshot(null, this.$el)!
 
         expect(body.get().find('iframe')[0].id).to.equal('foo-bar')
       })
@@ -138,7 +144,7 @@ describe('driver/src/cy/snapshots', () => {
       it('placeholders have same classes', function () {
         $('<iframe class=\'foo bar\' />').appendTo(cy.$$('body'))
 
-        const { body } = cy.createSnapshot(null, this.$el)
+        const { body } = cy.createSnapshot(null, this.$el)!
 
         expect(body.get().find('iframe')[0].className).to.equal('foo bar')
       })
@@ -146,7 +152,7 @@ describe('driver/src/cy/snapshots', () => {
       it('placeholders have inline styles', function () {
         $('<iframe style=\'margin: 40px\' />').appendTo(cy.$$('body'))
 
-        const { body } = cy.createSnapshot(null, this.$el)
+        const { body } = cy.createSnapshot(null, this.$el)!
 
         expect(body.get().find('iframe').css('margin')).to.equal('40px')
       })
@@ -154,7 +160,7 @@ describe('driver/src/cy/snapshots', () => {
       it('placeholders have width set to outer width', function () {
         $('<iframe style=\'width: 40px; padding: 20px; border: solid 5px\' />').appendTo(cy.$$('body'))
 
-        const { body } = cy.createSnapshot(null, this.$el)
+        const { body } = cy.createSnapshot(null, this.$el)!
 
         expect(body.get().find('iframe').css('width')).to.equal('90px')
       })
@@ -162,7 +168,7 @@ describe('driver/src/cy/snapshots', () => {
       it('placeholders have height set to outer height', function () {
         $('<iframe style=\'height: 40px; padding: 10px; border: solid 5px\' />').appendTo(cy.$$('body'))
 
-        const { body } = cy.createSnapshot(null, this.$el)
+        const { body } = cy.createSnapshot(null, this.$el)!
 
         expect(body.get().find('iframe').css('height')).to.equal('70px')
       })
@@ -176,7 +182,7 @@ describe('driver/src/cy/snapshots', () => {
 
     // https://github.com/cypress-io/cypress/issues/7187
     it('does not trigger constructor', () => {
-      const constructor = cy.stub(cy.state('window'), 'customElementConstructor')
+      const constructor = cy.stub(cy.state('window') as CustomElementsWindow, 'customElementConstructor')
 
       cy.createSnapshot()
 
@@ -185,7 +191,7 @@ describe('driver/src/cy/snapshots', () => {
 
     // https://github.com/cypress-io/cypress/issues/7187
     it('does not trigger attributeChangedCallback', () => {
-      const attributeChanged = cy.stub(cy.state('window'), 'customElementAttributeChanged')
+      const attributeChanged = cy.stub(cy.state('window') as CustomElementsWindow, 'customElementAttributeChanged')
 
       cy.createSnapshot()
 
@@ -193,3 +199,5 @@ describe('driver/src/cy/snapshots', () => {
     })
   })
 })
+
+export {}
