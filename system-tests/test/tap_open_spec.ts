@@ -289,8 +289,8 @@ describe('tap CLI before any spec has run', function () {
   })
 
   // Declared last: it selects a spec, which every test above depends on not having happened.
-  it('confirms for humans what a run launched', async () => {
-    // `run` returns as soon as the spec is requested, so it reports what was launched.
+  it('acknowledges a requested run as running and points at status', async () => {
+    // `run` returns as soon as the spec is requested, so it acknowledges that rather than an outcome.
     const result = await session.tap(['run', SPEC])
 
     expect(result.exitCode).to.eq(0)

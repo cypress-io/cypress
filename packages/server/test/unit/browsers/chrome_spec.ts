@@ -816,11 +816,13 @@ describe('lib/browsers/chrome', () => {
         on: sinon.stub(),
         off: sinon.stub(),
       }
-      const makeBrowserCriClient = (close: sinon.SinonStub) => ({
-        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
-        resetBrowserTargets: sinon.stub().resolves(),
-        close,
-      })
+      const makeBrowserCriClient = (close: sinon.SinonStub) => {
+        return {
+          attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+          resetBrowserTargets: sinon.stub().resolves(),
+          close,
+        }
+      }
       const first = makeBrowserCriClient(firstClose)
       const second = makeBrowserCriClient(sinon.stub().resolves())
       const create = sinon.stub(BrowserCriClient, 'create')
@@ -830,11 +832,13 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_setAutomation').resolves({ _listenForFrameTreeChanges: sinon.stub(), isAUTFrame: sinon.stub() } as any)
       sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
 
-      const connect = () => chrome.connectToExisting(
-        { displayName: 'Chrome' } as any,
-        { ...mitmOpts, url: 'http://localhost:3000/__/' },
-        { use: sinon.stub() } as any,
-      )
+      const connect = () => {
+        return chrome.connectToExisting(
+          { displayName: 'Chrome' } as any,
+          { ...mitmOpts, url: 'http://localhost:3000/__/' },
+          { use: sinon.stub() } as any,
+        )
+      }
 
       return { first, second, create, connect }
     }
@@ -963,13 +967,15 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_navigateUsingCRI').resolves()
       sinon.stub(utils, 'initializeCDP').resolves()
 
-      const attach = () => chrome.attachListeners(
-        'https://example.com/__/#/specs/runner',
-        pageCriClient as any,
-        { use: sinon.stub() } as any,
-        { ...options } as any,
-        { displayName: 'Chrome' } as any,
-      )
+      const attach = () => {
+        return chrome.attachListeners(
+          'https://example.com/__/#/specs/runner',
+          pageCriClient as any,
+          { use: sinon.stub() } as any,
+          { ...options } as any,
+          { displayName: 'Chrome' } as any,
+        )
+      }
 
       return { pageCriClient, attach }
     }

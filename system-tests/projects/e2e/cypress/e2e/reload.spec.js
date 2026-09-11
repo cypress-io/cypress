@@ -5,6 +5,19 @@ const reporterDocument = () => {
   return top.document.querySelector('#reporter-frame').contentDocument
 }
 
+// the restart button replaces the stop button only after the reporter
+// re-renders, and a stopped test cannot queue more Cypress commands, so
+// this polls outside of the command queue
+const clickRestartWhenRendered = () => {
+  const restartButton = reporterDocument().querySelector('button.restart')
+
+  if (restartButton) {
+    return restartButton.click()
+  }
+
+  setTimeout(clickRestartWhenRendered, 20)
+}
+
 describe('runner reload', () => {
   before(() => {
 
@@ -28,7 +41,7 @@ describe('runner reload', () => {
       // this simulates user clicking the stop and reload button
       // in the browser reporter gui
       cy.$$('button.stop', reporterDocument()).click()
-      cy.$$('button.restart', reporterDocument()).click()
+      setTimeout(clickRestartWhenRendered, 20)
     }
   })
 

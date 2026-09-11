@@ -187,6 +187,7 @@ yarn clean-deps && yarn
 
 ## Code Conventions
 
+- **TypeScript for all new code** — New source, specs, and test fixtures must be TypeScript, not JavaScript. This includes system-test project fixtures: use `cypress.config.ts` and `.cy.ts` specs (lightweight fixtures without their own `node_modules` should `export default { ... }` a plain object rather than importing `defineConfig` from `cypress`).
 - **No Prettier** — Formatting is enforced entirely through ESLint. The `.prettierignore` excludes all files.
 - **Single quotes** — `'single'` quote style required for all JS/TS.
 - **No semicolons** — Enforced via ESLint (`semi: 'never'`).
@@ -246,7 +247,8 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Changelog & Template
 
-- For user-facing changes shipping with the next Cypress version, add a changelog entry to [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) — see the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md).
+- The semantic title prefix decides whether a changelog entry is required. `breaking`, `dependency`, `deprecation`, `feat`, `fix`, `misc`, and `perf` each need an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md); `chore`, `docs`, `refactor`, `revert`, and `test` do not. Choosing `fix` already asserts the change ships to users, so do not then skip the entry because the impact looks internal — the "no user-facing impact" exemption in the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) describes the second group of prefixes.
+- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
