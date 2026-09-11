@@ -59,6 +59,7 @@ exports['module api and after:run results'] = `
     "taskTimeout": 60000,
     "testIsolation": true,
     "trashAssetsBeforeRuns": true,
+    "trustedCertificates": [],
     "userAgent": null,
     "video": false,
     "videoCompression": false,

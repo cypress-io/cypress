@@ -692,6 +692,12 @@ describe('visual error templates', () => {
         default: ['/path/to/cypress.config.js', err],
       }
     },
+    TRUSTED_CERTIFICATES_LOAD_ERROR: () => {
+      return {
+        default: ['certs/server.crt.pem', makeErr()],
+        pem: ['trustedCertificates[0].pem', makeErr()],
+      }
+    },
     SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: () => {
       const err = makeErr()
 
