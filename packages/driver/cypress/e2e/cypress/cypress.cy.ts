@@ -1,5 +1,6 @@
+import lodash from 'lodash'
+
 const { $, Promise } = Cypress
-const lodash = require('lodash')
 
 describe('driver/src/cypress/index', () => {
   let CypressInstance
@@ -7,13 +8,13 @@ describe('driver/src/cypress/index', () => {
   beforeEach(function () {
     cy.stub(Promise, 'config')
 
-    CypressInstance = Cypress.$Cypress.create({})
+    CypressInstance = (Cypress.$Cypress as any).create({})
   })
 
   context('$Cypress', () => {
     it('is attached but not global', () => {
-      expect(window.$Cypress).to.be.undefined
-      expect(window.top.$Cypress).to.be.undefined
+      expect((window as any).$Cypress).to.be.undefined
+      expect((window.top as any).$Cypress).to.be.undefined
     })
   })
 
@@ -87,13 +88,13 @@ describe('driver/src/cypress/index', () => {
 
     // https://github.com/cypress-io/cypress/issues/4346
     it('can complete if a circular reference is sent', () => {
-      const foo = {
+      const foo: any = {
         bar: {},
       }
 
       foo.bar.baz = foo
 
-      return Cypress.backend('foo', foo)
+      return Cypress.backend('foo' as any, foo)
       .then(() => {
         throw new Error('should not reach')
       }).catch((e) => {
@@ -106,7 +107,7 @@ describe('driver/src/cypress/index', () => {
     it('returns true on cy, cy chainable', () => {
       expect(Cypress.isCy(cy)).to.be.true
 
-      const chainer = cy.wrap().then(() => {
+      const chainer = cy.wrap(undefined).then(() => {
         expect(Cypress.isCy(chainer)).to.be.true
       })
     })
@@ -123,7 +124,7 @@ describe('driver/src/cypress/index', () => {
   context('.log', () => {
     it('throws when passing non-object to Cypress.log()', () => {
       const fn = () => {
-        Cypress.log('My Log')
+        Cypress.log('My Log' as any)
       }
 
       expect(fn).to.throw().with.property('message')
@@ -151,7 +152,7 @@ describe('driver/src/cypress/index', () => {
 
   context('private command methods', () => {
     it('throws when using Cypress.addAssertionCommand', () => {
-      const addAssertionCommand = () => Cypress.addAssertionCommand()
+      const addAssertionCommand = () => (Cypress as any).addAssertionCommand()
 
       expect(addAssertionCommand).to.throw().and.satisfy((err) => {
         expect(err.message).to.include('You cannot use the undocumented private command interface: `addAssertionCommand`')
@@ -161,7 +162,7 @@ describe('driver/src/cypress/index', () => {
     })
 
     it('throws when using Cypress.addUtilityCommand', () => {
-      const addUtilityCommand = () => Cypress.addUtilityCommand()
+      const addUtilityCommand = () => (Cypress as any).addUtilityCommand()
 
       expect(addUtilityCommand).to.throw().and.satisfy((err) => {
         expect(err.message).to.include('You cannot use the undocumented private command interface: `addUtilityCommand`')
