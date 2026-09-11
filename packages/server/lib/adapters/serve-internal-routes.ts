@@ -1,8 +1,12 @@
+import Debug from 'debug'
 import { toIdentityResponse } from '@packages/proxy'
+import { asyncRetry } from '../util/async_retry'
 import type { HttpHeaders, HttpRequest, InterceptMiddleware } from '@packages/network-interception'
 import type { Request as ServerRequest } from '../request'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isCloudBundleNamespace, isCypressServerOrigin, isInternalCypressRoute, isTrustedInternalLoopback, matchesPathPrefix, resolveProxyUrlBase } from './internal-routes'
 import type { InternalRouteConfig } from './internal-routes'
+
+const debug = Debug('cypress:server:serve-internal-routes')
 
 type ServeInternalRoutesConfig = InternalRouteConfig
 
@@ -52,6 +56,36 @@ function toLoopbackUrl (requestUrl: string, config: ServeInternalRoutesConfig): 
   const url = new URL(requestUrl, resolveProxyUrlBase(config))
 
   return `http://127.0.0.1:${config.port}${url.pathname}${url.search}`
+}
+
+// The shared keep-alive agent can hand us a socket our own Express already
+// closed, which surfaces as ECONNRESET. The server closes a whole idle batch at
+// once and a runner boot fires these by the dozen, so one retry can land on
+// another dead socket from the same batch. A fresh connection succeeds
+// immediately, so spend the attempts quickly rather than slowly.
+const LOOPBACK_RETRY_DELAYS = [0, 50, 250]
+
+// A dead pooled socket, or the server not yet accepting. Any other failure
+// fails the same way on a replay.
+const RETRIABLE_LOOPBACK_CODES = new Set(['ECONNRESET', 'ECONNREFUSED', 'EPIPE'])
+
+// Only replay a loopback the server cannot already have acted on. A reset while
+// a mutating response was in flight would double-apply it.
+const REPLAYABLE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+// @cypress/request reports network failures wrapped in a RequestError.
+function loopbackErrorCode (err: unknown): string | undefined {
+  const wrapped = err as { code?: string, error?: { code?: string } } | undefined
+
+  return wrapped?.error?.code ?? wrapped?.code
+}
+
+function describeLoopbackError (err: unknown): string {
+  if (err instanceof AggregateError) {
+    return err.errors.map((e: Error) => e.message).join('; ')
+  }
+
+  return (err as Error).message
 }
 
 function shouldSendBody (request: HttpRequest): boolean {
@@ -156,9 +190,11 @@ export function createServeInternalRoutesMiddleware ({
     // spec-bridge iframe controller) derive the request origin from
     // req.proxiedUrl, so carry the browser's original absolute URL in the
     // loopback header for setProxiedUrl to restore.
-    const response = await serverRequest.create({
+    const method = (request.method ?? 'GET').toUpperCase()
+
+    const sendLoopback = () => serverRequest.create({
       url: toLoopbackUrl(request.url, config),
-      method: request.method ?? 'GET',
+      method,
       headers: {
         ...filterHeaders(request.headers),
         // In Cypress-in-Cypress runs this loopback takes a second hop, and
@@ -198,6 +234,33 @@ export function createServeInternalRoutesMiddleware ({
       resolveWithFullResponse: true,
       simple: false,
     }, true)
+
+    let response
+
+    // Never throw for a route we claimed: the CDP Fetch transport releases a
+    // throwing pause with a bare Fetch.continueRequest, which fetches this
+    // Cypress URL from the site under test. That 404s, so the runner document
+    // or one of its chunks silently never loads and the run stalls forever.
+    try {
+      response = await asyncRetry(sendLoopback, {
+        maxAttempts: LOOPBACK_RETRY_DELAYS.length + 1,
+        retryDelay: (attempt) => LOOPBACK_RETRY_DELAYS[attempt - 1] ?? 0,
+        shouldRetry: (err) => REPLAYABLE_METHODS.has(method) && RETRIABLE_LOOPBACK_CODES.has(loopbackErrorCode(err) ?? ''),
+        onRetry: (delay, err) => debug('retrying internal route loopback for %s in %dms: %s', url.pathname, delay, loopbackErrorCode(err)),
+      })()
+    } catch (err) {
+      // The body is served on the AUT's origin, where page content can read it,
+      // so keep the detail here rather than in the response.
+      debug('internal route loopback failed for %s: %s', url.pathname, describeLoopbackError(err))
+
+      return {
+        id: request.id,
+        url: request.url,
+        statusCode: 502,
+        headers: { 'content-type': 'text/plain' },
+        body: 'Bad Gateway',
+      }
+    }
 
     // Fetch.fulfillRequest bodies are identity-only — the browser runs no
     // content-encoding decoders on fulfilled responses. A hop past the loopback
