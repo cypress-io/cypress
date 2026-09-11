@@ -292,7 +292,7 @@ jobs:
       # mirrors run_driver_suite() in scripts/validate-proxy-middleware-transport.sh,
       # plus the MITM injection/interception-heavy specs (net_stubbing, security,
       # redirects, service-worker)
-      spec: cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/csp_headers.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/issues/3890.cy.js,cypress/e2e/cy/snapshot.cy.js,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/commands/net_stubbing.cy.ts,cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/e2e/service-worker.cy.js
+      spec: cypress/e2e/e2e/encoding.cy.ts,cypress/e2e/e2e/csp_headers.cy.js,cypress/e2e/cypress/proxy-logging.cy.ts,cypress/e2e/issues/3890.cy.js,cypress/e2e/cy/snapshot.cy.ts,cypress/e2e/cypress/downloads.cy.ts,cypress/e2e/commands/net_stubbing.cy.ts,cypress/e2e/e2e/security.cy.js,cypress/e2e/e2e/redirects.cy.js,cypress/e2e/e2e/service-worker.cy.js
       requires:
         - ready-to-test
   - system-tests-chrome:
