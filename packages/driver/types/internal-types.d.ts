@@ -60,6 +60,7 @@ declare namespace Cypress {
     originalConfig: Cypress.ObjectLike
     cy: $Cy
     Chainer: typeof import('../src/cypress/chainer').$Chainer
+    Command: typeof import('../src/cypress/command').$Command
     Location: {
       create: (url: string) => ({ domain: string, superDomain: string })
     }
