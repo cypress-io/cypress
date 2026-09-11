@@ -902,6 +902,16 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
+  TRUSTED_CERTIFICATES_LOAD_ERROR: (filePathOrLabel: string, err: Error) => {
+    return errTemplate`\
+      Cypress could not load a certificate you listed in ${fmt.highlight(`trustedCertificates`)}.
+
+      The entry was: ${fmt.highlightSecondary(filePathOrLabel)}
+
+      ${fmt.highlightSecondary(err.message)}
+
+      Each entry must supply a PEM-encoded certificate, either as a ${fmt.highlightSecondary(`filePath`)} resolved from your project root or as an inline ${fmt.highlightSecondary(`pem`)} string.`
+  },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
     return errTemplate`
