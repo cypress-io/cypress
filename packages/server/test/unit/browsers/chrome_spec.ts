@@ -259,6 +259,61 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    it('merges a --disable-features arg added in before:browser:launch with its own', function () {
+      sinon.stub(plugins, 'has').returns(true)
+      plugins.execute.resolves(null)
+      plugins.execute.withArgs('before:browser:launch').callsFake((event, browser, launchOptions) => {
+        launchOptions.args.push('--disable-features=OptimizationGuideModelDownloading')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', openOpts, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+        const disableFeatures = args.filter((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).to.have.length(1)
+
+        const features = disableFeatures[0].slice('--disable-features='.length).split(',')
+
+        expect(features).to.include.members([
+          'OptimizationGuideModelDownloading',
+          'LocalNetworkAccessChecks',
+          'HttpsUpgrades',
+          'Translate',
+        ])
+      })
+    })
+
+    it('merges a --host-resolver-rules arg added in before:browser:launch with the rules derived from hosts', function () {
+      sinon.stub(plugins, 'has').returns(true)
+      plugins.execute.resolves(null)
+      plugins.execute.withArgs('before:browser:launch').callsFake((event, browser, launchOptions) => {
+        launchOptions.args.push('--host-resolver-rules=MAP example.com 10.0.0.1')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      const options = { ...openOpts, hosts: { 'foobar.com': '127.0.0.1' } }
+
+      return chrome.open({ isHeadless: true, majorVersion: 112 }, 'http://', options, this.automation)
+      .then(() => {
+        const args = launch.launch.firstCall.args[3]
+        const hostResolverRules = args.filter((arg) => arg.startsWith('--host-resolver-rules='))
+
+        expect(hostResolverRules).to.have.length(1)
+
+        const rules = hostResolverRules[0].slice('--host-resolver-rules='.length).split(',')
+
+        // user-supplied rules come first so they win over the ones from `hosts`
+        expect(rules).to.deep.eq([
+          'MAP example.com 10.0.0.1',
+          'MAP foobar.com 127.0.0.1',
+        ])
+      })
+    })
+
     it('uses a custom profilePath if supplied', function () {
       chrome._writeExtension.restore()
       utils.getProfileDir.restore()
@@ -761,11 +816,13 @@ describe('lib/browsers/chrome', () => {
         on: sinon.stub(),
         off: sinon.stub(),
       }
-      const makeBrowserCriClient = (close: sinon.SinonStub) => ({
-        attachToTargetUrl: sinon.stub().resolves(pageCriClient),
-        resetBrowserTargets: sinon.stub().resolves(),
-        close,
-      })
+      const makeBrowserCriClient = (close: sinon.SinonStub) => {
+        return {
+          attachToTargetUrl: sinon.stub().resolves(pageCriClient),
+          resetBrowserTargets: sinon.stub().resolves(),
+          close,
+        }
+      }
       const first = makeBrowserCriClient(firstClose)
       const second = makeBrowserCriClient(sinon.stub().resolves())
       const create = sinon.stub(BrowserCriClient, 'create')
@@ -775,11 +832,13 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_setAutomation').resolves({ _listenForFrameTreeChanges: sinon.stub(), isAUTFrame: sinon.stub() } as any)
       sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(9222)
 
-      const connect = () => chrome.connectToExisting(
-        { displayName: 'Chrome' } as any,
-        { ...mitmOpts, url: 'http://localhost:3000/__/' },
-        { use: sinon.stub() } as any,
-      )
+      const connect = () => {
+        return chrome.connectToExisting(
+          { displayName: 'Chrome' } as any,
+          { ...mitmOpts, url: 'http://localhost:3000/__/' },
+          { use: sinon.stub() } as any,
+        )
+      }
 
       return { first, second, create, connect }
     }
@@ -875,6 +934,75 @@ describe('lib/browsers/chrome', () => {
       expect(onInitializeNewBrowserTabCalled).to.be.true
       expect(cdpSocketServer.attachCDPClient).to.be.calledWith(pageCriClient)
       expect(protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+    })
+  })
+
+  describe('#attachListeners', () => {
+    const clearParams = { origin: '*', storageTypes: 'service_workers,cache_storage' }
+
+    function setup (options: object) {
+      const pageCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        targetId: '1234',
+        whenChildTargetHandled: sinon.stub().resolves(),
+        reenableChildTargetInterception: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      const cdpAutomation = {
+        _listenForFrameTreeChanges: sinon.stub(),
+        _handlePausedRequests: sinon.stub().resolves(),
+        isAUTFrame: sinon.stub().resolves(false),
+        onAUTFrameNavigated: sinon.stub(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient as any)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation as any)
+      sinon.stub(chrome, '_handleDownloads').resolves()
+      sinon.stub(chrome, '_navigateUsingCRI').resolves()
+      sinon.stub(utils, 'initializeCDP').resolves()
+
+      const attach = () => {
+        return chrome.attachListeners(
+          'https://example.com/__/#/specs/runner',
+          pageCriClient as any,
+          { use: sinon.stub() } as any,
+          { ...options } as any,
+          { displayName: 'Chrome' } as any,
+        )
+      }
+
+      return { pageCriClient, attach }
+    }
+
+    it('clears persisted service worker state before the runner navigation', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      expect(pageCriClient.send).to.have.been.calledWith('Storage.clearDataForOrigin', clearParams)
+      expect(pageCriClient.send.withArgs('Storage.clearDataForOrigin')).to.have.been.calledBefore(chrome._navigateUsingCRI as any)
+    })
+
+    it('does not clear persisted service worker state on the MITM path', async function () {
+      const { pageCriClient, attach } = setup({ ...mitmOpts, shouldClearPersistedServiceWorkers: true })
+
+      await attach()
+
+      expect(pageCriClient.send).not.to.have.been.calledWith('Storage.clearDataForOrigin')
+    })
+
+    it('does not clear persisted service worker state when testIsolation is disabled', async function () {
+      const { pageCriClient, attach } = setup({ ...openOpts, shouldClearPersistedServiceWorkers: false })
+
+      await attach()
+
+      expect(pageCriClient.send).not.to.have.been.calledWith('Storage.clearDataForOrigin')
     })
   })
 
@@ -1286,6 +1414,65 @@ describe('lib/browsers/chrome', () => {
         expect(args.filter((arg) => arg.startsWith('--disable-features='))).to.have.length(1)
         expect(args.find((arg) => arg.startsWith('--disable-features='))).not.to.include('ServiceWorkerAutoPreload')
       })
+    })
+  })
+
+  describe('#_normalizeDisableFeatures', () => {
+    it('returns args unchanged when no disable features args are present', () => {
+      const args = ['--foo', '--bar=baz']
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(args)
+    })
+
+    it('returns args unchanged when a single disable features arg is present', () => {
+      const args = ['--foo', '--disable-features=Translate,HttpsUpgrades']
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(args)
+    })
+
+    it('keeps Cypress features when a user arg from before:browser:launch is appended', () => {
+      const args = [
+        '--disable-features=Translate,LocalNetworkAccessChecks',
+        '--foo',
+        '--disable-features=OptimizationGuideModelDownloading',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--foo',
+        '--disable-features=Translate,LocalNetworkAccessChecks,OptimizationGuideModelDownloading',
+      ])
+    })
+
+    it('deduplicates features present in more than one arg', () => {
+      const args = [
+        '--disable-features=Translate,HttpsUpgrades',
+        '--disable-features=HttpsUpgrades,MediaRouter',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--disable-features=Translate,HttpsUpgrades,MediaRouter',
+      ])
+    })
+
+    it('does not let a trailing empty arg clobber the merged features', () => {
+      const args = [
+        '--disable-features=Translate',
+        '--disable-features=',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq([
+        '--disable-features=Translate',
+      ])
+    })
+
+    it('drops the switch entirely when every value is empty', () => {
+      const args = [
+        '--foo',
+        '--disable-features=',
+        '--disable-features=',
+      ]
+
+      expect(chrome._normalizeDisableFeatures(args)).to.deep.eq(['--foo'])
     })
   })
 

@@ -208,6 +208,38 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   return args
 }
 
+const DISABLE_FEATURES = '--disable-features='
+
+/**
+ * Merge multiple `--disable-features` arguments into one.
+ *
+ * Cypress disables features in `_getArgs` that the run depends on, and users
+ * may add their own via `before:browser:launch`. Chromium only honors the last
+ * occurrence of the switch, so the values must be combined: a user-supplied
+ * argument otherwise replaces Cypress's list rather than adding to it.
+ */
+const _normalizeDisableFeatures = function (args: string[]): string[] {
+  const featureArgs = args.filter((arg) => arg.startsWith(DISABLE_FEATURES))
+
+  if (featureArgs.length <= 1) {
+    return args
+  }
+
+  const features = _.uniq(
+    featureArgs
+    .flatMap((arg) => arg.slice(DISABLE_FEATURES.length).split(','))
+    .filter(Boolean),
+  )
+
+  const rest = args.filter((arg) => !arg.startsWith(DISABLE_FEATURES))
+
+  if (!features.length) {
+    return rest
+  }
+
+  return rest.concat(`${DISABLE_FEATURES}${features.join(',')}`)
+}
+
 const HOST_RESOLVER_RULES = '--host-resolver-rules='
 
 /**
@@ -360,6 +392,8 @@ export = {
 
   _normalizeHostResolverRules,
 
+  _normalizeDisableFeatures,
+
   _removeRootExtension,
 
   _recordVideo,
@@ -442,7 +476,7 @@ export = {
     // These features are launch-time-only: connectToExisting attaches to an
     // already-running browser and inherits the flags of whatever launched it.
     if (options.useBrowserNetworkInterception) {
-      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
+      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith(DISABLE_FEATURES))
 
       // ServiceWorkerAutoPreload serves navigations that cold-start a service
       // worker from a browser-issued request no CDP session can pause
@@ -450,7 +484,7 @@ export = {
       const features = 'WebFontsCacheAwareTimeoutAdaption,ServiceWorkerAutoPreload'
 
       if (disableFeaturesIndex === -1) {
-        args.push(`--disable-features=${features}`)
+        args.push(`${DISABLE_FEATURES}${features}`)
       } else {
         args[disableFeaturesIndex] += `,${features}`
       }
@@ -696,6 +730,23 @@ export = {
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
 
+      // The runner document is served on the AUT's origin, so a root-scoped
+      // worker the origin registered in an earlier session is entitled to
+      // answer for it — and in a persistent open-mode profile it survives to
+      // do so before interception can attach. Redundant with
+      // reset:browser:state on the connectToNewSpec path, and harmless there.
+      // cache_storage goes along because clearing service_workers drops the
+      // registration but leaves its caches, which a re-registered worker would
+      // serve last session's responses from. Cookies and local storage stay
+      // untouched: clearing those would log the profile out of every site it
+      // has visited.
+      if (options.shouldClearPersistedServiceWorkers) {
+        await pageCriClient.send('Storage.clearDataForOrigin', {
+          origin: '*',
+          storageTypes: 'service_workers,cache_storage',
+        })
+      }
+
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
       await this._navigateUsingCRI(pageCriClient, url)
@@ -752,10 +803,12 @@ export = {
       // Write the final merged preferences BEFORE launching the browser
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
-    // normalize the --load-extensions argument by
-    // massaging what the user passed into our own, and merge any
-    // user-supplied --host-resolver-rules with the ones derived from `hosts`
-    const args = _normalizeHostResolverRules(_normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser))
+    // Each merges a switch Chromium honors only once, so what a user adds in
+    // before:browser:launch extends Cypress's value instead of replacing it.
+    let args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+
+    args = _normalizeHostResolverRules(args)
+    args = _normalizeDisableFeatures(args)
 
     // this overrides any previous user-data-dir args
     // by being the last one
