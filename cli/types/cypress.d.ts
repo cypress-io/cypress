@@ -2943,9 +2943,11 @@ declare namespace Cypress {
 
   /**
    * A certificate the browser's own network stack should trust when it would
-   * otherwise reject it (e.g. a self-signed cert). Supply exactly one of a
-   * relative path to a PEM file, an inline PEM string, or a precomputed base64
-   * SHA-256 SPKI fingerprint.
+   * otherwise reject it (e.g. a self-signed cert). Supply exactly one of a path
+   * to a PEM file, an inline PEM string, or a precomputed base64 SHA-256 SPKI
+   * fingerprint. A path is resolved against the project root, so an absolute
+   * path is used as-is. A PEM file or string holding several certificates
+   * trusts every certificate in the bundle.
    */
   type TrustedCertificate =
     | { filePath: string }
@@ -3340,8 +3342,9 @@ declare namespace Cypress {
      * Certificates the browser should treat as genuinely trusted rather than merely
      * tolerating their errors (e.g. a self-signed development cert). On the native browser
      * network path this lets the browser cache the origin's assets across navigations.
-     * Each entry supplies exactly one of a relative path to a PEM file, an inline PEM
-     * string, or a base64 SHA-256 SPKI fingerprint.
+     * Each entry supplies exactly one of a path to a PEM file (resolved against the
+     * project root), an inline PEM string, or a base64 SHA-256 SPKI fingerprint. Every
+     * certificate in a PEM bundle is trusted, not just the first.
      * @default []
      */
     trustedCertificates: TrustedCertificate[]
