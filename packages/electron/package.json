@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@electron/fuses": "1.8.0",
+    "@electron/get": "^4.0.1",
     "@electron/packager": "18.3.6",
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.31.0",
