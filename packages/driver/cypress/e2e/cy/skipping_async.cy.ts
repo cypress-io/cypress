@@ -1,10 +1,12 @@
+export {} // make typescript see this as a module
+
 const { Screenshot } = Cypress
 
 let failedEventFired = false
 
 Cypress.on('fail', (error) => {
   failedEventFired = true
-  throw new Error(error)
+  throw new Error(`${error}`)
 })
 
 let screenshotTaken = false
@@ -13,16 +15,14 @@ Screenshot.defaults({ onAfterScreenshot: () => {
   screenshotTaken = true
 } })
 
-const pendingTests = []
-const passedTests = []
+const pendingTests: Cypress.ObjectLike[] = []
+const passedTests: Cypress.ObjectLike[] = []
 
 Cypress.on('test:after:run', (test) => {
   if (test.state === 'pending') {
-    return pendingTests.push(test)
-  }
-
-  if (test.state === 'passed') {
-    return passedTests.push(test)
+    pendingTests.push(test)
+  } else if (test.state === 'passed') {
+    passedTests.push(test)
   }
 })
 
@@ -32,25 +32,17 @@ beforeEach(() => {
   Cypress.config('isInteractive', false)
 })
 
-describe('generally skipped test', () => {
-  before(function () {
-    this.skip()
-  })
-
+describe('skipped test', () => {
   it('does not fail', function () {
-    expect(true).to.be.false
-  })
-})
-
-describe('individually skipped tests', () => {
-  it('does not fail when using this.skip', function () {
-    this.skip()
-    expect(true).to.be.false
+    cy.then(() => {
+      this.skip()
+    }).then(() => {
+      expect(true).to.be.false
+    })
   })
 
-  // NOTE: We are skipping this test in order to test skip functionality
-  it.skip('does not fail when using it.skip', () => {
-    expect(true).to.be.false
+  it('does not prevent subsequent tests from running', () => {
+    expect(true).to.be.true
   })
 })
 
@@ -64,7 +56,7 @@ describe('skipped test side effects', () => {
   })
 
   it('does still mark all tests with the correct state', () => {
-    expect(pendingTests).to.have.length(3)
-    expect(passedTests).to.have.length(2)
+    expect(pendingTests).to.have.length(1)
+    expect(passedTests).to.have.length(3)
   })
 })
