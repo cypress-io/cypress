@@ -47,9 +47,9 @@ run_unit_suite() {
 
 run_driver_suite() {
   local force_http1="$1"
-  # `.cy.*` rather than a pinned extension so a spec's JS/TS conversion cannot
-  # silently drop it from this list -- Cypress ignores a --spec entry that
-  # matches nothing and still exits 0
+  # Cypress ignores a --spec entry that matches nothing and still exits 0, so
+  # glob the extension: a spec converted between JS and TS stays in this list
+  # instead of silently dropping out of the run
   local specs="cypress/e2e/e2e/encoding.cy.*,cypress/e2e/e2e/csp_headers.cy.*,cypress/e2e/cypress/proxy-logging.cy.*,cypress/e2e/issues/3890.cy.*,cypress/e2e/cy/snapshot.cy.*,cypress/e2e/cypress/downloads.cy.*"
 
   yarn workspace @packages/driver cypress:run -- \

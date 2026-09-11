@@ -1,6 +1,6 @@
 const { $ } = Cypress
 
-// the fixture defines these on `window` so the tests can stub them
+// the custom-elements fixture defines these on `window` so the tests can stub them
 type CustomElementsWindow = Window & {
   customElementConstructor: () => void
   customElementAttributeChanged: () => void
