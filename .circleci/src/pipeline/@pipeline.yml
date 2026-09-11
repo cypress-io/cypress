@@ -3083,6 +3083,26 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - windows_reinstall_deps
+            - run:
+                name: Warm up the freshly installed electron binary
+                # getElectronNodeVersion() allows electron 10s; the first run of a
+                # newly extracted electron.exe can exceed that while Defender scans it.
+                command: |
+                  EXE="node_modules/electron/dist/electron.exe"
+                  if [ ! -f "$EXE" ]; then
+                    echo "$EXE not found, nothing to warm up"
+                    exit 0
+                  fi
+                  export ELECTRON_RUN_AS_NODE=1
+                  for i in 1 2 3; do
+                    start=$(date +%s)
+                    if "./$EXE" -e "process.stdout.write(process.versions.node)"; then
+                      echo " <- electron warm on attempt $i after $(( $(date +%s) - start ))s"
+                      break
+                    fi
+                    echo "attempt $i failed after $(( $(date +%s) - start ))s"
+                  done
+                  exit 0
       - run:
           name: Install Linux packages needed to build, zip and launch the binary
           # Installed one at a time and tolerantly: the base image already carries
