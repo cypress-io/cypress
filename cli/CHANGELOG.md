@@ -7,7 +7,7 @@
 
 **Bugfixes:**
 
-- `cypress tap run` now reports that the spec is running and to use `cypress tap status` for progress, instead of printing the launched spec's testing type and browser.
+- `cypress tap run` now reports that the spec is running and to use `cypress tap status` for progress, instead of printing the launched spec's testing type and browser. [#34777](https://github.com/cypress-io/cypress/pull/34777)
 - Fixed a regression in [16.0.0](#16-0-0) where a run in Chrome, Chromium, or Edge could stop producing output partway through and hang indefinitely, with no error, no failing test, and no timeout, until the CI job was killed for exceeding its no-output limit. Fixes [#34778](https://github.com/cypress-io/cypress/issues/34778).
 - Fixed an issue where adding a `--disable-features` argument in [`before:browser:launch`](https://docs.cypress.io/api/node-events/browser-launch-api) silently dropped every feature Cypress disables in Chrome, Chromium, and Edge, because the browser honors only the last occurrence of that argument. Cypress now merges its own values with yours. Fixes [#34775](https://github.com/cypress-io/cypress/issues/34775).
 - Fixed a regression in [16.0.0](#16-0-0) where, in `cypress open` on Chrome, Chromium, and Edge, testing a site that registers an origin-wide service worker could render the site's own content — such as its 404 page — in place of the Cypress app after clicking a spec or reloading the browser tab. A service worker registered by the site under test can no longer answer for Cypress's own pages and assets. Fixes [#34789](https://github.com/cypress-io/cypress/issues/34789). Addressed in [#34762](https://github.com/cypress-io/cypress/pull/34762).
