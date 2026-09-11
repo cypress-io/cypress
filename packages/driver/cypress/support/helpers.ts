@@ -1,13 +1,18 @@
 const { _ } = Cypress
 
-const getQueueNames = () => {
+// declared locally because the webpack runtime has no types; overriding `d` gives
+// each export a setter so a spec can stub the exports of a TypeScript module
+declare const __webpack_require__: {
+  d: (...args: any[]) => void
+  o: (exports: object, name: string) => boolean
+}
+
+export const getQueueNames = () => {
   return _.map(cy.queue, 'name')
 }
 
-function allowTsModuleStubbing () {
-  // eslint-disable-next-line no-undef
+export function allowTsModuleStubbing () {
   __webpack_require__.d = function (exports, name, getter) {
-  // eslint-disable-next-line no-undef
     if (!__webpack_require__.o(exports, name)) {
       let stub
 
@@ -20,9 +25,4 @@ function allowTsModuleStubbing () {
       })
     }
   }
-}
-
-module.exports = {
-  getQueueNames,
-  allowTsModuleStubbing,
 }

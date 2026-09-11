@@ -1,15 +1,29 @@
-const fs = require('fs-extra')
-const zlib = require('zlib')
-const auth = require('basic-auth')
-const bodyParser = require('body-parser')
-const express = require('express')
-const http = require('http')
+import fs from 'fs-extra'
+import zlib from 'zlib'
+import auth from 'basic-auth'
+import bodyParser from 'body-parser'
+import compression from 'compression'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import errorhandler from 'errorhandler'
+import express from 'express'
+import http from 'http'
+import methodOverride from 'method-override'
+import multer from 'multer'
+import path from 'path'
+import Promise from 'bluebird'
+import { authCreds } from '../fixtures/auth_creds'
+
+// required rather than imported: @packages/https-proxy leaves its test directory out
+// of type checking, so importing this helper would pull its latent type errors into
+// the driver's program
 const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
-const path = require('path')
-const Promise = require('bluebird')
-const multer = require('multer')
+
 const upload = multer({ dest: 'cypress/_test-output/' })
-const { authCreds } = require('../fixtures/auth_creds')
+
+// express types `query` values as a union of string, array and nested object; these
+// fixture routes are only ever called with plain strings, so they read them as such
+type QueryRequest = express.Request<Record<string, string>, any, any, Record<string, string>>
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
@@ -27,13 +41,13 @@ const createApp = (port) => {
     res.end(req.method)
   })
 
-  app.use(require('cors')())
-  app.use(require('cookie-parser')())
-  app.use(require('compression')())
+  app.use(cors())
+  app.use(cookieParser())
+  app.use(compression())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
   app.use(bodyParser.raw())
-  app.use(require('method-override')())
+  app.use(methodOverride())
 
   app.head('/', (req, res) => {
     return res.sendStatus(200)
@@ -43,9 +57,9 @@ const createApp = (port) => {
     return res.send('<html><body>root page</body></html>')
   })
 
-  app.get('/timeout', (req, res) => {
+  app.get('/timeout', (req: QueryRequest, res) => {
     return Promise
-    .delay(req.query.ms || 0)
+    .delay(Number(req.query.ms) || 0)
     .then(() => {
       return res.send('<html><body>timeout</body></html>')
     })
@@ -64,15 +78,18 @@ const createApp = (port) => {
     .send('<html><body>hello there</body></html>')
   })
 
-  app.get('/status-code', (req, res) => {
+  app.get('/status-code', (req: QueryRequest, res) => {
     if (req.query.message) {
       res.statusMessage = req.query.message
     }
 
-    res.sendStatus(req.query.code || 200)
+    // deliberately uncoerced: express only strips the body headers when `statusCode` is
+    // the number 204 or 304, so a numeric code here would change the response the
+    // net_stubbing 204 spy (#8999) was written against
+    res.sendStatus((req.query.code || 200) as unknown as number)
   })
 
-  app.all('/redirect', (req, res) => {
+  app.all('/redirect', (req: QueryRequest, res) => {
     if (req.query.chunked) {
       res.setHeader('transfer-encoding', 'chunked')
       res.removeHeader('content-length')
@@ -143,7 +160,7 @@ const createApp = (port) => {
     .sendStatus(401)
   })
 
-  app.get('/json-content-type', (req, res) => {
+  app.get('/json-content-type', (req: QueryRequest, res) => {
     res.setHeader('content-type', req.query.contentType || 'application/json')
 
     return res.end('{}')
@@ -190,7 +207,10 @@ const createApp = (port) => {
   })
 
   app.all('/dump-form-data', upload.single('file'), (req, res) => {
-    return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}<br>original name:<br>${req.file.originalname}</body></html>`)
+    // @types/multer is not installed, so the upload middleware's `req.file` is untyped
+    const { originalname } = (req as any).file
+
+    return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}<br>original name:<br>${originalname}</body></html>`)
   })
 
   app.get('/status-404', (req, res) => {
@@ -205,7 +225,7 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
-  app.get('/prelogin', (req, res) => {
+  app.get('/prelogin', (req: QueryRequest, res) => {
     const { redirect, override } = req.query
     let cookie = 'prelogin=true'
 
@@ -220,7 +240,7 @@ const createApp = (port) => {
     .redirect(302, redirect)
   })
 
-  app.get('/cookie-login', (req, res) => {
+  app.get('/cookie-login', (req: QueryRequest, res) => {
     const { cookie, localhostCookie, username, redirect } = req.query
 
     res
@@ -232,7 +252,7 @@ const createApp = (port) => {
     return req.cookies.user || req.cookies['__Host-user'] || req.cookies['__Secure-user']
   }
 
-  app.get('/verify-cookie-login', (req, res) => {
+  app.get('/verify-cookie-login', (req: QueryRequest, res) => {
     if (!getUserCookie(req)) {
       return res
       .send('<html><body><h1>Not logged in</h1></body></html>')
@@ -240,7 +260,7 @@ const createApp = (port) => {
 
     const { cookie, username, redirect } = req.query
 
-    res.send(`
+    return res.send(`
       <html>
         <body>
           <h1>Redirecting ${username}...</h1>
@@ -254,7 +274,7 @@ const createApp = (port) => {
     `)
   })
 
-  app.get('/login', (req, res) => {
+  app.get('/login', (req: QueryRequest, res) => {
     const { cookie, username } = req.query
 
     if (!username) {
@@ -267,7 +287,7 @@ const createApp = (port) => {
 
     const decodedCookie = decodeURIComponent(cookie)
 
-    res
+    return res
     .append('Set-Cookie', decodedCookie)
     .append('Set-Cookie', 'prelogin=verified')
     .redirect(302, '/welcome')
@@ -290,14 +310,14 @@ const createApp = (port) => {
       return res.send('<html><body><h1>Login not verified</h1></body></html>')
     }
 
-    res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
+    return res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
   })
 
   app.get('/test-request', (req, res) => {
     res.sendStatus(200)
   })
 
-  app.get('/set-cookie', (req, res) => {
+  app.get('/set-cookie', (req: QueryRequest, res) => {
     const { cookie } = req.query
 
     res
@@ -305,7 +325,7 @@ const createApp = (port) => {
     .sendStatus(200)
   })
 
-  app.get('/set-same-site-none-cookie-on-redirect', (req, res) => {
+  app.get('/set-same-site-none-cookie-on-redirect', (req: QueryRequest, res) => {
     const { redirect, cookie } = req.query
     const cookieDecoded = decodeURIComponent(cookie)
 
@@ -317,7 +337,7 @@ const createApp = (port) => {
   })
 
   app.get('/test-request-credentials', (req, res) => {
-    const { origin } = new URL(req.headers.referer)
+    const { origin } = new URL(req.headers.referer!)
 
     res
     .setHeader('Access-Control-Allow-Origin', origin)
@@ -325,9 +345,9 @@ const createApp = (port) => {
     .sendStatus(200)
   })
 
-  app.get('/set-cookie-credentials', (req, res) => {
+  app.get('/set-cookie-credentials', (req: QueryRequest, res) => {
     const { cookie } = req.query
-    const { origin } = new URL(req.headers.referer)
+    const { origin } = new URL(req.headers.referer!)
 
     res
     .setHeader('Access-Control-Allow-Origin', origin)
@@ -338,7 +358,7 @@ const createApp = (port) => {
 
   let _var = ''
 
-  app.get('/set-var', (req, res) => {
+  app.get('/set-var', (req: QueryRequest, res) => {
     _var = req.query.v
     res.sendStatus(200)
   })
@@ -464,14 +484,14 @@ const createApp = (port) => {
 
   app.use(express.static(path.join(__dirname, '..')))
 
-  app.use(require('errorhandler')())
+  app.use(errorhandler())
 
   return app
 }
 
 httpPorts.forEach((port) => {
   const app = createApp(port)
-  const server = http.Server(app)
+  const server = http.createServer(app)
 
   return server.listen(app.get('port'), () => {
     // eslint-disable-next-line no-console

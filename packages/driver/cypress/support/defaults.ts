@@ -1,8 +1,6 @@
-const { $ } = Cypress
-
 const isActuallyInteractive = Cypress.config('isInteractive')
 
-window.top.__cySkipValidateConfig = true
+window.top!.__cySkipValidateConfig = true
 
 if (!isActuallyInteractive) {
   // we want to only enable retries in runMode
@@ -17,6 +15,7 @@ beforeEach(function () {
   // always set that we're interactive so we
   // get consistent passes and failures when running
   // from CI and when running in GUI mode
+  // @ts-expect-error - isInteractive is read-only to users, but the driver tests need it
   Cypress.config('isInteractive', true)
 
   if (!isActuallyInteractive) {
@@ -30,11 +29,11 @@ beforeEach(function () {
   // this could fail if this window
   // is a cross origin window
   try {
-    $(cy.state('window')).off()
+    Cypress.$(cy.state('window')).off()
   } catch (error) {} // eslint-disable-line no-empty
 
   // only want to run this as part of the privileged commands spec
-  if (cy.config('spec').baseName === 'privileged_commands.cy.ts') {
+  if (Cypress.spec.baseName === 'privileged_commands.cy.ts') {
     cy.visit('/fixtures/files-form.html')
 
     // it only needs to run once per spec run

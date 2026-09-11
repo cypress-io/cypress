@@ -1,18 +1,18 @@
-// only required to read in webpack config, since it is .ts
-require('@packages/ts/register')
-require('./server')
-const _ = require('lodash')
-const path = require('path')
-const fs = require('fs-extra')
-const Promise = require('bluebird')
-const wp = require('@cypress/webpack-preprocessor')
-const Jimp = require('jimp')
-const webpackConfig = require('@packages/runner/webpack.config.ts')
+import './server'
+import _ from 'lodash'
+import path from 'path'
+import fs from 'fs-extra'
+import Promise from 'bluebird'
+import wp from '@cypress/webpack-preprocessor'
+import Jimp from 'jimp'
+
+// required rather than imported: @packages/runner's check-ts is tslint only, so importing
+// its webpack config would make this package's tsc run the only gate on that file and on
+// @packages/web-config's base config, under stricter options than either package uses
+const webpackConfig = require('@packages/runner/webpack.config')
 
 async function getWebpackOptions () {
-  const opts = await webpackConfig.default()
-
-  const webpackOptions = opts[0]
+  const webpackOptions = (await webpackConfig.default())[0]
 
   // set mode to development which overrides
   // the 'none' value of the base webpack config
@@ -34,10 +34,8 @@ async function getWebpackOptions () {
 
   return webpackOptions
 }
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = async (on, config) => {
+
+const setupNodeEvents: Cypress.PluginConfig = async (on, config) => {
   const webpackOptions = await getWebpackOptions()
 
   on('file:preprocessor', wp({ webpackOptions }))
@@ -100,3 +98,5 @@ module.exports = async (on, config) => {
 
   return config
 }
+
+export = setupNodeEvents
