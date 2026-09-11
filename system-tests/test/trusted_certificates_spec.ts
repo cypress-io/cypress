@@ -6,6 +6,8 @@ import systemTests from '../lib/system-tests'
 // the config is validated, each entry's SPKI fingerprint is computed, and the
 // `--ignore-certificate-errors-spki-list` flag reaches Chrome alongside the
 // blanket `--ignore-certificate-errors`, so the origin is genuinely trusted.
+// The flag assertion lives in the fixture's `before:browser:launch` handler,
+// since the blanket flag alone would make the spec pass with no trusted certs.
 //
 // NOTE: this does NOT assert the disk-cache behavior the feature restores. That
 // is unobservable from a Cypress system test — Cypress's `--test-type` /
