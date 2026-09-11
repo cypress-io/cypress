@@ -1762,9 +1762,9 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             yarn binary-zip
-            mkdir -p /tmp/startup-comparison
-            mv cypress.zip "/tmp/startup-comparison/cypress-$(node ./scripts/get-platform-key.js)-<< parameters.label >>.zip"
-            ls -l /tmp/startup-comparison
+            mkdir -p startup-comparison
+            mv cypress.zip "startup-comparison/cypress-$(node ./scripts/get-platform-key.js)-<< parameters.label >>.zip"
+            ls -l startup-comparison
 
   upload-build-artifacts:
     steps:
@@ -3138,8 +3138,17 @@ jobs:
             echo "  <Cypress binary> --project=<dir> --emit-when-ready"
             echo "Compare snapshot-on against snapshot-off from THIS job only - cross-run"
             echo "and cross-machine drift is the same order as the effect being measured."
+      - run:
+          name: Verify both zips exist before storing them
+          command: |
+            count=$(ls -1 startup-comparison/*.zip 2>/dev/null | wc -l | tr -d ' ')
+            ls -l startup-comparison || true
+            if [ "$count" -ne 2 ]; then
+              echo "expected 2 zips in startup-comparison, found $count"
+              exit 1
+            fi
       - store_artifacts:
-          path: /tmp/startup-comparison
+          path: startup-comparison
 
   create-and-trigger-packaging-artifacts:
     <<: *defaults
