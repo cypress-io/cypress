@@ -150,7 +150,7 @@ const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg: string): string {
+  solution (msg?: string): string {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 

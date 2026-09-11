@@ -181,6 +181,20 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
+function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | undefined {
+  // Missing `bytes` means the browser never buffered the body (a streamed
+  // upload), not that the body is empty.
+  if (!entries?.length || entries.some(({ bytes }) => bytes === undefined)) {
+    return undefined
+  }
+
+  if (entries.length === 1) {
+    return Buffer.from(entries[0].bytes!, 'base64')
+  }
+
+  return Buffer.concat(entries.map(({ bytes }) => Buffer.from(bytes!, 'base64')))
+}
+
 function contentTypeOf (entries?: Protocol.Fetch.HeaderEntry[]): string | undefined {
   const values = entries
   ?.filter(({ name }) => name.toLowerCase() === 'content-type')
@@ -260,11 +274,15 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
       inFlightRequests.set(transportRequest.id, transportRequest)
 
+      transportRequest.pausePostDataBuffer = toPausePostData(transportRequest.postDataEntries)
+
       debugVerbose('decodeRequest %s %s %o', transportRequest.method, transportRequest.url, {
         id: transportRequest.id,
         requestId: transportRequest.requestId,
         headerNames: Object.keys(transportRequest.headers ?? {}),
-        hasPostData: transportRequest.postData !== undefined,
+        hasPostData: transportRequest.hasPostData,
+        postDataChars: transportRequest.postData?.length,
+        postDataBytes: transportRequest.pausePostDataBuffer?.length,
       })
 
       return {
@@ -272,7 +290,7 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         url: transportRequest.url,
         method: transportRequest.method,
         headers: transportRequest.headers,
-        body: transportRequest.postData,
+        body: transportRequest.pausePostDataBuffer ?? transportRequest.postData,
         resourceType: transportRequest.resourceType,
       }
     },
@@ -298,13 +316,24 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.headers = toNetworkHeaders(httpRequest.headers)
       }
 
+      // An untouched body comes back as that Buffer, or as net-stubbing's utf8
+      // view of it. The transport reads neither as unchanged, so writing either
+      // field below would upload U+FFFD in place of the browser's own bytes.
+      const pauseBody = transportRequest.pausePostDataBuffer
+      const bodyUnchanged = pauseBody !== undefined && (Buffer.isBuffer(httpRequest.body)
+        ? httpRequest.body.equals(pauseBody)
+        : httpRequest.body === pauseBody.toString('utf8'))
+
+      // postData alone is not enough: it is omitted for a body too big to inline.
+      const pauseCarriedBody = transportRequest.postData !== undefined || pauseBody !== undefined
+
       // The net-stubbing pipeline normalizes every intercepted request to a
       // string body, so a request the browser paused without one arrives back
       // here as `''` — indistinguishable from a body a handler emptied. Sending
       // that as postData makes Chrome attach `Content-Length: 0` to requests
       // that never had a body (#24407). Only an empty body the pause itself
       // carried is a real change worth forwarding.
-      if (httpRequest.body !== undefined && (httpRequest.body.length > 0 || transportRequest.postData !== undefined)) {
+      if (!bodyUnchanged && httpRequest.body !== undefined && (httpRequest.body.length > 0 || pauseCarriedBody)) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
 
         // A Buffer body must reach the transport as bytes: the utf8 string
@@ -313,6 +342,12 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         if (Buffer.isBuffer(httpRequest.body)) {
           transportRequest.postDataBuffer = httpRequest.body
         }
+      }
+
+      // Carries the request-stage route-match result to the transport, which
+      // stashes it on the response-pause deferred for shouldStreamBody.
+      if (httpRequest.hadMatchingRoutes !== undefined) {
+        transportRequest.hadMatchingRoutes = httpRequest.hadMatchingRoutes
       }
 
       return transportRequest
@@ -334,7 +369,9 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         bodyStream: transportResponse.bodyStream,
         headers: stripWireEncodingHeaders(toHttpHeaders(transportResponse.responseHeaders)),
         statusCode: transportResponse.responseCode,
+        statusMessage: transportResponse.responseStatusText,
         ...(transportResponse.bodySkipped ? { bodySkipped: true } : {}),
+        ...(transportResponse.captureStream ? { captureStream: transportResponse.captureStream } : {}),
       }
     },
 

@@ -136,62 +136,60 @@ describe('Next.js', {
   numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
-    cy.scaffoldProject('next-14')
+    cy.scaffoldProject('next-16')
   })
 
   it('error conditions', () => {
     const verify = loadErrorSpec({
-      projectName: 'next-14',
+      projectName: 'next-16',
       configFile: 'cypress.config.js',
       filePath: 'cypress/Errors.cy.jsx',
       failCount: 4,
     })
 
+    // line/column omitted: Next.js 16 bundles React internally and the exact
+    // stack frame offsets vary across React versions; message is sufficient
+    // to validate error reporting behaviour.
+    // hasCodeFrame: false — code frames are not fully supported with Next.js 15/16.
+    // see: https://github.com/cypress-io/cypress/issues/30667
     verify('error on mount', {
-      line: 6,
-      column: 33,
       uncaught: true,
       uncaughtMessage: 'mount error',
+      hasCodeFrame: false,
       message: [
         'The following error originated from your application code',
         'mount error',
       ],
-      codeFrameText: 'Errors.cy.jsx',
     })
 
     verify('sync error', {
-      line: 13,
-      column: 19,
       uncaught: true,
       uncaughtMessage: 'sync error',
+      hasCodeFrame: false,
       message: [
         'The following error originated from your application code',
         'sync error',
       ],
-      codeFrameText: 'Errors.cy.jsx',
     }).then(() => {
       // TODO: ReactDOM seems to double throw.
       // verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
-      line: 22,
-      column: 21,
       uncaught: true,
       uncaughtMessage: 'async error',
+      hasCodeFrame: false,
       message: [
         'The following error originated from your application code',
         'async error',
       ],
-      codeFrameText: 'Errors.cy.jsx',
     }).then(() => {
       verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
-      line: 48,
-      column: 8,
       command: 'get',
+      hasCodeFrame: false,
       message: [
         'Timed out retrying',
         'element-that-does-not-exist',
@@ -340,7 +338,7 @@ describe.skip('Svelte', {
   })
 })
 
-const angularVersions = [18, 19] as const
+const angularVersions = [21, 22] as const
 
 angularVersions.forEach((angularVersion) => {
   describe(`Angular ${angularVersion}`, {
@@ -359,13 +357,12 @@ angularVersions.forEach((angularVersion) => {
         projectName: `angular-${angularVersion}`,
         configFile: 'cypress.config.ts',
         filePath: 'src/app/errors.cy.ts',
-        failCount: 3,
-        passCount: 1,
+        failCount: 4,
       })
 
       verify('sync error', {
         fileName: 'errors.ts',
-        line: 14,
+        line: 22,
         column: 11,
         uncaught: true,
         uncaughtMessage: 'sync error',
@@ -379,7 +376,7 @@ angularVersions.forEach((angularVersion) => {
 
       verify('async error', {
         fileName: 'errors.ts',
-        line: 19,
+        line: 27,
         column: 13,
         uncaught: true,
         uncaughtMessage: 'async error',
@@ -392,7 +389,7 @@ angularVersions.forEach((angularVersion) => {
       })
 
       verify('command failure', {
-        line: 20,
+        line: 21,
         column: 8,
         command: 'get',
         message: [

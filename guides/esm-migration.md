@@ -25,7 +25,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] cli ✅ **COMPLETED** 
 - [x] npm/angular ✅ **COMPLETED** 
 - [x] npm/cypress-schematic ✅ **COMPLETED**
-- [ ] npm/eslint-plugin-dev
+- ~~npm/eslint-plugin-dev~~ — **SKIP**: private, no longer published, and deleted once every package is on `@packages/eslint-config`. See [the ESLint migration guide](./eslint-migration.md).
 - [x] npm/grep ✅ **COMPLETED** 
 - [x] npm/mount-utils ✅ **COMPLETED**  
 - [x] npm/puppeteer ✅ **COMPLETED** 
@@ -62,7 +62,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
 - [x] packages/resolve-dist ✅ **COMPLETED**
-- [ ] packages/rewriter **PARTIAL** - entry point is JS
 - [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
@@ -109,7 +108,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/network-tools ✅ **COMPLETED**
 - [x] packages/packherd-require ✅ **COMPLETED**
 - [x] packages/proxy ✅ **COMPLETED**
-- [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
 - [x] packages/socket ✅ **COMPLETED**
@@ -122,6 +120,8 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 ### Phase 3: Bundle ESM/CJS versions of NPM packages 
 
 TBD: details will be clearer at the end of Phase 2
+
+Known consideration for when this is planned: a package that emits both `cjs/` and `esm/` has to ignore both in its lint config, or `yarn build && yarn lint` fails on thousands of violations in its own generated output. This is easy to miss because CI lints before building, so it only reproduces locally. `@packages/errors` has this today. Whatever shape Phase 3 takes, the ignore patterns need to land with it — in `@packages/eslint-config` if the output directories end up consistent across packages, per-package otherwise.
 
 ### Phase 4: Run Cypress server as an ESM package
 

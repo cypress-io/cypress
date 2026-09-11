@@ -1,7 +1,6 @@
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
 import * as rewriter from '../http/util/rewriter'
-import { resContentTypeIsJavaScript } from '../http/util/document-preparation'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
 /**
@@ -29,13 +28,10 @@ export async function removeSecurity (mw: ResponseInterceptionMiddlewareCtx): Pr
   const streamSpan = telemetry.startSpan({ name: `maybe:remove:security-resp:stream`, parentSpan: span, isVerbose })
 
   mw.incomingResStream = mw.incomingResStream.pipe(rewriter.security({
-    isNotJavascript: !resContentTypeIsJavaScript(mw.incomingRes),
-    useAstSourceRewriting: mw.config.experimentalSourceRewriting,
     modifyObstructiveThirdPartyCode: mw.config.experimentalModifyObstructiveThirdPartyCode && !mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
     modifyObstructiveCode: mw.config.modifyObstructiveCode,
     removeSRIAttributes: mw.config.removeSRIAttributes && mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
     url: mw.req.proxiedUrl,
-    deferSourceMapRewrite: mw.deferSourceMapRewrite,
   })).on('error', mw.onError).once('close', () => {
     streamSpan?.end()
   })

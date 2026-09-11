@@ -5,8 +5,8 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
-import type { BreakingErrResult, TestingType } from '@packages/types'
-import { logError, parseResolvedPattern, pluralize } from './errorUtils'
+import type { BreakingErrResult, ProtocolCaptureMethod, TestingType } from '@packages/types'
+import { logError, parseResolvedPattern } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
@@ -43,6 +43,15 @@ It also looks like you also passed in an explicit ${fmt.flag('--ci-build-id')} f
 This is only necessary if you are NOT running in one of our supported CI providers.
 
 This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.\
+`
+}
+
+const testReplayDirectoryRecommendation = (): ReturnType<typeof errPartial> => {
+  return errPartial`\
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.\
 `
 }
 
@@ -153,7 +162,7 @@ export const AllCypressErrors = {
   CLOUD_API_RESPONSE_FAILED_RETRYING: (
     arg1: { tries: number, delay: string, response: Error },
   ) => {
-    const time = pluralize('time', arg1.tries)
+    const time = arg1.tries === 1 ? 'time' : 'times'
     const { delay } = arg1
     const message = normalizeNetworkErrorMessage(arg1.response)
 
@@ -564,11 +573,18 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error) => {
+  CLOUD_PROTOCOL_INITIALIZATION_FAILURE: (error: Error, captureMethod?: ProtocolCaptureMethod) => {
+    // `beforeSpec` is where the recording's SQLite database is opened and the capture script
+    // first writes beneath the temporary directory. The other initialization steps never touch
+    // the filesystem, so the advice would only mislead.
+    const recommendation = captureMethod === 'beforeSpec' ? testReplayDirectoryRecommendation() : null
+
     return errTemplate`\
         Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
         These results will not display Test Replay recordings.
+
+        ${recommendation}
 
         This error will not affect or change the exit code.
 
@@ -580,10 +596,7 @@ export const AllCypressErrors = {
 
         These results will not display Test Replay recordings.
 
-        This can happen for many reasons. If this problem persists:
-
-        - Try increasing the available disk space.
-        - Ensure that ${fmt.path(path.join(os.tmpdir(), 'cypress', 'protocol'))} is both readable and writable.
+        ${testReplayDirectoryRecommendation()}
 
         This error will not affect or change the exit code.
 
@@ -714,10 +727,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/cloud`
   },
-  // TODO: make this relative path, not absolute
-  NO_PROJECT_ID: (configFilePath: string) => {
-    return errTemplate`Can't find ${fmt.highlight(`projectId`)} in the config file: ${fmt.path(configFilePath || '')}`
-  },
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
     return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
   },
@@ -797,7 +806,6 @@ export const AllCypressErrors = {
 
         If you're running lots of tests on a memory intense application.
           - Try increasing the CPU/memory on the machine you're running on.
-          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
           - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
 
         You can learn more here:
@@ -825,7 +833,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Your ${fmt.highlight(`supportFile`)} is missing or invalid: ${fmt.path(supportFilePath)}
 
-        The supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).
+        The supportFile must be a .js or .ts file or be supported by your preprocessor plugin (if configured).
 
         Fix your support file, or set supportFile to ${fmt.highlightSecondary(`false`)} if a support file is not necessary for your project.
 
@@ -1233,6 +1241,26 @@ export const AllCypressErrors = {
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
+  BROWSER_NETWORK_INTERCEPTION_ESCAPE: (url: string, isRunnerDocument: boolean) => {
+    // The partial carries its own trailing blank line and is interpolated
+    // inline below, so the paragraph that follows keeps its spacing whether or
+    // not there is a remedy to add.
+    const runnerDocumentRemedy = isRunnerDocument ? errPartial`
+        The escaped document is Cypress's own runner, which is served on the origin under test. A service worker that origin registered in an earlier session answered for it. If you have disabled ${fmt.highlight(`testIsolation`)}, re-enable it so Cypress clears that worker before loading the runner; otherwise, clear the browser profile or this origin's site data.
+
+        ` : null
+
+    return errTemplate`\
+        A document served by a service worker was not intercepted by Cypress:
+
+        ${fmt.url(url)}
+
+        The browser started the service worker and let it serve this document before Cypress could attach to it. The response kept its original headers and was invisible to ${fmt.highlight(`cy.intercept`)} and Test Replay. If the document carries framebusting headers, the visit will time out.
+
+        ${runnerDocumentRemedy}Only the first escaped document in a spec is reported here. If this causes failures, set ${fmt.highlight(`forceHttp1`)} to ${fmt.highlight(`true`)} in your Cypress configuration to route traffic through Cypress's HTTP proxy, or configure ${fmt.highlight(`retries`)} so an affected test re-runs after Cypress has attached to the worker.
+
+        Details: ${fmt.url(`https://github.com/cypress-io/cypress/issues/34674`)}`
+  },
   BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
     return errTemplate`\
       We detected that the ${fmt.highlight(browserName)} browser process closed unexpectedly.
@@ -1280,7 +1308,8 @@ export const AllCypressErrors = {
     return errTemplate`\
         The ${fmt.highlight(`experimentalJustInTimeCompile`)} configuration option was removed in ${fmt.cypressVersion(`14.0.0`)}.
         A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
   },
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
     return errTemplate`\
@@ -1289,7 +1318,8 @@ export const AllCypressErrors = {
         You can safely remove this option from your config.
 
         https://on.cypress.io/session
-        https://on.cypress.io/origin`
+        https://on.cypress.io/origin
+    `
   },
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
     return errTemplate`\
@@ -1303,7 +1333,8 @@ export const AllCypressErrors = {
 
         Cypress Studio is now available for all users.
 
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
   },
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
     const code = errPartial`
@@ -1324,7 +1355,17 @@ export const AllCypressErrors = {
 
         \`cy.prompt\` is now available for all users.
 
-        You can safely remove this option from your config.`
+        You can safely remove this option from your config.
+    `
+  },
+  EXPERIMENTAL_SOURCE_REWRITING_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSourceRewriting`)} option was removed in ${fmt.cypressVersion(`16.0.0`)}.
+
+        The experimental AST-based source rewriting was removed in favor of the default regex-based source rewriting.
+
+        You can safely remove this option from your config.
+    `
   },
   JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
@@ -1337,14 +1378,56 @@ export const AllCypressErrors = {
       Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
     `
   },
-  CYPRESS_ENV_DEPRECATION: () => {
+  EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
     return errTemplate`\
-      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('allowCypressEnv')} configuration option is enabled. This allows any browser code to read values from ${fmt.highlight('Cypress.env()')}. This is insecure and will be removed in a future major version.
+      The ${fmt.highlight('experimentalFastVisibility')} configuration option has been removed. The modern visibility algorithm is now the default.
 
-      1. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration)
-      2. Set ${fmt.highlight('allowCypressEnv: false')} in your Cypress configuration to disable ${fmt.highlight('Cypress.env()')}
+      Please remove ${fmt.highlight('experimentalFastVisibility')} from your configuration. To use the legacy algorithm instead, set ${fmt.highlightSecondary(`visibilityStrategy: 'legacy'`)}.
+    `
+  },
+  EXPERIMENTAL_MEMORY_MANAGEMENT_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('experimentalMemoryManagement')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}. Memory management is now enabled by default under the ${fmt.highlight('manageBrowserMemory')} option.
+
+      Please remove ${fmt.highlight('experimentalMemoryManagement')} from your configuration. To keep memory management disabled, set ${fmt.highlightSecondary('manageBrowserMemory: false')}.
+    `
+  },
+  VISIBILITY_STRATEGY_DEPRECATION: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight(`visibilityStrategy: 'legacy'`)} option is deprecated. The legacy visibility algorithm will be removed in a future version of Cypress.
+
+      Remove the ${fmt.highlight('visibilityStrategy')} option from your configuration to use the modern algorithm.
+    `
+  },
+  ALLOW_CYPRESS_ENV_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('allowCypressEnv')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}.
+
+      ${fmt.highlight('Cypress.env()')} has been removed. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration).
+
+      You can safely remove ${fmt.highlight('allowCypressEnv')} from your configuration.
 
       Learn more: https://on.cypress.io/cypress-env-migration
+    `
+  },
+  EXEC_TIMEOUT_REMOVED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('execTimeout')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}.
+
+      ${fmt.highlight('cy.exec()')} has been removed. Replace ${fmt.highlight('cy.exec()')} calls with ${fmt.highlight('cy.task()')}, and use ${fmt.highlight('taskTimeout')} to configure how long those tasks may run.
+
+      You can safely remove ${fmt.highlight('execTimeout')} from your configuration.
+
+      Learn more: https://on.cypress.io/task
+    `
+  },
+  FORCE_HTTP1_DEPRECATION: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('forceHttp1')} option is deprecated and will be removed in a future version of Cypress.
+
+      Remove it from your configuration to use the default network path.
+
+      Read the documentation for the forceHttp1 configuration option: https://docs.cypress.io/app/references/configuration#forceHttp1
     `
   },
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
@@ -1359,6 +1442,15 @@ export const AllCypressErrors = {
       The ${fmt.highlight('injectDocumentDomain')} option is only available for E2E testing.
 
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
+    `
+  },
+  BROWSER_ELECTRON_DEPRECATED: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('Electron')} browser is deprecated as a test browser and will be removed in a future version of Cypress.
+
+      Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.
+
+      Read more about supported browsers: https://on.cypress.io/launching-browsers
     `
   },
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
@@ -1404,7 +1496,8 @@ export const AllCypressErrors = {
 
         You can safely remove this option from your config.
 
-        https://on.cypress.io/migration-guide`
+        https://on.cypress.io/migration-guide
+    `
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG: (errShape: BreakingErrResult) => {

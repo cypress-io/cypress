@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 
 import { Poller } from '../../../src/polling'
 import { createTestDataContext } from '../helper'

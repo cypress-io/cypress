@@ -15,7 +15,6 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
 import { cypressSessions } from './cypress-sessions'
 import type {
@@ -31,7 +30,8 @@ import type {
   VideoRecording,
   AutomationCommands,
 } from '@packages/types'
-import { DataContext, getCtx } from '@packages/data-context'
+import type { DataContext } from '@packages/data-context'
+import { getCtx } from '@packages/data-context'
 import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
@@ -51,6 +51,7 @@ export interface Cfg extends ReceivedCypressOptions {
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
   isDefaultProtocolEnabled?: boolean
+  isInteractive?: boolean
   hideCommandLog?: boolean
   hideRunnerUi?: boolean
   exit?: boolean
@@ -172,13 +173,21 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    new CyPromptLifecycleManager().initializeCyPromptManager({
-      cloudDataSource: this.ctx.cloud,
-      ctx: this.ctx,
-      record: this.options.record,
-      key: this.options.key,
-      projectId: cfg.projectId,
-    })
+    const isSimulatedOpenMode = !!process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+
+    // cy.prompt requires both an authenticated user and a projectId. In open mode
+    // the user can still log in or add a projectId to their config, so we download
+    // the bundle eagerly. A run's config is fixed, so without a projectId there is
+    // no way to reach a usable state and downloading the bundle is wasted work.
+    if (!cfg.isTextTerminal || isSimulatedOpenMode || cfg.projectId || process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+      new CyPromptLifecycleManager().initializeCyPromptManager({
+        cloudDataSource: this.ctx.cloud,
+        ctx: this.ctx,
+        record: this.options.record,
+        key: this.options.key,
+        projectId: cfg.projectId,
+      })
+    }
 
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
@@ -214,9 +223,10 @@ export class ProjectBase extends EE {
       _.extend(cfg, config.setUrls(cfg))
     }
 
-    if (!isProxyDisabled()) {
-      cfg.proxyServer = cfg.proxyUrl
-    }
+    // The network path is per-launch and per-browser, so it is unknown here and
+    // the proxy address must always be available; the launch layer decides which
+    // browsers actually receive it. `omitConfigKeys` keeps it out of run results.
+    cfg.proxyServer = cfg.proxyUrl
 
     // store the cfg from
     // opening the server
@@ -683,9 +693,15 @@ export class ProjectBase extends EE {
     return !!this.browser
   }
 
-  setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
+  async setCurrentSpecAndBrowser (spec, browser: FoundBrowser, useBrowserNetworkInterception: boolean) {
     this.spec = spec
     this.browser = browser
+
+    // Awaited so the browser cannot launch and issue its first request while the
+    // CDP Fetch runtime is still installed: a proxy-path launch has to have its
+    // https proxy (first call may generate the root CA) and the shared network
+    // pointers handed back to the proxy runtime before then.
+    await this._server?.setNetworkMode(useBrowserNetworkInterception)
 
     if (this.browser.family !== 'chromium') {
       // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)
@@ -740,15 +756,22 @@ export class ProjectBase extends EE {
 
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
+    const simulateOpenMode = !!process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+
     const hideRunnerUi = (
       (this.options?.args?.runnerUi === false ||
       (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)) &&
-      !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+      !simulateOpenMode
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner
     const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
 
+    // isInteractive must be computed here and serialized via HtmlDataSource (see
+    // getPropertiesFromServerConfig) because cfg.env is not sent to the browser.
+    // The driver reads this top-level value at bootstrap; it cannot rely on
+    // config.env.INTERNAL_SIMULATE_OPEN_MODE. When CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+    // is set, run mode should behave like open mode in the driver (retries, stack traces, etc.).
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
@@ -756,6 +779,7 @@ export class ProjectBase extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       isDefaultProtocolEnabled,
+      isInteractive: !this._cfg.isTextTerminal || simulateOpenMode,
       hideCommandLog,
       hideRunnerUi,
     }

@@ -2,7 +2,6 @@ import { defineConfig } from 'cypress'
 const { projects } = require('./angular.json')
 
 export default defineConfig({
-  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     devServer: {
@@ -32,10 +31,6 @@ export default defineConfig({
             '@angular/core': require.resolve('@angular/core'),
             '@angular/platform-browser/testing': require.resolve('@angular/platform-browser/testing'),
             '@angular/platform-browser': require.resolve('@angular/platform-browser'),
-            '@angular/platform-browser-dynamic/testing': require.resolve('@angular/platform-browser-dynamic/testing'),
-            '@angular/platform-browser-dynamic': require.resolve('@angular/platform-browser-dynamic'),
-            'zone.js/testing': require.resolve('zone.js/testing'),
-            'zone.js': require.resolve('zone.js'),
           },
         },
       },

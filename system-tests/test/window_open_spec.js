@@ -6,7 +6,7 @@ describe('e2e window.open', () => {
   // NOTE: skipping this for now due to snap-shot-it monkey patching causing test failures
   it.skip('passes', function () {
     return systemTests.exec(this, {
-      spec: 'window_open_spec.coffee',
+      spec: 'window_open_spec.js',
       snapshot: true,
     })
   })

@@ -33,6 +33,37 @@ describe('<OpenBrowserList />', () => {
     cy.percySnapshot()
   })
 
+  it('marks the Electron browser as deprecated', () => {
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      render: (gqlVal) =>
+        (<div class="border-current border resize overflow-auto">
+          <OpenBrowserList gql={gqlVal}/>
+        </div>),
+    })
+
+    // The Electron card renders a deprecated ribbon.
+    cy.get('[data-cy-browser="electron"]').within(() => {
+      cy.findByTestId('deprecated-ribbon').should('contain', defaultMessages.openBrowser.deprecatedRibbon)
+    })
+
+    // Electron (deprecated) sorts after supported, non-deprecated browsers but
+    // before disabled/unsupported browsers (e.g. the "fake" disabled browser).
+    cy.get('[data-cy="open-browser-list"] [data-cy-browser]').then(($els) => {
+      const order = [...$els].map((el) => el.getAttribute('data-cy-browser'))
+      const electronIdx = order.indexOf('electron')
+      const fakeIdx = order.indexOf('fake')
+
+      expect(electronIdx).to.be.greaterThan(0)
+      expect(electronIdx).to.be.lessThan(fakeIdx)
+    })
+
+    // Hovering the ribbon reveals the deprecation tooltip and migration link.
+    cy.get('[data-cy-browser="electron"]').findByTestId('deprecated-ribbon').trigger('mouseenter')
+    cy.contains(defaultMessages.openBrowser.deprecatedTitle).should('be.visible')
+    cy.contains('a', defaultMessages.openBrowser.deprecatedLink)
+    .should('have.attr', 'href', 'https://on.cypress.io/launching-browsers')
+  })
+
   it('emits navigates back', () => {
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       render: (gqlVal) => (

@@ -75,7 +75,7 @@ exports[`config/src/validation > .isNumberOrFalse > returns error message when v
 {
   "key": "mockConfigKey",
   "type": "a number or false",
-  "value": null,
+  "value": "string",
 }
 `;
 

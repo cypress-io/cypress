@@ -1,3 +1,36 @@
+# [@[secure]/grep-v7.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/grep-v[secure]...@[secure]/grep-v7.0.0) (2026-08-26)
+
+
+### breaking
+
+* remove `Cypress.env()` API, `env` testConfig override, and `allowCypressEnv` config option ([#33963](https://github.com/[secure]-io/[secure]/issues/33963)) ([e4fd8ad](https://github.com/[secure]-io/[secure]/commit/e4fd8ade91d832e80b3d18b612ca006ea7ba8fc5)), closes [project-base#getConfig](https://github.com/project-base/issues/getConfig)
+
+
+### BREAKING CHANGES
+
+* Cypress.env() has been removed. Use Cypress.expose() for
+values that need to be accessible in the [secure], or cy.env() to read
+server-side environment variables.
+
+env is no longer a valid key in per-test or suite config overrides. Test
+config overrides execute only in the [secure], so env values could never be
+applied via the server. Use expose: { KEY: value } as the direct replacement.
+
+allowCypressEnv has been removed from config. If the option is still present
+in a project's [secure].config, Cypress will warn the user to remove it.
+
+Also bumps @percy/[secure] to 3.1.8 for Cypress.expose() compatibility, removes
+env: {} from the [secure]-tests.ts type test, restores correct formatting and
+trailing newline state in pristine scaffold snapshot files, and adds a root
+.eslintignore to prevent lint-staged from reformatting those snapshot files.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+* fix: compute isInteractive server-side for simulate-open-mode
+
+HtmlDataSource strips cfg.env before serializing config to the [secure],
+so the driver cannot read INTERNAL_SIMULATE_OPEN_MODE from env. Compute
+
 # [@cypress/grep-v6.0.3](https://github.com/cypress-io/cypress/compare/@cypress/grep-v6.0.2...@cypress/grep-v6.0.3) (2026-08-07)
 
 

@@ -41,7 +41,8 @@ import DebugPassed from './DebugPassed.vue'
 import DebugErrored from './DebugErrored.vue'
 import DebugNoTests from './DebugNoTests.vue'
 import DebugTimedout from './DebugTimedout.vue'
-import DebugOverLimit, { CloudRunHidingReason } from './DebugOverLimit.vue'
+import DebugOverLimit from './DebugOverLimit.vue'
+import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 
 gql`
 fragment DebugPageDetails_cloudCiBuildInfo on CloudCiBuildInfo {

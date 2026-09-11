@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { isIP } from 'net'
-import { PassThrough, Readable } from 'stream'
+import type { Readable } from 'stream'
+import { PassThrough } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -48,6 +49,17 @@ interface ResponseMiddlewareProps {
    * network capture adapter so it doesn't record a skipped body as an empty one.
    */
   resBodySkipped?: boolean
+  /**
+   * Set by the synthetic proxy codec when the CDP Fetch transport captured a
+   * side-channel stream of the bytes the browser delivered for a
+   * stream-classified response. Consumed by the network capture adapter so
+   * Replay records those bytes instead of skipping the body. Not
+   * incomingResStream, because the two have disjoint lifetimes: the body
+   * middleware drains incomingResStream to completion BEFORE the pause is
+   * released (a never-ending stream there wedges the pipeline), while these
+   * bytes only begin to flow AFTER Fetch.continueResponse.
+   */
+  resCaptureStream?: Readable
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
@@ -611,7 +623,10 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body)
+    const updatedBody = injectIntoServiceWorker(body, {
+      disableServiceWorkerNavigationPreload: this.useBrowserNetworkInterception,
+      reservedPathPrefixes: this.useBrowserNetworkInterception ? this.reservedPathPrefixes : undefined,
+    })
 
     const pt = new PassThrough
 

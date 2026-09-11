@@ -37,7 +37,6 @@ yarn workspace @packages/server build-prod
 - `lib/video_capture.ts` — Video recording via ffmpeg
 - `lib/session.ts` — Session management for `cy.session()`
 - `lib/fixture.ts` — Fixture file loading
-- `lib/exec.ts` — `cy.exec()` subprocess handling
 - `lib/config.ts` — Server-side config resolution
 - `lib/makeDataContext.ts` — Data context factory for GraphQL layer
 
@@ -54,7 +53,7 @@ yarn workspace @packages/server build-prod
 **Integration Points**
 
 - Consumes virtually every other `@packages/*` package in the monorepo.
-- `@packages/proxy` and `@packages/rewriter` handle all HTTP interception.
+- `@packages/proxy` handles all HTTP interception.
 - `@packages/net-stubbing` provides `cy.intercept()` server-side state.
 - `@packages/data-context` provides the GraphQL layer consumed by `@packages/launchpad` and `@packages/app`.
 - `@packages/socket` provides the WebSocket bridge between the server and the browser driver.

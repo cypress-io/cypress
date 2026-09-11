@@ -19,14 +19,14 @@
     "@cypress/mount-utils": "0.0.0-development",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
-    "@vitejs/plugin-vue": "6.0.3",
+    "@vitejs/plugin-vue": "6.0.6",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",
     "axios": "^1.15.1",
     "cypress": "0.0.0-development",
-    "rollup": "3.29.5",
+    "rollup": "^4.60.2",
     "typescript": "~5.4.5",
-    "vite": "6.3.5",
+    "vite": "^8.0.9",
     "vue-eslint-parser": "^10.0.0",
     "vue": "3.2.47",
     "vue-i18n": "9.14.5",
@@ -44,7 +44,7 @@
     "src/**/*.js"
   ],
   "engines": {
-    "node": ">=18"
+    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
   },
   "types": "dist/index.d.ts",
   "license": "MIT",

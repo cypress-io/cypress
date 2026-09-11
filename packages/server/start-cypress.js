@@ -4,7 +4,7 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
-const { GracefulExit } = require('./lib/util/graceful-exit')
+const { GracefulExit, getPeerWaitTimeoutMs } = require('./lib/util/graceful-exit')
 const { NetProfiler } = require('./lib/util/net_profiler')
 const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 const { suppress } = require('./lib/util/suppress_warnings')
@@ -71,7 +71,7 @@ if (isRunningElectron) {
     } catch (error) {
       debug('Error during telemetry shutdown on exit: %o', error)
     }
-  }, 'finalize telemetry')
+  }, 'finalize telemetry', getPeerWaitTimeoutMs())
 
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 

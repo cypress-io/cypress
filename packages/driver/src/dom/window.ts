@@ -33,7 +33,6 @@ const getWindowByElement = function (el) {
 }
 
 export default {
-  getWindowByDocument,
   getWindowByElement,
   isWindow,
 }

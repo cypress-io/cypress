@@ -194,7 +194,7 @@ describe('driver/src/cypress/stack_utils', () => {
       })
 
       $sourceMapUtils.getSourcePosition.onCall(1).returns({
-        file: 'cypress/integration/features/source_map_spec.coffee',
+        file: 'cypress/integration/features/source_map_spec.cy.ts',
         line: 4,
         column: 3,
       })
@@ -210,7 +210,7 @@ describe('driver/src/cypress/stack_utils', () => {
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (some_other_file.ts:2:1)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.cy.ts:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -231,9 +231,9 @@ describe('driver/src/cypress/stack_utils', () => {
         {
           function: 'Context.<anonymous>',
           fileUrl: 'http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js',
-          originalFile: 'cypress/integration/features/source_map_spec.coffee',
-          relativeFile: 'cypress/integration/features/source_map_spec.coffee',
-          absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
+          originalFile: 'cypress/integration/features/source_map_spec.cy.ts',
+          relativeFile: 'cypress/integration/features/source_map_spec.cy.ts',
+          absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.cy.ts',
           line: 4,
           column: 3,
           whitespace: '    ',
@@ -246,7 +246,7 @@ describe('driver/src/cypress/stack_utils', () => {
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (some_other_file.ts:2:1)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.cy.ts:4:3)\
 `)
     })
 
@@ -255,7 +255,7 @@ describe('driver/src/cypress/stack_utils', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:1)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.cy.ts:4:3)\
 `)
     })
 
@@ -269,7 +269,7 @@ lines
 
 Error: spec iframe stack
     at foo.bar (some_other_file.ts:2:1)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.cy.ts:4:3)\
 `)
     })
 
@@ -281,7 +281,7 @@ Error: spec iframe stack
       })
 
       $sourceMapUtils.getSourcePosition.onCall(1).returns({
-        file: 'webpack:///cypress/integration/features/source_map_spec.coffee',
+        file: 'webpack:///cypress/integration/features/source_map_spec.cy.ts',
         line: 4,
         column: 3,
       })
@@ -290,7 +290,7 @@ Error: spec iframe stack
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (cypress:///some_other_file.ts:2:1)
-    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:3)\
+    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.cy.ts:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -311,9 +311,9 @@ Error: spec iframe stack
         {
           function: 'Context.<anonymous>',
           fileUrl: 'http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js',
-          originalFile: 'webpack:///cypress/integration/features/source_map_spec.coffee',
-          relativeFile: 'cypress/integration/features/source_map_spec.coffee',
-          absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
+          originalFile: 'webpack:///cypress/integration/features/source_map_spec.cy.ts',
+          relativeFile: 'cypress/integration/features/source_map_spec.cy.ts',
+          absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.cy.ts',
           line: 4,
           column: 3,
           whitespace: '    ',
@@ -329,7 +329,7 @@ Error: spec iframe stack
       })
 
       $sourceMapUtils.getSourcePosition.onCall(1).returns({
-        file: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee',
+        file: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.cy.ts',
         line: 4,
         column: 3,
       })
@@ -338,7 +338,7 @@ Error: spec iframe stack
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
     at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:1)
-    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:3)\
+    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.cy.ts:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -359,9 +359,9 @@ Error: spec iframe stack
         {
           function: 'Context.<anonymous>',
           fileUrl: 'http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js',
-          originalFile: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee',
-          relativeFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
-          absoluteFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
+          originalFile: 'webpack:////root/absolute/path/cypress/integration/features/source_map_spec.cy.ts',
+          relativeFile: '/root/absolute/path/cypress/integration/features/source_map_spec.cy.ts',
+          absoluteFile: '/root/absolute/path/cypress/integration/features/source_map_spec.cy.ts',
           line: 4,
           column: 3,
           whitespace: '    ',

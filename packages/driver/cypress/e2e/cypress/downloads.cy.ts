@@ -85,7 +85,7 @@ describe('download behavior', () => {
   })
 
   it('downloads from anchor tag with download attribute', () => {
-    cy.exec(`rm -f ${Cypress.config('downloadsFolder')}/downloads_records.csv`)
+    cy.task('remove:file', `${Cypress.config('downloadsFolder')}/downloads_records.csv`)
     cy.readFile(`${Cypress.config('downloadsFolder')}/downloads_records.csv`).should('not.exist')
 
     // trigger download
@@ -96,7 +96,7 @@ describe('download behavior', () => {
 
   // NOTE: webkit opens a new window and doesn't download the file
   it('downloads from anchor tag without download attribute', { browser: '!webkit' }, () => {
-    cy.exec(`rm -f ${Cypress.config('downloadsFolder')}/downloads_records.csv`)
+    cy.task('remove:file', `${Cypress.config('downloadsFolder')}/downloads_records.csv`)
     cy.readFile(`${Cypress.config('downloadsFolder')}/downloads_records.csv`).should('not.exist')
 
     // trigger download

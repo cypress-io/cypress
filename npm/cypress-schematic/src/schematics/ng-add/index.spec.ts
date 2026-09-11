@@ -1,7 +1,8 @@
 import { describe, beforeEach, it, expect } from 'vitest'
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
+import type { UnitTestTree } from '@angular-devkit/schematics/testing'
+import { SchematicTestRunner } from '@angular-devkit/schematics/testing'
 import { join } from 'path'
-import { JsonObject } from '@angular-devkit/core'
+import type { JsonObject } from '@angular-devkit/core'
 
 describe('@cypress/schematic: ng-add', () => {
   const schematicRunner = new SchematicTestRunner(

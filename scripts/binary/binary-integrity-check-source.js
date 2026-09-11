@@ -24,7 +24,16 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const tempError = new OrigError
 
   originalCaptureStackTrace(tempError, arguments.callee)
-  const stack = originalFilter.call(tempError.stack, (frame) => !originalStartsWith.call(frame.getFileName(), 'node:internal') && !originalStartsWith.call(frame.getFileName(), 'node:electron'))
+  const stack = originalFilter.call(tempError.stack, (frame) => {
+    const fileName = frame.getFileName()
+
+    // Drop all built-in Node stack frames (node:internal, node:electron, node:diagnostics_channel, etc.)
+    if (typeof fileName !== 'string') {
+      return true
+    }
+
+    return !originalStartsWith.call(fileName, 'node:')
+  })
 
   OrigError.prepareStackTrace = originalPrepareStackTrace
   OrigError.stackTraceLimit = originalStackTraceLimit
@@ -189,10 +198,6 @@ function integrityCheck (options) {
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
         column: 2764,
-      },
-      {
-        functionName: 'traceSync',
-        fileName: 'node:diagnostics_channel',
       },
     ],
   })

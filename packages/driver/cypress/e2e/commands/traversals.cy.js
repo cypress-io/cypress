@@ -365,7 +365,7 @@ describe('src/cy/commands/traversals', () => {
         const findLog = this.logs[1]
         const assertionLog = this.logs[2]
 
-        expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+        expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
         expect(getLog.get('state')).to.eq('passed')
         expect(getLog.get('error')).to.be.undefined

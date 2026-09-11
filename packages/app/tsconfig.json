@@ -12,6 +12,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
+    "verbatimModuleSyntax": true,
     // needed for mobx
     "useDefineForClassFields": true,
     "noImplicitThis": true,

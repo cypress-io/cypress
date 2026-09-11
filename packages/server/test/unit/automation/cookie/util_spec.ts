@@ -1,6 +1,7 @@
 const { expect } = require('../../../spec_helper')
 
-import { cookieMatches, isHostOnlyCookie, CyCookie } from '../../../../lib/automation/cookie/util'
+import type { CyCookie } from '../../../../lib/automation/cookie/util'
+import { cookieMatches, isHostOnlyCookie } from '../../../../lib/automation/cookie/util'
 
 context('lib/automation/cookie/util', () => {
   context('.cookieMatches', () => {

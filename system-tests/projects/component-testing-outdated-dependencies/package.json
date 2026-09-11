@@ -1,6 +1,8 @@
 {
+  "name": "component-testing-outdated-dependencies",
   "dependencies": {
-    "react": "15.6.2",
-    "vite": "4.5.12"
-  }
+    "react": "17.0.2",
+    "vite": "7.3.3"
+  },
+  "type": "module"
 }

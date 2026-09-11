@@ -1,5 +1,4 @@
 module.exports = {
-  allowCypressEnv: false,
   e2e: {
     setupNodeEvents () {
       // This will continually ping unless the child process is killed.

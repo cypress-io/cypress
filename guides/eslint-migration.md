@@ -28,7 +28,6 @@
 - [ ] packages/proxy
 - [ ] packages/net-stubbing
 - [ ] packages/driver
-- [ ] packages/rewriter
 - [ ] packages/reporter
 - [x] packages/server
 
@@ -45,6 +44,11 @@
 
 ### Batch 4c: Core packages (part 3)
 - [x] cli
+- [x] packages/agent-info ✅ **COMPLETED**
+- [x] packages/cypress-sessions ✅ **COMPLETED**
+- [x] packages/electron ✅ **COMPLETED**
+- [x] packages/eslint-config ✅ **COMPLETED** — the shared config lints itself
+- [x] packages/stderr-filtering ✅ **COMPLETED**
 - [ ] packages/config
 - [ ] packages/root
 - [ ] packages/resolve-dist
@@ -149,7 +153,9 @@ For each package in the batch:
 - If a package needs a custom override, add it in a local `eslint.config.ts` (prefer to upstream to the shared config if possible).
 
 ### 6. **Deprecate and Remove Old Plugin**
-- Once all packages are migrated, remove `@cypress/eslint-plugin-dev` from the repo and CI.
+- `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
+- Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
+- The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
 
 ### 7. **Simplify Lint-Staged Configuration**
 After all packages are migrated, simplify the lint-staged configuration in root `package.json`:

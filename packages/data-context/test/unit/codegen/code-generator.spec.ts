@@ -3,12 +3,14 @@ import { parse } from '@babel/parser'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-import { DataContext } from '../../../src'
-import {
+import type { DataContext } from '../../../src'
+import type {
   Action,
-  codeGenerator,
   CodeGenResult,
   CodeGenResults,
+} from '../../../src/codegen/code-generator'
+import {
+  codeGenerator,
   hasNonExampleSpec,
   getExampleSpecPaths,
 } from '../../../src/codegen/code-generator'

@@ -76,11 +76,6 @@
     "from": "env"
   },
   {
-    "value": 60000,
-    "from": "default",
-    "field": "execTimeout"
-  },
-  {
     "value": false,
     "from": "default",
     "field": "experimentalCspAllowList"
@@ -89,11 +84,6 @@
     "value": true,
     "from": "default",
     "field": "experimentalInteractiveRunEvents"
-  },
-  {
-    "value": false,
-    "from": "default",
-    "field": "experimentalSourceRewriting"
   },
   {
     "value": false,

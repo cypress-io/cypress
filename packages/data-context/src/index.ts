@@ -28,7 +28,12 @@ let ctx: DataContext | null = null
 export async function clearCtx () {
   if (ctx) {
     debug('signalling mainProcessWillDisconnect')
-    await ctx.lifecycleManager.mainProcessWillDisconnect()
+    try {
+      await ctx.lifecycleManager.mainProcessWillDisconnect()
+    } catch (error) {
+      debug('mainProcessWillDisconnect failed, continuing anyway: %o', error)
+    }
+
     debug('destroying data-context')
     await ctx.destroy()
     debug('data-context destroyed')

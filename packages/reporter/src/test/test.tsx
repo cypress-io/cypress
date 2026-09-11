@@ -1,11 +1,14 @@
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback } from 'react'
+import type { MouseEvent } from 'react'
+import React, { useCallback } from 'react'
 import { IconCypressStudio } from '@cypress-design/react-icon'
 
-import events, { Events } from '../lib/events'
-import appState, { AppState } from '../lib/app-state'
+import type { Events } from '../lib/events'
+import events from '../lib/events'
+import type { AppState } from '../lib/app-state'
+import appState from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
-import TestModel from './test-model'
+import type TestModel from './test-model'
 import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
@@ -66,7 +69,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
           key={`studio-command-${model}`}
           content={
             <div className='flex items-center py-[8px] px-[8px]'>
-              <div><IconCypressStudio strokeColor="gray-500" className="mr-[10px]" /></div>
+              <div><IconCypressStudio className="mr-[10px]" /></div>
               <div className='text-sm text-gray-700'>Edit in Studio</div>
             </div>
           }

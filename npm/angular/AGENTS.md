@@ -1,6 +1,6 @@
 # @cypress/angular
 
-`@cypress/angular` is a published npm package that provides the `mount` function for mounting Angular components (Angular 18+) inside the Cypress test runner for component testing. It is bundled with the `cypress` binary and does not typically need to be installed separately by end users.
+`@cypress/angular` is a published npm package that provides the `mount` function for mounting Angular components without zone.js, targeting Angular 21+ with zoneless change detection. It is bundled with the `cypress` binary and does not typically need to be installed separately by end users.
 
 ## Key Commands
 
@@ -13,13 +13,13 @@ yarn lint         # ESLint
 ## Architecture
 
 - `src/index.ts` — public entry point; re-exports `mount` and related types
-- `src/mount.ts` — core Angular component mounting logic (bootstraps an Angular application into the Cypress AUT iframe)
+- `src/mount.ts` — mounting logic adapted for Angular's zoneless change detection (no zone.js bootstrapping)
 
 ## Gotchas / Notes
 
-- Requires `zone.js` as a peer dependency. For Angular 20+ without zone.js, use `@cypress/angular-zoneless` instead.
-- The `postbuild` script (`sync-exported-npm-with-cli.js`) copies `dist/` to `cli/angular/` in the monorepo root. If you change this package and need to test it inside the full Cypress binary, you must run `yarn build` first.
-- Built output goes to `{workspaceRoot}/cli/angular` per the Nx target config — not just `dist/`.
+- Peer dependencies require Angular 21+.
+- The `postbuild` script copies `dist/` to `cli/angular/` in the monorepo root. Build before testing in the Cypress binary.
+- Uses TypeScript ~5.9.2 (newer than most other npm packages in this workspace which use ~5.4.5).
 
 ## Integration Points
 

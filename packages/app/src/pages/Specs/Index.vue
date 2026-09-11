@@ -99,7 +99,7 @@ useSubscription({
 /**
  * Used to trigger Spec updates via the useCloudSpec composable.
  */
-const mostRecentUpdate = ref<string | undefined>()
+const mostRecentUpdate = ref<string | null>(null)
 
 /**
  * At this time, the CloudRun is not passing the `updatedAt` field.  To mimic

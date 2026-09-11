@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, MockedObject, vi } from 'vitest'
-import { OriginBehavior } from '../lib/document-domain-injection'
+import type { MockedObject } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import type { OriginBehavior } from '../lib/document-domain-injection'
 
 import { RemoteStates, DEFAULT_DOMAIN_NAME, toFileServerUrl } from '../lib/remote-states'
 import type { RemoteState } from '../lib/remote-states'
@@ -87,7 +88,7 @@ describe('remote states', () => {
         },
       })
 
-      originalState.auth = { username: 'u', password: 'p' }
+      originalState!.auth = { username: 'u', password: 'p' }
 
       const currentState = remoteStates.get('http://localhost:3500/foobar')
 

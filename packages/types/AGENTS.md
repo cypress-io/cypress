@@ -1,4 +1,4 @@
-This package provides shared TypeScript type definitions used across all packages in the Cypress monorepo, covering browsers, configuration, specs, automation, proxy, cloud, reporter, driver, and more.
+This package provides shared TypeScript type definitions used across all packages in the Cypress monorepo, covering browsers, configuration, specs, automation, proxy, protocol, reporter, driver, and more.
 
 **Key Commands**
 
@@ -28,7 +28,6 @@ All source lives in `src/` as individual domain-scoped files:
 - `src/server.ts` — Server-side types
 - `src/driver.ts` — Driver protocol types
 - `src/reporter.ts` — Reporter event types
-- `src/cloud.ts` — Cypress Cloud API types
 - `src/protocol.ts` — Protocol types for CDP/BiDi
 - `src/auth.ts` — Authentication types
 - `src/git.ts` — Git info types

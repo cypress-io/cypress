@@ -413,9 +413,9 @@ declare namespace Cypress {
      * ```
      * Cypress.spec
      * // {
-     * //  name: "config_passing_spec.coffee",
-     * //  relative: "cypress/integration/config_passing_spec.coffee",
-     * //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+     * //  name: "config_passing.cy.ts",
+     * //  relative: "cypress/e2e/config_passing.cy.ts",
+     * //  absolute: "/users/smith/projects/web/cypress/e2e/config_passing.cy.ts"
      * //  specType: "integration"
      * // }
      * ```
@@ -507,41 +507,6 @@ declare namespace Cypress {
      */
     config(Object: TestConfigOverrides): void
 
-    // no real way to type without generics
-    /**
-     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{js,ts,mjs,cjs}"
-     *
-     * @see https://on.cypress.io/env
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(): ObjectLike
-    /**
-     * Returns specific environment variable or undefined
-     * @see https://on.cypress.io/env
-     * @example
-     *    // cypress.config.js
-     *    { "env": { "foo": "bar" } }
-     *    Cypress.env("foo") // => bar
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(key: string): any
-    /**
-     * Set value for a variable.
-     * Any value you change will be permanently changed for the remainder of your tests.
-     * @see https://on.cypress.io/env
-     * @example
-     *    Cypress.env("host", "http://server.dev.local")
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(key: string, value: any): void
-    /**
-     * Set values for multiple variables at once. Values are merged with existing values.
-     * @see https://on.cypress.io/env
-     * @example
-     *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(object: ObjectLike): void
     /**
      * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs}"
      *
@@ -1021,7 +986,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getalllocalstorage
      */
-    getAllLocalStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+    getAllLocalStorage(options?: Partial<Loggable & Timeoutable>): Chainable<StorageByOrigin>
 
     /**
      * Clear local storage for all origins.
@@ -1040,7 +1005,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getallsessionstorage
      */
-    getAllSessionStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+    getAllSessionStorage(options?: Partial<Loggable & Timeoutable>): Chainable<StorageByOrigin>
 
     /**
      * Clear session storage for all origins.
@@ -1370,15 +1335,6 @@ declare namespace Cypress {
     each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
 
     /**
-     * End a chain of commands
-     *
-     * @deprecated `cy.end()` has been deprecated and will be removed in a future release.
-     * Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`.
-     * @see https://on.cypress.io/end
-     */
-    end(): Chainable<null>
-
-    /**
      * Get A DOM element at a specific index in an array of elements.
      *
      * @see https://on.cypress.io/eq
@@ -1389,16 +1345,6 @@ declare namespace Cypress {
      *    cy.get('li').eq(-2) // Yields second from last 'li' element
      */
     eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-
-    /**
-     * Execute a system command.
-     *
-     * @deprecated `cy.exec()` has been deprecated and will be removed in a future major release.
-     * Use {@linkcode Chainable.task cy.task()} instead, which runs in Node without depending on
-     * the operating system, shell, or terminal of the machine running Cypress.
-     * @see https://on.cypress.io/exec
-     */
-    exec(command: string, options?: Partial<ExecOptions>): Chainable<Exec>
 
     /**
      * Get the DOM elements that match a specific selector. Opposite of `.not()`
@@ -3027,17 +2973,6 @@ declare namespace Cypress {
     baseUrl: string | null
 
     /**
-     * Whether Cypress should allow [Cypress.env()](https://on.cypress.io/env) API to be available in the browser.
-     *
-     * Cypress recommends migrating to the cy.env() command and disabling this within your Cypress configuration.
-     *
-     * The use of Cypress.env() will warn and throw an error when this is set to false.
-     *
-     * This will be the default behavior in a future major version of Cypress and Cypress.env() will be removed.
-     * @default true
-     */
-    allowCypressEnv: boolean
-    /**
      * Any values to be set as [environment variables](https://on.cypress.io/environment-variables)
      * @default {}
      */
@@ -3057,6 +2992,11 @@ declare namespace Cypress {
      * @default 50
      */
     numTestsKeptInMemory: number
+    /**
+     * Enables improved memory management within Chromium-based browsers.
+     * @default true
+     */
+    manageBrowserMemory: boolean
     /**
      * Port used to host Cypress. Normally this is a randomly generated port
      * @default null
@@ -3088,14 +3028,6 @@ declare namespace Cypress {
      */
     defaultCommandTimeout: number
     /**
-     * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
-     * @default 60000
-     * @deprecated `execTimeout` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
-     * removed in a future major release. Use {@linkcode ResolvedConfigOptions.taskTimeout taskTimeout} with
-     * {@linkcode Chainable.task cy.task()} instead.
-     */
-    execTimeout: number
-    /**
      * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
      * @default 60000
      */
@@ -3122,7 +3054,7 @@ declare namespace Cypress {
      */
     requestTimeout: number
     /**
-     * Time, in milliseconds, to wait for a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
+     * Time, in milliseconds, to wait for a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
      * @default 30000
      */
     responseTimeout: number
@@ -3141,6 +3073,14 @@ declare namespace Cypress {
      * @default "cypress/fixtures"
      */
     fixturesFolder: string | false
+    /**
+     * Routes Chrome, Chromium, and Edge through the legacy network path, which re-issues
+     * their connections over HTTP/1.1. Firefox, Electron, and WebKit always use it.
+     *
+     * @deprecated This option will be removed in a future version of Cypress.
+     * @default false
+     */
+    forceHttp1: boolean
     /**
      * Path to folder where files downloaded during a test are saved
      * @default "cypress/downloads"
@@ -3256,6 +3196,12 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
+     * Time, in milliseconds, between each keystroke when typing with [cy.type()](https://on.cypress.io/type).
+     * When `null`, the value set with [Cypress.Keyboard.defaults()](https://on.cypress.io/keyboard-api) is used, falling back to `0`.
+     * @default null
+     */
+    keystrokeDelay: number | null
+    /**
      * Indicates whether Cypress should allow CSP header directives from the application under test.
      * - When this option is set to `false`, Cypress will strip the entire CSP header.
      * - When this option is set to `true`, Cypress will only to strip directives that would interfere
@@ -3278,8 +3224,6 @@ declare namespace Cypress {
      * NOTE: Setting this flag to true removes Subresource Integrity (SRI) from third-party resources.
      * To strip SRI from first-party resources as well, use `removeSRIAttributes`.
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
-     * This option has no impact on experimentalSourceRewriting and is only used with the
-     * non-experimental source rewriter.
      * @see https://on.cypress.io/experiments#Configuration
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
@@ -3300,11 +3244,6 @@ declare namespace Cypress {
      */
     experimentalRunAllSpecs?: boolean
     /**
-     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
-     * @default false
-     */
-    experimentalSourceRewriting: boolean
-    /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
@@ -3315,15 +3254,15 @@ declare namespace Cypress {
      */
     experimentalWebKitSupport: boolean
     /**
-     * Enables support for improved memory management within Chromium-based browsers.
-     * @default false
+     * Determines which visibility algorithm Cypress uses to check element visibility.
+     * `'modern'` uses a performance-optimized algorithm based on `checkVisibility()`.
+     * `'legacy'` uses the traditional ancestor-walking algorithm.
+     * @default 'modern'
+     * @deprecated This option is deprecated. It exists only as a migration path
+     * for tests that still need the legacy algorithm. The `'legacy'` value and
+     * this entire option will be removed in a future version of Cypress.
      */
-    experimentalMemoryManagement: boolean
-    /**
-     * Enables an alternative, performance-optimized visibility algorithm.
-     * @default false
-     */
-    experimentalFastVisibility: boolean
+    visibilityStrategy: 'legacy' | 'modern'
     /**
      * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
      * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
@@ -3486,7 +3425,7 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3494,7 +3433,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3769,36 +3708,13 @@ declare namespace Cypress {
   }
 
   /**
-   * Options object to change the default behavior of cy.exec().
-   *
-   * @deprecated `ExecOptions` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
-   * removed in a future major release.
-   */
-  interface ExecOptions extends Loggable, Timeoutable {
-    /**
-     * Whether to fail if the command exits with a non-zero code
-     *
-     * @default true
-     */
-    failOnNonZeroExit: boolean
-    /**
-     * Object of environment variables to set before the command executes
-     * (e.g. {USERNAME: 'johndoe'}). Will be merged with existing
-     * system environment variables
-     *
-     * @default {}
-     */
-    env: object
-  }
-
-  /**
    * Options for Cypress.Keyboard.defaults()
    */
   interface KeyboardDefaultsOptions {
     /**
-    * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
+    * Time, in milliseconds, between each keystroke when typing.
     *
-    * @default 10
+    * @default 0
     */
     keystrokeDelay: number
   }
@@ -6552,7 +6468,7 @@ declare namespace Cypress {
     (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): Cypress
   }
 
-  // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
+  // $CommandQueue - a lot to type; implementation is not fully reflected here
   interface CommandQueue extends ObjectLike {
     logs(filters: any): any
     add(obj: any): any
@@ -6639,18 +6555,6 @@ declare namespace Cypress {
     get(): EnqueuedCommandAttributes
     set<K extends keyof EnqueuedCommandAttributes>(key: K, value: EnqueuedCommandAttributes[K]): Log
     set(options: Partial<EnqueuedCommandAttributes>): Log
-  }
-
-  /**
-   * The result yielded by cy.exec().
-   *
-   * @deprecated `Exec` has been deprecated along with {@linkcode Chainable.exec cy.exec()} and will be
-   * removed in a future major release.
-   */
-  interface Exec {
-    exitCode: number
-    stdout: string
-    stderr: string
   }
 
   type TypedArray =

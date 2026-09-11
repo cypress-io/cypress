@@ -1164,23 +1164,15 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       hookName = getHookName(runnable)
       const test = getTest() || getTestFromHookOrFindTest(runnable)
 
-      const unsupportedPlugin = $errUtils.getUnsupportedPlugin(runnable)
-
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
       const errMessage = $errUtils.errByPath('uncaught.error_in_hook', {
         parentTitle,
         hookName,
         retries: test._retries,
-        unsupportedPlugin,
-        errMessage: err.message,
       }).message
 
-      if (unsupportedPlugin) {
-        err = $errUtils.modifyErrMsg(err, errMessage, () => errMessage)
-      } else {
-        err = $errUtils.appendErrMsg(err, errMessage)
-      }
+      err = $errUtils.appendErrMsg(err, errMessage)
 
       // If the test never failed and only the hooks did,
       // we need to attach the metadata of the test to the hook to report the failure correctly to the server reporter.

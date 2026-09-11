@@ -79,7 +79,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, SVGAttributes, watch, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
+import type { Component } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { promiseTimeout } from '@vueuse/core'
 
@@ -88,7 +89,7 @@ export type Badge = { value: string, status: 'success' | 'failed' | 'error', lab
 export type IconStatus = { value: 'running' | 'failing' | 'passed' | 'failed' | 'canceled' | 'errored', label: string }
 
 const props = withDefaults(defineProps <{
-  icon: FunctionalComponent<SVGAttributes>
+  icon: Component
   name: string
   // Currently active row (generally the current route)
   active?: boolean

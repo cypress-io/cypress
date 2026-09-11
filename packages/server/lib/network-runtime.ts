@@ -1,7 +1,9 @@
 import Debug from 'debug'
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
-import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import type { Protocol } from 'devtools-protocol'
+import type { BrowserPreRequest } from '@packages/proxy'
+import { NetworkProxy, createProxyNetworkInterception, createSyntheticProxyCodec, defaultMiddleware } from '@packages/proxy'
+import type { NetStubbingState } from '@packages/net-stubbing'
 import { HttpIntercept, registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import { blocked } from '@packages/network'
@@ -18,8 +20,11 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './browsers/cdp-protocol/cri-clie
 import { createCdpFetchCodec } from './browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from './browsers/cdp-protocol/cdp-fetch-transport'
 import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './browsers/cdp-protocol/cdp-fetch-transport'
+import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
+import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
+import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, resolveProxyUrlBase } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:network-runtime')
 
@@ -33,6 +38,9 @@ export type CreateProxyRuntimeDeps = {
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // Required, not created here: the server owns one state for its whole lifetime
+  // and every network runtime shares it.
+  netStubbingState: NetStubbingState
 }
 
 export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
@@ -60,8 +68,16 @@ export type CreateCdpFetchRuntimeDeps = {
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
-  // Prefer the state already bound to the driver socket (created at open()).
-  netStubbingState?: NetStubbingState
+  // Required: DriverInterceptRegistrationAdapter is bound by value to the state
+  // created at open(), so a second NetStubbingState here would leave every
+  // cy.intercept() registered against a state this runtime never matches.
+  netStubbingState: NetStubbingState
+  /**
+   * Called when a service-worker-served document reached the renderer without
+   * passing through CDP Fetch interception (#34674). Observe-only — by the
+   * time this fires the raw response was already consumed.
+   */
+  onInterceptionEscape?: (escape: InterceptionEscape) => void
 }
 
 export type CdpFetchNetworkRuntime = {
@@ -86,7 +102,7 @@ export type CdpFetchNetworkRuntime = {
  * Composition-root factory for the proxy-default network runtime.
  */
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
-  const stubbingState = netStubbingState()
+  const stubbingState = deps.netStubbingState
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -111,12 +127,20 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     getCurrentBrowser: deps.getCurrentBrowser,
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
+    // Explicit, like the createServeInternalRoutesMiddleware call just below
+    // (which keeps its own isBrowserNetworkMode name): the MITM path never
+    // uses CDP Fetch, so it never needs disable-navigation-preload.ts's seam
+    // (#34652). Left undefined here would still behave the same downstream
+    // (falsy), but a general discriminator field should say what a path is,
+    // not leave it unset.
+    useBrowserNetworkInterception: false,
   })
   const networkInterception = new HttpIntercept(networkProxy.codec)
 
   networkInterception.use(createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
+    isBrowserNetworkMode: false,
   }))
 
   networkInterception.use(networkProxy.http.createLegacyProxyPipeline(networkProxy.codec))
@@ -154,7 +178,7 @@ const RUNTIME_STOPPED_ERROR = 'Cannot attach extra target: CDP Fetch runtime has
  * a synthetic Express ctx via createSyntheticProxyCodec.
  */
 export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetchNetworkRuntime {
-  const stubbingState = deps.netStubbingState ?? netStubbingState()
+  const stubbingState = deps.netStubbingState
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
@@ -179,13 +203,48 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     getCurrentBrowser: deps.getCurrentBrowser,
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
+    // Only the CDP Fetch runtime (browser network interception mode) sets this;
+    // createProxyRuntime (MITM) does not. See
+    // packages/proxy/lib/http/util/disable-navigation-preload.ts (#34652).
+    useBrowserNetworkInterception: true,
+    // The proxy cannot reach the route definitions, so hand it the list the
+    // service worker injector needs to make instrumented workers decline them.
+    reservedPathPrefixes: getCypressReservedPathPrefixes(deps.config),
   })
+
+  // Shared by the main transport and every extra-target transport so a popup
+  // can never classify or gate capture differently than the page that opened
+  // it.
+  //
+  // hasMatchingRoute is threaded in from the response pause's own
+  // request-stage result (see cdp-fetch-transport.ts) rather than re-matched
+  // here: the request-stage middleware (SetMatchingRoutes) is the
+  // authoritative match — it already did the `times` counting, saw the
+  // request before any handler mutated its URL or headers, and already
+  // excludes the dev server and disabled routes. Re-matching at response time
+  // would disagree with that: it would wrongly revive a `times`-exhausted
+  // route for a *later* request (which can wedge on an endless body), and
+  // handler-mutated requests would never re-match what the browser actually
+  // sent.
+  const shouldStreamBody = (event: Protocol.Fetch.RequestPausedEvent, { hasMatchingRoute }: { hasMatchingRoute: boolean }): boolean => {
+    return shouldStreamResponseBody(event, {
+      modifyObstructiveCode: deps.config.modifyObstructiveCode,
+      experimentalModifyObstructiveThirdPartyCode: deps.config.experimentalModifyObstructiveThirdPartyCode,
+      hasMatchingRoute: () => hasMatchingRoute,
+    })
+  }
+
+  // server-base applies the protocol manager to networkProxy.http after this
+  // factory returns (and may clear it later), so this must read the field
+  // fresh on every call rather than capturing today's value.
+  const shouldCaptureBody = (): boolean => networkProxy.http.protocolManager?.isProtocolEnabled ?? false
 
   // Express handleHttpRequest (studio/cy-prompt forwards) needs the proxy codec;
   // CDP Fetch needs its own codec. Share middleware stages, keep intercepts distinct.
   const serveInternalRoutes = createServeInternalRoutesMiddleware({
     config: deps.config,
     request: deps.request,
+    isBrowserNetworkMode: true,
   })
 
   const attachStages = <TRequest, TResponse>(
@@ -259,6 +318,14 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     addPendingUrlWithoutPreRequest: (url) => networkProxy.addPendingUrlWithoutPreRequest(url),
     resolveOriginRedirect,
     onRequestCanceled,
+    shouldStreamBody,
+    shouldCaptureBody,
+  })
+
+  // Observe-only (#34674): listens on the same connection as the transport and
+  // never sends CDP commands, so it cannot interfere with Fetch ownership.
+  const escapeDetector = new InterceptionEscapeDetector(deps.client, (escape) => {
+    deps.onInterceptionEscape?.(escape)
   })
 
   // Extra-target transports share networkInterception so they cannot drift from
@@ -297,6 +364,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         isFromExtraTarget: true,
         resolveOriginRedirect,
         onRequestCanceled,
+        shouldStreamBody,
+        shouldCaptureBody,
       })
 
       await extraTransport.start()
@@ -347,10 +416,15 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         return fetchTransport.attachChildSession(sessionId)
       }
 
+      // Before the transport, so its pause ledger sees the first paused
+      // requests once Fetch comes up.
+      escapeDetector.start()
+
       try {
         await fetchTransport.start()
       } catch (err) {
         deps.client.onChildTargetAttached = undefined
+        escapeDetector.stop()
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
 
@@ -361,6 +435,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     // we do not double-reset with a conflicting resetBetweenSpecs flag.
     reset () {
       fetchTransport.reset()
+      escapeDetector.reset()
 
       for (const extraTransport of extraTargetTransports) {
         extraTransport.reset()
@@ -369,6 +444,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async stop () {
       stopped = true
       deps.client.onChildTargetAttached = undefined
+      escapeDetector.stop()
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined
 

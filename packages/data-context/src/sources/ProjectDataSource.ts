@@ -21,7 +21,8 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '../../graphql/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-import { FileExtension, getDefaultSpecFileName } from '../util/files'
+import { getDefaultSpecFileName } from '../util/files'
+import type { FileExtension } from '../util/files'
 
 type SpecPatterns = {
   specPattern?: string[]

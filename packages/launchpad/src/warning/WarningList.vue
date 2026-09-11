@@ -13,7 +13,8 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import { ErrorTypeEnum, WarningContentFragment, WarningListFragment, WarningList_PingBaseUrlDocument, WarningList_RemoveWarningDocument } from '../generated/graphql'
+import { WarningList_PingBaseUrlDocument, WarningList_RemoveWarningDocument } from '../generated/graphql'
+import type { ErrorTypeEnum, WarningContentFragment, WarningListFragment } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import { useMutation } from '@urql/vue'
 

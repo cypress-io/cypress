@@ -3,7 +3,8 @@ import nock from 'nock'
 import sinonChai from 'sinon-chai'
 import pkg from '@packages/root'
 
-import { createInstance as axiosCreateInstance, CreateInstanceRequestBody, CreateInstanceResponse } from '../../../../lib/cloud/api/create_instance'
+import type { CreateInstanceRequestBody, CreateInstanceResponse } from '../../../../lib/cloud/api/create_instance'
+import { createInstance as axiosCreateInstance } from '../../../../lib/cloud/api/create_instance'
 import api from '../../../../lib/cloud/api'
 
 chai.use(sinonChai)

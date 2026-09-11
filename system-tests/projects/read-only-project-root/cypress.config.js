@@ -3,7 +3,6 @@ const fs = require('fs')
 const { expect } = require('chai')
 
 module.exports = {
-  'allowCypressEnv': false,
   'retries': null,
   'e2e': {
     'supportFile': 'cypress/support.js',

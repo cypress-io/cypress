@@ -1,4 +1,5 @@
-import { URL, Url } from 'url'
+import type { Url } from 'url'
+import { URL } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import fs from 'fs-extra'
@@ -59,7 +60,7 @@ export class UrlMatcher {
     }
 
     if (ret && rule.path) {
-      ret = rule.pathMatcher?.match(path ?? '')
+      ret = rule.pathMatcher.match(path ?? '')
     }
 
     return ret
@@ -132,10 +133,7 @@ export class ClientCertificateStore {
   }
 
   getClientCertificateAgentOptionsForUrl (requestUrl: Url): ClientCertificates | null {
-    if (
-      !this._urlClientCertificates ||
-      this._urlClientCertificates.length === 0
-    ) {
+    if (this._urlClientCertificates.length === 0) {
       return null
     }
 
@@ -144,28 +142,22 @@ export class ClientCertificateStore {
       return UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
     })
 
-    switch (matchingCerts.length) {
-      case 0:
-        debug(`not using client certificate(s) for url '${requestUrl.href}'`)
+    if (matchingCerts.length === 0) {
+      debug(`not using client certificate(s) for url '${requestUrl.href}'`)
 
-        return null
-      case 1:
-        debug(`using client certificate(s) for url '${requestUrl.href}'`)
-
-        return matchingCerts[0].clientCertificates
-      default:
-        matchingCerts.sort((a, b) => {
-          return b.pathnameLength - a.pathnameLength
-        })
-
-        debug(`using client certificate(s) for url '${requestUrl.href}'`)
-
-        return matchingCerts[0].clientCertificates
+      return null
     }
+
+    // the longest matching path is the most specific rule, so it wins
+    matchingCerts.sort((a, b) => b.pathnameLength - a.pathnameLength)
+
+    debug(`using client certificate(s) for url '${requestUrl.href}'`)
+
+    return matchingCerts[0].clientCertificates
   }
 
-  getCertCount (): Number {
-    return !this._urlClientCertificates ? 0 : this._urlClientCertificates.length
+  getCertCount (): number {
+    return this._urlClientCertificates.length
   }
 
   clear (): void {
@@ -183,6 +175,8 @@ export const clientCertificateStoreSingleton = new ClientCertificateStore()
  */
 
 type Config = {
+  // not read here, but it keeps `Config` from being a weak type that no caller
+  // structurally matches — every caller passes a full Cypress config
   projectRoot: string
   clientCertificates?: Array<{
     url: string

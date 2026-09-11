@@ -1,5 +1,6 @@
 import js from '@eslint/js'
-import { InfiniteDepthConfigWithExtends, configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
+import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
+import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 
 import cy from 'eslint-plugin-cypress'
 
@@ -10,6 +11,8 @@ import stylistic from '@stylistic/eslint-plugin'
 import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
+
+import { cypressDevPlugin } from './rules'
 
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
@@ -84,6 +87,38 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@stylistic/jsx-max-props-per-line': 'off',
       '@stylistic/jsx-curly-brace-presence': 'off',
       '@stylistic/jsx-quotes': 'off',
+    },
+  },
+
+  // Cypress-authored rules, kept under the `@cypress/dev` namespace they had in
+  // @cypress/eslint-plugin-dev so existing eslint-disable comments still resolve.
+  {
+    plugins: {
+      '@cypress/dev': cypressDevPlugin,
+    },
+    rules: {
+      // A warning rather than an error: 30 sites in packages already on this
+      // config predate the rule. The rule reports without offering a fix, so
+      // those sites have to be reindented by hand; once they are, raise this
+      // to 'error'.
+      '@cypress/dev/arrow-body-multiline-braces': ['warn', 'always'],
+    },
+  },
+  {
+    files: ['**/*.{jsx,tsx}'],
+    rules: {
+      '@cypress/dev/arrow-body-multiline-braces': 'off',
+    },
+  },
+  {
+    files: [
+      '**/test/**/*.{js,jsx,ts,tsx}',
+      '**/cypress/**/*.{js,jsx,ts,tsx}',
+      '**/*.spec.{js,jsx,ts,tsx}',
+      '**/*.cy.{js,jsx,ts,tsx}',
+    ],
+    rules: {
+      '@cypress/dev/skip-comment': 'error',
     },
   },
 
@@ -271,12 +306,12 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // v8 snapshot bundling fails on mixed inline type + value imports
+  // v8 snapshot bundling fails on mixed inline type + value imports.
+  // Globs are package-relative: lint runs per package, not from the repo root.
   {
     files: [
-      'packages/**/lib/**/*.{js,ts,tsx}',
-      'packages/**/src/**/*.{js,ts,tsx}',
-      'packages/server/**/*.{js,ts,tsx}',
+      'lib/**/*.{js,ts,tsx}',
+      'src/**/*.{js,ts,tsx}',
     ],
     ignores: [
       '**/test/**',
@@ -286,6 +321,20 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     ],
     rules: {
       'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+    },
+  },
+
+  {
+    files: ['**/*.{js,ts,tsx,vue}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', {
+        prefer: 'type-imports',
+        // the fixer must not emit the inline specifiers
+        // `consistent-type-specifier-style` forbids
+        fixStyle: 'separate-type-imports',
+        // inline `import()` type annotations are erased on emit regardless
+        disallowTypeAnnotations: false,
+      }],
     },
   },
 ]

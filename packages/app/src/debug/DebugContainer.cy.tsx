@@ -1,4 +1,5 @@
-import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
+import type { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment } from '../generated/graphql-test'
+import { DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
@@ -556,7 +557,14 @@ describe('<DebugContainer />', () => {
 
         //test scrolling
 
-        cy.findByTestId('run-423').should('not.be.visible')
+        // The modern visibility algorithm doesn't detect scroll-clipped
+        // elements as hidden, so assert geometrically that run-423 sits
+        // below the scroll container's visible area before scrolling.
+        cy.findByTestId('run-423').then(($el) => {
+          const container = $el[0].closest('#debug-runs-container') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
 
         cy.findByTestId('debug-runs-container').scrollTo('bottom')
 

@@ -2,6 +2,8 @@
 // `studio` bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
+import type { VNode } from 'vue'
+
 // Recording state: 'recording' (active), 'paused' (user-controlled, resumable),
 // or 'disabled' (system-controlled, cannot be activated until conditions change).
 export type RecordingState = 'recording' | 'paused' | 'disabled'
@@ -106,7 +108,7 @@ export interface StudioPanelProps {
   pendingNavigationResume?: (() => void) | null
 }
 
-export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
+export type StudioPanelShape = (props: StudioPanelProps) => VNode
 
 export interface StudioAppDefaultShape {
   // Purposefully do not use React in this signature to avoid conflicts when this type gets

@@ -12,7 +12,7 @@
     "noImplicitAny": false,
     "noEmit": true,
     "types": [
-      "mocha"
+      "node"
     ]
   },
   "include": [

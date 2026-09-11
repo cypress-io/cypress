@@ -20,12 +20,16 @@ const uniqueRoute = (route) => {
   return `${route}-${routeCount}`
 }
 
+// The default network path intercepts in the browser through CDP, which only
+// Chromium-family browsers support; Firefox, Electron, and WebKit stay on the
+// HTTP/1 proxy either way.
+const usesBrowserNetworkPath = !Cypress.config('forceHttp1') && Cypress.isBrowser([{ name: '!electron', family: 'chromium' }])
+
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
 describe('network stubbing', { retries: 15 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
-    cy.spy(Cypress.utils, 'warning')
     // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
     // to ensure that we have a valid origin for our tests.
     cy.visit('/fixtures/empty.html')
@@ -333,21 +337,6 @@ describe('network stubbing', { retries: 15 }, function () {
     // @see https://github.com/cypress-io/cypress/issues/16117
     it('can statically stub a url response with headers', () => {
       cy.intercept('/url', { headers: { foo: 'bar' }, body: 'something' })
-    })
-
-    // TODO: implement warning in cy.intercept if appropriate
-    // https://github.com/cypress-io/cypress/issues/2372
-    it.skip('warns if a percent-encoded URL is used', function () {
-      cy.intercept('GET', '/foo%25bar').then(function () {
-        expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.intercept(), but cy.intercept() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
-      })
-    })
-
-    // NOTE: see todo on 'warns if a percent-encoded URL is used'
-    it.skip('does not warn if an invalid percent-encoded URL is used', function () {
-      cy.intercept('GET', 'http://example.com/%E0%A4%A').then(function () {
-        expect(Cypress.utils.warning).to.not.be.called
-      })
     })
 
     it('does not intercept an XHR sync request with a route handler', () => {
@@ -799,19 +788,6 @@ describe('network stubbing', { retries: 15 }, function () {
           // @ts-ignore
           url: {},
         })
-      })
-
-      // TODO: not currently implemented
-      it.skip('fails when method is invalid', function (done) {
-        const url = uniqueRoute('/foo')
-
-        testFail((err) => {
-          expect(err.message).to.include('cy.intercept() was called with an invalid method: \'POSTS\'.')
-
-          done()
-        })
-
-        cy.intercept('post', url, {})
       })
 
       it('requires a url when given a response', function (done) {
@@ -1665,7 +1641,7 @@ describe('network stubbing', { retries: 15 }, function () {
         // NOTE: accepted MITM → CDP drift (#34562): proxy-off there is no browser→proxy
         // hop to report, and the protocol negotiated with the origin is not knowable
         // while the request is paused, so httpVersion is honestly absent.
-        if (Cypress.expose('PROXY_DISABLED')) {
+        if (usesBrowserNetworkPath) {
           expect(req.httpVersion).to.be.undefined
         } else {
           expect(req.httpVersion).to.eq('1.1')
@@ -1689,6 +1665,31 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    it('receives a binary request body in handler as bytes', function () {
+      const bytes = new Uint8Array(4096)
+
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = (i * 7 + 0x80) & 0xff
+      }
+
+      let seen
+
+      cy.intercept('POST', '/upload', (req) => {
+        seen = req.body
+      }).as('upload')
+
+      cy.window().then((win) => {
+        return win.fetch('/upload', { method: 'POST', body: new Blob([bytes]) })
+      })
+
+      cy.wait('@upload')
+
+      cy.then(() => {
+        expect(seen).to.be.an('ArrayBuffer')
+        expect(new Uint8Array(seen)).to.deep.eq(bytes)
+      })
+    })
+
     it('can modify an ArrayBuffer request body', function () {
       const modifiedUint8 = new Uint8Array(2)
 
@@ -1708,6 +1709,20 @@ describe('network stubbing', { retries: 15 }, function () {
       .visit('/fixtures/dump-binary.html')
       .wait('@post').its('response.body').should(assertBody)
       .get('#result').should('have.text', modifiedUint8.join(', '))
+    })
+
+    it('can modify a request body to bytes that are not valid utf8', function () {
+      // 0x9b is a continuation byte with no lead and 0xfe never appears in
+      // utf8, so a string round trip would replace both
+      const modified = new Uint8Array([0x9b, 0xfe, 0x41])
+
+      cy.intercept('/binary*', function (req) {
+        req.body = modified.buffer
+      }).as('post')
+      .visit('/fixtures/dump-binary.html')
+      .wait('@post')
+      // #result is what the origin echoed back, so this asserts the wire
+      .get('#result').should('have.text', modified.join(', '))
     })
 
     it('can modify original request body and have it passed to next handler', function (done) {
@@ -2809,7 +2824,7 @@ describe('network stubbing', { retries: 15 }, function () {
           // NOTE: accepted MITM → CDP drift (#34611): content-length is absent from
           // the paused request — the browser sets it on the wire, so proxy-off there
           // is no value to recompute from and none is synthesized for an emptied body.
-          if (Cypress.expose('PROXY_DISABLED')) {
+          if (usesBrowserNetworkPath) {
             expect(req.headers['content-length']).to.be.undefined
           } else {
             expect(req.headers['content-length']).to.eq('0')
@@ -2879,6 +2894,20 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    // A custom phrase can only have come off the wire, so this fails if the
+    // phrase is reconstructed from the status code instead of read.
+    it('receives the origin reason phrase as res.statusMessage', function (done) {
+      cy.intercept('/status-code*', function (req) {
+        req.reply(function (res) {
+          expect(res.statusMessage).to.eq('Totally Fine')
+
+          done()
+        })
+      }).then(function () {
+        $.get('/status-code?code=200&message=Totally%20Fine')
+      })
+    })
+
     it('intercepts redirects as expected', function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`
@@ -2945,7 +2974,7 @@ describe('network stubbing', { retries: 15 }, function () {
           // NOTE: accepted MITM → CDP drift (#34611): the browser's HTTP cache sits
           // between the origin and the Fetch pause, so revalidation is resolved before
           // we see it and the second hit is reported as another 200 rather than a 304.
-          const expectedStatusCode = (Cypress.expose('PROXY_DISABLED') ? [200, 200] : [200, 304])[hits]
+          const expectedStatusCode = (usesBrowserNetworkPath ? [200, 200] : [200, 304])[hits]
 
           expect(expectedStatusCode).to.exist
           expect(res.statusCode).to.eq(expectedStatusCode)
@@ -3583,7 +3612,7 @@ describe('network stubbing', { retries: 15 }, function () {
       it('can timeout when retrieving upstream response', {
         responseTimeout: 25,
       }, function (done) {
-        if (Cypress.expose('PROXY_DISABLED')) {
+        if (usesBrowserNetworkPath) {
           // NOTE: accepted MITM → CDP drift (#34611): responseTimeout bounds the
           // upstream request Cypress makes itself. Proxy-off the browser owns that
           // request, so there is no Cypress-side socket to time out and no error to
@@ -3842,7 +3871,7 @@ describe('network stubbing', { retries: 15 }, function () {
       // NOTE: accepted MITM → CDP drift (#34611): the browser resolves the
       // revalidation against its own cache before the Fetch pause, so the second
       // response is reported as a 200 instead of the origin's 304.
-      .wait('@image').its('response.statusCode').should('eq', Cypress.expose('PROXY_DISABLED') ? 200 : 304)
+      .wait('@image').its('response.statusCode').should('eq', usesBrowserNetworkPath ? 200 : 304)
     })
 
     // https://github.com/cypress-io/cypress/issues/14522

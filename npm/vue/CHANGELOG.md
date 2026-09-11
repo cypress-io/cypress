@@ -1,3 +1,26 @@
+# [@[secure]/vue-v7.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/vue-v[secure]...@[secure]/vue-v7.0.0) (2026-08-26)
+
+
+### breaking
+
+* merge @[secure]/angular-zoneless upstream into @[secure]/angular and remove angular support for angular 18, 19 and 20. ([4d8e35c](https://github.com/[secure]-io/[secure]/commit/4d8e35ca7b49e732a05742ae2e410e173b8d89f2))
+* release version 7.0.0 of @[secure]/vue ([da346af](https://github.com/[secure]-io/[secure]/commit/da346af1d9826a6147fa8251a257212b7d4a14b9))
+* Remove support for Node.js 20 and Node.js 25 ([#33771](https://github.com/[secure]-io/[secure]/issues/33771)) ([1d3c287](https://github.com/[secure]-io/[secure]/commit/1d3c287dc10427a5807e26477149edb6ce8d01e2)), closes [#33778](https://github.com/[secure]-io/[secure]/issues/33778)
+
+
+### BREAKING CHANGES
+
+* remove support for Node.js 20. Cypress requires Node.js ^22.0.0 or >=24.0.0.
+
+Co-authored-by: Cursor <cursoragent@cursor.com>
+
+* breaking: remove Node.js 25 support
+
+Node.js 25 reaches EOL on June 1, 2026. Narrow engines.node to ^22.0.0 || ^24.0.0 || >=26.0.0 so Node 25 is excluded while Node.js 26 and later remain supported.
+* merge @[secure]/angular-zoneless upstream into @[secure]/angular and remove angular support for angular 18, 19, and 20. Additionally, @[secure]/schematic only supports Cypress 16 and doesnt scaffold the angular-zoneless mount handler any longer. This is a breaking change to Cypress, @[secure]/angular, and @[secure]/schematic. Additionally, @[secure]/angular-zoneless will be deprecated on NPM due to the upstream move
+i
+* updates build target of @[secure]/vue from es5 to es2022
+
 # [@cypress/vue-v6.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v6.0.2...@cypress/vue-v6.0.3) (2026-04-13)
 
 # [@cypress/vue-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v6.0.1...@cypress/vue-v6.0.2) (2025-01-08)

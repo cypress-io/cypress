@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import Debug from 'debug'
-import { Artifact, IArtifact, ArtifactKinds } from './artifact'
+import type { IArtifact } from './artifact'
+import { Artifact, ArtifactKinds } from './artifact'
 import { fileUploadStrategy } from './file_upload_strategy'
 
 const debug = Debug('cypress:server:cloud:artifacts:screenshot')

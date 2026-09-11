@@ -231,10 +231,6 @@ const getDefaultWebpackOptions = () => {
           loader: require.resolve('babel-loader'),
           options: getBabelLoaderOptions(),
         }],
-      }, {
-        test: /\.coffee$/,
-        exclude: [/node_modules/, /browserslist/],
-        loader: require.resolve('coffee-loader'),
       }],
     },
     plugins: [
@@ -262,7 +258,7 @@ const getDefaultWebpackOptions = () => {
       ...(Debug.enabled(WBADebugNamespace) ? [new BundleAnalyzerPlugin()] : []),
     ],
     resolve: {
-      extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
+      extensions: ['.js', '.json', '.jsx', '.mjs'],
       fallback: {
         assert: false,
         buffer: require.resolve('buffer/'),
