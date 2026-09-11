@@ -4,4 +4,4 @@
 [31m[39m
 [31m[95mfail whale[39m[31m[39m
 [31m[39m
-[31mEach entry must supply a PEM-encoded certificate, either as a [95mfilePath[39m[31m resolved from your project root or as an inline [95mpem[39m[31m string.[39m
+[31mEach entry must supply exactly one of a [95mfilePath[39m[31m to a PEM file (relative paths resolve against your project root), an inline [95mpem[39m[31m string, or a base64 SHA-256 [95mspki[39m[31m fingerprint.[39m

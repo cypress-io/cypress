@@ -910,7 +910,7 @@ export const AllCypressErrors = {
 
       ${fmt.highlightSecondary(err.message)}
 
-      Each entry must supply a PEM-encoded certificate, either as a ${fmt.highlightSecondary(`filePath`)} resolved from your project root or as an inline ${fmt.highlightSecondary(`pem`)} string.`
+      Each entry must supply exactly one of a ${fmt.highlightSecondary(`filePath`)} to a PEM file (relative paths resolve against your project root), an inline ${fmt.highlightSecondary(`pem`)} string, or a base64 SHA-256 ${fmt.highlightSecondary(`spki`)} fingerprint.`
   },
   // TODO: make this relative path, not absolute
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR: (configFilePath: string, invalidEventName: string, validEventNames: string[], err: Error) => {
