@@ -28,7 +28,9 @@ Cypress.on('test:after:run', (test) => {
 
 beforeEach(() => {
   // Set isInteractive to false to ensure that screenshots will be
-  // triggered in both run and open mode
+  // triggered in both run and open mode. It is not a test override, so the
+  // types reject it even though the driver applies it at runtime.
+  // @ts-expect-error
   Cypress.config('isInteractive', false)
 })
 
