@@ -47,10 +47,17 @@ describe('e2e trusted certificates', () => {
     },
   })
 
+  // The opt-in full-suite forceHttp1 CI jobs export CYPRESS_forceHttp1=true
+  // (see .circleci @pipeline.yml). The fixture's before:browser:launch check
+  // only holds on the browser network path, and CLI config beats env, so the
+  // explicit `forceHttp1: false` pins this test to that path there.
   systemTests.it('loads a self-signed origin whose certificate is declared trusted', {
     spec: 'trusted_certificates.cy.ts',
     browser: 'chrome',
     project: 'trusted-certificates',
     expectedExitCode: 0,
+    config: {
+      forceHttp1: false,
+    },
   })
 })
