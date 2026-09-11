@@ -1,43 +1,60 @@
 import path from 'path'
 import fs from 'fs-extra'
 import { X509Certificate, createHash } from 'crypto'
+import * as errors from '../errors'
 
 export type TrustedCertificateEntry =
   | { filePath: string }
   | { pem: string }
   | { spki: string }
 
+const CERTIFICATE_BLOCK = /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g
+
 /**
- * Computes the base64 SHA-256 of a certificate's SubjectPublicKeyInfo (SPKI),
- * which is the exact value Chrome's `--ignore-certificate-errors-spki-list`
- * flag expects. Only the first certificate in a PEM bundle is read; that is
- * the intended behavior, since Chrome matches the list against any certificate
- * in the chain the server presents, so one leaf or CA fingerprint suffices.
+ * Computes the base64 SHA-256 of a single certificate's SubjectPublicKeyInfo
+ * (SPKI), which is the exact value Chrome's `--ignore-certificate-errors-spki-list`
+ * flag expects.
  */
-export function spkiFingerprintFromPem (pem: string): string {
+export function generateSpkiFingerprint (pem: string): string {
   const der = new X509Certificate(pem).publicKey.export({ type: 'spki', format: 'der' })
 
   return createHash('sha256').update(der).digest('base64')
 }
 
 /**
- * Maps validated `trustedCertificates` entries to their SPKI fingerprints,
- * reading and parsing certs as needed. A read or parse failure throws an Error
- * naming the offending entry; the caller decides how to surface it. The result
- * is deduped.
+ * Fingerprints every certificate in a PEM bundle. Chrome matches the list against
+ * any certificate in the chain the server presents, but a bundle can carry several
+ * unrelated roots, so trusting only the first would silently drop the rest.
  */
-export function trustedCertificateFingerprints (entries: TrustedCertificateEntry[], projectRoot: string): string[] {
-  const fingerprints = entries.map((entry) => {
+function generateBundleFingerprints (pem: string, label: string): string[] {
+  const blocks = pem.match(CERTIFICATE_BLOCK)
+
+  if (!blocks?.length) {
+    return errors.throwErr('TRUSTED_CERTIFICATES_LOAD_ERROR', label, new Error('no `-----BEGIN CERTIFICATE-----` block was found'))
+  }
+
+  return blocks.map((block) => {
+    try {
+      return generateSpkiFingerprint(block)
+    } catch (err: any) {
+      return errors.throwErr('TRUSTED_CERTIFICATES_LOAD_ERROR', label, err)
+    }
+  })
+}
+
+/**
+ * Maps validated `trustedCertificates` entries to their SPKI fingerprints,
+ * reading and parsing certs as needed. A read or parse failure throws a Cypress
+ * error naming the offending entry. The result is deduped.
+ */
+export function resolveTrustedCertificateFingerprints (entries: TrustedCertificateEntry[], projectRoot: string): string[] {
+  const fingerprints = entries.flatMap((entry, i) => {
     if ('spki' in entry) {
-      return entry.spki
+      return [entry.spki]
     }
 
     if ('pem' in entry) {
-      try {
-        return spkiFingerprintFromPem(entry.pem)
-      } catch (err: any) {
-        throw new Error(`Could not parse the \`pem\` of a \`trustedCertificates\` entry: ${err.message}`)
-      }
+      return generateBundleFingerprints(entry.pem, `trustedCertificates[${i}].pem`)
     }
 
     const resolved = path.resolve(projectRoot, entry.filePath)
@@ -47,14 +64,10 @@ export function trustedCertificateFingerprints (entries: TrustedCertificateEntry
       // eslint-disable-next-line no-restricted-syntax
       pem = fs.readFileSync(resolved, 'utf8')
     } catch (err: any) {
-      throw new Error(`Could not load the \`trustedCertificates\` certificate at \`${entry.filePath}\`: ${err.message}`)
+      return errors.throwErr('TRUSTED_CERTIFICATES_LOAD_ERROR', entry.filePath, err)
     }
 
-    try {
-      return spkiFingerprintFromPem(pem)
-    } catch (err: any) {
-      throw new Error(`Could not parse the \`trustedCertificates\` certificate at \`${entry.filePath}\`: ${err.message}`)
-    }
+    return generateBundleFingerprints(pem, entry.filePath)
   })
 
   return [...new Set(fingerprints)]
