@@ -7,6 +7,7 @@ context('cy.server', () => {
       done()
     })
 
+    // @ts-expect-error - cy.server() was removed
     cy.server()
   })
 })
@@ -20,6 +21,7 @@ context('cy.route', () => {
       done()
     })
 
+    // @ts-expect-error - cy.route() was removed
     cy.route('/foo')
   })
 })
@@ -33,6 +35,7 @@ context('cy.end', () => {
       done()
     })
 
+    // @ts-expect-error - cy.end() was removed
     cy.end()
   })
 
@@ -43,6 +46,7 @@ context('cy.end', () => {
       done()
     })
 
+    // @ts-expect-error - .end() was removed
     cy.wrap({}).end()
   })
 })
@@ -58,6 +62,7 @@ context('cy.exec', () => {
       done()
     })
 
+    // @ts-expect-error - cy.exec() was removed
     cy.exec('ls')
   })
 
@@ -69,6 +74,7 @@ context('cy.exec', () => {
     })
 
     cy.origin('http://www.foobar.com:3500', () => {
+      // @ts-expect-error - cy.exec() was removed
       cy.exec('ls')
     })
   })
@@ -83,6 +89,7 @@ context('Cypress.server.defaults', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.Server was removed
     Cypress.Server.defaults({})
   })
 })
@@ -96,6 +103,7 @@ context('Cypress.Cookies.defaults', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.Cookies.defaults() was removed
     Cypress.Cookies.defaults({})
   })
 })
@@ -109,6 +117,7 @@ context('Cypress.Cookies.preserveOnce', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.Cookies.preserveOnce() was removed
     Cypress.Cookies.preserveOnce({})
   })
 })
@@ -125,6 +134,7 @@ context('Cypress.env', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env('FOO')
   })
 
@@ -135,6 +145,7 @@ context('Cypress.env', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env('FOO', 'bar')
   })
 
@@ -145,6 +156,7 @@ context('Cypress.env', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env({ FOO: 'foo', BAR: 'bar' })
   })
 
@@ -155,6 +167,7 @@ context('Cypress.env', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env(['FOO', 'BAR'])
   })
 
@@ -165,6 +178,7 @@ context('Cypress.env', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env(['FOO'])
   })
 
@@ -175,6 +189,7 @@ context('Cypress.env', () => {
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env()
   })
 
@@ -182,14 +197,15 @@ context('Cypress.env', () => {
   it('points the code frame and stack at the call site', { browser: '!webkit' }, (done) => {
     cy.on('fail', (err) => {
       expect(err.codeFrame).to.exist
-      expect(err.codeFrame.relativeFile).to.include('removed_commands.cy.js')
-      expect(err.codeFrame.frame).to.include('Cypress.env')
+      expect(err.codeFrame!.relativeFile).to.include('removed_commands.cy.ts')
+      expect(err.codeFrame!.frame).to.include('Cypress.env')
       expect(err.stack).to.include('From Your Spec Code:')
       expect(err.stack).not.to.include('bluebird')
 
       done()
     })
 
+    // @ts-expect-error - Cypress.env() was removed
     Cypress.env('FOO')
   })
 
@@ -203,6 +219,7 @@ context('Cypress.env', () => {
     })
 
     cy.origin('http://www.foobar.com:3500', () => {
+      // @ts-expect-error - Cypress.env() was removed
       Cypress.env('FOO')
     })
   })
