@@ -23,7 +23,7 @@ import {
 } from '../../src/project/utils'
 import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
-import { Config } from '../../src/project/types'
+import type { Config } from '../../src/project/types'
 import fs from 'fs-extra'
 
 const debug = Debug('test')
@@ -999,10 +999,6 @@ describe('config/src/project/utils', () => {
       await defaults('responseTimeout', 30000)
     })
 
-    it('execTimeout=60000', async function () {
-      await defaults('execTimeout', 60000)
-    })
-
     it('waitForAnimations=true', async function () {
       await defaults('waitForAnimations', true)
     })
@@ -1304,30 +1300,28 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
-          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {},
           excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
-          execTimeout: { value: 60000, from: 'default' },
           experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
           experimentalCspAllowList: { value: false, from: 'default' },
-          experimentalFastVisibility: { value: false, from: 'default' },
+          visibilityStrategy: { value: 'modern', from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
-          experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           expose: {},
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+          forceHttp1: { value: false, from: 'default' },
           hosts: { value: null, from: 'default' },
           includeShadowDom: { value: false, from: 'default' },
           injectDocumentDomain: { value: false, from: 'default' },
           justInTimeCompile: { value: true, from: 'default' },
           isInteractive: { value: true, from: 'default' },
-          keystrokeDelay: { value: 0, from: 'default' },
+          keystrokeDelay: { value: null, from: 'default' },
+          manageBrowserMemory: { value: true, from: 'default' },
           modifyObstructiveCode: { value: true, from: 'default' },
           numTestsKeptInMemory: { value: 50, from: 'default' },
           pageLoadTimeout: { value: 60000, from: 'default' },
@@ -1408,7 +1402,6 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
-          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {
             foo: {
@@ -1433,16 +1426,13 @@ describe('config/src/project/utils', () => {
             },
           },
           excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
-          execTimeout: { value: 60000, from: 'default' },
           experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
           experimentalCspAllowList: { value: false, from: 'default' },
-          experimentalFastVisibility: { value: false, from: 'default' },
+          visibilityStrategy: { value: 'modern', from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
-          experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           expose: {
             baz: {
@@ -1456,12 +1446,14 @@ describe('config/src/project/utils', () => {
           },
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
+          forceHttp1: { value: false, from: 'default' },
           hosts: { value: null, from: 'default' },
           includeShadowDom: { value: false, from: 'default' },
           injectDocumentDomain: { value: false, from: 'default' },
           justInTimeCompile: { value: true, from: 'default' },
           isInteractive: { value: true, from: 'default' },
-          keystrokeDelay: { value: 0, from: 'default' },
+          keystrokeDelay: { value: null, from: 'default' },
+          manageBrowserMemory: { value: true, from: 'default' },
           modifyObstructiveCode: { value: true, from: 'default' },
           numTestsKeptInMemory: { value: 50, from: 'default' },
           pageLoadTimeout: { value: 60000, from: 'default' },

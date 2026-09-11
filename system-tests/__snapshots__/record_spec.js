@@ -2590,7 +2590,6 @@ This can happen for a number of different reasons.
 
 If you're running lots of tests on a memory intense application.
   - Try increasing the CPU/memory on the machine you're running on.
-  - Try enabling experimentalMemoryManagement in your config file.
   - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
 
 You can learn more here:
@@ -2932,6 +2931,11 @@ exports['e2e record capture-protocol enabled protocol runtime errors error in pr
 Warning: We encountered an error while initializing the Test Replay recording for this spec.
 
 These results will not display Test Replay recordings.
+
+This can happen for many reasons. If this problem persists:
+
+- Try increasing the available disk space.
+- Ensure that /os/tmpdir/cypress/protocol is both readable and writable.
 
 This error will not affect or change the exit code.
 

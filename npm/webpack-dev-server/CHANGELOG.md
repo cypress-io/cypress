@@ -1,3 +1,20 @@
+# [@[secure]/webpack-dev-server-v6.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v5.6.3...@[secure]/webpack-dev-server-v6.0.0) (2026-08-26)
+
+
+### breaking
+
+* release version 6.0.0 of @[secure]/webpack-dev-server ([cef29eb](https://github.com/[secure]-io/[secure]/commit/cef29eb9c1801e08b558d8da87121f867259b382))
+
+
+### Features
+
+* add Angular 22 [secure] [secure] support for Cypress 16 ([#34046](https://github.com/[secure]-io/[secure]/issues/34046)) ([df8980e](https://github.com/[secure]-io/[secure]/commit/df8980e474c4d7376a8ee30cd45e630945a176e5))
+
+
+### BREAKING CHANGES
+
+* update build target of @[secure]/webpack-dev-server from es2017 to es2022
+
 # [@cypress/webpack-dev-server-v5.6.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.2...@cypress/webpack-dev-server-v5.6.3) (2026-08-10)
 
 # [@cypress/webpack-dev-server-v5.6.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.1...@cypress/webpack-dev-server-v5.6.2) (2026-05-31)

@@ -1,8 +1,0 @@
-{
-  "plugins": [
-    "cypress"
-  ],
-  "extends": [
-    "plugin:@cypress/dev/tests"
-  ]
-}

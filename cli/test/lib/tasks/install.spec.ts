@@ -5,7 +5,8 @@ import chalk from 'chalk'
 import { stripVTControlCharacters as stripAnsi } from 'util'
 import timers from 'timers/promises'
 import fs from 'fs-extra'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import download from '../../../lib/tasks/download'
@@ -38,6 +39,10 @@ vi.mock('os', async (importActual) => {
     },
   }
 })
+
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
 
 vi.mock('timers/promises', async (importActual) => {
   const actual = await importActual()

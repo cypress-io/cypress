@@ -1,5 +1,6 @@
-import { computed, Ref, unref } from 'vue'
+import { computed, unref } from 'vue'
 import { dayjs } from '../runs/utils/day.js'
+import type { Ref } from 'vue'
 
 /*
   Format duration to in HH:mm:ss format. The `totalDuration` field is milliseconds. Remove the leading "00:" if the value is less

@@ -41,10 +41,16 @@
 
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
-import type { ReactComponentDescriptor } from '@packages/data-context/src/gen/graphcache-config.gen'
 import { gql, useMutation } from '@urql/vue'
 import { ref, onMounted } from 'vue'
-import { ComponentList_GetReactComponentsFromFileDocument, FileListItemFragment } from '../../../generated/graphql'
+import { ComponentList_GetReactComponentsFromFileDocument } from '../../../generated/graphql'
+import type { FileListItemFragment } from '../../../generated/graphql'
+
+/** Same shape as GraphQL `ReactComponentDescriptor` (generated graphcache import is restricted). */
+type ReactComponentDescriptor = {
+  exportName: string
+  isDefault: boolean
+}
 
 const { t } = useI18n()
 const errored = ref<boolean | undefined>(false)

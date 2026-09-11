@@ -3,13 +3,13 @@ import Debug from 'debug'
 import { errors } from '../errors'
 import { throwTapError } from './tap-connection'
 import type { LiveSessionState } from '../cypress-sessions'
-import { SESSION_ID_HEADER } from '@packages/cypress-sessions'
+import { verifySessionRecord } from '../cypress-sessions'
+import { SESSION_ID_HEADER, LEGACY_TAP_GRAPHQL_PATH, tapGraphqlPath } from '@packages/cypress-sessions'
 import type { TapGraphqlOperation } from '@packages/cypress-sessions'
 
 const debug = Debug('cypress:cli:tap')
 
 const GRAPHQL_HOST = '127.0.0.1'
-const GRAPHQL_PATH = '/__cypress/graphql'
 const DEFAULT_QUERY_TIMEOUT_MS = 4000
 
 interface GraphqlEnvelope {
@@ -45,31 +45,61 @@ const validateEnvelope = <T>(operationName: string, envelope: GraphqlEnvelope | 
   return envelope.data as T
 }
 
+// Whether the session served this path at all. The force-proxy guard redirects an
+// unrecognized path to the runner page while the MITM proxy is on, and Express 404s
+// it when CDP owns browser traffic instead; graphql itself answers 400 or 500, so
+// neither of these comes from the query.
+const isUnservedPath = (response: { status: number, redirected: boolean }): boolean => {
+  return response.redirected || response.status === 404
+}
+
+// A session serving neither path is the reason for the failure, so the fault lies with
+// it rather than the request. Its liveness probe tells the two apart: the route is
+// unnamespaced and present in every build that has tap, so an answer means a live
+// session that simply predates the tap route, and silence means it is gone.
+const throwForUnservedPaths = async (session: LiveSessionState, operationName: string): Promise<never> => {
+  const live = await verifySessionRecord(session)
+
+  if (live === null) {
+    return throwTapError('STALE_SESSION', `The session stopped answering while running ${operationName}.`)
+  }
+
+  return throwTapError('SESSION_OUTDATED', `The session does not serve ${operationName} over tap GraphQL.`)
+}
+
 export const querySessionGraphql = async <TResult>(session: LiveSessionState, operation: TapGraphqlOperation<TResult>, timeoutMs: number = DEFAULT_QUERY_TIMEOUT_MS): Promise<TResult> => {
   const { operationName, query, variables } = operation
-  const url = `http://${GRAPHQL_HOST}:${session.serverPort}${GRAPHQL_PATH}/${operationName}`
 
-  let response: { status: number, redirected: boolean, json (): Promise<unknown> }
-
-  try {
-    response = await fetch(url, {
+  const post = (path: string) => {
+    return fetch(`http://${GRAPHQL_HOST}:${session.serverPort}${path}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', [SESSION_ID_HEADER]: session.sessionId },
       body: JSON.stringify({ operationName, query, variables: variables ?? {} }),
       signal: AbortSignal.timeout(timeoutMs),
     })
+  }
+
+  let response: { status: number, redirected: boolean, json (): Promise<unknown> }
+
+  try {
+    response = await post(tapGraphqlPath(operationName))
+
+    // Sessions that predate the fixed tap route only serve GraphQL under the project's
+    // `namespace`, so retry the default one — every such session that did not override
+    // it answers there.
+    if (isUnservedPath(response)) {
+      debug('graphql request %s to pid %d went unserved; retrying the legacy path', operationName, session.pid)
+
+      response = await post(`${LEGACY_TAP_GRAPHQL_PATH}/${operationName}`)
+    }
   } catch (err: any) {
     debug('graphql request %s to pid %d failed: %o', operationName, session.pid, err)
 
     return throwTapError('GRAPHQL_UNREACHABLE', `Could not reach the session to run ${operationName}: ${err.message}`, err)
   }
 
-  // A valid request passes the server's force-proxy guard untouched; a redirect
-  // means the guard sent us to the runner page because the session doesn't allow
-  // direct tap GraphQL — an older Cypress that predates it (or one that rejected
-  // our session-id). Report that instead of the runner HTML as a data error.
-  if (response.redirected) {
-    return throwTapError('SESSION_OUTDATED', `The session redirected the ${operationName} request instead of answering it, so it does not support direct tap GraphQL.`)
+  if (isUnservedPath(response)) {
+    return await throwForUnservedPaths(session, operationName)
   }
 
   if (response.status !== 200) {

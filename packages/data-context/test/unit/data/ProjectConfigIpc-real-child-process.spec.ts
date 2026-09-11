@@ -39,7 +39,6 @@ describe('ProjectConfigIpc', () => {
 
       projectConfigIpc = new ProjectConfigIpc(
         undefined,
-        undefined,
         projectPath,
         path.join(projectPath, 'cypress.config.js'),
         'cypress.config.js',

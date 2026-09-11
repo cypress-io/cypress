@@ -275,6 +275,7 @@ export function createSyntheticIncomingResponse (response: HttpResponse): Incomi
   const incomingRes = new IncomingMessage(new Socket())
 
   incomingRes.statusCode = response.statusCode ?? 200
+  incomingRes.statusMessage = response.statusMessage ?? ''
   // Match Node IncomingMessage: response middleware looks up content-encoding,
   // content-type, set-cookie, etc. with lowercase keys.
   incomingRes.headers = lowercaseHeaders(response.headers ?? {})

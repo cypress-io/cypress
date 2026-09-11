@@ -97,6 +97,11 @@ describe('Server', () => {
                 use: () => { },
               }
 
+              // these requests arrive in absolute form, and CONNECT for https,
+              // like a proxied browser — which only happens on the MITM path,
+              // and the server refuses CONNECT until a launch resolves it
+              await this.server.setNetworkMode(false)
+
               await this.server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
                 this.server.remoteStates.set(initialUrl)

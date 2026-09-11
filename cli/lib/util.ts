@@ -403,11 +403,11 @@ const util = {
     return elapsed * (1 / (percent / 100)) - elapsed
   },
 
-  convertPercentToPercentage (num: number): number {
+  convertPercentToPercentage (num: number | null): number {
     // convert a percent with values between 0 and 1
     // with decimals, so that it is between 0 and 100
     // and has no decimal places
-    return Math.round(_.isFinite(num) ? (num * 100) : 0)
+    return num !== null && _.isFinite(num) ? Math.round(num * 100) : 0
   },
 
   secsRemaining (eta: number): string {

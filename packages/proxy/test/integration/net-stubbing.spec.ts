@@ -1,8 +1,10 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
-import { NetworkProxy } from '../../'
+import { NetworkProxy, createSyntheticProxyCodec } from '../../'
+import type {
+  NetStubbingState,
+} from '@packages/net-stubbing'
 import {
   netStubbingState as _netStubbingState,
-  NetStubbingState,
   onNetStubbingEvent,
 } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'
@@ -26,6 +28,7 @@ describe('network stubbing', () => {
   let server
   let destinationPort
   let socket
+  let proxy: NetworkProxy
   let documentDomainInjection: DocumentDomainInjection
 
   const serverPort = 3030
@@ -52,7 +55,7 @@ describe('network stubbing', () => {
     app = express()
     netStubbingState = _netStubbingState()
 
-    const proxy = new NetworkProxy({
+    proxy = new NetworkProxy({
       socket,
       netStubbingState,
       networkInterceptionCore: createProxyNetworkInterception({
@@ -68,6 +71,7 @@ describe('network stubbing', () => {
       serverBus: new EventEmitter(),
       getCurrentBrowser: vi.fn(),
     })
+
     const httpIntercept = new HttpIntercept(proxy.codec)
 
     httpIntercept.use(proxy.http.createLegacyProxyPipeline(proxy.codec))
@@ -365,6 +369,55 @@ describe('network stubbing', () => {
 
     expect(resp2.status).toEqual(200)
     expect(resp2.text).toEqual('foo')
+  })
+
+  describe('proxy disabled (CDP Fetch transport shape)', () => {
+    // Mirrors createCdpFetchRuntime: the legacy pipeline runs over the
+    // synthetic codec, and the origin call is the transport's `next`. When
+    // the browser knows a load failed (e.g. a netstack-rejected br
+    // response), CdpFetchTransport rejects that call with a
+    // toNetworkError()-shaped error, and that rejection must reach the
+    // driver as a network:error event (#34565).
+    it('emits network:error to the driver when the origin call rejects on a matched request', async () => {
+      netStubbingState.routes.push({
+        id: '1',
+        routeMatcher: {
+          url: '*',
+        },
+        hasInterceptor: false,
+        getFixture,
+        matches: 1,
+      })
+
+      const syntheticCodec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => proxy.http.createMiddlewareContext(req, res),
+      })
+
+      const pipeline = proxy.http.createLegacyProxyPipeline(syntheticCodec)
+
+      const url = `http://localhost:${destinationPort}/`
+      const originError = new Error(`origin rejection for ${url}`)
+
+      await expect(pipeline({
+        id: 'cdp-fetch-1',
+        url,
+        method: 'GET',
+        headers: { host: `localhost:${destinationPort}` },
+        resourceType: 'xhr',
+      }, () => Promise.reject(originError))).rejects.toThrow()
+
+      expect(socket.toDriver).toHaveBeenCalledWith(
+        'net:stubbing:event',
+        'network:error',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            error: expect.objectContaining({
+              message: originError.message,
+            }),
+          }),
+        }),
+      )
+    })
   })
 
   describe('CSP Headers', () => {

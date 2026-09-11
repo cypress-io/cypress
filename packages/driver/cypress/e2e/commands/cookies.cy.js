@@ -28,7 +28,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo').its('hostOnly').should('eq', true)
     }
 
-    cy.getCookies().then((cookies) => {
+    cy.getCookies().should((cookies) => {
       expect(cookies).to.have.lengthOf(1)
 
       const cookie = cookies[0]
@@ -39,7 +39,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       }
     })
 
-    cy.getAllCookies().then((cookies) => {
+    cy.getAllCookies().should((cookies) => {
       expect(cookies).to.have.lengthOf(1)
 
       const cookie = cookies[0]
@@ -56,7 +56,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookies().then((cookies) => {
+      cy.getCookies().should((cookies) => {
         expect(cookies).to.have.length(2)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -73,7 +73,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies().then((cookies) => {
+        cy.getCookies().should((cookies) => {
           expect(cookies).to.have.length(1)
           expect(cookies[0].name).to.equal('key2')
           expect(cookies[0].domain).to.match(/\.?foobar\.com/)
@@ -84,7 +84,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     it('returns cookies from the subdomain and bare domain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       setCookies()
-      cy.getCookies().then((cookies) => {
+      cy.getCookies().should((cookies) => {
         expect(cookies).to.have.length(4)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -105,7 +105,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies().then((cookies) => {
+        cy.getCookies().should((cookies) => {
           const sortedCookies = Cypress._.sortBy(cookies, 'name')
 
           expect(sortedCookies).to.have.length(2)
@@ -121,7 +121,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+      cy.getCookies({ domain: 'www.foobar.com' }).should((cookies) => {
         expect(cookies).to.have.length(2)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -132,7 +132,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         expect(sortedCookies[1].domain).to.match(/\.?foobar\.com/)
       })
 
-      cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
+      cy.getCookies({ domain: 'barbaz.com' }).should((cookies) => {
         expect(cookies).to.have.length(2)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -149,7 +149,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies({ domain: 'www.barbaz.com' }).then((cookies) => {
+        cy.getCookies({ domain: 'www.barbaz.com' }).should((cookies) => {
           expect(cookies).to.have.length(4)
 
           const sortedCookies = Cypress._.sortBy(cookies, 'name')
@@ -172,7 +172,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getAllCookies().then((cookies) => {
+      cy.getAllCookies().should((cookies) => {
         expect(cookies).to.have.length(8)
 
         const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
@@ -195,7 +195,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
-        cy.getAllCookies().then((cookies) => {
+        cy.getAllCookies().should((cookies) => {
           expect(cookies).to.have.length(8)
 
           const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
@@ -228,7 +228,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookie('key').then((cookie) => {
+      cy.getCookie('key').should((cookie) => {
         expect(cookie.value).to.equal('barbaz.com value')
         expect(cookie.domain).to.match(/\.?barbaz\.com/)
       })
@@ -239,7 +239,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://foobar.com:3500', () => {
         cy.visit('http://foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(cookie.value).to.equal('foobar.com value')
           expect(cookie.domain).to.match(/\.?foobar\.com/)
         })
@@ -250,7 +250,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
-      cy.getCookie('key').then((cookie) => {
+      cy.getCookie('key').should((cookie) => {
         expect(cookie.value).to.equal('www.barbaz.com value')
         expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
       })
@@ -262,7 +262,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(cookie.value).to.equal('www.foobar.com value')
           expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
         })
@@ -273,7 +273,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
 
-      cy.getCookie('key').then((cookie) => {
+      cy.getCookie('key').should((cookie) => {
         expect(cookie.value).to.equal('barbaz.com value')
         expect(cookie.domain).to.match(/\.?barbaz\.com/)
       })
@@ -285,7 +285,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
-        cy.getCookie('key').then((cookie) => {
+        cy.getCookie('key').should((cookie) => {
           expect(cookie.value).to.equal('foobar.com value')
           expect(cookie.domain).to.match(/\.?foobar\.com/)
         })
@@ -296,7 +296,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       setCookies()
 
-      cy.getCookie('key', { domain: 'www.foobar.com' }).then((cookie) => {
+      cy.getCookie('key', { domain: 'www.foobar.com' }).should((cookie) => {
         expect(cookie.value).to.equal('www.foobar.com value')
         expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
       })
@@ -307,7 +307,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookie('key', { domain: 'www.barbaz.com' }).then((cookie) => {
+        cy.getCookie('key', { domain: 'www.barbaz.com' }).should((cookie) => {
           expect(cookie.value).to.equal('www.barbaz.com value')
           expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
         })
@@ -680,8 +680,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
-        responseTimeout: 2500,
+      it('sets timeout to Cypress.config(defaultCommandTimeout)', {
+        defaultCommandTimeout: 2500,
       }, () => {
         Cypress.automation.resolves([])
 
@@ -701,20 +701,20 @@ describe('src/cy/commands/cookies', () => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
+    })
 
-      it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves([])
+    // https://github.com/cypress-io/cypress/issues/4802
+    it('retries reading cookies until an assertion passes', () => {
+      const get = Cypress.automation.withArgs('get:cookies')
 
-        cy.timeout(100)
+      get.resolves([])
+      get.onCall(2).resolves([
+        { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
+      ])
 
-        cy.spy(cy, 'clearTimeout')
-
-        cy.getCookies().then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
-
-          // restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
-        })
+      cy.getCookies().should('have.length', 1).then((cookies) => {
+        expect(cookies[0].name).to.eq('foo')
+        expect(get.callCount).to.be.gte(3)
       })
     })
 
@@ -780,7 +780,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getCookies')
           expect(lastLog.get('message')).to.eq('')
-          expect(err.message).to.eq('`cy.getCookies()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.getCookies()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/getcookies')
 
           done()
@@ -880,7 +880,7 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', { responseTimeout: 2500 }, () => {
+      it('sets timeout to Cypress.config(defaultCommandTimeout)', { defaultCommandTimeout: 2500 }, () => {
         Cypress.automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -899,20 +899,19 @@ describe('src/cy/commands/cookies', () => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
+    })
 
-      it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves([])
+    it('retries reading cookies until an assertion passes', () => {
+      const get = Cypress.automation.withArgs('get:cookies')
 
-        cy.timeout(100)
+      get.resolves([])
+      get.onCall(2).resolves([
+        { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
+      ])
 
-        cy.spy(cy, 'clearTimeout')
-
-        cy.getAllCookies().then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
-
-          // restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
-        })
+      cy.getAllCookies().should('have.length', 1).then((cookies) => {
+        expect(cookies[0].name).to.eq('foo')
+        expect(get.callCount).to.be.gte(3)
       })
     })
 
@@ -962,7 +961,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getAllCookies')
           expect(lastLog.get('message')).to.eq('')
-          expect(err.message).to.eq('`cy.getAllCookies()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.getAllCookies()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/getallcookies')
 
           done()
@@ -1076,8 +1075,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
-        responseTimeout: 2500,
+      it('sets timeout to Cypress.config(defaultCommandTimeout)', {
+        defaultCommandTimeout: 2500,
       }, () => {
         Cypress.automation.resolves(null)
 
@@ -1097,20 +1096,34 @@ describe('src/cy/commands/cookies', () => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
+    })
 
-      it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves(null)
+    // https://github.com/cypress-io/cypress/issues/4802
+    it('retries reading the cookie until an assertion passes', () => {
+      const get = Cypress.automation.withArgs('get:cookie')
 
-        cy.timeout(100)
+      get.resolves(null)
+      get.onCall(2).resolves({
+        name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
+      })
 
-        cy.spy(cy, 'clearTimeout')
+      cy.getCookie('foo').should('exist').then((cookie) => {
+        expect(cookie.value).to.eq('bar')
+        expect(get.callCount).to.be.gte(3)
+      })
+    })
 
-        cy.getCookie('foo').then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookie')
+    // https://github.com/cypress-io/cypress/issues/4802
+    // the cookie must be re-read on retries even when the failing assertion is
+    // chained through another query (e.g. `.its()`).
+    it('retries reading the cookie when assertions are chained through another query', () => {
+      const get = Cypress.automation.withArgs('get:cookie')
 
-          // restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
-        })
+      get.resolves({ name: 'foo', value: 'stale', domain: 'localhost', path: '/', secure: true, httpOnly: false })
+      get.onCall(2).resolves({ name: 'foo', value: 'fresh', domain: 'localhost', path: '/', secure: true, httpOnly: false })
+
+      cy.getCookie('foo').its('value').should('eq', 'fresh').then(() => {
+        expect(get.callCount).to.be.gte(3)
       })
     })
 
@@ -1163,7 +1176,7 @@ describe('src/cy/commands/cookies', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('getCookie')
           expect(lastLog.get('message')).to.eq('foo')
-          expect(err.message).to.eq('`cy.getCookie()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('Timed out retrying after 50ms: `cy.getCookie()` timed out waiting `50ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/getcookie')
 
           done()

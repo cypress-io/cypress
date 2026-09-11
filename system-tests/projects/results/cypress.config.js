@@ -4,7 +4,6 @@ const path = require('path')
 // writes the results of the after:spec and after:run events to a file
 // so they can be snapshotted by the outer test
 module.exports = {
-  allowCypressEnv: false,
   e2e: {
     setupNodeEvents (on) {
       on('after:spec', (spec, results) => {

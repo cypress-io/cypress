@@ -192,7 +192,6 @@ Here is a list of the core packages in this repository with a short description,
  | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
  | [resolve-dist](./packages/resolve-dist)       | `@packages/resolve-dist`    | Centralizes the resolution of paths to compiled/static assets from server-side code..    |
- | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
  | [runner](./packages/runner)           | `@packages/runner`      | (deprecated) The runner is the minimal "chrome" around the user's application under test. |
  | [scaffold-config](./packages/scaffold-config)           | `@packages/scaffold-config`      | The logic related to scaffolding new projects using launchpad.   |
@@ -220,7 +219,6 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
- | [angular-zoneless](./npm/angular-zoneless)             | `@cypress/angular-zoneless`        | Cypress component testing for Angular using zoneless change detection.       |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
@@ -229,7 +227,7 @@ Here is a list of the npm packages in this repository:
  | [svelte](./npm/svelte)                               | `@cypress/svelte`                   | Cypress component testing for Svelte.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
  | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue 3.               |
- | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript.  |
+ | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features and TypeScript.  |
  | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
  | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
 

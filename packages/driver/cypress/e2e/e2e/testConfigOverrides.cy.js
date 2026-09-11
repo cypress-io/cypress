@@ -25,21 +25,21 @@ describe('per-test config', () => {
 
   it('set various config values', {
     defaultCommandTimeout: 200,
-    env: {
+    expose: {
       FOO_VALUE: 'foo',
     },
   }, () => {
     cy.visit('/fixtures/generic.html')
     expect(Cypress.config().defaultCommandTimeout).eq(200)
     expect(Cypress.config('defaultCommandTimeout')).eq(200)
-    expect(Cypress.env('FOO_VALUE')).eq('foo')
+    expect(Cypress.expose('FOO_VALUE')).eq('foo')
   })
 
   it('does not leak various config values', {
   }, () => {
     expect(Cypress.config().defaultCommandTimeout).not.eq(200)
     expect(Cypress.config('defaultCommandTimeout')).not.eq(200)
-    expect(Cypress.env('FOO_VALUE')).not.eq('foo')
+    expect(Cypress.expose('FOO_VALUE')).not.eq('foo')
   })
 
   it('can set viewport', {
@@ -85,10 +85,10 @@ describe('per-test config', () => {
     expect(Cypress.browser.name).eq('webkit')
   })
 
-  describe('mutating global config via Cypress.config and Cypress.env', () => {
-    it('1/2 global config and env', {
+  describe('mutating global config via Cypress.config and Cypress.expose', () => {
+    it('1/2 global config and expose', {
       defaultCommandTimeout: 1234,
-      env: {
+      expose: {
         FOO: '0',
       },
     }, () => {
@@ -96,55 +96,55 @@ describe('per-test config', () => {
       expect(Cypress.config('responseTimeout')).eq(1111)
       expect(Cypress.config('defaultCommandTimeout')).eq(1234)
 
-      Cypress.env('BAR', '1')
-      expect(Cypress.env('FOO')).eq('0')
-      expect(Cypress.env('BAR')).eq('1')
+      Cypress.expose('BAR', '1')
+      expect(Cypress.expose('FOO')).eq('0')
+      expect(Cypress.expose('BAR')).eq('1')
     })
 
-    it('2/2 global config and env', () => {
+    it('2/2 global config and expose', () => {
       expect(Cypress.config('responseTimeout')).eq(1111)
       expect(Cypress.config('defaultCommandTimeout')).eq(4000)
 
-      expect(Cypress.env('FOO')).eq(undefined)
-      expect(Cypress.env('BAR')).eq('1')
+      expect(Cypress.expose('FOO')).eq(undefined)
+      expect(Cypress.expose('BAR')).eq('1')
     })
   })
 
   describe('in beforeEach', () => {
     it('set various config values', {
       defaultCommandTimeout: 200,
-      env: {
+      expose: {
         FOO_VALUE: 'foo',
       },
     }, () => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
 
     beforeEach(() => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
   })
 
   describe('in afterEach', () => {
     it('set various config values', {
       defaultCommandTimeout: 200,
-      env: {
+      expose: {
         FOO_VALUE: 'foo',
       },
     }, () => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
 
     afterEach(() => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
   })
 
@@ -370,6 +370,47 @@ describe('cannot set override configuration options that', () => {
     })
 
     Cypress.config('chromeWebSecurity', false)
+  })
+
+  it('throws if mutating viewportWidth with Cypress.config() during test execution', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot override `viewportWidth` during test execution')
+      done()
+    })
+
+    Cypress.config('viewportWidth', 200)
+  })
+
+  it('throws if mutating viewportHeight with Cypress.config() during test execution', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot override `viewportHeight` during test execution')
+      done()
+    })
+
+    Cypress.config('viewportHeight', 100)
+  })
+
+  it('throws if mutating blockHosts with Cypress.config() during test execution', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot override `blockHosts` during test execution')
+      done()
+    })
+
+    Cypress.config('blockHosts', 'example.com')
+  })
+
+  it('throws if mutating env with Cypress.config()', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('Overriding the `env` configuration was removed in Cypress version 16.0.0')
+      expect(err.message).to.include('https://on.cypress.io/cypress-env-migration')
+      done()
+    })
+
+    Cypress.config('env', { FOO: 'bar' })
   })
 
   it('does not throw for non-Cypress config values', () => {

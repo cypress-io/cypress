@@ -5,7 +5,7 @@ import dedent from 'dedent'
 type ProjectDirs = typeof fixtureDirs
 
 // These versions should reflect the latest versions of each major version of Vite - update as needed
-const VITE_REACT: ProjectDirs[number][] = ['vite5.4.18-react', 'vite6.2.5-react', 'vite7.0.0-react', 'vite8.0.0-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite8.0.0-react']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []
@@ -29,49 +29,43 @@ for (const project of VITE_REACT) {
       cy.waitForSpecToFinish({ passCount: 2 })
     })
 
-    // AFAICT, vite 8 with rolldown support bundles react differently, so it is available in the "missing react" components and passes
-    if (project !== 'vite8.0.0-react') {
-      it('MissingReact: should fail, rerun, succeed', () => {
-        cy.on('uncaught:exception', () => {
+    it('MissingReact: should fail, rerun, succeed', () => {
+      cy.on('uncaught:exception', () => {
         // Ignore the uncaught exception in the AUT
-          return false
-        })
-
-        cy.visitApp()
-        cy.specsPageIsVisible()
-        cy.contains('MissingReact.cy.jsx').click()
-        cy.waitForSpecToFinish({ failCount: 1 })
-        cy.withCtx(async (ctx) => {
-          await ctx.actions.file.writeFileInProject(`src/MissingReact.jsx`,
-        `import React from 'react';
-        ${await ctx.file.readFileInProject('src/MissingReact.jsx')}`)
-        })
-
-        cy.waitForSpecToFinish({ passCount: 1 })
+        return false
       })
-    }
 
-    // AFAICT, vite 8 with rolldown support bundles react differently, so it is available in the "missing react" components and passes
-    if (project !== 'vite8.0.0-react') {
-      it('MissingReactInSpec: should fail, rerun, succeed', () => {
-        cy.on('uncaught:exception', () => {
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.contains('MissingReact.cy.jsx').click()
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(`src/MissingReact.jsx`,
+            `import React from 'react';
+            ${await ctx.file.readFileInProject('src/MissingReact.jsx')}`)
+      })
+
+      cy.waitForSpecToFinish({ passCount: 1 })
+    })
+
+    it('MissingReactInSpec: should fail, rerun, succeed', () => {
+      cy.on('uncaught:exception', () => {
         // Ignore the uncaught exception in the AUT
-          return false
-        })
-
-        cy.visitApp()
-        cy.specsPageIsVisible()
-        cy.contains('MissingReactInSpec.cy.jsx').click()
-        cy.waitForSpecToFinish({ failCount: 1 })
-        cy.reporter().find('.test-err-code-frame').should('be.visible')
-        cy.withCtx(async (ctx) => {
-          await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
-            await ctx.file.readFileInProject('src/App.cy.jsx'))
-        })
-
-        cy.waitForSpecToFinish({ passCount: 2 })
+        return false
       })
-    }
+
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.contains('MissingReactInSpec.cy.jsx').click()
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.reporter().find('.test-err-code-frame').should('be.visible')
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(`src/MissingReactInSpec.cy.jsx`,
+          await ctx.file.readFileInProject('src/App.cy.jsx'))
+      })
+
+      cy.waitForSpecToFinish({ passCount: 2 })
+    })
 
     it('AppCompilationError: should fail with uncaught exception error', () => {
       cy.on('uncaught:exception', () => {

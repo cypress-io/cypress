@@ -1,31 +1,34 @@
-import { getSystemPath, JsonObject, JsonValue, normalize, strings } from '@angular-devkit/core'
+import type { JsonObject, JsonValue } from '@angular-devkit/core'
+import { getSystemPath, normalize, strings } from '@angular-devkit/core'
+import type {
+  Rule,
+  SchematicContext,
+  Tree,
+} from '@angular-devkit/schematics'
 import {
   apply,
   chain,
   mergeWith,
   move,
-  Rule,
-  SchematicContext,
   SchematicsException,
   applyTemplates,
-  Tree,
   url,
 } from '@angular-devkit/schematics'
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks'
 import { of } from 'rxjs'
 import { concatMap, map } from 'rxjs/operators'
-import { gte as isSemverGte } from 'semver'
-
 import { addPackageJsonDependency, NodeDependencyType } from '../utils/dependencies'
+import type {
+  NodePackage,
+} from '../utils'
 import {
   getAngularJsonValue,
-  getAngularSemverVersion,
   getLatestNodeVersion,
-  NodePackage,
   getDirectoriesAndCreateSpecs,
 } from '../utils'
 import { relative, resolve } from 'path'
-import { JSONFile, JSONPath } from '../utils/jsonFile'
+import type { JSONPath } from '../utils/jsonFile'
+import { JSONFile } from '../utils/jsonFile'
 
 type HandleFilesType = {
   projects: any
@@ -37,8 +40,6 @@ type HandleFilesType = {
 
 export default function (_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
-    _options = { ..._options, __version__: getAngularSemverVersion(tree) }
-
     return chain([
       updateDependencies(),
       addCypressCoreFiles(_options),
@@ -142,15 +143,7 @@ function addCypressComponentTestingFiles (options: any): Rule {
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
 
-      let applyPath = './files-ct'
-
-      try {
-        // if using Angular 21 or greater, we need to use the cypress/angular-zoneless mount function, which was introduced in Cypress 15.8.0
-        // and will likely be the default in the future in Cypress 16
-        applyPath = isSemverGte(options.__version__, '21.0.0') ? './files-ct-zoneless' : './files-ct'
-      } catch (error) {
-        context.logger.debug('Error checking Angular version', error)
-      }
+      const applyPath = './files-ct'
 
       return handleFiles(tree, context, {
         projects,

@@ -83,14 +83,10 @@ describe('command log', () => {
         cy.document(options)
       })
 
-      // Ignore cy.each(), cy.end() because they don't have options.
+      // Ignore cy.each(), cy.end(), cy.exec() because they don't have options.
 
       testOptions('eq', { timeout: 1111 }, 1, (options) => {
         cy.get('input').eq(0, options)
-      })
-
-      testOptions('exec', { env: { 'a': true } }, 0, (options) => {
-        cy.exec('ls', options)
       })
     })
 
@@ -294,7 +290,7 @@ describe('command log', () => {
 
       testOptions('writeFile', { timeout: 3000 }, 0, (options) => {
         cy.writeFile('./cypress/_test-output/test.txt', 'test', options)
-        .exec('rm ./cypress/_test-output/test.txt')
+        .task('remove:file', './cypress/_test-output/test.txt')
       })
     })
   })

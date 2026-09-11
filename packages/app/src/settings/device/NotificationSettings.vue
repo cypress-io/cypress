@@ -46,7 +46,6 @@
               :disabled="!desktopNotificationsEnabled"
               @update="(value) => updatePref(id, value)"
             />
-            {{ gql.localSettings }}
           </h4>
         </div>
         <div class="py-[16px]">
@@ -107,7 +106,8 @@ import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import SettingsSection from '../SettingsSection.vue'
-import { NotificationSettingsFragment, SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
+import { SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
+import type { NotificationSettingsFragment } from '../../generated/graphql'
 import Checkbox from '@packages/frontend-shared/src/components/Checkbox.vue'
 import ButtonDS from '@cypress-design/vue-button'
 import Button from '@packages/frontend-shared/src/components/Button.vue'

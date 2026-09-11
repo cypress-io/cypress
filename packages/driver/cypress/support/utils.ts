@@ -197,7 +197,6 @@ export const makeRequestForCookieBehaviorTests = (
 }
 
 function runCommands () {
-  cy.exec('echo "hello"')
   cy.readFile('cypress/fixtures/app.json')
   cy.writeFile('cypress/_test-output/written.json', 'contents')
   cy.task('return:arg', 'arg')

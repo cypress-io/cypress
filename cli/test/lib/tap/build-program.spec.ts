@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import commander from 'commander'
+import type commander from 'commander'
 
 import { buildTapProgram } from '../../../lib/tap/build-program'
 import { buildTapSchema, type TapSchema } from '@packages/cypress-sessions'
@@ -390,7 +390,7 @@ describe('lib/tap/build-program', () => {
   it('treats a schema command that omits params as having no positionals', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram({
-      protocolVersion: 1,
+      schemaVersion: 1,
       cypressVersion: '15.0.0',
       commands: [{
         name: 'health',
@@ -408,7 +408,7 @@ describe('lib/tap/build-program', () => {
   })
 
   const dashedSchema: TapSchema = {
-    protocolVersion: 1,
+    schemaVersion: 1,
     cypressVersion: '15.0.0',
     commands: [{
       name: 'export',
@@ -451,7 +451,7 @@ describe('lib/tap/build-program', () => {
   it('forwards a dashed param name keyed by its raw schema name (positionals bypass camelCasing)', () => {
     const dispatch = vi.fn()
     const program = buildTapProgram({
-      protocolVersion: 1,
+      schemaVersion: 1,
       cypressVersion: '15.0.0',
       commands: [{
         name: 'show',

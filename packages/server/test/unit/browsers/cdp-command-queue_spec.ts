@@ -1,4 +1,5 @@
-import { CDPCommandQueue, Command } from '../../../lib/browsers/cdp-protocol/cdp-command-queue'
+import type { Command } from '../../../lib/browsers/cdp-protocol/cdp-command-queue'
+import { CDPCommandQueue } from '../../../lib/browsers/cdp-protocol/cdp-command-queue'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import _ from 'lodash'
 

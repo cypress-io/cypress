@@ -636,21 +636,6 @@ const replaceSelectionContents = function (el, key) {
   }
 }
 
-const getCaretPosition = function (el) {
-  const bounds = getSelectionBounds(el)
-
-  if (bounds.start == null) {
-    // no selection
-    return null
-  }
-
-  if (bounds.start === bounds.end) {
-    return bounds.start
-  }
-
-  return null
-}
-
 const interceptSelect = function (this: any) {
   if ($elements.isInput(this) && !$elements.canSetSelectionRangeElement(this)) {
     setSelectionRange(this, 0, $elements.getNativeProp(this, 'value').length)
@@ -739,10 +724,8 @@ export default {
   deleteRightOfCursor,
   deleteLeftOfCursor,
   selectAll,
-  deleteSelectionContents,
   moveSelectionToEnd,
   moveSelectionToStart,
-  getCaretPosition,
   moveCursorLeft,
   moveCursorRight,
   moveCursorUp,

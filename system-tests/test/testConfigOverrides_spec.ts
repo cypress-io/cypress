@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
-import systemTests, { expect, BrowserName } from '../lib/system-tests'
+import type { BrowserName } from '../lib/system-tests'
+import systemTests, { expect } from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 
 const e2ePath = Fixtures.projectPath('e2e')
@@ -55,14 +56,6 @@ describe('testConfigOverrides', () => {
     browser: 'electron',
     expectedExitCode: 2,
     config: { screenshotOnRunFailure: false },
-  })
-
-  systemTests.it(`fails when trying to perform testConfigOverrides for Cypress.env() with allowCypressEnv=false`, {
-    spec: 'testConfigOverrides/allow_cypress_env.cy.js',
-    configFile: 'cypress-allow-cypress-env.config.mjs',
-    expectedExitCode: 1,
-    browser: 'electron',
-    snapshot: true,
   })
 
   // window.Error throws differently for firefox. break into

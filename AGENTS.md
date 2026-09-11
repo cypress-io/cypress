@@ -7,7 +7,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 ## Workspaces
 
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
-- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, rewriter, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (33 packages total)
+- **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more (32 packages total)
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling (15 packages)
 - **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot` (3 packages)
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
@@ -128,7 +128,6 @@ yarn clean-deps && yarn
 - **`@packages/network`** — Low-level network protocol utilities.
 - **`@packages/network-tools`** — Higher-level networking helpers used across packages.
 - **`@packages/https-proxy`** — HTTPS proxy implementation for TLS interception.
-- **`@packages/rewriter`** — JavaScript source rewriter that transforms test and app code for Cypress compatibility (instrument, polyfill, inject).
 
 ### Configuration & Data
 
@@ -168,7 +167,6 @@ yarn clean-deps && yarn
 - **`@cypress/react`** — Component testing adapter for React.
 - **`@cypress/vue`** — Component testing adapter for Vue.js.
 - **`@cypress/angular`** — Component testing adapter for Angular.
-- **`@cypress/angular-zoneless`** — Angular adapter without zone.js.
 - **`@cypress/svelte`** — Component testing adapter for Svelte.
 - **`@cypress/mount-utils`** — Shared utilities used by all component testing adapters.
 
@@ -177,7 +175,7 @@ yarn clean-deps && yarn
 - **`@cypress/webpack-dev-server`** — Webpack Dev Server launcher for component testing.
 - **`@cypress/vite-dev-server`** — Vite Dev Server launcher for component testing.
 - **`@cypress/webpack-preprocessor`** — Webpack preprocessor for bundling test spec files.
-- **`@cypress/webpack-batteries-included-preprocessor`** — Webpack preprocessor with batteries included (TypeScript, CoffeeScript, etc.).
+- **`@cypress/webpack-batteries-included-preprocessor`** — Webpack preprocessor with batteries included (TypeScript, etc.).
 - **`@cypress/vite-plugin-cypress-esm`** — Vite plugin for mutable ESM modules in browser tests.
 
 ### Plugins & Dev Tooling (published via `npm/`)
@@ -248,7 +246,8 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Changelog & Template
 
-- For user-facing changes shipping with the next Cypress version, add a changelog entry to [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) — see the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md).
+- The semantic title prefix decides whether a changelog entry is required. `breaking`, `dependency`, `deprecation`, `feat`, `fix`, `misc`, and `perf` each need an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md); `chore`, `docs`, `refactor`, `revert`, and `test` do not. Choosing `fix` already asserts the change ships to users, so do not then skip the entry because the impact looks internal — the "no user-facing impact" exemption in the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) describes the second group of prefixes.
+- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
@@ -256,7 +255,7 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
 - **Supplementary**: GitHub Actions for security scanning (Snyk), SBOM generation, browser version auto-updates, and PR validation.
 - **Base branch**: `develop` — all PRs target `develop`; release branches follow `release/X.Y.Z`.
-- **Multi-platform matrix**: Linux x64, Linux ARM64, macOS x64, macOS ARM64, Windows — all run in parallel.
+- **Multi-platform matrix**: Linux x64, Linux ARM64, macOS x64, macOS ARM64, Windows — all run in parallel. Coverage is per-job, not uniform: `unit-tests` runs only on linux-x64 and windows, so a unit test coupled to the host architecture passes CI and still fails locally on arm64. See [`cli/AGENTS.md`](./cli/AGENTS.md) for keeping specs host-independent.
 - **Release gate**: All tests must pass through the `ready-to-release` aggregation job before `npm-release` runs.
 - **External PRs**: Require manual approval via `approve-contributor-pr` gate before CI runs.
 - **Binary builds**: Triggered separately after npm release; cross-platform binaries are assembled and distributed via CDN.

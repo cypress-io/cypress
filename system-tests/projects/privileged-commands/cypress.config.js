@@ -1,5 +1,4 @@
 module.exports = {
-  allowCypressEnv: false,
   e2e: {
     baseUrl: 'http://user:pass@localhost:9999/app',
     supportFile: false,

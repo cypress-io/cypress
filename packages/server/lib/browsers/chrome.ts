@@ -23,7 +23,6 @@ import memory from './memory'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
-import { isProxyDisabled } from '../util/is-proxy-disabled'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -209,6 +208,38 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   return args
 }
 
+const DISABLE_FEATURES = '--disable-features='
+
+/**
+ * Merge multiple `--disable-features` arguments into one.
+ *
+ * Cypress disables features in `_getArgs` that the run depends on, and users
+ * may add their own via `before:browser:launch`. Chromium only honors the last
+ * occurrence of the switch, so the values must be combined: a user-supplied
+ * argument otherwise replaces Cypress's list rather than adding to it.
+ */
+const _normalizeDisableFeatures = function (args: string[]): string[] {
+  const featureArgs = args.filter((arg) => arg.startsWith(DISABLE_FEATURES))
+
+  if (featureArgs.length <= 1) {
+    return args
+  }
+
+  const features = _.uniq(
+    featureArgs
+    .flatMap((arg) => arg.slice(DISABLE_FEATURES.length).split(','))
+    .filter(Boolean),
+  )
+
+  const rest = args.filter((arg) => !arg.startsWith(DISABLE_FEATURES))
+
+  if (!features.length) {
+    return rest
+  }
+
+  return rest.concat(`${DISABLE_FEATURES}${features.join(',')}`)
+}
+
 const HOST_RESOLVER_RULES = '--host-resolver-rules='
 
 /**
@@ -361,6 +392,8 @@ export = {
 
   _normalizeHostResolverRules,
 
+  _normalizeDisableFeatures,
+
   _removeRootExtension,
 
   _recordVideo,
@@ -437,16 +470,23 @@ export = {
 
     // Blink's cache-aware font loading hard-fails uncached @font-face loads
     // (net::ERR_FAILED) when a CDP Fetch response-stage pause is attached,
-    // which the proxy-disabled transport always enables (crbug.com/1196004).
-    // Web fonts do not load at all with the proxy disabled unless this flag
-    // stays — do not remove it.
-    if (isProxyDisabled()) {
-      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith('--disable-features='))
+    // which the CDP transport always enables (crbug.com/1196004). Web fonts do
+    // not load at all on the browser (CDP) network path unless this flag stays —
+    // do not remove it.
+    // These features are launch-time-only: connectToExisting attaches to an
+    // already-running browser and inherits the flags of whatever launched it.
+    if (options.useBrowserNetworkInterception) {
+      const disableFeaturesIndex = args.findIndex((arg) => arg.startsWith(DISABLE_FEATURES))
+
+      // ServiceWorkerAutoPreload serves navigations that cold-start a service
+      // worker from a browser-issued request no CDP session can pause
+      // https://github.com/cypress-io/cypress/issues/34709
+      const features = 'WebFontsCacheAwareTimeoutAdaption,ServiceWorkerAutoPreload'
 
       if (disableFeaturesIndex === -1) {
-        args.push('--disable-features=WebFontsCacheAwareTimeoutAdaption')
+        args.push(`${DISABLE_FEATURES}${features}`)
       } else {
-        args[disableFeaturesIndex] += ',WebFontsCacheAwareTimeoutAdaption'
+        args[disableFeaturesIndex] += `,${features}`
       }
     }
 
@@ -568,6 +608,19 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
+    // this runs once per spec, and the client from the previous spec still holds
+    // an open websocket to the same browser. Nothing else closes it. Awaited so
+    // its close, which clears the session's CDP url, can't land after the new
+    // connection sets its own; the reference is left in place until the new
+    // client replaces it so the getter doesn't see undefined mid-connect.
+    if (browserCriClient) {
+      try {
+        await browserCriClient.close(true)
+      } catch (e) {
+        debug('error closing the previous browser cri client: %o', e)
+      }
+    }
+
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,
@@ -587,10 +640,10 @@ export = {
     const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
-    // Fetch must be wired here when the MITM proxy is disabled. The page is
+    // Fetch must be wired here on the browser (CDP) network path. The page is
     // already loaded — enable Page, listen for future frame changes, and seed
     // the frame tree so isAUTFrame works before any new frameAttached events.
-    if (isProxyDisabled()) {
+    if (options.useBrowserNetworkInterception) {
       await pageCriClient.send('Page.enable')
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await cdpAutomation.seedFrameTree(pageCriClient)
@@ -655,12 +708,44 @@ export = {
       pageCriClient.send('ServiceWorker.enable'),
       options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
-      utils.initializeCDP(pageCriClient, automation),
+      utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
     ])
 
-    if (isProxyDisabled()) {
+    if (options.useBrowserNetworkInterception) {
       cdpAutomation._listenForFrameTreeChanges(pageCriClient)
       await options.onPageCriClientReady?.(pageCriClient, cdpAutomation.isAUTFrame, cdpAutomation.onAUTFrameNavigated)
+
+      // A service worker auto-attaches on both the browser-level connection
+      // and this page connection; the browser connection defers releasing a
+      // paused one until this promise resolves, so it never starts serving
+      // navigations before Fetch interception is enabled on its session
+      // here (#34674). For a crash-reloaded target, the browser connection
+      // instead asks this page connection to re-enable interception outright
+      // and holds on that call - a stale confirmation can't be told apart
+      // from a fresh one, so this never trusts one that was already on file.
+      // Both reassigned on every attachListeners call so they always point
+      // at the current page client - connectToNewSpec reuses the same
+      // pageCriClient across specs, but resetBrowserTargets can swap in a
+      // new one before this runs again.
+      browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
+      browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
+
+      // The runner document is served on the AUT's origin, so a root-scoped
+      // worker the origin registered in an earlier session is entitled to
+      // answer for it — and in a persistent open-mode profile it survives to
+      // do so before interception can attach. Redundant with
+      // reset:browser:state on the connectToNewSpec path, and harmless there.
+      // cache_storage goes along because clearing service_workers drops the
+      // registration but leaves its caches, which a re-registered worker would
+      // serve last session's responses from. Cookies and local storage stay
+      // untouched: clearing those would log the profile out of every site it
+      // has visited.
+      if (options.shouldClearPersistedServiceWorkers) {
+        await pageCriClient.send('Storage.clearDataForOrigin', {
+          origin: '*',
+          storageTypes: 'service_workers,cache_storage',
+        })
+      }
 
       await this._navigateUsingCRI(pageCriClient, url)
     } else {
@@ -718,10 +803,12 @@ export = {
       // Write the final merged preferences BEFORE launching the browser
       _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
-    // normalize the --load-extensions argument by
-    // massaging what the user passed into our own, and merge any
-    // user-supplied --host-resolver-rules with the ones derived from `hosts`
-    const args = _normalizeHostResolverRules(_normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser))
+    // Each merges a switch Chromium honors only once, so what a user adds in
+    // before:browser:launch extends Cypress's value instead of replacing it.
+    let args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+
+    args = _normalizeHostResolverRules(args)
+    args = _normalizeDisableFeatures(args)
 
     // this overrides any previous user-data-dir args
     // by being the last one

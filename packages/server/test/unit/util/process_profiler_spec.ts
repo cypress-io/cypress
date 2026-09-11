@@ -1,7 +1,7 @@
 import '../../spec_helper'
 
 import _ from 'lodash'
-import si from 'systeminformation'
+import type si from 'systeminformation'
 import { expect } from 'chai'
 import {
   groupCyProcesses,

@@ -5,6 +5,12 @@
   have a convention where we put GQL queries into Vue components, so for simplicity's sake
   this is a regular ole component.
 -->
+<template>
+  <span
+    class="hidden"
+    aria-hidden="true"
+  />
+</template>
 
 <script setup lang="ts">
 import { watchEffect, ref } from 'vue'

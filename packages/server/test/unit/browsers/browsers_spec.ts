@@ -463,6 +463,72 @@ describe('lib/browsers/index', () => {
         expect(browsers.getBrowserInstance()).to.eq(null)
       })
     })
+
+    it('stops waiting on a browser that never exits once timeoutMs elapses', async () => {
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      // never emits 'exit', as a browser whose process is slow to be reaped
+      browserInstance.kill = sinon.stub()
+
+      browsers._setInstance(browserInstance)
+
+      const startedAt = Date.now()
+
+      const removeAllListenersSpy = sinon.spy(browserInstance, 'removeAllListeners')
+
+      await browsers.close({ timeoutMs: 50 })
+
+      expect(Date.now() - startedAt).to.be.lessThan(1000)
+      expect(browserInstance.kill).to.be.calledOnce
+      // the process is still alive, so its later events still need listeners
+      expect(removeAllListenersSpy).not.to.have.been.called
+    })
+
+    it('waits indefinitely when timeoutMs is present but undefined', async () => {
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = sinon.stub()
+
+      browsers._setInstance(browserInstance)
+
+      // open_project always passes the option object, so an absent bound arrives as an explicit
+      // undefined property; it has to keep waiting, the way a project switch relies on
+      let settled = false
+      const closed = browsers.close({ timeoutMs: undefined }).then(() => {
+        settled = true
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      expect(settled).to.be.false
+
+      browserInstance.emit('exit')
+      await closed
+
+      expect(settled).to.be.true
+    })
+
+    it('waits indefinitely when no timeoutMs is given', async () => {
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = sinon.stub()
+
+      browsers._setInstance(browserInstance)
+
+      let settled = false
+      const closed = browsers.close().then(() => {
+        settled = true
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      expect(settled).to.be.false
+
+      browserInstance.emit('exit')
+      await closed
+
+      expect(settled).to.be.true
+    })
   })
 
   context('browserStatus', () => {

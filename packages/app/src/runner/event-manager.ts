@@ -2,7 +2,6 @@
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '../store/mobx-runner-store'
-import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
@@ -10,7 +9,8 @@ import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { EntrySource, useStudioStore } from '../store/studio-store'
+import type { EntrySource } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
@@ -58,7 +58,6 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: SocketShape
@@ -71,13 +70,8 @@ export class EventManager {
   constructor (
     // import '@packages/driver'
     private $CypressDriver: any,
-    // import * as MobX
-    private Mobx: typeof MobX,
-    // selectorPlaygroundModel singleton
-    selectorPlaygroundModel: any,
     ws: SocketShape,
   ) {
-    this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
@@ -121,19 +115,6 @@ export class EventManager {
     this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
       const connected = isConnected ? automation.CONNECTED : automation.MISSING
 
-      // legacy MobX integration
-      // TODO: UNIFY-1318 - can we delete this, or does the driver depend on this somehow?
-      this.Mobx.runInAction(() => {
-        state.automation = connected
-      })
-
-      this.ws.on('automation:disconnected', () => {
-        this.Mobx.runInAction(() => {
-          state.automation = automation.DISCONNECTED
-        })
-      })
-
-      // unified integration
       this.ws.on('automation:disconnected', () => {
         runnerUiStore.setAutomationStatus('DISCONNECTED')
       })
@@ -685,14 +666,14 @@ export class EventManager {
 
     Cypress.on('run:start', async () => {
       hasMochaRunEnded = false
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
     })
 
     Cypress.on('run:end', async () => {
       hasMochaRunEnded = true
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('end:memory:profiling')
       }
     })
@@ -740,9 +721,7 @@ export class EventManager {
 
       this.studioStore.interceptTest(test)
 
-      // if the experimental flag is on and we are in a chromium based browser,
-      // check the memory pressure to determine if garbage collection is needed
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
           test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })
@@ -944,8 +923,6 @@ export class EventManager {
     if (!Cypress) {
       return
     }
-
-    state.setIsLoading(true)
 
     if (!isRerun) {
       // only clear test state when a new spec is selected

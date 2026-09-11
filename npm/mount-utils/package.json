@@ -13,13 +13,13 @@
   "dependencies": {},
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "eslint": "^9.31.0",
     "lodash": "^4.17.21",
-    "rollup": "3.29.5",
-    "rollup-plugin-dts": "5.0.0",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "rollup": "4.60.2",
+    "rollup-plugin-dts": "6.4.1",
+    "rollup-plugin-typescript2": "^0.37.0",
     "typescript": "~5.4.5"
   },
   "files": [

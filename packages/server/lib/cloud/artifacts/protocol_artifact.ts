@@ -1,7 +1,8 @@
 import fs from 'fs/promises'
 import { existsSync } from 'fs'
 import type { ProtocolManager } from '../protocol'
-import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact, ArtifactKinds } from './artifact'
+import type { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult } from './artifact'
+import { Artifact, ArtifactKinds } from './artifact'
 import Debug from 'debug'
 const debug = Debug('cypress:server:cloud:artifacts:protocol')
 

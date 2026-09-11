@@ -3,7 +3,7 @@ import FirefoxUtil from '../../../lib/browsers/firefox-util'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { Automation } from '../../../lib/automation'
-import { Client as WebDriverClient } from 'webdriver'
+import type { Client as WebDriverClient } from 'webdriver'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 
 describe('Firefox-Util', () => {

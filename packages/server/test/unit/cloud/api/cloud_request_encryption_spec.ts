@@ -1,12 +1,15 @@
-import express, { Request, Response } from 'express'
+import type { Request, Response } from 'express'
+import express from 'express'
 import crypto from 'crypto'
 import { expect } from 'chai'
 import fs from 'fs'
 
-import { DestroyableProxy, fakeServer } from './utils/fake_proxy_server'
+import type { DestroyableProxy } from './utils/fake_proxy_server'
+import { fakeServer } from './utils/fake_proxy_server'
 import bodyParser from 'body-parser'
 import { TEST_PRIVATE } from '@tooling/system-tests/lib/protocol-stubs/protocolStubResponse'
-import { createCloudRequest, TCloudReqest } from '../../../../lib/cloud/api/cloud_request'
+import type { TCloudReqest } from '../../../../lib/cloud/api/cloud_request'
+import { createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import * as jose from 'jose'
 import dedent from 'dedent'
 

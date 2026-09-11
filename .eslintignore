@@ -1,0 +1,3 @@
+# scaffold snapshot files — these must match what the scaffold tool generates
+# and should not be reformatted to match repo style
+system-tests/projects/pristine*/expected-cypress-*/**

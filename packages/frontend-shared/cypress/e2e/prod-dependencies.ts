@@ -2,7 +2,9 @@ export { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLSer
 
 export { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 
-export { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql'
+export { buildSchema, execute, GraphQLError, parse } from 'graphql'
+
+export type { ExecutionResult } from 'graphql'
 
 export { Response } from 'cross-fetch'
 

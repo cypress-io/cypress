@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 
 import type { ServiceWorkerClientEvent } from './service-worker-manager'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from './disable-navigation-preload'
 
 // structural stand-in for the webworker lib's WorkerGlobalScope — the real lib can't be
 // referenced because lib="webworker" conflicts with the dom lib program-wide
@@ -43,10 +44,16 @@ declare let self: ServiceWorkerGlobalScope
 /**
  * Injects code into the service worker to overwrite the fetch events to determine if the service worker handled the request.
  * @param body the body of the service worker
+ * @param options.disableServiceWorkerNavigationPreload when true, prepends the
+ * navigation-preload disabling expression ahead of everything else in the script, so
+ * it runs before any user code. See disable-navigation-preload.ts (#34652) for why.
+ * @param options.reservedPathPrefixes when set, the wrapped fetch listeners decline requests
+ * whose path starts with one of these prefixes rather than letting the application handle them.
+ * Supplied by the server from packages/server/lib/adapters/internal-routes.ts.
  * @returns the updated service worker
  */
-export const injectIntoServiceWorker = (body: Buffer) => {
-  function __cypressInjectIntoServiceWorker () {
+export const injectIntoServiceWorker = (body: Buffer, options: { disableServiceWorkerNavigationPreload?: boolean, reservedPathPrefixes?: string[] } = {}) => {
+  function __cypressInjectIntoServiceWorker (reservedPathPrefixes: string[] | null) {
     let listenerCount = 0
     const nonCaptureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
     const captureListenersMap = new WeakMap<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>()
@@ -92,8 +99,27 @@ export const injectIntoServiceWorker = (body: Buffer) => {
       return typeof options === 'boolean' ? options : options?.capture
     }
 
+    // A request under a path Cypress reserves belongs to the runner and never to
+    // the application, whichever origin it is on.
+    const isReservedPathRequest = (url: string) => {
+      if (!reservedPathPrefixes) {
+        return false
+      }
+
+      const { pathname } = new URL(url)
+
+      return reservedPathPrefixes.some((prefix) => pathname.startsWith(prefix))
+    }
+
     function wrapListener (listener: FetchListener): FetchListener {
       return async (event) => {
+        // declining lets the request fall through to the network, where Cypress intercepts it
+        if (isReservedPathRequest(event.request.url)) {
+          sendFetchRequest({ url: event.request.url, isControlled: false })
+
+          return
+        }
+
         // we want to override the respondWith method so we can track if it was called
         // to determine if the service worker handled the request
         const oldRespondWith = event.respondWith
@@ -294,9 +320,16 @@ export const injectIntoServiceWorker = (body: Buffer) => {
     })
   }
 
+  // Prepended ahead of everything else, including the IIFE below, so it runs
+  // before any user code has a chance to call navigationPreload.enable().
+  const disableNavigationPreload = options.disableServiceWorkerNavigationPreload
+    ? `${DISABLE_NAVIGATION_PRELOAD_EXPRESSION};`
+    : ''
+
   const updatedBody = `
+${disableNavigationPreload}
 let __cypressIsScriptEvaluated = false;
-(${__cypressInjectIntoServiceWorker})();
+(${__cypressInjectIntoServiceWorker})(${JSON.stringify(options.reservedPathPrefixes ?? null)});
 ${body};
 __cypressIsScriptEvaluated = true;`
 

@@ -53,14 +53,14 @@ import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 
 import { DEBUG_TAB_MEDIUM } from '../utils/constants'
-import type { FunctionalComponent, SVGAttributes } from 'vue'
+import type { Component } from 'vue'
 
 const { t } = useI18n()
 
 const props = defineProps<{
   title: string
   description?: string
-  icon?: FunctionalComponent<SVGAttributes, {}>
+  icon?: Component
   helpLinkHref?: string
   helpLinkSrText?: string
   utm?: { utm_campaign: string }

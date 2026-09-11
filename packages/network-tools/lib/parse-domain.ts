@@ -6,17 +6,16 @@ export type ParsedDomainParts = {
   tld: string
 }
 
-export type ParseDomainOptions = {
-  privateTlds?: boolean
-}
-
 // `extractHostname: false` means tldts parses the input verbatim as a hostname —
 // it does NOT pull the host out of a URL. Callers must pass a hostname (e.g.
 // `www.example.com`), not a full URL (`https://www.example.com`), or tldts will
 // silently return wrong results.
-const TLDT_OPTS_BASE = {
+// `allowPrivateDomains` keeps a private suffix (e.g. `herokuapp.com`) as the tld, so
+// two customers' apps on one host resolve to different super domains.
+const TLDTS_OPTS = {
   extractHostname: false,
   mixedInputs: false,
+  allowPrivateDomains: true,
 } as const
 
 /**
@@ -44,14 +43,11 @@ function legacyCustomTldSplit (hostname: string): ParsedDomainParts | null {
     }
   }
 
+  // the `\.[^.]+$` alternation is what matched (the digit/dot one returned above),
+  // so the hostname holds a dot and a non-empty final segment
   const segments = hostname.split('.')
-
-  if (segments.length < 2) {
-    return null
-  }
-
-  const tld = segments[segments.length - 1] || ''
-  const domain = segments[segments.length - 2] || ''
+  const tld = segments[segments.length - 1]
+  const domain = segments[segments.length - 2]
   const subdomain = segments.length > 2 ? segments.slice(0, -2).join('.') : ''
 
   return { subdomain, domain, tld }
@@ -89,22 +85,14 @@ function tldtsToLegacy (hostname: string, r: ReturnType<typeof tldtsParse>): Par
  * legacy `customTlds` regexp the old cors wrapper always passed so host-only cookie logic
  * still sees a parsed shape where applicable.
  */
-export function parseDomain (input: string, options: ParseDomainOptions = {}): ParsedDomainParts | null {
-  const merged: ParseDomainOptions & { privateTlds: boolean } = {
-    privateTlds: true,
-    ...options,
-  }
-
+export function parseDomain (input: string): ParsedDomainParts | null {
   const hostname = input.trim().replace(/^\.+/, '')
 
   if (!hostname) {
     return null
   }
 
-  const r = tldtsParse(hostname, {
-    ...TLDT_OPTS_BASE,
-    allowPrivateDomains: merged.privateTlds !== false,
-  })
+  const r = tldtsParse(hostname, TLDTS_OPTS)
 
   const fromTld = tldtsToLegacy(hostname, r)
 

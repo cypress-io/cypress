@@ -11,7 +11,10 @@ interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.add('end', () => null)
+  Commands.add('end', () => {
+    return $errUtils.throwErrByPath('end.removed')
+  })
+
   Commands.add('noop', (arg) => arg)
 
   Commands.add('log', (msg, ...args) => {

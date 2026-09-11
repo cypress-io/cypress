@@ -8,8 +8,10 @@ import chaiAsPromised from 'chai-as-promised'
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
-import { putFetch, ParseKinds } from '../../../../lib/cloud/network/fetch'
-import { linearDelay, asyncRetry } from '../../../../lib/util/async_retry'
+import type { putFetch } from '../../../../lib/cloud/network/fetch'
+import { ParseKinds } from '../../../../lib/cloud/network/fetch'
+import type { asyncRetry } from '../../../../lib/util/async_retry'
+import { linearDelay } from '../../../../lib/util/async_retry'
 import type { putProtocolArtifact } from '../../../../lib/cloud/api/put_protocol_artifact'
 
 chai.use(chaiAsPromised).use(sinonChai)

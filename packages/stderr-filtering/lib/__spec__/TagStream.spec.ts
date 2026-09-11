@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, MockedObject } from 'vitest'
+import type { MockedObject } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { TagStream } from '../TagStream'
 import { START_TAG, END_TAG } from '../constants'
 import { StringDecoder } from 'string_decoder'

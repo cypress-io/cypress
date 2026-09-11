@@ -10,7 +10,8 @@
 
 <script setup lang="ts">
 
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import Tabs from '@cypress-design/vue-tabs'
 import type { Tab } from '@cypress-design/constants-tabs'
 import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkOutline } from '@cypress-design/vue-icon'
@@ -41,7 +42,7 @@ const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
 // Not doing this results in layout issues as icons get added/removed
 const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}-${shouldUseLongText.value}`)
 
-const tabs = computed(() => {
+const tabs = computed((): Tab[] => {
   return [
     {
       id: 'e2e',
@@ -57,7 +58,7 @@ const tabs = computed(() => {
       iconAfter: props.isCtConfigured === false ? StyledQuestionMarkIcon : undefined,
       active: props.viewedTestingType === 'component',
     },
-  ]
+  ] as Tab[]
 })
 
 function handleSwitch (tab: Tab) {

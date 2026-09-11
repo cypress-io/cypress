@@ -1,5 +1,10 @@
 import { expect } from 'chai'
 
+// The default network path intercepts in the browser through CDP, which only
+// Chromium-family browsers support; Firefox, Electron, and WebKit stay on the
+// HTTP/1 proxy either way.
+const usesBrowserNetworkPath = !Cypress.config('forceHttp1') && Cypress.isBrowser([{ name: '!electron', family: 'chromium' }])
+
 describe('Proxy Logging', () => {
   const { _ } = Cypress
 
@@ -224,7 +229,7 @@ describe('Proxy Logging', () => {
                 // browser→proxy hop to report, and the protocol negotiated with the
                 // origin is not knowable while the request is paused, so httpVersion
                 // is honestly absent rather than a fabricated 1.1.
-                ...(Cypress.expose('PROXY_DISABLED') ? {} : { httpVersion: '1.1' }),
+                ...(usesBrowserNetworkPath ? {} : { httpVersion: '1.1' }),
                 query: {},
                 responseTimeout: Cypress.config('responseTimeout'),
                 headers: interceptProps.Request.headers,

@@ -12,8 +12,8 @@
     "@babel/preset-typescript": "^7.26.0",
     "@vitejs/plugin-react": "^4.3.3",
     "babel-loader": "^9.2.1",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.18",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.9",
     "webpack": "^5.96.1",
     "webpack-dev-server": "^5.1.0"
   },

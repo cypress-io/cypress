@@ -10,7 +10,8 @@
 import type { SpawnOptions } from 'child_process'
 
 import { monorepoPaths } from '../monorepoPaths'
-import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProcessUtils'
+import type { AllSpawnableApps } from '../utils/childProcessUtils'
+import { spawned, spawnUntilMatch } from '../utils/childProcessUtils'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow

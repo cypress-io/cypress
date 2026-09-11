@@ -1,7 +1,9 @@
 import { expect } from 'chai'
 import { installErrorTransform } from '../../../../lib/cloud/api/axios_middleware/transform_error'
-import { AxiosError, AxiosResponse, AxiosInstance } from 'axios'
-import sinon, { SinonSpy } from 'sinon'
+import type { AxiosResponse, AxiosInstance } from 'axios'
+import { AxiosError } from 'axios'
+import type { SinonSpy } from 'sinon'
+import sinon from 'sinon'
 
 describe('transformError', () => {
   const status = 400

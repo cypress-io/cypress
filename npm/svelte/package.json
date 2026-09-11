@@ -15,7 +15,7 @@
     "@cypress/mount-utils": "0.0.0-development",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
-    "rollup": "3.29.5",
+    "rollup": "^4.60.2",
     "svelte": "^5.4.0",
     "typescript": "~5.4.5"
   },
