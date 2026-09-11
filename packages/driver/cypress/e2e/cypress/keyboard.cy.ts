@@ -1,4 +1,8 @@
-const { Keyboard } = Cypress
+import type $Keyboard from '../../../src/cy/keyboard'
+
+// The public `Cypress.Keyboard` type only describes `defaults` and `Keys`, so
+// borrow the implementation's type to reach the rest of the runtime surface.
+const Keyboard = Cypress.Keyboard as unknown as typeof $Keyboard
 
 const DEFAULTS = {
   keystrokeDelay: null,
@@ -46,7 +50,7 @@ describe('src/cypress/keyboard', () => {
         keystrokeDelay: 5,
       })
 
-      expect(result).to.deep.eql({
+      expect(result).to.deep.equal({
         keystrokeDelay: 5,
       })
     })
@@ -64,6 +68,7 @@ describe('src/cypress/keyboard', () => {
     describe('errors', () => {
       it('throws if not passed an object', () => {
         const fn = () => {
+          // @ts-expect-error - missing the required options object
           Keyboard.defaults()
         }
 
@@ -78,6 +83,7 @@ describe('src/cypress/keyboard', () => {
 
       it('throws if keystrokeDelay is not a number', () => {
         const fn = () => {
+          // @ts-expect-error - keystrokeDelay must be a number
           Keyboard.defaults({ keystrokeDelay: false })
         }
 
