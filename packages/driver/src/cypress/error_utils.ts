@@ -200,14 +200,35 @@ const getUserInvocationStack = (err, state) => {
   return undefined
 }
 
+// `DOMException`, which browsers throw for cross-origin access and CSP
+// violations, inherits `message` as a getter-only accessor, so plain
+// assignment throws. Shadow the accessor with an own property instead, and if
+// even that is refused (a frozen error), leave the error untouched so the
+// original one still reaches the user rather than being replaced by this
+// failure.
+const setErrProp = (err, prop: string, value: any): boolean => {
+  try {
+    err[prop] = value
+  } catch {
+    try {
+      Object.defineProperty(err, prop, { value, writable: true, configurable: true })
+    } catch {
+      return false
+    }
+  }
+
+  return true
+}
+
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  err.stack = $stackUtils.normalizedStack(err)
+  setErrProp(err, 'stack', $stackUtils.normalizedStack(err))
 
   const newMessage = cb(err.message, newErrMsg)
   const newStack = stackWithReplacedProps(err, { message: newMessage })
 
-  err.message = newMessage
-  err.stack = newStack
+  if (setErrProp(err, 'message', newMessage)) {
+    setErrProp(err, 'stack', newStack)
+  }
 
   return err
 }
