@@ -130,8 +130,10 @@ describe('src/cy/commands/debugging', () => {
     it('can pause in run mode with --headed and --no-exit', function () {
       let didPause = false
 
+      // @ts-expect-error - runtime config, not a test config override
       Cypress.config('isInteractive', false)
       Cypress.config('browser').isHeaded = true
+      // @ts-expect-error - runtime config, not a test config override
       Cypress.config('exit', false)
 
       cy.once('paused', (name) => {
