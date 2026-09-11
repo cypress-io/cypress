@@ -478,9 +478,7 @@ export const isValidTrustedCertificates = (key: string, value: any): ErrResult |
     return errMsg(key, value, 'an array of trusted certificate objects')
   }
 
-  for (let i = 0; i < value.length; i++) {
-    const entry = value[i]
-
+  for (const [i, entry] of value.entries()) {
     if (!_.isPlainObject(entry)) {
       return errMsg(`${key}[${i}]`, entry, 'an object with exactly one of "filePath", "pem", or "spki"')
     }
@@ -496,10 +494,6 @@ export const isValidTrustedCertificates = (key: string, value: any): ErrResult |
 
     if (!_.isString(entryValue) || _.isEmpty(entryValue)) {
       return errMsg(`${key}[${i}].${entryKey}`, entryValue, 'a non-empty string')
-    }
-
-    if (entryKey === 'filePath' && path.isAbsolute(entryValue)) {
-      return errMsg(`${key}[${i}].filePath`, entryValue, 'a relative filepath')
     }
 
     if (entryKey === 'spki' && !SPKI_FINGERPRINT.test(entryValue)) {

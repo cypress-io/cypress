@@ -92,6 +92,10 @@ describe('config/src/validation', () => {
       expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: 'certs/leaf.pem' }])).toBe(true)
     })
 
+    it('accepts a filePath entry with an absolute path', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: '/etc/certs/leaf.pem' }])).toBe(true)
+    })
+
     it('accepts a pem entry', () => {
       expect(validation.isValidTrustedCertificates(mockKey, [{ pem: '-----BEGIN CERTIFICATE-----' }])).toBe(true)
     })
@@ -138,12 +142,6 @@ describe('config/src/validation', () => {
 
     it('rejects a non-string value', () => {
       const result = validation.isValidTrustedCertificates(mockKey, [{ pem: 123 }])
-
-      expect(result).not.toBe(true)
-    })
-
-    it('rejects an absolute filePath', () => {
-      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: '/etc/certs/leaf.pem' }])
 
       expect(result).not.toBe(true)
     })
