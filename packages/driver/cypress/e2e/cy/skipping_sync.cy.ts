@@ -18,11 +18,11 @@ Screenshot.defaults({ onAfterScreenshot: () => {
 const pendingTests: Cypress.ObjectLike[] = []
 const passedTests: Cypress.ObjectLike[] = []
 
-Cypress.on('test:after:run', (test) => {
-  if (test.state === 'pending') {
-    pendingTests.push(test)
-  } else if (test.state === 'passed') {
-    passedTests.push(test)
+Cypress.on('test:after:run', (attributes) => {
+  if (attributes.state === 'pending') {
+    pendingTests.push(attributes)
+  } else if (attributes.state === 'passed') {
+    passedTests.push(attributes)
   }
 })
 
