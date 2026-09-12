@@ -28,19 +28,5 @@
       "Read(./tooling/v8-snapshot/cache/*/snapshot-meta.json)",
       "Read(./packages/app/cypress/e2e/runner/snapshots/**)"
     ]
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-file.mjs\"",
-            "timeout": 120
-          }
-        ]
-      }
-    ]
   }
 }

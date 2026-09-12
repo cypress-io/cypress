@@ -412,7 +412,6 @@ settings.local.json
 .claude/*
 !.claude/settings.json
 !.claude/skills
-!.claude/hooks
 
 # chunk active sidecar tracking
 .chunk/sidecar.json

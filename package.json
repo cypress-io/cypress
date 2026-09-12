@@ -251,6 +251,19 @@
       "**/expect"
     ]
   },
+  "lint-staged": {
+    "npm/vue/**/*.{js,jsx,ts,tsx,vue}": "yarn workspace @cypress/vue eslint --fix",
+    "npm/svelte/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/svelte eslint --fix",
+    "npm/react/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/react eslint --fix",
+    "npm/!(vue|svelte|react)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "scripts/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
+    "system-tests/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
+    "tooling/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
+    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    ".circleci/*.yml": "circleci config validate"
+  },
   "resolutions": {
     "**/@electron/get": "^4.0.1",
     "**/@graphql-tools/delegate": "8.2.1",
