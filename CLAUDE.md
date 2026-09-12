@@ -45,4 +45,8 @@
 - E2E and packaged-binary integration tests do not run in the sandbox. When they are needed, provide the exact commands and ask the user to run them.
 - Before committing or pushing, `yarn check-ts`, `yarn lint`, and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
 
+## Product Context
+
+- The Electron *browser* (`--browser electron`) is deprecated and slated for removal. Do not plan, build, or test features that depend on it as a test browser, and do not treat it as the default browser in plans or docs. Electron remains only the host process for the app; assume tests run in Chrome, Chromium, Edge, Firefox, or WebKit.
+
 @AGENTS.md
