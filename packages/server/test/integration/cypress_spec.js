@@ -1869,6 +1869,18 @@ describe('lib/cypress', () => {
         this.expectExitWith(0)
       })
     })
+
+    it('does not warn when running the internal smoke test', function () {
+      return cypress.start(['--smoke-test', '--ping=abc123'])
+      .then(() => {
+        expect(
+          errors.warning.calledWith('INVOKED_BINARY_OUTSIDE_NPM_MODULE'),
+          'SMOKE_TEST_DIRECT_BINARY_WARNING',
+        ).to.be.false
+
+        this.expectExitWith(0)
+      })
+    })
   })
 
   context('interactive', () => {
