@@ -55,15 +55,17 @@ export class TagStream extends Transform {
    *
    * Processes the input chunk, handles both Buffer and string inputs,
    * and wraps the result with the configured start and end tags.
-   * Implements backpressure handling by waiting for the 'drain' event
-   * when the downstream stream cannot accept more data.
+   *
+   * Node applies backpressure to the writable side of a transform while its
+   * readable buffer is full, so the chunk can be pushed without waiting on
+   * this stream's own 'drain' event - that event cannot fire until this
+   * transform completes, so waiting on it would deadlock the pipeline.
    *
    * @param chunk - The input chunk to transform. Can be Buffer, string, or any other type.
    * @param encoding - The encoding of the chunk (used by Transform stream).
    * @param callback - Callback function to signal completion of transformation.
-   * @returns Promise that resolves when transformation is complete.
    */
-  async transform (chunk: Buffer | string | any, encoding: string, callback: (error?: Error, data?: Buffer) => void) {
+  transform (chunk: Buffer | string | any, encoding: string, callback: (error?: Error, data?: Buffer) => void) {
     try {
       const out = chunk instanceof Buffer ?
         this.initializedDecoder.write(chunk) :
@@ -71,12 +73,7 @@ export class TagStream extends Transform {
       const transformed = out ? this.tag(out) : Buffer.from('')
 
       debugVerbose(`transformed: "${transformed.toString().replaceAll('\n', '\\n')}"`)
-      const canWrite = this.push(transformed)
-
-      if (!canWrite) {
-        debugVerbose('waiting for drain')
-        await new Promise((resolve) => this.once('drain', resolve))
-      }
+      this.push(transformed)
 
       callback()
     } catch (err) {
