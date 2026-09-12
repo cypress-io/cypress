@@ -17,5 +17,16 @@
   "enabledPlugins": {
     "cypress@cypress": true,
     "typescript-lsp@claude-plugins-official": true
+  },
+  "permissions": {
+    "deny": [
+      "Read(./yarn.lock)",
+      "Read(./**/yarn.lock)",
+      "Read(./**/package-lock.json)",
+      "Read(./**/pnpm-lock.yaml)",
+      "Read(./packages/frontend-shared/src/shiki/languages/**)",
+      "Read(./tooling/v8-snapshot/cache/*/snapshot-meta.json)",
+      "Read(./packages/app/cypress/e2e/runner/snapshots/**)"
+    ]
   }
 }
