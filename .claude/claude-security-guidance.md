@@ -1,112 +1,146 @@
 # Security guidance for the Cypress monorepo
 
-Cypress is a test runner. It deliberately does things a normal web app must never
-do: it terminates TLS for the application under test, strips the AUT's security
-headers, evaluates user-authored code, and runs a privileged Electron process
-next to attacker-influenced page content. So "this code disables a security
-control" is often correct here. The question is always **which side of a trust
-boundary it happens on**.
+Cypress deliberately does things a normal web app must never do: it terminates
+TLS for the app under test, strips its security headers, evaluates user-authored
+code, and runs a privileged Electron process next to attacker-influenced page
+content. "This disables a security control" is often correct here. The question
+is always **which side of a trust boundary it is on**.
 
-Treat these as the trust boundaries:
-
-- **Untrusted**: the application under test, its responses, its DOM, its cookies;
-  anything arriving over `postMessage` from an AUT frame; GitHub issue and PR text.
-- **Semi-trusted**: the user's project — `cypress.config.ts`, spec files, plugin
-  code, fixture paths. The user chose to run it, but it must not escalate beyond
-  the privileges Cypress already has.
-- **Trusted**: the Electron main process, the server, the launchpad/app UI origin,
+- **Untrusted**: the AUT — responses, DOM, cookies, `Set-Cookie`; anything over
+  `postMessage` from an AUT frame; any `x-cypress-*` request header (same-origin
+  AUT script can set these); a forged `Host` or `Referer`; a page script talking
+  to the extension; GitHub issue and PR text.
+- **Semi-trusted**: the user's project — config, specs, plugin code, fixtures,
+  `package.json` `config`. It must not escalate past Cypress itself.
+- **Trusted**: the Electron main process, the server, the launchpad/app origin,
   release tooling and CI credentials.
 
-A finding is serious when untrusted data crosses into trusted, or when a control
-that protects the *user's own* connection is weakened.
+Serious means untrusted data crossing into trusted, or a control protecting the
+*user's own* connection or machine being weakened.
 
-## Deliberate, load-bearing exceptions
+Areas this file omits for space are in `guides/security-review-notes.md`.
 
-Do not "fix" these. Flag only a change that widens what they accept.
+## Deliberate exceptions — do not "fix" these
 
-- `packages/driver/src/cypress/script_utils.ts` evaluates spec contents via
-  `specWindow.eval`. Running the user's spec is the product.
-- `packages/driver/src/cross-origin/origin_fn.ts` evaluates the serialized
-  `cy.origin()` callback with `window.eval`. Also by design.
-- `packages/proxy/lib/adapters/remove-security.ts` strips AUT response security
-  headers so the AUT can be framed and instrumented.
-- `@packages/https-proxy` intercepts the AUT's TLS with generated certificates.
-- `packages/server/lib/browsers/chrome.ts` passes `--disable-web-security` when
-  the user sets `chromeWebSecurity: false`, and
-  `packages/server/lib/gui/windows.ts` derives the Electron window's
-  `webSecurity` from that same config.
+Flag only a change that widens their reach.
 
-For each of these, the review question is narrow: does the change let the
-mechanism reach traffic, an origin, or a process it did not reach before?
+- Running user code is the product: `driver/src/cypress/script_utils.ts`,
+  `driver/src/cross-origin/origin_fn.ts`, `server/lib/plugins/child/`.
+- `proxy/lib/http/util/regex-rewriter.ts` rewrites obstructive `top`/`parent`
+  code and strips SRI `integrity`; `adapters/remove-security.ts` is only the
+  gate. HSTS is deliberately never stripped — do not add it.
+- `@packages/https-proxy` intercepts AUT TLS. `server/lib/request.ts` sets
+  `NODE_TLS_REJECT_UNAUTHORIZED=0` process-wide and `util/suppress_warnings.ts`
+  hides the warning — do not widen that filter. Calls to Cypress-owned services
+  must use `strictAgent` from `network/lib/agent.ts`.
+- `socket/lib/utils.ts` lifts socket.io-parser's `maxAttachments` DoS cap,
+  justified as "two trusted local processes" — widening who can reach that socket
+  invalidates that and must be raised.
 
-## What to look for
+## Origin comparison
 
-**Origin and scope decisions.** Cookie, interception, and proxy logic must
-compare parsed URL components, not string prefixes. A `startsWith`/`includes`
-check on an origin treats `example.com.attacker.net` as `example.com`, which
-sends a cookie or a matched intercept to the wrong host. The same applies to
-cookie `Domain`, `Secure`, and `SameSite` derivation.
+- `toFileServerUrl` (`network-tools/lib/remote-states.ts`) is the reference, and
+  its comment says why: compare `URL.origin`, never a string prefix, because a
+  prefix treats `http://localhost:2020@evil.com` as under the file origin.
+- Two gates still use `startsWith`: `urlMatchesOriginProtectionSpace`
+  (`network-tools/lib/cors.ts`), which mints `Authorization: Basic`, and
+  `reqMatchesPolicyBasedOnDomain` (`proxy/lib/http/util/document-preparation.ts`),
+  which feeds injection level. `extension/app/v3/service-worker.ts` matches tabs
+  with `tab.url.includes(url)`.
+- The `TypeError` fallbacks in `uri.ts` and `cors.ts` must keep returning a
+  *recovered authority*, never raw input, or distinct malformed URLs collapse
+  into one parsed object and compare same-origin. Never widen those `catch`es.
+- `allowPrivateDomains` (`parse-domain.ts`) keeps tenants on a shared host in
+  separate super-domains; callers must pass a hostname, not a URL.
+- The third-party/first-party scoping for
+  `experimentalModifyObstructiveThirdPartyCode` and `removeSRIAttributes` is
+  duplicated in `remove-security.ts` **and** `inject-html.ts`.
 
-**Security-header rewriting.** Anything in `packages/proxy` or
-`packages/network` that removes or relaxes CSP, `X-Frame-Options`, HSTS, or the
-cross-origin isolation headers must apply to AUT responses only — never to the
-Cypress UI's own origin, and never to a third-party request the AUT happens to
-make.
+## Inline script payloads
 
-**AUT content reaching privileged UI.** `reifyDomElement` in
-`packages/driver/src/util/serialization/log.ts` assigns `innerHTML` from a
-`postMessage`d payload that originated in the AUT, and reifies its attributes.
-Anything that widens that path — more tag names, more attributes, event handler
-attributes, `<script>`, `<iframe>`, `srcdoc`, `javascript:` URLs — is script
-execution in the runner's own origin, not the AUT's. Attribute allowlisting is
-the control; keep it.
+`privileged-commands-manager.ts` has the correct escaper,
+`serializeForInlineScript` (`<`, `>`, U+2028, U+2029). Use it for every value
+interpolated into an inline `<script>`. `JSON.stringify` alone is **not** enough:
+it does not escape `<`, `>`, or `/`, so a value containing `</script>` closes the
+element. Sites to hold to this standard: `proxy/lib/http/util/inject.ts` (its
+payload carries `simulatedCookies` from the origin's own `Set-Cookie`, and
+`document.domain` from `getSuperDomain`) and
+`data-context/src/sources/HtmlDataSource.ts` (spec filenames, `projectName`,
+`namespace`). `socket/lib/node/cdp-socket.ts` hand-rolls quote escaping into a
+`Runtime.evaluate` expression — prefer `callFunctionOn` with `arguments`, and
+keep the builders in `automation/commands/` numeric or boolean.
 
-**Electron renderer privileges.** Any new `BrowserWindow` or `webPreferences`
-change: keep `contextIsolation` on and `nodeIntegration` off for any window that
-can load remote or AUT-influenced content. Expose capability through an explicit
-preload bridge with a narrow surface, never the raw `require`, `fs`, or
-`child_process`.
+## Headers
 
-**The config/plugins child process.** It executes the user's config and plugin
-code, so treat everything crossing back over that IPC channel as semi-trusted
-input: never `eval` it, never interpolate it into a shell string, and resolve any
-path it supplies against the project root before touching the filesystem. This
-code also runs on the *user's* Node — see the runtime floors in `AGENTS.md`
-before using a modern API.
+- `PatchExpressSetHeader` bypasses Node's `ERR_INVALID_CHAR`, and
+  `insecureHTTPParser: true` is set in `network/lib/http-utils.ts`, so header
+  injection and smuggling are the live risk class in the proxy. Keep
+  `OmitProblematicHeaders` before `SetInjectionLevel`.
+- `x-cypress-*` headers carry trust decisions (`isAUTFrame` drives cookie
+  attachment and injection level), so each must be deleted before passthrough.
+- `x-cypress-internal-loopback-token` gates `proxiedUrl` override and force-proxy
+  bypass: **every new passthrough path must strip it.** The comments in
+  `adapters/internal-routes.ts` and `serve-internal-routes.ts` explain why header
+  presence alone is never sufficient.
 
-**Process spawning.** Browser launch, `execa`, and `child_process` calls must
-pass an argv array, not a composed shell string, whenever any element comes from
-a project path, browser argument, spec name, or environment variable.
+## Local endpoints and tokens
 
-**Local HTTP and socket endpoints.** The server, GraphQL endpoint, and
-`__cypress`/`__launchpad` routes are reachable from the AUT's browser. New routes
-need an origin or token check, and any token comparison should be constant-time.
-Adding a permissive CORS header to these is a finding.
+- `/__launchpad/*` is protected by `corsOriginDelegate.ts` (loopback host **and**
+  matching port) across CORS, socket.io `allowRequest` and the `graphql-ws`
+  upgrade. `/__cypress/graphql` and the driver socket.io server have no
+  equivalent check and both reach privileged handlers, so new routes or socket
+  events there need an origin or token check.
+- Do not treat `socketId` as authentication — no handler requires it.
+- Token comparisons in `file_server.ts`, `internal-routes.ts`,
+  `privileged-commands-manager.ts` and `cloud/auth.ts` use `!==`; new ones should
+  use `crypto.timingSafeEqual`, with tokens from `crypto.randomBytes` rather than
+  `util/random.ts`'s reduced charset. Never log a token or an `access_token`.
 
-**Credentials.** Record keys and auth tokens must pass through `hideKeys()` from
-`@packages/config` before reaching a log, an error template, a snapshot, or a
-telemetry attribute — `packages/server/lib/modes/record.ts` does this before
-building `CLOUD_RECORD_KEY_NOT_VALID`. Error snapshots under
-`packages/errors/test/__snapshots__` are committed, so a key that reaches an
-error message reaches the public repo.
+## Reaching the OS
 
-**Archive extraction and downloads.** In `cli/`, validate entry paths before
-extracting (no absolute paths, no `..`), and keep checksum verification on the
-downloaded binary. `CYPRESS_DOWNLOAD_*` and `CYPRESS_RUN_BINARY` are
-user-controlled: they must not build a shell command, and paths derived from them
-should be resolved and checked.
+`shell.openExternal` (`gui/links.ts`) and the editor launch
+(`util/file-opener.ts`, `actions/FileActions.ts`, which pass `"${binary}"` as a
+quoted string and hit `cmd.exe /C` on Windows) are the two paths from a socket
+message to process execution. Validate the scheme, validate the editor against
+the discovered `availableEditors`, prefer argv arrays. `socket-base.ts` already
+overrides the front-end-supplied `fileDetails.where` server-side for this reason
+— extend that distrust, don't narrow it. Browser launch and `execa` need argv
+arrays whenever an element derives from a project path, browser argument, spec
+name, or env var.
 
-**Workflows.** Files under `.github/workflows/` hold real credentials —
-`WORKFLOW_DEPLOY_KEY`, `CYPRESS_BOT_APP_PRIVATE_KEY`, npm and AWS tokens in
-`scripts/`. `triage_handle_new_comments.yml` triggers on `issue_comment`, so
-comment text is attacker-controlled. Never interpolate `github.event.*` text into
-a `run:` block; bind it to an `env:` var and quote the expansion. Scrutinize any
-move to `pull_request_target`, any widening of `permissions:`, and any new
-third-party action that is not pinned to a commit SHA.
+## Electron renderer privileges
 
-## Out of scope
+`gui/windows.ts` defaults to `webSecurity: true`, `nodeIntegration: false`,
+`contextIsolation: true`, but `create()` merges with `_.defaultsDeep` and then
+unconditionally overwrites `webSecurity` from `chromeWebSecurity`. Force these
+keys *after* the merge so a caller cannot opt out, and derive `webSecurity` from
+config only for AUT windows. Keep `setWindowOpenHandler` returning `deny`. A new
+`preload` needs `contextIsolation` plus `sandbox` and a hand-written
+`contextBridge` allowlist. The GUI window's origin must stay loopback.
 
-Test fixtures under `system-tests/projects/**` and
-`packages/driver/cypress/fixtures/**` contain intentionally unsafe HTML and
-insecure requests, and `packages/server/test/**` disables TLS verification on
-purpose. Do not report those as vulnerabilities.
+## AUT content reaching privileged UI
+
+`reifyDomElement` (`driver/src/util/serialization/log.ts`) assigns `innerHTML`
+from a `postMessage`d payload that originated in the AUT, so widening that path
+(more tags, event-handler attributes, `<script>`, `srcdoc`, `javascript:`) is
+script execution in the runner's own origin.
+
+## Credentials
+
+Record keys and auth tokens must pass through `hideKeys()` from
+`@packages/config` before reaching a log, error, snapshot, or telemetry attribute
+— `server/lib/modes/record.ts` does this. It reveals 10 characters, so it suits a
+high-entropy key and nothing shorter. Snapshots under
+`packages/errors/test/__snapshots__` are committed, so pass a picked subset into
+an error, never the whole config. `HtmlDataSource.ts`'s `delete cfg.env` is the
+load-bearing scrub before config reaches the browser, and Cloud request logging
+is deliberately body-free.
+
+## Two last things
+
+A PR that **deletes an existing security comment** in these files is a red flag:
+they encode invariants not visible in the code.
+
+Fixtures under `system-tests/projects/**` and `driver/cypress/fixtures/**`
+contain intentionally unsafe HTML, and `packages/server/test/**` disables TLS
+verification on purpose. Do not report those.
