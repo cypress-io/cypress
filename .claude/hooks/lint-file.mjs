@@ -3,10 +3,8 @@
 // Lints the file Claude Code just edited. The harness pipes a PostToolUse
 // payload on stdin, and the linter is chosen from the path that payload names.
 //
-// That choice is not a constant: the repo is mid-migration (see
-// guides/eslint-migration.md), so a package either carries its own flat config
-// and a local ESLint 9, or falls back to the root .eslintrc.js under ESLint 8.
-// Reading it off the path leaves no list here to keep in sync as packages move.
+// Which ESLint owns that path is scripts/eslint-routing.js's answer to give,
+// shared with lint-staged so an edit and a commit cannot disagree.
 //
 // Plain JS rather than TypeScript: it runs on every edit, so it must start
 // without a transpile step — and without the repo's dependencies, which it
@@ -16,43 +14,17 @@ import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 
-const LINTABLE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.vue', '.json'])
-const GENERATED_DIRS = new Set(['node_modules', 'dist'])
-const FLAT_CONFIGS = [
-  'eslint.config.js',
-  'eslint.config.mjs',
-  'eslint.config.cjs',
-  'eslint.config.ts',
-  'eslint.config.mts',
-  'eslint.config.cts',
-]
-
-// How deep a workspace sits under each directory, mirroring
-// `workspaces.packages` in the root package.json.
-const WORKSPACE_DEPTHS = new Map([
-  ['cli', 1],
-  ['system-tests', 1],
-  ['scripts', 1],
-  ['packages', 2],
-  ['npm', 2],
-  ['tooling', 2],
-])
-
-// Deliberately not "nearest package.json": test fixtures carry their own
-// manifests, and stopping at one of those would hide the owning package's
-// flat config and lint the file as if the package had never migrated.
-const findWorkspaceDir = (segments, root) => {
-  const depth = WORKSPACE_DEPTHS.get(segments[0])
-
-  if (!depth || segments.length <= depth) {
+// Loaded from the checkout that owns the file, not from next to this script:
+// in a worktree those are different trees, and the tree being linted is the
+// one whose workspaces and ignore rules apply.
+const loadRouting = (root) => {
+  try {
+    return createRequire(join(root, 'package.json'))('./scripts/eslint-routing.js')
+  } catch {
     return null
   }
-
-  const dir = join(root, ...segments.slice(0, depth))
-
-  return existsSync(join(dir, 'package.json')) ? dir : root
 }
 
 const resolveEslint = (from) => {
@@ -90,7 +62,12 @@ const main = () => {
   const filePath = hook?.tool_input?.file_path
 
   if (typeof filePath !== 'string') {
-    return
+    // A tool call arrived in a shape this hook does not understand, which
+    // means the payload contract moved and every edit is now going unlinted.
+    // Every other exit here is silent, so this one has to say so.
+    return typeof hook?.tool_name === 'string'
+      ? { payload: { systemMessage: `Lint hook found no tool_input.file_path in the ${hook.tool_name} payload and is linting nothing. Check .claude/hooks/lint-file.mjs against the current hook payload shape.` } }
+      : undefined
   }
 
   const candidates = [process.env.CLAUDE_PROJECT_DIR, hook.cwd].filter((dir) => typeof dir === 'string' && dir)
@@ -103,25 +80,19 @@ const main = () => {
     return
   }
 
-  if (!existsSync(file) || !LINTABLE_EXTENSIONS.has(extname(file))) {
+  const routing = loadRouting(root)
+
+  if (!routing || !existsSync(file) || !routing.isLintable(file) || routing.isIgnored(file, root)) {
     return
   }
 
-  const rel = relative(root, file)
-  const segments = rel.split(/[\\/]/)
+  const workspace = routing.findWorkspace(file, root)
 
-  if (segments.some((segment) => GENERATED_DIRS.has(segment))) {
+  if (!workspace) {
     return
   }
 
-  const workspaceDir = segments.length === 1 ? root : findWorkspaceDir(segments, root)
-
-  if (!workspaceDir) {
-    return
-  }
-
-  const isFlatConfig = FLAT_CONFIGS.some((config) => existsSync(join(workspaceDir, config)))
-  const cwd = isFlatConfig ? workspaceDir : root
+  const cwd = workspace.isFlatConfig ? workspace.dir : root
   const eslint = resolveEslint(cwd)
 
   if (!eslint) {
@@ -146,6 +117,7 @@ const main = () => {
     return
   }
 
+  const rel = relative(root, file)
   const wasFixed = existsSync(file) && digest() !== before
 
   if (result.status === 1) {
