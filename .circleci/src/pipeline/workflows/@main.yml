@@ -452,8 +452,21 @@ linux-x64:
           - get-published-artifacts
           - system-tests-node-modules-install
 
+# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop push.
+# The two darwin workflows compete for leased self-hosted macOS hardware, and
+# per-merge platform signal isn't actionable at that frequency. linux-arm64 is
+# cheap but rides the same gate so all platform coverage lands in one sweep.
+# A CircleCI Scheduled Pipeline (configured in the CircleCI UI, not here) runs
+# them on develop by setting run-platform-workflows=true, plus on the other
+# filters listed below.
 linux-arm64:
-  when: *full-workflow-filters
+  when: &scheduled-platform-filters
+    or:
+      - equal: [ true, << pipeline.parameters.run-platform-workflows >> ]
+      - and:
+          - *full-workflow-filters
+          - not:
+              equal: [ develop, << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
@@ -514,7 +527,7 @@ linux-arm64:
           - linux-arm64-build
 
 darwin-x64:
-  when: *full-workflow-filters
+  when: *scheduled-platform-filters
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
@@ -564,7 +577,7 @@ darwin-x64:
           - darwin-x64-build
 
 darwin-arm64:
-  when: *full-workflow-filters
+  when: *scheduled-platform-filters
   jobs:
     - node_modules_install:
         name: darwin-arm64-node-modules-install
@@ -611,9 +624,12 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
-# Windows CI is expensive, so unlike the other platform workflows above it does not run on every 
-# develop/release push. It runs via CircleCI Scheduled Pipelines (configured in the CircleCI UI, not here)
-# that set run-windows-workflow=true, plus on the other filters listed below.
+# Windows CI is expensive in CircleCI credits, so it doesn't run on every
+# develop push either, and it also skips release/* entirely. It runs on
+# develop via the same CircleCI Scheduled Pipeline (configured in the CircleCI
+# UI, not here) that drives linux-arm64/darwin-x64/darwin-arm64, setting
+# run-windows-workflow=true instead of run-platform-workflows=true, plus on
+# the other filters listed below.
 windows:
   when:
     or:
