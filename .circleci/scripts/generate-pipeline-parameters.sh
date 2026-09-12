@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 # Generates a JSON object of CircleCI pipeline parameters based on changed files.
-# Used in launch-primary-workflow to enable path-based job filtering on PRs.
+# Used in launch-primary-workflow to enable path-based job filtering on PR
+# branches and on genuine webhook pushes to develop.
 #
 # Output: JSON written to stdout, consumed by continuation/continue pipeline_parameters.
 #
-# All run-* params default to true so that develop/release branches and
-# API-triggered pipelines run everything without needing to pass explicit params.
+# Every path a job could care about must map to a run-* param below: a path
+# that matches nothing is an error rather than a silent skip.
+#
+# release/* branches, the update-v8-snapshot-cache-on-develop branch, the
+# run-all-jobs manual trigger, and any develop run that isn't a webhook push
+# (scheduled pipelines, API triggers, or an unset/unknown trigger source) skip
+# path inspection entirely and run everything.
+#
+# The corresponding pipeline parameters in @pipeline.yml default to true, so a
+# continuation that omits them runs everything rather than nothing.
 
 set -euo pipefail
 
@@ -80,14 +89,36 @@ emit_all_true() {
 }
 
 # ----- branch override --------------------------------------------------------
-# On develop/release branches all jobs must run.
+# On release branches and the v8 snapshot cache branch all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" == "develop" ]] || \
-   [[ "$BRANCH" =~ ^release/ ]] || \
+if [[ "$BRANCH" =~ ^release/ ]] || \
    [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true
   exit 0
+fi
+
+# ----- develop trigger-source exemption ---------------------------------------
+# The nightly platform cron runs *on* the develop branch (CIRCLE_BRANCH=develop),
+# so a branch check alone can't tell it apart from a real push - it must stay
+# unfiltered, or path-filtering would silently gut the nightly full sweep down
+# to the last merge's diff. Scoping filtering to genuine webhook pushes also
+# covers manual "Trigger Pipeline" reruns and run-windows-workflow=true
+# triggers for free, since those report a non-webhook trigger source too -
+# no separate check is needed for them.
+#
+# filtering_develop_push is threaded through the rest of the script instead of
+# re-testing $BRANCH at each site (diff base resolution, the empty-diff check,
+# the unrecognized-path guard) that needs to behave differently for a develop
+# push than for a PR.
+filtering_develop_push=false
+if [[ "$BRANCH" == "develop" ]]; then
+  if [[ "${TRIGGER_SOURCE:-}" != "webhook" ]]; then
+    echo "Develop trigger source '${TRIGGER_SOURCE:-<unset>}' is not a webhook push — running all tests" >&2
+    emit_all_true
+    exit 0
+  fi
+  filtering_develop_push=true
 fi
 
 # ----- manual trigger override -----------------------------------------------
@@ -100,25 +131,71 @@ if [[ "$RUN_ALL_RAW" == "true" || "$RUN_ALL_RAW" == "1" ]]; then
 fi
 
 # ----- compute changed files --------------------------------------------------
-# Fetch develop from the upstream project repo using CIRCLE_PROJECT_USERNAME/REPONAME,
-# which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
-# contributor's fork. This ensures fork PRs compare against the real develop branch.
-UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
-MERGE_BASE=""
-if git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
-  MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
-else
-  echo "Could not fetch upstream develop" >&2
-fi
+# --no-renames on every diff below: with rename detection on, `--name-only`
+# reports only a rename's destination, so moving a file out of a globally
+# triggering package (say packages/config/) would escape that trigger.
+#
+# Resolves the base commit for a develop push. Prefers BASE_REVISION
+# (<< pipeline.git.base_revision >>) since it also covers a push that lands
+# multiple commits at once; falls back to HEAD~1, which is correct for both
+# squash merges and true merge commits landing on develop (first-parent).
+# Tolerates a missing/garbage BASE_REVISION under `set -e` via the `if` guards.
+resolve_develop_base() {
+  local base="${BASE_REVISION:-}"
 
-if [[ -n "$MERGE_BASE" ]]; then
-  CHANGED=$(git -c core.quotepath=false diff --name-only "$MERGE_BASE" HEAD)
+  if [[ -n "$base" ]] && git cat-file -e "${base}^{commit}" 2>/dev/null; then
+    echo "$base"
+    return 0
+  fi
+
+  if git cat-file -e "HEAD~1^{commit}" 2>/dev/null; then
+    echo "HEAD~1"
+    return 0
+  fi
+
+  return 1
+}
+
+if [[ "$filtering_develop_push" == "true" ]]; then
+  # A develop push's merge-base against upstream develop is HEAD itself (the
+  # push already landed), so the upstream-fetch logic below would always see
+  # an empty diff. Diff against the previous tip instead. The checkout in this
+  # job is blobless (full commit/tree history, blobs filtered), so this needs
+  # no extra fetch.
+  if DEVELOP_BASE=$(resolve_develop_base); then
+    echo "Diffing develop push against $DEVELOP_BASE" >&2
+    CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only "$DEVELOP_BASE" HEAD)
+  else
+    echo "Warning: could not resolve a base revision for develop push (BASE_REVISION='${BASE_REVISION:-<unset>}', HEAD~1 unavailable) — running all tests" >&2
+    emit_all_true
+    exit 0
+  fi
 else
-  echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
-  CHANGED=$(git -c core.quotepath=false diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+  # Fetch develop from the upstream project repo using CIRCLE_PROJECT_USERNAME/REPONAME,
+  # which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
+  # contributor's fork. This ensures fork PRs compare against the real develop branch.
+  UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
+  MERGE_BASE=""
+  if git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
+    MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
+  else
+    echo "Could not fetch upstream develop" >&2
+  fi
+
+  if [[ -n "$MERGE_BASE" ]]; then
+    CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only "$MERGE_BASE" HEAD)
+  else
+    echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
+    CHANGED=$(git -c core.quotepath=false diff --no-renames --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+  fi
 fi
 
 if [[ -z "$CHANGED" ]]; then
+  if [[ "$filtering_develop_push" == "true" ]]; then
+    echo "Warning: no changed files detected for develop push — running all tests" >&2
+    emit_all_true
+    exit 0
+  fi
   echo "Error: no changed files detected" >&2
   exit 1
 fi
@@ -348,8 +425,17 @@ while IFS= read -r file; do
       # No CI jobs are associated with these packages — no tests to run
       ;;
     *)
-      # Unrecognized path — fail loudly so the mapping is kept up to date.
-      # Add the new path to one of the cases above rather than silently skipping tests.
+      # Unrecognized path. On a PR, fail loudly so the mapping is kept up to
+      # date — add the new path to one of the cases above rather than
+      # silently skipping tests. On a develop push, the merge already passed
+      # PR CI, so failing the merge pipeline over an unmapped path is worse
+      # than over-running it — fall back to running everything instead.
+      if [[ "$filtering_develop_push" == "true" ]]; then
+        echo "Warning: unrecognized path '$file' has no mapping in generate-pipeline-parameters.sh — running all tests" >&2
+        echo "Add it to the targeted path mapping section when convenient." >&2
+        emit_all_true
+        exit 0
+      fi
       echo "Error: unrecognized path '$file' has no mapping in generate-pipeline-parameters.sh" >&2
       echo "Add it to the targeted path mapping section before merging." >&2
       exit 1
