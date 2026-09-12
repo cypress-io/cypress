@@ -20,62 +20,57 @@ Serious means untrusted data crossing into trusted, or a control protecting the
 
 Areas this file omits for space are in `guides/security-review-notes.md`.
 
-## Deliberate exceptions — do not "fix" these
+## By design — do not report these
 
 Flag only a change that widens their reach.
 
 - Running user code is the product: `driver/src/cypress/script_utils.ts`,
   `driver/src/cross-origin/origin_fn.ts`, `server/lib/plugins/child/`.
 - `proxy/lib/http/util/regex-rewriter.ts` rewrites obstructive `top`/`parent`
-  code and strips SRI `integrity`; `adapters/remove-security.ts` is only the
-  gate. HSTS is deliberately never stripped — do not add it.
-- `@packages/https-proxy` intercepts AUT TLS. `server/lib/request.ts` sets
-  `NODE_TLS_REJECT_UNAUTHORIZED=0` process-wide and `util/suppress_warnings.ts`
-  hides the warning — do not widen that filter. Calls to Cypress-owned services
-  must use `strictAgent` from `network/lib/agent.ts`.
-- `socket/lib/utils.ts` lifts socket.io-parser's `maxAttachments` DoS cap,
-  justified as "two trusted local processes" — widening who can reach that socket
-  invalidates that and must be raised.
+  code and strips SRI `integrity` for the AUT; `adapters/remove-security.ts` is
+  the gate. HSTS is intentionally left intact — do not start stripping it.
+- `@packages/https-proxy` intercepts AUT TLS, and verification is relaxed
+  process-wide for proxied traffic. Requests to Cypress-owned services (Cloud,
+  telemetry, update checks) must use `strictAgent` from `network/lib/agent.ts`,
+  and the Node warning filter in `util/suppress_warnings.ts` must stay narrow.
+- `socket/lib/utils.ts` raises a parser limit for the local driver↔server
+  channel. Its comment states the assumption that makes this safe; preserve that
+  assumption rather than the limit.
 
 ## Origin comparison
 
-- `toFileServerUrl` (`network-tools/lib/remote-states.ts`) is the reference, and
-  its comment says why: compare `URL.origin`, never a string prefix, because a
-  prefix treats `http://localhost:2020@evil.com` as under the file origin.
-- Two gates still use `startsWith`: `urlMatchesOriginProtectionSpace`
-  (`network-tools/lib/cors.ts`), which mints `Authorization: Basic`, and
-  `reqMatchesPolicyBasedOnDomain` (`proxy/lib/http/util/document-preparation.ts`),
-  which feeds injection level. `extension/app/v3/service-worker.ts` matches tabs
-  with `tab.url.includes(url)`.
+- Compare `URL.origin`, never a string prefix. `toFileServerUrl`
+  (`network-tools/lib/remote-states.ts`) is the reference, and its comment says
+  why: a prefix treats `http://localhost:2020@evil.com` as under the file origin.
+  The same applies to matching a tab or frame by URL — use structured
+  comparison, not `includes`.
 - The `TypeError` fallbacks in `uri.ts` and `cors.ts` must keep returning a
   *recovered authority*, never raw input, or distinct malformed URLs collapse
   into one parsed object and compare same-origin. Never widen those `catch`es.
 - `allowPrivateDomains` (`parse-domain.ts`) keeps tenants on a shared host in
   separate super-domains; callers must pass a hostname, not a URL.
 - The third-party/first-party scoping for
-  `experimentalModifyObstructiveThirdPartyCode` and `removeSRIAttributes` is
-  duplicated in `remove-security.ts` **and** `inject-html.ts`.
+  `experimentalModifyObstructiveThirdPartyCode` and `removeSRIAttributes` lives
+  in both `remove-security.ts` and `inject-html.ts`. Change them together, or
+  the stream and in-memory paths diverge.
 
 ## Inline script payloads
 
-`privileged-commands-manager.ts` has the correct escaper,
-`serializeForInlineScript` (`<`, `>`, U+2028, U+2029). Use it for every value
-interpolated into an inline `<script>`. `JSON.stringify` alone is **not** enough:
-it does not escape `<`, `>`, or `/`, so a value containing `</script>` closes the
-element. Sites to hold to this standard: `proxy/lib/http/util/inject.ts` (its
-payload carries `simulatedCookies` from the origin's own `Set-Cookie`, and
-`document.domain` from `getSuperDomain`) and
-`data-context/src/sources/HtmlDataSource.ts` (spec filenames, `projectName`,
-`namespace`). `socket/lib/node/cdp-socket.ts` hand-rolls quote escaping into a
-`Runtime.evaluate` expression — prefer `callFunctionOn` with `arguments`, and
-keep the builders in `automation/commands/` numeric or boolean.
+Route every value interpolated into an inline `<script>` through
+`serializeForInlineScript` in `privileged-commands-manager.ts`, which escapes
+`<`, `>`, U+2028 and U+2029. `JSON.stringify` alone is **not** enough: it does
+not escape `<`, `>`, or `/`, so a value containing `</script>` closes the
+element. This matters most where the value is not obviously constant — a cookie
+value, a hostname derived from a proxied URL, a spec filename, a project name.
+Prefer `Runtime.callFunctionOn` with `arguments` over composing a
+`Runtime.evaluate` expression, and keep the builders in `automation/commands/`
+numeric or boolean.
 
 ## Headers
 
-- `PatchExpressSetHeader` bypasses Node's `ERR_INVALID_CHAR`, and
-  `insecureHTTPParser: true` is set in `network/lib/http-utils.ts`, so header
-  injection and smuggling are the live risk class in the proxy. Keep
-  `OmitProblematicHeaders` before `SetInjectionLevel`.
+- Header injection and smuggling are the live risk class in the proxy, because
+  it deliberately runs a lenient parser and writes some headers past Node's
+  validation. Keep `OmitProblematicHeaders` ordered before `SetInjectionLevel`.
 - `x-cypress-*` headers carry trust decisions (`isAUTFrame` drives cookie
   attachment and injection level), so each must be deleted before passthrough.
 - `x-cypress-internal-loopback-token` gates `proxiedUrl` override and force-proxy
@@ -85,56 +80,55 @@ keep the builders in `automation/commands/` numeric or boolean.
 
 ## Local endpoints and tokens
 
-- `/__launchpad/*` is protected by `corsOriginDelegate.ts` (loopback host **and**
-  matching port) across CORS, socket.io `allowRequest` and the `graphql-ws`
-  upgrade. `/__cypress/graphql` and the driver socket.io server have no
-  equivalent check and both reach privileged handlers, so new routes or socket
-  events there need an origin or token check.
-- Do not treat `socketId` as authentication — no handler requires it.
-- Token comparisons in `file_server.ts`, `internal-routes.ts`,
-  `privileged-commands-manager.ts` and `cloud/auth.ts` use `!==`; new ones should
-  use `crypto.timingSafeEqual`, with tokens from `crypto.randomBytes` rather than
-  `util/random.ts`'s reduced charset. Never log a token or an `access_token`.
+- `corsOriginDelegate.ts` is the pattern: require a loopback host **and** a
+  matching port, across CORS, socket.io `allowRequest` and the `graphql-ws`
+  upgrade. Any route or socket event that reaches a privileged handler — opening
+  a file, launching a browser, setting the editor — needs an equivalent origin or
+  token check.
+- `socketId` is a rendezvous value, not authentication. Do not treat it as one.
+- Compare secrets with `crypto.timingSafeEqual` on equal-length buffers, and
+  generate them with `crypto.randomBytes`. Never log a token or an
+  `access_token`.
 
 ## Reaching the OS
 
 `shell.openExternal` (`gui/links.ts`) and the editor launch
-(`util/file-opener.ts`, `actions/FileActions.ts`, which pass `"${binary}"` as a
-quoted string and hit `cmd.exe /C` on Windows) are the two paths from a socket
-message to process execution. Validate the scheme, validate the editor against
-the discovered `availableEditors`, prefer argv arrays. `socket-base.ts` already
-overrides the front-end-supplied `fileDetails.where` server-side for this reason
-— extend that distrust, don't narrow it. Browser launch and `execa` need argv
-arrays whenever an element derives from a project path, browser argument, spec
-name, or env var.
+(`util/file-opener.ts`, `actions/FileActions.ts`) are the paths from a socket
+message to process execution. Allowlist the scheme, validate an editor against
+the discovered `availableEditors`, and pass argv arrays rather than interpolated
+strings — the Windows path runs through `cmd.exe /C`. `socket-base.ts` already
+overrides the front-end-supplied `fileDetails.where` server-side; extend that
+distrust, don't narrow it. Browser launch and `execa` need argv arrays whenever
+an element derives from a project path, browser argument, spec name, or env var.
 
 ## Electron renderer privileges
 
-`gui/windows.ts` defaults to `webSecurity: true`, `nodeIntegration: false`,
-`contextIsolation: true`, but `create()` merges with `_.defaultsDeep` and then
-unconditionally overwrites `webSecurity` from `chromeWebSecurity`. Force these
-keys *after* the merge so a caller cannot opt out, and derive `webSecurity` from
-config only for AUT windows. Keep `setWindowOpenHandler` returning `deny`. A new
-`preload` needs `contextIsolation` plus `sandbox` and a hand-written
-`contextBridge` allowlist. The GUI window's origin must stay loopback.
+`gui/windows.ts` sets `webSecurity: true`, `nodeIntegration: false` and
+`contextIsolation: true` as defaults. Because `create()` merges caller options
+with `_.defaultsDeep`, force these keys *after* the merge so a caller cannot opt
+out, and derive `webSecurity` from `chromeWebSecurity` only for AUT windows.
+Keep `setWindowOpenHandler` returning `deny`. A new `preload` needs
+`contextIsolation` plus `sandbox` and a hand-written `contextBridge` allowlist.
+The GUI window's origin must stay loopback.
 
 ## AUT content reaching privileged UI
 
 `reifyDomElement` (`driver/src/util/serialization/log.ts`) assigns `innerHTML`
 from a `postMessage`d payload that originated in the AUT, so widening that path
 (more tags, event-handler attributes, `<script>`, `srcdoc`, `javascript:`) is
-script execution in the runner's own origin.
+script execution in the runner's own origin. Keep the attribute allowlist, and
+validate `event.origin` on anything the extension accepts from a page.
 
 ## Credentials
 
 Record keys and auth tokens must pass through `hideKeys()` from
-`@packages/config` before reaching a log, error, snapshot, or telemetry attribute
-— `server/lib/modes/record.ts` does this. It reveals 10 characters, so it suits a
-high-entropy key and nothing shorter. Snapshots under
-`packages/errors/test/__snapshots__` are committed, so pass a picked subset into
-an error, never the whole config. `HtmlDataSource.ts`'s `delete cfg.env` is the
-load-bearing scrub before config reaches the browser, and Cloud request logging
-is deliberately body-free.
+`@packages/config` before reaching a log, error, snapshot, or telemetry
+attribute — `server/lib/modes/record.ts` is the example. It suits a high-entropy
+key and nothing shorter. Snapshots under `packages/errors/test/__snapshots__`
+are committed, so pass a picked subset into an error, never the whole config.
+`HtmlDataSource.ts`'s `delete cfg.env` is the load-bearing scrub before config
+reaches the browser, and Cloud request logging is deliberately body-free. Create
+new secret files with mode `0o600`.
 
 ## Two last things
 

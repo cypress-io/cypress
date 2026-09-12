@@ -9,7 +9,7 @@
     {
       "rule_name": "electron_renderer_trust",
       "regex": "nodeIntegration\\s*:\\s*true|contextIsolation\\s*:\\s*false|allowRunningInsecureContent|webSecurity\\s*:\\s*false|nodeIntegrationInSubFrames",
-      "reminder": "Electron webPreferences change. A renderer that loads any remote or AUT-influenced content must keep contextIsolation on and nodeIntegration off; expose capabilities through an explicit preload bridge instead. Note packages/server/lib/gui/windows.ts already derives webSecurity from the user's chromeWebSecurity config."
+      "reminder": "Electron webPreferences change. A renderer that loads any remote or AUT-influenced content must keep contextIsolation on and nodeIntegration off; expose capabilities through an explicit preload bridge instead. webSecurity should follow the user's chromeWebSecurity config for AUT windows only."
     },
     {
       "rule_name": "credential_literal",
