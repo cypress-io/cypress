@@ -97,6 +97,7 @@ For each package in the batch:
 
 1. **Remove old ESLint config and plugin references:**
    - Delete `.eslintrc`, `.eslintrc.json`, or `.eslintrc.js` in the package.
+   - Delete `.eslintignore` — flat config does not read it. Anything in it that is still needed becomes an `ignores` entry in `eslint.config.ts`.
    - Remove any references to `@cypress/eslint-plugin-dev` in `package.json` (if present).
    - **Remove TSLint configs:** Delete `tslint.json` and remove `tslint` dependencies from `package.json`.
 2. **Add a new ESLint config file:**
@@ -152,12 +153,32 @@ For each package in the batch:
 - If you hit any missing rules or plugin gaps, note them for follow-up.
 - If a package needs a custom override, add it in a local `eslint.config.ts` (prefer to upstream to the shared config if possible).
 
-### 6. **Deprecate and Remove Old Plugin**
+### 6. **Build Output**
+
+Compiled output (`cjs/`, `esm/`, `dist/`) is ignored centrally, in both config homes, and neither list should be duplicated per package:
+
+- root `.eslintrc.js` `ignorePatterns` — for the packages still on eslintrc
+- `packages/eslint-config/src/baseConfig.ts` `ignores` — for the migrated ones
+
+A package-level `.eslintignore` cannot do this job, which is worth knowing before reaching for one. ESLint 8 merges every ignore source into a single predicate based at the *common ancestor* of their base paths, and the root `.eslintrc.js` `ignorePatterns` pulls that ancestor up to the repo root. Entries from an `.eslintignore` are flagged `loose`, so they are re-based without being re-prefixed: a package-relative entry keeps its spelling and is then matched against the repo root. Anything containing a `/` is anchored there and silently matches nothing — `packages/resolve-dist/.eslintignore` listed `cjs/index.js` and ESLint linted the file anyway, failing `linux-lint` on develop. Only unanchored spellings survive the re-base:
+
+| Pattern | Result |
+| --- | --- |
+| `**/tsconfig.json` | matches at any depth |
+| `cjs/` | matches at any depth (a trailing slash is not an anchor) |
+| `cjs/index.js` | anchored at the repo root, matches nothing |
+| `/src/thing.ts` | re-prefixed with the package path, matches |
+
+`ESLINT_USE_FLAT_CONFIG` packages are not affected: flat config does not read `.eslintignore` at all, so a migrated package must express ignores as an `ignores` entry. Delete any `.eslintignore` left behind when migrating a package — it is dead weight once the package is on flat config.
+
+Note also that `cjs`/`esm` are anchored to the workspace roots (`packages/*`, `npm/*`, `tooling/*`) rather than written as `**/esm/**`. System-tests fixtures ship handwritten sources under an `esm/` directory, and an unanchored pattern would stop linting them without any signal.
+
+### 7. **Deprecate and Remove Old Plugin**
 - `@cypress/eslint-plugin-dev` is already `private` and no longer publishes. `7.0.0` stays on npm for anything pinned to it.
 - Its two custom rules (`arrow-body-multiline-braces`, `skip-comment`) are mirrored in `@packages/eslint-config` under the same `@cypress/dev` namespace, so a package gets the same behavior either side of the migration and existing `eslint-disable @cypress/dev/...` comments keep resolving. Until the plugin is gone, a change to either rule belongs in both.
 - The plugin still cannot be deleted: the root `.eslintrc.js` and the nested eslintrc files extend its `general`/`tests`/`react` presets, so it is what every unmigrated package lints against. Once all packages are migrated, remove it from the repo and CI, along with the root `.eslintrc.js`, the root `.eslintignore`, and `eslint` 8 from the root `package.json`.
 
-### 7. **Simplify Lint-Staged Configuration**
+### 8. **Simplify Lint-Staged Configuration**
 After all packages are migrated, simplify the lint-staged configuration in root `package.json`:
 
 ```json
@@ -168,7 +189,7 @@ After all packages are migrated, simplify the lint-staged configuration in root 
 }
 ```
 
-### 8. **Update Lerna/Monorepo Config**
+### 9. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
 

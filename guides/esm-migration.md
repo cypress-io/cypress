@@ -121,7 +121,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 
 TBD: details will be clearer at the end of Phase 2
 
-Known consideration for when this is planned: a package that emits both `cjs/` and `esm/` has to ignore both in its lint config, or `yarn build && yarn lint` fails on thousands of violations in its own generated output. This is easy to miss because CI lints before building, so it only reproduces locally. `@packages/errors` has this today. Whatever shape Phase 3 takes, the ignore patterns need to land with it — in `@packages/eslint-config` if the output directories end up consistent across packages, per-package otherwise.
+Lint ignores build output centrally, so a package that emits `cjs/` and `esm/` needs no ignore entries of its own: the root `.eslintrc.js` `ignorePatterns` covers packages still on eslintrc, `baseConfig.ts` `ignores` covers the ones on flat config, and any emitter under `packages/*`, `npm/*` or `tooling/*` is covered as soon as it is added. Two things to keep in mind if Phase 3 changes the output layout: the `linux-lint` job restores a built workspace, so generated output is on disk when ESLint runs and an uncovered emitter fails CI rather than only local `yarn build && yarn lint`; and output directories outside those workspace roots (or named something other than `cjs`/`esm`/`dist`) need their pattern added centrally. See [the ESLint migration guide](./eslint-migration.md#6-build-output) for why this cannot be done with a per-package `.eslintignore`.
 
 ### Phase 4: Run Cypress server as an ESM package
 

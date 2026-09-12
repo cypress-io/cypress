@@ -43,12 +43,11 @@ module.exports = {
     'system-tests/lib/validations/**',
     // ignore as the file has invalid syntax
     'system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx',
-    // Build output — `tsc`/rollup emit, which the style rules here are not
-    // written for. It has to be ignored centrally: a per-package
-    // `.eslintignore` is re-based onto this file's directory, and patterns in
-    // it that contain a `/` keep their package-relative spelling, so they
-    // silently match nothing. `cjs`/`esm` stay anchored to the workspace roots
-    // because system-tests fixtures ship handwritten sources under `esm/`.
+    // Build output, ignored here rather than per package: a package's
+    // `.eslintignore` is re-based onto this directory with its patterns
+    // unchanged, so any entry containing a `/` silently matches nothing.
+    // `cjs`/`esm` are anchored to the workspace roots because system-tests
+    // fixtures ship handwritten sources under `esm/`.
     '**/dist/**',
     'npm/*/cjs/**',
     'npm/*/esm/**',

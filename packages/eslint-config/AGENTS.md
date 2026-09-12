@@ -24,3 +24,4 @@ src/
 - The package uses `jiti` as a peer runtime so ESLint can load the TypeScript config files without a pre-build step.
 - There is no `test` script — the config is validated implicitly by running `lint` across consumer packages.
 - Targets ESLint v9.31+ as a peer dependency; earlier ESLint versions are incompatible with the flat-config API used here.
+- The `ignores` block in `baseConfig.ts` holds build output (`cjs/`, `esm/`, `dist/`) for every consumer. Its globs are package-relative — lint runs per package, not from the repo root. The eslintrc half of the monorepo gets the same coverage from `ignorePatterns` in the root `.eslintrc.js`, so a new output directory has to be added in both places until the migration finishes. Never add a per-package `.eslintignore` for build output: see [the ESLint migration guide](../../guides/eslint-migration.md#6-build-output) for why those entries silently do nothing.
