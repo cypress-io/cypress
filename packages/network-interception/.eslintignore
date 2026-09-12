@@ -1,6 +1,3 @@
-**/dist
-cjs/
-esm/
 **/*.d.ts
 **/package-lock.json
 **/tsconfig.json

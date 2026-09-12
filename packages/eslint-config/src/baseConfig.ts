@@ -271,7 +271,10 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   {
     ignores: [
       '.releaserc.js',
+      // build output: `tsc`/rollup emit, not handwritten source
+      'cjs/**/*',
       'dist/**/*',
+      'esm/**/*',
       '**/__snapshots__/**/*',
       'test/.mocharc.js',
     ],
