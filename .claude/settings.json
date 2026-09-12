@@ -10,5 +10,19 @@
   },
   "enabledPlugins": {
     "cypress@cypress": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-file.mjs\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
   }
 }
