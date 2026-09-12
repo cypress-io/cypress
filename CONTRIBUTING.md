@@ -241,6 +241,7 @@ You must have the following installed on your system to contribute locally:
 - [`Yarn v1 Classic`](https://yarnpkg.com/en/docs/install) (See also [Corepack](#corepack) below.)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
 - [`circleci CLI`](https://circleci.com/docs/guides/toolkit/local-cli/) if you intend on editing the CI configuration.
+- [`typescript-language-server`](https://github.com/typescript-language-server/typescript-language-server) (`npm install -g typescript-language-server typescript`) if you use Claude Code locally. The repo enables the `typescript-lsp` plugin in [.claude/settings.json](.claude/settings.json), which gives Claude type errors and go-to-definition across the monorepo, but the plugin does not install the binary for you. Run `claude plugin install typescript-lsp@claude-plugins-official` to pick up the plugin itself.
 
 #### Debian/Ubuntu
 

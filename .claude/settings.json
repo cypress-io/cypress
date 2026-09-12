@@ -6,9 +6,16 @@
         "source": "github",
         "repo": "cypress-io/ai-toolkit"
       }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     }
   },
   "enabledPlugins": {
-    "cypress@cypress": true
+    "cypress@cypress": true,
+    "typescript-lsp@claude-plugins-official": true
   }
 }
