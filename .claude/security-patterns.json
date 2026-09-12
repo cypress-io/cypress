@@ -1,0 +1,43 @@
+{
+  "patterns": [
+    {
+      "rule_name": "tls_verification_disabled",
+      "regex": "rejectUnauthorized\\s*:\\s*false|NODE_TLS_REJECT_UNAUTHORIZED",
+      "exclude_paths": ["**/test/**", "**/tests/**", "**/*_spec.*", "**/*.cy.*", "**/system-tests/**"],
+      "reminder": "Certificate verification disabled outside a test. In shipped code this belongs only in @packages/https-proxy, where intercepting the AUT's TLS is the point. Anywhere else it silently downgrades a real user's connection."
+    },
+    {
+      "rule_name": "electron_renderer_trust",
+      "regex": "nodeIntegration\\s*:\\s*true|contextIsolation\\s*:\\s*false|allowRunningInsecureContent|webSecurity\\s*:\\s*false|nodeIntegrationInSubFrames",
+      "reminder": "Electron webPreferences change. A renderer that loads any remote or AUT-influenced content must keep contextIsolation on and nodeIntegration off; expose capabilities through an explicit preload bridge instead. Note packages/server/lib/gui/windows.ts already derives webSecurity from the user's chromeWebSecurity config."
+    },
+    {
+      "rule_name": "credential_literal",
+      "substrings": ["AKIA", "ghp_", "github_pat_", "sk_live_", "-----BEGIN RSA", "-----BEGIN OPENSSH", "-----BEGIN PRIVATE"],
+      "reminder": "Looks like a hardcoded credential. Read it from the environment or the secret manager. This repo is public, and git history is not erasable."
+    },
+    {
+      "rule_name": "record_key_in_output",
+      "regex": "(?:debug|console\\.\\w+|logger\\.\\w+|throwErr|errors\\.\\w+)\\([^)\\n]{0,200}(?:recordKey|record_key|authToken|CYPRESS_RECORD_KEY)",
+      "reminder": "A record key or auth token is reaching a log, error, or snapshot. Pass it through hideKeys() from @packages/config first, the way packages/server/lib/modes/record.ts does before building CLOUD_RECORD_KEY_NOT_VALID."
+    },
+    {
+      "rule_name": "workflow_untrusted_event_input",
+      "regex": "pull_request_target|github\\.event\\.(?:issue|comment|pull_request|review)\\.(?:body|title)|github\\.event\\.pull_request\\.head\\.(?:ref|repo)",
+      "paths": ["**/.github/workflows/**"],
+      "reminder": "Untrusted event text in a workflow. Never interpolate it into a run: block - bind it to an env var and quote the expansion. Workflows here already carry WORKFLOW_DEPLOY_KEY and CYPRESS_BOT_APP_PRIVATE_KEY, so an injection is a credential disclosure."
+    },
+    {
+      "rule_name": "response_security_header_removal",
+      "regex": "(?i)content-security-policy|x-frame-options|strict-transport-security|cross-origin-(?:opener|embedder|resource)-policy",
+      "paths": ["**/packages/proxy/**", "**/packages/network/**", "**/packages/server/lib/**"],
+      "reminder": "Touching a response security header. Confirm the change reaches only application-under-test responses, never the Cypress UI's own origin or a third-party request the AUT happens to make. See packages/proxy/lib/adapters/remove-security.ts for the existing boundary."
+    },
+    {
+      "rule_name": "origin_comparison_by_string",
+      "regex": "(?:origin|href|url|host|domain)\\w*\\.(?:startsWith|endsWith|includes|indexOf)\\(",
+      "paths": ["**/packages/proxy/**", "**/packages/network/**", "**/packages/net-stubbing/**", "**/packages/driver/src/cross-origin/**"],
+      "reminder": "Origin decided by substring match. Compare parsed URL components (protocol, hostname, port) instead - a prefix or includes() check treats evil-example.com.attacker.net as example.com and can leak cookies or intercepted traffic across origins."
+    }
+  ]
+}

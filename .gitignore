@@ -412,6 +412,8 @@ settings.local.json
 
 .claude/*
 !.claude/settings.json
+!.claude/claude-security-guidance.md
+!.claude/security-patterns.json
 
 # chunk active sidecar tracking
 .chunk/sidecar.json
