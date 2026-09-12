@@ -153,7 +153,7 @@ For each package in the batch:
 - If you hit any missing rules or plugin gaps, note them for follow-up.
 - If a package needs a custom override, add it in a local `eslint.config.ts` (prefer to upstream to the shared config if possible).
 
-### 6. **Build Output**
+### 6. **Ignore Build Output Centrally**
 
 Compiled output (`cjs/`, `esm/`, `dist/`) is ignored centrally, in both config homes, and neither list should be duplicated per package:
 
