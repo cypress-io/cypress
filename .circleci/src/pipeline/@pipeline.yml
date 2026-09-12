@@ -1851,7 +1851,6 @@ jobs:
       - run:
           name: Linting 🧹
           command: |
-            yarn clean
             git clean -df
             yarn lint
       - run:
