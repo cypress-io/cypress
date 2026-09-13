@@ -1305,19 +1305,22 @@ namespace CypressRequireTests {
   Cypress.require(123) // $ExpectError
 }
 
+// Regression guard: these globals are declared with `var` so they land on
+// `typeof globalThis`. The `window.` and `globalThis.` references below are the
+// only thing in this suite that fails if one is changed to `let` or `const`.
 namespace CypressGlobalsTests {
-  Cypress
-  cy
-  expect
-  assert
+  Cypress // $ExpectType Cypress & CyEventEmitter
+  cy // $ExpectType cy & CyEventEmitter
+  expect // $ExpectType ExpectStatic
+  assert // $ExpectType AssertStatic
 
-  window.Cypress
-  window.cy
-  window.expect
-  window.assert
+  window.Cypress // $ExpectType Cypress & CyEventEmitter
+  window.cy // $ExpectType cy & CyEventEmitter
+  window.expect // $ExpectType ExpectStatic
+  window.assert // $ExpectType AssertStatic
 
-  globalThis.Cypress
-  globalThis.cy
-  globalThis.expect
-  globalThis.assert
+  globalThis.Cypress // $ExpectType Cypress & CyEventEmitter
+  globalThis.cy // $ExpectType cy & CyEventEmitter
+  globalThis.expect // $ExpectType ExpectStatic
+  globalThis.assert // $ExpectType AssertStatic
 }
