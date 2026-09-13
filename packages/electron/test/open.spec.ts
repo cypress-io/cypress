@@ -198,14 +198,34 @@ describe('open', () => {
   })
 
   describe('when platform is linux', () => {
+    // Windows has no `process.geteuid` property at all, which `vi.spyOn` requires and
+    // which restoring a captured value rather than a descriptor would leave behind.
+    let originalDescriptor: PropertyDescriptor | undefined
+
+    const stubGeteuid = (euid?: number) => {
+      Object.defineProperty(process, 'geteuid', {
+        value: euid === undefined ? undefined : () => euid,
+        writable: true,
+        configurable: true,
+      })
+    }
+
     beforeEach(() => {
       vi.spyOn(os, 'platform').mockReturnValue('linux')
+      originalDescriptor = Object.getOwnPropertyDescriptor(process, 'geteuid')
     })
 
-    describe('anmd geteuid returns 0', () => {
+    afterEach(() => {
+      if (originalDescriptor) {
+        Object.defineProperty(process, 'geteuid', originalDescriptor)
+      } else {
+        Reflect.deleteProperty(process, 'geteuid')
+      }
+    })
+
+    describe('and geteuid returns 0', () => {
       beforeEach(() => {
-        // @ts-expect-error
-        vi.spyOn(process, 'geteuid').mockReturnValue(0)
+        stubGeteuid(0)
       })
 
       it('spawns with --no-sandbox', async () => {
@@ -216,9 +236,7 @@ describe('open', () => {
 
     describe('and geteuid returns 1000', () => {
       beforeEach(() => {
-        // @ts-expect-error
-
-        vi.spyOn(process, 'geteuid').mockReturnValue(1000)
+        stubGeteuid(1000)
       })
 
       it('spawns without --no-sandbox', async () => {
@@ -228,21 +246,8 @@ describe('open', () => {
     })
 
     describe('and geteuid is undefined', () => {
-      let originalGeteuid: typeof process.geteuid
-
       beforeEach(() => {
-        originalGeteuid = process.geteuid
-        Object.defineProperty(process, 'geteuid', {
-          value: undefined,
-          writable: true,
-        })
-      })
-
-      afterEach(() => {
-        Object.defineProperty(process, 'geteuid', {
-          value: originalGeteuid,
-          writable: true,
-        })
+        stubGeteuid()
       })
 
       it('spawns without --no-sandbox', async () => {

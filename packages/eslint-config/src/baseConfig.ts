@@ -123,7 +123,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'no-console': 'error',
       'no-restricted-properties': [
-        'warn',
+        'error',
         {
           object: 'process',
           property: 'geteuid',
