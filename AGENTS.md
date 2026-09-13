@@ -13,6 +13,16 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
+## Task runbooks
+
+`.claude/skills/*/SKILL.md` holds step-by-step runbooks for multi-step workflows that span packages. Claude Code loads them on demand; **other agents should read the file directly** when starting one of these tasks, since nothing loads them automatically:
+
+- [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
+- [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
+- [`cypress-changelog-entry`](./.claude/skills/cypress-changelog-entry/SKILL.md) — whether a PR needs a `cli/CHANGELOG.md` entry, where it goes, and how to verify it.
+
+The directory is the authoritative list; each `SKILL.md` opens with a description of when it applies. These are procedure only — the canonical rules for a workflow live in [`guides/`](./guides/) or the relevant package `README.md`, and a skill links to them.
+
 ## Prerequisites
 
 - **Node**: Use the node version specified in the `.node-version` file (check with `node -v`; run `nvm use` to manage versions)

@@ -1,16 +1,17 @@
 ---
 name: cypress-changelog-entry
 description: >-
-  Decides whether a PR needs a cli/CHANGELOG.md entry from its changed paths
-  and semantic title prefix, writes it in the correct section with the issue
-  or PR links validation matches, covers dependency bumps that address a CVE
-  or advisory reported in security scans, and verifies with
-  scripts/semantic-commits/validate-binary-changelog.js. Also use when a
-  release shipped while a PR was open and an entry is stranded under an older
-  version heading, when picking a semantic prefix, or on verify-release-readiness
-  failures such as "A changelog entry was not found in cli/CHANGELOG.md",
-  "does not include the Breaking Changes section", or "Found the changelog entry
-  in the wrong section".
+  Decides whether a PR needs a cli/CHANGELOG.md entry — the Cypress release
+  notes — from its changed paths and semantic PR title prefix, including when
+  internal, chore, or an npm-only change means no entry is required. Writes the
+  entry in the correct section (Bugfixes, Features, Breaking Changes, Dependency
+  Updates) with the issue or PR links validation matches, covers dependency
+  bumps addressing a CVE or advisory reported in security scans, and verifies
+  with scripts/semantic-commits/validate-binary-changelog.js. Also use when
+  picking a semantic prefix, when a release shipped while a PR was open and an
+  entry is stranded under an older version heading, or on
+  verify-release-readiness failures such as "A changelog entry was not found in
+  cli/CHANGELOG.md" or "Found the changelog entry in the wrong section".
 ---
 
 # Writing a Cypress changelog entry
