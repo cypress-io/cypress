@@ -12,13 +12,9 @@ export default [
   },
   {
     rules: {
-      '@stylistic/comma-dangle': 'warn',
       '@stylistic/comma-spacing': 'warn',
       '@stylistic/type-generic-spacing': 'warn',
-      '@stylistic/quotes': 'warn',
-      '@stylistic/arrow-parens': 'warn',
       '@stylistic/no-multi-spaces': 'warn',
-      'padding-line-between-statements': 'warn',
       '@stylistic/space-unary-ops': 'warn',
       '@stylistic/member-delimiter-style': 'warn',
       '@stylistic/object-curly-spacing': 'warn',
