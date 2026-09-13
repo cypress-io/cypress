@@ -556,7 +556,7 @@ export class Reporter {
 
     const args = this.parseArgs(event as ReporterEventName, arg)
 
-    return this.runner && this.runner.emit.apply(this.runner, args as Parameters<Mocha.Runner['emit']>)
+    return this.runner && this.runner.emit(...(args as Parameters<Mocha.Runner['emit']>))
   }
 
   parseArgs (event: ReporterEventName, arg?: RunnablePayload): [string, ...unknown[]] {
