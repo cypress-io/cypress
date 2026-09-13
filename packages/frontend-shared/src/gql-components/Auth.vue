@@ -104,7 +104,9 @@ const props = withDefaults(defineProps<{
   utmMedium: string
   utmContent?: string
 }>(), {
+  authFlow: 'login',
   autoStartAuth: false,
+  utmContent: undefined,
 })
 
 gql`
@@ -261,12 +263,10 @@ const browserOpened = computed(() => {
   return props.gql.authState.browserOpened
 })
 
-const authFlow = computed(() => props.authFlow || 'login')
-
 const executeAuthMutation = () => {
   const variables = { utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() }
 
-  return authFlow.value === 'signup' ? signup.executeMutation(variables) : login.executeMutation(variables)
+  return props.authFlow === 'signup' ? signup.executeMutation(variables) : login.executeMutation(variables)
 }
 
 // We determine that a login is pending if there is no current cloudViewer and
@@ -321,7 +321,7 @@ const buttonText = computed(() => {
     return strings.continue
   }
 
-  return authFlow.value === 'signup' ? strings.signup : strings.login
+  return props.authFlow === 'signup' ? strings.signup : strings.login
 })
 
 const buttonPrefixIcon = computed(() => {
