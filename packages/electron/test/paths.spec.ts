@@ -20,13 +20,15 @@ vi.mock('fs', async () => {
 })
 
 vi.mock('path', async () => {
+  const actual = await vi.importActual<typeof path & { default: typeof path }>('path')
+
   return {
-    ...(await vi.importActual('path')),
+    ...actual,
     join: vi.fn(),
     resolve: vi.fn(),
     dirname: vi.fn(),
     default: {
-      ...(await vi.importActual('path')).default,
+      ...actual.default,
       join: vi.fn(),
       resolve: vi.fn(),
       dirname: vi.fn(),

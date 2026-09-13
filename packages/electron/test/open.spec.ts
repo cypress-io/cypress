@@ -123,8 +123,7 @@ describe('open', () => {
       }
     })
 
-    // @ts-expect-error
-    vi.spyOn(process, 'exit').mockImplementation(() => {})
+    vi.spyOn(process, 'exit').mockImplementation((() => {}) as () => never)
   })
 
   afterEach(() => {
@@ -334,7 +333,7 @@ describe('open', () => {
       process.removeAllListeners('SIGINT')
       process.removeAllListeners('SIGTERM')
 
-      vi.spyOn(process, 'exit').mockImplementation(() => {})
+      vi.spyOn(process, 'exit').mockImplementation((() => {}) as () => never)
 
       vi.mocked(mockChildProcess.on).mockImplementation((event: string, fn) => {
         if (event === 'close') {
