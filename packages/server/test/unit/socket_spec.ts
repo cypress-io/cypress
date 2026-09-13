@@ -237,8 +237,8 @@ describe('lib/socket', () => {
     })
 
     describe('on(mocha)', () => {
-      // the driver emits mocha events with a variable number of arguments, so
-      // each one must reach onMocha individually rather than as a single array
+      // the driver emits mocha events with a variable number of arguments, so each
+      // must reach onMocha individually rather than as one array
       it('forwards every argument to onMocha', function (done) {
         this.options.onMocha = function (...args) {
           expect(args).to.deep.eq(['test:before:run', { id: 'r3', title: 'does something' }])

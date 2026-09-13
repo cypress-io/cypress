@@ -416,9 +416,7 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  // the protocol implementation ships from the Cloud as a class instance whose
-  // methods rely on `this`, so invoking one detached from its instance would
-  // break it in a way that argument assertions alone cannot detect
+  // the Cloud ships the protocol as a class instance whose methods rely on `this`
   describe('invocation receiver', () => {
     it('invokes a synchronous method on the protocol instance', () => {
       sinon.stub(protocol, 'resetTest')

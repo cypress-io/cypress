@@ -182,9 +182,7 @@ describe('lib/cloud/studio', () => {
       )
     })
 
-    // the studio server ships from the Cloud as a class instance whose methods
-    // rely on `this`, so invoking one detached from its instance would break it
-    // in a way that argument assertions alone cannot detect
+    // the Cloud ships the studio server as a class instance whose methods rely on `this`
     it('invokes the method on the studio server instance', () => {
       sinon.stub(studio, 'initializeRoutes')
 
