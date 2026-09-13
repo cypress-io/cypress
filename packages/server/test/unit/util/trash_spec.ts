@@ -9,14 +9,14 @@ import { proxyquire } from '../../spec_helper'
 require('../../spec_helper')
 
 // Creates test directories and files for trash testing
-const populateDirectories = (basePath: string): void => {
-  fs.mkdirSync(basePath, { recursive: true })
-  fs.mkdirSync(path.resolve(basePath, 'bar'), { recursive: true })
-  fs.mkdirSync(path.resolve(basePath, 'bar', 'baz'), { recursive: true })
+const populateDirectories = async (basePath: string): Promise<void> => {
+  await fs.promises.mkdir(basePath, { recursive: true })
+  await fs.promises.mkdir(path.resolve(basePath, 'bar'), { recursive: true })
+  await fs.promises.mkdir(path.resolve(basePath, 'bar', 'baz'), { recursive: true })
 
-  fs.writeFileSync(path.resolve(basePath, 'a.txt'), '')
-  fs.writeFileSync(path.resolve(basePath, 'bar', 'b.txt'), '')
-  fs.writeFileSync(path.resolve(basePath, 'bar', 'baz', 'c.txt'), '')
+  await fs.promises.writeFile(path.resolve(basePath, 'a.txt'), '')
+  await fs.promises.writeFile(path.resolve(basePath, 'bar', 'b.txt'), '')
+  await fs.promises.writeFile(path.resolve(basePath, 'bar', 'baz', 'c.txt'), '')
 
   expect(fs.existsSync(path.resolve(basePath, 'a.txt'))).to.be.true
   expect(fs.existsSync(path.resolve(basePath, 'bar', 'b.txt'))).to.be.true
@@ -34,15 +34,13 @@ const expectDirectoriesExist = (basePath: string): void => {
 describe('lib/util/trash', () => {
   let tempDir: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tempDir = path.join(os.tmpdir(), `cypress-test-${Date.now()}`)
-    fs.mkdirSync(tempDir, { recursive: true })
+    await fs.promises.mkdir(tempDir, { recursive: true })
   })
 
-  afterEach(() => {
-    if (fs.existsSync(tempDir)) {
-      fs.rmSync(tempDir, { recursive: true, force: true })
-    }
+  afterEach(async () => {
+    await fs.promises.rm(tempDir, { recursive: true, force: true })
   })
 
   context('.folder', () => {
@@ -50,11 +48,11 @@ describe('lib/util/trash', () => {
       sinon.stub(os, 'platform').returns('darwin')
       const basePath = path.join(tempDir, 'foo')
 
-      populateDirectories(basePath)
+      await populateDirectories(basePath)
 
       await trash.folder(basePath)
       expectDirectoriesExist(basePath)
-      fs.rmdirSync(basePath)
+      await fs.promises.rmdir(basePath)
     })
 
     it('doesn\'t fail if directory is non-existent', async () => {
@@ -70,11 +68,11 @@ describe('lib/util/trash', () => {
       sinon.stub(os, 'platform').returns('win32')
       const basePath = path.join(tempDir, 'foo')
 
-      populateDirectories(basePath)
+      await populateDirectories(basePath)
 
       const trashStub = sinon.stub().callsFake(async (paths: string[]) => {
         // the underlying implementation removes the items...
-        paths.forEach((p) => fs.rmSync(p, { recursive: true, force: true }))
+        await Promise.all(paths.map((p) => fs.promises.rm(p, { recursive: true, force: true })))
         // ...but then rejects with a non-zero exit error
         throw new Error('Command failed: windows-trash.exe')
       })
@@ -86,14 +84,14 @@ describe('lib/util/trash', () => {
       await trashModule.folder(basePath)
       expect(trashStub).to.have.been.called
       expectDirectoriesExist(basePath)
-      fs.rmdirSync(basePath)
+      await fs.promises.rmdir(basePath)
     })
 
     it('rethrows when trash fails and the item still exists', async () => {
       sinon.stub(os, 'platform').returns('win32')
       const basePath = path.join(tempDir, 'foo')
 
-      populateDirectories(basePath)
+      await populateDirectories(basePath)
 
       const trashStub = sinon.stub().rejects(new Error('Command failed: windows-trash.exe'))
 
@@ -110,18 +108,18 @@ describe('lib/util/trash', () => {
       }
 
       expect(thrown).to.be.an('error')
-      fs.rmSync(basePath, { recursive: true, force: true })
+      await fs.promises.rm(basePath, { recursive: true, force: true })
     })
 
     it('completely removes directory on Linux', async () => {
       sinon.stub(os, 'platform').returns('linux')
       const basePath = path.join(tempDir, 'foo')
 
-      populateDirectories(basePath)
+      await populateDirectories(basePath)
 
       await trash.folder(basePath)
       expectDirectoriesExist(basePath)
-      fs.rmdirSync(basePath)
+      await fs.promises.rmdir(basePath)
     })
   })
 })
