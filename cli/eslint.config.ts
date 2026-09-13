@@ -22,7 +22,6 @@ export default [
       '@stylistic/space-in-parens': 'warn',
       '@stylistic/space-infix-ops': 'warn',
       '@stylistic/template-tag-spacing': 'warn',
-      'no-var': 'warn',
       '@stylistic/space-before-function-paren': ['warn', 'always'],
     },
   },
