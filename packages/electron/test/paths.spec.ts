@@ -22,10 +22,12 @@ vi.mock('fs', async () => {
 vi.mock('path', async () => {
   return {
     ...(await vi.importActual('path')),
+    join: vi.fn(),
     resolve: vi.fn(),
     dirname: vi.fn(),
     default: {
       ...(await vi.importActual('path')).default,
+      join: vi.fn(),
       resolve: vi.fn(),
       dirname: vi.fn(),
     },
@@ -40,12 +42,22 @@ describe('paths', () => {
 
   beforeEach(async () => {
     originalPath = await vi.importActual('path')
-    vi.mocked(path.resolve).mockImplementation((...args) => {
-      return originalPath.resolve(originalPath.join('/', ...args))
+
+    // `paths.ts` builds every path through `path`, so the mocks delegate to `path.posix`.
+    // On the host's own implementation Windows yields separators and a drive letter, and
+    // the POSIX literals these specs assert on could only ever match on POSIX.
+    vi.mocked(path.join).mockImplementation((...args) => {
+      return originalPath.posix.join(...args)
     })
 
+    vi.mocked(path.resolve).mockImplementation((...args) => {
+      return originalPath.posix.resolve(originalPath.posix.join('/', ...args))
+    })
+
+    // The comparison stays on the host implementation: both sides derive from a real
+    // `__dirname`, which is a native path on every platform.
     vi.mocked(path.dirname).mockImplementation((filePath) => {
-      return filePath === originalPath.resolve(__dirname, '../src') ? root : originalPath.dirname(filePath)
+      return filePath === originalPath.resolve(__dirname, '../src') ? root : originalPath.posix.dirname(filePath)
     })
 
     vi.mocked(existsSync).mockImplementation((filePath) => {
