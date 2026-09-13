@@ -151,7 +151,7 @@ export class StudioManager implements StudioManagerShape {
       debug('invoking sync method %s with args %o', method, args)
 
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return this._studioServer[method].apply(this._studioServer, args)
+      return this._studioServer[method](...args)
     } catch (error: unknown) {
       let actualError: Error
 
@@ -186,7 +186,7 @@ export class StudioManager implements StudioManagerShape {
       debug('invoking async method %s with args %o', method, args)
 
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._studioServer[method].apply(this._studioServer, args)
+      return await this._studioServer[method](...args)
     } catch (error: unknown) {
       let actualError: Error
 
