@@ -126,6 +126,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   {
     rules: {
       'no-console': 'error',
+      'prefer-spread': 'error',
       'no-restricted-properties': [
         'warn',
         {
@@ -205,7 +206,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-unsafe-finally': 'off',
       'no-async-promise-executor': 'off',
       'no-unsafe-optional-chaining': 'off',
-      'prefer-spread': 'warn',
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
