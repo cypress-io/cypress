@@ -10,6 +10,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 
 ## Table of Contents
 
+* [Adding a configuration option](./adding-a-config-option.md)
 * [App lifecycle](./app-lifecycle.md)
 * [App <--> Cloud Testing](./app-cloud-testing.md)
 * [CI](./continuous-integration.md)

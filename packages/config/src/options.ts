@@ -7,14 +7,18 @@ import type { TestingType } from '@packages/types'
 import * as validate from './validation'
 
 /**
- * When adding a new config option, ensure the following steps are taken:
- * - Add the option to the appropriate array
+ * Adding, renaming, or removing a config option touches ~10 files across three packages,
+ * three checked-in snapshot files, and the cypress-documentation repo. Two steps fail silently.
+ *
+ * Follow `/guides/adding-a-config-option.md` rather than this list:
+ * - Add the option to the appropriate array below
  * - Add the type definition to `/cli/types/cypress.d.ts`
  * - Ensure the `results_spec` system test passes with updated snapshots
  * - Ensure the config package tests pass with updated snapshots
  *
  * Additionally, for experiments:
  * - add name and description copy to `/packages/frontend-shared/src/locales/en-US.json`
+ * - add `_names` and `_summaries` copy to `/packages/server/lib/experiments.ts`
  */
 
 const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [

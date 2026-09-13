@@ -31,6 +31,14 @@ src/
   validation.ts  Per-option validation functions used at runtime
 ```
 
+## Adding, Renaming, or Removing a Configuration Option
+
+Read [Adding a Cypress Configuration Option](../../guides/adding-a-config-option.md) first. The
+change spans roughly ten files across three packages, three checked-in snapshot files, and a pull
+request in `cypress-io/cypress-documentation` — and the experiment copy files fail silently when
+missed.
+Note also that `packages/config/*` is a global CI trigger, so every job in the matrix runs.
+
 ## Gotchas / Notes
 
 - `CYPRESS_env` and `CYPRESS_expose` must be valid JSON objects (e.g. `{"key":"value"}`). Plain strings are warned and ignored; use `--env key=value` for individual Cypress env vars instead.

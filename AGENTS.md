@@ -15,7 +15,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 
 ## Task runbooks
 
-Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
+Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [adding a configuration option](./guides/adding-a-config-option.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
 
 `.claude/skills/*/SKILL.md` adds a thin layer on top for the two workflows that need agent-specific execution guidance — which permissions a phase needs, long-running commands, and host quirks that would be noise in a contributor guide. Claude Code loads them on demand; **other agents should read the file directly**, since nothing loads them automatically:
 
