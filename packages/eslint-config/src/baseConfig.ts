@@ -140,7 +140,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
         'error',
         {
           // match sync FS methods except for `existsSync`
-          // examples: fse.readFileSync, fs.readFileSync, this.ctx.fs.readFileSync...
+          // examples: fs.readFileSync, this.ctx.fs.readFileSync...
+          // an aliased import such as `fse.readFileSync` is not matched, since the
+          // object has to be named `fs` or reached through a member named `fs`
           selector: `MemberExpression[object.name='fs'][property.name=/^[A-z]+Sync$/]:not(MemberExpression[property.name='existsSync']), MemberExpression[property.name=/^[A-z]+Sync$/]:not(MemberExpression[property.name='existsSync']):has(MemberExpression[property.name='fs'])`,
           message: 'Synchronous fs calls should not be used in Cypress. Use an async API instead.',
         },
