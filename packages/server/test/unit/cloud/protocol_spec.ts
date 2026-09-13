@@ -416,6 +416,36 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
+  // the protocol implementation ships from the Cloud as a class instance whose
+  // methods rely on `this`, so invoking one detached from its instance would
+  // break it in a way that argument assertions alone cannot detect
+  describe('invocation receiver', () => {
+    it('invokes a synchronous method on the protocol instance', () => {
+      sinon.stub(protocol, 'resetTest')
+
+      protocolManager.resetTest('r3', 1)
+
+      expect(protocol.resetTest).to.be.calledOn(protocol)
+    })
+
+    it('invokes an asynchronous method on the protocol instance', async () => {
+      sinon.stub(protocol, 'preAfterTest').resolves()
+
+      await protocolManager.preAfterTest({ id: 'id', title: 'test' }, { nextTestHasTestIsolationOn: true })
+
+      expect(protocol.preAfterTest).to.be.calledOn(protocol)
+    })
+
+    it('forwards no arguments when the caller supplies none', () => {
+      const cleanup = sinon.stub(protocol, 'cleanup')
+
+      protocolManager.cleanup()
+
+      expect(cleanup).to.be.calledOn(protocol)
+      expect(cleanup.getCall(0).args).to.deep.eq([])
+    })
+  })
+
   describe('.reset', () => {
     it('closes the protocol manager', () => {
       const mockClose = sinon.stub()
