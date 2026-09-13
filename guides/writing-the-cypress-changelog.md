@@ -108,6 +108,31 @@ No backticks for:
 | ------------------------- | ------- | ------- |
 | npm package major version | `X`     | 15      |
 
+## Verifying Your Entry
+
+Run the same check CI's `verify-release-readiness` job runs:
+
+```bash
+GH_TOKEN=<token> node ./scripts/semantic-commits/validate-binary-changelog.js
+```
+
+Two prerequisites, both of which fail before the script reaches any changelog logic:
+
+- **A root `yarn` install.** The script loads `bluebird` and `@octokit/core` from the root `node_modules`. Without them it exits at `Cannot find module 'bluebird'` — a missing dependency, not a problem with your entry.
+- **`GH_TOKEN`.** It queries the GitHub API for the last release and this branch's commits, and throws `The GH_TOKEN env is not set.` without one. Any token with public repo read access works; `gh auth token` supplies one.
+
+Run it on your feature branch. The gate that limits full-changelog validation to `develop` and `release/X.Y.Z` applies only under `CIRCLECI`, so a local run validates the whole changelog whatever branch you are on.
+
+It reports one of:
+
+- `A changelog entry was not found in cli/CHANGELOG.md.`
+- `The changelog does not include the **<Section>:** section.`
+- `Found the changelog entry in the wrong section.`
+- a missing-links error that prints the exact expected string to paste.
+- a parse error naming the offending line number, for an unknown or duplicate section header or a missing blank line.
+
+The script checks placement and links only. Wording, ordering, and whether the entry is understandable are left to reviewers, so a passing run does not mean the writing guidelines above have been met.
+
 ## Release
 
 At the time of the release, the releaser will:

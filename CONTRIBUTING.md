@@ -479,16 +479,17 @@ to AI assistants while remaining transparent and minimal for human contributors.
 
 - `CLAUDE.md` — Used by Claude Code (Claude loads these by walking upward from the working directory).
 - `AGENTS.md` — Used by Codex CLI and Cursor. Claude references this via `@import`.
-- `.claude/skills/*/SKILL.md` — Used by Claude Code. Task-specific runbooks that are
-  loaded on demand rather than in every conversation, for multi-step workflows that
-  span packages (building the binary, writing a changelog entry).
+- `.claude/skills/*/SKILL.md` — Used by Claude Code. A thin layer over `guides/` for the
+  few workflows needing agent-specific execution guidance, such as which permissions a
+  build phase requires (building the binary, debugging packaged artifacts).
 
 The root `AGENTS.md` provides project-wide context. Workspace and package-level
 `AGENTS.md` files add scoped details.
 
-Skills are a convenience layer for one tool, never a source of truth. They link to the
-canonical guide or `README.md` for a workflow and hold only the procedure around it, so
-that contributors not using Claude are never sent into `.claude/` to find a rule.
+Skills are a convenience layer for one tool, never a source of truth. Procedures belong in
+`guides/`, which every contributor and every AI tool can read; a skill links to the relevant
+guide and adds only what is specific to running the task, so that contributors not using
+Claude are never sent into `.claude/` to find a rule.
 
 #### Maintenance expectations
 

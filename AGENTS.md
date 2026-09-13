@@ -15,13 +15,14 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 
 ## Task runbooks
 
-`.claude/skills/*/SKILL.md` holds step-by-step runbooks for multi-step workflows that span packages. Claude Code loads them on demand; **other agents should read the file directly** when starting one of these tasks, since nothing loads them automatically:
+Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
+
+`.claude/skills/*/SKILL.md` adds a thin layer on top for the two workflows that need agent-specific execution guidance — which permissions a phase needs, long-running commands, and host quirks that would be noise in a contributor guide. Claude Code loads them on demand; **other agents should read the file directly**, since nothing loads them automatically:
 
 - [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
 - [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
-- [`cypress-changelog-entry`](./.claude/skills/cypress-changelog-entry/SKILL.md) — whether a PR needs a `cli/CHANGELOG.md` entry, where it goes, and how to verify it.
 
-The directory is the authoritative list; each `SKILL.md` opens with a description of when it applies. These are procedure only — the canonical rules for a workflow live in [`guides/`](./guides/) or the relevant package `README.md`, and a skill links to them.
+Prefer adding to a guide. A new skill is only warranted when the content is about *running* the task rather than doing it correctly.
 
 ## Prerequisites
 
