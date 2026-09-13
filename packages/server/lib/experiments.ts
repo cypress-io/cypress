@@ -1,5 +1,5 @@
 import { get } from 'lodash'
-import { isExperimentalOptionName } from '@packages/config'
+import { hasExperimentalPrefix } from '@packages/config'
 
 /**
  * Returns a single string with human-readable experiments.
@@ -87,12 +87,19 @@ export const getExperimentsFromResolved = (resolvedConfig, names = experimental.
     return experiments
   }
 
-  const experimentalKeys = Object.keys(resolvedConfig).filter(isExperimentalOptionName)
+  const experimentalKeys = Object.keys(resolvedConfig).filter(hasExperimentalPrefix)
 
   experimentalKeys.forEach((key) => {
-    // Fall back to the config key so an experiment missing its copy still appears in the run
-    // header rather than vanishing from it. `experiments_spec` fails when copy is missing.
-    const name = get(names, key, key)
+    const name = get(names, key)
+
+    if (!name) {
+      // Cypress does not reject unknown keys in a user's config, so an arbitrary
+      // `experimentalAnything` of their own reaches here and must not be reported as a Cypress
+      // experiment. Every real one has a name — `experiments_spec` asserts that — so a missing
+      // name means the key is not ours.
+      return
+    }
+
     const summary = get(summaries, key, 'top secret')
 
     // it would be nice to have default value in the resolved config

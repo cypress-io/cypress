@@ -116,14 +116,16 @@ export const getBreakingKeys = () => {
 }
 
 /**
- * An option is an experiment if its name starts with `experimental`. Both the Settings screen
- * and the `cypress run` header discover experiments this way, so they share this definition
- * rather than each re-deriving it from a key prefix.
+ * Whether a key *looks like* an experiment. Cypress does not reject unknown keys in a user's
+ * config, so this matching a key does not make it a Cypress experiment — callers scanning a
+ * resolved config must still check it against a known list. Both the Settings screen and the
+ * `cypress run` header discover experiments by this prefix, so they share the definition.
  */
-export const isExperimentalOptionName = (key: string) => key.startsWith('experimental')
+export const hasExperimentalPrefix = (key: string) => key.startsWith('experimental')
 
+/** The `experimental*` options Cypress actually defines. */
 export const getExperimentalOptionNames = () => {
-  return publicConfigKeys.filter(isExperimentalOptionName)
+  return publicConfigKeys.filter(hasExperimentalPrefix)
 }
 
 export const getBreakingRootKeys = () => {

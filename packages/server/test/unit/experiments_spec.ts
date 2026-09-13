@@ -116,5 +116,20 @@ describe('experiments', () => {
 
       expect(result).to.deep.equal(expected)
     })
+
+    it('ignores experimental-looking keys that are not Cypress experiments', () => {
+      // A user's config may contain arbitrary keys; Cypress does not reject them. One that
+      // happens to start with `experimental` must not be reported as a Cypress experiment.
+      const project = {
+        resolvedConfig: {
+          experimentalSomethingTheUserInvented: {
+            value: true,
+            from: 'config',
+          },
+        },
+      }
+
+      expect(getExperiments(project)).to.deep.equal({})
+    })
   })
 })

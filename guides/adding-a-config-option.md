@@ -227,9 +227,14 @@ are flattened. Miss a file and the test names it:
 add copy to packages/server/lib/experiments.ts
 ```
 
-Both files also share one definition of what counts as an experiment —
-`isExperimentalOptionName` from [`@packages/config`](../packages/config/src/browser.ts) — rather
-than each re-deriving the `experimental` prefix.
+Both files also share one definition of the prefix — `hasExperimentalPrefix` from
+[`@packages/config`](../packages/config/src/browser.ts) — rather than each re-deriving it.
+
+The prefix alone is not enough to identify an experiment, though. **Cypress does not reject
+unknown keys in a user's config**, so a user's own `experimentalWhateverTheyLike` reaches the
+resolved config and matches the prefix. `getExperimentsFromResolved` therefore skips any key with
+no entry in `_names`, which is what keeps a user's invented key out of the run header. That guard
+is load-bearing, not dead code — do not "simplify" it into a fallback to the key name.
 
 ### 7c. Add the option to the Settings component fixture
 
@@ -260,6 +265,10 @@ name: t(`settingsPage.experiments.${configItem.field}.name`),
 screen renders the literal string `settingsPage.experiments.myNewOption.name` as the experiment's
 name. TypeScript cannot catch it — the key is built from runtime config, so there is nothing
 static to check — which is why the coverage assertions in step 7b exist.
+
+Note that this component filters on the `experimental` prefix alone, with no equivalent of the
+run header's `_names` check, so a user's own `experimental*` config key renders here the same way.
+That is existing behavior and not something your option introduces.
 
 ## Regenerating Snapshots
 
