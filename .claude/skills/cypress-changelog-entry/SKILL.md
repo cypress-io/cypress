@@ -71,7 +71,7 @@ Get the version with **`node ./scripts/get-next-version.js`** (see [guides/next-
 Three structural rules the parser enforces as hard errors:
 
 - **Only the seven section headings listed above are valid.** Anything else throws, including the `**Summary:**` section the guide describes for large releases — it does not appear in the file and the tooling rejects it.
-- **Never repeat a section heading** in one release — always add to the existing block. Only a repeat with another section between the two throws `Duplicate section header`; a repeat immediately after the first block **silently discards every entry above it**. If an entry seems to vanish from validation, check for a second copy of its heading.
+- **No duplicate section headings** in one release — a repeat throws `Duplicate section header`, naming the line (`Condense change content under a single section header.`). Add to the existing block instead.
 - Section order, when several are present: Breaking Changes, Deprecations, Performance, Features, Bugfixes, Misc, Dependency Updates. Order entries within a section by user impact, most impactful first.
 
 ### Reconcile against the current release section

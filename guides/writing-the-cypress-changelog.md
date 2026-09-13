@@ -40,7 +40,7 @@ This changelog describes the **binary**. Validation only considers changed files
     The file is parsed by position, so a few rules are enforced as hard errors by [`parse-changelog.js`](../scripts/semantic-commits/parse-changelog.js):
     - Line 1 stays the HTML comment and **line 2 must be the `## X.Y.Z` heading**, with a blank line after it and after every section header.
     - Only the change sections in the table below are valid section headers. Anything else throws, naming the offending line number.
-    - Never repeat a section header within a release; always add to the existing section. A repeat with another section between the two throws `Duplicate section header`, but a repeat **immediately after** the first block silently discards every entry above it, so those entries are never validated and can ship missing.
+    - A section header may not appear twice in the same release — a repeat throws `Duplicate section header`, naming the line. Add to the existing section instead.
     - Parsing stops at the next `## X.Y.Z`, so only the topmost release is validated.
 
 2. Each changelog entry is written and merged with the associated user-facing code change in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
