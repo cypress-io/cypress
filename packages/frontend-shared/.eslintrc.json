@@ -26,12 +26,20 @@
       "files": "**/*.vue",
       "rules": {
         "vue/no-v-html": "off",
+        "vue/require-default-prop": "error",
         "no-spaced-func": "off",
-        "no-restricted-imports": [
+        "no-restricted-imports": "off",
+        "@typescript-eslint/no-restricted-imports": [
           "error",
           {
             "patterns": [
-              "@packages/data-context/*"
+              {
+                "group": [
+                  "@packages/data-context/*"
+                ],
+                "allowTypeImports": true,
+                "message": "data-context is server-side; a Vue component may only borrow its types."
+              }
             ]
           }
         ]
