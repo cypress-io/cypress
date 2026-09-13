@@ -18,11 +18,8 @@ shell.set('-e') // any error is fatal
 // yet we do not install "@types/.." packages with "npm install cypress"
 // because they can conflict with user's own libraries
 
-// Every fs call below is synchronous on purpose: this is a one-shot build step
-// whose copies and rewrites are strictly ordered against the synchronous shelljs
-// operations (`shell.rm`, `shell.sed`) that touch the same files, and `shell.set('-e')`
-// relies on each step throwing before the next one starts. There is no concurrency
-// to win here, only ordering to lose.
+// The fs calls below are synchronous so they stay ordered against the shelljs
+// operations (`shell.rm`, `shell.sed`) that rewrite the same files.
 
 // eslint-disable-next-line no-restricted-syntax
 fs.ensureDirSync(join(__dirname, '..', 'types'))

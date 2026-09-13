@@ -182,11 +182,8 @@ describe('lib/modes/run', () => {
     fsUtil.access.withArgs(fallbackRoot).resolves()
     // @ts-expect-error
     process.chdir.withArgs(fallbackRoot).returns()
-    // Not I/O: this configures the `fs.statSync` stub installed in the outer
-    // `beforeEach`. ProjectLifecycleManager checks the project root synchronously,
-    // so the stub has to mirror that signature.
-    // @ts-expect-error
-    fs.statSync.withArgs(fallbackRoot).returns({ // eslint-disable-line no-restricted-syntax
+    // @ts-expect-error - statSync is already stubbed in the outer beforeEach
+    fs.statSync.withArgs(fallbackRoot).returns({ // eslint-disable-line no-restricted-syntax -- configures the stub, not a real fs call
       isDirectory: () => true,
     })
 
