@@ -1,11 +1,11 @@
-const { expect, use } = require('chai')
-const chaiAsPromised = require('chai-as-promised')
+import { expect, use } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 
-const { parseChangelog } = require('../../semantic-commits/parse-changelog')
+import { parseChangelog } from '../../semantic-commits/parse-changelog'
 
 use(chaiAsPromised)
 
-const changelog = (...lines) => ['<!-- comment -->', ...lines].join('\n')
+const changelog = (...lines: string[]) => ['<!-- comment -->', ...lines].join('\n')
 
 describe('semantic-pull-request/parse-changelog', () => {
   it('collects the entries of each section', async () => {
