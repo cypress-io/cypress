@@ -205,7 +205,7 @@ yarn clean-deps && yarn
 - **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
-- **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
+- **Sync FS calls** — An error (except `existsSync`); use the async variants. Where sync I/O is genuinely correct — a build script whose steps are ordered against other sync work, or a stub that must mirror a sync signature — add a narrowly scoped `// eslint-disable-next-line no-restricted-syntax` with a comment explaining why.
 
 ### Code Comments
 

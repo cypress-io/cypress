@@ -137,7 +137,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       ],
       'no-restricted-syntax': [
         // esquery tool: https://estools.github.io/esquery/
-        'warn',
+        'error',
         {
           // match sync FS methods except for `existsSync`
           // examples: fse.readFileSync, fs.readFileSync, this.ctx.fs.readFileSync...
