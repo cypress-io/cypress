@@ -271,7 +271,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   {
     ignores: [
       '.releaserc.js',
+      'cjs/**/*',
       'dist/**/*',
+      'esm/**/*',
       '**/__snapshots__/**/*',
       'test/.mocharc.js',
     ],
