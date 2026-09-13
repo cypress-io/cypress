@@ -12,7 +12,6 @@ export default [
   },
   {
     rules: {
-      '@stylistic/comma-dangle': 'warn',
       '@stylistic/comma-spacing': 'warn',
       '@stylistic/type-generic-spacing': 'warn',
       '@stylistic/quotes': 'warn',
