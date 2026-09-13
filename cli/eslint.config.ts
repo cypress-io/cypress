@@ -31,6 +31,8 @@ export default [
       '**/__snapshots__',
       '**/build/**/*',
       'package.json',
+      // cli types are checked by dtslint
+      'types/**',
       '**/angular/**/*',
       '**/react/**/*',
       '**/vue/**/*',
