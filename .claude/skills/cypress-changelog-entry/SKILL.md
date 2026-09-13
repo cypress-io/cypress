@@ -15,7 +15,7 @@ description: >-
 
 # Writing a Cypress changelog entry
 
-Canonical reference: [guides/writing-the-cypress-changelog.md](../../../guides/writing-the-cypress-changelog.md) (full style rules, formatting tables, release duties). Source of truth for sections, version bumps, and the phrase convention: [`scripts/semantic-commits/change-categories.js`](../../../scripts/semantic-commits/change-categories.js).
+**[guides/writing-the-cypress-changelog.md](../../../guides/writing-the-cypress-changelog.md) is the source of truth** for which prefixes need an entry, section names and order, phrasing, formatting, and dependency/security wording. This skill is the procedure around it: how to decide, where to place, and how to verify. When the two disagree, the guide wins and this file is the one to fix — along with [`change-categories.js`](../../../scripts/semantic-commits/change-categories.js) (sections, version bumps, phrase convention) and [`parse-changelog.js`](../../../scripts/semantic-commits/parse-changelog.js) (structure), which the guide documents.
 
 ## Agent execution
 
@@ -70,7 +70,7 @@ Get the version with **`node ./scripts/get-next-version.js`** (see [guides/next-
 Three structural rules the parser enforces as hard errors:
 
 - **Only the seven section headings listed above are valid.** Anything else throws, including the `**Summary:**` section the guide describes for large releases — it does not appear in the file and the tooling rejects it.
-- **No duplicate section headings** in one release (`Condense change content under a single section header.`). Add to the existing section instead.
+- **Never repeat a section heading** in one release — always add to the existing block. Only a repeat with another section between the two throws `Duplicate section header`; a repeat immediately after the first block **silently discards every entry above it**. If an entry seems to vanish from validation, check for a second copy of its heading.
 - Section order, when several are present: Breaking Changes, Deprecations, Performance, Features, Bugfixes, Misc, Dependency Updates. Order entries within a section by user impact, most impactful first.
 
 ### Reconcile against the current release section

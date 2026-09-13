@@ -247,8 +247,8 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Changelog & Template
 
-- The semantic title prefix decides whether a changelog entry is required. `breaking`, `dependency`, `deprecation`, `feat`, `fix`, `misc`, and `perf` each need an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md); `chore`, `docs`, `refactor`, `revert`, and `test` do not. Choosing `fix` already asserts the change ships to users, so do not then skip the entry because the impact looks internal — the "no user-facing impact" exemption in the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) describes the second group of prefixes.
-- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token.
+- The semantic title prefix decides whether an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) is required, which section it belongs in, and how it must be phrased. The [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) is the source of truth for all of it — read it rather than guessing, and note that a `fix` prefix always requires an entry.
+- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
