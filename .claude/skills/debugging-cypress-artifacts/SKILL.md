@@ -7,6 +7,7 @@ description: >-
   CYPRESS_RUN_BINARY, DEBUG and inspect flags, and workspace recovery without
   stash. Use when investigating artifact-only bugs, binary-build electron
   MODULE_NOT_FOUND, or a packaged cypress open/run repro loop.
+allowed-tools: Bash(yarn) Bash(yarn lerna run build-cli --scope cypress) Bash(yarn workspace @packages/data-context build) Bash(env -u ELECTRON_RUN_AS_NODE yarn binary-build*) Bash(env -u ELECTRON_RUN_AS_NODE yarn binary-package*) Bash(node cli/build/dist/bin/cypress*) Bash(node packages/server/index.js --version) Bash(env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version)
 ---
 
 # Debugging Cypress packaged artifacts
@@ -17,17 +18,19 @@ Build steps: see [building-cypress-binary](../building-cypress-binary/SKILL.md).
 
 ## Agent execution (avoid repeated permission prompts)
 
-Run this workflow **without asking the user to approve each command**. Use elevated permissions up front:
+This skill’s **`allowed-tools`** pre-approves the build and repro commands of the loop, so a full pass does not stop for approval on every step. It only suppresses prompts for those commands — it grants no network access and no filesystem scope the host has not already given. Cleanup is deliberately left out: **`git clean -xfd`** permanently deletes untracked and ignored files, so it asks every time, as do `git reset`, `git restore` and `rm` below.
 
-| Phase | Command pattern | Permissions |
-|-------|-----------------|-------------|
-| Install | `yarn` from repo root (if `node_modules/.bin/lerna` missing) | `network` |
-| CLI build | `yarn lerna run build-cli --scope cypress` | `network` |
-| Binary build | `env -u ELECTRON_RUN_AS_NODE yarn binary-build` / `binary-package` with `--version` / `--platform` | `all` (long-running, writes outside workspace temp dirs). **Unset `ELECTRON_RUN_AS_NODE`** — see building skill. |
-| Repro / logs | `node cli/build/dist/bin/cypress …`, `node packages/server/index.js --version` | `network` if debug ingest uses HTTP |
-| Cleanup | `git clean -xfd`, then `yarn` | `all` for clean; `network` for yarn |
+| Phase | Command pattern | Prompts? |
+|-------|-----------------|----------|
+| Install | `yarn` from repo root (if `node_modules/.bin/lerna` missing) | no |
+| CLI build | `yarn lerna run build-cli --scope cypress` | no |
+| Binary build | `env -u ELECTRON_RUN_AS_NODE yarn binary-build` / `binary-package` with `--version` / `--platform` | no. Long-running and writes to temp dirs outside the workspace. **Unset `ELECTRON_RUN_AS_NODE`** — see building skill. |
+| Repro / logs | `node cli/build/dist/bin/cypress …`, `node packages/server/index.js --version` | no |
+| Cleanup | `git clean -xfd`, then `yarn` | yes for `git clean`; no for `yarn` |
 
-Do **not** re-prompt for sandbox/network on every step in the same session once the user has asked for a full artifact debug loop.
+Pre-approval matches on the command as written, and this loop always uses the **`env -u ELECTRON_RUN_AS_NODE`** form of the binary steps — that prefix is part of the pre-approved pattern, not decoration to drop.
+
+Where the host gates network or filesystem access on top of that — `yarn` reaching the registry, the binary steps writing under the OS tmp dir, debug ingest posting over HTTP — ask for it once at the start of the debug loop rather than at every step.
 
 ## Git workflow for a debug loop (single checkout)
 
@@ -38,7 +41,7 @@ Use a **WIP commit** as a bookmark, then **reset** (not **`git revert`**) to res
 1. **`git checkout -b debug/<topic>`** (or stay on an existing debug branch).
 2. **Analysis edits** (logging, temporary probes, etc.). Commit only what you mean — prefer **`git add <paths>`** over blind **`git commit -a`**, so build noise on tracked files is not swept into the WIP commit.
 3. **`git commit -m "wip: debug …"`** if there are changes worth preserving (see **Husky** below if commit fails).
-4. **Build** packaged CLI and binary (see building skill): `yarn lerna run build-cli --scope cypress`, then **`env -u ELECTRON_RUN_AS_NODE yarn binary-build`** / **`binary-package`** with matching **`--version`** (discover via `env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version`) and **`--platform`**.
+4. **Build** packaged CLI and binary (see building skill): `yarn lerna run build-cli --scope cypress`, then **`env -u ELECTRON_RUN_AS_NODE yarn binary-build`** and **`env -u ELECTRON_RUN_AS_NODE yarn binary-package`**, both with matching **`--version`** (discover via `env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version`) and **`--platform`**.
 5. **Repro** with packaged entrypoints (below).
 6. **Restore workspace:**
    ```bash

@@ -8,6 +8,7 @@ description: >-
   the tree is dirty after a build. Use when the user asks to build the Cypress
   binary, binary-package, electron MODULE_NOT_FOUND during binary-build, or
   local binary zip. For artifact debugging, use debugging-cypress-artifacts.
+allowed-tools: Bash(yarn) Bash(yarn binary-build*) Bash(yarn binary-package*) Bash(yarn binary-zip*) Bash(env -u ELECTRON_RUN_AS_NODE yarn binary-build*) Bash(env -u ELECTRON_RUN_AS_NODE yarn binary-package*) Bash(env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version)
 ---
 
 # Building the Cypress binary
@@ -18,7 +19,13 @@ Artifact debugging (packaged CLI, `CYPRESS_RUN_BINARY`, git debug loop): [debugg
 
 ## Agent execution
 
-Run from repo root with **Yarn 1** and Node per **`.node-version`**. Request **`network`** for `yarn` / `yarn lerna …`; request **`all`** for `yarn binary-build` and `yarn binary-package` (long runs, temp dir under OS tmp, high memory). Sandbox vs full permissions does **not** fix a failed dist smoke test if **`ELECTRON_RUN_AS_NODE=1`** is set — unset that var instead (below). Do not ask the user to approve each command separately during one build session.
+Run from repo root with **Yarn 1** and Node per **`.node-version`**.
+
+The commands below are pre-approved in this skill’s **`allowed-tools`**, so a multi-step build does not stop for approval on every step. That is the whole of what it does: it suppresses permission prompts for those specific commands. It grants no network access and widens no filesystem scope. `binary-build` and `binary-package` are long runs that need the network, a temp dir under the OS tmp dir, and a lot of memory — if the host sandboxes any of that, ask for it once, up front, for the whole build session rather than at each step.
+
+Pre-approval matches on the command as written, so the **`env -u ELECTRON_RUN_AS_NODE`** forms are listed alongside the bare ones — a prefixed command is a different command to the permission check.
+
+Whichever way permissions are granted, they do **not** fix a failed dist smoke test when **`ELECTRON_RUN_AS_NODE=1`** is set — unset that var instead (below).
 
 **Prerequisites:** If `node_modules/.bin/lerna` or `rollup` is missing, run **`yarn`** first (postinstall runs the monorepo build; may take several minutes).
 
@@ -87,7 +94,7 @@ Yarn 1 forwards extra args to the script; an explicit `--` before flags also wor
 
 A full binary build drives **`yarn lerna run build`** and **`build-prod`** across packages, writes many **`dist/`** artifacts, uses a **root `build/`** symlink into a temp dir (`scripts/binary/build.ts` → `TMP_BUILD_DIR`), and can leave output **interleaved with source** (**.js` beside `.ts`**, some **`.ts` mutations**). Expect **`git status` to be unusable** until reset.
 
-**Full reset:** `git clean -xfd && yarn` — destroys untracked/ignored files; do not rely on stash here.
+**Full reset:** `git clean -xfd && yarn` — destroys untracked/ignored files, so it is deliberately left out of `allowed-tools` and still asks before it runs. Do not rely on stash here.
 
 **Keeping WIP through a build:** use the commit → build → clean → **`git reset HEAD~1`** loop or a **git worktree** — see [debugging-cypress-artifacts](../debugging-cypress-artifacts/SKILL.md).
 
