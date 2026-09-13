@@ -51,20 +51,22 @@ export const mockConnection = (connectionSchema: unknown = schema, execOutcome: 
   return call
 }
 
-export const readySession = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => ({
-  schemaVersion: 1,
-  pid: 4242,
-  projectRoot: '/projects/app',
-  serverPort: 49200,
-  sessionId: 'inst-1',
-  testingType: 'e2e',
-  cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-  browserName: 'Chrome',
-  browserFamily: 'chromium',
-  machineId: null,
-  userId: null,
-  ...overrides,
-})
+export const readySession = (overrides: Partial<ReadySessionState> = {}): ReadySessionState => {
+  return {
+    schemaVersion: 1,
+    pid: 4242,
+    projectRoot: '/projects/app',
+    serverPort: 49200,
+    sessionId: 'inst-1',
+    testingType: 'e2e',
+    cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+    browserName: 'Chrome',
+    browserFamily: 'chromium',
+    machineId: null,
+    userId: null,
+    ...overrides,
+  }
+}
 
 export const mockResolved = (overrides: Partial<SessionSelection> = {}): SessionSelection => {
   const selection: SessionSelection = { session: readySession(), reason: 'only', candidateCount: 1, ...overrides }

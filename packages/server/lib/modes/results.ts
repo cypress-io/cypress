@@ -106,32 +106,36 @@ const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
   }
 }
 
-const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
-  error: run.error,
-  reporter: run.reporter,
-  reporterStats: run.reporterStats,
-  screenshots: _.map(run.screenshots, (screenshot) => ({
-    height: screenshot.height,
-    name: screenshot.name,
-    path: screenshot.path,
-    takenAt: screenshot.takenAt,
-    width: screenshot.width,
-  })),
-  spec: createPublicSpec(run.spec),
-  stats: {
-    duration: run.stats.wallClockDuration,
-    endedAt: run.stats.wallClockEndedAt,
-    failures: run.stats.failures,
-    passes: run.stats.passes,
-    pending: run.stats.pending,
-    skipped: run.stats.skipped,
-    startedAt: run.stats.wallClockStartedAt,
-    suites: run.stats.suites,
-    tests: run.stats.tests,
-  },
-  tests: _.map(run.tests, createPublicTest),
-  video: run.video,
-})
+const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => {
+  return {
+    error: run.error,
+    reporter: run.reporter,
+    reporterStats: run.reporterStats,
+    screenshots: _.map(run.screenshots, (screenshot) => {
+      return {
+        height: screenshot.height,
+        name: screenshot.name,
+        path: screenshot.path,
+        takenAt: screenshot.takenAt,
+        width: screenshot.width,
+      }
+    }),
+    spec: createPublicSpec(run.spec),
+    stats: {
+      duration: run.stats.wallClockDuration,
+      endedAt: run.stats.wallClockEndedAt,
+      failures: run.stats.failures,
+      passes: run.stats.passes,
+      pending: run.stats.pending,
+      skipped: run.stats.skipped,
+      startedAt: run.stats.wallClockStartedAt,
+      suites: run.stats.suites,
+      tests: run.stats.tests,
+    },
+    tests: _.map(run.tests, createPublicTest),
+    video: run.video,
+  }
+}
 
 /**
  * Normalize browser object to remove private props and make it more consistent
@@ -196,26 +200,28 @@ export const createPublicConfig = (config: Cfg): CypressCommandLine.PublicConfig
  * Normalize results for module API/after:run to remove private props and make
  * them more consistent and user-friendly
  */
-export const createPublicRunResults = (results: CypressRunResult): CypressCommandLine.CypressRunResult => ({
-  browserName: results.browserName,
-  browserPath: results.browserPath,
-  browserVersion: results.browserVersion,
-  config: createPublicConfig(results.config),
-  cypressVersion: results.cypressVersion,
-  endedTestsAt: results.endedTestsAt,
-  osName: results.osName,
-  osVersion: results.osVersion,
-  runs: _.map(results.runs, createPublicRun),
-  runUrl: results.runUrl,
-  startedTestsAt: results.startedTestsAt,
-  totalDuration: results.totalDuration,
-  totalFailed: results.totalFailed,
-  totalPassed: results.totalPassed,
-  totalPending: results.totalPending,
-  totalSkipped: results.totalSkipped,
-  totalSuites: results.totalSuites,
-  totalTests: results.totalTests,
-})
+export const createPublicRunResults = (results: CypressRunResult): CypressCommandLine.CypressRunResult => {
+  return {
+    browserName: results.browserName,
+    browserPath: results.browserPath,
+    browserVersion: results.browserVersion,
+    config: createPublicConfig(results.config),
+    cypressVersion: results.cypressVersion,
+    endedTestsAt: results.endedTestsAt,
+    osName: results.osName,
+    osVersion: results.osVersion,
+    runs: _.map(results.runs, createPublicRun),
+    runUrl: results.runUrl,
+    startedTestsAt: results.startedTestsAt,
+    totalDuration: results.totalDuration,
+    totalFailed: results.totalFailed,
+    totalPassed: results.totalPassed,
+    totalPending: results.totalPending,
+    totalSkipped: results.totalSkipped,
+    totalSuites: results.totalSuites,
+    totalTests: results.totalTests,
+  }
+}
 
 /**
  * Normalize spec object to remove private props and make it more consistent

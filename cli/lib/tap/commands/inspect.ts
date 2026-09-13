@@ -95,43 +95,45 @@ export const extractInspect = (
   frame: AutFrame,
   selector: string,
   at?: number,
-): Promise<FrameInspectResult | FrameAmbiguousResult> => withAmbiguous(connection, frame, selector, at, async (): Promise<FrameInspectResult> => {
-  const { client, sessionId } = connection
+): Promise<FrameInspectResult | FrameAmbiguousResult> => {
+  return withAmbiguous(connection, frame, selector, at, async (): Promise<FrameInspectResult> => {
+    const { client, sessionId } = connection
 
-  await client.DOM.enable({}, sessionId)
-  await client.Accessibility.enable(sessionId)
+    await client.DOM.enable({}, sessionId)
+    await client.Accessibility.enable(sessionId)
 
-  const base: FrameInspectResult = { selector, found: false }
-  const objectId = await querySelectorObjectId(connection, frame, selector, at ?? 0)
+    const base: FrameInspectResult = { selector, found: false }
+    const objectId = await querySelectorObjectId(connection, frame, selector, at ?? 0)
 
-  if (!objectId) {
-    return base
-  }
+    if (!objectId) {
+      return base
+    }
 
-  const info = await client.Runtime.callFunctionOn({
-    functionDeclaration: readElementInfo.toString(),
-    objectId,
-    arguments: [{ value: REPORTED_STYLES }],
-    returnByValue: true,
-  }, sessionId)
+    const info = await client.Runtime.callFunctionOn({
+      functionDeclaration: readElementInfo.toString(),
+      objectId,
+      arguments: [{ value: REPORTED_STYLES }],
+      returnByValue: true,
+    }, sessionId)
 
-  if (info.exceptionDetails) {
-    throw new TapError('FRAME_READ_FAILED', { message: `inspecting the element failed: ${info.exceptionDetails.exception?.description || info.exceptionDetails.text}` })
-  }
+    if (info.exceptionDetails) {
+      throw new TapError('FRAME_READ_FAILED', { message: `inspecting the element failed: ${info.exceptionDetails.exception?.description || info.exceptionDetails.text}` })
+    }
 
-  const { tag, attributes, styles, box } = info.result.value as ElementInfo
-  const aria = await readAriaNode(connection, objectId)
+    const { tag, attributes, styles, box } = info.result.value as ElementInfo
+    const aria = await readAriaNode(connection, objectId)
 
-  return {
-    ...base,
-    found: true,
-    tag,
-    attributes,
-    ...(aria ? { aria } : {}),
-    box,
-    styles,
-  }
-})
+    return {
+      ...base,
+      found: true,
+      tag,
+      attributes,
+      ...(aria ? { aria } : {}),
+      box,
+      styles,
+    }
+  })
+}
 
 export const inspectCommand = defineNativeCommand('inspect', (options, _args, commandOptions) => {
   const at = parseIndex(commandOptions.at)
