@@ -13,5 +13,10 @@
   "rules": {
     "no-console": "off",
     "prefer-rest-params": "off"
+  },
+  "settings": {
+    "json": {
+      "json-with-comments-files": [".vscode/**"]
+    }
   }
 }
