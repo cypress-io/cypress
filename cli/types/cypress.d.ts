@@ -3242,7 +3242,7 @@ declare namespace Cypress {
      * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
      * @default false
      */
-    experimentalRunAllSpecs?: boolean
+    experimentalRunAllSpecs: boolean
     /**
      * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false

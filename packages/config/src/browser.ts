@@ -115,6 +115,17 @@ export const getBreakingKeys = () => {
   return breakingKeys
 }
 
+/**
+ * An option is an experiment if its name starts with `experimental`. Both the Settings screen
+ * and the `cypress run` header discover experiments this way, so they share this definition
+ * rather than each re-deriving it from a key prefix.
+ */
+export const isExperimentalOptionName = (key: string) => key.startsWith('experimental')
+
+export const getExperimentalOptionNames = () => {
+  return publicConfigKeys.filter(isExperimentalOptionName)
+}
+
 export const getBreakingRootKeys = () => {
   return breakingRootOptions
 }

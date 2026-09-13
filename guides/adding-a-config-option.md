@@ -3,28 +3,10 @@
 Adding a configuration option looks like a one-line change to
 [`packages/config/src/options.ts`](../packages/config/src/options.ts). It is not. A public
 option touches roughly ten files across three packages, three checked-in snapshot files in two
-different snapshot systems, and a pull request in a second repository — and two of those steps
-fail *silently*, shipping a visibly broken Settings screen with a green CI run.
+different snapshot systems, and a pull request in a second repository.
 
 This guide is the source of truth for the workflow. Read it before you add, rename, or remove
 an option.
-
-## Before You Start: This Change Is Expensive in CI
-
-`packages/config/*` is a **global trigger** in
-[`.circleci/scripts/generate-pipeline-parameters.sh`](../.circleci/scripts/generate-pipeline-parameters.sh)
-(line 133). Path-based job filtering is skipped entirely and `emit_all_true` flips all 23 job
-groups to `true` — driver, server, app UI, launchpad, reporter, frontend-shared, system tests,
-V8, CLI, unit, and every `npm/*` package suite — on every platform in the matrix.
-
-The global-trigger loop runs **before** the targeted path mapping that exempts `*.md` and other
-documentation files, and it exits as soon as it matches. So `packages/config/*` means *every* file
-under that directory — editing `packages/config/AGENTS.md` runs the full matrix just as surely as
-editing `options.ts` does.
-
-There is no cheap iteration loop here. A wrong guess about a default value or a missed snapshot
-costs a full matrix run. **Run the local checks in [Verifying Your Change](#verifying-your-change)
-before you push**, not after CI tells you.
 
 ## Decide What Kind of Option You Are Adding
 
@@ -37,7 +19,7 @@ the exported `options` list:
 
 | Array | Line | For |
 | -- | -- | -- |
-| `driverConfigOptions` | ~157 | Options the driver reads in the browser — timeouts, viewport, retries, `experimental*` behavior flags. Supports `isFolder` and `isExperimental`. |
+| `driverConfigOptions` | ~157 | Options the driver reads in the browser — timeouts, viewport, retries, `experimental*` behavior flags. Supports `isFolder`. |
 | `runtimeOptions` | ~520 | Options resolved by the Node process — ports, paths, browser lists, CLI-only values. Supports `isInternal`. |
 
 If a user writes it in `cypress.config.ts` and it changes how commands behave in the browser,
@@ -60,14 +42,10 @@ there the way `env` and `devServerConfig` already are.
 
 ### 3. Experimental or not?
 
-An option is experimental if — and only if — its **name starts with `experimental`**. Nothing
-else decides this. See [The Two Silent Failures](#the-two-silent-failures) below; it is the
-single most important section of this guide.
-
-> **`isExperimental: true` does nothing.** The flag is declared on `DriverConfigOption` and set
-> on six options, and it has **zero consumers anywhere in the repository**. Set it for
-> consistency with its neighbors, but do not rely on it to make anything happen. In particular,
-> `experimentalCspAllowList` does *not* set it and still renders in the experiments UI.
+An option is experimental if — and only if — its **name starts with `experimental`**. Both the
+Settings screen and the `cypress run` header discover experiments by that prefix, and nothing
+else marks one. Experimental options need the extra copy described in
+[Adding an Experimental Option](#adding-an-experimental-option).
 
 ## The Shape of an Option
 
@@ -81,21 +59,26 @@ single most important section of this guide.
 }
 ```
 
-| Field | Required | What it actually does |
-| -- | -- | -- |
-| `name` | yes | The key users write in `cypress.config.ts`. |
-| `defaultValue` | yes for `runtimeOptions` | May be a **function** `(runtimeOptions) => value`, evaluated at resolve time by `getDefaultValues`. Use that form when the default differs between `e2e` and `component` (see `slowTestThreshold`). |
-| `validation` | yes | A function from [`validation.ts`](../packages/config/src/validation.ts). |
-| `overrideLevel` | no | Where the option may be overridden at test time: `'any'`, `'suiteOrTest'`, `'suite'`, `'never'`. **Omitting it means `'never'`** — `testOverrideLevels` fills the gap with that fallback. Setting anything other than `'never'` means you have a second `cypress.d.ts` edit to make. |
-| `requireRestartOnChange` | no | `'server'` or `'browser'`. Editing the option in open mode restarts that process rather than hot-reloading. |
-| `isFolder` | driver only | The value is resolved to an absolute path against `projectRoot` by `convertRelativeToAbsolutePaths` in [`project/utils.ts`](../packages/config/src/project/utils.ts). |
-| `isExperimental` | driver only | Nothing. See the note above. |
-| `isInternal` | runtime only | Excludes the key from the public config surface and from Cloud recording payloads. |
+- **`name`** (required) — the key users write in `cypress.config.ts`.
+- **`defaultValue`** (required for `runtimeOptions`) — may be a **function** `(runtimeOptions) => value`,
+  evaluated at resolve time by `getDefaultValues`. Use that form when the default differs between
+  `e2e` and `component`, as `slowTestThreshold` does.
+- **`validation`** (required) — a function from [`validation.ts`](../packages/config/src/validation.ts).
+- **`overrideLevel`** — where the option may be overridden at test time: `'any'`, `'suiteOrTest'`,
+  `'suite'`, or `'never'`. **Omitting it means `'never'`**; `testOverrideLevels` fills the gap with
+  that fallback. Setting anything else means you have a second `cypress.d.ts` edit to make.
+- **`requireRestartOnChange`** — `'server'` or `'browser'`. Editing the option in open mode restarts
+  that process rather than hot-reloading.
+- **`isFolder`** (driver options only) — the value is resolved to an absolute path against
+  `projectRoot` by `convertRelativeToAbsolutePaths` in
+  [`project/utils.ts`](../packages/config/src/project/utils.ts).
+- **`isInternal`** (runtime options only) — excludes the key from the public config surface and from
+  Cloud recording payloads.
 
-Array **order is observable**. The `getPublicConfigKeys` snapshot records keys in declaration
-order, not alphabetical order, so inserting an option in the middle of an array rewrites part of
-that snapshot. The file asks you to keep options alphabetical; it has drifted, so match your
-neighbors rather than forcing a re-sort.
+Both arrays are kept **sorted by `name`**, and names must be unique across the two.
+[`options.spec.ts`](../packages/config/test/options.spec.ts) fails the build otherwise, naming
+the entries to move — declaration order is observable in `getPublicConfigKeys` and in the resolved
+config sent to Cypress Cloud, so an unsorted insert shows up as unrelated snapshot churn.
 
 ### Validators
 
@@ -141,17 +124,23 @@ defaultCommandTimeout: number
 ```
 
 Declare the property **non-optional**. Optionality is applied by consumers through
-`Partial<Pick<...>>` and `CoreConfigOptions`, so a `?` here is redundant — match your neighbors.
-(A handful of `experimental*` entries are declared optional; that is drift, not a convention.)
+`Partial<Pick<...>>` and `CoreConfigOptions`, so a `?` here is redundant.
 
 **If `overrideLevel` is anything other than `'never'`, you have a second edit here.** The
-`Pick<ConfigOptions, ...>` unions in `SuiteConfigOverrides` (~line 3427) and
-`TestConfigOverrides` (~line 3435) are maintained by hand and list exactly which options may
-appear in `describe`/`it` config overrides. Miss them and
-`it('...', { myNewOption: true }, () => {})` is a type error even though it works at runtime.
-These lists have drifted from `overrideLevel` before — `experimentalOriginDependencies` is
-`overrideLevel: 'any'` and is not in either `Pick` — so treat the existing contents as a
-precedent, not as proof of completeness.
+`Pick<ConfigOptions, ...>` unions in `SuiteConfigOverrides` and `TestConfigOverrides` are
+maintained by hand and list exactly which options may appear in `describe`/`it` config overrides.
+Miss them and `it('...', { myNewOption: true }, () => {})` is a type error even though the runtime
+accepts it. [`options.spec.ts`](../packages/config/test/options.spec.ts) compares the two lists
+against `overrideLevel` and fails when they diverge, so you will be told rather than having to
+remember.
+
+Not every overridable option can go in those unions. `Pick<ConfigOptions, ...>` can only reach
+members of `ResolvedConfigOptions` that `UserConfigOptions` does not omit, so an option declared
+on `EndToEndConfigOptions` (such as `experimentalOriginDependencies`) or omitted outright (such as
+`excludeSpecPattern`) is unreachable there. Those, plus options whose value cannot take effect
+per-test, are listed with their reasons in `OVERRIDE_TYPE_EXCEPTIONS` in that spec. Add yours
+there rather than forcing it into the union — `yarn workspace cypress dtslint` will reject a
+`Pick` of a key that `ConfigOptions` does not have.
 
 The pull request template has a dedicated checkbox for this step: *"Have API changes been
 updated in the type definitions?"*
@@ -188,11 +177,11 @@ option that ships without a docs entry is effectively undiscoverable.
 
 ## Adding an Experimental Option
 
-Everything above, plus two independent copies of the display copy, in two different packages.
-**Both are looked up by key at runtime, with no compile-time check** — and by default, nothing
-tests either one. Step 7c fixes half of that.
+An option is an experiment purely because its name starts with `experimental`. Both surfaces
+that show experiments to users discover them by that prefix and then look their display copy up
+by key, so an experiment needs copy in two places.
 
-### 7a. Frontend copy in `en-US.json`
+### 7a. Settings screen copy — `en-US.json`
 
 [`packages/frontend-shared/src/locales/en-US.json`](../packages/frontend-shared/src/locales/en-US.json),
 under `settingsPage.experiments.<optionName>`:
@@ -207,30 +196,48 @@ under `settingsPage.experiments.<optionName>`:
 The `description` is rendered as **markdown** by `ExperimentRow.vue`, so backticks and links
 work: wrap config values in backticks and link out to `https://on.cypress.io/...` where useful.
 
-### 7b. Terminal copy in `experiments.ts`
+### 7b. Run header copy — `experiments.ts`
 
-[`packages/server/lib/experiments.ts`](../packages/server/lib/experiments.ts) keeps a *second,
-independent* copy of the same two strings, in the `_names` and `_summaries` maps. Add both:
+The `Experiments:` row of the `cypress run` header is plain text, so
+[`packages/server/lib/experiments.ts`](../packages/server/lib/experiments.ts) carries its own
+`_names` and `_summaries` maps. Copy the same strings across, with any markdown links reduced to
+their labels:
 
 ```ts
-const _summaries: StringValues = {
-  experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
+export const _names: StringValues = {
+  experimentalRunAllSpecs: 'Run All Specs',
 }
 
-const _names: StringValues = {
-  experimentalRunAllSpecs: 'Run All Specs',
+export const _summaries: StringValues = {
+  experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.',
 }
 ```
 
-These feed the `Experiments:` row of the `cypress run` header table via
-[`print-run.ts`](../packages/server/lib/util/print-run.ts). The two copies are not kept in sync
-by anything — today they already disagree on trailing punctuation — so write both at once while
-the wording is in front of you.
+Both maps are kept sorted by key. The server cannot import from `@packages/frontend-shared` —
+that package depends on `@packages/server`, so the dependency only runs one way — which is why
+the copy is duplicated rather than shared.
 
-### 7c. Opt into the component test via `config.json`
+**You do not have to remember any of this.**
+[`experiments_spec.ts`](../packages/server/test/unit/experiments_spec.ts) asserts that every
+`experimental*` option in `@packages/config` has copy in *both* files, that neither file carries
+copy for an option that no longer exists, and that the two say the same thing once markdown links
+are flattened. Miss a file and the test names it:
 
-Add your option to
-[`packages/frontend-shared/cypress/fixtures/config.json`](../packages/frontend-shared/cypress/fixtures/config.json):
+```
+add copy to packages/server/lib/experiments.ts
+```
+
+Both files also share one definition of what counts as an experiment —
+`isExperimentalOptionName` from [`@packages/config`](../packages/config/src/browser.ts) — rather
+than each re-deriving the `experimental` prefix.
+
+### 7c. Add the option to the Settings component fixture
+
+[`Experiments.cy.tsx`](../packages/app/src/settings/project/Experiments.cy.tsx) renders the
+Settings screen against
+[`packages/frontend-shared/cypress/fixtures/config.json`](../packages/frontend-shared/cypress/fixtures/config.json)
+and asserts each row against the i18n messages. That fixture is hand-maintained and currently
+lists only a subset of options, so add yours to get the component covered:
 
 ```json
 {
@@ -240,93 +247,19 @@ Add your option to
 }
 ```
 
-This is what makes step 7a testable rather than hope-based. See
-[Failure 1](#failure-1-the-settings-ui-renders-the-raw-i18n-key).
+### Why the copy matters more than it looks
 
-## The Two Silent Failures
-
-Neither of the copy files above is referenced by name anywhere. Both consumers **discover
-experiments by scanning for the `experimental` key prefix and then looking the name up by key**.
-Skip either file and every test still passes.
-
-### Failure 1: the Settings UI renders the raw i18n key
-
-[`packages/app/src/settings/project/Experiments.vue`](../packages/app/src/settings/project/Experiments.vue):
+[`Experiments.vue`](../packages/app/src/settings/project/Experiments.vue) builds its i18n key by
+interpolation:
 
 ```ts
-const experimentalConfigurations = props.gql.config.filter((item) => item.field.startsWith('experimental'))
-
-return experimentalConfigurations.map((configItem) => ({
-  key: configItem.field,
-  name: t(`settingsPage.experiments.${configItem.field}.name`),
-  enabled: !!configItem.value,
-  description: t(`settingsPage.experiments.${configItem.field}.description`),
-}))
+name: t(`settingsPage.experiments.${configItem.field}.name`),
 ```
 
-Your option appears in the list the moment it exists in `options.ts`, because it matches the
-prefix. The name and description are then resolved from `en-US.json` **by an interpolated key**.
-`vue-i18n` returns the key path itself when a key is missing, so the Settings screen renders:
-
-> ### settingsPage.experiments.myNewOption.name
-> `myNewOption`
->
-> settingsPage.experiments.myNewOption.description
-
-TypeScript cannot catch this. The `t()` calls are typed against the `en-US.json` schema, but the
-key is a template literal built from runtime config, so there is nothing static to check.
-
-**There is one test that can catch it, and you have to opt your option into it.**
-[`Experiments.cy.tsx`](../packages/app/src/settings/project/Experiments.cy.tsx) mounts the
-component against a hand-maintained fixture and asserts each rendered name against the i18n
-messages:
-
-```tsx
-let experimentEntries = config.filter((a) => a.field.startsWith('experimental'))
-...
-const expName = defaultMessages.settingsPage.experiments[exp.field].name
-cy.contains(`[data-cy="experiment-${exp.field}"]`, expName)
-```
-
-The fixture is
-[`packages/frontend-shared/cypress/fixtures/config.json`](../packages/frontend-shared/cypress/fixtures/config.json),
-and it is **stale**: it lists 45 of the 67 public config keys and only 3 of the 7 experimental
-options. Your option is not in it, so the test iterates right past it and passes.
-
-Add the entry described in [step 7c](#7c-opt-into-the-component-test-via-configjson) and the test
-starts guarding you: a missing `en-US.json` key then throws on
-`defaultMessages.settingsPage.experiments[exp.field].name` instead of quietly rendering garbage.
-It is three lines of JSON, and it converts the worst failure mode in this workflow into a normal
-red test.
-
-### Failure 2: the `cypress run` header drops the experiment entirely
-
-[`packages/server/lib/experiments.ts`](../packages/server/lib/experiments.ts) does the same
-prefix scan, then bails out without a warning:
-
-```ts
-const isExperimentKey = (key) => key.startsWith('experimental')
-const experimentalKeys = Object.keys(resolvedConfig).filter(isExperimentKey)
-
-experimentalKeys.forEach((key) => {
-  const name = get(names, key)
-
-  if (!name) {
-    // ignore unknown experiments
-    return
-  }
-  ...
-})
-```
-
-Miss `_names` and your experiment is simply absent from the `Experiments:` row when a user enables
-it. Nothing logs, nothing fails. Because the row is only populated for experiments whose value
-differs from the default, no CI job that runs with default config will ever notice, and there is
-no equivalent of the `Experiments.cy.tsx` hook here —
-[`experiments_spec.ts`](../packages/server/test/unit/experiments_spec.ts) passes its own `names`
-and `summaries` maps in rather than exercising the real ones.
-
-**Verify this one by eye.** Run a project with the option enabled and read the run header.
+`vue-i18n` returns the key path itself when a key is missing, so without step 7a the Settings
+screen renders the literal string `settingsPage.experiments.myNewOption.name` as the experiment's
+name. TypeScript cannot catch it — the key is built from runtime config, so there is nothing
+static to check — which is why the coverage assertions in step 7b exist.
 
 ## Regenerating Snapshots
 
@@ -424,30 +357,34 @@ yarn workspace @packages/config test-unit
 # lint (formatting is enforced entirely through ESLint — this repo has no Prettier)
 yarn lint --scope @packages/config
 
-# experimental options only: the Settings screen component test
+# experiment copy coverage (experimental options only)
+yarn workspace @packages/server test-unit -- experiments_spec
+
+# the Settings screen component test (experimental options only)
 yarn workspace @packages/app cypress:run:ct -- --spec src/settings/project/Experiments.cy.tsx
 
 # the slow one, last
 yarn workspace @tooling/system-tests test results_spec
 ```
 
-Then verify the `cypress run` header by hand with the option enabled, per
-[Failure 2](#failure-2-the-cypress-run-header-drops-the-experiment-entirely). No automated check
-covers it.
+`options.spec.ts` and `experiments_spec.ts` are the guards that catch the mistakes this workflow
+used to hide: unsorted or duplicated option names, override types that fall behind
+`overrideLevel`, and experiment copy present in one file but not the other. If either fails, the
+message names the file to edit.
 
 ## Checklist
 
-- [ ] Option added to `driverConfigOptions` or `runtimeOptions` in `packages/config/src/options.ts`
+- [ ] Option added to `driverConfigOptions` or `runtimeOptions` in `packages/config/src/options.ts`, in alphabetical position
 - [ ] `isInternal` set correctly — public keys are sent to Cypress Cloud on recorded runs
 - [ ] Validator chosen or written in `packages/config/src/validation.ts`, with test cases
 - [ ] Type added to `ResolvedConfigOptions` in `cli/types/cypress.d.ts` with an `@default` tag
-- [ ] If `overrideLevel` is not `'never'`: added to the `Pick` unions in `SuiteConfigOverrides` **and** `TestConfigOverrides`
+- [ ] If `overrideLevel` is not `'never'`: added to the `Pick` unions in `SuiteConfigOverrides` **and** `TestConfigOverrides` (or listed in `OVERRIDE_TYPE_EXCEPTIONS` with a reason)
 - [ ] Hand-written expectations updated in `packages/config/test/project/utils.spec.ts`
 - [ ] `@packages/config` snapshots regenerated (`test-unit -- -u`)
 - [ ] `system-tests/__snapshots__/results_spec.ts.js` regenerated (`SNAPSHOT_UPDATE=1`)
 - [ ] **Experimental only:** copy added to `packages/frontend-shared/src/locales/en-US.json`
-- [ ] **Experimental only:** `_names` and `_summaries` added to `packages/server/lib/experiments.ts`
-- [ ] **Experimental only:** entry added to `packages/frontend-shared/cypress/fixtures/config.json` so `Experiments.cy.tsx` guards the copy
-- [ ] **Experimental only:** the `cypress run` header checked by eye with the option enabled
+- [ ] **Experimental only:** matching `_names` and `_summaries` added to `packages/server/lib/experiments.ts`
+- [ ] **Experimental only:** entry added to `packages/frontend-shared/cypress/fixtures/config.json`
+- [ ] **Experimental only:** `experiments_spec` passes
 - [ ] Changelog entry added per [Writing the Cypress Changelog](./writing-the-cypress-changelog.md)
 - [ ] Pull request opened in [`cypress-io/cypress-documentation`](https://github.com/cypress-io/cypress-documentation) and linked in the template

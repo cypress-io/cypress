@@ -79,7 +79,6 @@ interface ConfigOption {
 
 interface DriverConfigOption extends ConfigOption {
   isFolder?: boolean
-  isExperimental?: boolean
 }
 
 // Cypress run-time options
@@ -149,12 +148,9 @@ export const defaultExcludeSpecPattern = {
   component: ['**/__snapshots__/*', '**/__image_snapshots__/*'],
 }
 
-// NOTE:
-// If you add/remove/change a config value, make sure to update the following
-// - cli/types/index.d.ts (including allowed config options on TestOptions)
-//
-// Add options in alphabetical order for better readability
-const driverConfigOptions: Array<DriverConfigOption> = [
+// Both arrays are kept sorted by `name`, and every name must be unique across the two.
+// `test/options.spec.ts` enforces both.
+export const driverConfigOptions: Array<DriverConfigOption> = [
   {
     name: 'animationDistanceThreshold',
     defaultValue: 5,
@@ -223,9 +219,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'never',
     requireRestartOnChange: 'server',
   }, {
-    name: 'expose',
-    defaultValue: {},
-    validation: validate.isPlainObject,
+    name: 'excludeSpecPattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultExcludeSpecPattern.component : defaultExcludeSpecPattern.e2e,
+    validation: validate.isStringOrArrayOfStrings,
     overrideLevel: 'any',
   }, {
     name: 'experimentalCspAllowList',
@@ -237,21 +233,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: validate.isBoolean,
-    isExperimental: true,
     requireRestartOnChange: 'server',
-  }, {
-    name: 'experimentalRunAllSpecs',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
   }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
-    name: 'injectDocumentDomain',
     defaultValue: false,
     validation: validate.isBoolean,
     requireRestartOnChange: 'server',
@@ -259,25 +243,26 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'experimentalOriginDependencies',
     defaultValue: false,
     validation: validate.isBoolean,
-    isExperimental: true,
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
+  }, {
+    name: 'experimentalRunAllSpecs',
+    defaultValue: false,
+    validation: validate.isBoolean,
   }, {
     name: 'experimentalSingleTabRunMode',
     defaultValue: false,
     validation: validate.isBoolean,
-    isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalWebKitSupport',
     defaultValue: false,
     validation: validate.isBoolean,
-    isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'visibilityStrategy',
-    defaultValue: 'modern',
-    validation: validate.isOneOf('legacy', 'modern'),
+    name: 'expose',
+    defaultValue: {},
+    validation: validate.isPlainObject,
     overrideLevel: 'any',
   }, {
     name: 'fileServerFolder',
@@ -297,15 +282,15 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     requireRestartOnChange: 'server',
   }, {
-    name: 'excludeSpecPattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultExcludeSpecPattern.component : defaultExcludeSpecPattern.e2e,
-    validation: validate.isStringOrArrayOfStrings,
-    overrideLevel: 'any',
-  }, {
     name: 'includeShadowDom',
     defaultValue: false,
     validation: validate.isBoolean,
     overrideLevel: 'any',
+  }, {
+    name: 'injectDocumentDomain',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
   }, {
     name: 'justInTimeCompile',
     defaultValue: true,
@@ -331,14 +316,14 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
-    name: 'platform',
-    defaultValue: () => os.platform(),
-    validation: validate.isString,
-  }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
     overrideLevel: 'any',
+  }, {
+    name: 'platform',
+    defaultValue: () => os.platform(),
+    validation: validate.isString,
   }, {
     name: 'port',
     defaultValue: null,
@@ -427,15 +412,19 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isFolder: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: validate.isValidScrollBehavior,
+    overrideLevel: 'any',
+  }, {
     name: 'slowTestThreshold',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 250 : 10000,
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
-    name: 'scrollBehavior',
-    defaultValue: 'top',
-    validation: validate.isValidScrollBehavior,
-    overrideLevel: 'any',
+    name: 'specPattern',
+    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.component : defaultSpecPattern.e2e,
+    validation: validate.isStringOrArrayOfStrings,
   }, {
     name: 'supportFile',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 'cypress/support/component.{js,jsx,ts,tsx}' : 'cypress/support/e2e.{js,jsx,ts,tsx}',
@@ -500,6 +489,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'suiteOrTest',
   }, {
+    name: 'visibilityStrategy',
+    defaultValue: 'modern',
+    validation: validate.isOneOf('legacy', 'modern'),
+    overrideLevel: 'any',
+  }, {
     name: 'waitForAnimations',
     defaultValue: true,
     validation: validate.isBoolean,
@@ -510,14 +504,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     requireRestartOnChange: 'server',
   },
-  {
-    name: 'specPattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.component : defaultSpecPattern.e2e,
-    validation: validate.isStringOrArrayOfStrings,
-  },
 ]
 
-const runtimeOptions: Array<RuntimeConfigOption> = [
+export const runtimeOptions: Array<RuntimeConfigOption> = [
   {
     // Internal config field, useful to ignore the e2e specPattern set by the user
     // or the default one when looking fot CT, it needs to be a config property because after
@@ -560,9 +549,24 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   }, {
+    name: 'hideCommandLog',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  }, {
+    name: 'hideRunnerUi',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  }, {
     name: 'hosts',
     defaultValue: null,
     validation: validate.isPlainObject,
+  }, {
+    name: 'isDefaultProtocolEnabled',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
   }, {
     name: 'isInteractive',
     // `isInteractive` is the inverse of `isTextTerminal`, which run mode sets
@@ -581,10 +585,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
     isInternal: true,
-  }, {
-    name: 'modifyObstructiveCode',
-    defaultValue: true,
-    validation: validate.isBoolean,
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
@@ -619,22 +619,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     name: 'version',
     defaultValue: pkg.version,
     validation: validate.isString,
-    isInternal: true,
-  }, {
-    name: 'isDefaultProtocolEnabled',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isInternal: true,
-  }, {
-    name: 'hideCommandLog',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isInternal: true,
-  },
-  {
-    name: 'hideRunnerUi',
-    defaultValue: false,
-    validation: validate.isBoolean,
     isInternal: true,
   },
 ]

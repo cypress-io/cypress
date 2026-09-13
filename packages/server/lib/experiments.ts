@@ -1,4 +1,5 @@
 import { get } from 'lodash'
+import { isExperimentalOptionName } from '@packages/config'
 
 /**
  * Returns a single string with human-readable experiments.
@@ -39,43 +40,33 @@ interface StringValues {
 }
 
 /**
- * Keeps summaries of experiments. Each summary is 1 - 2 sentences
- * describing the purpose of the experiment.
- * When adding an experiment, add its summary text here.
- *
- * @example
-  ```
-  {
-    experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially'
-  }
-  ```
+ * Plain-text summaries of each experiment, shown in the `Experiments:` row of the
+ * `cypress run` header. The Settings screen renders its own markdown copy from
+ * `@packages/frontend-shared`'s `en-US.json`; `experiments_spec` asserts the two cover the
+ * same set of options, so an experiment can never reach users with copy in only one place.
 */
-const _summaries: StringValues = {
-  experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
+export const _summaries: StringValues = {
+  experimentalCspAllowList: 'Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running.',
+  experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in plugins during interactive mode.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
+  experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
+  experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.',
   experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
-  experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
-  experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
 }
 
 /**
- * Keeps short names for experiments. When adding new experiments, add a short name.
- * The name and summary will be shown in the Settings tab of the Desktop GUI.
- * @example
-  ```
-  {
-    experimentalRunAllSpecs: 'Run All Specs'
-  }
-  ```
+ * Short display names for each experiment. Kept in the same order and covering the same keys
+ * as `_summaries`.
 */
-const _names: StringValues = {
-  experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
-  experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',
-  experimentalSingleTabRunMode: 'Single Tab Run Mode',
-  experimentalWebKitSupport: 'WebKit Support',
-  experimentalRunAllSpecs: 'Run All Specs',
+export const _names: StringValues = {
+  experimentalCspAllowList: 'CSP Allow List',
+  experimentalInteractiveRunEvents: 'Interactive run events',
+  experimentalModifyObstructiveThirdPartyCode: 'Modify obstructive third party code',
   experimentalOriginDependencies: 'Origin Dependencies',
+  experimentalRunAllSpecs: 'Run All Specs',
+  experimentalSingleTabRunMode: 'Single tab run mode',
+  experimentalWebKitSupport: 'WebKit Support',
 }
 
 /**
@@ -96,17 +87,12 @@ export const getExperimentsFromResolved = (resolvedConfig, names = experimental.
     return experiments
   }
 
-  const isExperimentKey = (key) => key.startsWith('experimental')
-  const experimentalKeys = Object.keys(resolvedConfig).filter(isExperimentKey)
+  const experimentalKeys = Object.keys(resolvedConfig).filter(isExperimentalOptionName)
 
   experimentalKeys.forEach((key) => {
-    const name = get(names, key)
-
-    if (!name) {
-      // ignore unknown experiments
-      return
-    }
-
+    // Fall back to the config key so an experiment missing its copy still appears in the run
+    // header rather than vanishing from it. `experiments_spec` fails when copy is missing.
+    const name = get(names, key, key)
     const summary = get(summaries, key, 'top secret')
 
     // it would be nice to have default value in the resolved config

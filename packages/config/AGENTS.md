@@ -33,11 +33,30 @@ src/
 
 ## Adding, Renaming, or Removing a Configuration Option
 
-Read [Adding a Cypress Configuration Option](../../guides/adding-a-config-option.md) first. The
-change spans roughly ten files across three packages, three checked-in snapshot files, and a pull
-request in `cypress-io/cypress-documentation` — and the experiment copy files fail silently when
-missed.
-Note also that `packages/config/*` is a global CI trigger, so every job in the matrix runs.
+Read [Adding a Cypress Configuration Option](../../guides/adding-a-config-option.md) first.
+
+**Decide first whether the option is user-facing or internal — the two have different workflows
+and very different costs to get wrong.**
+
+*User-facing* options are the ones a user writes in their `cypress.config.ts`. They are added
+without `isInternal`, so they become part of the public config surface: they need a type in
+[`cli/types/cypress.d.ts`](../../cli/types/cypress.d.ts), a changelog entry, and a pull request in
+[`cypress-io/cypress-documentation`](https://github.com/cypress-io/cypress-documentation). They
+are also included in `getCloudRecordingConfigKeys()`, which is the allow-list for the config
+payload sent to Cypress Cloud on recorded runs — so never make an option public if its value could
+carry anything user-specific that should not leave the machine.
+
+*Internal* options are plumbing the app sets for itself — ports, resolved paths, routes, CLI-only
+values. They live in `runtimeOptions` with `isInternal: true`, are excluded from the public key
+list and from Cloud payloads, and need none of the public-surface work above. `configFile` is the
+canonical borderline case: it is set only via the CLI, so it is marked internal even though users
+are aware of it.
+
+If you are unsure, it is internal. Promoting an option later is easy; retracting a public option
+requires a `breakingOptions` entry, an error in `@packages/errors`, and a deprecation cycle.
+
+Note that `packages/config/*` is a global CI trigger, so every job in the matrix runs — including
+for changes to this file.
 
 ## Gotchas / Notes
 
