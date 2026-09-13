@@ -79,11 +79,13 @@ const snapshotsBlock = (snapshots: TapCommandSnapshot[]): string[] => {
     return [heading('SNAPSHOTS', 0), `${indent(1)}${emptyState('[NO SNAPSHOTS]')}`]
   }
 
-  const rows = snapshots.map((snapshot) => [
-    String(snapshot.index),
-    snapshot.name ?? '—',
-    snapshotTime(snapshot.timestamp),
-  ])
+  const rows = snapshots.map((snapshot) => {
+    return [
+      String(snapshot.index),
+      snapshot.name ?? '—',
+      snapshotTime(snapshot.timestamp),
+    ]
+  })
 
   // Mute from the snapshot rather than the padded cell: what reads as absent is
   // the field being unset, which only the row's own data knows.

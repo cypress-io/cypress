@@ -97,11 +97,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@cypress/dev': cypressDevPlugin,
     },
     rules: {
-      // A warning rather than an error: 30 sites in packages already on this
-      // config predate the rule. The rule reports without offering a fix, so
-      // those sites have to be reindented by hand; once they are, raise this
-      // to 'error'.
-      '@cypress/dev/arrow-body-multiline-braces': ['warn', 'always'],
+      '@cypress/dev/arrow-body-multiline-braces': ['error', 'always'],
     },
   },
   {
