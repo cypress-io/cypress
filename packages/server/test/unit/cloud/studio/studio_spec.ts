@@ -83,9 +83,11 @@ describe('lib/cloud/studio', () => {
         '../api/studio/report_studio_error': { reportStudioError: sinon.stub() },
         './StudioElectron': { StudioElectron: class {} },
         '../require_script': {
-          requireScript: () => ({
-            default: { createStudioServer: createStudioServerStub },
-          }),
+          requireScript: () => {
+            return {
+              default: { createStudioServer: createStudioServerStub },
+            }
+          },
         },
       }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
 
@@ -123,9 +125,11 @@ describe('lib/cloud/studio', () => {
         '../api/studio/report_studio_error': { reportStudioError: sinon.stub() },
         './StudioElectron': { StudioElectron: class {} },
         '../require_script': {
-          requireScript: () => ({
-            default: { createStudioServer: createStudioServerStub },
-          }),
+          requireScript: () => {
+            return {
+              default: { createStudioServer: createStudioServerStub },
+            }
+          },
         },
       }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
 

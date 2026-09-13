@@ -393,20 +393,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native sessions command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 54321,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 54321,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     // Reporting whether the runner page answers takes a session, so this command
     // opens one — bounded, and only where there is a browser to ask.
@@ -529,20 +531,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native status command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 4242,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 4242,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
       const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
@@ -774,20 +778,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native specs command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 4242,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 4242,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
       const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }
@@ -966,20 +972,22 @@ describe('lib/exec/tap', () => {
   })
 
   describe('the CLI-native run command', () => {
-    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => ({
-      schemaVersion: 1,
-      pid: 4242,
-      projectRoot: '/projects/app',
-      serverPort: 49200,
-      sessionId: 'inst-1',
-      testingType: 'e2e',
-      cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-      browserName: 'Chrome',
-      browserFamily: 'chromium',
-      machineId: null,
-      userId: null,
-      ...overrides,
-    })
+    const liveSession = (overrides: Partial<LiveSessionState> = {}): LiveSessionState => {
+      return {
+        schemaVersion: 1,
+        pid: 4242,
+        projectRoot: '/projects/app',
+        serverPort: 49200,
+        sessionId: 'inst-1',
+        testingType: 'e2e',
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        browserName: 'Chrome',
+        browserFamily: 'chromium',
+        machineId: null,
+        userId: null,
+        ...overrides,
+      }
+    }
 
     const mockLiveResolved = (session: LiveSessionState): LiveSessionSelection => {
       const selection: LiveSessionSelection = { session, reason: 'only', candidateCount: 1 }

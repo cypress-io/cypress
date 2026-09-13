@@ -192,48 +192,50 @@ export function createServeInternalRoutesMiddleware ({
     // loopback header for setProxiedUrl to restore.
     const method = (request.method ?? 'GET').toUpperCase()
 
-    const sendLoopback = () => serverRequest.create({
-      url: toLoopbackUrl(request.url, config),
-      method,
-      headers: {
-        ...filterHeaders(request.headers),
-        // In Cypress-in-Cypress runs this loopback takes a second hop, and
-        // that hop gzips the response:
-        //
-        //   1. The child project's app (the AUT, http://localhost:4455) asks
-        //      for /__cypress-studio/app-studio.js on its own origin.
-        //   2. The parent Cypress's CDP interception pauses the request, and
-        //      this middleware (the parent's instance) loops it back to the
-        //      parent's own Express server.
-        //   3. The parent has no studio routes of its own — its cy-in-cy
-        //      passthrough (routes.ts) re-enters the proxy pipeline to
-        //      forward the request to the child at 4455, where the real
-        //      cloud-bundle routes live.
-        //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
-        //      rewrites a MISSING accept-encoding (filterHeaders strips it
-        //      above) to 'gzip,identity', so the child's studio route
-        //      responds gzipped.
-        //
-        // Fetch.fulfillRequest bodies are identity-only — the browser runs no
-        // decoders on fulfilled responses — so a gzipped body reaches the
-        // page as unparseable bytes. An explicit 'identity' survives the
-        // rewrite (only br/gzip tokens are kept, with 'identity' as the
-        // fallback), so every hop in the chain serves an unencoded body.
-        // Single-hop loopbacks (real users) already serve identity for an
-        // absent header, so this is only needed where the second hop exists.
-        ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
-          ? { 'accept-encoding': 'identity' }
-          : {}),
-        [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
-        [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
-      },
-      ...(shouldSendBody(request) ? { body: request.body } : {}),
-      encoding: null,
-      followRedirect: false,
-      gzip: false,
-      resolveWithFullResponse: true,
-      simple: false,
-    }, true)
+    const sendLoopback = () => {
+      return serverRequest.create({
+        url: toLoopbackUrl(request.url, config),
+        method,
+        headers: {
+          ...filterHeaders(request.headers),
+          // In Cypress-in-Cypress runs this loopback takes a second hop, and
+          // that hop gzips the response:
+          //
+          //   1. The child project's app (the AUT, http://localhost:4455) asks
+          //      for /__cypress-studio/app-studio.js on its own origin.
+          //   2. The parent Cypress's CDP interception pauses the request, and
+          //      this middleware (the parent's instance) loops it back to the
+          //      parent's own Express server.
+          //   3. The parent has no studio routes of its own — its cy-in-cy
+          //      passthrough (routes.ts) re-enters the proxy pipeline to
+          //      forward the request to the child at 4455, where the real
+          //      cloud-bundle routes live.
+          //   4. StripUnsupportedAcceptEncoding runs on that forwarding hop and
+          //      rewrites a MISSING accept-encoding (filterHeaders strips it
+          //      above) to 'gzip,identity', so the child's studio route
+          //      responds gzipped.
+          //
+          // Fetch.fulfillRequest bodies are identity-only — the browser runs no
+          // decoders on fulfilled responses — so a gzipped body reaches the
+          // page as unparseable bytes. An explicit 'identity' survives the
+          // rewrite (only br/gzip tokens are kept, with 'identity' as the
+          // fallback), so every hop in the chain serves an unencoded body.
+          // Single-hop loopbacks (real users) already serve identity for an
+          // absent header, so this is only needed where the second hop exists.
+          ...(process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE || process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
+            ? { 'accept-encoding': 'identity' }
+            : {}),
+          [CYPRESS_INTERNAL_LOOPBACK_HEADER]: url.href,
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+        },
+        ...(shouldSendBody(request) ? { body: request.body } : {}),
+        encoding: null,
+        followRedirect: false,
+        gzip: false,
+        resolveWithFullResponse: true,
+        simple: false,
+      }, true)
+    }
 
     let response
 
