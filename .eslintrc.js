@@ -43,6 +43,9 @@ module.exports = {
     'system-tests/lib/validations/**',
     // ignore as the file has invalid syntax
     'system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx',
+    // `internal-scripts` lints `.json`, and the json plugin classifies
+    // `tsconfig.json` as JSON-with-comments and warns instead of linting it
+    'scripts/gulp/tsconfig.json',
     // Build output, ignored here rather than per package: a package's
     // `.eslintignore` is re-based onto this directory with its patterns
     // unchanged, so any entry containing a `/` silently matches nothing.
