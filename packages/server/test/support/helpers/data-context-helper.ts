@@ -31,8 +31,8 @@ export function getSystemTestProject<T extends typeof fixtureDirs[number]> (proj
   return path.join(__dirname, '..', '..', '..', '..', 'system-tests', 'projects', project) as SystemTestProjectPath<T>
 }
 
-export function removeCommonNodeModules () {
-  fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
+export async function removeCommonNodeModules () {
+  await fs.remove(path.join(Fixtures.cyTmpDir, 'node_modules'))
 }
 
 export async function scaffoldMigrationProject (project: typeof fixtureDirs[number]): Promise<string> {

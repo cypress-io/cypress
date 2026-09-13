@@ -257,11 +257,11 @@ function makeTestCase (v: Partial<TestCase> & { name: string }): TestCase {
   }) as TestCase
 }
 
-const startLatencyOrigin = (cert: string, key: string) => {
+const startLatencyOrigin = async (cert: string, key: string) => {
   // mirrors the hosted test-page-speed page: 1000 unique image fetches.
   // Lives in support/fixtures because the runner's `test/performance/**` glob
   // would otherwise hand the .html file to mocha as a spec
-  const html = fs.readFileSync(path.join(__dirname, '../support/fixtures/index1000.html'), 'utf8')
+  const html = await fse.readFile(path.join(__dirname, '../support/fixtures/index1000.html'), 'utf8')
   const imageBody = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(2044)])
 
   // bare request handler — Express over http2.createSecureServer dies

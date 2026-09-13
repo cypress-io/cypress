@@ -300,10 +300,10 @@ describe('lib/tasks/download', function () {
     let expectedFileSize: number
     let onProgress: Mock
 
-    beforeEach(function () {
+    beforeEach(async function () {
       expectedChecksum = hasha.fromFileSync(examplePath)
 
-      expectedFileSize = fs.statSync(examplePath).size
+      expectedFileSize = (await fs.stat(examplePath)).size
 
       onProgress = vi.fn().mockReturnValue(undefined)
       debug('example file %s should have checksum %s and file size %d',

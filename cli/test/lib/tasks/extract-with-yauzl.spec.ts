@@ -82,10 +82,10 @@ const buildZip = (entries: ZipEntryInput[]): Buffer => {
   return Buffer.concat([...localBlocks, cdrConcat, eocd])
 }
 
-const writeZip = (entries: ZipEntryInput[]): string => {
+const writeZip = async (entries: ZipEntryInput[]): Promise<string> => {
   const zipPath = path.join(os.tmpdir(), `cy-extract-test-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.zip`)
 
-  fs.writeFileSync(zipPath, buildZip(entries))
+  await fsp.writeFile(zipPath, buildZip(entries))
 
   return zipPath
 }
@@ -104,7 +104,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   })
 
   it('extracts a single deflated file with default permissions', async () => {
-    const zip = writeZip([{ name: 'hello.txt', body: Buffer.from('hi there') }])
+    const zip = await writeZip([{ name: 'hello.txt', body: Buffer.from('hi there') }])
 
     await extractWithYauzl(zip, destDir, onEntry)
 
@@ -115,7 +115,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   })
 
   it('creates directory entries', async () => {
-    const zip = writeZip([
+    const zip = await writeZip([
       { name: 'sub/', unixMode: 0o755 },
       { name: 'sub/inner.txt', body: Buffer.from('inside') },
     ])
@@ -130,7 +130,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   it('treats entries with the Unix directory mode as directories even without a trailing slash', async () => {
     // S_IFDIR (0o040000) in the high 16 bits of externalFileAttributes,
     // and no trailing slash on the entry name.
-    const zip = writeZip([{ name: 'sub', unixMode: 0o040755, store: true }])
+    const zip = await writeZip([{ name: 'sub', unixMode: 0o040755, store: true }])
 
     await extractWithYauzl(zip, destDir, onEntry)
 
@@ -138,7 +138,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   })
 
   it('preserves Unix file modes on extracted files', async () => {
-    const zip = writeZip([{ name: 'bin', body: Buffer.from('payload'), unixMode: 0o755 }])
+    const zip = await writeZip([{ name: 'bin', body: Buffer.from('payload'), unixMode: 0o755 }])
 
     await extractWithYauzl(zip, destDir, onEntry)
 
@@ -149,7 +149,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   })
 
   it('creates symlinks for entries with the Unix symlink mode', async () => {
-    const zip = writeZip([
+    const zip = await writeZip([
       { name: 'target.txt', body: Buffer.from('real') },
       { name: 'link', body: Buffer.from('target.txt'), unixMode: 0o120777, store: true },
     ])
@@ -164,7 +164,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   })
 
   it('refuses an entry whose path escapes the destination', async () => {
-    const zip = writeZip([{ name: '../escape.txt', body: Buffer.from('nope') }])
+    const zip = await writeZip([{ name: '../escape.txt', body: Buffer.from('nope') }])
 
     // yauzl 3.x rejects the entry name itself ("invalid relative path"); our own
     // path-traversal guard would also catch this. Either rejection is acceptable.
@@ -174,7 +174,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   })
 
   it('refuses a symlink whose target resolves outside the destination', async () => {
-    const zip = writeZip([
+    const zip = await writeZip([
       { name: 'link', body: Buffer.from('../../etc/passwd'), unixMode: 0o120777, store: true },
     ])
 
@@ -185,7 +185,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
 
   it('refuses a symlink whose declared size exceeds the cap', async () => {
     const big = Buffer.alloc(8 * 1024, 'a')
-    const zip = writeZip([{ name: 'link', body: big, unixMode: 0o120777, store: true }])
+    const zip = await writeZip([{ name: 'link', body: big, unixMode: 0o120777, store: true }])
 
     await expect(extractWithYauzl(zip, destDir, onEntry)).rejects.toThrow(/symlink with target larger than/)
   })
@@ -195,7 +195,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
     // catches the size mismatch during read; if a future yauzl ever surfaces
     // the body anyway, our own per-chunk cap in readEntryAsString catches it.
     const big = Buffer.alloc(8 * 1024, 'a')
-    const zip = writeZip([
+    const zip = await writeZip([
       { name: 'link', body: big, unixMode: 0o120777, store: true, fakeUncompressedSize: 4 },
     ])
 
@@ -205,7 +205,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
   it('rejects an invalid zip file', async () => {
     const bogus = path.join(os.tmpdir(), `cy-extract-test-bogus-${Date.now()}.zip`)
 
-    fs.writeFileSync(bogus, 'not a zip file')
+    await fsp.writeFile(bogus, 'not a zip file')
 
     await expect(extractWithYauzl(bogus, destDir, onEntry)).rejects.toThrow()
 
@@ -220,7 +220,7 @@ describe('lib/tasks/extract-with-yauzl', () => {
 
     await fsp.writeFile(blocker, 'i am a file, not a directory')
 
-    const zip = writeZip([{ name: 'blocked/inside.txt', body: Buffer.from('hi') }])
+    const zip = await writeZip([{ name: 'blocked/inside.txt', body: Buffer.from('hi') }])
 
     await expect(extractWithYauzl(zip, destDir, onEntry)).rejects.toThrow()
   })

@@ -10,8 +10,8 @@ describe('lib/cypress-sessions', () => {
   let cacheDir: string
   let recordPath: string
 
-  beforeEach(() => {
-    cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-cypress-sessions-'))
+  beforeEach(async () => {
+    cacheDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-cypress-sessions-'))
     recordPath = path.join(cacheDir, 'sessions', `${process.pid}.json`)
 
     // resolveCypressCacheRoot also reads the npm_config_/npm_package_config_ variants,

@@ -2,6 +2,7 @@ import '../../spec_helper'
 
 import _ from 'lodash'
 import fs from 'fs'
+import fsp from 'fs/promises'
 import stream from 'stream'
 import { concatStream } from '@packages/network'
 import { streamBuffer } from '../../../lib/util/stream_buffer'
@@ -117,8 +118,8 @@ describe('lib/util/stream_buffer', () => {
     })
   })
 
-  it('can be piped into and then read from', function (done) {
-    const expected = fs.readFileSync(__filename).toString()
+  it('can be piped into and then read from', async function () {
+    const expected = (await fsp.readFile(__filename)).toString()
     const rs = fs.createReadStream(__filename)
     const sb = streamBuffer()
 
@@ -126,14 +127,9 @@ describe('lib/util/stream_buffer', () => {
 
     const readable = sb.createReadStream()
 
-    rs.on('end', () => {
-      return drain(readable)
-      .then((buf) => {
-        expect(buf).to.eq(expected)
+    await new Promise<void>((resolve) => rs.on('end', resolve))
 
-        done()
-      })
-    })
+    expect(await drain(readable)).to.eq(expected)
   })
 
   it('readable recursively pushes until it returns false', (done) => {

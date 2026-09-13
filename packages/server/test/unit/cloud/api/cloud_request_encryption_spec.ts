@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import express from 'express'
 import crypto from 'crypto'
 import { expect } from 'chai'
-import fs from 'fs'
+import fsp from 'fs/promises'
 
 import type { DestroyableProxy } from './utils/fake_proxy_server'
 import { fakeServer } from './utils/fake_proxy_server'
@@ -93,13 +93,13 @@ describe('CloudRequest Encryption', () => {
   app.get('/ping', (req, res) => res.json({ pong: 'true' }))
 
   app.get('/signed', async (req, res) => {
-    const buffer = fs.readFileSync(__filename)
+    const buffer = await fsp.readFile(__filename)
 
     return signResponse(req, res, buffer)
   })
 
   app.get('/invalid-signing', async (req, res) => {
-    const buffer = fs.readFileSync(__filename)
+    const buffer = await fsp.readFile(__filename)
 
     return invalidSignResponse(req, res, buffer)
   })
@@ -151,7 +151,7 @@ describe('CloudRequest Encryption', () => {
     // Good
     const data = await TestReq.get('/signed', { encrypt: 'signed' }).then((d) => d.data)
 
-    expect(data).to.equal(fs.readFileSync(__filename, 'utf8'))
+    expect(data).to.equal(await fsp.readFile(__filename, 'utf8'))
 
     // Bad
     try {
