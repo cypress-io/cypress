@@ -1,7 +1,6 @@
-// Cypress adds chai expect and assert to global.
-// `var` is load-bearing in an ambient global script file: only `var` declarations
-// land on `typeof globalThis`, so `let`/`const` would drop `window.expect` and
-// `globalThis.assert` from the published types.
+// Cypress adds chai expect and assert to global
+// In an ambient global declaration only `var` lands on `typeof globalThis`,
+// which is what makes `window.expect` and `globalThis.assert` resolve.
 // eslint-disable-next-line no-var
 declare var expect: Chai.ExpectStatic
 // eslint-disable-next-line no-var
