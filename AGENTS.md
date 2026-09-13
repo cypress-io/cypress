@@ -13,6 +13,17 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 - **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
+## Task runbooks
+
+Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
+
+`.claude/skills/*/SKILL.md` adds a thin layer on top for the two workflows that need agent-specific execution guidance — which permissions a phase needs, long-running commands, and host quirks that would be noise in a contributor guide. Claude Code loads them on demand; **other agents should read the file directly**, since nothing loads them automatically:
+
+- [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
+- [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
+
+Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
+
 ## Prerequisites
 
 - **Node**: Use the node version specified in the `.node-version` file (check with `node -v`; run `nvm use` to manage versions)
@@ -249,8 +260,8 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Changelog & Template
 
-- The semantic title prefix decides whether a changelog entry is required. `breaking`, `dependency`, `deprecation`, `feat`, `fix`, `misc`, and `perf` each need an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md); `chore`, `docs`, `refactor`, `revert`, and `test` do not. Choosing `fix` already asserts the change ships to users, so do not then skip the entry because the impact looks internal — the "no user-facing impact" exemption in the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) describes the second group of prefixes.
-- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token.
+- The semantic title prefix decides whether an entry in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) is required, which section it belongs in, and how it must be phrased. The [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) is the source of truth for all of it — read it rather than guessing, and note that a `fix` prefix always requires an entry.
+- Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
