@@ -55,6 +55,7 @@ Thanks for taking the time to contribute! :smile:
     - [Packages](#packages)
     - [AI assistant guidance files](#ai-assistant-guidance-files)
       - [Files used by AI tools](#files-used-by-ai-tools)
+      - [Choosing where guidance goes](#choosing-where-guidance-goes)
       - [Maintenance expectations](#maintenance-expectations)
       - [External references](#external-references)
   - [Committing Code](#committing-code)
@@ -486,10 +487,36 @@ to AI assistants while remaining transparent and minimal for human contributors.
 The root `AGENTS.md` provides project-wide context. Workspace and package-level
 `AGENTS.md` files add scoped details.
 
-Skills are a convenience layer for one tool, never a source of truth. Procedures belong in
-`guides/`, which every contributor and every AI tool can read; a skill links to the relevant
-guide and adds only what is specific to running the task, so that contributors not using
-Claude are never sent into `.claude/` to find a rule.
+#### Choosing where guidance goes
+
+**Default to a guide.** [`guides/`](./guides/) is where this repository keeps its
+procedures, and a guide is readable by every contributor and every AI tool, costs nothing
+until it is opened, and gives the workflow a single copy to keep correct. Index it in
+[`guides/README.md`](./guides/README.md) and link it from the relevant `AGENTS.md`.
+
+**Write a skill only when one of these is true**, and keep it to that content:
+
+- It pre-approves tools via `allowed-tools`, so a long multi-step task does not prompt on
+  every command. This is the one thing a skill can do that a markdown file cannot.
+- It is about operating the agent rather than doing the task — which permissions a phase
+  needs, host quirks such as unsetting `ELECTRON_RUN_AS_NODE`, or not re-prompting for
+  sandbox access mid-build. This would be noise in a contributor guide.
+
+**The test that settles most cases:** would a contributor doing this task by hand need to
+know it? If yes, it belongs in the guide, even when an agent needs it too. A prerequisite
+such as "this script needs a root `yarn` install and a `GH_TOKEN`" looks agent-specific and
+is not — anyone running that script hits the same failure.
+
+These are **not** reasons to write a skill:
+
+- *"It is a long multi-step procedure."* So is [the release process](./guides/release-process.md); `guides/` holds those.
+- *"The knowledge is scattered across several files."* That is a documentation problem. Consolidate it into one guide.
+- *"An agent might not find the guide."* The runbooks section of the root `AGENTS.md` provides the same discoverability whether it links a guide or a skill.
+- *"`AGENTS.md` should stay descriptive."* True, and that points at `guides/`, not at `.claude/`.
+
+A skill is a convenience layer for one tool and never a source of truth. It links to its
+guide and adds only the execution detail, so that contributors not using Claude are never
+sent into `.claude/` to find a rule.
 
 #### Maintenance expectations
 

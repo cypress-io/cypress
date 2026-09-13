@@ -22,7 +22,7 @@ Step-by-step procedures live in [`guides/`](./guides/) — start there for any m
 - [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
 - [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
 
-Prefer adding to a guide. A new skill is only warranted when the content is about *running* the task rather than doing it correctly.
+Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
 
 ## Prerequisites
 
