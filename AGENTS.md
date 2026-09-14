@@ -274,13 +274,15 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - **External PRs**: Require manual approval via `approve-contributor-pr` gate before CI runs.
 - **Binary builds**: Triggered separately after npm release; cross-platform binaries are assembled and distributed via CDN.
 
-## Cursor Cloud specific instructions
+## Cloud agent environments
+
+Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, and similar). Most of this applies to any of them; bullets that name a host apply only there, so confirm the rest against the container you are in rather than assuming.
 
 ### Environment
 
-- Yarn 1.22.22 is pre-installed. The update script runs `yarn` which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
 - The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
-- Xvfb is already running on `DISPLAY=:1`. Chrome is available at `/usr/bin/google-chrome-stable`.
+- Browsers and a display are **not** guaranteed. Cursor Cloud runs Xvfb on `DISPLAY=:1` and ships Chrome at `/usr/bin/google-chrome-stable`; Claude Code on the web has neither, and offers only the Chromium that Playwright bundles under `$PLAYWRIGHT_BROWSERS_PATH`. Check `echo $DISPLAY` and resolve the browser path before running anything headed or Chrome-specific.
 
 ### Running Cypress in dev mode
 
