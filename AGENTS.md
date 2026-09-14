@@ -278,7 +278,8 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Environment
 
-- Node.js >= 22.19.0 and Yarn 1.22.22 are pre-installed. The update script runs `yarn` which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- Yarn 1.22.22 is pre-installed. The update script runs `yarn` which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
 - Xvfb is already running on `DISPLAY=:1`. Chrome is available at `/usr/bin/google-chrome-stable`.
 
 ### Running Cypress in dev mode
@@ -295,6 +296,29 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 ### Linting
 
 - `yarn lint --scope @packages/<name>` for focused lint. Full monorepo lint: `yarn lint`.
+
+### Matching the required Node version
+
+Install the required version from the repo root, where `nvm` picks it up from [`.nvmrc`](./.nvmrc):
+
+```bash
+export NVM_DIR=/opt/nvm          # wherever nvm is installed
+. "$NVM_DIR/nvm.sh" || true      # see below: sourcing can exit non-zero
+nvm install                      # reads .nvmrc
+```
+
+Two things bite here:
+
+- **Source `nvm.sh` on its own line.** It exits non-zero when no default version is aliased yet, so `. "$NVM_DIR/nvm.sh" && nvm install` silently skips the install and looks like a failed download.
+- **`nvm use` does not survive a new shell.** Containers that put their own Node first on `PATH` keep resolving to it in every new shell, so the version reverts between commands. Prepend the installed version's bin directory to `PATH` in whatever the environment persists across commands (a shell profile, or the session env file that agent harnesses expose):
+
+```bash
+echo "export PATH=\"$(nvm which current | xargs dirname):\$PATH\"" >> ~/.bashrc
+```
+
+Verify with `node -v` in a *fresh* shell rather than the one that ran `nvm use`.
+
+Prefer this over `yarn --ignore-engines`: the flag only silences the check for the install itself. `yarn <script>` still refuses to run afterwards (`Commands cannot run with an incompatible environment`), and the postinstall rebuilds native modules such as `better-sqlite3` against the wrong Node.
 
 ### Key caveats
 
