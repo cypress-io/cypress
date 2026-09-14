@@ -40,13 +40,13 @@ interface StringValues {
 }
 
 /**
- * Copy for the `Experiments:` row of the `cypress run` header. It duplicates the Settings screen
- * copy in `@packages/frontend-shared`'s `en-US.json` because that package depends on this one, so
- * the import can only run the other way; `experiments_spec` holds the two in step. Plain text
- * here — the Settings screen renders markdown.
+ * Descriptions of each experiment. Not rendered anywhere today — the `Experiments:` row of the
+ * `cypress run` header prints `key=value` — but kept alongside `_names` so the pair stays a
+ * complete description of an experiment. `experiments_spec` holds them in step with the Settings
+ * screen copy in `@packages/frontend-shared`'s `en-US.json`, which cannot be imported here
+ * because that package depends on this one.
 */
 export const _summaries: StringValues = {
-  experimentalCspAllowList: 'Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running.',
   experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in plugins during interactive mode.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
   experimentalOriginDependencies: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
@@ -55,8 +55,11 @@ export const _summaries: StringValues = {
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
 }
 
+/**
+ * Membership here decides whether an experiment appears in the `cypress run` header at all, so
+ * adding a key changes that output. The string itself is not displayed.
+ */
 export const _names: StringValues = {
-  experimentalCspAllowList: 'CSP Allow List',
   experimentalInteractiveRunEvents: 'Interactive run events',
   experimentalModifyObstructiveThirdPartyCode: 'Modify obstructive third party code',
   experimentalOriginDependencies: 'Origin Dependencies',

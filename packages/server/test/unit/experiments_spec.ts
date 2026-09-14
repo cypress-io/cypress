@@ -7,34 +7,46 @@ import { getExperiments, formatExperiments, _names, _summaries } from '../../lib
 
 const enUsPath = path.join(__dirname, '../../../frontend-shared/src/locales/en-US.json')
 
-// Both the Settings screen and the `cypress run` header look an experiment's copy up by key, so
-// a missing entry is invisible until a user turns that experiment on.
+/**
+ * Experiments deliberately absent from `experiments.ts`, with the reason. Adding one here is a
+ * user-visible change to the `cypress run` header, so it needs its own change and its own
+ * snapshot regeneration rather than riding along with unrelated work.
+ */
+const OMITTED_FROM_RUN_HEADER: Record<string, string> = {
+  experimentalCspAllowList: 'would add an Experiments: row to system-tests/__snapshots__/experimental_csp_allow_list_spec.ts.js, and formatExperiments renders its array value ambiguously',
+}
+
+// The Settings screen looks an experiment's copy up by key, so a missing entry is invisible
+// until a user turns that experiment on.
 describe('experiment copy', () => {
   const settingsCopy = fs.readJsonSync(enUsPath).settingsPage.experiments
   const experimentalOptions = getExperimentalOptionNames()
+  const reportedInRunHeader = experimentalOptions.filter((name) => !OMITTED_FROM_RUN_HEADER[name])
 
   it('covers every experimental config option', () => {
     expect(experimentalOptions).not.to.be.empty
 
     const missingFromSettings = experimentalOptions.filter((name) => !settingsCopy[name])
-    const missingFromRunHeader = experimentalOptions.filter((name) => !_names[name] || !_summaries[name])
+    const missingFromRunHeader = reportedInRunHeader.filter((name) => !_names[name] || !_summaries[name])
 
     expect(missingFromSettings, 'add copy to packages/frontend-shared/src/locales/en-US.json').to.deep.eq([])
     expect(missingFromRunHeader, 'add copy to packages/server/lib/experiments.ts').to.deep.eq([])
   })
 
   it('does not carry copy for options that no longer exist', () => {
-    const stale = Object.keys(_names).filter((name) => !experimentalOptions.includes(name))
+    const known = (names: string[]) => names.filter((name) => !experimentalOptions.includes(name))
 
-    expect(stale, 'remove copy for options deleted from @packages/config').to.deep.eq([])
+    expect(known(Object.keys(_names)), 'remove from _names').to.deep.eq([])
+    expect(known(Object.keys(_summaries)), 'remove from _summaries').to.deep.eq([])
+    expect(known(Object.keys(OMITTED_FROM_RUN_HEADER)), 'remove from OMITTED_FROM_RUN_HEADER').to.deep.eq([])
   })
 
   it('says the same thing in the Settings screen and the run header', () => {
-    // The Settings screen renders markdown; the run header is plain text. Links are the only
+    // The Settings screen renders markdown; experiments.ts is plain text. Links are the only
     // permitted difference, so compare against the link labels.
     const toPlainText = (markdown: string) => markdown.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
 
-    experimentalOptions.forEach((name) => {
+    reportedInRunHeader.forEach((name) => {
       expect(_names[name], `${name} display name`).to.eq(settingsCopy[name].name)
       expect(_summaries[name], `${name} summary`).to.eq(toPlainText(settingsCopy[name].description))
     })

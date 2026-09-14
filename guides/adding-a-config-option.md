@@ -19,8 +19,8 @@ the exported `options` list:
 
 | Array | Line | For |
 | -- | -- | -- |
-| `driverConfigOptions` | ~157 | Options the driver reads in the browser — timeouts, viewport, retries, `experimental*` behavior flags. Supports `isFolder`. |
-| `runtimeOptions` | ~520 | Options resolved by the Node process — ports, paths, browser lists, CLI-only values. Supports `isInternal`. |
+| `driverConfigOptions` | ~144 | Options the driver reads in the browser — timeouts, viewport, retries, `experimental*` behavior flags. Supports `isFolder`. |
+| `runtimeOptions` | ~500 | Options resolved by the Node process — ports, paths, browser lists, CLI-only values. Supports `isInternal`. |
 
 If a user writes it in `cypress.config.ts` and it changes how commands behave in the browser,
 it belongs in `driverConfigOptions`.
@@ -153,7 +153,7 @@ asserts two complete resolved-config objects (~lines 1302 and 1404) as literal
 Add your option by hand, or the tests fail with a diff you have to read carefully.
 
 The same file has a block of one-line default-value assertions (`await defaults('defaultCommandTimeout', 4000)`,
-~line 986). Adding one for your option is optional but cheap, and it fails with a far clearer
+~line 987). Adding one for your option is optional but cheap, and it fails with a far clearer
 message than a 200-line object diff.
 
 ### 4. Regenerate the snapshots
@@ -196,12 +196,14 @@ under `settingsPage.experiments.<optionName>`:
 The `description` is rendered as **markdown** by `ExperimentRow.vue`, so backticks and links
 work: wrap config values in backticks and link out to `https://on.cypress.io/...` where useful.
 
-### 7b. Run header copy — `experiments.ts`
+### 7b. Register the experiment in `experiments.ts`
 
-The `Experiments:` row of the `cypress run` header is plain text, so
-[`packages/server/lib/experiments.ts`](../packages/server/lib/experiments.ts) carries its own
-`_names` and `_summaries` maps. Copy the same strings across, with any markdown links reduced to
-their labels:
+[`packages/server/lib/experiments.ts`](../packages/server/lib/experiments.ts) carries `_names` and
+`_summaries` maps. **Membership in `_names` is what decides whether an experiment appears in the
+`Experiments:` row of the `cypress run` header at all** — the row prints `key=value`, so the
+strings themselves are not displayed. They exist as a description of the experiment and are held in
+step with the Settings copy. Add both, in plain text, with any markdown links reduced to their
+labels:
 
 ```ts
 export const _names: StringValues = {
@@ -216,6 +218,12 @@ export const _summaries: StringValues = {
 Both maps are kept sorted by key. The server cannot import from `@packages/frontend-shared` —
 that package depends on `@packages/server`, so the dependency only runs one way — which is why
 the copy is duplicated rather than shared.
+
+Because adding a key changes `cypress run` output, it can break terminal snapshots for any
+system test that enables the option. Regenerate them in the same change:
+`SNAPSHOT_UPDATE=1 yarn workspace @tooling/system-tests test <spec>`. An experiment that is
+deliberately not reported there belongs in `OMITTED_FROM_RUN_HEADER` in `experiments_spec`, with
+the reason — `experimentalCspAllowList` is there today.
 
 **You do not have to remember any of this.**
 [`experiments_spec.ts`](../packages/server/test/unit/experiments_spec.ts) asserts that every
