@@ -1,7 +1,6 @@
 export {} // make typescript see this as a module
 
-// `console` is a property of the global scope rather than of `Window`, so the
-// top frame has to be widened before spying on it
+// `console` lives on the global scope rather than on `Window`
 const topWindow = () => window.top as Window & typeof globalThis
 
 // `_warn` is a Bluebird internal, so it is absent from Bluebird's public types
@@ -9,6 +8,8 @@ type PromiseInternals = typeof Cypress.Promise.prototype & {
   _warn (message: string, shouldUseOwnTrace?: boolean, promise?: unknown): void
 }
 
+// `cy.foo()` is added per-test and so is absent from the Chainable interface,
+// which is what every `@ts-expect-error` below suppresses
 describe('promises', () => {
   beforeEach(function () {
     this.warn = cy.spy(Cypress.Promise.prototype as PromiseInternals, '_warn')
@@ -87,7 +88,7 @@ describe('promises', () => {
       return done()
     })
 
-    // @ts-expect-error - custom command is not added to the Chainable interface
+    // @ts-expect-error
     Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
@@ -96,7 +97,7 @@ describe('promises', () => {
       })
     })
 
-    // @ts-expect-error - custom command is not added to the Chainable interface
+    // @ts-expect-error
     return cy.foo()
   })
 
@@ -123,25 +124,25 @@ describe('promises', () => {
       return done()
     })
 
-    // @ts-expect-error - custom command is not added to the Chainable interface
+    // @ts-expect-error
     Cypress.Commands.add('foo', () => {
       return new Cypress.Promise((resolve) => {
         return cy.wrap({}).then(resolve)
       })
     })
 
-    // @ts-expect-error - custom command is not added to the Chainable interface
+    // @ts-expect-error
     return cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {
-    // @ts-expect-error - custom command is not added to the Chainable interface
+    // @ts-expect-error
     Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
     })
 
-    // @ts-expect-error - custom command is not added to the Chainable interface
+    // @ts-expect-error
     return cy.foo()
   })
 
