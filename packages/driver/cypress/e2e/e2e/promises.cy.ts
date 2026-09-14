@@ -1,3 +1,5 @@
+export {} // make typescript see this as a module
+
 // `console` is a property of the global scope rather than of `Window`, so the
 // top frame has to be widened before spying on it
 const topWindow = () => window.top as Window & typeof globalThis
