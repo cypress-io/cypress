@@ -1,6 +1,6 @@
-// In an ambient global declaration only `var` lands on `typeof globalThis`, which
-// is what makes `window.Cypress` and `globalThis.cy` resolve. The driver reassigns
-// both at runtime.
+// Only `var` lands on `typeof globalThis` in an ambient global declaration, which
+// is what keeps `cy` and `Cypress` reachable on `window` and `globalThis`. The
+// driver reassigns both at runtime.
 
 /**
  * Global variables `cy` added by Cypress with all API commands.
