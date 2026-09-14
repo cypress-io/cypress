@@ -16,16 +16,16 @@ describe('e2e cookies spec', () => {
     // https://github.com/cypress-io/cypress/issues/8261
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
     it('can set __Host- cookie', { retries: 15 }, () => {
-      cy.visit('https://example.com')
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Host-foobar', 'someval', {
-        domain: 'example.com',
+        domain: 'www.foobar.com',
         sameSite: 'strict',
         secure: true,
       })
 
       cy.getCookie('__Host-foobar').should((cookie) => {
         expect(cookie).exist
-        expect(cookie!.domain).match(/^\.?example\.com$/)
+        expect(cookie!.domain).match(/^\.?www\.foobar\.com$/)
         expect(cookie!.path).eq('/')
         expect(cookie!.secure).is.true
       })
@@ -33,7 +33,7 @@ describe('e2e cookies spec', () => {
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
     it('errors when __Host- cookie and secure:false', { retries: 15 }, (done) => {
-      cy.visit('https://example.com')
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Host-foobar', 'someval')
 
       cy.on('fail', (err) => {
@@ -47,7 +47,7 @@ describe('e2e cookies spec', () => {
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
     it('errors when __Host- cookie and path', { retries: 15 }, (done) => {
-      cy.visit('https://example.com')
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Host-foobar', 'someval', {
         secure: true,
         path: '/foo',
@@ -63,16 +63,16 @@ describe('e2e cookies spec', () => {
   context('__Secure- prefix', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
     it('can set __Secure- cookie', { retries: 15 }, () => {
-      cy.visit('https://example.com')
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Secure-foobar', 'someval', {
-        domain: 'example.com',
+        domain: 'www.foobar.com',
         path: '/foo',
         secure: true,
       })
 
       cy.getCookie('__Secure-foobar').should((cookie) => {
         expect(cookie).exist
-        expect(cookie!.domain).match(/^\.?example\.com$/)
+        expect(cookie!.domain).match(/^\.?www\.foobar\.com$/)
         expect(cookie!.path).eq('/foo')
         expect(cookie!.secure).is.true
       })
@@ -80,9 +80,9 @@ describe('e2e cookies spec', () => {
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
     it('errors when __Secure- cookie secure:false', { retries: 15 }, (done) => {
-      cy.visit('https://example.com')
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
       cy.setCookie('__Secure-foobar', 'someval', {
-        domain: 'example.com',
+        domain: 'www.foobar.com',
         path: '/foo',
       })
 
