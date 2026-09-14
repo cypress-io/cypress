@@ -11,22 +11,6 @@ export default [
     },
   },
   {
-    rules: {
-      '@stylistic/comma-spacing': 'warn',
-      '@stylistic/type-generic-spacing': 'warn',
-      '@stylistic/no-multi-spaces': 'warn',
-      '@stylistic/space-unary-ops': 'warn',
-      '@stylistic/member-delimiter-style': 'warn',
-      '@stylistic/object-curly-spacing': 'warn',
-      '@stylistic/semi': 'warn',
-      '@stylistic/space-in-parens': 'warn',
-      '@stylistic/space-infix-ops': 'warn',
-      '@stylistic/template-tag-spacing': 'warn',
-      'no-var': 'warn',
-      '@stylistic/space-before-function-paren': ['warn', 'always'],
-    },
-  },
-  {
     ignores: [
       '**/__snapshots__',
       '**/build/**/*',
@@ -37,6 +21,9 @@ export default [
       '**/svelte/**/*',
       '**/mount-utils/**/*',
       '**/types/{bluebird,chai,chai-jquery,jquery,lodash,minimatch,mocha,sinon,sinon-chai}/**/*',
+      // Copied in by sync-typedefs from @packages/network-interception, which lints
+      // the original. Its disable directive reads as unused against this config.
+      '**/types/net-stubbing.d.ts',
       '.mocharc.js',
       '**/*.js',
     ],
