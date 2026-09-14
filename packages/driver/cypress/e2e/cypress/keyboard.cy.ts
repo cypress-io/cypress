@@ -1,4 +1,11 @@
-const { Keyboard } = Cypress
+// The published `Cypress.Keyboard` type covers only the documented `defaults()`
+// and `Keys`. This spec exercises the internal surface, which also exposes
+// `reset()` and `getConfig()`, and resolves `defaults()` to the updated config.
+const Keyboard = Cypress.Keyboard as unknown as {
+  defaults: (options: Partial<Cypress.KeyboardDefaultsOptions>) => Partial<Cypress.KeyboardDefaultsOptions>
+  getConfig: () => Partial<Cypress.KeyboardDefaultsOptions>
+  reset: () => void
+}
 
 const DEFAULTS = {
   keystrokeDelay: null,
@@ -46,7 +53,7 @@ describe('src/cypress/keyboard', () => {
         keystrokeDelay: 5,
       })
 
-      expect(result).to.deep.eql({
+      expect(result).to.eql({
         keystrokeDelay: 5,
       })
     })
@@ -64,6 +71,7 @@ describe('src/cypress/keyboard', () => {
     describe('errors', () => {
       it('throws if not passed an object', () => {
         const fn = () => {
+          // @ts-expect-error - asserting the runtime guard against a missing argument
           Keyboard.defaults()
         }
 
@@ -78,6 +86,7 @@ describe('src/cypress/keyboard', () => {
 
       it('throws if keystrokeDelay is not a number', () => {
         const fn = () => {
+          // @ts-expect-error - asserting the runtime guard against a non-numeric delay
           Keyboard.defaults({ keystrokeDelay: false })
         }
 
