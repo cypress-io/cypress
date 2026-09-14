@@ -20,19 +20,10 @@ if (run[0] && run[0].includes('--inspect-brk')) {
 }
 
 if (options['glob-in-dir']) {
-  const globInDir = options['glob-in-dir']
-  const isUnitDir = String(globInDir).replace(/\\/g, '/').endsWith('test/unit')
-
   if (run[0]) {
-    run = [path.join(globInDir, '**', `*${run[0]}*`)]
-  } else if (isUnitDir) {
-    // Unit specs named `*.spec.*` belong to vitest (see vitest.config.ts)
-    run = [
-      path.join(globInDir, '**', '*_spec.js'),
-      path.join(globInDir, '**', '*_spec.ts'),
-    ]
+    run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [path.join(globInDir, '**')]
+    run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 
@@ -106,6 +97,20 @@ if (!isWindows()) {
   )
 
   commandAndArguments.args = commandAndArguments.args.concat(run)
+}
+
+const globInDir = options['glob-in-dir'] && String(options['glob-in-dir']).replace(/\\/g, '/')
+
+if (globInDir && globInDir.endsWith('test/unit')) {
+  // Unit specs named `*.spec.*` belong to vitest (see vitest.config.ts). The
+  // include glob above is left for the shell to expand into directories that
+  // mocha recurses, so the exclusion has to be a mocha `--ignore`, quoted on
+  // POSIX so the shell hands the glob through intact.
+  ['*.spec.js', '*.spec.ts'].forEach((pattern) => {
+    const ignore = path.posix.join(globInDir, '**', pattern)
+
+    commandAndArguments.args.push('--ignore', isWindows() ? ignore : `'${ignore}'`)
+  })
 }
 
 if (options.fgrep) {
