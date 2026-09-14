@@ -15,4 +15,4 @@ expectType<Cypress.Chainable>(
 
 // Rewritten relative types match those copied from node_modules
 // see npm/vue/inline-types.ts for more info.
-expectType<typeof VueTestUtils['config']['global']>(VTU['config']['global'])
+expectType<typeof VueTestUtils['config']['global']>(VTU.config.global)

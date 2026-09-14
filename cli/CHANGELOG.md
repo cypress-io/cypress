@@ -1,9 +1,13 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.0.1
+## 16.1.0
 
 **Performance:**
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
+
+**Features:**
+
+- Added the [`trustedCertificates`](https://docs.cypress.io/app/references/configuration#trustedCertificates) configuration option. On the native browser network path (Chrome, Chromium, and Edge), declare a certificate your application under test presents — a self-signed development certificate, an internal certificate authority, or a precomputed SPKI fingerprint — and Chrome treats connections to that origin as trusted rather than merely tolerating its certificate errors. Static assets from the origin are then cached across navigations as they are in production; previously nothing from an untrusted-certificate origin was ever written to the browser's disk cache, so asset-heavy specs re-downloaded every asset on each [`cy.visit()`](https://on.cypress.io/visit). Origins you do not declare continue to load exactly as before. Firefox, WebKit, Electron, and [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) runs are unaffected. Addresses [#34760](https://github.com/cypress-io/cypress/issues/34760).
 
 **Bugfixes:**
 
