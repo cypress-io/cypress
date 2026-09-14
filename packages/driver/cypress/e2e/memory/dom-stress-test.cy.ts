@@ -29,7 +29,7 @@ describe(`DOM Stress Tests`, () => {
       beforeEach(() => {
         cy.log(`loading basic list with ${count}items`)
         cy.visit('/fixtures/dom-stress-test.html')
-        cy.get('input[data-cy="item-count"]').clear().type(count)
+        cy.get('input[data-cy="item-count"]').clear().type(`${count}`)
         cy.get('input[data-cy="list-id"]').clear().type('basic-list')
         cy.get('button[data-cy="add-list"]').click()
       })
