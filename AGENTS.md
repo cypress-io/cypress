@@ -22,7 +22,9 @@ Step-by-step procedures live in [`guides/`](./guides/) — start there for any m
 - [`building-cypress-binary`](./.claude/skills/building-cypress-binary/SKILL.md) — `binary-build` / `binary-package` / `binary-zip`, non-interactive flags, `ELECTRON_RUN_AS_NODE`, macOS signing.
 - [`debugging-cypress-artifacts`](./.claude/skills/debugging-cypress-artifacts/SKILL.md) — bugs that only reproduce in packaged output, the commit/build/clean/reset loop, `CYPRESS_RUN_BINARY`.
 
-Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
+`.claude/rules/*.md` is a second thin layer, for facts that are only correct in one part of the tree — which test runner a package uses, which runtime floor a directory is bound by, how a given kind of snapshot is regenerated. Each file carries a `paths:` glob, and Claude Code loads it when it opens a matching file. They are pointers, not sources of truth: every one links back to the guide or `AGENTS.md` section that owns the topic, so **other agents can skip them** and lose nothing.
+
+Add new guidance to a guide by default. A skill is only warranted when the content is about *running* the task rather than doing it correctly — if a contributor doing the task by hand would need to know it, it belongs in the guide. A rule is only warranted when the guidance is wrong outside a specific path. See [Choosing where guidance goes](./CONTRIBUTING.md#choosing-where-guidance-goes).
 
 ## Prerequisites
 
@@ -50,8 +52,10 @@ yarn start
 ### Testing
 
 ```bash
-# Run tests scoped to a single package (preferred over bare yarn test)
-yarn test --scope @packages/server
+# Run a single package's tests (go through the workspace, not the root test script —
+# the root script hardcodes its own --scope flags and lerna unions them, so
+# `yarn test --scope <pkg>` runs the whole default suite plus that package)
+yarn workspace @packages/server test
 
 # Target a specific vitest spec file (packages that use vitest)
 yarn workspace @packages/config test -- <path-to-spec>
@@ -64,6 +68,9 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 
 # Filter mocha tests by name pattern
 yarn workspace @packages/server test-unit -- --grep "<pattern>"
+
+# @packages/data-context is the one package on jest, not vitest or mocha
+yarn workspace @packages/data-context test-unit -- <path-to-spec>
 
 # Run system tests (full binary-level E2E)
 yarn test-system
@@ -288,7 +295,7 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 
 ### Running tests
 
-- Prefer scoped tests: `yarn workspace @packages/<name> test` (vitest) or `yarn test --scope @packages/<name>` (lerna).
+- Prefer scoped tests: `yarn workspace @packages/<name> test`. Do not use `yarn test --scope <name>` — lerna unions scopes with the ones the root `test` script already sets, so it broadens the run instead of narrowing it. `yarn lint --scope` and `yarn check-ts --scope` do narrow correctly.
 - Some test suites (e.g., `@packages/network`) require privileged ports (443) and will fail with EACCES in unprivileged containers — this is expected.
 - `@packages/config` has 2 tests that assert `cypressBinaryRoot` contains `'cypress'`; these fail when the workspace directory name differs (e.g., `/workspace`). This is a known path-dependent issue, not a code bug.
 
