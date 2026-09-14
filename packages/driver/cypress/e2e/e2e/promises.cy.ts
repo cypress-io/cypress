@@ -1,6 +1,10 @@
+// `console` is a property of the global scope rather than of `Window`, so the
+// top frame has to be widened before spying on it
+const topWindow = () => window.top as Window & typeof globalThis
+
 describe('promises', () => {
   beforeEach(function () {
-    this.warn = cy.spy(Cypress.Promise.prototype, '_warn')
+    this.warn = cy.spy(Cypress.Promise.prototype as any, '_warn')
   })
 
   afterEach(function () {
@@ -8,7 +12,7 @@ describe('promises', () => {
   })
 
   it('warns when returning a promise and calling cypress commands', () => {
-    cy.spy(top.console, 'warn')
+    const consoleWarn = cy.spy(topWindow().console, 'warn')
 
     const title = cy.state('runnable').fullTitle()
 
@@ -19,19 +23,19 @@ describe('promises', () => {
 
       return cy.wrap('lol')
       .then(() => {
-        const msg = top.console.warn.firstCall.args[0]
+        const msg = consoleWarn.firstCall.args[0]
 
         expect(msg).to.include('Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.')
         expect(msg).to.include(title)
         expect(msg).to.include('https://on.cypress.io/returning-promise-and-commands-in-test')
 
-        expect(top.console.warn).to.be.calledOnce
+        expect(consoleWarn).to.be.calledOnce
       })
     })
   })
 
   it('warns when instantiating a promise and calling cypress commands', () => {
-    cy.spy(top.console, 'warn')
+    const consoleWarn = cy.spy(topWindow().console, 'warn')
 
     const title = cy.state('runnable').fullTitle()
 
@@ -42,18 +46,18 @@ describe('promises', () => {
       return cy.wrap('lol')
       .then(resolve)
     }).then(() => {
-      const msg = top.console.warn.firstCall.args[0]
+      const msg = consoleWarn.firstCall.args[0]
 
       expect(msg).to.include('Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.')
       expect(msg).to.include(title)
       expect(msg).to.include('https://on.cypress.io/returning-promise-and-commands-in-test')
 
-      expect(top.console.warn).to.be.calledOnce
+      expect(consoleWarn).to.be.calledOnce
     })
   })
 
   it('throws when returning a promise from a custom command', function (done) {
-    const logs = []
+    const logs: any[] = []
 
     cy.on('log:added', (attrs, log) => {
       this.lastLog = log
@@ -76,6 +80,7 @@ describe('promises', () => {
       return done()
     })
 
+    // @ts-expect-error - custom command is not added to the Chainable interface
     Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
@@ -84,11 +89,12 @@ describe('promises', () => {
       })
     })
 
+    // @ts-expect-error - custom command is not added to the Chainable interface
     return cy.foo()
   })
 
   it('throws when instantiating a promise from a custom command', function (done) {
-    const logs = []
+    const logs: any[] = []
 
     cy.on('log:added', (attrs, log) => {
       this.lastLog = log
@@ -110,21 +116,25 @@ describe('promises', () => {
       return done()
     })
 
+    // @ts-expect-error - custom command is not added to the Chainable interface
     Cypress.Commands.add('foo', () => {
       return new Cypress.Promise((resolve) => {
         return cy.wrap({}).then(resolve)
       })
     })
 
+    // @ts-expect-error - custom command is not added to the Chainable interface
     return cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {
+    // @ts-expect-error - custom command is not added to the Chainable interface
     Cypress.Commands.add('foo', () => {
       return Cypress.Promise
       .delay(10)
     })
 
+    // @ts-expect-error - custom command is not added to the Chainable interface
     return cy.foo()
   })
 
