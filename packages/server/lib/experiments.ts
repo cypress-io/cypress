@@ -40,10 +40,10 @@ interface StringValues {
 }
 
 /**
- * Plain-text summaries of each experiment, shown in the `Experiments:` row of the
- * `cypress run` header. The Settings screen renders its own markdown copy from
- * `@packages/frontend-shared`'s `en-US.json`; `experiments_spec` asserts the two cover the
- * same set of options, so an experiment can never reach users with copy in only one place.
+ * Copy for the `Experiments:` row of the `cypress run` header. It duplicates the Settings screen
+ * copy in `@packages/frontend-shared`'s `en-US.json` because that package depends on this one, so
+ * the import can only run the other way; `experiments_spec` holds the two in step. Plain text
+ * here — the Settings screen renders markdown.
 */
 export const _summaries: StringValues = {
   experimentalCspAllowList: 'Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running.',
@@ -55,10 +55,6 @@ export const _summaries: StringValues = {
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
 }
 
-/**
- * Short display names for each experiment. Kept in the same order and covering the same keys
- * as `_summaries`.
-*/
 export const _names: StringValues = {
   experimentalCspAllowList: 'CSP Allow List',
   experimentalInteractiveRunEvents: 'Interactive run events',
@@ -93,10 +89,8 @@ export const getExperimentsFromResolved = (resolvedConfig, names = experimental.
     const name = get(names, key)
 
     if (!name) {
-      // Cypress does not reject unknown keys in a user's config, so an arbitrary
-      // `experimentalAnything` of their own reaches here and must not be reported as a Cypress
-      // experiment. Every real one has a name — `experiments_spec` asserts that — so a missing
-      // name means the key is not ours.
+      // Cypress accepts unknown keys in a user's config, so one they invented that happens to
+      // start with `experimental` reaches here and is not an experiment of ours.
       return
     }
 

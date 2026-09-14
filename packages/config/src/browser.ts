@@ -116,14 +116,13 @@ export const getBreakingKeys = () => {
 }
 
 /**
- * Whether a key *looks like* an experiment. Cypress does not reject unknown keys in a user's
- * config, so this matching a key does not make it a Cypress experiment — callers scanning a
- * resolved config must still check it against a known list. Both the Settings screen and the
- * `cypress run` header discover experiments by this prefix, so they share the definition.
+ * Cypress accepts unknown keys in a user's config, so a key matching this prefix is not
+ * necessarily an experiment of ours — anything scanning a resolved config has to check a known
+ * list too. Shared so the Settings screen and the `cypress run` header agree on the prefix.
  */
 export const hasExperimentalPrefix = (key: string) => key.startsWith('experimental')
 
-/** The `experimental*` options Cypress actually defines. */
+/** The `experimental*` options Cypress itself defines, as opposed to anything merely prefixed. */
 export const getExperimentalOptionNames = () => {
   return publicConfigKeys.filter(hasExperimentalPrefix)
 }

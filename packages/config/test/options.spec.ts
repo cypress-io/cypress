@@ -10,19 +10,15 @@ const typeDefsPath = path.join(__dirname, '../../../cli/types/cypress.d.ts')
  * not expose, with the reason. Anything not listed here must appear in both `Pick` unions.
  */
 const OVERRIDE_TYPE_EXCEPTIONS: Record<string, string> = {
-  // Omitted from `UserConfigOptions`, so it cannot be picked from `ConfigOptions` at all.
-  excludeSpecPattern: 'not a member of ConfigOptions',
-  // Declared on `EndToEndConfigOptions` rather than `ResolvedConfigOptions`, so it is likewise
-  // not reachable through `ConfigOptions`.
-  experimentalOriginDependencies: 'e2e-only, not a member of ConfigOptions',
-  // The reporter is constructed once per run, so a per-test value cannot take effect.
-  reporter: 'resolved once per run',
-  reporterOptions: 'resolved once per run',
+  excludeSpecPattern: 'omitted from UserConfigOptions, so it cannot be picked from ConfigOptions',
+  experimentalOriginDependencies: 'declared on EndToEndConfigOptions, so it is not in ConfigOptions',
+  reporter: 'the reporter is constructed once per run, so a per-test value cannot take effect',
+  reporterOptions: 'the reporter is constructed once per run, so a per-test value cannot take effect',
 }
 
-// Declaration order is observable: `getPublicConfigKeys` and the resolved config sent to
-// Cypress Cloud both preserve it, so an unsorted insert shows up as unrelated snapshot churn.
 describe('config/src/options', () => {
+  // Declaration order is observable: `getPublicConfigKeys` and the resolved config sent to
+  // Cypress Cloud both preserve it, so an unsorted insert shows up as unrelated snapshot churn.
   describe('option ordering', () => {
     const cases = [
       ['driverConfigOptions', driverConfigOptions],

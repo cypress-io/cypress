@@ -7,10 +7,8 @@ import { getExperiments, formatExperiments, _names, _summaries } from '../../lib
 
 const enUsPath = path.join(__dirname, '../../../frontend-shared/src/locales/en-US.json')
 
-// Both the Settings screen and the `cypress run` header find experiments by the `experimental`
-// name prefix and then look their copy up by key, so a missing entry is invisible until a user
-// turns the experiment on. These assertions are the only thing standing between a new
-// experiment and shipping without copy.
+// Both the Settings screen and the `cypress run` header look an experiment's copy up by key, so
+// a missing entry is invisible until a user turns that experiment on.
 describe('experiment copy', () => {
   const settingsCopy = fs.readJsonSync(enUsPath).settingsPage.experiments
   const experimentalOptions = getExperimentalOptionNames()
@@ -117,9 +115,8 @@ describe('experiments', () => {
       expect(result).to.deep.equal(expected)
     })
 
+    // Cypress accepts unknown keys in a user's config, so the prefix alone cannot identify one.
     it('ignores experimental-looking keys that are not Cypress experiments', () => {
-      // A user's config may contain arbitrary keys; Cypress does not reject them. One that
-      // happens to start with `experimental` must not be reported as a Cypress experiment.
       const project = {
         resolvedConfig: {
           experimentalSomethingTheUserInvented: {
