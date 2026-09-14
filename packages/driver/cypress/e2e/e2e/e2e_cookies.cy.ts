@@ -1,10 +1,6 @@
-const { _ } = Cypress
-
 const cleanse = (cookies: Cypress.Cookie[]) => {
-  return _.cloneDeepWith(cookies, (v, key) => {
-    if (key === 'expiry') {
-      return 100
-    }
+  return Cypress._.cloneDeepWith(cookies, (v, key) => {
+    return key === 'expiry' ? 100 : undefined
   })
 }
 
