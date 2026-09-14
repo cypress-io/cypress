@@ -185,6 +185,24 @@ describe('lib/cloud/studio', () => {
         {},
       )
     })
+
+    // the Cloud ships the studio server as a class instance whose methods rely on `this`
+    it('invokes the method on the studio server instance', () => {
+      sinon.stub(studio, 'initializeRoutes')
+
+      studioManager.initializeRoutes({} as any)
+
+      expect(studio.initializeRoutes).to.be.calledOn(studio)
+    })
+
+    it('forwards no arguments when the caller supplies none', () => {
+      const getCachedStudioConfig = sinon.stub(studio, 'getCachedStudioConfig').returns({} as any)
+
+      studioManager.getCachedStudioConfig()
+
+      expect(getCachedStudioConfig).to.be.calledOn(studio)
+      expect(getCachedStudioConfig.getCall(0).args).to.deep.eq([])
+    })
   })
 
   describe('asynchronous method invocation', () => {
@@ -250,6 +268,27 @@ describe('lib/cloud/studio', () => {
         'captureStudioEvent',
         {},
       )
+    })
+
+    it('invokes the method on the studio server instance', async () => {
+      sinon.stub(studio, 'captureStudioEvent').resolves()
+
+      await studioManager.captureStudioEvent({} as any)
+
+      expect(studio.captureStudioEvent).to.be.calledOn(studio)
+    })
+
+    it('forwards the argument and returns the resolved value', async () => {
+      const config = { canAccessStudioAI: true } as any
+      const browser = { name: 'chrome' } as any
+
+      sinon.stub(studio, 'getStudioConfig').resolves(config)
+
+      const result = await studioManager.getStudioConfig(browser)
+
+      expect(studio.getStudioConfig).to.be.calledOn(studio)
+      expect(studio.getStudioConfig).to.be.calledWithExactly(browser)
+      expect(result).to.eq(config)
     })
   })
 
