@@ -236,6 +236,30 @@ describe('lib/socket', () => {
       })
     })
 
+    describe('on(mocha)', () => {
+      // the driver emits mocha events with a variable number of arguments, so each
+      // must reach onMocha individually rather than as one array
+      it('forwards every argument to onMocha', function (done) {
+        this.options.onMocha = function (...args) {
+          expect(args).to.deep.eq(['test:before:run', { id: 'r3', title: 'does something' }])
+
+          return done()
+        }
+
+        return this.client.emit('mocha', 'test:before:run', { id: 'r3', title: 'does something' })
+      })
+
+      it('forwards a single argument', function (done) {
+        this.options.onMocha = function (...args) {
+          expect(args).to.deep.eq(['start'])
+
+          return done()
+        }
+
+        return this.client.emit('mocha', 'start')
+      })
+    })
+
     describe('on(backend:request, get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {

@@ -1,20 +1,21 @@
-const { $ } = Cypress
-const { create } = require('../../../src/cy/snapshots_css')
+import { create } from '../../../src/cy/snapshots_css'
 
-const normalizeStyles = (styles) => {
+const { $ } = Cypress
+
+const normalizeStyles = (styles: string) => {
   return styles
   .replace(/\s+/gm, '')
   .replace(/['"]/gm, '\'')
 }
 
-const addStyles = (styles, to) => {
-  return new Promise((resolve) => {
-    $(styles).on('load', resolve).appendTo(cy.$$(to))
+const addStyles = (styles: string, to: string) => {
+  return new Promise<void>((resolve) => {
+    $(styles).on('load', () => resolve()).appendTo(cy.$$(to))
   })
 }
 
 describe('driver/src/cy/snapshots_css', () => {
-  let snapshotCss
+  let snapshotCss: ReturnType<typeof create>
 
   beforeEach(() => {
     snapshotCss = create(cy.$$, cy.state)
@@ -85,7 +86,7 @@ describe('driver/src/cy/snapshots_css', () => {
     it('returns new id if css has been modified', () => {
       const idsBefore = snapshotCss.getStyleIds()
 
-      cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
+      cy.state('document')!.styleSheets[0].insertRule('.qux { color: orange; }')
       snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
       const idsAfter = snapshotCss.getStyleIds()
 
@@ -97,7 +98,7 @@ describe('driver/src/cy/snapshots_css', () => {
     })
 
     it('returns same id after css has been modified until a new window', () => {
-      cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
+      cy.state('document')!.styleSheets[0].insertRule('.qux { color: orange; }')
       snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
       const ids1 = snapshotCss.getStyleIds()
       const ids2 = snapshotCss.getStyleIds()
@@ -107,7 +108,7 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(ids1.headStyleIds[0]).to.equal(ids2.headStyleIds[0])
       expect(ids2.headStyleIds[0]).to.equal(ids3.headStyleIds[0])
 
-      cy.state('document').styleSheets[0].deleteRule(0) // need to change contents or they will map to same id
+      cy.state('document')!.styleSheets[0].deleteRule(0) // need to change contents or they will map to same id
       snapshotCss.onBeforeWindowLoad()
       const ids4 = snapshotCss.getStyleIds()
 
@@ -118,9 +119,9 @@ describe('driver/src/cy/snapshots_css', () => {
     it('returns same id if css has been modified but yields same contents', () => {
       const ids1 = snapshotCss.getStyleIds()
 
-      cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
+      cy.state('document')!.styleSheets[0].insertRule('.qux { color: orange; }')
       snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
-      cy.state('document').styleSheets[0].deleteRule(0)
+      cy.state('document')!.styleSheets[0].deleteRule(0)
       snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
 
       const ids2 = snapshotCss.getStyleIds()
@@ -131,17 +132,14 @@ describe('driver/src/cy/snapshots_css', () => {
   })
 
   context('.getStylesByIds', () => {
-    let getStyles
+    const getStyles = () => {
+      const { headStyleIds, bodyStyleIds } = snapshotCss.getStyleIds()
 
-    beforeEach(() => {
-      getStyles = () => {
-        const { headStyleIds, bodyStyleIds } = snapshotCss.getStyleIds()
-        const headStyles = snapshotCss.getStylesByIds(headStyleIds)
-        const bodyStyles = snapshotCss.getStylesByIds(bodyStyleIds)
-
-        return { headStyles, bodyStyles }
+      return {
+        headStyles: snapshotCss.getStylesByIds(headStyleIds),
+        bodyStyles: snapshotCss.getStylesByIds(bodyStyleIds),
       }
-    })
+    }
 
     it('returns array of css styles for given ids', () => {
       const { headStyles, bodyStyles } = getStyles()
@@ -162,7 +160,7 @@ describe('driver/src/cy/snapshots_css', () => {
       const styleEl = document.createElement('style')
 
       $(styleEl).appendTo(cy.$$('head'))
-      styleEl.sheet.insertRule('.foo { color: red; }', 0)
+      styleEl.sheet!.insertRule('.foo { color: red; }', 0)
 
       const { headStyles } = getStyles()
 

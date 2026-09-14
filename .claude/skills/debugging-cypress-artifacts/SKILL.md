@@ -50,7 +50,7 @@ Use a **WIP commit** as a bookmark, then **reset** (not **`git revert`**) to res
 
 7. Repeat from step 2.
 
-**Rules:** Do not **`git reset HEAD~1`** after pushing that WIP commit unless you intend to rewrite remote history. Untracked files not in the WIP commit are **gone** after `git clean -xfd`. **`.cursor/skills/`** is gitignored except `!.cursor/skills` — skills survive `git clean -xfd`; other `.cursor/*` files may not.
+**Rules:** Do not **`git reset HEAD~1`** after pushing that WIP commit unless you intend to rewrite remote history. Untracked files not in the WIP commit are **gone** after `git clean -xfd`. `.claude/*` and `.cursor/*` are gitignored except for a short allowlist (`.claude/skills`, `.claude/settings.json`, `.cursor/BUGBOT.md`, `.cursor/environment.json`, `.cursor/Dockerfile`) — those are tracked and survive `git clean -xfd`; anything else you keep under those directories will not.
 
 **Husky:** If **`git commit`** fails with missing **`.husky/_/husky.sh`**, do not loop on commit. Proceed with staged instrumentation, then restore via **`git restore`** in step 6 (or fix Husky / run `yarn` so hooks install, then commit).
 

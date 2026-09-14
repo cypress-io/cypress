@@ -1,10 +1,12 @@
+export {} // make typescript see this as a module
+
 const { Screenshot } = Cypress
 
 let failedEventFired = false
 
 Cypress.on('fail', (error) => {
   failedEventFired = true
-  throw new Error(error)
+  throw error
 })
 
 let screenshotTaken = false
@@ -13,22 +15,21 @@ Screenshot.defaults({ onAfterScreenshot: () => {
   screenshotTaken = true
 } })
 
-const pendingTests = []
-const passedTests = []
+const pendingTests: Cypress.ObjectLike[] = []
+const passedTests: Cypress.ObjectLike[] = []
 
-Cypress.on('test:after:run', (test) => {
-  if (test.state === 'pending') {
-    return pendingTests.push(test)
-  }
-
-  if (test.state === 'passed') {
-    return passedTests.push(test)
+Cypress.on('test:after:run', (attributes) => {
+  if (attributes.state === 'pending') {
+    pendingTests.push(attributes)
+  } else if (attributes.state === 'passed') {
+    passedTests.push(attributes)
   }
 })
 
 beforeEach(() => {
   // Set isInteractive to false to ensure that screenshots will be
   // triggered in both run and open mode
+  // @ts-expect-error - isInteractive is not a test override, but the driver applies it at runtime
   Cypress.config('isInteractive', false)
 })
 

@@ -18,10 +18,12 @@ export interface ReportedInvocation {
  * `cypress tap` handles itself rather than passing to a command. The flags a
  * command declares are reported once commander has parsed them, by noteTapCommand.
  */
-export const reportedInvocation = (command: string | undefined, wantsHelp: boolean, options: TapCliOptions): ReportedInvocation => ({
-  command: command ? getKnownCommand(command) : undefined,
-  flags: [
-    ...wantsHelp ? ['help'] : [],
-    ...Object.keys(options),
-  ],
-})
+export const reportedInvocation = (command: string | undefined, wantsHelp: boolean, options: TapCliOptions): ReportedInvocation => {
+  return {
+    command: command ? getKnownCommand(command) : undefined,
+    flags: [
+      ...wantsHelp ? ['help'] : [],
+      ...Object.keys(options),
+    ],
+  }
+}
