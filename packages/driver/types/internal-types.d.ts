@@ -74,6 +74,10 @@ declare namespace Cypress {
     command(name: string, ...args: any[]): Chainable<any>
   }
 
+  interface cy {
+    isStopped: () => boolean
+  }
+
   interface CypressUtils {
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
     isInstanceOf: (instance: any, constructor: any) => boolean
