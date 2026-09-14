@@ -26,9 +26,11 @@ describe('lib/routes', () => {
           namespace: 'namespace',
         } as Cfg,
         getSpec: sinon.stub().returns({}),
-        getNetworkProxy: () => ({
-          handleHttpRequest: () => {},
-        } as unknown as NetworkProxy),
+        getNetworkProxy: () => {
+          return {
+            handleHttpRequest: () => {},
+          } as unknown as NetworkProxy
+        },
         nodeProxy: {} as HttpProxy,
         onError: () => {},
         // @ts-expect-error
@@ -308,9 +310,11 @@ describe('lib/routes', () => {
           namespace: '__cypress',
         } as Cfg,
         getSpec: sinon.stub().returns({}),
-        getNetworkProxy: () => ({
-          handleHttpRequest: () => {},
-        } as unknown as NetworkProxy),
+        getNetworkProxy: () => {
+          return {
+            handleHttpRequest: () => {},
+          } as unknown as NetworkProxy
+        },
         nodeProxy: {} as HttpProxy,
         onError: () => {},
         // @ts-expect-error

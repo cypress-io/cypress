@@ -585,4 +585,93 @@ describe('lib/adapters/serve-internal-routes', () => {
       expect(serverRequest.create).to.have.been.calledOnce
     })
   })
+
+  describe('loopback failures', () => {
+    const econnreset = () => Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' })
+
+    it('answers locally instead of throwing so the request cannot escape to the origin', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      serverRequest.create.rejects(econnreset())
+
+      const response = await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__/',
+        method: 'GET',
+      }, next)
+
+      expect(next).not.to.have.been.called
+      expect(response.statusCode).to.equal(502)
+      expect(response.body).to.equal('Bad Gateway')
+      expect(response.body).not.to.contain('ECONNRESET')
+    })
+
+    it('replays a dead pooled socket and serves the response the retry got', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      serverRequest.create.onFirstCall().rejects(econnreset())
+      serverRequest.create.onSecondCall().resolves({ statusCode: 200, headers: {}, body: 'ok' })
+
+      const response = await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__/',
+        method: 'GET',
+      }, next)
+
+      expect(serverRequest.create).to.have.been.calledTwice
+      expect(response.statusCode).to.equal(200)
+      expect(response.body).to.equal('ok')
+    })
+
+    it('does not replay a loopback the server may already have acted on', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      serverRequest.create.rejects(econnreset())
+
+      const response = await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__cypress/process-origin-callback',
+        method: 'POST',
+        body: '{}',
+      }, next)
+
+      expect(serverRequest.create).to.have.been.calledOnce
+      expect(response.statusCode).to.equal(502)
+    })
+
+    it('does not replay a failure a retry cannot fix', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      serverRequest.create.rejects(new Error('socket hang up'))
+
+      const response = await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__/',
+        method: 'GET',
+      }, next)
+
+      expect(serverRequest.create).to.have.been.calledOnce
+      expect(response.statusCode).to.equal(502)
+    })
+
+    it('unwraps the network error @cypress/request wrapped before deciding to replay', async () => {
+      const { middleware, serverRequest } = createMiddleware()
+      const next = sinon.stub()
+
+      serverRequest.create.onFirstCall().rejects(Object.assign(new Error('Error: read ECONNRESET'), { error: econnreset() }))
+      serverRequest.create.onSecondCall().resolves({ statusCode: 200, headers: {}, body: 'ok' })
+
+      await middleware({
+        id: 'req-1',
+        url: 'http://localhost:8080/__/',
+        method: 'GET',
+      }, next)
+
+      expect(serverRequest.create).to.have.been.calledTwice
+    })
+  })
 })

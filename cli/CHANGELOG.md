@@ -1,16 +1,28 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 16.0.1
+## 16.1.0
 
 **Performance:**
 
 - Fixed a memory leak in the Cypress server where every service worker started by the application under test held onto state until the browser closed, so memory use climbed over the course of a run in Chrome, Chromium, Edge, and Electron. Addressed in [#34721](https://github.com/cypress-io/cypress/pull/34721).
 
+**Features:**
+
+- Added the [`trustedCertificates`](https://docs.cypress.io/app/references/configuration#trustedCertificates) configuration option. On the native browser network path (Chrome, Chromium, and Edge), declare a certificate your application under test presents — a self-signed development certificate, an internal certificate authority, or a precomputed SPKI fingerprint — and Chrome treats connections to that origin as trusted rather than merely tolerating its certificate errors. Static assets from the origin are then cached across navigations as they are in production; previously nothing from an untrusted-certificate origin was ever written to the browser's disk cache, so asset-heavy specs re-downloaded every asset on each [`cy.visit()`](https://on.cypress.io/visit). Origins you do not declare continue to load exactly as before. Firefox, WebKit, Electron, and [`forceHttp1`](https://docs.cypress.io/app/references/configuration#forceHttp1) runs are unaffected. Addresses [#34760](https://github.com/cypress-io/cypress/issues/34760).
+
 **Bugfixes:**
 
+- `cypress tap run` now reports that the spec is running and to use `cypress tap status` for progress, instead of printing the launched spec's testing type and browser. [#34777](https://github.com/cypress-io/cypress/pull/34777)
+- Fixed a regression in [16.0.0](#16-0-0) where a run in Chrome, Chromium, or Edge could stop producing output partway through and hang indefinitely, with no error, no failing test, and no timeout, until the CI job was killed for exceeding its no-output limit. Fixes [#34778](https://github.com/cypress-io/cypress/issues/34778).
+- Fixed an issue where adding a `--disable-features` argument in [`before:browser:launch`](https://docs.cypress.io/api/node-events/browser-launch-api) silently dropped every feature Cypress disables in Chrome, Chromium, and Edge, because the browser honors only the last occurrence of that argument. Cypress now merges its own values with yours. Fixes [#34775](https://github.com/cypress-io/cypress/issues/34775).
+- Fixed a regression in [16.0.0](#16-0-0) where, in `cypress open` on Chrome, Chromium, and Edge, testing a site that registers an origin-wide service worker could render the site's own content — such as its 404 page — in place of the Cypress app after clicking a spec or reloading the browser tab. A service worker registered by the site under test can no longer answer for Cypress's own pages and assets. Fixes [#34789](https://github.com/cypress-io/cypress/issues/34789). Addressed in [#34762](https://github.com/cypress-io/cypress/pull/34762).
+- Fixed an issue where a variant of A/B tested content in the Cypress app that was weighted never to be shown could become the only variant shown. Fixes [#34814](https://github.com/cypress-io/cypress/issues/34814).
+- Fixed a regression in [12.0.0](#12-0-0) where an assertion on a [`cy.contains()`](https://on.cypress.io/contains) command that matched no element did not say what was searched for, reporting `expected undefined not to exist in the DOM` in the Command Log. The searched content is now shown, such as `expected Saving not to exist in the DOM`. Fixes [#25962](https://github.com/cypress-io/cypress/issues/25962).
+- Fixed a regression in [16.0.0](#16-0-0) where [`blockHosts`](https://on.cypress.io/configuration#blockHosts) was not enforced in Chrome, Chromium, and Edge. Requests to a blocked host reached the network instead of failing with a `503` status. Scripts and other resources from those hosts still loaded. Fixes [#34785](https://github.com/cypress-io/cypress/issues/34785).
 - Fixed a regression in [16.0.0](#16-0-0) where the headless Electron browser window was sized smaller than requested on Windows during `cypress run`, so failure screenshots and recorded videos were smaller than the expected 1280x720. Setting `preferences.width` and `preferences.height` in [`before:browser:launch`](https://on.cypress.io/before-browser-launch) had no effect on the result. Fixes [#34771](https://github.com/cypress-io/cypress/issues/34771).
 
 **Misc:**
 
+- Fixed an issue where setting [`keystrokeDelay`](https://docs.cypress.io/app/references/configuration#Keyboard) in a TypeScript configuration file failed to compile with `'keystrokeDelay' does not exist in type 'ConfigOptions'`, even though Cypress read and validated the option at runtime. Fixes [#34796](https://github.com/cypress-io/cypress/issues/34796). Addressed in [#34798](https://github.com/cypress-io/cypress/pull/34798).
 - When a Test Replay recording fails while being prepared for a spec during `cypress run`, Cypress now recommends increasing available disk space and confirming that the temporary directory used for Test Replay recordings is readable and writable, instead of printing only the underlying error such as `SqliteError: unable to open database file`. Addressed in [#34763](https://github.com/cypress-io/cypress/pull/34763).
 
 ## 16.0.0

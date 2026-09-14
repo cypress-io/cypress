@@ -580,6 +580,76 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           })
         })
       })
+
+      it('initializes cy prompt lifecycle manager in open mode without a projectId', function () {
+        this.config.projectId = undefined
+        this.config.isTextTerminal = false
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).to.be.called
+        })
+      })
+
+      it('does not initialize cy prompt lifecycle manager in run mode without a projectId', function () {
+        this.config.projectId = undefined
+        this.config.isTextTerminal = true
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).not.to.be.called
+        })
+      })
+
+      it('does not initialize cy prompt lifecycle manager when recording without a projectId', function () {
+        this.config.projectId = undefined
+        this.config.isTextTerminal = true
+        this.project.options.record = true
+        this.project.options.key = '123e4567-e89b-12d3-a456-426614174000'
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).not.to.be.called
+        })
+      })
+
+      it('initializes cy prompt lifecycle manager in run mode without a projectId when simulating open mode', function () {
+        this.config.projectId = undefined
+        this.config.isTextTerminal = true
+        process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE = '1'
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).to.be.called
+        })
+        .finally(() => {
+          delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+        })
+      })
+
+      it('initializes cy prompt lifecycle manager in run mode without a projectId when the bundle is local', function () {
+        this.config.projectId = undefined
+        this.config.isTextTerminal = true
+        process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).to.be.called
+        })
+        .finally(() => {
+          delete process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
+        })
+      })
     })
 
     describe('saved state', function () {

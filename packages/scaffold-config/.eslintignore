@@ -1,4 +1,2 @@
 **/tsconfig.json
-cjs/
-esm/
 browser/

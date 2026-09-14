@@ -138,11 +138,13 @@ describe('streamDownloadVerifyExtract', () => {
     it('wraps a filesystem-class syscall (ENOSPC) from the pipeline as BundleError(stage=extract) and does NOT retry', async () => {
       const enospc = Object.assign(new Error('no space left on device'), { code: 'ENOSPC', errno: -28 })
 
-      const makeBody = () => new Readable({
-        read () {
-          this.destroy(enospc)
-        },
-      })
+      const makeBody = () => {
+        return new Readable({
+          read () {
+            this.destroy(enospc)
+          },
+        })
+      }
 
       const response = {
         ok: true,
@@ -181,11 +183,13 @@ describe('streamDownloadVerifyExtract', () => {
     it('still treats network-class syscalls (ECONNRESET) mid-pipeline as stage=network and retries', async () => {
       const econnreset = Object.assign(new Error('socket hang up'), { code: 'ECONNRESET', errno: -54 })
 
-      const makeBody = () => new Readable({
-        read () {
-          this.destroy(econnreset)
-        },
-      })
+      const makeBody = () => {
+        return new Readable({
+          read () {
+            this.destroy(econnreset)
+          },
+        })
+      }
 
       const response = {
         ok: true,
