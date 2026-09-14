@@ -11,13 +11,14 @@ paths:
 
 # Generated files — regenerate, never hand-edit
 
-| File | Regenerate with |
-| --- | --- |
-| `packages/data-context/schemas/schema.graphql`, `src/gen/nxs.gen.ts` | `yarn workspace @packages/data-context build` |
-| `src/generated/graphql.ts` in `app` / `launchpad` / `frontend-shared`, `packages/cypress-sessions/lib/generated/graphql.ts` | `yarn workspace @packages/data-context build:graphql` (watch: `yarn codegen`) |
-| autobarrel `index.ts` files (header `created by autobarrel`) | `yarn codegen` |
-| `scripts/gulp/monorepoPaths.ts` | `yarn gulp makePathMap` — after adding or removing a package |
-| `.circleci/packed/*.yml` | `yarn pack-ci --validate` — edit `.circleci/src/` only |
+- `packages/data-context/schemas/schema.graphql`, `src/gen/nxs.gen.ts` —
+  `yarn workspace @packages/data-context build`
+- `src/generated/graphql.ts` in `app` / `launchpad` / `frontend-shared`, and
+  `packages/cypress-sessions/lib/generated/graphql.ts` —
+  `yarn workspace @packages/data-context build:graphql` (watch: `yarn codegen`)
+- autobarrel `index.ts` files (header `created by autobarrel`) — `yarn codegen`
+- `scripts/gulp/monorepoPaths.ts` — `yarn gulp makePathMap`, after adding or removing a package
+- `.circleci/packed/*.yml` — `yarn pack-ci --validate`; edit `.circleci/src/` only
 
 ## What actually needs committing
 

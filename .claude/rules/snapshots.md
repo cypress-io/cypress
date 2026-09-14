@@ -10,12 +10,13 @@ paths:
 Never hand-edit a snapshot file, and never regenerate one to make a failure go away.
 Four mechanisms live in this repo — using the wrong one is a hard error, not a no-op.
 
-| Snapshots | How to update |
-| --- | --- |
-| snap-shot-it `.js` (`@packages/server`, `system-tests`, `@tooling/v8-snapshot`, root `__snapshots__/`) | `SNAPSHOT_UPDATE=1 <test command>` |
-| vitest `.snap` (`cli`, `@packages/{config,launcher}`, `npm/webpack-*`) | `yarn test -u` in that workspace |
-| `@packages/errors` `.ansi` | `yarn test -u` from `packages/errors` — see [error handling](../../guides/error-handling.md) |
-| `@packages/app` runner `.json` | `yarn workspace @packages/app cypress:run:e2e:update:snapshots` |
+- **snap-shot-it `.js`** (`@packages/server`, `system-tests`, `@tooling/v8-snapshot`, root
+  `__snapshots__/`) — `SNAPSHOT_UPDATE=1 <test command>`
+- **vitest `.snap`** (`cli`, `@packages/{config,launcher}`, `npm/webpack-*`) — `yarn test -u`
+  in that workspace
+- **`@packages/errors` `.ansi`** — `yarn test -u` from `packages/errors`; see
+  [error handling](../../guides/error-handling.md)
+- **`@packages/app` runner `.json`** — `yarn workspace @packages/app cypress:run:e2e:update:snapshots`
 
 Details: [`packages/server/README.md`](../../packages/server/README.md) and
 [`system-tests/README.md`](../../system-tests/README.md).

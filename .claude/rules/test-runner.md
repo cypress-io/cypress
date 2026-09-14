@@ -12,12 +12,10 @@ paths:
 The runner is **per package**, not uniform. Check the package's own `package.json`
 `test` / `test-unit` script before running anything.
 
-| Runner | Where |
-| --- | --- |
-| vitest | most of `packages/`, `npm/`, and `cli` |
-| **jest** (`--experimental-vm-modules`) | `@packages/data-context` — the only one |
-| mocha | `@packages/server`, `@tooling/v8-snapshot`, `@tooling/electron-mksnapshot` |
-| Cypress E2E/CT | `@packages/{app,launchpad,frontend-shared}`, `npm/{react,vue,vite-plugin-cypress-esm}` |
+- **vitest** — most of `packages/`, `npm/`, and `cli`
+- **jest** (`--experimental-vm-modules`) — `@packages/data-context`, the only one
+- **mocha** — `@packages/server`, `@tooling/v8-snapshot`, `@tooling/electron-mksnapshot`
+- **Cypress E2E/CT** — `@packages/{app,launchpad,frontend-shared}`, `npm/{react,vue,vite-plugin-cypress-esm}`
 
 ## Never use `yarn test --scope`
 
