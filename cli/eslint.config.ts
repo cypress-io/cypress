@@ -11,21 +11,6 @@ export default [
     },
   },
   {
-    rules: {
-      '@stylistic/comma-spacing': 'warn',
-      '@stylistic/type-generic-spacing': 'warn',
-      '@stylistic/no-multi-spaces': 'warn',
-      '@stylistic/space-unary-ops': 'warn',
-      '@stylistic/member-delimiter-style': 'warn',
-      '@stylistic/object-curly-spacing': 'warn',
-      '@stylistic/semi': 'warn',
-      '@stylistic/space-in-parens': 'warn',
-      '@stylistic/space-infix-ops': 'warn',
-      '@stylistic/template-tag-spacing': 'warn',
-      '@stylistic/space-before-function-paren': ['warn', 'always'],
-    },
-  },
-  {
     ignores: [
       '**/__snapshots__',
       '**/build/**/*',
