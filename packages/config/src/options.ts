@@ -468,6 +468,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: true,
     validation: validate.isBoolean,
   }, {
+    name: 'trustedCertificates',
+    defaultValue: [],
+    validation: validate.isValidTrustedCertificates,
+    requireRestartOnChange: 'browser',
+  }, {
     name: 'userAgent',
     defaultValue: null,
     validation: validate.isString,
