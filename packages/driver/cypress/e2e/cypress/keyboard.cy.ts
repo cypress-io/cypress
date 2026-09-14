@@ -64,7 +64,7 @@ describe('src/cypress/keyboard', () => {
     describe('errors', () => {
       it('throws if not passed an object', () => {
         const fn = () => {
-          // @ts-expect-error - asserting the runtime guard against a missing argument
+          // @ts-expect-error - intentionally omitting the required argument
           Keyboard.defaults()
         }
 
@@ -79,7 +79,7 @@ describe('src/cypress/keyboard', () => {
 
       it('throws if keystrokeDelay is not a number', () => {
         const fn = () => {
-          // @ts-expect-error - asserting the runtime guard against a non-numeric delay
+          // @ts-expect-error - intentionally passing a non-numeric delay
           Keyboard.defaults({ keystrokeDelay: false })
         }
 

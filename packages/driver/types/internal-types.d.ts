@@ -29,9 +29,9 @@ interface InternalCheckOptions extends Partial<Cypress.CheckClearOptions> {
 }
 
 // `Cypress.Keyboard` is published with only the documented `defaults()` and
-// `Keys`, so internal callers cast to this. It cannot be merged onto
-// `Cypress.Cypress` instead: a duplicate member has to be declared with an
-// identical type, and a mismatch here is silently dropped under `skipLibCheck`.
+// `Keys`, so internal callers cast to this. Merging it onto `Cypress.Cypress`
+// does not work: a duplicate member needs an identical type, and the mismatch
+// is an error inside a .d.ts, which `skipLibCheck` drops.
 type InternalKeyboard = typeof import('../src/cy/keyboard').default
 
 declare namespace Cypress {
