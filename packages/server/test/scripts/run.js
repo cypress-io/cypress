@@ -20,10 +20,19 @@ if (run[0] && run[0].includes('--inspect-brk')) {
 }
 
 if (options['glob-in-dir']) {
+  const globInDir = options['glob-in-dir']
+  const isUnitDir = String(globInDir).replace(/\\/g, '/').endsWith('test/unit')
+
   if (run[0]) {
-    run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
+    run = [path.join(globInDir, '**', `*${run[0]}*`)]
+  } else if (isUnitDir) {
+    // Unit specs named `*.spec.*` belong to vitest (see vitest.config.ts)
+    run = [
+      path.join(globInDir, '**', '*_spec.js'),
+      path.join(globInDir, '**', '*_spec.ts'),
+    ]
   } else {
-    run = [path.join(options['glob-in-dir'], '**')]
+    run = [path.join(globInDir, '**')]
   }
 }
 
