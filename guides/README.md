@@ -25,6 +25,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [Protocol development](./protocol-development.md)
 * [Purging Specific URLs from Cloudflare cache](./purging-cloudflare-cache.md)
 * [Release process](./release-process.md)
+* [Security review notes](./security-review-notes.md)
 * [Studio development](./studio-development.md)
 * [Testing other projects](./testing-other-projects.md)
 * [Testing strategy and style guide (draft)](./testing-strategy-and-styleguide.md)

@@ -483,6 +483,11 @@ to AI assistants while remaining transparent and minimal for human contributors.
 - `.claude/skills/*/SKILL.md` — Used by Claude Code. A thin layer over `guides/` for the
   few workflows needing agent-specific execution guidance, such as which permissions a
   build phase requires (building the binary, debugging packaged artifacts).
+- `.claude/claude-security-guidance.md` and `.claude/security-patterns.json` — Read by the
+  `security-guidance` plugin when it reviews a change. The first gives the invariants this
+  codebase has to keep, one per area; the second adds deterministic per-edit pattern rules.
+  [Security review notes](./guides/security-review-notes.md) is the long form both defer
+  to, and [SECURITY.md](./SECURITY.md) covers what users are responsible for when testing.
 
 The root `AGENTS.md` provides project-wide context. Workspace and package-level
 `AGENTS.md` files add scoped details.
