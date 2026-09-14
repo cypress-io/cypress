@@ -1,11 +1,4 @@
-// The published `Cypress.Keyboard` type covers only the documented `defaults()`
-// and `Keys`. This spec exercises the internal surface, which also exposes
-// `reset()` and `getConfig()`, and resolves `defaults()` to the updated config.
-const Keyboard = Cypress.Keyboard as unknown as {
-  defaults: (options: Partial<Cypress.KeyboardDefaultsOptions>) => Partial<Cypress.KeyboardDefaultsOptions>
-  getConfig: () => Partial<Cypress.KeyboardDefaultsOptions>
-  reset: () => void
-}
+const Keyboard = Cypress.Keyboard as unknown as InternalKeyboard
 
 const DEFAULTS = {
   keystrokeDelay: null,

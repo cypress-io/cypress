@@ -28,19 +28,16 @@ interface InternalCheckOptions extends Partial<Cypress.CheckClearOptions> {
   interval?: number
 }
 
-interface InternalKeyboard extends Partial<Keyboard> {
-  getMap: () => object
-  reset: () => void
-  Keys: {
-    TAB: 'Tab'
-  }
-}
+// `Cypress.Keyboard` is published with only the documented `defaults()` and
+// `Keys`, so internal callers cast to this. It cannot be merged onto
+// `Cypress.Cypress` instead: a duplicate member has to be declared with an
+// identical type, and a mismatch here is silently dropped under `skipLibCheck`.
+type InternalKeyboard = typeof import('../src/cy/keyboard').default
 
 declare namespace Cypress {
   interface Cypress {
     browserMajorVersion: () => number
     backend: (eventName: string, ...args: any[]) => Promise<any>
-    Keyboard: InternalKeyboard
     // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
     ProxyLogging: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
