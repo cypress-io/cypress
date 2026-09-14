@@ -1,6 +1,7 @@
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useSpecStore } from '../store'
 import InlineSpecListTree from './InlineSpecListTree.vue'
+import { getSeparator } from './tree/useCollapsibleTree'
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 
 describe('InlineSpecListTree', () => {
@@ -97,5 +98,90 @@ describe('InlineSpecListTree', () => {
     .should('contain', 'Spec-C')
     .should('contain', 'utils')
     .and('contain', 'Spec-D')
+  })
+
+  it('restores directory expansion state from a provided cache', () => {
+    const specProp = ref(foundSpecs.slice(0, 4))
+    const componentsKey = ['src', 'components'].join(getSeparator())
+    // simulates the cache as it would be restored from persisted preferences after a UI reload,
+    // with the "components" directory previously collapsed. It is reactive because the app hands
+    // down the object behind a `ref`, and a plain object would not exercise that tracking.
+    const cache = reactive<Record<string, boolean>>({ [componentsKey]: false })
+
+    cy.mount(() => (
+      <div class="bg-gray-1000">
+        <InlineSpecListTree specs={specProp.value} treeExpansionCache={cache}/>
+      </div>
+    ))
+
+    cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+    // directories with no cache entry still fall back to expanded by default
+    cy.contains('button', 'src').should('have.attr', 'aria-expanded', 'true')
+    cy.contains('button', 'utils').should('have.attr', 'aria-expanded', 'true')
+  })
+
+  it('writes directory expansion changes into the provided cache', () => {
+    const specProp = ref(foundSpecs.slice(0, 4))
+    const componentsKey = ['src', 'components'].join(getSeparator())
+    const cache = reactive<Record<string, boolean>>({})
+
+    cy.mount(() => (
+      <div class="bg-gray-1000">
+        <InlineSpecListTree specs={specProp.value} treeExpansionCache={cache}/>
+      </div>
+    ))
+
+    cy.contains('button', 'components').click()
+    cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+    .then(() => {
+      expect(cache[componentsKey]).to.eq(false)
+    })
+  })
+
+  it('keeps the keyboard position in the list when toggling with a cache', () => {
+    const specProp = ref(foundSpecs.slice(0, 4))
+    const cache = reactive<Record<string, boolean>>({})
+
+    cy.mount(() => (
+      <div class="bg-gray-1000">
+        <InlineSpecListTree specs={specProp.value} treeExpansionCache={cache}/>
+      </div>
+    ))
+
+    // rows are src > components > Spec-A > Spec-B > Spec-C > utils > Spec-D
+    cy.findAllByTestId('spec-row-item').should('have.length', 7)
+
+    cy.contains('button', 'components').focus().type('{enter}')
+    cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+
+    // Writing into the cache must not rebuild the tree, which would reset the active item and
+    // scroll the list back to the top. Arrowing down should reach "utils", the row after the
+    // collapsed directory, rather than restarting from the first row.
+    cy.focused().type('{downarrow}')
+    cy.focused().should('contain.text', 'utils')
+  })
+
+  it('keeps a directory collapsed when specs are added', () => {
+    const specProp = ref(foundSpecs.slice(0, 4))
+    const cache = reactive<Record<string, boolean>>({})
+    const addedSpec = { ...foundSpecs[0], baseName: 'Spec-E.spec.tsx', fileName: 'Spec-E', relative: 'src/components/Spec-E.spec.tsx' }
+
+    cy.mount(() => (
+      <div class="bg-gray-1000">
+        <InlineSpecListTree specs={specProp.value} treeExpansionCache={cache}/>
+      </div>
+    ))
+
+    cy.contains('button', 'components').click()
+    cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+
+    cy.then(() => {
+      specProp.value = [...foundSpecs.slice(0, 4), addedSpec]
+    })
+
+    // A collapsed directory stays collapsed once the expansion state is persisted, so a newly
+    // added spec inside it stays hidden until the user expands that directory again.
+    cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+    cy.findAllByTestId('spec-file-item').should('have.length', 1)
   })
 })

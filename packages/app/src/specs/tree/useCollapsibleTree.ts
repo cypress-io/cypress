@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import { computed } from 'vue'
+import { computed, toRaw } from 'vue'
 import { useToggle } from '@vueuse/core'
 import type { FoundSpec } from '@packages/types/src'
 import { getRunnerConfigFromWindow } from '../../runner/get-runner-config-from-window'
@@ -155,8 +155,12 @@ interface UseCollapsibleTreeOptions {
    * Provide a long-lived cache to preserve directory collapse state across tree re-builds.
    * This can be useful when row data is updating but doesn't represent a change to the
    * structure of the tree.
+   *
+   * Expansion changes are written straight into this object, so it must be reactive for a
+   * caller to observe them. The initial read is deliberately untracked so that those writes
+   * don't invalidate the computed the tree is usually built in.
    */
-  cache?: Map<string, boolean>
+  cache?: Record<string, boolean>
 }
 
 function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | null, acc: UseCollapsibleTreeNode<T>[] = []) {
@@ -175,7 +179,11 @@ function useCollapsibleTreeNode <T extends RawNode<T>> (rawNode: T, options: Use
   const { cache, expandInitially } = options
   const treeNode = rawNode as UseCollapsibleTreeNode<T>
   const roots = parent ? collectRoots<T>(parent) : []
-  const [expanded, toggle] = useToggle(cache?.get(rawNode.id) ?? !!expandInitially)
+
+  // Read through the raw cache so building the tree does not subscribe to cache keys. The
+  // caller builds the tree inside a computed, and writing an expansion change below would
+  // otherwise invalidate it and rebuild the whole tree on every toggle.
+  const [expanded, toggle] = useToggle(toRaw(cache)?.[rawNode.id] ?? !!expandInitially)
 
   const hidden = computed(() => {
     return !!roots.find((r) => r.expanded.value === false)
@@ -186,8 +194,8 @@ function useCollapsibleTreeNode <T extends RawNode<T>> (rawNode: T, options: Use
     const newValue = toggle(value)
 
     // If this is a non-hidden directory then watch for expansion changes and register them into the cache if one was provided
-    if (!!cache && !hidden.value && rawNode.children?.length) {
-      cache.set(rawNode.id, !originalState)
+    if (cache && !hidden.value && rawNode.children?.length) {
+      cache[rawNode.id] = !originalState
     }
 
     return newValue

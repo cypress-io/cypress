@@ -48,6 +48,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'lastTestCountsEvent',
   'promptsShown',
   'specFilter',
+  'specsListTreeExpansion',
   'preferredEditorBinary',
   'desktopNotificationsEnabled',
   'dismissNotificationBannerUntil',
@@ -90,6 +91,7 @@ export type AllowedState = Partial<{
   lastTestCountsEvent: Maybe<number>
   promptsShown: Maybe<object>
   specFilter: Maybe<string>
+  specsListTreeExpansion: Maybe<Record<string, boolean>>
   preferredEditorBinary: Maybe<string>
   isSideNavigationOpen: Maybe<boolean>
   testingType: 'e2e' | 'component'
