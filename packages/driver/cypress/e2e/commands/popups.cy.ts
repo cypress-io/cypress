@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
 
 describe('src/cy/commands/popups', () => {
   context('alert', () => {
