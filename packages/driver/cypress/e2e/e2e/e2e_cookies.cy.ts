@@ -1,6 +1,6 @@
 const { _ } = Cypress
 
-const cleanse = (cookies) => {
+const cleanse = (cookies: Cypress.Cookie[]) => {
   return _.cloneDeepWith(cookies, (v, key) => {
     if (key === 'expiry') {
       return 100
@@ -13,7 +13,7 @@ const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { same
 describe('e2e cookies spec', () => {
   it('simple cookie', () => {
     cy.setCookie('foo', 'bar')
-    cy.getCookie('foo', 'bar').should('exist')
+    cy.getCookie('foo').should('exist')
   })
 
   context('__Host- prefix', () => {
@@ -29,9 +29,9 @@ describe('e2e cookies spec', () => {
 
       cy.getCookie('__Host-foobar').should((cookie) => {
         expect(cookie).exist
-        expect(cookie.domain).match(/^\.?example\.com$/)
-        expect(cookie.path).eq('/')
-        expect(cookie.secure).is.true
+        expect(cookie!.domain).match(/^\.?example\.com$/)
+        expect(cookie!.path).eq('/')
+        expect(cookie!.secure).is.true
       })
     })
 
@@ -76,9 +76,9 @@ describe('e2e cookies spec', () => {
 
       cy.getCookie('__Secure-foobar').should((cookie) => {
         expect(cookie).exist
-        expect(cookie.domain).match(/^\.?example\.com$/)
-        expect(cookie.path).eq('/foo')
-        expect(cookie.secure).is.true
+        expect(cookie!.domain).match(/^\.?example\.com$/)
+        expect(cookie!.path).eq('/foo')
+        expect(cookie!.secure).is.true
       })
     })
 
