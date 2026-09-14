@@ -13,6 +13,16 @@ self.addEventListener('activate', (e) => {
 })
 
 self.addEventListener('fetch', (e) => {
+  if (new URL(e.request.url).pathname.startsWith('/__/assets/e2e-poison')) {
+    // Poison marker under Cypress's reserved client route. An app worker is
+    // otherwise entitled to answer for this path, so the marker coming back is
+    // proof the injected wrapper let the app handler run for a runner-namespace
+    // request.
+    e.respondWith(new Response('SW-POISON', { headers: { 'content-type': 'text/plain' } }))
+
+    return
+  }
+
   if (e.request.mode === 'navigate') {
     e.respondWith((async () => {
       const preload = await e.preloadResponse

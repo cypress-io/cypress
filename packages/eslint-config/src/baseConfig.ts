@@ -12,6 +12,8 @@ import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
+import { cypressDevPlugin } from './rules'
+
 export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
   ...tsConfigs.recommended,
@@ -88,12 +90,41 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
+  // Cypress-authored rules, kept under the `@cypress/dev` namespace they had in
+  // @cypress/eslint-plugin-dev so existing eslint-disable comments still resolve.
+  {
+    plugins: {
+      '@cypress/dev': cypressDevPlugin,
+    },
+    rules: {
+      '@cypress/dev/arrow-body-multiline-braces': ['error', 'always'],
+    },
+  },
+  {
+    files: ['**/*.{jsx,tsx}'],
+    rules: {
+      '@cypress/dev/arrow-body-multiline-braces': 'off',
+    },
+  },
+  {
+    files: [
+      '**/test/**/*.{js,jsx,ts,tsx}',
+      '**/cypress/**/*.{js,jsx,ts,tsx}',
+      '**/*.spec.{js,jsx,ts,tsx}',
+      '**/*.cy.{js,jsx,ts,tsx}',
+    ],
+    rules: {
+      '@cypress/dev/skip-comment': 'error',
+    },
+  },
+
   // overrides for basic recommended rules, and custom rules
   {
     rules: {
       'no-console': 'error',
+      'prefer-spread': 'error',
       'no-restricted-properties': [
-        'warn',
+        'error',
         {
           object: 'process',
           property: 'geteuid',
@@ -171,7 +202,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'no-unsafe-finally': 'off',
       'no-async-promise-executor': 'off',
       'no-unsafe-optional-chaining': 'off',
-      'prefer-spread': 'warn',
 
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
@@ -237,7 +267,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   {
     ignores: [
       '.releaserc.js',
+      'cjs/**/*',
       'dist/**/*',
+      'esm/**/*',
       '**/__snapshots__/**/*',
       'test/.mocharc.js',
     ],

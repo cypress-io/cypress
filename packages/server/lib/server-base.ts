@@ -59,11 +59,12 @@ import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
 const fullyQualifiedRe = /^https?:\/\//
+const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
@@ -676,12 +677,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     isAUTFrame?: (frameId: string) => Promise<boolean>,
     onAUTFrameNavigated?: (listener: (url: string) => void) => () => void,
   ) {
-    const config = this.ensureProp(this._openConfig, 'open') as unknown as CreateProxyRuntimeDeps['config']
+    const openConfig = this.ensureProp(this._openConfig, 'open')
+    const config = openConfig as unknown as CreateProxyRuntimeDeps['config']
 
     // Once per runtime — one per spec/tab — so a worker that escapes on every
     // navigation warns once instead of flooding stdout. Every escape is still
     // visible under DEBUG=cypress:server:browsers:interception-escape-detector.
     let warnedInterceptionEscape = false
+
+    const reservedPathPrefixes = getCypressReservedPathPrefixes(openConfig)
 
     const runtime = createCdpFetchRuntime({
       client,
@@ -705,7 +709,24 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         }
 
         warnedInterceptionEscape = true
-        errors.warning('BROWSER_NETWORK_INTERCEPTION_ESCAPE', url)
+
+        // Cypress's runner is served on the AUT's origin under paths Cypress
+        // reserves, so an escape there means the origin's worker answered for
+        // Cypress's own document — a different problem, with a different
+        // remedy, than an escaped AUT document. This runs synchronously off a
+        // CDP event with no catch above it, so an unparseable url reports the
+        // generic variant rather than throwing out of the listener.
+        let isRunnerDocument = false
+
+        try {
+          const { pathname } = new URL(url)
+
+          isRunnerDocument = reservedPathPrefixes.some((prefix) => pathname.startsWith(prefix))
+        } catch {
+          debug('could not parse escaped url %s', url)
+        }
+
+        errors.warning('BROWSER_NETWORK_INTERCEPTION_ESCAPE', url, isRunnerDocument)
       },
     })
 
@@ -876,6 +897,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   _createHttpServer (app): DestroyableHttpServer {
     const svr = http.createServer(httpUtils.lenientOptions, app)
+
+    // Our own internal-route loopback pools sockets against this server on an
+    // agent that never idles them out, so anything we close first comes back as
+    // an ECONNRESET on reuse. That pool only sees traffic when a spec's runner
+    // boots, so it sits idle for however long the previous spec ran — far past
+    // Node's 5s default. Outlast that rather than race it; the loopback's own
+    // retry covers a gap longer than this.
+    svr.keepAliveTimeout = KEEP_ALIVE_TIMEOUT
 
     allowDestroy(svr)
 

@@ -359,7 +359,7 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('mocha', (...args: unknown[]) => {
-          return options.onMocha.apply(options, args)
+          return options.onMocha(...args)
         })
 
         socket.on('recorder:frame', (data) => {
@@ -585,8 +585,16 @@ export class SocketBase implements SocketBroadcaster {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
-              case 'wait:for:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+              case 'wait:for:prompt:ready': {
+                const cyPromptLifecycleManager = getCtx().coreData.cyPromptLifecycleManager
+
+                // The manager is not initialized when cy.prompt cannot possibly
+                // run, so report it as unavailable rather than returning nothing.
+                if (!cyPromptLifecycleManager) {
+                  return { success: false }
+                }
+
+                return cyPromptLifecycleManager.getCyPrompt().then(async (cyPrompt) => {
                   if (cyPrompt.cyPromptManager) {
                     await options.onCyPromptReady(cyPrompt.cyPromptManager)
                   }
@@ -596,6 +604,7 @@ export class SocketBase implements SocketBroadcaster {
                     error: cyPrompt.error ? errors.cloneErr(cyPrompt.error) : undefined,
                   }
                 })
+              }
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }

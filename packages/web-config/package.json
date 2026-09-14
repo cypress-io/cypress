@@ -12,7 +12,6 @@
     "@babel/preset-env": "7.28.0",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@babel/register": "7.27.1",
     "@svgr/webpack": "8.0.1",
     "@types/webpack": "^5.28.1",
     "arraybuffer-loader": "1.0.8",

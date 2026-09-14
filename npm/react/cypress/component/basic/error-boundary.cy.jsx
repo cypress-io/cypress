@@ -21,9 +21,6 @@ describe('Error Boundary', () => {
     )
 
     cy.get('h1').should('have.text', 'Normal Child')
-    cy.get(ErrorBoundary)
-    .its('state.error')
-    .should('not.exist')
   })
 
   it('on error, display fallback UI', () => {

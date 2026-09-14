@@ -152,7 +152,7 @@ while IFS= read -r file; do
     .percy.yml|.releaserc.js|renovate.json|docker-compose.yml|lerna.json|\
     electron-builder.json|knip.json|nx.json|jsconfig.json|autobarrel.json|\
     mocha-reporter-config.json|apollo.config.js|\
-    .husky/*|.vscode/*|.cursor/*|__snapshots__/*)
+    .husky/*|.vscode/*|.cursor/*|.claude/*|__snapshots__/*)
       ;;
     packages/driver/*)
       driver_tests=true

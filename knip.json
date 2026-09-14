@@ -120,7 +120,6 @@
         "lib/modes/**/*.ts",
         "lib/browsers/**/*.ts",
         "lib/capture.ts",
-        "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
         "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
@@ -211,8 +210,7 @@
     },
     "packages/web-config": {
       "entry": [
-        "webpack.config.base.ts",
-        "node-register.js"
+        "webpack.config.base.ts"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",
@@ -261,8 +259,8 @@
       "entry": [
         "src/main.ts",
         "src/cypress/commands.ts",
-        "cypress/plugins/server.js",
-        "cypress/plugins/index.js",
+        "cypress/plugins/server.ts",
+        "cypress/plugins/index.ts",
         "cypress.config.ts",
         "cypress/**/*.{ts,tsx,js,jsx}"
       ],
@@ -736,8 +734,6 @@
     "packages/example/bin/convert.js",
     "packages/extension/app/v3/content.ts",
     "packages/extension/app/v3/service-worker.ts",
-    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
-    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",
@@ -762,10 +758,11 @@
     "@vue/compiler-dom",
     "@vue/compiler-sfc",
     "edgedriver",
-    "react-15.6.1",
     "react-16.0.0",
-    "react-dom-15.6.1",
+    "react-19.1.1",
     "react-dom-16.0.0",
+    "react-dom-19.1.1",
+    "scheduler-0.26.0",
     "text-mask-addons",
     "vanilla-text-mask",
     "zone.js"

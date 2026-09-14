@@ -15,6 +15,7 @@ import { pipeline } from 'stream/promises'
 import crypto from 'crypto'
 import { flipFuses, FuseVersion, FuseV1Options } from '@electron/fuses'
 import { move, remove } from 'fs-extra'
+import * as cyIcons from '@packages/icons'
 // @ts-ignore
 import pkg from '@packages/root'
 
@@ -34,7 +35,7 @@ export function getElectronVersion () {
 // returns icons package so that the caller code can find
 // paths to the icons without hard-coding them
 export const icons = () => {
-  return require('@packages/icons')
+  return cyIcons
 }
 
 function checkCurrentVersion (pathToVersion: string) {
@@ -69,7 +70,7 @@ async function checkIconVersion (platform: string) {
     return
   }
 
-  const mainIconsPath = icons().getPathToIcon('cypress.icns')
+  const mainIconsPath = cyIcons.getPathToIcon('cypress.icns')
   const cachedIconsPath = getPathToResources('electron.icns')
 
   const [mainHash, cachedHash] = await Promise.all(
@@ -161,9 +162,8 @@ async function pkgElectronApp (
   const e = 'electron'
   const p = 'packager'
   const pkgr = require(`@${e}/${p}`)
-  const icons = require('@packages/icons')
 
-  const iconPath = icons.getPathToIcon('cypress')
+  const iconPath = cyIcons.getPathToIcon('cypress')
 
   debug('package icon', iconPath)
 

@@ -116,6 +116,22 @@ export type BrowserLaunchOpts = {
    * consumer reads this rather than re-deriving it.
    */
   useBrowserNetworkInterception: boolean
+  /**
+   * Base64 SHA-256 SPKI fingerprints of the user's `trustedCertificates`, resolved once
+   * per launch. On the browser (CDP) network path these are passed via
+   * `--ignore-certificate-errors-spki-list` alongside the blanket ignore flag, so a
+   * declared cert's origin is genuinely trusted (and therefore cacheable) rather than
+   * merely tolerated.
+   */
+  trustedCertificateFingerprints?: string[]
+  /**
+   * Whether to drop every origin's persisted service worker and cache storage
+   * ahead of each runner-document navigation on the browser network path — both
+   * at launch and when moving to the next spec. Resolved at launch from
+   * project-level `testIsolation`, because this runs before any spec code and so
+   * no suite-level override can be known yet.
+   */
+  shouldClearPersistedServiceWorkers?: boolean
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
